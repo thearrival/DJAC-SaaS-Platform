@@ -15,8 +15,6 @@ Makefile
 docker-compose*
 Dockerfile
 **/node_modules
-pnpm-lock.yaml
 .gitignore
-.npmrc
 .prettierrc
 .prettierignore
