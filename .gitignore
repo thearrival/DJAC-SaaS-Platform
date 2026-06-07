@@ -118,3 +118,5 @@ temp/
 audit/assessment-events.log
 audit/*.log
 
+
+.vercel
