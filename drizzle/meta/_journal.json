@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1763283286115,
+      "tag": "0000_fluffy_praxagora",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1763283343345,
+      "tag": "0001_careful_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1773720000000,
+      "tag": "0003_enterprise_vendor_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1773859200000,
+      "tag": "0004_auth_control_center",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1742472000000,
+      "tag": "0005_local_auth_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1743033600000,
+      "tag": "0006_rbac_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1744416000000,
+      "tag": "0007_rbac_access_control",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1745020800000,
+      "tag": "0018_cyber_ops",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1745107200000,
+      "tag": "0019_yalla_admin",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1745193600000,
+      "tag": "0020_yalla_admin_access_links",
+      "breakpoints": true
+    }
+  ]
+}

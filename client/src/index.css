@@ -1,0 +1,2041 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── DJAC Global Font Stack ──────────────────────────────────────────────────
+   Consistent across both themes. Inter is loaded from the system font stack
+   (no Google Fonts dependency) with generous fallbacks.
+────────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code",
+    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-display: "Space Grotesk", "Inter", "Segoe UI", sans-serif;
+  /* Semantic color tokens for animation system */
+  --color-success: oklch(0.80 0.25 155);
+  --color-warning: oklch(0.78 0.22 70);
+  --color-info: oklch(0.88 0.15 200);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  /* ── DJAC Light Theme ── */
+  --radius: 0.65rem;
+  --primary: oklch(0.60 0.22 290);
+  /* #9359EC purple */
+  --primary-foreground: oklch(1 0 0);
+  /* Charts (same accent palette in both modes) */
+  --chart-1: oklch(0.875 0.135 196);
+  /* cyan */
+  --chart-2: oklch(0.60 0.22 290);
+  /* purple */
+  --chart-3: oklch(0.875 0.20 145);
+  /* green */
+  --chart-4: oklch(0.62 0.25 27);
+  /* red */
+  --chart-5: oklch(0.83 0.18 97);
+  /* yellow */
+  /* Background / text */
+  --background: oklch(0.97 0.008 264);
+  /* #F2F5FF near-white */
+  --foreground: oklch(0.115 0.095 264);
+  /* #040F61 deep navy */
+  --card: oklch(1 0 0);
+  /* white */
+  --card-foreground: oklch(0.115 0.095 264);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.115 0.095 264);
+  --secondary: oklch(0.92 0.015 264);
+  --secondary-foreground: oklch(0.22 0.085 264);
+  --muted: oklch(0.93 0.012 264);
+  --muted-foreground: oklch(0.45 0.04 264);
+  --accent: oklch(0.92 0.015 264);
+  --accent-foreground: oklch(0.22 0.085 264);
+  --destructive: oklch(0.62 0.254 27);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.86 0.02 264);
+  --input: oklch(0.86 0.02 264);
+  --ring: oklch(0.60 0.22 290);
+  /* Sidebar */
+  --sidebar: oklch(0.94 0.015 264);
+  --sidebar-foreground: oklch(0.115 0.095 264);
+  --sidebar-primary: oklch(0.60 0.22 290);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0 0 0 / 5%);
+  --sidebar-accent-foreground: oklch(0.115 0.095 264);
+  --sidebar-border: oklch(0 0 0 / 8%);
+  --sidebar-ring: oklch(0.60 0.22 290);
+  /* ── DJAC inline-style color tokens (light) ── */
+  --djac-bg: #F0F4FF;
+  --djac-bg-deep: #FFFFFF;
+  --djac-card: rgba(4, 15, 97, 0.04);
+  --djac-card-hi: rgba(4, 15, 97, 0.07);
+  --djac-border: rgba(4, 15, 97, 0.11);
+  --djac-border-hi: rgba(0, 100, 200, 0.35);
+  --djac-text: #020B45;
+  --djac-muted: rgba(2, 11, 69, 0.55);
+  --djac-input-bg: rgba(4, 15, 97, 0.05);
+  --djac-input-border: rgba(4, 15, 97, 0.14);
+  --djac-nav-bg: rgba(240, 244, 255, 0.92);
+  --djac-section-alt: rgba(230, 237, 255, 0.65);
+  /* ── DJAC accent colors (light: semantic / professional palette) ── */
+  --djac-cyan: #0284c7;
+  --djac-green: #16a34a;
+  --djac-red: #dc2626;
+  --djac-orange: #ea580c;
+  --djac-yellow: #d97706;
+  --djac-purple: #7c3aed;
+  /* ── Semantic HSL channel vars — used as hsl(var(--success)) in animation components ── */
+  --success: 152 100% 41%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 45%;
+  --warning-foreground: 0 0% 100%;
+  --info: 201 96% 40%;
+  --info-foreground: 0 0% 100%;
+  /* Glow shadows */
+  --glow-cyan: 0 0 20px rgba(0, 247, 255, 0.25);
+  --glow-purple: 0 0 20px rgba(147, 89, 236, 0.25);
+}
+
+.dark {
+  /* ── DJAC Dark Theme ── */
+  --primary: oklch(0.60 0.22 290);
+  --primary-foreground: oklch(1 0 0);
+  --chart-1: oklch(0.875 0.135 196);
+  --chart-2: oklch(0.60 0.22 290);
+  --chart-3: oklch(0.875 0.20 145);
+  --chart-4: oklch(0.62 0.25 27);
+  --chart-5: oklch(0.83 0.18 97);
+  --background: oklch(0.115 0.095 264);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0.138 0.085 264);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.138 0.085 264);
+  --popover-foreground: oklch(1 0 0);
+  --secondary: oklch(0.16 0.078 264);
+  --secondary-foreground: oklch(0.65 0.015 265);
+  --muted: oklch(0.165 0.072 264);
+  --muted-foreground: oklch(0.65 0.015 265);
+  --accent: oklch(0.16 0.078 264);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.62 0.254 27);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 8%);
+  --ring: oklch(0.60 0.22 290);
+  --sidebar: oklch(0.085 0.065 264);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.60 0.22 290);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(1 0 0 / 8%);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(1 0 0 / 7%);
+  --sidebar-ring: oklch(0.60 0.22 290);
+  /* ── DJAC inline-style color tokens (dark) ── */
+  --djac-bg: #040F61;
+  --djac-bg-deep: #020B45;
+  --djac-card: rgba(255, 255, 255, 0.044);
+  --djac-card-hi: rgba(255, 255, 255, 0.075);
+  --djac-border: rgba(255, 255, 255, 0.09);
+  --djac-border-hi: rgba(0, 247, 255, 0.45);
+  --djac-text: #FFFFFF;
+  --djac-muted: #9CA3AF;
+  --djac-input-bg: rgba(255, 255, 255, 0.06);
+  --djac-input-border: rgba(255, 255, 255, 0.13);
+  --djac-nav-bg: rgba(4, 15, 97, 0.90);
+  --djac-section-alt: rgba(2, 11, 69, 0.65);
+  /* ── DJAC accent colors (dark: electric neon palette) ── */
+  --djac-cyan: #00F7FF;
+  --djac-green: #01FF7F;
+  --djac-red: #FF1744;
+  --djac-orange: #FF6B2B;
+  --djac-yellow: #FFD600;
+  --djac-purple: #9359EC;
+  /* ── Semantic HSL channel vars — dark (electric neon) ── */
+  --success: 152 100% 50%;
+  --success-foreground: 230 92% 12%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 230 92% 12%;
+  --info: 185 100% 49%;
+  --info-foreground: 230 92% 12%;
+  /* Glow shadows */
+  --glow-cyan: 0 0 20px rgba(0, 247, 255, 0.35);
+  --glow-purple: 0 0 20px rgba(147, 89, 236, 0.35);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  /* ── Smooth theme transitions ─────────────────────────────────────────────
+     Applied to every element so colors, backgrounds, borders, and shadows
+     all cross-fade when the .dark class is toggled on <html>.
+     The guard on prefers-reduced-motion respects OS accessibility settings.
+     The @media print guard prevents transitions from delaying PDF rendering.
+  ──────────────────────────────────────────────────────────────────────── */
+  *,
+  *::before,
+  *::after {
+    transition-property:
+      color, background-color, border-color, outline-color,
+      text-decoration-color, fill, stroke,
+      box-shadow, opacity;
+    transition-duration: 220ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    /* All sizing is relative — no fixed pixel overrides */
+    box-sizing: border-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0ms !important;
+    }
+  }
+
+  @media print {
+
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0ms !important;
+    }
+
+    /* Hide elements tagged as non-printable */
+    .no-print {
+      display: none !important;
+    }
+
+    /* Reveal elements that are print-only */
+    .print-only {
+      display: revert !important;
+    }
+
+    body {
+      background: white !important;
+      color: black !important;
+    }
+
+    /* Preserve colour fidelity in printed charts/badges */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+
+  /* ── Fluid root font-size ─────────────────────────────────────────────────
+     clamp(13px, 1.1vw, 16px) means:
+     • At 1180 px viewport width  → ~13px (compact laptops)
+     • At 1440 px viewport width  → ~15.8px (standard desktop)
+     • At 1920 px viewport width  → capped at 16px
+     • Browser zoom multiplies this uniformly, so layout scales correctly.
+     All rem/em values in the app are now zoom-relative for free.
+  ──────────────────────────────────────────────────────────────────────── */
+  html {
+    font-size: clamp(13px, 1.1vw, 16px);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-variation-settings: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Allow browser-zoom to widen the viewport gracefully */
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    scrollbar-gutter: stable;
+    /* Prevent content overflow from breaking horizontal scrollbar */
+    overflow-x: hidden;
+    /* Minimum readable width — narrows smoothly via zoom */
+    min-width: 320px;
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+
+  /**
+   * Custom container utility that centers content and adds responsive padding.
+   *
+   * This overrides Tailwind's default container behavior to:
+   * - Auto-center content (mx-auto)
+   * - Add responsive horizontal padding
+   * - Set max-width for large screens
+   *
+   * Usage: <div className="container">...</div>
+   *
+   * For custom widths, use max-w-* utilities directly:
+   * <div className="max-w-6xl mx-auto px-4">...</div>
+   */
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    /* 16px - mobile padding */
+    padding-right: 1rem;
+  }
+
+  /* NOTE: removed broad .flex override — it collapsed sidebar groups and flex containers.
+     Use `min-h-0 min-w-0` Tailwind utilities directly on elements that need overflow clipping. */
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      /* 24px - tablet padding */
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      /* 32px - desktop padding */
+      padding-right: 2rem;
+      max-width: 1280px;
+      /* Standard content width */
+    }
+  }
+
+  /* Shared action-option button style used by account and sign-out dialogs. */
+  .djac-option-btn {
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, color-mix(in oklab, hsl(var(--card)) 88%, hsl(var(--accent)) 12%) 100%);
+    border-color: color-mix(in oklab, hsl(var(--border)) 78%, hsl(var(--primary)) 22%);
+    box-shadow: 0 6px 20px -16px color-mix(in oklab, hsl(var(--primary)) 55%, transparent 45%);
+  }
+
+  .djac-option-btn:hover {
+    border-color: color-mix(in oklab, hsl(var(--border)) 62%, hsl(var(--primary)) 38%);
+    box-shadow: 0 12px 28px -20px color-mix(in oklab, hsl(var(--primary)) 65%, transparent 35%);
+    transform: translateY(-1px);
+  }
+
+  .djac-option-btn:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+html[dir="rtl"] body {
+  direction: rtl;
+}
+
+/* ── RTL layout overrides ────────────────────────────────────────────────── */
+
+/* Flip sidebar to the right in RTL */
+html[dir="rtl"] [data-sidebar="sidebar"] {
+  right: 0;
+  left: auto !important;
+  border-right: none;
+  border-left: 1px solid hsl(var(--sidebar-border));
+}
+
+/* Padding/margin mirrors for sidebar inset */
+html[dir="rtl"] [data-sidebar="inset"] {
+  margin-left: 0;
+  margin-right: var(--sidebar-width);
+}
+
+/* Flip icon margins in menu buttons */
+html[dir="rtl"] [data-sidebar="menu-button"] svg:first-child {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Flip logo / collapse-button row in sidebar header */
+html[dir="rtl"] [data-sidebar="header"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Dropdown menus: open from the correct side */
+html[dir="rtl"] [data-radix-popper-content-wrapper] {
+  direction: rtl;
+}
+
+/* Notification / toast alignment */
+html[dir="rtl"] [data-sonner-toaster] {
+  direction: rtl;
+}
+
+/* Flip flex-row icon-text gap for dialog/card option buttons */
+html[dir="rtl"] .djac-option-btn {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+/* General RTL helper: flip text-start to text-end */
+html[dir="rtl"] .text-start {
+  text-align: end;
+}
+
+html[dir="rtl"] .text-end {
+  text-align: start;
+}
+
+/* Global: flip mr-2 inside flex containers for icon spacing */
+html[dir="rtl"] .flex.items-center>.mr-2,
+html[dir="rtl"] .flex.items-start>.mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+html[dir="rtl"] .flex.items-center>.mr-3,
+html[dir="rtl"] .flex.items-start>.mr-3 {
+  margin-right: 0;
+  margin-left: 0.75rem;
+}
+
+/* Page layout: desktop top bar locale/theme buttons alignment */
+html[dir="rtl"] .djac-topbar {
+  flex-direction: row-reverse;
+}
+
+/* ── Theme toggle animation keyframes ───────────────────────────────────── */
+@keyframes djac-spin-in {
+  from {
+    transform: rotate(-90deg) scale(0.6);
+    opacity: 0;
+  }
+
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes djac-spin-out {
+  from {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+
+  to {
+    transform: rotate(90deg) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.djac-theme-icon-enter {
+  animation: djac-spin-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.djac-theme-icon-exit {
+  animation: djac-spin-out 200ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* ── App shell polish ────────────────────────────────────────────────────── */
+.djac-main-surface {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+
+.djac-main-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 520px at 4% -8%, color-mix(in oklab, hsl(var(--primary)) 14%, transparent 86%), transparent 62%),
+    radial-gradient(820px 420px at 100% 0%, color-mix(in oklab, hsl(var(--chart-1)) 10%, transparent 90%), transparent 64%),
+    linear-gradient(180deg, color-mix(in oklab, hsl(var(--background)) 94%, hsl(var(--card)) 6%) 0%, hsl(var(--background)) 100%);
+}
+
+.djac-page-enter {
+  animation: djac-page-enter 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes djac-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .djac-page-enter {
+    animation: none;
+  }
+}
+
+/* ── Table row hover utility ────────────────────────────────────────────── */
+.djac-row-hover {
+  transition: background 0.15s ease;
+}
+
+.djac-row-hover:hover {
+  background: var(--djac-card-hi, hsl(var(--muted)));
+}
+
+/* ── Skip-to-main accessibility link ────────────────────────────────────── */
+.djac-skip-link {
+  position: absolute;
+  top: -9999px;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.5rem 1.25rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: top 0ms;
+}
+
+.djac-skip-link:focus-visible {
+  top: 1rem;
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* ── Full-page loading spinner (Suspense fallback) ───────────────────────── */
+@keyframes djac-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.djac-page-spinner {
+  width: 32px;
+  height: 32px;
+  /* --border and --primary are oklch() values in this theme, not HSL channels.
+     Wrapping them in hsl() would produce invalid CSS and make the spinner
+     invisible. Use the custom properties directly instead. */
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: djac-spinner 0.7s linear infinite;
+}
+
+/* ── Stagger fade-up animation for list items ───────────────────────────── */
+@keyframes djac-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.djac-stagger>* {
+  animation: djac-fade-up 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.djac-stagger>*:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.djac-stagger>*:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.djac-stagger>*:nth-child(3) {
+  animation-delay: 80ms;
+}
+
+.djac-stagger>*:nth-child(4) {
+  animation-delay: 120ms;
+}
+
+.djac-stagger>*:nth-child(5) {
+  animation-delay: 160ms;
+}
+
+.djac-stagger>*:nth-child(n+6) {
+  animation-delay: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .djac-page-spinner {
+    animation: none;
+  }
+
+  .djac-stagger>* {
+    animation: none;
+  }
+}
+
+/* ── Dashboard responsive layout tuning ─────────────────────────────────── */
+@media (max-width: 1280px) {
+  .djac-dash-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .djac-dash-modules-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .djac-dash-fw-grid,
+  .djac-dash-insight-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .djac-dash-root {
+    padding: 16px 14px 28px !important;
+  }
+
+  .djac-dash-chart-grid,
+  .djac-dash-main-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .djac-dash-main-grid {
+    gap: 12px !important;
+  }
+
+  .djac-dash-kpi-grid,
+  .djac-dash-modules-strip,
+  .djac-dash-fw-grid,
+  .djac-dash-insight-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .djac-dash-footer {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .djac-dash-kpi-grid,
+  .djac-dash-modules-strip,
+  .djac-dash-fw-grid,
+  .djac-dash-insight-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Glassmorphism card utility ─────────────────────────────────────────── */
+.djac-glass-card {
+  background: color-mix(in oklab, var(--djac-card) 80%, transparent 20%);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid var(--djac-border);
+  border-radius: 14px;
+}
+
+/* ── KPI card lift on hover ─────────────────────────────────────────────── */
+.djac-kpi-hover {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.djac-kpi-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px -10px color-mix(in oklab, var(--djac-border-hi) 55%, transparent 45%);
+  border-color: var(--djac-border-hi) !important;
+}
+
+/* ── Glow accent utilities ──────────────────────────────────────────────── */
+.djac-glow-cyan {
+  box-shadow: 0 0 0 1px var(--djac-cyan), 0 4px 20px -6px color-mix(in oklab, var(--djac-cyan) 50%, transparent 50%);
+}
+
+.djac-glow-green {
+  box-shadow: 0 0 0 1px var(--djac-green), 0 4px 20px -6px color-mix(in oklab, var(--djac-green) 50%, transparent 50%);
+}
+
+.djac-glow-red {
+  box-shadow: 0 0 0 1px var(--djac-red), 0 4px 20px -6px color-mix(in oklab, var(--djac-red) 50%, transparent 50%);
+}
+
+/* ── Gradient text ──────────────────────────────────────────────────────── */
+.djac-gradient-text {
+  background: linear-gradient(135deg, var(--djac-cyan) 0%, var(--djac-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Pulsing live dot ───────────────────────────────────────────────────── */
+@keyframes djac-pulse-ring {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--djac-red) 70%, transparent 30%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+}
+
+.djac-pulse-dot {
+  animation: djac-pulse-ring 1.8s ease-in-out infinite;
+}
+
+@keyframes djac-pulse-green {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--djac-green) 70%, transparent 30%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+}
+
+.djac-pulse-dot-green {
+  animation: djac-pulse-green 2.4s ease-in-out infinite;
+}
+
+/* ── Scrollbar polish (obligation feed + other overflow regions) ─────────── */
+.djac-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.djac-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.djac-scroll::-webkit-scrollbar-thumb {
+  background: var(--djac-border);
+  border-radius: 99px;
+}
+
+.djac-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--djac-border-hi);
+}
+
+/* ── Sidebar active item accent bar ─────────────────────────────────────── */
+[data-sidebar="menu-button"][data-active="true"] {
+  position: relative;
+  background: color-mix(in oklab, hsl(var(--primary)) 12%, hsl(var(--sidebar-accent)) 88%) !important;
+  color: hsl(var(--primary)) !important;
+  font-weight: 600 !important;
+}
+
+[data-sidebar="menu-button"][data-active="true"]::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: hsl(var(--primary));
+}
+
+html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
+  border-radius: 3px 0 0 3px;
+}
+
+/* ── Topbar breadcrumb separator ────────────────────────────────────────── */
+.djac-topbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--djac-border);
+  flex-shrink: 0;
+}
+
+/* ── Animated counter badge ─────────────────────────────────────────────── */
+.djac-badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 99px;
+  background: var(--djac-red);
+  color: #fff;
+  line-height: 1;
+}
+
+/* ── Section fade-in stagger animation ──────────────────────────────────── */
+@keyframes djac-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.djac-section-1 {
+  animation: djac-fade-up 0.35s 0.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.djac-section-2 {
+  animation: djac-fade-up 0.35s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 2b sits between section-2 and section-3 — used for the Dashboard module health strip */
+.djac-section-2b {
+  animation: djac-fade-up 0.35s 0.155s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.djac-section-3 {
+  animation: djac-fade-up 0.35s 0.19s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.djac-section-4 {
+  animation: djac-fade-up 0.35s 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.djac-section-5 {
+  animation: djac-fade-up 0.35s 0.33s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.djac-section-6 {
+  animation: djac-fade-up 0.35s 0.40s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.djac-section-7 {
+  animation: djac-fade-up 0.35s 0.47s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Page root: standard full-page wrapper for pages with their own padding ─ */
+/* Cancels the main tag's base padding so there is no double-inset.            */
+.djac-page-root {
+  margin: calc(-1 * var(--page-outer-pad, 1rem));
+  padding: 24px 28px 48px;
+  min-height: calc(100vh - 3.5rem);
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .djac-page-root {
+    padding: 16px 16px 32px;
+  }
+}
+
+/* ── Public-facing responsive polish ────────────────────────────────────── */
+.djac-locale-switcher {
+  min-width: 0;
+}
+
+.djac-topbar-controls {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1100px) {
+
+  .djac-home-feature-grid,
+  .djac-home-steps-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 820px) {
+  .djac-home-nav-inner {
+    height: auto !important;
+    gap: 12px;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    align-items: flex-start !important;
+  }
+
+  .djac-home-nav-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .djac-home-feature-grid,
+  .djac-home-steps-grid,
+  .djac-home-framework-grid,
+  .djac-home-intake-grid,
+  .djac-home-form-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .djac-home-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .djac-home-hero-actions {
+    align-items: stretch;
+  }
+
+  .djac-home-hero-actions>* {
+    width: 100%;
+  }
+
+  .djac-home-cta-card {
+    padding: 28px 20px !important;
+  }
+
+  .djac-topbar-mobile {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .djac-home-stats-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Transfer Checker step-3 results grid — responsive collapse ─────────── */
+@media (max-width: 820px) {
+  .djac-transfer-step3-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .djac-section-1,
+  .djac-section-2,
+  .djac-section-2b,
+  .djac-section-3,
+  .djac-section-4,
+  .djac-section-5,
+  .djac-section-6,
+  .djac-section-7 {
+    animation: none;
+  }
+
+  .djac-kpi-hover:hover {
+    transform: none;
+  }
+
+  .djac-pulse-dot,
+  .djac-pulse-dot-green {
+    animation: none;
+  }
+}
+
+/* ── Progress bar shimmer ───────────────────────────────────────────────── */
+@keyframes djac-shimmer {
+  from {
+    background-position: -200% center;
+  }
+
+  to {
+    background-position: 200% center;
+  }
+}
+
+.djac-shimmer-bar {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: djac-shimmer 2.2s linear infinite;
+}
+
+/* ── Insight card accent border glow on hover ───────────────────────────── */
+.djac-insight-card {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.djac-insight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Sidebar group label polish ─────────────────────────────────────────── */
+/* Subtle top divider between every sidebar group except the first. */
+[data-sidebar="group"]+[data-sidebar="group"] {
+  border-top: 1px solid var(--djac-border);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+/* Sidebar group label: keep font-size only. Do NOT override height —
+   the collapse animation uses -mt-8 based on the component's h-8 (32px). */
+[data-sidebar="group-label"] {
+  font-size: 10px;
+}
+
+/* Safety: sidebar content/group/menu containers must always stack vertically.
+   This prevents any accidental flex-direction override from global styles. */
+[data-sidebar="content"],
+[data-sidebar="group"],
+[data-sidebar="menu"] {
+  flex-direction: column;
+}
+
+/* ── Pro Intelligence two-column grid responsive ─────────────────────────── */
+@media (max-width: 860px) {
+  .pro-intel-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Notification badge spring-scale entry ──────────────────────────────── */
+@keyframes djac-badge-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  70% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.djac-badge-pop {
+  animation: djac-badge-pop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DJAC DESIGN SYSTEM — SUPPLEMENT LAYER v2.0 · April 2026
+   ─────────────────────────────────────────────────────────────────────────
+   Adds: typography scale tokens · standardised page layout utilities ·
+   spacing + dimension tokens · component primitives (table, empty-state,
+   filter-bar, form-field, callout, tier-pill) · accessibility hardening ·
+   zoom-stability guards · browser normalisation · print stylesheet.
+   All tokens follow the existing --djac-* naming convention so they compose
+   cleanly with the light / dark themes already defined above.
+   No existing rule is modified — only additive.
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Design token extensions ─────────────────────────────────────────────
+   Grouping: typography · spacing · border-radius · shadow · component sizes
+────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Typography scale */
+  --djac-text-display: clamp(2rem, 4.2vw, 3rem);
+  --djac-text-h1: clamp(1.5rem, 2.4vw, 2rem);
+  --djac-text-h2: clamp(1.25rem, 1.8vw, 1.5rem);
+  --djac-text-h3: clamp(1rem, 1.3vw, 1.125rem);
+  --djac-text-h4: 0.875rem;
+  --djac-text-body: 0.875rem;
+  --djac-text-body-sm: 0.8125rem;
+  --djac-text-body-xs: 0.75rem;
+  --djac-text-caption: 0.625rem;
+  --djac-text-btn: 0.875rem;
+  --djac-text-btn-sm: 0.8125rem;
+  --djac-text-input: 0.875rem;
+  --djac-text-label: 0.8125rem;
+  --djac-text-table-hd: 0.75rem;
+  --djac-text-table-bd: 0.8125rem;
+  --djac-text-badge: 0.6875rem;
+  --djac-text-tooltip: 0.75rem;
+  /* Line heights */
+  --djac-lh-tight: 1.2;
+  --djac-lh-snug: 1.35;
+  --djac-lh-normal: 1.5;
+  --djac-lh-relaxed: 1.65;
+  /* Letter spacing */
+  --djac-ls-tight: -0.01em;
+  --djac-ls-wide: 0.03em;
+  --djac-ls-widest: 0.08em;
+  /* Spacing (4-px base grid) */
+  --djac-sp-1: 0.25rem;
+  --djac-sp-2: 0.5rem;
+  --djac-sp-3: 0.75rem;
+  --djac-sp-4: 1rem;
+  --djac-sp-5: 1.25rem;
+  --djac-sp-6: 1.5rem;
+  --djac-sp-8: 2rem;
+  --djac-sp-10: 2.5rem;
+  --djac-sp-12: 3rem;
+  /* Border radius tokens */
+  --djac-radius-xs: 0.25rem;
+  --djac-radius-sm: 0.375rem;
+  --djac-radius-md: 0.5rem;
+  --djac-radius-lg: 0.75rem;
+  --djac-radius-xl: 1rem;
+  --djac-radius-full: 9999px;
+  /* Shadow tokens */
+  --djac-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --djac-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.09);
+  --djac-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.11);
+  --djac-shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.14);
+  --djac-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.18);
+  /* Component dimension tokens */
+  --djac-topbar-h: 3.5rem;
+  --djac-input-h: 2.375rem;
+  --djac-input-h-sm: 2rem;
+  --djac-btn-h: 2.25rem;
+  --djac-btn-h-sm: 2rem;
+  --djac-btn-h-lg: 2.75rem;
+  --djac-icon-sm: 1rem;
+  --djac-icon-md: 1.25rem;
+  --djac-icon-lg: 1.5rem;
+  --djac-icon-xl: 2rem;
+  --djac-table-row-h: 2.75rem;
+  --djac-table-head-h: 2.5rem;
+  --djac-modal-sm: 22rem;
+  --djac-modal-md: 32rem;
+  --djac-modal-lg: 40rem;
+  --djac-modal-xl: 56rem;
+  /* Z-index ladder */
+  --djac-z-dropdown: 200;
+  --djac-z-sticky: 300;
+  --djac-z-overlay: 400;
+  --djac-z-modal: 500;
+  --djac-z-toast: 600;
+}
+
+/* ── 2. Typography utilities ─────────────────────────────────────────────────
+   Apply once via className; avoid arbitrary text-[px] overrides.
+────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  .djac-display {
+    font-size: var(--djac-text-display);
+    font-weight: 800;
+    line-height: var(--djac-lh-tight);
+    letter-spacing: var(--djac-ls-tight);
+  }
+
+  .djac-h1 {
+    font-size: var(--djac-text-h1);
+    font-weight: 700;
+    line-height: var(--djac-lh-tight);
+    letter-spacing: var(--djac-ls-tight);
+  }
+
+  .djac-h2 {
+    font-size: var(--djac-text-h2);
+    font-weight: 700;
+    line-height: var(--djac-lh-snug);
+    letter-spacing: var(--djac-ls-tight);
+  }
+
+  .djac-h3 {
+    font-size: var(--djac-text-h3);
+    font-weight: 600;
+    line-height: var(--djac-lh-snug);
+  }
+
+  .djac-h4 {
+    font-size: var(--djac-text-h4);
+    font-weight: 600;
+    line-height: var(--djac-lh-normal);
+  }
+
+  .djac-body {
+    font-size: var(--djac-text-body);
+    line-height: var(--djac-lh-normal);
+  }
+
+  .djac-body-sm {
+    font-size: var(--djac-text-body-sm);
+    line-height: var(--djac-lh-normal);
+  }
+
+  .djac-body-xs {
+    font-size: var(--djac-text-body-xs);
+    line-height: var(--djac-lh-relaxed);
+  }
+
+  .djac-caption {
+    font-size: var(--djac-text-caption);
+    letter-spacing: var(--djac-ls-wide);
+  }
+
+  .djac-label {
+    font-size: var(--djac-text-label);
+    font-weight: 500;
+  }
+
+  .djac-badge-text {
+    font-size: var(--djac-text-badge);
+    font-weight: 700;
+    letter-spacing: var(--djac-ls-widest);
+    text-transform: uppercase;
+  }
+
+  .djac-table-head {
+    font-size: var(--djac-text-table-hd);
+    font-weight: 600;
+    letter-spacing: var(--djac-ls-wide);
+    text-transform: uppercase;
+  }
+
+  .djac-table-cell {
+    font-size: var(--djac-text-table-bd);
+  }
+
+  .djac-muted-text {
+    color: hsl(var(--muted-foreground));
+  }
+}
+
+/* ── 3. Standardised page layout ─────────────────────────────────────────────
+   .djac-page            outer page wrapper (inside SidebarInset main)
+   .djac-page-header     title / subtitle / action row
+   .djac-page-header__*  sub-elements
+   .djac-stat-grid       primary KPI grid (4→2→1 col)
+   .djac-chart-grid      side-by-side charts (2→1 col)
+   .djac-three-col       generic 3-col (3→2→1 col)
+────────────────────────────────────────────────────────────────────────── */
+@layer components {
+
+  .djac-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--djac-sp-6);
+    /* Breathing room: top padding so first section doesn't hug topbar */
+    padding-block-start: var(--djac-sp-2);
+    padding-block-end: var(--djac-sp-12);
+    /* Constrain ultra-wide content — prevents lines 110ch wide on 4K monitors */
+    max-width: 90rem;
+    width: 100%;
+    /* No extra margin — the parent main already provides horizontal padding */
+    container-type: inline-size;
+    container-name: djac-page;
+  }
+
+  .djac-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    /* Extra top breathing room between topbar and page title */
+    padding-block-start: var(--djac-sp-2);
+    gap: var(--djac-sp-4);
+    flex-wrap: wrap;
+  }
+
+  .djac-page-header__title {
+    font-size: var(--djac-text-h1);
+    font-weight: 700;
+    line-height: var(--djac-lh-tight);
+    letter-spacing: var(--djac-ls-tight);
+    color: hsl(var(--foreground));
+  }
+
+  .djac-page-header__subtitle {
+    font-size: var(--djac-text-body-sm);
+    color: hsl(var(--muted-foreground));
+    margin-top: var(--djac-sp-1);
+    max-width: 52ch;
+    line-height: var(--djac-lh-relaxed);
+  }
+
+  .djac-page-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--djac-sp-2);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  /* KPI stat grid: 4 → 2 → 1 columns */
+  .djac-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--djac-sp-4);
+  }
+
+  @container djac-page (max-width: 900px) {
+    .djac-stat-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container djac-page (max-width: 500px) {
+    .djac-stat-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Chart 50/50 grid: 2 → 1 column */
+  .djac-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--djac-sp-4);
+  }
+
+  @container djac-page (max-width: 840px) {
+    .djac-chart-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Generic 3-col grid: 3 → 2 → 1 */
+  .djac-three-col {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--djac-sp-4);
+  }
+
+  @container djac-page (max-width: 960px) {
+    .djac-three-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container djac-page (max-width: 600px) {
+    .djac-three-col {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ── Table container ─────────────────────────────────────────────────── */
+  .djac-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--djac-radius-lg);
+    border: 1px solid hsl(var(--border));
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .djac-table-container::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .djac-table-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .djac-table-container::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 99px;
+  }
+
+  .djac-table-container table {
+    width: 100%;
+    min-width: max-content;
+    border-collapse: collapse;
+  }
+
+  .djac-table-container thead tr {
+    background: hsl(var(--muted) / 60%);
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .djac-table-container thead th {
+    font-size: var(--djac-text-table-hd);
+    font-weight: 600;
+    letter-spacing: var(--djac-ls-wide);
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+    padding: 0.625rem 0.875rem;
+    white-space: nowrap;
+    text-align: start;
+  }
+
+  .djac-table-container tbody td {
+    font-size: var(--djac-text-table-bd);
+    padding: 0.5rem 0.875rem;
+    border-bottom: 1px solid hsl(var(--border) / 50%);
+    vertical-align: middle;
+  }
+
+  .djac-table-container tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .djac-table-container tbody tr {
+    transition: background 0.12s ease;
+  }
+
+  .djac-table-container tbody tr:hover {
+    background: hsl(var(--muted) / 40%);
+  }
+
+  /* ── Empty state ─────────────────────────────────────────────────────── */
+  .djac-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--djac-sp-3);
+    padding: var(--djac-sp-12) var(--djac-sp-6);
+    text-align: center;
+    min-height: 12rem;
+  }
+
+  .djac-empty-state__icon {
+    width: 3rem;
+    height: 3rem;
+    color: hsl(var(--muted-foreground) / 35%);
+  }
+
+  .djac-empty-state__title {
+    font-size: var(--djac-text-h4);
+    font-weight: 600;
+    color: hsl(var(--foreground));
+  }
+
+  .djac-empty-state__sub {
+    font-size: var(--djac-text-body-sm);
+    color: hsl(var(--muted-foreground));
+    max-width: 36ch;
+    line-height: var(--djac-lh-relaxed);
+  }
+
+  /* ── Filter toolbar ──────────────────────────────────────────────────── */
+  .djac-filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--djac-sp-2);
+  }
+
+  .djac-filter-bar>* {
+    flex-shrink: 0;
+  }
+
+  /* ── Form field wrapper ──────────────────────────────────────────────── */
+  .djac-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--djac-sp-1);
+  }
+
+  .djac-form-field__label {
+    font-size: var(--djac-text-label);
+    font-weight: 500;
+    color: hsl(var(--foreground));
+  }
+
+  .djac-form-field__hint {
+    font-size: var(--djac-text-body-xs);
+    color: hsl(var(--muted-foreground));
+  }
+
+  .djac-form-field__error {
+    font-size: var(--djac-text-body-xs);
+    color: hsl(var(--destructive));
+    font-weight: 500;
+  }
+
+  /* ── Form grid 2-col → 1-col ──────────────────────────────────────────── */
+  .djac-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--djac-sp-4);
+  }
+
+  .djac-form-grid .djac-col-2 {
+    grid-column: span 2;
+  }
+
+  @container djac-page (max-width: 560px) {
+    .djac-form-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .djac-form-grid .djac-col-2 {
+      grid-column: span 1;
+    }
+  }
+
+  /* ── Skeleton loader ─────────────────────────────────────────────────── */
+  .djac-skeleton {
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted) / 60%) 50%, hsl(var(--muted)) 75%);
+    background-size: 200% 100%;
+    animation: djac-shimmer 1.8s linear infinite;
+    border-radius: var(--djac-radius-sm);
+  }
+
+  /* ── Status dot ──────────────────────────────────────────────────────── */
+  .djac-status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--djac-sp-1);
+    font-size: var(--djac-text-body-xs);
+    font-weight: 500;
+  }
+
+  .djac-status-dot::before {
+    content: "";
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .djac-status-dot--green::before {
+    background: var(--djac-green);
+  }
+
+  .djac-status-dot--amber::before {
+    background: var(--djac-yellow);
+  }
+
+  .djac-status-dot--red::before {
+    background: var(--djac-red);
+  }
+
+  .djac-status-dot--muted::before {
+    background: var(--djac-muted);
+  }
+
+  /* ── Callout / inline alert ──────────────────────────────────────────── */
+  .djac-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--djac-sp-3);
+    border-radius: var(--djac-radius-md);
+    border: 1px solid;
+    padding: var(--djac-sp-3) var(--djac-sp-4);
+    font-size: var(--djac-text-body-sm);
+    line-height: var(--djac-lh-relaxed);
+  }
+
+  .djac-callout--info {
+    background: hsl(var(--chart-1) / 8%);
+    border-color: hsl(var(--chart-1) / 30%);
+    color: hsl(var(--chart-1));
+  }
+
+  .djac-callout--success {
+    background: color-mix(in oklch, var(--djac-green) 10%, transparent);
+    border-color: color-mix(in oklch, var(--djac-green) 30%, transparent);
+    color: var(--djac-green);
+  }
+
+  .djac-callout--warn {
+    background: color-mix(in oklch, var(--djac-yellow) 10%, transparent);
+    border-color: color-mix(in oklch, var(--djac-yellow) 30%, transparent);
+    color: var(--djac-yellow);
+  }
+
+  .djac-callout--error {
+    background: color-mix(in oklch, var(--djac-red) 10%, transparent);
+    border-color: color-mix(in oklch, var(--djac-red) 30%, transparent);
+    color: var(--djac-red);
+  }
+
+  /* ── Tier / risk-level pill ──────────────────────────────────────────── */
+  .djac-tier-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--djac-radius-full);
+    font-size: var(--djac-text-badge);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--djac-ls-widest);
+    border: 1px solid;
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+  }
+
+  .djac-tier-pill--critical {
+    background: color-mix(in oklch, #ef4444 12%, transparent);
+    border-color: color-mix(in oklch, #ef4444 35%, transparent);
+    color: #ef4444;
+  }
+
+  .djac-tier-pill--high {
+    background: color-mix(in oklch, #f97316 12%, transparent);
+    border-color: color-mix(in oklch, #f97316 35%, transparent);
+    color: #f97316;
+  }
+
+  .djac-tier-pill--medium {
+    background: color-mix(in oklch, #eab308 12%, transparent);
+    border-color: color-mix(in oklch, #eab308 35%, transparent);
+    color: #eab308;
+  }
+
+  .djac-tier-pill--low {
+    background: color-mix(in oklch, #22c55e 12%, transparent);
+    border-color: color-mix(in oklch, #22c55e 35%, transparent);
+    color: #22c55e;
+  }
+
+  /* ── Content width cap for ultra-wide monitors ───────────────────────── */
+  .djac-content-cap {
+    max-width: 90rem;
+    /* 1440px */
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  /* ── Dialog size presets ─────────────────────────────────────────────── */
+  .djac-dialog-sm {
+    max-width: var(--djac-modal-sm);
+  }
+
+  .djac-dialog-md {
+    max-width: var(--djac-modal-md);
+  }
+
+  .djac-dialog-lg {
+    max-width: var(--djac-modal-lg);
+  }
+
+  .djac-dialog-xl {
+    max-width: var(--djac-modal-xl);
+  }
+}
+
+/* ── 4. Global focus-visible hardening ───────────────────────────────────────
+   Consistent keyboard-focus ring for all interactive elements.
+────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    /* Inherit the element's own border-radius so the ring follows its shape */
+    border-radius: inherit;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Disabled state — scoped to interactive form elements only.
+     Sidebar/nav buttons handle their own disabled styles internally. */
+  input[disabled],
+  button[disabled],
+  select[disabled],
+  textarea[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  a[aria-disabled="true"],
+  button[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* iOS Safari: prevent auto-zoom on inputs smaller than 16px */
+  @supports (-webkit-touch-callout: none) {
+
+    input,
+    select,
+    textarea {
+      font-size: max(1rem, var(--djac-text-input));
+    }
+  }
+
+  /* Ultra-wide: constrain app shell at 1800px */
+  @media (min-width: 1920px) {
+    .djac-main-surface {
+      max-width: 112.5rem;
+      margin-inline: auto;
+    }
+  }
+
+  /* Chart SVG text should use the same font as the app */
+  svg text {
+    font-family: var(--font-sans);
+  }
+}
+
+/* ── Animation Components Glassmorphism Utilities ────────────────────────────
+   Supports the DJAC_ANIMATION_EXPORT.tsx component library.
+   Uses dark-theme HSL semantic channels (--success, --warning, --info).
+   Parallels .djac-glass-card but with tighter blur + stronger primary glow.
+────────────────────────────────────────────────────────────────────────── */
+.glass-card {
+  background: linear-gradient(135deg,
+      hsla(230, 70%, 16%, 0.8),
+      hsla(230, 70%, 12%, 0.6));
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid hsla(185, 100%, 49%, 0.12);
+}
+
+.glass-card:hover {
+  border-color: hsla(185, 100%, 49%, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 247, 255, 0.08);
+}
+
+.glass-surface {
+  background: hsla(230, 70%, 14%, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glow-border {
+  border: 1px solid hsla(185, 100%, 49%, 0.2);
+  box-shadow: inset 0 0 30px hsla(185, 100%, 49%, 0.03);
+}
+
+/* ── Text Gradient Utilities ────────────────────────────────────────────────
+   Linear gradients for text effects on hero + animation component headlines.
+────────────────────────────────────────────────────────────────────────── */
+.text-gradient-cyan {
+  background: linear-gradient(135deg,
+      hsl(185, 100%, 49%),
+      hsl(185, 80%, 40%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg,
+      hsl(260, 74%, 56%),
+      hsl(270, 100%, 60%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Custom scrollbar for animation component feeds ─────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsla(185, 100%, 49%, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(185, 100%, 49%, 0.3);
+}
+
+/* ── 5. Zoom-stability guards ────────────────────────────────────────────────
+   Verified at 90 / 100 / 110 / 125 / 150 / 175 / 200% browser zoom.
+────────────────────────────────────────────────────────────────────────── */
+@layer base {
+
+  /* Sidebar content clips gracefully instead of overflowing */
+  [data-sidebar="menu-button"] span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  /* Images never bleed */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Video / canvas: constrain width but do NOT force height: auto.
+     Canvas has no intrinsic size — height: auto collapses it to 0. */
+  video,
+  canvas {
+    max-width: 100%;
+  }
+
+  /* Code blocks scroll instead of stretching the viewport */
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+}
+
+/* ── 6. Browser normalisation ────────────────────────────────────────────────*/
+
+/* Firefox: global thin scrollbar */
+@-moz-document url-prefix() {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+}
+
+/* Safari: prevent elastic overscroll from shifting the shell */
+@supports (-webkit-overflow-scrolling: touch) {
+
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+}
+
+/* Smooth page scroll (except inside overlays which can cause jank) */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  [data-radix-dialog-content],
+  [data-radix-popover-content] {
+    scroll-behavior: auto;
+  }
+}
+
+/* ── 7. Print stylesheet ─────────────────────────────────────────────────────
+   Compliance reports / audit logs are routinely printed or exported to PDF.
+────────────────────────────────────────────────────────────────────────── */
+@media print {
+
+  [data-sidebar="sidebar"],
+  [data-sidebar="inset"]>.djac-topbar,
+  .djac-topbar,
+  .djac-skip-link,
+  [data-sonner-toaster],
+  .djac-pulse-dot,
+  .djac-pulse-dot-green,
+  button:not(.djac-print-show) {
+    display: none !important;
+  }
+
+  [data-sidebar="inset"],
+  main#main-content {
+    margin: 0 !important;
+    padding: 0.5rem !important;
+    width: 100% !important;
+  }
+
+  .djac-glass-card,
+  [class*="shadow"] {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3,
+  .djac-page-header {
+    page-break-after: avoid;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DJAC ANIMATION SYSTEM — UTILITY LAYER
+   Glass morphism, gradient text, glow utilities for framer-motion components
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Glass card ─────────────────────────────────────────────────────────── */
+.glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.glass-card:hover {
+  border-color: hsla(185, 100%, 49%, 0.22);
+  box-shadow: 0 8px 32px rgba(0, 247, 255, 0.07);
+}
+
+.light .glass-card,
+:root:not(.dark) .glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(240, 244, 255, 0.55) 100%);
+  border: 1px solid rgba(4, 15, 97, 0.09);
+}
+
+.light .glass-card:hover,
+:root:not(.dark) .glass-card:hover {
+  border-color: rgba(2, 132, 199, 0.28);
+  box-shadow: 0 8px 28px rgba(2, 132, 199, 0.08);
+}
+
+/* ── Glass surface (lighter variant) ───────────────────────────────────── */
+.glass-surface {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ── Glow border ────────────────────────────────────────────────────────── */
+.glow-border {
+  border: 1px solid hsla(185, 100%, 49%, 0.2);
+  box-shadow: inset 0 0 30px hsla(185, 100%, 49%, 0.03), var(--glow-cyan);
+}
+
+/* ── Gradient text ──────────────────────────────────────────────────────── */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, hsl(185, 100%, 49%), hsl(200, 100%, 60%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, hsl(260, 74%, 56%), hsl(280, 80%, 65%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, hsl(38, 92%, 50%), hsl(50, 100%, 60%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── font-display utility ───────────────────────────────────────────────── */
+.font-display {
+  font-family: var(--font-display, "Space Grotesk", "Inter", sans-serif);
+}
+
+/* ── Success / warning / info text colors ───────────────────────────────── */
+.text-success {
+  color: hsl(var(--success));
+}
+
+.text-warning {
+  color: hsl(var(--warning));
+}
+
+.text-info {
+  color: hsl(var(--info));
+}
+
+.bg-success {
+  background-color: hsl(var(--success));
+}
+
+.bg-warning {
+  background-color: hsl(var(--warning));
+}
+
+.bg-info {
+  background-color: hsl(var(--info));
+}
+
+/* ── Destructive alias ──────────────────────────────────────────────────── */
+.text-destructive {
+  color: hsl(var(--destructive));
+}
+
+.bg-destructive {
+  background-color: hsl(var(--destructive));
+}
+
+/* ── Neon glow box-shadow utilities  ─────────────────────────────────────── */
+.shadow-cyan {
+  box-shadow: var(--glow-cyan);
+}
+
+.shadow-purple {
+  box-shadow: var(--glow-purple);
+}
+
+/* ── Progress shimmer animation ─────────────────────────────────────────── */
+@keyframes anim-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(300%);
+  }
+}
+
+.anim-shimmer {
+  animation: anim-shimmer 2.5s linear infinite;
+}
+
+/* ── Scanning line animation ─────────────────────────────────────────────── */
+@keyframes anim-scan-v {
+  from {
+    top: -2%;
+  }
+
+  to {
+    top: 102%;
+  }
+}
+
+@keyframes anim-scan-h {
+  from {
+    left: 102%;
+  }
+
+  to {
+    left: -2%;
+  }
+}
+
+/* ── Reduced-motion: disable animation system extras ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .glass-card:hover {
+    box-shadow: none;
+  }
+
+  .anim-shimmer {
+    animation: none;
+  }
+}

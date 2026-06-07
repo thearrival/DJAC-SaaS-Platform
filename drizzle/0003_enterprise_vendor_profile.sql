@@ -1,0 +1,17 @@
+ALTER TABLE `vendors`
+  MODIFY COLUMN `operatingCountries` text,
+  ADD COLUMN `businessRegistrationNumber` varchar(120),
+  ADD COLUMN `headquartersLocation` varchar(120),
+  ADD COLUMN `primaryContactName` varchar(255),
+  ADD COLUMN `primaryContactEmail` varchar(320),
+  ADD COLUMN `primaryContactRole` varchar(120),
+  ADD COLUMN `primaryContactPhone` varchar(64),
+  ADD COLUMN `serviceType` varchar(120),
+  ADD COLUMN `serviceScope` text,
+  ADD COLUMN `hostingEnvironment` varchar(120),
+  ADD COLUMN `regulatoryJurisdictions` text,
+  ADD COLUMN `dataProcessingActivities` text,
+  ADD COLUMN `criticalityLevel` varchar(64),
+  ADD COLUMN `riskTier` varchar(64),
+  ADD COLUMN `thirdPartyDependencies` varchar(64),
+  ADD COLUMN `fourthPartyDependencies` varchar(64);

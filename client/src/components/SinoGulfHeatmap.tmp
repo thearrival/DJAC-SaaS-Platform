@@ -1,0 +1,324 @@
+
+export function SinoGulfHeatmap() {
+    const { theme } = useTheme();
+    const { t } = useLocale();
+    const isDark = theme === "dark";
+
+    const [whatIfMode, setWhatIfMode] = useState(false);
+    const [hoveredPipe, setHoveredPipe] = useState<string | null>(null);
+    const [selectedPipe, setSelectedPipe] = useState<string | null>(null);
+    const [tooltip, setTooltip] = useState<{ x: number; y: number; pipe: ActivePipe } | null>(null);
+    const svgRef = useRef<SVGSVGElement>(null);
+    const [tick, setTick] = useState(0);
+
+    // Pulse animation tick
+    useEffect(() => {
+        const id = setInterval(() => setTick(t => (t + 1) % 100), 80);
+        return () => clearInterval(id);
+    }, []);
+
+    const C = useMemo(() => ({
+        bg: isDark ? "#050C2A" : "#f0f4ff",
+        water: isDark ? "#0a1535" : "#dbeafe",
+        land: isDark ? "#0d1e3e" : "#e8edf8",
+        border: isDark ? "#1e3063" : "#c7d2fe",
+        grid: isDark ? "#0d1e3e" : "#e2e8f0",
+        text: isDark ? "#E0E6FF" : "#1e293b",
+        muted: isDark ? "#6B7FC4" : "#64748b",
+        node: isDark ? "#141f45" : "#ffffff",
+        nodeBorder: isDark ? "#2a3f8a" : "#93c5fd",
+    }), [isDark]);
+
+    const getActivePipes = useCallback(() =>
+        PIPES.map(p => ({
+            ...p,
+            activeStatus: whatIfMode && p.whatIfStatus ? p.whatIfStatus : p.status,
+        })), [whatIfMode]);
+
+    const activePipes = getActivePipes();
+
+    // Counts for legend
+    const counts = useMemo(() => {
+        const c = { compliant: 0, approval_required: 0, blocked: 0, simulated_violation: 0 };
+        for (const p of activePipes) c[p.activeStatus]++;
+        return c;
+    }, [activePipes]);
+
+    const handleSvgClick = (e: React.MouseEvent<SVGSVGElement>) => {
+        if ((e.target as SVGElement).tagName === "svg") {
+            setSelectedPipe(null);
+            setTooltip(null);
+        }
+    };
+
+    function handlePipeInteract(e: React.MouseEvent, pipe: typeof activePipes[0]) {
+        e.stopPropagation();
+        const svgEl = svgRef.current;
+        if (!svgEl) return;
+        const rect = svgEl.getBoundingClientRect();
+        const svgX = ((e.clientX - rect.left) / rect.width) * VB.w;
+        const svgY = ((e.clientY - rect.top) / rect.height) * VB.h;
+        setSelectedPipe(pipe.id);
+        setTooltip({ x: svgX, y: svgY, pipe });
+    }
+
+    return (
+        <div
+            style={{ background: "var(--djac-card)", border: "1px solid var(--djac-border)", borderRadius: 16, overflow: "hidden" }}
+        >
+            {/* Header */}
+            <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid var(--djac-border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+                <div>
+                    <p style={{ color: "var(--djac-muted)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>
+                        {t("heatmap.sinoGulf.sectionLabel", "Global Regulatory Heatmap")}
+                    </p>
+                    <h2 style={{ color: "var(--djac-text)", fontSize: 15, fontWeight: 700, margin: 0 }}>
+                        {t("heatmap.sinoGulf.title", "Sino-Gulf Data Residency Architecture")}
+                    </h2>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    {/* Status legend */}
+                    {([
+                        ["compliant", "Compliant"],
+                        ["approval_required", "CAC Approval"],
+                        ["blocked", "Blocked"],
+                        ...(whatIfMode ? [["simulated_violation" as PipeStatus, "⚡ Simulated"]] : []),
+                    ] as [PipeStatus, string][]).map(([status, lbl]) => (
+                        <span
+                            key={status}
+                            style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 600, color: pipeColor(status, isDark), padding: "2px 8px", border: `1px solid ${pipeColor(status, isDark)}40`, borderRadius: 99, background: `${pipeColor(status, isDark)}12` }}
+                        >
+                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: pipeColor(status, isDark), display: "inline-block" }} />
+                            {lbl} ({counts[status]})
+                        </span>
+                    ))}
+                    <Button
+                        size="sm"
+                        variant={whatIfMode ? "destructive" : "outline"}
+                        onClick={() => { setWhatIfMode(v => !v); setSelectedPipe(null); setTooltip(null); }}
+                        style={{ height: 28, fontSize: 11, fontWeight: 700, gap: 4 }}
+                    >
+                        <FlaskConical className="h-3.5 w-3.5" />
+                        {whatIfMode
+                            ? t("heatmap.sinoGulf.exitSimulation", "Exit Simulation")
+                            : t("heatmap.sinoGulf.whatIf", "What-If: 1M+ User Transfer")}
+                    </Button>
+                </div>
+            </div>
+
+            {/* What-If banner */}
+            {whatIfMode && (
+                <div style={{ background: isDark ? "rgba(255,107,43,0.12)" : "rgba(234,88,12,0.08)", borderBottom: "1px solid rgba(255,107,43,0.3)", padding: "8px 20px", display: "flex", alignItems: "center", gap: 8 }}>
+                    <Zap style={{ color: "#FF6B2B", width: 14, height: 14, flexShrink: 0 }} />
+                    <p style={{ color: isDark ? "#FF9B6B" : "#c2410c", fontSize: 12, margin: 0 }}>
+                        <strong>Simulation active:</strong> Moving 1M+ user records from Riyadh → Beijing.
+                        Affected: <strong>PIPL Art. 38–40</strong> (CAC cross-border assessment), <strong>PDPL Art. 29</strong> (third-country transfer), <strong>DSL Art. 31</strong> (critical data category). Pipes highlighted in orange/red require immediate remediation.
+                    </p>
+                </div>
+            )}
+
+            {/* SVG Map */}
+            <div style={{ position: "relative" }}>
+                <style>{`
+          @keyframes djac-pipe-flow {
+            0%   { stroke-dashoffset: 40; }
+            100% { stroke-dashoffset: 0; }
+          }
+          @keyframes djac-pipe-pulse {
+            0%, 100% { opacity: 0.6; }
+            50%       { opacity: 1; }
+          }
+          @keyframes djac-node-ping {
+            0%   { transform: scale(1);   opacity: 0.8; }
+            50%  { transform: scale(1.4); opacity: 0.4; }
+            100% { transform: scale(1);   opacity: 0.8; }
+          }
+        `}</style>
+                <svg
+                    ref={svgRef}
+                    viewBox={`0 0 ${VB.w} ${VB.h}`}
+                    style={{ width: "100%", display: "block", maxHeight: 420 }}
+                    onClick={handleSvgClick}
+                >
+                    {/* Background */}
+                    <rect width={VB.w} height={VB.h} fill={C.bg} />
+
+                    {/* Faint grid */}
+                    {[40, 80, 120, 160, 200, 240, 280, 320, 360, 400].map(y => (
+                        <line key={`gy${y}`} x1={0} y1={y} x2={VB.w} y2={y} stroke={C.grid} strokeWidth="0.5" />
+                    ))}
+                    {[80, 160, 240, 320, 400, 480, 560, 640, 720].map(x => (
+                        <line key={`gx${x}`} x1={x} y1={0} x2={x} y2={VB.h} stroke={C.grid} strokeWidth="0.5" />
+                    ))}
+
+                    {/* Water region hint */}
+                    <ellipse cx={380} cy={260} rx={260} ry={90} fill={C.water} opacity={0.4} />
+
+                    {/* Region labels */}
+                    <text x={70} y={290} fill={C.muted} fontSize="9" fontWeight="600" opacity="0.6" textAnchor="middle">ARABIAN GULF</text>
+                    <text x={390} y={310} fill={C.muted} fontSize="9" fontWeight="600" opacity="0.6" textAnchor="middle">INDIAN OCEAN</text>
+                    <text x={660} y={190} fill={C.muted} fontSize="9" fontWeight="600" opacity="0.6" textAnchor="middle">SOUTH CHINA SEA</text>
+
+                    {/* Pipes */}
+                    {activePipes.map(pipe => {
+                        const from = project(NODES[pipe.from].lon, NODES[pipe.from].lat);
+                        const to = project(NODES[pipe.to].lon, NODES[pipe.to].lat);
+                        const color = pipeColor(pipe.activeStatus, isDark);
+                        const isHovered = hoveredPipe === pipe.id;
+                        const isSelected = selectedPipe === pipe.id;
+                        const isPulsing = pipe.activeStatus === "approval_required" || pipe.activeStatus === "simulated_violation" || pipe.activeStatus === "blocked";
+                        const d = cubicBez(from, to);
+
+                        return (
+                            <g key={pipe.id}>
+                                {/* Ghost hit area */}
+                                <path
+                                    d={d}
+                                    fill="none"
+                                    stroke="transparent"
+                                    strokeWidth={16}
+                                    style={{ cursor: "pointer" }}
+                                    onMouseEnter={() => setHoveredPipe(pipe.id)}
+                                    onMouseLeave={() => setHoveredPipe(null)}
+                                    onClick={(e) => handlePipeInteract(e, pipe)}
+                                />
+                                {/* Glow layer */}
+                                {(isHovered || isSelected) && (
+                                    <path d={d} fill="none" stroke={color} strokeWidth={6} opacity={0.25} />
+                                )}
+                                {/* Base pipe */}
+                                <path
+                                    d={d}
+                                    fill="none"
+                                    stroke={color}
+                                    strokeWidth={isHovered || isSelected ? 2.5 : 1.8}
+                                    strokeLinecap="round"
+                                    opacity={isPulsing ? 0.7 : 0.9}
+                                    style={isPulsing ? { animation: "djac-pipe-pulse 1.8s ease-in-out infinite" } : undefined}
+                                />
+                                {/* Animated data-flow dashes */}
+                                <path
+                                    d={d}
+                                    fill="none"
+                                    stroke={color}
+                                    strokeWidth={isHovered || isSelected ? 2.5 : 1.8}
+                                    strokeLinecap="round"
+                                    strokeDasharray="8 12"
+                                    strokeDashoffset={tick * (pipe.volume === "high" ? 1.6 : pipe.volume === "medium" ? 0.9 : 0.5)}
+                                    opacity={0.95}
+                                />
+                                {/* Volume indicator dot at midpoint */}
+                                {pipe.volume === "high" && (() => {
+                                    const t0 = 0.5;
+                                    const mx = from.x + (to.x - from.x) * t0;
+                                    const my = from.y + (to.y - from.y) * t0 - 4;
+                                    return <circle cx={mx} cy={my} r={3} fill={color} opacity={0.8} />;
+                                })()}
+                            </g>
+                        );
+                    })}
+
+                    {/* Nodes */}
+                    {(Object.entries(NODES) as [NodeKey, typeof NODES[NodeKey]][]).map(([key, node]) => {
+                        const { x, y } = project(node.lon, node.lat);
+                        const isActive = activePipes.some(p => p.from === key || p.to === key);
+                        const hasViolation = whatIfMode && activePipes.some(p => (p.from === key || p.to === key) && (p.activeStatus === "simulated_violation" || p.activeStatus === "blocked"));
+                        const nodeColor = hasViolation ? pipeColor("simulated_violation", isDark) : isDark ? "#00F7FF" : "#0284c7";
+
+                        return (
+                            <g key={key} style={{ cursor: "default" }}>
+                                {/* Ping ring for active nodes */}
+                                {isActive && (
+                                    <circle
+                                        cx={x} cy={y} r={14}
+                                        fill="none"
+                                        stroke={nodeColor}
+                                        strokeWidth="1"
+                                        opacity={0.3}
+                                        style={{ animation: `djac-node-ping ${hasViolation ? 0.9 : 2.4}s ease-in-out infinite` }}
+                                    />
+                                )}
+                                {/* Node circle */}
+                                <circle cx={x} cy={y} r={8} fill={C.node} stroke={nodeColor} strokeWidth={hasViolation ? 2 : 1.5} />
+                                <circle cx={x} cy={y} r={4} fill={nodeColor} opacity={0.85} />
+                                {/* City label */}
+                                <text x={x} y={y + 20} fill={C.text} fontSize="9.5" fontWeight="700" textAnchor="middle">
+                                    {node.flag} {node.label}
+                                </text>
+                                {/* Jurisdiction tag */}
+                                <text x={x} y={y + 30} fill={C.muted} fontSize="7.5" fontWeight="500" textAnchor="middle" textDecoration="none" opacity="0.8">
+                                    {node.jurisdiction === "cn" ? "PIPL · CSL · DSL" : node.jurisdiction === "sa" ? "PDPL · NCA" : node.label}
+                                </text>
+                            </g>
+                        );
+                    })}
+
+                    {/* Tooltip */}
+                    {tooltip && (() => {
+                        const { x, y, pipe } = tooltip;
+                        const color = pipeColor(pipe.activeStatus, isDark);
+                        const bw = 200, bh = pipe.articles ? 90 : 60;
+                        const bx = Math.min(x + 12, VB.w - bw - 8);
+                        const by = Math.min(y - 20, VB.h - bh - 8);
+                        return (
+                            <g>
+                                <rect x={bx} y={by} width={bw} height={bh} rx={7} fill={isDark ? "#0d1744" : "#f8faff"} stroke={color} strokeWidth={1.2} />
+                                <text x={bx + 10} y={by + 16} fill={C.text} fontSize="9.5" fontWeight="700">{pipe.label}</text>
+                                <text x={bx + 10} y={by + 29} fill={color} fontSize="8.5" fontWeight="600">{statusLabel(pipe.activeStatus)}</text>
+                                <text x={bx + 10} y={by + 42} fill={C.muted} fontSize="7.5">{pipe.frameworks.join(" · ")}</text>
+                                {pipe.articles?.slice(0, 2).map((a, i) => (
+                                    <text key={i} x={bx + 10} y={by + 55 + i * 12} fill={isDark ? "#FF9B6B" : "#c2410c"} fontSize="7">{a}</text>
+                                ))}
+                            </g>
+                        );
+                    })()}
+                </svg>
+
+                {/* Selected pipe detail panel */}
+                {selectedPipe && (() => {
+                    const pipe = activePipes.find(p => p.id === selectedPipe)!;
+                    const color = pipeColor(pipe.activeStatus, isDark);
+                    return (
+                        <div
+                            style={{ position: "absolute", bottom: 12, left: 12, right: 12, background: isDark ? "rgba(5,12,42,0.95)" : "rgba(240,244,255,0.97)", border: `1px solid ${color}60`, borderRadius: 10, padding: "10px 14px", backdropFilter: "blur(8px)", display: "flex", alignItems: "flex-start", gap: 10 }}
+                        >
+                            <div style={{ color, flexShrink: 0, marginTop: 2 }}>{statusIcon(pipe.activeStatus)}</div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                                    <span style={{ color: "var(--djac-text)", fontSize: 12, fontWeight: 700 }}>{pipe.label}</span>
+                                    <span style={{ color, fontSize: 11, fontWeight: 600 }}>— {statusLabel(pipe.activeStatus)}</span>
+                                </div>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: pipe.articles ? 6 : 0 }}>
+                                    {pipe.frameworks.map(fw => (
+                                        <Badge key={fw} variant="outline" style={{ fontSize: 10, height: 18, borderColor: `${color}50`, color }}>{fw}</Badge>
+                                    ))}
+                                </div>
+                                {pipe.articles && (
+                                    <p style={{ color: isDark ? "#FF9B6B" : "#c2410c", fontSize: 11, margin: 0 }}>
+                                        <strong>Required actions:</strong> {pipe.articles.join(", ")}
+                                    </p>
+                                )}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => { setSelectedPipe(null); setTooltip(null); }}
+                                style={{ color: "var(--djac-muted)", background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0 }}
+                                aria-label="Close"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                    );
+                })()}
+            </div>
+
+            {/* Footer hint */}
+            <div style={{ padding: "8px 20px", borderTop: "1px solid var(--djac-border)", display: "flex", alignItems: "center", gap: 6 }}>
+                <Info style={{ color: "var(--djac-muted)", width: 12, height: 12, flexShrink: 0 }} />
+                <p style={{ color: "var(--djac-muted)", fontSize: 10, margin: 0 }}>
+                    {t("heatmap.sinoGulf.hint", "Click any data pipe for full regulatory context. Use What-If to simulate transfer scenarios.")}
+                </p>
+            </div>
+        </div>
+    );
+}

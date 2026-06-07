@@ -1,0 +1,50 @@
+{
+  "name": "DJAC Tool",
+  "short_name": "DJAC",
+  "description": "Enterprise compliance dashboard for China–Saudi Arabia cross-border operations",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/yalla-hack-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/yalla-hack-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open compliance dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/yalla-hack-logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Vendor Assessment",
+      "short_name": "Vendors",
+      "description": "Run a vendor assessment",
+      "url": "/vendor-assessment",
+      "icons": [{ "src": "/yalla-hack-logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Gap Tracker",
+      "short_name": "Gaps",
+      "description": "View compliance gaps",
+      "url": "/gap-tracker",
+      "icons": [{ "src": "/yalla-hack-logo.png", "sizes": "96x96" }]
+    }
+  ]
+}

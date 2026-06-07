@@ -1,0 +1,21 @@
+User-agent: *
+Disallow: /api/
+Disallow: /admin-control-center
+Disallow: /superadmin/
+Disallow: /company/
+Disallow: /client-workspace
+Disallow: /saas-metrics
+Disallow: /operations
+Disallow: /audit-log
+Disallow: /team-members
+Disallow: /org-settings
+Disallow: /api-keys
+Disallow: /billing
+
+Allow: /
+Allow: /pricing
+Allow: /signup
+Allow: /login
+Allow: /forgot-password
+Allow: /privacy
+Allow: /terms
