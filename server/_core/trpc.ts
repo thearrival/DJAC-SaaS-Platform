@@ -1,4 +1,4 @@
-import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG, NOT_PLATFORM_ADMIN_ERR_MSG, NOT_SUPER_ADMIN_ERR_MSG, NOT_COMPANY_ADMIN_ERR_MSG, hasMinRole } from '@shared/const';
+import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG, NOT_PLATFORM_ADMIN_ERR_MSG, NOT_SUPER_ADMIN_ERR_MSG, NOT_COMPANY_ADMIN_ERR_MSG, hasMinRole } from '../../shared/const';
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";

@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { hasMinRole } from "@shared/const";
+import { hasMinRole } from "../shared/const";
 import {
     serializeVendorMultiValue,
     vendorCloudProviderValues,
@@ -13,7 +13,7 @@ import {
     vendorJurisdictionValues,
     vendorRiskTierValues,
     vendorServiceTypeValues,
-} from "@shared/vendorProfile";
+} from "../shared/vendorProfile";
 import type { Vendor } from "../drizzle/schema";
 import { z } from "zod";
 import { activeOrgProcedure, orgProcedure, router } from "./_core/trpc";

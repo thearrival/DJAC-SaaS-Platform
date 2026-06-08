@@ -1,4 +1,4 @@
-import { COOKIE_NAME, hasMinRole } from "@shared/const";
+import { COOKIE_NAME, hasMinRole } from "../../shared/const";
 import { parse as parseCookieHeader } from "cookie";
 import type { IncomingMessage, Server as HttpServer } from "http";
 import { WebSocketServer, type RawData, type WebSocket } from "ws";

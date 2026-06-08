@@ -1,5 +1,5 @@
-import { parseVendorMultiValue } from "@shared/vendorProfile";
-import { hasMinRole } from "@shared/const";
+import { parseVendorMultiValue } from "../shared/vendorProfile";
+import { hasMinRole } from "../shared/const";
 import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import {
     accessRequests,

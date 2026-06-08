@@ -29,7 +29,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import { sendEmail } from "./email";
 import { recordAuditEvent } from "./audit-logger";
 import { broadcastSSE } from "./services/sse-bus";
-import { hasMinRole } from "@shared/const";
+import { hasMinRole } from "../shared/const";
 import {
     LOCAL_AUTH_COOKIE,
     cookieOptions,

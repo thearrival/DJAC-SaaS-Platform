@@ -3,7 +3,7 @@ import {
     serializeVendorMultiValue,
     type EnterpriseTechStackComponentInput,
     type EnterpriseVendorProfileInput,
-} from "@shared/vendorProfile";
+} from "../shared/vendorProfile";
 import type { TechStackComponent, Vendor } from "../drizzle/schema";
 import { techStackComponents, vendors } from "../drizzle/schema";
 import { getDb } from "./db";

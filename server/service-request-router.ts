@@ -7,7 +7,7 @@ import { TRPCError } from "@trpc/server";
 import { activeOrgProcedure, protectedProcedure, router } from "./_core/trpc";
 import { requireModulePermission, requireModulePermissionIfOrgContext } from "./_core/permission-guard";
 import { recordAuditEvent } from "./audit-logger";
-import { hasMinRole } from "@shared/const";
+import { hasMinRole } from "../shared/const";
 import { logEvent } from "./_core/logger";
 import { sendEmail } from "./email";
 import { ENV } from "./_core/env";

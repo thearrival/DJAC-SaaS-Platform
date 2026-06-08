@@ -8,7 +8,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { router, platformAdminProcedure, superAdminProcedure, protectedProcedure } from "./_core/trpc";
 import { recordAuditEvent } from "./audit-logger";
-import { PLATFORM_ROLES, type PlatformRole, hasMinRole, NOT_PLATFORM_ADMIN_ERR_MSG } from "@shared/const";
+import { PLATFORM_ROLES, type PlatformRole, hasMinRole, NOT_PLATFORM_ADMIN_ERR_MSG } from "../shared/const";
 import { listUsersWithRoles, assignUserRole, assignLocalUserRole, listAuditLogs } from "./role-store";
 
 const platformRoleSchema = z.enum([
