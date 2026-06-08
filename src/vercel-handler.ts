@@ -52,9 +52,17 @@ export default async function handler(req: any, res: any) {
   if (path.startsWith("/api/_dbcheck")) {
     try {
       if (!cachedApp && !initError) cachedApp = await createApp();
-      const { getDb } = await import("../server/db");
-      const db = await getDb();
-      res.status(200).json({ ok: !!db, hasApp: !!cachedApp, node: process.version });
+      const dbModule = await import("../server/db");
+      const { ENV } = await import("../server/_core/env");
+      const db = await dbModule.getDb();
+      const dbUrl = ENV.databaseUrl;
+      res.status(200).json({
+        ok: !!db,
+        hasApp: !!cachedApp,
+        hasDbUrl: !!dbUrl,
+        dbUrlPrefix: typeof dbUrl === "string" ? dbUrl.substring(0, 20) + "..." : "none",
+        node: process.version,
+      });
     } catch (e) {
       res.status(200).json({ ok: false, error: e instanceof Error ? e.message : String(e), node: process.version });
     }

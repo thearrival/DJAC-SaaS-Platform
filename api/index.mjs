@@ -133,6 +133,14 @@ var init_config_schema = __esm({
 });
 
 // server/_core/env.ts
+var env_exports = {};
+__export(env_exports, {
+  ENV: () => ENV,
+  STRIPE_PRICE_ENV_KEYS: () => STRIPE_PRICE_ENV_KEYS,
+  checkProductionEnv: () => checkProductionEnv,
+  evaluateStripeBillingConfig: () => evaluateStripeBillingConfig,
+  resolveAiQueueMode: () => resolveAiQueueMode
+});
 function parseQueueMode(value) {
   if (value === "redis" || value === "in_memory") return value;
   return void 0;
@@ -19630,9 +19638,17 @@ async function handler(req, res) {
   if (path6.startsWith("/api/_dbcheck")) {
     try {
       if (!cachedApp && !initError) cachedApp = await createApp();
-      const { getDb: getDb2 } = await Promise.resolve().then(() => (init_db(), db_exports));
-      const db = await getDb2();
-      res.status(200).json({ ok: !!db, hasApp: !!cachedApp, node: process.version });
+      const dbModule = await Promise.resolve().then(() => (init_db(), db_exports));
+      const { ENV: ENV2 } = await Promise.resolve().then(() => (init_env(), env_exports));
+      const db = await dbModule.getDb();
+      const dbUrl = ENV2.databaseUrl;
+      res.status(200).json({
+        ok: !!db,
+        hasApp: !!cachedApp,
+        hasDbUrl: !!dbUrl,
+        dbUrlPrefix: typeof dbUrl === "string" ? dbUrl.substring(0, 20) + "..." : "none",
+        node: process.version
+      });
     } catch (e) {
       res.status(200).json({ ok: false, error: e instanceof Error ? e.message : String(e), node: process.version });
     }
