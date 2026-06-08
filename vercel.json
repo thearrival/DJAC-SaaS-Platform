@@ -24,7 +24,7 @@
       "dest": "/api/index?api_path=$1"
     },
     {
-      "src": "/((?!api/).*)",
+      "src": "/((?!api/|assets/|\\.well-known/)[^.]*)$",
       "dest": "/index.html"
     }
   ],
