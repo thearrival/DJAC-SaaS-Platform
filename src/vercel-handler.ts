@@ -49,6 +49,18 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_dbcheck")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      const { getDb } = await import("../server/db");
+      const db = await getDb();
+      res.status(200).json({ ok: !!db, hasApp: !!cachedApp, node: process.version });
+    } catch (e) {
+      res.status(200).json({ ok: false, error: e instanceof Error ? e.message : String(e), node: process.version });
+    }
+    return;
+  }
+
   try {
     if (!cachedApp && !initError) cachedApp = await createApp();
     if (!cachedApp) { res.status(500).json({ error: "Express app failed to initialize", message: initError }); return; }

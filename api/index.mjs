@@ -1272,6 +1272,18 @@ var init_schema = __esm({
 });
 
 // server/db.ts
+var db_exports = {};
+__export(db_exports, {
+  closeDbPool: () => closeDbPool,
+  getDatabaseUnavailableMessage: () => getDatabaseUnavailableMessage,
+  getDb: () => getDb,
+  getUserById: () => getUserById,
+  getUserByOpenId: () => getUserByOpenId,
+  listUsersForAdmin: () => listUsersForAdmin,
+  touchUserActivity: () => touchUserActivity,
+  updateUserProfile: () => updateUserProfile,
+  upsertUser: () => upsertUser
+});
 import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
@@ -19613,6 +19625,17 @@ async function handler(req, res) {
       }
     }
     res.status(200).json({ ok: true, steps, initError, hasApp: !!cachedApp, node: process.version });
+    return;
+  }
+  if (path6.startsWith("/api/_dbcheck")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      const { getDb: getDb2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+      const db = await getDb2();
+      res.status(200).json({ ok: !!db, hasApp: !!cachedApp, node: process.version });
+    } catch (e) {
+      res.status(200).json({ ok: false, error: e instanceof Error ? e.message : String(e), node: process.version });
+    }
     return;
   }
   try {
