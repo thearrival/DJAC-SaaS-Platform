@@ -75,8 +75,8 @@ export async function listLocalUsersForAdmin(): Promise<Pick<LocalUser,
 export async function insertLocalUser(data: InsertLocalUser): Promise<LocalUser> {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
-    const [result] = await db.insert(localUsers).values(data);
-    const newId = (result as { insertId: number }).insertId;
+    const [inserted] = await db.insert(localUsers).values(data).returning({ id: localUsers.id });
+    const newId = inserted.id;
     const [row] = await db.select().from(localUsers).where(eq(localUsers.id, newId)).limit(1);
     return row;
 }

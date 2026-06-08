@@ -136,5 +136,5 @@ export async function purgeExpiredReportShares(): Promise<number> {
     const result = await db
         .delete(reportShares)
         .where(lt(reportShares.expiresAt, now));
-    return Number((result[0] as { affectedRows?: number })?.affectedRows ?? 0);
+    return result.rowCount ?? 0;
 }

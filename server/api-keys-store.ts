@@ -83,7 +83,7 @@ export async function createApiKey(
         MEM_KEYS.push(row);
         return { id: row.id, name, keyPrefix: prefix, rawKey: raw };
     }
-    const [result] = await db.insert(apiKeys).values({
+    const [inserted] = await db.insert(apiKeys).values({
         organizationId: orgId,
         createdByUserId,
         name,
@@ -91,8 +91,8 @@ export async function createApiKey(
         keyPrefix: prefix,
         scopes: scopesJson,
         expiresAt,
-    });
-    const newId = (result as { insertId: number }).insertId;
+    }).returning({ id: apiKeys.id });
+    const newId = inserted.id;
     return { id: newId, name, keyPrefix: prefix, rawKey: raw };
 }
 

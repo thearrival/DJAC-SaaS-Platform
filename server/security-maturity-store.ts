@@ -157,7 +157,7 @@ export async function createAssessmentRow(
         return assessment;
     }
 
-    const [result] = await db.insert(securityMaturityAssessments).values({
+    const [inserted] = await db.insert(securityMaturityAssessments).values({
         organizationId: orgId,
         title: input.title,
         frameworkRef: input.frameworkRef ?? null,
@@ -166,8 +166,8 @@ export async function createAssessmentRow(
         maturityLevel,
         recommendations: input.recommendations ?? null,
         assessedByUserId: localUserId,
-    });
-    const insertId = (result as { insertId: number }).insertId;
+    }).returning({ id: securityMaturityAssessments.id });
+    const insertId = inserted.id;
     const [created] = await db
         .select()
         .from(securityMaturityAssessments)

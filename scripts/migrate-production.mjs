@@ -17,7 +17,7 @@
  *   (called automatically by scripts/entrypoint.sh before server start)
  */
 
-import mysql from "mysql2/promise";
+import pg from "pg";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,18 +37,15 @@ const MAX_CONNECT_ATTEMPTS = 30;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-/**
- * Wait until the database accepts connections.
- * Retries up to MAX_CONNECT_ATTEMPTS times with a 3-second pause between attempts.
- */
 async function waitForDatabase(url) {
     console.log(`⏳  Waiting for database to become available…`);
 
     for (let attempt = 1; attempt <= MAX_CONNECT_ATTEMPTS; attempt++) {
         try {
-            const conn = await mysql.createConnection(url);
-            await conn.ping();
-            await conn.end();
+            const client = new pg.Client(url);
+            await client.connect();
+            await client.query("SELECT 1");
+            await client.end();
             console.log(`✅  Database is ready`);
             return;
         } catch (err) {
@@ -73,9 +70,7 @@ function splitStatements(sql) {
         .filter(
             (s) =>
                 s.length > 0 &&
-                // Drop comment-only lines
                 !s.startsWith("--") &&
-                // Drop drizzle metadata comments that appear as standalone blocks
                 !s.startsWith("/*")
         );
 }
@@ -89,19 +84,20 @@ function sleep(ms) {
 async function run() {
     await waitForDatabase(DB_URL);
 
-    const connection = await mysql.createConnection(DB_URL);
+    const client = new pg.Client(DB_URL);
+    await client.connect();
 
     try {
         // ── Bootstrap migration tracking table ─────────────────────────────
-        await connection.execute(`
+        await client.query(`
       CREATE TABLE IF NOT EXISTS _schema_migrations (
-        id          INT UNSIGNED   NOT NULL AUTO_INCREMENT,
-        filename    VARCHAR(255)   NOT NULL,
-        applied_at  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        checksum    CHAR(64)       NULL COMMENT 'SHA-256 of the SQL file at time of apply',
+        id          SERIAL       NOT NULL,
+        filename    VARCHAR(255) NOT NULL,
+        applied_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        checksum    CHAR(64)     NULL,
         PRIMARY KEY (id),
-        UNIQUE KEY uq_filename (filename)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        UNIQUE (filename)
+      )
     `);
 
         // ── Discover migration files ────────────────────────────────────────
@@ -111,7 +107,7 @@ async function run() {
             const all = await fs.readdir(migrationsDir);
             files = all
                 .filter((f) => f.endsWith(".sql") && /^\d/.test(f))
-                .sort(); // lexicographic → 0000_, 0001_, 0002_, …
+                .sort();
         } catch {
             console.log("⚠   No drizzle/ directory found — skipping migrations");
             return;
@@ -123,10 +119,10 @@ async function run() {
         }
 
         // ── Fetch already-applied migrations ───────────────────────────────
-        const [rows] = await connection.query(
+        const appliedResult = await client.query(
             "SELECT filename FROM _schema_migrations"
         );
-        const applied = new Set(rows.map((r) => r.filename));
+        const applied = new Set(appliedResult.rows.map((r) => r.filename));
 
         // ── Apply pending migrations ────────────────────────────────────────
         let appliedCount = 0;
@@ -145,8 +141,8 @@ async function run() {
 
             if (statements.length === 0) {
                 console.log(`  ⚠   empty  ${file} — recorded but no statements executed`);
-                await connection.execute(
-                    "INSERT INTO _schema_migrations (filename) VALUES (?)",
+                await client.query(
+                    "INSERT INTO _schema_migrations (filename) VALUES ($1)",
                     [file]
                 );
                 appliedCount++;
@@ -155,33 +151,31 @@ async function run() {
 
             console.log(`  ▶   apply  ${file}  (${statements.length} statements)`);
 
-            // Use a transaction per migration file for atomicity
-            await connection.execute("START TRANSACTION");
+            await client.query("BEGIN");
             try {
                 for (const stmt of statements) {
-                    await connection.execute(stmt);
+                    await client.query(stmt);
                 }
-                await connection.execute(
-                    "INSERT INTO _schema_migrations (filename) VALUES (?)",
+                await client.query(
+                    "INSERT INTO _schema_migrations (filename) VALUES ($1)",
                     [file]
                 );
-                await connection.execute("COMMIT");
+                await client.query("COMMIT");
                 appliedCount++;
             } catch (err) {
-                await connection.execute("ROLLBACK");
+                await client.query("ROLLBACK");
                 throw new Error(
                     `Migration failed in file "${file}": ${err.message}\n` +
-                    `Failing statement (truncated): ${err.sql?.slice(0, 200) ?? "(unknown)"}`
+                    `Failing statement (truncated): ${err.message}`
                 );
             }
         }
 
-        // ── Summary ─────────────────────────────────────────────────────────
         console.log(
             `\n✅  Migrations complete — applied: ${appliedCount}, skipped: ${skippedCount}, total: ${files.length}`
         );
     } finally {
-        await connection.end();
+        await client.end();
     }
 }
 

@@ -42,7 +42,7 @@ async function createDefaultOrganizationForUser(
         .replace(/^-|-$/g, "")
         .slice(0, 60) || "default"}`;
 
-    const [insertOrg] = await db.insert(organizations).values({
+    const [inserted] = await db.insert(organizations).values({
         slug: safeSlug,
         name: orgName,
         billingEmail: user.email || `user-${user.id}@example.local`,
@@ -52,9 +52,9 @@ async function createDefaultOrganizationForUser(
         trialEndsAt: defaultTrialEndsAt,
         isActive: 1,
         maxSeats: 5,
-    });
+    }).returning({ id: organizations.id });
 
-    const organizationId = (insertOrg as { insertId: number }).insertId;
+    const organizationId = inserted.id;
 
     await db.insert(organizationMembers).values({
         organizationId,

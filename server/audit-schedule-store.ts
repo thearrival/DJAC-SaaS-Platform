@@ -115,7 +115,7 @@ export async function createAudit(orgId: number, input: CreateAuditInput): Promi
         MEM_AUDITS.push(entry);
         return { id: entry.id };
     }
-    const result = await db.insert(auditSchedules).values({
+    const [insertedAudit] = await db.insert(auditSchedules).values({
         organizationId: orgId,
         title: input.title,
         description: input.description ?? null,
@@ -128,8 +128,8 @@ export async function createAudit(orgId: number, input: CreateAuditInput): Promi
         findings: input.findings ?? null,
         recurrence: input.recurrence,
         notes: input.notes ?? null,
-    });
-    return { id: (result as unknown as { insertId: number }).insertId };
+    }).returning({ id: auditSchedules.id });
+    return { id: insertedAudit.id };
 }
 
 export async function patchAudit(

@@ -249,11 +249,12 @@ async function hasUsedOwnerLinkNonce(nonce: string): Promise<boolean> {
 
     try {
         const nonceHash = hashOwnerLinkNonce(nonce);
-        const [rows] = await db.execute(sql`
+        const linkResult = await db.execute(sql`
             SELECT id FROM yallaAdminAccessLinkNonces
             WHERE nonceHash = ${nonceHash}
             LIMIT 1
-        `) as unknown as [{ id: number }[]];
+        `);
+        const rows = linkResult.rows as { id: number }[];
         return Array.isArray(rows) && rows.length > 0;
     } catch {
         return hasUsedOwnerLinkNonceInMemory(nonce);
@@ -406,12 +407,12 @@ async function requireSession(req: Request, res: Response, next: NextFunction): 
     try {
         const db = await getDb();
         if (db) {
-            const [row] = await db.execute(sql`
+            const sessionResult = await db.execute(sql`
                 SELECT isRevoked FROM yallaAdminSessions
                 WHERE id = ${parsed.sessionId} AND expiresAt > NOW()
                 LIMIT 1
             `);
-            const rows = row as unknown as { isRevoked: number }[] | undefined;
+            const rows = sessionResult.rows as { isRevoked: number }[] | undefined;
             if (!rows || rows.length === 0 || rows[0]?.isRevoked) {
                 res.status(401).json({ error: "Session revoked or expired" });
                 return;
@@ -587,12 +588,12 @@ async function handleMe(req: Request, res: Response): Promise<void> {
     try {
         const db = await getDb();
         if (db) {
-            const [row] = await db.execute(sql`
+            const sessionResult = await db.execute(sql`
                 SELECT isRevoked FROM yallaAdminSessions
                 WHERE id = ${session.sessionId} AND expiresAt > NOW()
                 LIMIT 1
             `);
-            const rows = row as unknown as { isRevoked: number }[] | undefined;
+            const rows = sessionResult.rows as { isRevoked: number }[] | undefined;
             if (!rows || rows.length === 0 || rows[0]?.isRevoked) {
                 res.clearCookie(COOKIE_NAME, { path: ADMIN_API_PATH });
                 res.json({ authenticated: false });
@@ -608,29 +609,38 @@ async function handleOverview(_req: Request, res: Response): Promise<void> {
         const db = await getDb();
         if (!db) { res.json({}); return; }
 
-        const [usersRow] = await db.execute(sql`SELECT COUNT(*) as total FROM localUsers`) as unknown as [{ total: number }[]];
-        const [orgsRow] = await db.execute(sql`SELECT COUNT(*) as total FROM organizations`) as unknown as [{ total: number }[]];
-        const [activeSessionsRow] = await db.execute(sql`
+        const usersResult = await db.execute(sql`SELECT COUNT(*) as total FROM localUsers`);
+        const usersRow = usersResult.rows as { total: number }[];
+        const orgsResult = await db.execute(sql`SELECT COUNT(*) as total FROM organizations`);
+        const orgsRow = orgsResult.rows as { total: number }[];
+        const activeSessionsResult = await db.execute(sql`
             SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()
-        `) as unknown as [{ total: number }[]];
-        const [todayLoginsRow] = await db.execute(sql`
+        `);
+        const activeSessionsRow = activeSessionsResult.rows as { total: number }[];
+        const todayLoginsResult = await db.execute(sql`
             SELECT COUNT(*) as total FROM auditLogs
             WHERE action = 'auth.login' AND createdAt >= CURDATE()
-        `) as unknown as [{ total: number }[]];
-        const [serviceRequestsRow] = await db.execute(sql`
+        `);
+        const todayLoginsRow = todayLoginsResult.rows as { total: number }[];
+        const serviceRequestsResult = await db.execute(sql`
             SELECT COUNT(*) as total FROM serviceRequests WHERE status NOT IN ('completed', 'cancelled')
-        `) as unknown as [{ total: number }[]];
-        const [assetsRow] = await db.execute(sql`SELECT COUNT(*) as total FROM assetInventory`) as unknown as [{ total: number }[]];
+        `);
+        const serviceRequestsRow = serviceRequestsResult.rows as { total: number }[];
+        const assetsResult = await db.execute(sql`SELECT COUNT(*) as total FROM assetInventory`);
+        const assetsRow = assetsResult.rows as { total: number }[];
 
-        const [todaySignupsRow] = await db.execute(sql`
+        const todaySignupsResult = await db.execute(sql`
             SELECT COUNT(*) as total FROM localUsers WHERE DATE(createdAt) = CURDATE()
-        `) as unknown as [{ total: number }[]];
-        const [newOrgsRow] = await db.execute(sql`
+        `);
+        const todaySignupsRow = todaySignupsResult.rows as { total: number }[];
+        const newOrgsResult = await db.execute(sql`
             SELECT COUNT(*) as total FROM organizations WHERE DATE(createdAt) = CURDATE()
-        `) as unknown as [{ total: number }[]];
-        const [revenueRow] = await db.execute(sql`
+        `);
+        const newOrgsRow = newOrgsResult.rows as { total: number }[];
+        const revenueResult = await db.execute(sql`
             SELECT COUNT(*) as total FROM organizations WHERE plan IN ('professional','enterprise') AND isActive = 1
-        `) as unknown as [{ total: number }[]];
+        `);
+        const revenueRow = revenueResult.rows as { total: number }[];
 
         res.json({
             totalUsers: usersRow?.[0]?.total ?? 0,
@@ -655,7 +665,7 @@ async function handleUsers(req: Request, res: Response): Promise<void> {
         const limit = Math.min(parseInt(req.query.limit as string ?? "50", 10) || 50, 200);
         const offset = parseInt(req.query.offset as string ?? "0", 10) || 0;
 
-        const [users] = await db.execute(sql`
+        const usersDbResult = await db.execute(sql`
             SELECT
                 u.id,
                 u.username,
@@ -672,7 +682,8 @@ async function handleUsers(req: Request, res: Response): Promise<void> {
             GROUP BY u.id
             ORDER BY u.createdAt DESC
             LIMIT ${limit} OFFSET ${offset}
-        `) as unknown as [unknown[]];
+        `);
+        const users = usersDbResult.rows as unknown[];
 
         res.json(users ?? []);
     } catch {
@@ -692,12 +703,14 @@ async function handleSystem(_req: Request, res: Response): Promise<void> {
 
         if (db) {
             try {
-                const [vRow] = await db.execute(sql`SELECT VERSION() as v`) as unknown as [{ v: string }[]];
+                const versionResult = await db.execute(sql`SELECT VERSION() as v`);
+                const vRow = versionResult.rows as { v: string }[];
                 dbVersion = vRow?.[0]?.v ?? "";
-                const [tRow] = await db.execute(sql`
+                const tableResult = await db.execute(sql`
                     SELECT COUNT(*) as c FROM information_schema.TABLES
                     WHERE TABLE_SCHEMA = DATABASE()
-                `) as unknown as [{ c: number }[]];
+                `);
+                const tRow = tableResult.rows as { c: number }[];
                 tableCount = tRow?.[0]?.c ?? 0;
                 dbStatus = "healthy";
             } catch {
@@ -735,11 +748,12 @@ async function handleAudit(req: Request, res: Response): Promise<void> {
         const limit = Math.min(parseInt(req.query.limit as string ?? "100", 10) || 100, 500);
         const action = req.query.action as string | undefined;
 
-        const [rows] = await db.execute(
+        const auditResult = await db.execute(
             action
                 ? sql`SELECT * FROM yallaAdminAuditLogs WHERE action = ${action} ORDER BY createdAt DESC LIMIT ${limit}`
                 : sql`SELECT * FROM yallaAdminAuditLogs ORDER BY createdAt DESC LIMIT ${limit}`
-        ) as unknown as [unknown[]];
+        );
+        const rows = auditResult.rows as unknown[];
 
         res.json(rows ?? []);
     } catch {
@@ -754,11 +768,12 @@ async function handlePlatformAudit(req: Request, res: Response): Promise<void> {
         const limit = Math.min(parseInt(req.query.limit as string ?? "100", 10) || 100, 500);
         const category = req.query.category as string | undefined;
 
-        const [rows] = await db.execute(
+        const platformAuditResult = await db.execute(
             category
                 ? sql`SELECT * FROM auditLogs WHERE category = ${category} ORDER BY createdAt DESC LIMIT ${limit}`
                 : sql`SELECT * FROM auditLogs ORDER BY createdAt DESC LIMIT ${limit}`
-        ) as unknown as [unknown[]];
+        );
+        const rows = platformAuditResult.rows as unknown[];
 
         res.json(rows ?? []);
     } catch {
@@ -778,7 +793,7 @@ async function handleInteractions(req: Request, res: Response): Promise<void> {
         const context = (req.query.context as string | undefined)?.trim();
         const action = (req.query.action as string | undefined)?.trim();
 
-        const [rows] = await db.execute(
+        const interactionResult = await db.execute(
             context && action
                 ? sql`
                     SELECT
@@ -873,7 +888,8 @@ async function handleInteractions(req: Request, res: Response): Promise<void> {
                             ORDER BY l.createdAt DESC
                             LIMIT ${limit}
                         `
-        ) as unknown as [unknown[]];
+        );
+        const rows = interactionResult.rows as unknown[];
 
         res.json(rows ?? []);
     } catch {
@@ -893,7 +909,7 @@ async function handleIntake(req: Request, res: Response): Promise<void> {
 
         let serviceRequests: unknown[] = [];
         if (db) {
-            const [srRows] = await db.execute(sql`
+            const srResult = await db.execute(sql`
                 SELECT
                     sr.id,
                     sr.serviceType,
@@ -911,7 +927,8 @@ async function handleIntake(req: Request, res: Response): Promise<void> {
                 LEFT JOIN organizations o ON o.id = sr.organizationId
                 ORDER BY sr.createdAt DESC
                 LIMIT ${limit}
-            `) as unknown as [unknown[]];
+            `);
+            const srRows = srResult.rows as unknown[];
             serviceRequests = srRows ?? [];
         }
 
@@ -940,7 +957,7 @@ async function handleOnboarding(req: Request, res: Response): Promise<void> {
 
         const limit = Math.min(parseInt(req.query.limit as string ?? "50", 10) || 50, 200);
 
-        const [[counts], [recent]] = await Promise.all([
+        const [countsResult, recentResult] = await Promise.all([
             db.execute(sql`
                 SELECT stage, COUNT(*) as total
                 FROM userOnboarding
@@ -964,7 +981,9 @@ async function handleOnboarding(req: Request, res: Response): Promise<void> {
                 ORDER BY o.updatedAt DESC
                 LIMIT ${limit}
             `),
-        ]) as unknown as [[unknown[]], [unknown[]]];
+        ]);
+        const counts = countsResult.rows as unknown[];
+        const recent = recentResult.rows as unknown[];
 
         res.json({ counts: counts ?? [], recent: recent ?? [] });
     } catch {
@@ -981,7 +1000,7 @@ async function handleValidationFailures(req: Request, res: Response): Promise<vo
         }
 
         const limit = Math.min(parseInt(req.query.limit as string ?? "100", 10) || 100, 500);
-        const [rows] = await db.execute(sql`
+        const validationResult = await db.execute(sql`
             SELECT
                 id,
                 category,
@@ -997,7 +1016,8 @@ async function handleValidationFailures(req: Request, res: Response): Promise<vo
             WHERE action = 'trpc.validation_failed' OR outcome IN ('failure', 'blocked')
             ORDER BY createdAt DESC
             LIMIT ${limit}
-        `) as unknown as [unknown[]];
+        `);
+        const rows = validationResult.rows as unknown[];
 
         res.json(rows ?? []);
     } catch {
@@ -1012,7 +1032,7 @@ async function handleSubscriptions(req: Request, res: Response): Promise<void> {
 
         const limit = Math.min(parseInt(req.query.limit as string ?? "100", 10) || 100, 500);
 
-        const [[subs], [events], [summary]] = await Promise.all([
+        const [subsResult, eventsResult, summaryResult] = await Promise.all([
             db.execute(sql`
                 SELECT
                     s.id,
@@ -1062,7 +1082,10 @@ async function handleSubscriptions(req: Request, res: Response): Promise<void> {
                 GROUP BY plan, status, currency
                 ORDER BY plan, status
             `),
-        ]) as unknown as [[unknown[]], [unknown[]], [unknown[]]];
+        ]);
+        const subs = subsResult.rows as unknown[];
+        const events = eventsResult.rows as unknown[];
+        const summary = summaryResult.rows as unknown[];
 
         res.json({
             subscriptions: subs ?? [],
@@ -1079,7 +1102,7 @@ async function handleSignups(req: Request, res: Response): Promise<void> {
         const db = await getDb();
         if (!db) { res.json([]); return; }
         const limit = Math.min(parseInt(req.query.limit as string ?? "50", 10) || 50, 200);
-        const [rows] = await db.execute(sql`
+        const signupsResult = await db.execute(sql`
             SELECT
                 u.id,
                 u.username,
@@ -1096,7 +1119,8 @@ async function handleSignups(req: Request, res: Response): Promise<void> {
             LEFT JOIN organizations o ON o.id = om.organizationId
             ORDER BY u.createdAt DESC
             LIMIT ${limit}
-        `) as unknown as [unknown[]];
+        `);
+        const rows = signupsResult.rows as unknown[];
         res.json(rows ?? []);
     } catch {
         res.status(500).json({ error: "Failed to fetch signups" });
@@ -1108,7 +1132,7 @@ async function handleOrgs(req: Request, res: Response): Promise<void> {
         const db = await getDb();
         if (!db) { res.json([]); return; }
         const limit = Math.min(parseInt(req.query.limit as string ?? "100", 10) || 100, 500);
-        const [rows] = await db.execute(sql`
+        const orgsResult = await db.execute(sql`
             SELECT
                 o.id,
                 o.name,
@@ -1125,7 +1149,8 @@ async function handleOrgs(req: Request, res: Response): Promise<void> {
             GROUP BY o.id
             ORDER BY o.createdAt DESC
             LIMIT ${limit}
-        `) as unknown as [unknown[]];
+        `);
+        const rows = orgsResult.rows as unknown[];
         res.json(rows ?? []);
     } catch {
         res.status(500).json({ error: "Failed to fetch organizations" });
@@ -1139,11 +1164,14 @@ async function handleRealtime(_req: Request, res: Response): Promise<void> {
             res.json({ activeSessions: 0, recentActions: 0, newUsersLastHour: 0, sseClients: getSSEClientCount(), dbStatus: "unavailable" });
             return;
         }
-        const [[sessRow], [actRow], [newUsersRow]] = await Promise.all([
-            db.execute(sql`SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()`) as unknown as [[{ total: number }]],
-            db.execute(sql`SELECT COUNT(*) as total FROM auditLogs WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)`) as unknown as [[{ total: number }]],
-            db.execute(sql`SELECT COUNT(*) as total FROM localUsers WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 60 MINUTE)`) as unknown as [[{ total: number }]],
+        const [sessResult, actResult, newUsersResult] = await Promise.all([
+            db.execute(sql`SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()`),
+            db.execute(sql`SELECT COUNT(*) as total FROM auditLogs WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)`),
+            db.execute(sql`SELECT COUNT(*) as total FROM localUsers WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 60 MINUTE)`),
         ]);
+        const sessRow = sessResult.rows as { total: number }[];
+        const actRow = actResult.rows as { total: number }[];
+        const newUsersRow = newUsersResult.rows as { total: number }[];
         res.json({
             activeSessions: sessRow?.[0]?.total ?? 0,
             recentActions: actRow?.[0]?.total ?? 0,
@@ -1190,15 +1218,14 @@ async function handleUserDetail(req: Request, res: Response): Promise<void> {
             `),
         ]);
 
-        const userRows = Array.isArray(userResult) ? userResult : (userResult as unknown[][])[0];
-        const user = Array.isArray(userRows) ? userRows[0] : null;
+        const user = userResult.rows[0];
         if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
         res.json({
             user,
-            sessions: Array.isArray(sessionResult) ? sessionResult : (sessionResult as unknown[][])[0] ?? [],
-            auditTrail: Array.isArray(auditResult) ? auditResult : (auditResult as unknown[][])[0] ?? [],
-            interactions: Array.isArray(interactionResult) ? interactionResult : (interactionResult as unknown[][])[0] ?? [],
+            sessions: sessionResult.rows,
+            auditTrail: auditResult.rows,
+            interactions: interactionResult.rows,
         });
     } catch {
         res.status(500).json({ error: "Failed to fetch user detail" });
@@ -1240,15 +1267,14 @@ async function handleOrgDetail(req: Request, res: Response): Promise<void> {
             `),
         ]);
 
-        const orgRows = Array.isArray(orgResult) ? orgResult : (orgResult as unknown[][])[0];
-        const org = Array.isArray(orgRows) ? orgRows[0] : null;
+        const org = orgResult.rows[0];
         if (!org) { res.status(404).json({ error: "Organization not found" }); return; }
 
         res.json({
             org,
-            members: Array.isArray(membersResult) ? membersResult : (membersResult as unknown[][])[0] ?? [],
-            subscription: (Array.isArray(subscriptionResult) ? subscriptionResult : (subscriptionResult as unknown[][])[0] ?? [])[0] ?? null,
-            auditTrail: Array.isArray(auditResult) ? auditResult : (auditResult as unknown[][])[0] ?? [],
+            members: membersResult.rows,
+            subscription: subscriptionResult.rows[0] ?? null,
+            auditTrail: auditResult.rows,
         });
     } catch {
         res.status(500).json({ error: "Failed to fetch org detail" });
@@ -1267,7 +1293,8 @@ async function handleSuspendUser(req: Request, res: Response): Promise<void> {
         const db = await getDb();
         if (!db) { res.status(503).json({ error: "Database unavailable" }); return; }
 
-        const [rows] = await db.execute(sql`SELECT id, email, status FROM localUsers WHERE id = ${userId} LIMIT 1`) as unknown as [{ id: number; email: string; status: string }[]];
+        const userResult = await db.execute(sql`SELECT id, email, status FROM localUsers WHERE id = ${userId} LIMIT 1`);
+        const rows = userResult.rows as { id: number; email: string; status: string }[];
         const user = rows[0];
         if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
@@ -1314,7 +1341,8 @@ async function handleSuspendOrg(req: Request, res: Response): Promise<void> {
         const db = await getDb();
         if (!db) { res.status(503).json({ error: "Database unavailable" }); return; }
 
-        const [rows] = await db.execute(sql`SELECT id, name, status FROM organizations WHERE id = ${orgId} LIMIT 1`) as unknown as [{ id: number; name: string; status: string }[]];
+        const orgCheckResult = await db.execute(sql`SELECT id, name, status FROM organizations WHERE id = ${orgId} LIMIT 1`);
+        const rows = orgCheckResult.rows as { id: number; name: string; status: string }[];
         const org = rows[0];
         if (!org) { res.status(404).json({ error: "Organization not found" }); return; }
 
@@ -1410,37 +1438,41 @@ async function handleExportCsv(req: Request, res: Response): Promise<void> {
         let filename: string;
 
         if (type === "users") {
-            const [userRows] = await db.execute(sql`
+            const userExportResult = await db.execute(sql`
                 SELECT id, username, email, role, isEmailVerified, isMfaEnabled, createdAt, lastLoginAt
                 FROM localUsers ORDER BY createdAt DESC LIMIT 10000
-            `) as unknown as [unknown[]];
+            `);
+            const userRows = userExportResult.rows as unknown[];
             rows = userRows ?? [];
             headers = "id,username,email,role,isEmailVerified,isMfaEnabled,createdAt,lastLoginAt";
             filename = "users-export.csv";
         } else if (type === "orgs") {
-            const [orgRows] = await db.execute(sql`
+            const orgExportResult = await db.execute(sql`
                 SELECT id, name, plan, isActive, trialEndsAt, createdAt
                 FROM organizations ORDER BY createdAt DESC LIMIT 10000
-            `) as unknown as [unknown[]];
+            `);
+            const orgRows = orgExportResult.rows as unknown[];
             rows = orgRows ?? [];
             headers = "id,name,plan,isActive,trialEndsAt,createdAt";
             filename = "orgs-export.csv";
         } else if (type === "subscriptions") {
-            const [subRows] = await db.execute(sql`
+            const subExportResult = await db.execute(sql`
                 SELECT s.id, s.plan, s.status, s.currentPeriodStart, s.currentPeriodEnd,
                        s.cancelAtPeriodEnd, o.name AS orgName, s.createdAt
                 FROM subscriptions s
                 JOIN organizations o ON o.id = s.organizationId
                 ORDER BY s.createdAt DESC LIMIT 10000
-            `) as unknown as [unknown[]];
+            `);
+            const subRows = subExportResult.rows as unknown[];
             rows = subRows ?? [];
             headers = "id,plan,status,currentPeriodStart,currentPeriodEnd,cancelAtPeriodEnd,orgName,createdAt";
             filename = "subscriptions-export.csv";
         } else if (type === "audit") {
-            const [auditRows] = await db.execute(sql`
+            const auditExportResult = await db.execute(sql`
                 SELECT id, category, action, outcome, ipAddress, createdAt
                 FROM auditLogs ORDER BY createdAt DESC LIMIT 10000
-            `) as unknown as [unknown[]];
+            `);
+            const auditRows = auditExportResult.rows as unknown[];
             rows = auditRows ?? [];
             headers = "id,category,action,outcome,ipAddress,createdAt";
             filename = "audit-export.csv";

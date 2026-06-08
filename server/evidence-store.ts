@@ -127,7 +127,7 @@ export async function addEvidence(
         MEM_EVIDENCE.push(item);
         return { success: true, id: item.id };
     }
-    const [result] = await db.insert(complianceEvidence).values({
+    const [inserted] = await db.insert(complianceEvidence).values({
         organizationId: orgId,
         sourceType: input.sourceType,
         sourceId: input.sourceId ?? null,
@@ -138,10 +138,8 @@ export async function addEvidence(
         tags: input.tags ?? null,
         createdAt: now,
         updatedAt: now,
-    });
-    const insertId = typeof result === "object" && "insertId" in result
-        ? Number((result as { insertId: unknown }).insertId)
-        : 0;
+    }).returning({ id: complianceEvidence.id });
+    const insertId = inserted.id;
     return { success: true, id: insertId };
 }
 

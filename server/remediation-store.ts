@@ -86,7 +86,7 @@ export async function createTask(orgId: number, input: CreateTaskInput): Promise
         MEM_TASKS.push(task);
         return task;
     }
-    const result = await db.insert(remediationTasks).values({
+    const [insertedRemediation] = await db.insert(remediationTasks).values({
         organizationId: orgId,
         vendorId: input.vendorId ?? null,
         gapCode: input.gapCode ?? null,
@@ -97,8 +97,8 @@ export async function createTask(orgId: number, input: CreateTaskInput): Promise
         assignedToUserId: input.assignedToUserId ?? null,
         dueDate,
         notes: input.notes ?? null,
-    });
-    const newId = (result as unknown as { insertId: number }).insertId;
+    }).returning({ id: remediationTasks.id });
+    const newId = insertedRemediation.id;
     return {
         id: newId,
         organizationId: orgId,

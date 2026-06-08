@@ -2,14 +2,14 @@
  * create-admin.mjs
  *
  * Bootstrap utility — creates a local `admin` account in the localUsers table.
- * Run once after applying migration 0005_local_auth_users.sql.
+ * Run once after applying database migrations.
  *
  * Usage:
  *   node scripts/create-admin.mjs --name "Admin" --email admin@example.com --password "ChangeMe1!"
  *
  * Reads DATABASE_URL from .env (or environment).
  */
-import mysql from "mysql2/promise";
+import pg from "pg";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 
@@ -55,35 +55,36 @@ async function main() {
         process.exit(1);
     }
 
-    const conn = await mysql.createConnection(DATABASE_URL);
+    const client = new pg.Client(DATABASE_URL);
+    await client.connect();
 
     // Check for existing account
-    const [existing] = await conn.execute(
-        "SELECT id FROM localUsers WHERE email = ? LIMIT 1",
+    const existingResult = await client.query(
+        "SELECT id FROM \"localUsers\" WHERE email = $1 LIMIT 1",
         [emailNorm]
     );
-    if (existing.length > 0) {
-        console.error(`An account with email "${emailNorm}" already exists (id=${existing[0].id}).`);
-        await conn.end();
+    if (existingResult.rows.length > 0) {
+        console.error(`An account with email "${emailNorm}" already exists (id=${existingResult.rows[0].id}).`);
+        await client.end();
         process.exit(1);
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    await conn.execute(
-        `INSERT INTO localUsers (name, email, passwordHash, userType, preferredLocale, status)
-         VALUES (?, ?, ?, 'admin', 'en', 'active')`,
+    await client.query(
+        `INSERT INTO "localUsers" (name, email, "passwordHash", "userType", "preferredLocale", status)
+         VALUES ($1, $2, $3, 'admin', 'en', 'active')`,
         [name.trim(), emailNorm, passwordHash]
     );
 
-    const [rows] = await conn.execute(
-        "SELECT id, name, email, userType, status, createdAt FROM localUsers WHERE email = ? LIMIT 1",
+    const result = await client.query(
+        "SELECT id, name, email, \"userType\", status, \"createdAt\" FROM \"localUsers\" WHERE email = $1 LIMIT 1",
         [emailNorm]
     );
-    await conn.end();
+    await client.end();
 
     console.log("\n✅  Admin account created successfully:");
-    console.table(rows);
+    console.table(result.rows);
     console.log(
         "\nYou can now sign in at /login with this email and password.\n"
     );

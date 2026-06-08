@@ -258,14 +258,14 @@ export async function createAdminNotification(input: AdminNotificationInput) {
         return record;
     }
 
-    const result = await db.insert(adminNotifications).values({
+    const [inserted] = await db.insert(adminNotifications).values({
         category: input.category,
         title,
         content,
         entityType,
         entityId,
-    });
-    const id = Number(result[0]?.insertId ?? 0);
+    }).returning({ id: adminNotifications.id });
+    const id = inserted?.id ?? 0;
     const rows = await db
         .select()
         .from(adminNotifications)
@@ -303,15 +303,15 @@ export async function recordActivity(input: ActivityEventInput) {
         return record;
     }
 
-    const result = await db.insert(activityEvents).values({
+    const [inserted] = await db.insert(activityEvents).values({
         userId: input.userId ?? null,
         actorType: input.actorType,
         action: input.action.trim(),
         entityType: input.entityType.trim(),
         entityId: input.entityId ?? null,
         metadata,
-    });
-    const id = Number(result[0]?.insertId ?? 0);
+    }).returning({ id: activityEvents.id });
+    const id = inserted?.id ?? 0;
     const rows = await db.select().from(activityEvents).where(eq(activityEvents.id, id)).limit(1);
     return rows[0] ?? null;
 }
@@ -343,8 +343,8 @@ export async function createAccessRequest(input: AccessRequestInput) {
         };
         memoryAccessRequests.unshift(record);
     } else {
-        const result = await db.insert(accessRequests).values(values);
-        record = await loadAccessRequestById(Number(result[0]?.insertId ?? 0));
+        const [inserted] = await db.insert(accessRequests).values(values).returning({ id: accessRequests.id });
+        record = await loadAccessRequestById(inserted?.id ?? 0);
     }
 
     if (!record) {
@@ -407,8 +407,8 @@ export async function createConsultationRequest(input: ConsultationRequestInput)
         };
         memoryConsultationRequests.unshift(record);
     } else {
-        const result = await db.insert(consultationRequests).values(values);
-        record = await loadConsultationRequestById(Number(result[0]?.insertId ?? 0));
+        const [inserted] = await db.insert(consultationRequests).values(values).returning({ id: consultationRequests.id });
+        record = await loadConsultationRequestById(inserted?.id ?? 0);
     }
 
     if (!record) {

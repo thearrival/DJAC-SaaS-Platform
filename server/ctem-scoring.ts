@@ -311,14 +311,14 @@ export async function executeContinuousComplianceRun(params: {
     // Create a run record (or reuse provided id)
     let runId = params.runId;
     if (!runId) {
-        const [ins] = await db.insert(continuousComplianceRuns).values({
+        const [insertedRun] = await db.insert(continuousComplianceRuns).values({
             organizationId,
             vendorId: vendorId ?? null,
             runStatus: "running",
             triggeredBy,
             startedAt: new Date(),
-        } satisfies Partial<InsertContinuousComplianceRun> as any);
-        runId = (ins as { insertId: number }).insertId;
+        } satisfies Partial<InsertContinuousComplianceRun> as any).returning({ id: continuousComplianceRuns.id });
+        runId = insertedRun.id;
     } else {
         await db
             .update(continuousComplianceRuns)

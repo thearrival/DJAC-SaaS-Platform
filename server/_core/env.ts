@@ -131,6 +131,11 @@ export const ENV = {
   yallaAdminIpAllowlist: parsedEnv.YALLA_ADMIN_IP_ALLOWLIST,
   yallaAdminJwtSecret: parsedEnv.YALLA_ADMIN_JWT_SECRET,
   yallaAdminSessionTtlHours: parsedEnv.YALLA_ADMIN_SESSION_TTL_HOURS,
+
+  // ── Supabase ──────────────────────────────────────────────────────────────
+  supabaseUrl: parsedEnv.SUPABASE_URL,
+  supabaseAnonKey: parsedEnv.SUPABASE_ANON_KEY,
+  supabaseServiceRoleKey: parsedEnv.SUPABASE_SERVICE_ROLE_KEY,
 };
 
 // ── Production startup guards ──────────────────────────────────────────────

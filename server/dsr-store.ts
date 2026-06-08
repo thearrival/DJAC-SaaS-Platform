@@ -144,7 +144,7 @@ export async function createDsr(
         MEM_DSRS.push(item);
         return { success: true, id: item.id, dueDate };
     }
-    const [result] = await db.insert(dsrRequests).values({
+    const [inserted] = await db.insert(dsrRequests).values({
         organizationId: orgId,
         requestType: input.requestType,
         jurisdiction: input.jurisdiction,
@@ -159,10 +159,8 @@ export async function createDsr(
         notes: input.notes ?? null,
         createdAt: now,
         updatedAt: now,
-    });
-    const insertId = typeof result === "object" && "insertId" in result
-        ? Number((result as { insertId: unknown }).insertId)
-        : 0;
+    }).returning({ id: dsrRequests.id });
+    const insertId = inserted.id;
     return { success: true, id: insertId, dueDate };
 }
 

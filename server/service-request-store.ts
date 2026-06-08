@@ -125,7 +125,7 @@ export async function createRequest(
         return { row: newReq, insertId: newReq.id };
     }
 
-    const [result] = await db.insert(serviceRequests).values({
+    const [inserted] = await db.insert(serviceRequests).values({
         organizationId: orgId,
         requestedByUserId: localUserId,
         serviceType: input.serviceType,
@@ -136,8 +136,8 @@ export async function createRequest(
         budgetRange: input.budgetRange ?? null,
         priority: input.priority,
         status: "submitted",
-    });
-    const insertId = (result as { insertId: number }).insertId;
+    }).returning({ id: serviceRequests.id });
+    const insertId = inserted.id;
     const [created] = await db
         .select()
         .from(serviceRequests)

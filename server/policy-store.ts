@@ -102,7 +102,7 @@ export async function createPolicy(orgId: number, input: CreatePolicyInput): Pro
         return policy;
     }
 
-    const result = await db.insert(compliancePolicies).values({
+    const [insertedPolicy] = await db.insert(compliancePolicies).values({
         organizationId: orgId,
         policyCode: input.policyCode ?? null,
         title: input.title,
@@ -117,8 +117,8 @@ export async function createPolicy(orgId: number, input: CreatePolicyInput): Pro
         version: input.version,
         documentUrl: input.documentUrl ?? null,
         notes: input.notes ?? null,
-    });
-    const newId = (result as unknown as { insertId: number }).insertId;
+    }).returning({ id: compliancePolicies.id });
+    const newId = insertedPolicy.id;
     return {
         id: newId,
         organizationId: orgId,

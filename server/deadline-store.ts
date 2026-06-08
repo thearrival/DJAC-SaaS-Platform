@@ -292,8 +292,8 @@ export async function createDeadline(input: CreateDeadlineInput): Promise<Compli
         assignedToUserId: input.assignedToUserId ?? null,
     };
 
-    const result = await db.insert(complianceDeadlines).values(values);
-    const id = Number(result[0]?.insertId ?? 0);
+    const [inserted] = await db.insert(complianceDeadlines).values(values).returning({ id: complianceDeadlines.id });
+    const id = inserted?.id ?? 0;
     const [row] = await db.select().from(complianceDeadlines).where(eq(complianceDeadlines.id, id)).limit(1);
     return row!;
 }

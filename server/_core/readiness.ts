@@ -1,5 +1,5 @@
 import IORedis from "ioredis";
-import mysql from "mysql2/promise";
+import pg from "pg";
 import { ENV, evaluateStripeBillingConfig } from "./env";
 import { parsedEnv } from "../services/config-schema";
 
@@ -59,15 +59,16 @@ async function checkDatabaseReadiness(): Promise<ServiceReadiness> {
         };
     }
 
-    let connection: mysql.Connection | null = null;
+    let client: pg.Client | null = null;
     try {
-        connection = await mysql.createConnection(ENV.databaseUrl);
-        await connection.ping();
+        client = new pg.Client(ENV.databaseUrl);
+        await client.connect();
+        await client.query("SELECT 1");
 
         return {
             enabled: true,
             ready: true,
-            details: "Database connection successful.",
+            details: "Database connection successful (PostgreSQL).",
         };
     } catch (error) {
         if (ENV.allowInMemoryPersistenceFallback) {
@@ -86,8 +87,8 @@ async function checkDatabaseReadiness(): Promise<ServiceReadiness> {
             details: `Database connection failed: ${String(error)}`,
         };
     } finally {
-        if (connection) {
-            await connection.end().catch(() => undefined);
+        if (client) {
+            await client.end().catch(() => undefined);
         }
     }
 }

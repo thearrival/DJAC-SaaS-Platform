@@ -124,7 +124,7 @@ export async function createIncident(orgId: number, input: CreateIncidentInput):
         return incident;
     }
 
-    const result = await db.insert(complianceIncidents).values({
+    const [insertedIncident] = await db.insert(complianceIncidents).values({
         organizationId: orgId,
         incidentCode: input.incidentCode ?? null,
         title: input.title,
@@ -144,8 +144,8 @@ export async function createIncident(orgId: number, input: CreateIncidentInput):
         rootCause: input.rootCause ?? null,
         lessonsLearned: input.lessonsLearned ?? null,
         notes: input.notes ?? null,
-    });
-    const newId = (result as unknown as { insertId: number }).insertId;
+    }).returning({ id: complianceIncidents.id });
+    const newId = insertedIncident.id;
     return { id: newId, ...baseRow };
 }
 

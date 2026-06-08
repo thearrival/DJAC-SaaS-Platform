@@ -83,7 +83,7 @@ export async function persistAssessmentReport(
             continue;
         }
 
-        const insertResult = await db.insert(vendorAssessments).values({
+        const [inserted] = await db.insert(vendorAssessments).values({
             vendorId: report.assessment.vendorId,
             frameworkId,
             complianceScore: row.complianceScore,
@@ -91,9 +91,9 @@ export async function persistAssessmentReport(
             status: row.status,
             findings: findingsJson,
             recommendations: recommendationsJson,
-        });
+        }).returning({ id: vendorAssessments.id });
 
-        const assessmentId = Number(insertResult[0]?.insertId ?? 0);
+        const assessmentId = inserted?.id ?? 0;
         if (assessmentId > 0) {
             assessmentIdByFramework.set(frameworkCode, assessmentId);
             insertedFrameworks.add(frameworkCode);

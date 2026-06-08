@@ -176,7 +176,7 @@ export async function adminCreateThreatItem(
         return item;
     }
 
-    const [result] = await db.insert(threatIntelItems).values({
+    const [inserted] = await db.insert(threatIntelItems).values({
         organizationId: input.organizationId ?? null,
         title: input.title,
         summary: input.summary,
@@ -191,8 +191,8 @@ export async function adminCreateThreatItem(
         cvssScore: input.cvssScore ?? null,
         createdByUserId: localUserId,
         publishedAt,
-    });
-    const insertId = (result as { insertId: number }).insertId;
+    }).returning({ id: threatIntelItems.id });
+    const insertId = inserted.id;
     const [created] = await db
         .select()
         .from(threatIntelItems)

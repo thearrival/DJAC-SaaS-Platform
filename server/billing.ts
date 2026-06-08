@@ -157,7 +157,7 @@ export async function createOrganizationForUser(params: {
     const now = new Date();
     const trialEnd = trialEndsAt(now);
 
-    const [result] = await db.insert(organizations).values({
+    const [inserted] = await db.insert(organizations).values({
         slug: params.slug,
         name: params.name,
         billingEmail: params.billingEmail,
@@ -168,9 +168,9 @@ export async function createOrganizationForUser(params: {
         trialEndsAt: trialEnd,
         isActive: 1,
         maxSeats: 5,
-    });
+    }).returning({ id: organizations.id });
 
-    const orgId = (result as { insertId: number }).insertId;
+    const orgId = inserted.id;
 
     // Create the owner membership
     await db.insert(organizationMembers).values({

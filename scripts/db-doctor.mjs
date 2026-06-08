@@ -1,5 +1,5 @@
 import "dotenv/config";
-import mysql from "mysql2/promise";
+import pg from "pg";
 
 const databaseUrl = (process.env.DATABASE_URL || "").trim();
 const allowInMemoryPersistence = (process.env.ALLOW_IN_MEMORY_PERSISTENCE || "").trim();
@@ -23,21 +23,20 @@ async function main() {
         return;
     }
 
-    let connection;
+    let client;
     try {
         const parsed = new URL(databaseUrl);
         print(`Host=${parsed.hostname || "unknown"}`);
-        print(`Port=${parsed.port || "3306"}`);
+        print(`Port=${parsed.port || "5432"}`);
         print(`Database=${parsed.pathname.replace(/^\//, "") || "unknown"}`);
 
-        connection = await mysql.createConnection(databaseUrl);
-        await connection.ping();
-
-        const [rows] = await connection.query("SELECT DATABASE() AS dbName, VERSION() AS version");
-        const first = Array.isArray(rows) ? rows[0] : null;
+        client = new pg.Client(databaseUrl);
+        await client.connect();
+        const result = await client.query("SELECT current_database() AS dbName, version() AS version");
+        const first = result.rows[0];
         print(`Connection successful.`);
         if (first && typeof first === "object") {
-            print(`Server database=${first.dbName || "unknown"}`);
+            print(`Server database=${first.dbname || "unknown"}`);
             print(`Server version=${first.version || "unknown"}`);
         }
 
@@ -49,11 +48,11 @@ async function main() {
         print(`Connection failed: ${error instanceof Error ? error.message : String(error)}`);
         print("Troubleshooting:");
         print("1. Verify DATABASE_URL credentials, host, and port");
-        print("2. Confirm MySQL is reachable from this machine");
+        print("2. Confirm PostgreSQL is reachable from this machine");
         print("3. Run pnpm db:migrate after connectivity is fixed");
         process.exitCode = 1;
     } finally {
-        await connection?.end().catch(() => undefined);
+        await client?.end().catch(() => undefined);
     }
 }
 

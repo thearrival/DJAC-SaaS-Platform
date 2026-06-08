@@ -89,7 +89,7 @@ export async function createCtemAsset(
 ): Promise<CtemAsset> {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
-    const [res] = await db.insert(ctemAssets).values({
+    const [inserted] = await db.insert(ctemAssets).values({
         organizationId: orgId,
         vendorId: input.vendorId ?? undefined,
         assetName: input.assetName,
@@ -102,8 +102,8 @@ export async function createCtemAsset(
         criticalityScore: input.criticalityScore,
         status: input.status as any,
         notes: input.notes ?? undefined,
-    } as any);
-    const id = (res as { insertId: number }).insertId;
+    } as any).returning({ id: ctemAssets.id });
+    const id = inserted.id;
     const [row] = await db.select().from(ctemAssets).where(eq(ctemAssets.id, id));
     return row;
 }
@@ -228,7 +228,7 @@ export async function createCtemVulnerability(
 ): Promise<CtemVulnerability> {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
-    const [res] = await db.insert(ctemVulnerabilities).values({
+    const [inserted] = await db.insert(ctemVulnerabilities).values({
         assetId: input.assetId,
         cveId: input.cveId ?? null,
         title: input.title,
@@ -239,8 +239,8 @@ export async function createCtemVulnerability(
         isConfirmed: input.isConfirmed ? 1 : 0,
         notes: input.notes ?? null,
         discoveredAt: new Date(),
-    });
-    const id = (res as { insertId: number }).insertId;
+    }).returning({ id: ctemVulnerabilities.id });
+    const id = inserted.id;
     const [row] = await db.select().from(ctemVulnerabilities).where(eq(ctemVulnerabilities.id, id));
     return row;
 }

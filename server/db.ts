@@ -1,11 +1,11 @@
 import { desc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
-import mysql from "mysql2/promise";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pg from "pg";
 import { InsertUser, User, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
-let _pool: mysql.Pool | null = null;
+let _pool: pg.Pool | null = null;
 let _lastDbCheckFailedAt = 0;
 const DB_RETRY_BACKOFF_MS = 10_000;
 let devUserOverride: Partial<User> = {};
@@ -53,9 +53,6 @@ export function getDatabaseUnavailableMessage() {
   return "Database unavailable. Verify DATABASE_URL connectivity and ensure the database server is running.";
 }
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
-// In production (NODE_ENV=production) we use a connection pool for concurrency.
-// In development we fall back to a single connection to match existing behaviour.
 export async function getDb() {
   if (_db) return _db;
 
@@ -69,33 +66,23 @@ export async function getDb() {
 
   try {
     if (ENV.isProduction) {
-      // ── Production: connection pool ──────────────────────────────────────
       const connectionLimit = ENV.databasePoolSize;
 
-      _pool = mysql.createPool({
-        uri: databaseUrl,
-        connectionLimit,
-        waitForConnections: true,
-        queueLimit: 0,
-        enableKeepAlive: true,
-        keepAliveInitialDelay: 0,
+      _pool = new pg.Pool({
+        connectionString: databaseUrl,
+        max: connectionLimit,
       });
 
-      // Test the pool with a single connection
-      const conn = await _pool.getConnection();
-      await conn.ping();
-      conn.release();
+      const client = await _pool.connect();
+      await client.query("SELECT 1");
+      client.release();
 
-      // drizzle-orm/mysql2 typings expect the callback Pool, but the promise Pool
-      // works at runtime. Cast to satisfy the type checker.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      _db = drizzle(_pool as any);
-      console.info(`[Database] Pool created — connectionLimit=${connectionLimit}`);
+      _db = drizzle(_pool);
+      console.info(`[Database] Pool created — max=${connectionLimit}`);
     } else {
-      // ── Development / test: single connection ────────────────────────────
-      const conn = await mysql.createConnection(databaseUrl);
-      await conn.ping();
-      await conn.end();
+      const client = new pg.Client(databaseUrl);
+      await client.connect();
+      await client.end();
       _db = drizzle(databaseUrl);
     }
     return _db;
@@ -108,7 +95,6 @@ export async function getDb() {
   }
 }
 
-/** Gracefully close the pool when the process shuts down. */
 export async function closeDbPool(): Promise<void> {
   if (_pool) {
     await _pool.end();
@@ -207,7 +193,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastActivityAt = now;
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -304,6 +291,3 @@ export async function touchUserActivity(userId: number) {
 
   await db.update(users).set({ lastActivityAt: new Date() }).where(eq(users.id, userId));
 }
-
-// Compliance framework queries are in compliance-db.ts
-// Import and use them from there for all compliance-related database operations

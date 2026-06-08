@@ -125,6 +125,11 @@ export const parsedEnv = {
   STRIPE_PRICE_ENTERPRISE_MONTHLY: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY ?? "",
   STRIPE_PRICE_ENTERPRISE_ANNUAL: process.env.STRIPE_PRICE_ENTERPRISE_ANNUAL ?? "",
 
+  // ── Supabase ────────────────────────────────────────────────────────────
+  SUPABASE_URL: process.env.SUPABASE_URL ?? "",
+  SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ?? "",
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+
   // ── AI / integrations ─────────────────────────────────────────────────────
   OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "",
 

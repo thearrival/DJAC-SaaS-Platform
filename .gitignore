@@ -114,6 +114,9 @@ temp/
 # Stripe CLI
 .stripe/
 
+# Supabase local temp files
+supabase/.temp/
+
 # Audit event logs (may contain PII — never commit)
 audit/assessment-events.log
 audit/*.log

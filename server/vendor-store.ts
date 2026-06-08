@@ -188,8 +188,8 @@ export async function createVendorProfile(
     }
 
     const insertValues = toInsertValues(userId, input, organizationId);
-    const result = await db.insert(vendors).values(insertValues);
-    const vendorId = Number(result[0]?.insertId ?? 0);
+    const [insertedVendor] = await db.insert(vendors).values(insertValues).returning({ id: vendors.id });
+    const vendorId = insertedVendor.id;
 
     if (!vendorId) {
         throw new Error("Failed to create vendor record");

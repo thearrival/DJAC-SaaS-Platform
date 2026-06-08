@@ -144,7 +144,7 @@ export async function createAsset(
         return asset;
     }
 
-    const [result] = await db.insert(assetInventory).values({
+    const [inserted] = await db.insert(assetInventory).values({
         organizationId: orgId,
         name: input.name,
         assetType: input.assetType,
@@ -160,8 +160,8 @@ export async function createAsset(
         tags: input.tags ?? null,
         notes: input.notes ?? null,
         addedByUserId: localUserId,
-    });
-    const insertId = (result as { insertId: number }).insertId;
+    }).returning({ id: assetInventory.id });
+    const insertId = inserted.id;
     const [created] = await db
         .select()
         .from(assetInventory)

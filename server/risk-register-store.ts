@@ -100,7 +100,7 @@ export async function createRisk(orgId: number, input: CreateRiskInput): Promise
         MEM_RISKS.push(risk);
         return risk;
     }
-    const result = await db.insert(riskRegister).values({
+    const [insertedRisk] = await db.insert(riskRegister).values({
         organizationId: orgId,
         title: input.title,
         description: input.description ?? null,
@@ -115,8 +115,8 @@ export async function createRisk(orgId: number, input: CreateRiskInput): Promise
         controlReference: input.controlReference ?? null,
         reviewDate,
         notes: input.notes ?? null,
-    });
-    const newId = (result as unknown as { insertId: number }).insertId;
+    }).returning({ id: riskRegister.id });
+    const newId = insertedRisk.id;
     return {
         id: newId,
         organizationId: orgId,
