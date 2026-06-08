@@ -33,7 +33,7 @@ export const parsedEnv = {
   JWT_SECRET:
     process.env.JWT_SECRET ??
     (!_isProduction ? "djac-dev-local-only-not-for-production-use-set-jwt-secret" : ""),
-  DATABASE_URL: process.env.DATABASE_URL ?? "",
+  DATABASE_URL: process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_PRISMA_URL || "",
   OAUTH_SERVER_URL: process.env.OAUTH_SERVER_URL ?? "",
   OWNER_OPEN_ID: process.env.OWNER_OPEN_ID ?? "",
   APP_URL: (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""),

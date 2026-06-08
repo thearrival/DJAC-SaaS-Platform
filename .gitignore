@@ -123,3 +123,5 @@ audit/*.log
 
 
 .vercel
+
+.env*
