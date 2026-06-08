@@ -17,7 +17,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 
 const entry = path.resolve(root, "src", "vercel-handler.ts");
-const outfile = path.resolve(root, "api", "[[...path]].mjs");
+const outfile = path.resolve(root, "api", "[[...path]].js");
 
 console.log("[prebuild] Compiling Vercel handler...");
 console.log("[prebuild]   entry:", path.relative(root, entry));

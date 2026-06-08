@@ -5,7 +5,7 @@
   "installCommand": "pnpm install",
   "devCommand": "pnpm dev",
   "functions": {
-    "api/[[...path]].mjs": {
+    "api/[[...path]].js": {
       "memory": 512,
       "maxDuration": 30
     },
