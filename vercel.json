@@ -4,20 +4,6 @@
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install",
   "devCommand": "pnpm dev",
-  "functions": {
-    "api/[[...path]].cjs": {
-      "memory": 512,
-      "maxDuration": 30
-    },
-    "api/ping.ts": {
-      "memory": 512,
-      "maxDuration": 30
-    },
-    "api/test-prebuilt.js": {
-      "memory": 512,
-      "maxDuration": 30
-    }
-  },
   "routes": [
     {
       "src": "/((?!api/).*)",
