@@ -2,6 +2,7 @@ import IORedis from "ioredis";
 import pg from "pg";
 import { ENV, evaluateStripeBillingConfig } from "./env";
 import { parsedEnv } from "../services/config-schema";
+import { fixSslMode } from "./ssl-helper";
 
 type ServiceReadiness = {
     enabled: boolean;
@@ -61,7 +62,7 @@ async function checkDatabaseReadiness(): Promise<ServiceReadiness> {
 
     let client: pg.Client | null = null;
     try {
-        client = new pg.Client(ENV.databaseUrl);
+        client = new pg.Client(fixSslMode(ENV.databaseUrl));
         await client.connect();
         await client.query("SELECT 1");
 

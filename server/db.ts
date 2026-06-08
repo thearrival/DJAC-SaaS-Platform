@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { InsertUser, User, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
+import { fixSslMode } from "./_core/ssl-helper";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _pool: pg.Pool | null = null;
@@ -67,12 +68,7 @@ export async function getDb() {
   try {
     if (ENV.isProduction) {
       const connectionLimit = ENV.databasePoolSize;
-
-      // pg driver aliases sslmode=require to verify-full. Force no-verify
-      // to accept Supabase's self-signed certificates.
-      const sslUrl = databaseUrl.includes("sslmode")
-        ? databaseUrl.replace(/sslmode=\w+/, "sslmode=no-verify")
-        : databaseUrl + (databaseUrl.includes("?") ? "&" : "?") + "sslmode=no-verify";
+      const sslUrl = fixSslMode(databaseUrl);
 
       _pool = new pg.Pool({
         connectionString: sslUrl,
@@ -86,13 +82,10 @@ export async function getDb() {
       _db = drizzle(_pool);
       console.info(`[Database] Pool created — max=${connectionLimit}`);
     } else {
-      const sslUrl = databaseUrl.includes("sslmode")
-        ? databaseUrl.replace(/sslmode=\w+/, "sslmode=no-verify")
-        : databaseUrl + (databaseUrl.includes("?") ? "&" : "?") + "sslmode=no-verify";
-      const client = new pg.Client(sslUrl);
+      const client = new pg.Client(fixSslMode(databaseUrl));
       await client.connect();
       await client.end();
-      _db = drizzle(databaseUrl);
+      _db = drizzle(fixSslMode(databaseUrl));
     }
     return _db;
   } catch (error) {

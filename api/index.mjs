@@ -1279,6 +1279,21 @@ var init_schema = __esm({
   }
 });
 
+// server/_core/ssl-helper.ts
+function fixSslMode(url) {
+  if (!url) return url;
+  if (url.includes("sslmode")) {
+    return url.replace(/sslmode=\w+/g, "sslmode=no-verify");
+  }
+  const sep = url.includes("?") ? "&" : "?";
+  return url + sep + "sslmode=no-verify";
+}
+var init_ssl_helper = __esm({
+  "server/_core/ssl-helper.ts"() {
+    "use strict";
+  }
+});
+
 // server/db.ts
 var db_exports = {};
 __export(db_exports, {
@@ -1336,7 +1351,7 @@ async function getDb() {
   try {
     if (ENV.isProduction) {
       const connectionLimit = ENV.databasePoolSize;
-      const sslUrl = databaseUrl.includes("sslmode") ? databaseUrl.replace(/sslmode=\w+/, "sslmode=no-verify") : databaseUrl + (databaseUrl.includes("?") ? "&" : "?") + "sslmode=no-verify";
+      const sslUrl = fixSslMode(databaseUrl);
       _pool = new pg.Pool({
         connectionString: sslUrl,
         max: connectionLimit
@@ -1347,11 +1362,10 @@ async function getDb() {
       _db = drizzle(_pool);
       console.info(`[Database] Pool created \u2014 max=${connectionLimit}`);
     } else {
-      const sslUrl = databaseUrl.includes("sslmode") ? databaseUrl.replace(/sslmode=\w+/, "sslmode=no-verify") : databaseUrl + (databaseUrl.includes("?") ? "&" : "?") + "sslmode=no-verify";
-      const client = new pg.Client(sslUrl);
+      const client = new pg.Client(fixSslMode(databaseUrl));
       await client.connect();
       await client.end();
-      _db = drizzle(databaseUrl);
+      _db = drizzle(fixSslMode(databaseUrl));
     }
     return _db;
   } catch (error) {
@@ -1531,6 +1545,7 @@ var init_db = __esm({
     "use strict";
     init_schema();
     init_env();
+    init_ssl_helper();
     _db = null;
     _pool = null;
     _lastDbCheckFailedAt = 0;
@@ -6729,6 +6744,7 @@ async function notifyOwner(payload) {
 // server/_core/readiness.ts
 init_env();
 init_config_schema();
+init_ssl_helper();
 import IORedis from "ioredis";
 import pg2 from "pg";
 function evaluateScalingReadiness(input) {
@@ -6766,7 +6782,7 @@ async function checkDatabaseReadiness() {
   }
   let client = null;
   try {
-    client = new pg2.Client(ENV.databaseUrl);
+    client = new pg2.Client(fixSslMode(ENV.databaseUrl));
     await client.connect();
     await client.query("SELECT 1");
     return {
