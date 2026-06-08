@@ -1,10 +1,24 @@
 {
   "version": 2,
-  "buildCommand": "vite build",
+  "buildCommand": "vite build && node scripts/prebuild-vercel.mjs",
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install",
   "devCommand": "pnpm dev",
+  "functions": {
+    "api/index.cjs": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/ping.ts": {
+      "memory": 512,
+      "maxDuration": 30
+    }
+  },
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index?api_path=$1"
+    },
     {
       "src": "/((?!api/).*)",
       "dest": "/index.html"
