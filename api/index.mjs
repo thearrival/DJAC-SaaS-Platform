@@ -1318,7 +1318,8 @@ async function getDb() {
       const connectionLimit = ENV.databasePoolSize;
       _pool = new pg.Pool({
         connectionString: databaseUrl,
-        max: connectionLimit
+        max: connectionLimit,
+        ssl: { rejectUnauthorized: false }
       });
       const client = await _pool.connect();
       await client.query("SELECT 1");

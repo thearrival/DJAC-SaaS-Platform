@@ -71,6 +71,7 @@ export async function getDb() {
       _pool = new pg.Pool({
         connectionString: databaseUrl,
         max: connectionLimit,
+        ssl: { rejectUnauthorized: false },
       });
 
       const client = await _pool.connect();
