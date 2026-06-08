@@ -168,18 +168,17 @@ export function checkProductionEnv(): void {
   }
 
   if (missingSecrets.length > 0) {
-    console.error(
-      `[FATAL] Required environment variable(s) not set: ${missingSecrets.join(", ")}. Refusing to start.`,
-    );
-    process.exit(1);
+    const msg = `[FATAL] Required environment variable(s) not set: ${missingSecrets.join(", ")}. Refusing to start.`;
+    console.error(msg);
+    throw new Error(msg);
   }
 
   if (parsedEnv.JWT_SECRET.length < 32) {
-    console.error(
+    const msg =
       "[FATAL] JWT_SECRET must be at least 32 characters for production use. " +
-      "Generate one with: node -e \"console.log(require('crypto').randomBytes(48).toString('hex'))\"",
-    );
-    process.exit(1);
+      "Generate one with: node -e \"console.log(require('crypto').randomBytes(48).toString('hex'))\"";
+    console.error(msg);
+    throw new Error(msg);
   }
 
   if (stripeBillingConfig.partiallyConfigured) {
