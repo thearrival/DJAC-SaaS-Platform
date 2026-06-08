@@ -16,6 +16,10 @@
   },
   "routes": [
     {
+      "src": "/api/ping",
+      "dest": "/api/ping"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/index?api_path=$1"
     },
