@@ -20,6 +20,14 @@
     "api/schema-test.ts": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "api/local-import.ts": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "api/shared-import.ts": {
+      "memory": 512,
+      "maxDuration": 30
     }
   },
   "env": {
