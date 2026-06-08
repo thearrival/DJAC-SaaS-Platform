@@ -26,6 +26,9 @@ import { nanoid } from "nanoid";
 import { checkRateLimit, closeRateLimiter } from "./rateLimiter";
 import { getSecurityHeadersForRequest, shouldBypassApiRateLimit, getClientIp } from "./security";
 import { createYallaAdminRouter } from "./yalla-admin-router";
+import { checkProductionEnv } from "./env";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 120;
@@ -145,6 +148,8 @@ function securityHeaders(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function createApp() {
+  checkProductionEnv();
+
   const app = express();
   app.set("trust proxy", true);
 
@@ -308,7 +313,12 @@ async function startServer() {
   });
 }
 
-startServer().catch(console.error);
+// Only start the HTTP server when run directly (not when imported by Vercel serverless handler).
+const isMainModule = process.argv[1] !== undefined &&
+  path.resolve(process.argv[1]) === path.resolve(import.meta.filename ?? fileURLToPath(import.meta.url));
+if (isMainModule) {
+  startServer().catch(console.error);
+}
 
 function shutdown(signal: string) {
   console.info(`[Server] ${signal} received — shutting down gracefully`);

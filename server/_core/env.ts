@@ -139,7 +139,12 @@ export const ENV = {
 };
 
 // ── Production startup guards ──────────────────────────────────────────────
-if (parsedEnv.NODE_ENV === "production") {
+// NOTE: This is exported as a function so it runs inside createApp(), not at
+// module-import time. Module-level process.exit(1) would kill the Vercel
+// serverless runtime before any route handler is registered.
+export function checkProductionEnv(): void {
+  if (parsedEnv.NODE_ENV !== "production") return;
+
   const missingSecrets: string[] = [];
   const stripeBillingConfig = evaluateStripeBillingConfig({
     STRIPE_SECRET_KEY: parsedEnv.STRIPE_SECRET_KEY || undefined,
@@ -178,11 +183,10 @@ if (parsedEnv.NODE_ENV === "production") {
   }
 
   if (stripeBillingConfig.partiallyConfigured) {
-    console.error(
-      `[FATAL] Stripe billing is partially configured. Missing: ${stripeBillingConfig.missing.join(", ")}. ` +
-      "Either configure the full Stripe billing stack or remove the partial STRIPE_* values.",
+    console.warn(
+      `[WARN] Stripe billing is partially configured. Missing: ${stripeBillingConfig.missing.join(", ")}. ` +
+      "Billing and checkout flows may not work until all STRIPE_* variables are set.",
     );
-    process.exit(1);
   }
 
   if (!parsedEnv.STRIPE_SECRET_KEY) {
