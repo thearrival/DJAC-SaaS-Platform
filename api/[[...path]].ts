@@ -1,4 +1,5 @@
 let cachedApp: any = null;
+let initError: string | null = null;
 
 export default async function handler(req: any, res: any) {
   const url = req.url || req.originalUrl || "";
@@ -32,10 +33,32 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  // Inline init-test endpoint: tests Express initialization step-by-step.
+  if (path.startsWith("/api/_init")) {
+    const steps: Record<string, any> = {};
+    try {
+      steps.importStart = Date.now();
+      const mod = await import("../server/_core/index");
+      steps.importOk = true;
+      steps.importMs = Date.now() - steps.importStart;
+
+      steps.createAppStart = Date.now();
+      cachedApp = await mod.createApp();
+      steps.createAppOk = true;
+      steps.createAppMs = Date.now() - steps.createAppStart;
+    } catch (e) {
+      initError = e instanceof Error ? e.message : String(e);
+      steps.error = initError;
+      steps.stack = e instanceof Error ? e.stack : undefined;
+    }
+    res.status(200).json({ ok: true, steps, initError, hasApp: !!cachedApp, node: process.version });
+    return;
+  }
+
   try {
     if (!cachedApp) {
-      const { createApp } = await import("../server/_core/index");
-      cachedApp = await createApp();
+      const mod = await import("../server/_core/index");
+      cachedApp = await mod.createApp();
     }
     cachedApp(req, res);
   } catch (err) {
@@ -43,6 +66,7 @@ export default async function handler(req: any, res: any) {
     res.status(500).json({
       error: "Internal server error",
       message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
     });
   }
 }
