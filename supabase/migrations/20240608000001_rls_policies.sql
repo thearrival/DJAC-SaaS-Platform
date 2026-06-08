@@ -1,38 +1,21 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- DJAC SaaS - Row Level Security Policies
--- ═══════════════════════════════════════════════════════════════════════════════
-
--- Enable RLS on remaining tables
-ALTER TABLE IF EXISTS "compliancePolicies" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS "complianceIncidents" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS "remediationTasks" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS "riskRegister" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS "vendors" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS "vendorAssessments" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS "apiKeys" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS "complianceDeadlines" ENABLE ROW LEVEL SECURITY;
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- ORGANIZATION-LEVEL POLICIES
--- All tables with organizationId use the same pattern:
---   SELECT: org member can read
---   INSERT/UPDATE/DELETE: org admin or above
+-- DJAC SaaS - Row Level Security Policies (Extended)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 -- Helper: get user's organization IDs
-CREATE OR REPLACE FUNCTION auth.user_org_ids()
+CREATE OR REPLACE FUNCTION public.user_org_ids()
 RETURNS INTEGER[]
 LANGUAGE SQL STABLE
 AS $$
   SELECT COALESCE(ARRAY_AGG("organizationId"), ARRAY[]::INTEGER[])
   FROM "organizationMembers"
   WHERE "userId" IN (
-    SELECT id FROM "users" WHERE "openId" = auth.uid()::text
+    SELECT "id" FROM "users" WHERE "openId" = auth.uid()::text
   );
 $$;
 
 -- Helper: check if user is org admin
-CREATE OR REPLACE FUNCTION auth.user_is_org_admin(org_id INTEGER)
+CREATE OR REPLACE FUNCTION public.user_is_org_admin(org_id INTEGER)
 RETURNS BOOLEAN
 LANGUAGE SQL STABLE
 AS $$
@@ -41,124 +24,103 @@ AS $$
     WHERE "organizationId" = org_id
       AND "role" IN ('owner', 'admin')
       AND "userId" IN (
-        SELECT id FROM "users" WHERE "openId" = auth.uid()::text
+        SELECT "id" FROM "users" WHERE "openId" = auth.uid()::text
       )
   );
 $$;
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- VENDORS
+-- Dynamic policy creation with existence checks
 -- ═══════════════════════════════════════════════════════════════════════════════
-CREATE POLICY "vendors_org_select" ON "vendors"
-  FOR SELECT USING (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
 
-CREATE POLICY "vendors_org_insert" ON "vendors"
-  FOR INSERT WITH CHECK (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'vendors' AND relkind = 'r') THEN
+    EXECUTE 'ALTER TABLE "vendors" ENABLE ROW LEVEL SECURITY';
 
-CREATE POLICY "vendors_org_update" ON "vendors"
-  FOR UPDATE USING (
-    auth.user_is_org_admin("organizationId")
-  );
+    EXECUTE 'CREATE POLICY "vendors_org_select" ON "vendors"
+      FOR SELECT USING ("organizationId" = ANY(public.user_org_ids()))';
 
-CREATE POLICY "vendors_org_delete" ON "vendors"
-  FOR DELETE USING (
-    auth.user_is_org_admin("organizationId")
-  );
+    EXECUTE 'CREATE POLICY "vendors_org_insert" ON "vendors"
+      FOR INSERT WITH CHECK ("organizationId" = ANY(public.user_org_ids()))';
 
--- ═══════════════════════════════════════════════════════════════════════════════
--- COMPLIANCE POLICIES
--- ═══════════════════════════════════════════════════════════════════════════════
-CREATE POLICY "policies_org_select" ON "compliancePolicies"
-  FOR SELECT USING (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+    EXECUTE 'CREATE POLICY "vendors_org_update" ON "vendors"
+      FOR UPDATE USING (public.user_is_org_admin("organizationId"))';
 
-CREATE POLICY "policies_org_insert" ON "compliancePolicies"
-  FOR INSERT WITH CHECK (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+    EXECUTE 'CREATE POLICY "vendors_org_delete" ON "vendors"
+      FOR DELETE USING (public.user_is_org_admin("organizationId"))';
+  END IF;
+END $$;
 
-CREATE POLICY "policies_org_update" ON "compliancePolicies"
-  FOR UPDATE USING (
-    auth.user_is_org_admin("organizationId")
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'compliancepolicies' AND relkind = 'r') THEN
+    EXECUTE 'ALTER TABLE "compliancePolicies" ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'CREATE POLICY "policies_org_select" ON "compliancePolicies" FOR SELECT USING ("organizationId" = ANY(public.user_org_ids()))';
+    EXECUTE 'CREATE POLICY "policies_org_insert" ON "compliancePolicies" FOR INSERT WITH CHECK ("organizationId" = ANY(public.user_org_ids()))';
+    EXECUTE 'CREATE POLICY "policies_org_update" ON "compliancePolicies" FOR UPDATE USING (public.user_is_org_admin("organizationId"))';
+  END IF;
+END $$;
 
--- ═══════════════════════════════════════════════════════════════════════════════
--- INCIDENTS
--- ═══════════════════════════════════════════════════════════════════════════════
-CREATE POLICY "incidents_org_select" ON "complianceIncidents"
-  FOR SELECT USING (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'complianceincidents' AND relkind = 'r') THEN
+    EXECUTE 'ALTER TABLE "complianceIncidents" ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'CREATE POLICY "incidents_org_select" ON "complianceIncidents" FOR SELECT USING ("organizationId" = ANY(public.user_org_ids()))';
+    EXECUTE 'CREATE POLICY "incidents_org_insert" ON "complianceIncidents" FOR INSERT WITH CHECK ("organizationId" = ANY(public.user_org_ids()))';
+    EXECUTE 'CREATE POLICY "incidents_org_update" ON "complianceIncidents" FOR UPDATE USING ("organizationId" = ANY(public.user_org_ids()))';
+  END IF;
+END $$;
 
-CREATE POLICY "incidents_org_insert" ON "complianceIncidents"
-  FOR INSERT WITH CHECK (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'remediationtasks' AND relkind = 'r') THEN
+    EXECUTE 'ALTER TABLE "remediationTasks" ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'CREATE POLICY "remediation_org_select" ON "remediationTasks" FOR SELECT USING ("organizationId" = ANY(public.user_org_ids()))';
+    EXECUTE 'CREATE POLICY "remediation_org_insert" ON "remediationTasks" FOR INSERT WITH CHECK ("organizationId" = ANY(public.user_org_ids()))';
+    EXECUTE 'CREATE POLICY "remediation_org_update" ON "remediationTasks" FOR UPDATE USING ("organizationId" = ANY(public.user_org_ids()))';
+  END IF;
+END $$;
 
-CREATE POLICY "incidents_org_update" ON "complianceIncidents"
-  FOR UPDATE USING (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'riskregister' AND relkind = 'r') THEN
+    EXECUTE 'ALTER TABLE "riskRegister" ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'CREATE POLICY "risk_org_select" ON "riskRegister" FOR SELECT USING ("organizationId" = ANY(public.user_org_ids()))';
+    EXECUTE 'CREATE POLICY "risk_org_insert" ON "riskRegister" FOR INSERT WITH CHECK ("organizationId" = ANY(public.user_org_ids()))';
+    EXECUTE 'CREATE POLICY "risk_org_update" ON "riskRegister" FOR UPDATE USING ("organizationId" = ANY(public.user_org_ids()))';
+  END IF;
+END $$;
 
--- ═══════════════════════════════════════════════════════════════════════════════
--- REMEDIATION TASKS
--- ═══════════════════════════════════════════════════════════════════════════════
-CREATE POLICY "remediation_org_select" ON "remediationTasks"
-  FOR SELECT USING (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+-- Service role policies (applied for all tables when they exist)
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'compliancepolicies' AND relkind = 'r') THEN
+    EXECUTE 'CREATE POLICY "service_role_policies" ON "compliancePolicies" FOR ALL USING (current_role = ''service_role'')';
+  END IF;
+END $$;
 
-CREATE POLICY "remediation_org_insert" ON "remediationTasks"
-  FOR INSERT WITH CHECK (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'complianceincidents' AND relkind = 'r') THEN
+    EXECUTE 'CREATE POLICY "service_role_incidents" ON "complianceIncidents" FOR ALL USING (current_role = ''service_role'')';
+  END IF;
+END $$;
 
-CREATE POLICY "remediation_org_update" ON "remediationTasks"
-  FOR UPDATE USING (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'remediationtasks' AND relkind = 'r') THEN
+    EXECUTE 'CREATE POLICY "service_role_remediation" ON "remediationTasks" FOR ALL USING (current_role = ''service_role'')';
+  END IF;
+END $$;
 
--- ═══════════════════════════════════════════════════════════════════════════════
--- RISK REGISTER
--- ═══════════════════════════════════════════════════════════════════════════════
-CREATE POLICY "risk_org_select" ON "riskRegister"
-  FOR SELECT USING (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'riskregister' AND relkind = 'r') THEN
+    EXECUTE 'CREATE POLICY "service_role_risk" ON "riskRegister" FOR ALL USING (current_role = ''service_role'')';
+  END IF;
+END $$;
 
-CREATE POLICY "risk_org_insert" ON "riskRegister"
-  FOR INSERT WITH CHECK (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'vendors' AND relkind = 'r') THEN
+    EXECUTE 'CREATE POLICY "service_role_vendors" ON "vendors" FOR ALL USING (current_role = ''service_role'')';
+  END IF;
+END $$;
 
-CREATE POLICY "risk_org_update" ON "riskRegister"
-  FOR UPDATE USING (
-    "organizationId" = ANY(auth.user_org_ids())
-  );
-
--- ═══════════════════════════════════════════════════════════════════════════════
--- SERVICE ROLE ACCESS
--- ═══════════════════════════════════════════════════════════════════════════════
--- Grant full access to service_role for backend operations
-CREATE POLICY "service_role_policies" ON "compliancePolicies"
-  FOR ALL USING (current_role = 'service_role');
-
-CREATE POLICY "service_role_incidents" ON "complianceIncidents"
-  FOR ALL USING (current_role = 'service_role');
-
-CREATE POLICY "service_role_remediation" ON "remediationTasks"
-  FOR ALL USING (current_role = 'service_role');
-
-CREATE POLICY "service_role_risk" ON "riskRegister"
-  FOR ALL USING (current_role = 'service_role');
-
-CREATE POLICY "service_role_vendors" ON "vendors"
-  FOR ALL USING (current_role = 'service_role');
-
-CREATE POLICY "service_role_deadlines" ON "complianceDeadlines"
-  FOR ALL USING (current_role = 'service_role');
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname = 'compliancedeadlines' AND relkind = 'r') THEN
+    EXECUTE 'ALTER TABLE "complianceDeadlines" ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'CREATE POLICY "service_role_deadlines" ON "complianceDeadlines" FOR ALL USING (current_role = ''service_role'')';
+  END IF;
+END $$;
