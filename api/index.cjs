@@ -19609,9 +19609,19 @@ process.on("SIGINT", () => shutdown("SIGINT"));
 // src/vercel-handler.ts
 var cachedApp = null;
 var initError = null;
+function getPath(req) {
+  const url = req.url || "";
+  const [base] = url.split("?");
+  if (base === "/api/index" || base === "/api/index/") {
+    const qs = url.includes("?") ? url.slice(url.indexOf("?") + 1) : "";
+    const params = new URLSearchParams(qs);
+    const apiPath = params.get("api_path");
+    if (apiPath) return "/api/" + apiPath;
+  }
+  return base;
+}
 async function handler(req, res) {
-  const url = req.url || req.originalUrl || "";
-  const path6 = url.split("?")[0];
+  const path6 = getPath(req);
   if (path6.startsWith("/api/health") || path6.startsWith("/health")) {
     res.status(200).json({
       ok: true,
@@ -19625,7 +19635,7 @@ async function handler(req, res) {
   if (path6.startsWith("/api/_debug")) {
     res.status(200).json({
       ok: true,
-      url,
+      url: req.url,
       path: path6,
       method: req.method,
       headers: req.headers,

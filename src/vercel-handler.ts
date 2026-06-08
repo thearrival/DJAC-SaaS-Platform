@@ -3,9 +3,24 @@ import { createApp } from "../server/_core/index";
 let cachedApp: any = null;
 let initError: string | null = null;
 
+function getPath(req: any): string {
+  const url: string = req.url || "";
+  const [base] = url.split("?");
+
+  // When Vercel routes rewrite /api/(.*) → /api/index?api_path=$1,
+  // the original API sub-path is in the api_path query parameter.
+  if (base === "/api/index" || base === "/api/index/") {
+    const qs = url.includes("?") ? url.slice(url.indexOf("?") + 1) : "";
+    const params = new URLSearchParams(qs);
+    const apiPath = params.get("api_path");
+    if (apiPath) return "/api/" + apiPath;
+  }
+
+  return base;
+}
+
 export default async function handler(req: any, res: any) {
-  const url = req.url || req.originalUrl || "";
-  const path = (url as string).split("?")[0];
+  const path = getPath(req);
 
   if (path.startsWith("/api/health") || path.startsWith("/health")) {
     res.status(200).json({
@@ -21,7 +36,7 @@ export default async function handler(req: any, res: any) {
   if (path.startsWith("/api/_debug")) {
     res.status(200).json({
       ok: true,
-      url,
+      url: req.url,
       path,
       method: req.method,
       headers: req.headers,
@@ -32,7 +47,6 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  // Inline init-test endpoint: tests Express initialization step-by-step.
   if (path.startsWith("/api/_init")) {
     const steps: Record<string, any> = {};
     if (!cachedApp && !initError) {
