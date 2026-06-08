@@ -12,6 +12,10 @@
     "api/ping.ts": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "api/test-prebuilt.js": {
+      "memory": 512,
+      "maxDuration": 30
     }
   },
   "routes": [
