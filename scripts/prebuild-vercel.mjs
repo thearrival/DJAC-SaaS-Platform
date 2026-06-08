@@ -32,7 +32,7 @@ const cmd = [
   "--bundle",
   "--platform=node",
   "--target=node20",
-  "--format=esm",
+  "--format=cjs",
   "--packages=external",
   "--external:pg-native",
   `"${entry}"`,
@@ -46,7 +46,7 @@ try {
 } catch (err) {
   console.error("[prebuild] esbuild failed. Falling back to direct shell...");
   // Fallback: try without quotes (some shells handle differently)
-    const fallbackCmd = `npx esbuild --bundle --platform=node --target=node20 --format=esm --packages=external --external:pg-native "${entry.replace(/\\/g, '/')}" --outfile="${outfile.replace(/\\/g, '/')}"`;
+    const fallbackCmd = `npx esbuild --bundle --platform=node --target=node20 --format=cjs --packages=external --external:pg-native "${entry.replace(/\\/g, '/')}" --outfile="${outfile.replace(/\\/g, '/')}"`;
   try {
     execSync(fallbackCmd, { stdio: "inherit", cwd: root, shell: true });
   } catch (err2) {
