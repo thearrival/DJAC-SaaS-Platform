@@ -16,6 +16,10 @@
     "api/mini.ts": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "api/schema-test.ts": {
+      "memory": 512,
+      "maxDuration": 30
     }
   },
   "env": {
