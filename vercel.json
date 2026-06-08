@@ -6,10 +6,6 @@
   "devCommand": "pnpm dev",
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index?api_path=$1"
-    },
-    {
       "src": "/((?!api/).*)",
       "dest": "/index.html"
     }
