@@ -68,10 +68,15 @@ export async function getDb() {
     if (ENV.isProduction) {
       const connectionLimit = ENV.databasePoolSize;
 
+      // pg driver aliases sslmode=require to verify-full. Force no-verify
+      // to accept Supabase's self-signed certificates.
+      const sslUrl = databaseUrl.includes("sslmode")
+        ? databaseUrl.replace(/sslmode=\w+/, "sslmode=no-verify")
+        : databaseUrl + (databaseUrl.includes("?") ? "&" : "?") + "sslmode=no-verify";
+
       _pool = new pg.Pool({
-        connectionString: databaseUrl,
+        connectionString: sslUrl,
         max: connectionLimit,
-        ssl: { rejectUnauthorized: false },
       });
 
       const client = await _pool.connect();
@@ -81,7 +86,10 @@ export async function getDb() {
       _db = drizzle(_pool);
       console.info(`[Database] Pool created — max=${connectionLimit}`);
     } else {
-      const client = new pg.Client(databaseUrl);
+      const sslUrl = databaseUrl.includes("sslmode")
+        ? databaseUrl.replace(/sslmode=\w+/, "sslmode=no-verify")
+        : databaseUrl + (databaseUrl.includes("?") ? "&" : "?") + "sslmode=no-verify";
+      const client = new pg.Client(sslUrl);
       await client.connect();
       await client.end();
       _db = drizzle(databaseUrl);

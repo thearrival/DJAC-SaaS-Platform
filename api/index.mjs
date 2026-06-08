@@ -1336,10 +1336,10 @@ async function getDb() {
   try {
     if (ENV.isProduction) {
       const connectionLimit = ENV.databasePoolSize;
+      const sslUrl = databaseUrl.includes("sslmode") ? databaseUrl.replace(/sslmode=\w+/, "sslmode=no-verify") : databaseUrl + (databaseUrl.includes("?") ? "&" : "?") + "sslmode=no-verify";
       _pool = new pg.Pool({
-        connectionString: databaseUrl,
-        max: connectionLimit,
-        ssl: { rejectUnauthorized: false }
+        connectionString: sslUrl,
+        max: connectionLimit
       });
       const client = await _pool.connect();
       await client.query("SELECT 1");
@@ -1347,7 +1347,8 @@ async function getDb() {
       _db = drizzle(_pool);
       console.info(`[Database] Pool created \u2014 max=${connectionLimit}`);
     } else {
-      const client = new pg.Client(databaseUrl);
+      const sslUrl = databaseUrl.includes("sslmode") ? databaseUrl.replace(/sslmode=\w+/, "sslmode=no-verify") : databaseUrl + (databaseUrl.includes("?") ? "&" : "?") + "sslmode=no-verify";
+      const client = new pg.Client(sslUrl);
       await client.connect();
       await client.end();
       _db = drizzle(databaseUrl);
