@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "vite build && node scripts/prebuild-vercel.mjs && npx drizzle-kit migrate",
+  "buildCommand": "NODE_TLS_REJECT_UNAUTHORIZED=0 vite build && NODE_TLS_REJECT_UNAUTHORIZED=0 node scripts/prebuild-vercel.mjs && NODE_TLS_REJECT_UNAUTHORIZED=0 npx drizzle-kit migrate",
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install",
   "devCommand": "pnpm dev",
