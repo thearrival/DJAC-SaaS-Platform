@@ -1,35 +1,25 @@
 {
   "version": 2,
-  "buildCommand": "vite build",
+  "buildCommand": "vite build && node scripts/prebuild-vercel.mjs",
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install",
   "devCommand": "pnpm dev",
   "functions": {
-    "api/[[...path]].ts": {
+    "api/[[...path]].mjs": {
       "memory": 512,
       "maxDuration": 30
     },
     "api/ping.ts": {
       "memory": 512,
       "maxDuration": 30
-    },
-    "api/mini.ts": {
-      "memory": 512,
-      "maxDuration": 30
-    },
-    "api/schema-test.ts": {
-      "memory": 512,
-      "maxDuration": 30
-    },
-    "api/local-import.ts": {
-      "memory": 512,
-      "maxDuration": 30
-    },
-    "api/shared-import.ts": {
-      "memory": 512,
-      "maxDuration": 30
     }
   },
+  "routes": [
+    {
+      "src": "/((?!api/).*)",
+      "dest": "/index.html"
+    }
+  ],
   "env": {
     "NODE_ENV": "production",
     "VITE_API_URL": "/api"
