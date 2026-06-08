@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 
 const entry = path.resolve(root, "src", "vercel-handler.ts");
-const outfile = path.resolve(root, "api", "index.mjs");
+const outfile = path.resolve(root, "api", "index.cjs");
 
 console.log("[prebuild] Compiling Vercel handler...");
 fs.mkdirSync(path.dirname(outfile), { recursive: true });
@@ -17,7 +17,7 @@ fs.mkdirSync(path.dirname(outfile), { recursive: true });
 const cmd = [
   "npx", "esbuild",
   "--bundle", "--platform=node", "--target=node20",
-  "--format=esm", "--packages=external", "--external:pg-native",
+  "--format=cjs", "--packages=external", "--external:pg-native",
   `"${entry}"`, `--outfile="${outfile}"`,
 ].join(" ");
 

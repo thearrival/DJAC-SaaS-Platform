@@ -13,7 +13,7 @@ overrides:
   lodash: ^4.18.1
   fast-xml-builder: '>=1.1.7'
   follow-redirects: '>=1.16.0'
-  uuid: '>=11.1.1'
+  uuid: 11.1.1
   '@smithy/config-resolver': '>=4.4.0'
 
 patchedDependencies:
@@ -4748,8 +4748,8 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
 
-  uuid@14.0.0:
-    resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
+  uuid@11.1.1:
+    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
     hasBin: true
 
   vary@1.1.2:
@@ -7727,7 +7727,7 @@ snapshots:
       node-abort-controller: 3.1.1
       semver: 7.7.4
       tslib: 2.8.1
-      uuid: 14.0.0
+      uuid: 11.1.1
     transitivePeerDependencies:
       - supports-color
 
@@ -9728,7 +9728,7 @@ snapshots:
 
   utils-merge@1.0.1: {}
 
-  uuid@14.0.0: {}
+  uuid@11.1.1: {}
 
   vary@1.1.2: {}
 
