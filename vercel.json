@@ -12,6 +12,10 @@
     "api/ping.ts": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "api/mini.ts": {
+      "memory": 512,
+      "maxDuration": 30
     }
   },
   "env": {
