@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "vite build && node scripts/prebuild-vercel.mjs",
+  "buildCommand": "vite build",
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install",
   "devCommand": "pnpm dev",
