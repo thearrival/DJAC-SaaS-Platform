@@ -19,7 +19,6 @@ try {
   console.log("[safe-migrate] Migration complete.");
 } catch (e) {
   console.error("[safe-migrate] Migration failed:", e.message);
-  console.error("[safe-migrate] This may be OK if the schema already exists.");
   console.error("[safe-migrate] Check the error above for details.");
-  process.exitCode = 0; // Don't fail the build if migration fails
+  process.exit(1);
 }

@@ -86,9 +86,11 @@ export function isLocalMemoryFallbackEnabled(): boolean {
 export function createLocalMemoryUser(input: {
     name: string;
     email: string;
+    phoneNumber?: string | null;
     passwordHash: string;
     userType: "visitor" | "professional" | "admin";
     preferredLocale: "en" | "ar" | "zh";
+    status?: "active" | "pending" | "suspended";
     companyName?: string | null;
     jobTitle?: string | null;
     industry?: string | null;
@@ -99,6 +101,7 @@ export function createLocalMemoryUser(input: {
         id: _localMemoryUserId++,
         name: input.name,
         email: input.email,
+        phoneNumber: input.phoneNumber ?? null,
         passwordHash: input.passwordHash,
         userType: input.userType,
         companyName: input.companyName ?? null,
@@ -106,11 +109,12 @@ export function createLocalMemoryUser(input: {
         industry: input.industry ?? null,
         complianceResponsibility: input.complianceResponsibility ?? null,
         preferredLocale: input.preferredLocale,
-        status: "active",
+        status: input.status ?? "active",
         lastSignedIn: now,
         totpSecret: null,
         mfaEnabled: 0,
         mfaBackupCodes: null,
+        verifiedAt: null,
         createdAt: now,
         updatedAt: now,
     };

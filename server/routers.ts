@@ -30,6 +30,7 @@ import { serviceRequestRouter } from "./service-request-router";
 import { assetInventoryRouter } from "./asset-inventory-router";
 import { threatIntelRouter } from "./threat-intel-router";
 import { securityMaturityRouter } from "./security-maturity-router";
+import { googleAuthRouter } from "./google-auth-router";
 
 export const appRouter = router({
     system: systemRouter,
@@ -59,6 +60,7 @@ export const appRouter = router({
     assetInventory: assetInventoryRouter,
     threatIntel: threatIntelRouter,
     securityMaturity: securityMaturityRouter,
+    googleAuth: googleAuthRouter,
     deadlines: deadlineRouter,
     auth: authRouter,
     compliance: complianceFrameworkRouter,

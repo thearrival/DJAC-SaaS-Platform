@@ -6,6 +6,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 import { sounds } from "@/lib/sounds";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { trpc } from "@/lib/trpc";
 import {
   Dialog,
   DialogContent,
@@ -447,19 +448,57 @@ export default function DashboardLayout({
   }
 
   return (
-    <SidebarProvider
-      dir={direction}
-      style={
-        {
-          "--sidebar-width": `${sidebarWidth}px`,
-        } as CSSProperties
-      }
-    >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
-        {children}
-      </DashboardLayoutContent>
-    </SidebarProvider>
+    <OnboardingGate>
+      <SidebarProvider
+        dir={direction}
+        style={
+          {
+            "--sidebar-width": `${sidebarWidth}px`,
+          } as CSSProperties
+        }
+      >
+        <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
+          {children}
+        </DashboardLayoutContent>
+      </SidebarProvider>
+    </OnboardingGate>
   );
+}
+
+/**
+ * Redirects users who have not completed onboarding to the onboarding wizard.
+ * Super admins and platform admins are exempt.
+ */
+function OnboardingGate({ children }: { children: React.ReactNode }) {
+  const { isSuperAdmin, isPlatformAdmin } = useRbac();
+  const [, navigate] = useLocation();
+  const currentPath = window.location.pathname;
+
+  // Admin users skip onboarding enforcement
+  if (isSuperAdmin || isPlatformAdmin) return <>{children}</>;
+
+  const { data, isLoading, isError } = trpc.rbac.onboardingStatus.useQuery(undefined, {
+    retry: false,
+    staleTime: 60_000,
+  });
+
+  // While loading, render children optimistically to avoid flash
+  if (isLoading) return <>{children}</>;
+  // On error, allow access (don't block users from the platform)
+  if (isError) return <>{children}</>;
+
+  const isComplete = data?.complete ?? true;
+  const isOnWizardPage = currentPath === "/onboarding-wizard";
+
+  // If onboarding complete or already on wizard page, proceed normally
+  if (isComplete || isOnWizardPage) return <>{children}</>;
+
+  // Redirect to onboarding wizard if not complete
+  useEffect(() => {
+    navigate("/onboarding-wizard");
+  }, [navigate]);
+
+  return null;
 }
 
 type DashboardLayoutContentProps = {

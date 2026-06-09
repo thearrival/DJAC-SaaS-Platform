@@ -22,6 +22,7 @@ import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { DeHengFooter } from "@/components/DeHengFooter";
 
 // ─── Role helpers ─────────────────────────────────────────────────────────────
 
@@ -310,6 +311,7 @@ function InviteLayout({ children }: { children: React.ReactNode }) {
                     {t("invite.layout.footer", "DJAC Tool · Enterprise Compliance Intelligence · Saudi Arabia · China · UAE")}
                 </p>
             </div>
+            <DeHengFooter />
         </div>
     );
 }

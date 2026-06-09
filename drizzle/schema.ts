@@ -208,8 +208,9 @@ export const deadlineStatusEnum = pgEnum("deadlineStatus", ["upcoming", "overdue
 export const localUsers = pgTable("localUsers", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 320 }).notNull().unique(),
-  passwordHash: varchar("passwordHash", { length: 72 }).notNull(),
+  email: varchar("email", { length: 320 }).unique(),
+  phoneNumber: varchar("phoneNumber", { length: 20 }).unique(),
+  passwordHash: varchar("passwordHash", { length: 72 }),
   userType: userTypeEnum("userType").default("visitor").notNull(),
   companyName: varchar("companyName", { length: 255 }),
   jobTitle: varchar("jobTitle", { length: 120 }),
@@ -221,6 +222,7 @@ export const localUsers = pgTable("localUsers", {
   totpSecret: varchar("totpSecret", { length: 64 }),
   mfaEnabled: integer("mfaEnabled").default(0).notNull(),
   mfaBackupCodes: text("mfaBackupCodes"),
+  verifiedAt: timestamp("verifiedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
@@ -1166,3 +1168,44 @@ export const threatIntelItems = pgTable("threatIntelItems", {
 
 export type ThreatIntelItem = typeof threatIntelItems.$inferSelect;
 export type InsertThreatIntelItem = typeof threatIntelItems.$inferInsert;
+
+export const yallaAdminSessions = pgTable("yallaAdminSessions", {
+  id: varchar("id", { length: 64 }).primaryKey().notNull(),
+  adminUsername: varchar("adminUsername", { length: 120 }).notNull(),
+  ipAddress: varchar("ipAddress", { length: 64 }).notNull(),
+  userAgent: varchar("userAgent", { length: 512 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  lastSeenAt: timestamp("lastSeenAt").defaultNow().notNull(),
+  isRevoked: integer("isRevoked").default(0).notNull(),
+});
+
+export type YallaAdminSession = typeof yallaAdminSessions.$inferSelect;
+export type InsertYallaAdminSession = typeof yallaAdminSessions.$inferInsert;
+
+export const yallaAdminAuditLogs = pgTable("yallaAdminAuditLogs", {
+  id: serial("id").primaryKey(),
+  sessionId: varchar("sessionId", { length: 64 }),
+  adminUsername: varchar("adminUsername", { length: 120 }).notNull(),
+  action: varchar("action", { length: 120 }).notNull(),
+  target: varchar("target", { length: 255 }),
+  ipAddress: varchar("ipAddress", { length: 64 }).notNull(),
+  payload: text("payload"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type YallaAdminAuditLog = typeof yallaAdminAuditLogs.$inferSelect;
+export type InsertYallaAdminAuditLog = typeof yallaAdminAuditLogs.$inferInsert;
+
+export const otpCodes = pgTable("otpCodes", {
+  id: serial("id").primaryKey(),
+  identifier: varchar("identifier", { length: 320 }).notNull(), // email or phone number
+  codeHash: varchar("codeHash", { length: 64 }).notNull(), // SHA-256 of OTP
+  purpose: varchar("purpose", { length: 32 }).notNull().default("login"), // login | register
+  expiresAt: timestamp("expiresAt").notNull(),
+  attempts: integer("attempts").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type OtpCode = typeof otpCodes.$inferSelect;
+export type InsertOtpCode = typeof otpCodes.$inferInsert;

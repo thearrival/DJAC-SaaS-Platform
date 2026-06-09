@@ -48,6 +48,26 @@ export async function checkEmailExists(email: string): Promise<boolean> {
     return rows.length > 0;
 }
 
+export async function findLocalUserByPhone(phone: string): Promise<LocalUser | null> {
+    const db = await getDb();
+    if (!db) {
+        if (!isLocalMemoryFallbackEnabled()) return null;
+        return localMemoryUsers.find(u => u.phoneNumber === phone) ?? null;
+    }
+    const [row] = await db.select().from(localUsers).where(eq(localUsers.phoneNumber, phone)).limit(1);
+    return row ?? null;
+}
+
+export async function checkPhoneExists(phone: string): Promise<boolean> {
+    const db = await getDb();
+    if (!db) {
+        if (!isLocalMemoryFallbackEnabled()) return false;
+        return localMemoryUsers.some(u => u.phoneNumber === phone);
+    }
+    const rows = await db.select({ id: localUsers.id }).from(localUsers).where(eq(localUsers.phoneNumber, phone)).limit(1);
+    return rows.length > 0;
+}
+
 export async function listLocalUsersForAdmin(): Promise<Pick<LocalUser,
     "id" | "name" | "email" | "userType" | "companyName" | "jobTitle" | "industry" |
     "status" | "preferredLocale" | "lastSignedIn" | "createdAt">[]> {
@@ -170,4 +190,14 @@ export async function consumeLocalUserBackupCode(id: number, remainingCodes: str
         return;
     }
     await db.update(localUsers).set({ mfaBackupCodes: JSON.stringify(remainingCodes), lastSignedIn: new Date() }).where(eq(localUsers.id, id));
+}
+
+export async function verifyLocalUserEmail(id: number): Promise<void> {
+    const db = await getDb();
+    if (!db) {
+        const mem = localMemoryUsers.find(u => u.id === id);
+        if (mem) { mem.verifiedAt = new Date(); mem.updatedAt = new Date(); }
+        return;
+    }
+    await db.update(localUsers).set({ verifiedAt: new Date(), updatedAt: new Date() }).where(eq(localUsers.id, id));
 }

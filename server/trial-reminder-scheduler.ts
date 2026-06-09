@@ -8,9 +8,9 @@
  *   • 1 day before expiry — final-day reminder
  *   • On/after expiry     — expired notice
  *
- * Runs every 6 hours. Uses an in-process dedup Set (keyed by orgId+milestone)
- * to prevent duplicate sends within the same server lifetime.  For multi-pod
- * deployments, replace the dedup Set with a DB-flag or Redis entry.
+ * Runs every 6 hours. Uses DB columns (trialReminderDay3Sent,
+ * trialReminderDay6Sent, trialExpiredNoticeSent) for persistent deduplication
+ * that survives server restarts and multi-process deployments.
  *
  * Does nothing when SMTP is not configured (sendEmail falls back to console).
  */
@@ -24,10 +24,13 @@ import { ENV } from "./_core/env";
 const INTERVAL_MS = 6 * 60 * 60 * 1000; // every 6 hours
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Dedup: `${orgId}:${milestone}` — cleared on server restart only
-const sentSet = new Set<string>();
-
 type Milestone = "3d" | "1d" | "expired";
+
+function milestoneColumn(milestone: Milestone): "trialReminderDay3Sent" | "trialReminderDay6Sent" | "trialExpiredNoticeSent" {
+    if (milestone === "3d") return "trialReminderDay3Sent";
+    if (milestone === "1d") return "trialReminderDay6Sent";
+    return "trialExpiredNoticeSent";
+}
 
 function daysUntilExpiry(trialEndsAt: Date): number {
     return (trialEndsAt.getTime() - Date.now()) / DAY_MS;
@@ -92,6 +95,9 @@ async function runReminderCheck(): Promise<void> {
             name: organizations.name,
             billingEmail: organizations.billingEmail,
             trialEndsAt: organizations.trialEndsAt,
+            trialReminderDay3Sent: organizations.trialReminderDay3Sent,
+            trialReminderDay6Sent: organizations.trialReminderDay6Sent,
+            trialExpiredNoticeSent: organizations.trialExpiredNoticeSent,
         })
         .from(organizations)
         .where(eq(organizations.plan, "free_trial"));
@@ -117,18 +123,29 @@ async function runReminderCheck(): Promise<void> {
 
         if (!milestone) continue;
 
-        const dedupKey = `${org.id}:${milestone}`;
-        if (sentSet.has(dedupKey)) continue; // Already sent this cycle
+        // Check persistent DB flag — prevent re-send across restarts
+        const col = milestoneColumn(milestone);
+        const alreadySent = org[col] === 1;
+        if (alreadySent) continue;
 
-        await sendEmail({
-            to: org.billingEmail,
-            subject: buildSubject(milestone),
-            html: buildEmailHtml(org.name, milestone, pricingUrl),
-            text: buildEmailText(org.name, milestone, pricingUrl),
-        });
+        try {
+            await sendEmail({
+                to: org.billingEmail,
+                subject: buildSubject(milestone),
+                html: buildEmailHtml(org.name, milestone, pricingUrl),
+                text: buildEmailText(org.name, milestone, pricingUrl),
+            });
 
-        sentSet.add(dedupKey);
-        sent++;
+            // Mark sent in DB so the reminder survives restarts and multi-process deployments
+            await db
+                .update(organizations)
+                .set({ [col]: 1 })
+                .where(eq(organizations.id, org.id));
+
+            sent++;
+        } catch (err) {
+            console.warn(`[TrialReminder] Failed to send ${milestone} reminder to org ${org.id}:`, err);
+        }
     }
 
     if (sent > 0) {

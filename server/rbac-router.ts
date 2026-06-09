@@ -9,7 +9,7 @@
  */
 import { z } from "zod";
 import { router, orgProcedure, protectedProcedure } from "./_core/trpc";
-import { getEffectivePermissions } from "./rbac";
+import { getEffectivePermissions, isOnboardingComplete } from "./rbac";
 import { MODULE_SLUGS, type ModuleSlug } from "../shared/const";
 import type { TrpcContext } from "./_core/context";
 
@@ -99,5 +99,14 @@ export const rbacRouter = router({
             orgRole: ctx.organizationRole ?? null,
             organizationId: ctx.organizationId ?? null,
         };
+    }),
+
+    /** Check whether the current user has completed onboarding. */
+    onboardingStatus: protectedProcedure.query(async ({ ctx }) => {
+        const userId = typeof ctx.user.id === "number" ? ctx.user.id : null;
+        const localUserId = getLocalUserId(ctx.user);
+
+        const complete = await isOnboardingComplete(userId, localUserId);
+        return { complete };
     }),
 });

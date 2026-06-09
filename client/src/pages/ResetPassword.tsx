@@ -13,6 +13,7 @@ import { useLocale } from "@/contexts/useLocale";
 import { useTheme } from "@/contexts/useTheme";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { DeHengFooter } from "@/components/DeHengFooter";
 
 export default function ResetPassword() {
     usePageTitle("Set New Password — DJAC");
@@ -382,6 +383,7 @@ export default function ResetPassword() {
                     </p>
                 </div>
             </div>
+            <DeHengFooter />
         </div>
     );
 }

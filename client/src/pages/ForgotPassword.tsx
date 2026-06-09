@@ -13,6 +13,7 @@ import { useLocale } from "@/contexts/useLocale";
 import { useTheme } from "@/contexts/useTheme";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { DeHengFooter } from "@/components/DeHengFooter";
 
 export default function ForgotPassword() {
     usePageTitle("Account Recovery — DJAC");
@@ -266,6 +267,7 @@ export default function ForgotPassword() {
                     </p>
                 </div>
             </div>
+            <DeHengFooter />
         </div>
     );
 }

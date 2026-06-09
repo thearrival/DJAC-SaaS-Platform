@@ -13,7 +13,7 @@ import {
     Shield, ShieldCheck, Globe2, Zap, BookOpen, BarChart2, ArrowRight,
     LogIn, Mail, User, Building2, CheckCircle2, ChevronLeft, ChevronRight,
     Lock, Eye, EyeOff, Briefcase, UserPlus, Scale, Landmark, Package,
-    Hash, AlertCircle,
+    Hash, AlertCircle, Smartphone, Chrome,
 } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
@@ -207,7 +207,7 @@ function PasswordField({ value, onChange, placeholder, showStrength, label, auto
     );
 }
 
-type TabId = "signin" | "register";
+type TabId = "signin" | "register" | "otp";
 type RoleId = "compliance_officer" | "lawyer" | "company" | "government" | "consultant" | "vendor" | "visitor";
 type RegStep = "choose_role" | RoleId;
 type DatabaseReadiness = {
@@ -526,6 +526,8 @@ function SignInForm({ onRegister, database }: { onRegister: () => void; database
                 <span style={{ color: C.muted, fontSize: 11 }}>{t("signup.or", "OR")}</span>
                 <div style={{ flex: 1, height: 1, background: C.border }} />
             </div>
+            {/* Google Sign-In */}
+            <GoogleSignInButton C={C} t={t} />
             {isExternalOAuth() && (
                 <a href={getLoginUrl()} style={{ textDecoration: "none" }}>
                     <button className="djac-btn-secondary" style={{ width: "100%", background: C.inputBg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 20px", color: C.text, fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.18s" }}>
@@ -568,6 +570,8 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
     const [error, setError] = useState("");
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [dataConsent, setDataConsent] = useState(false);
+    const [pendingVerification, setPendingVerification] = useState(false);
+    const [otpCode, setOtpCode] = useState("");
     // ── Role-specific fields
     const [orgName, setOrgName] = useState("");
     const [jobTitle, setJobTitle] = useState("");
@@ -587,13 +591,27 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
     const safeReturnTo = returnTo.startsWith("/") ? returnTo : "/dashboard";
 
     const regMut = trpc.localAuth.register.useMutation({
+        onSuccess: (data) => {
+            if ("pendingVerification" in data && data.pendingVerification) {
+                sounds.success();
+                setPendingVerification(true);
+            } else if ("user" in data && data.user) {
+                sounds.success();
+                setTourPending();
+                sonnerToast.success(t("signup.accountCreated", "Account created! Welcome to DJAC."));
+                navigate(safeReturnTo);
+            }
+        },
+        onError: (err) => setError(parseTrpcError(err)),
+    });
+
+    const verifyOtpMut = trpc.localAuth.verifyOtp.useMutation({
         onSuccess: () => {
             sounds.success();
             setTourPending();
-            sonnerToast.success(t("signup.accountCreated", "Account created! Welcome to DJAC."));
             navigate(safeReturnTo);
         },
-        onError: (err) => setError(parseTrpcError(err)),
+        onError: (err) => setError(err.message),
     });
 
     const toggleTag = (arr: string[], setArr: (v: string[]) => void, val: string) =>
@@ -622,6 +640,14 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
         textTransform: "uppercase", letterSpacing: "0.07em", margin: "4px 0 7px",
     };
 
+    const ROLE_DEFAULT_TITLES: Partial<Record<RoleId, string>> = {
+        lawyer: "Legal Advisor",
+        company: "Company Representative",
+        consultant: "Consultant",
+        vendor: "Vendor Representative",
+    };
+    const effectiveTitle = (jobTitle || designation || ROLE_DEFAULT_TITLES[role] || "").trim();
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -639,17 +665,6 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
         }
         const reqs = pwRequirements(password);
         if (reqs.length > 0) { setError(reqs.join(" · ")); return; }
-
-        // Roles that have no explicit job-title input use a sensible default so
-        // that the server's min(2) Zod constraint is always satisfied without
-        // showing a misleading "Job title must be at least 2 characters" error.
-        const ROLE_DEFAULT_TITLES: Partial<Record<RoleId, string>> = {
-            lawyer: "Legal Advisor",
-            company: "Company Representative",
-            consultant: "Consultant",
-            vendor: "Vendor Representative",
-        };
-        const effectiveTitle = (jobTitle || designation || ROLE_DEFAULT_TITLES[role] || "").trim();
 
         // Client-side jobTitle guard — only applies to roles that expose the field.
         // For role-default titles the check is always satisfied; for roles with an
@@ -680,13 +695,14 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Header with back button */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <button type="button" onClick={onBack} style={{
+                <button type="button" onClick={() => { setPendingVerification(false); setOtpCode(""); onBack(); }} style={{
                     background: "none", border: `1px solid ${C.border}`, borderRadius: 8,
                     color: C.muted, cursor: "pointer", padding: "4px 10px",
                     display: "flex", alignItems: "center", gap: 4, fontSize: 11,
                 }}>
-                    <ChevronLeft size={13} /> {t("signup.back", "Back")}
+                    <ChevronLeft size={13} /> {pendingVerification ? t("signup.backToForm", "Edit details") : t("signup.back", "Back")}
                 </button>
+                {!pendingVerification && (
                 <div style={{
                     display: "inline-flex", alignItems: "center", gap: 6,
                     background: `${accent}14`, border: `1px solid ${accent}35`,
@@ -695,10 +711,74 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
                     {roleDef.icon}
                     <span>{t(`signup.role.${role}.badge`, roleDef.badgeFallback)}</span>
                 </div>
+                )}
             </div>
 
+            {/* OTP verification screen — shown after successful registration */}
+            {pendingVerification ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    <SecurityNotice C={C} />
+                    <div style={{
+                        background: `${C.green}10`, border: `1px solid ${C.green}35`,
+                        borderRadius: 10, padding: "12px 14px",
+                        display: "flex", alignItems: "flex-start", gap: 9,
+                    }}>
+                        <CheckCircle2 size={16} style={{ color: C.green, flexShrink: 0, marginTop: 1 }} />
+                        <div>
+                            <p style={{ fontWeight: 700, fontSize: 12.5, color: C.green, margin: "0 0 3px" }}>
+                                {t("signup.otpSentTitle", "Verification code sent!")}
+                            </p>
+                            <p style={{ color: C.muted, fontSize: 11.5, margin: 0, lineHeight: 1.5 }}>
+                                {t("signup.otpSentBody", "A 6-digit code has been sent to {email}. Enter it below to activate your account.").replace("{email}", email)}
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: C.muted, display: "block", marginBottom: 6 }}>
+                            {t("signup.otpCodeLabel", "Verification Code")}
+                        </label>
+                        <div style={{ position: "relative" }}>
+                            <Lock size={13} style={mkIcon(C, undefined, dir)} />
+                            <input
+                                required type="text" inputMode="numeric" maxLength={6}
+                                value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                placeholder="000000" style={mkWithIcon(C, dir)}
+                                autoComplete="one-time-code" autoFocus
+                                aria-label={t("signup.otpCodeAria", "6-digit verification code")}
+                            />
+                        </div>
+                    </div>
+                    {error && <p role="alert" style={{ color: C.red, fontSize: 12, margin: 0 }}>{error}</p>}
+                    <button
+                        type="button"
+                        onClick={() => { setError(""); verifyOtpMut.mutate({ identifier: email, code: otpCode, purpose: "register", name }); }}
+                        disabled={verifyOtpMut.isPending || otpCode.length !== 6}
+                        className="djac-btn-primary"
+                        style={{
+                            background: `linear-gradient(135deg,${C.green},${accent})`,
+                            border: "none", borderRadius: 10, padding: "13px 20px", color: "#fff",
+                            fontWeight: 800, fontSize: 14, cursor: verifyOtpMut.isPending ? "not-allowed" : "pointer",
+                            opacity: otpCode.length === 6 ? 1 : 0.6,
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                            transition: "all 0.18s", width: "100%",
+                        }}>
+                        <Shield size={15} />
+                        {verifyOtpMut.isPending ? t("signup.verifying", "Verifying...") : t("signup.activateAccount", "Activate Account")}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => { setError(""); handleSubmit({ preventDefault: () => {} } as React.FormEvent); }}
+                        disabled={regMut.isPending}
+                        style={{
+                            background: "none", border: "none", color: C.muted, fontSize: 12, cursor: "pointer",
+                            textDecoration: "underline", padding: "8px",
+                        }}>
+                        {t("signup.resendCode", "Didn't receive the code? Send again")}
+                    </button>
+                </div>
+            ) : (
+                <>
             <SecurityNotice C={C} />
-
             <div>
                 <h2 style={{ fontSize: 19, fontWeight: 800, margin: "0 0 4px", color: C.text }}>
                     {t(`signup.role.${role}.title`, roleDef.titleFallback)}
@@ -965,10 +1045,12 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
                     {regMut.isPending ? t("signup.authBusy", "Authentication in progress...") : ""}
                 </p>
             </form>
+            </>
+            )}
 
             <p style={{ color: C.muted, fontSize: 11.5, textAlign: "center", margin: 0 }}>
                 {t("signup.haveAccount", "Already have an account?")}{" "}
-                <button type="button" onClick={onSwitchToSignIn}
+                <button type="button" onClick={() => { onSwitchToSignIn(); setPendingVerification(false); }}
                     style={{ background: "none", border: "none", color: C.cyan, fontWeight: 600, fontSize: 11.5, cursor: "pointer", textDecoration: "underline" }}>
                     {t("signup.signIn", "Sign in")}
                 </button>
@@ -977,6 +1059,157 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
     );
 }
 
+// ─── Google Sign-In Button ──────────────────────────────────────────────────
+function GoogleSignInButton({ C, t }: { C: DesignTokens; t: (k: string, f: string) => string }) {
+    const googleUrl = trpc.googleAuth.getAuthUrl.useQuery(
+        { redirectTo: new URLSearchParams(window.location.search).get("r") ?? "/dashboard" },
+        { enabled: false }
+    );
+
+    return (
+        <button
+            type="button"
+            onClick={() => { void googleUrl.refetch().then(r => { if (r.data?.url) window.location.href = r.data.url; }); }}
+            className="djac-btn-secondary"
+            style={{
+                width: "100%", background: C.inputBg, border: `1px solid ${C.border}`,
+                borderRadius: 10, padding: "12px 20px", color: C.text, fontWeight: 700, fontSize: 13,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                transition: "all 0.18s",
+            }}>
+            <Chrome size={15} style={{ color: "#4285F4" }} />
+            {t("signup.googleSignIn", "Continue with Google")}
+        </button>
+    );
+}
+
+// ─── OTP Auth Form ──────────────────────────────────────────────────────────
+function OtpAuthForm() {
+    const C = useC();
+    const { t, direction } = useLocale();
+    const dir = direction;
+    const [, navigate] = useLocation();
+
+    const [identifier, setIdentifier] = useState("");
+    const [code, setCode] = useState("");
+    const [step, setStep] = useState<"input" | "verify">("input");
+    const [error, setError] = useState("");
+    const [mode, setMode] = useState<"login" | "register">("login");
+    const [name, setName] = useState("");
+
+    const returnTo = new URLSearchParams(window.location.search).get("r") ?? "/dashboard";
+    const safeReturnTo = returnTo.startsWith("/") ? returnTo : "/dashboard";
+
+    const sendMut = trpc.localAuth.sendOtp.useMutation({
+        onSuccess: () => { setStep("verify"); setError(""); },
+        onError: (err) => setError(err.message),
+    });
+
+    const verifyMut = trpc.localAuth.verifyOtp.useMutation({
+        onSuccess: () => navigate(safeReturnTo),
+        onError: (err) => setError(err.message),
+    });
+
+    if (step === "verify") {
+        return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                <SecurityNotice C={C} />
+                <div>
+                    <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 6px", color: C.text }}>
+                        {t("signup.otpTitle", "Enter Verification Code")}
+                    </h2>
+                    <p style={{ color: C.muted, fontSize: 13, margin: 0 }}>
+                        {t("signup.otpSub", "We sent a 6-digit code to {id}").replace("{id}", identifier)}
+                    </p>
+                </div>
+                <form onSubmit={e => { e.preventDefault(); setError(""); verifyMut.mutate({ identifier, code, purpose: mode, name: name || undefined }); }} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div style={{ position: "relative" }}>
+                        <Smartphone size={13} style={mkIcon(C, undefined, dir)} />
+                        <input
+                            required type="text" inputMode="numeric" maxLength={6}
+                            value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                            placeholder="000000" style={mkWithIcon(C, dir)}
+                            autoComplete="one-time-code" autoFocus
+                            aria-label={t("signup.otpCodeAria", "6-digit verification code")}
+                        />
+                    </div>
+                    {error && <p role="alert" style={{ color: C.red, fontSize: 12, margin: 0 }}>{error}</p>}
+                    <button type="submit" disabled={verifyMut.isPending || code.length !== 6} className="djac-btn-primary" style={{
+                        background: `linear-gradient(135deg,${C.cyan},${C.purple})`,
+                        border: "none", borderRadius: 10, padding: "13px 20px", color: "#fff",
+                        fontWeight: 800, fontSize: 14, cursor: verifyMut.isPending ? "not-allowed" : "pointer",
+                        opacity: code.length === 6 ? 1 : 0.6,
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                        transition: "all 0.18s", width: "100%",
+                    }}>
+                        <Shield size={15} /> {verifyMut.isPending ? t("signup.verifying", "Verifying...") : t("signup.verifyCode", "Verify Code")}
+                    </button>
+                    <button type="button" onClick={() => { setStep("input"); setCode(""); setError(""); }} style={{ background: "none", border: "none", color: C.muted, fontSize: 12, cursor: "pointer", textDecoration: "underline" }}>
+                        {t("signup.backToOtpInput", "← Use a different phone/email")}
+                    </button>
+                </form>
+            </div>
+        );
+    }
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <SecurityNotice C={C} />
+            <div>
+                <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 6px", color: C.text }}>
+                    {t("signup.otpSignInTitle", "Sign in with OTP")}
+                </h2>
+                <p style={{ color: C.muted, fontSize: 13, margin: 0 }}>
+                    {t("signup.otpSignInSub", "Enter your email or phone number to receive a one-time verification code.")}
+                </p>
+            </div>
+            <div style={{ display: "flex", gap: 3, background: C.tabBar, padding: 4, borderRadius: 12 }}>
+                <button type="button" onClick={() => setMode("login")} style={{
+                    flex: 1, background: mode === "login" ? C.tabActive : "transparent",
+                    border: `1px solid ${mode === "login" ? C.border : "transparent"}`,
+                    borderRadius: 8, padding: "7px 4px", cursor: "pointer",
+                    color: mode === "login" ? C.text : C.muted,
+                    fontWeight: mode === "login" ? 700 : 500, fontSize: 12, transition: "all 0.15s",
+                }}>{t("signup.otpLogin", "Sign In")}</button>
+                <button type="button" onClick={() => setMode("register")} style={{
+                    flex: 1, background: mode === "register" ? C.tabActive : "transparent",
+                    border: `1px solid ${mode === "register" ? C.border : "transparent"}`,
+                    borderRadius: 8, padding: "7px 4px", cursor: "pointer",
+                    color: mode === "register" ? C.text : C.muted,
+                    fontWeight: mode === "register" ? 700 : 500, fontSize: 12, transition: "all 0.15s",
+                }}>{t("signup.otpRegister", "Register")}</button>
+            </div>
+            <form onSubmit={e => { e.preventDefault(); setError(""); sendMut.mutate({ identifier: identifier.trim(), purpose: mode }); }} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {mode === "register" && (
+                    <div style={{ position: "relative" }}>
+                        <User size={13} style={mkIcon(C, undefined, dir)} />
+                        <input required minLength={2} value={name} onChange={e => setName(e.target.value)}
+                            placeholder={t("signup.fullName", "Full name")}
+                            style={mkWithIcon(C, dir)} autoComplete="name"
+                            aria-label={t("signup.fullName", "Full name")} />
+                    </div>
+                )}
+                <div style={{ position: "relative" }}>
+                    <Smartphone size={13} style={mkIcon(C, undefined, dir)} />
+                    <input required type="text" value={identifier} onChange={e => setIdentifier(e.target.value)}
+                        placeholder={t("signup.otpPlaceholder", "Email or phone number (+966...)")}
+                        style={mkWithIcon(C, dir)} autoComplete="tel"
+                        aria-label={t("signup.otpIdentifier", "Email or phone number")} />
+                </div>
+                {error && <p role="alert" style={{ color: C.red, fontSize: 12, margin: 0 }}>{error}</p>}
+                <button type="submit" disabled={sendMut.isPending || identifier.trim().length < 3} className="djac-btn-primary" style={{
+                    background: `linear-gradient(135deg,${C.cyan},${C.purple})`,
+                    border: "none", borderRadius: 10, padding: "13px 20px", color: "#fff",
+                    fontWeight: 800, fontSize: 14, cursor: sendMut.isPending ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    transition: "all 0.18s", width: "100%",
+                }}>
+                    <Smartphone size={15} /> {sendMut.isPending ? t("signup.sendingCode", "Sending code...") : t("signup.sendCode", "Send Verification Code")}
+                </button>
+            </form>
+        </div>
+    );
+}
 
 // ─── IP Registration Section ────────────────────────────────────────────────────
 // Displayed at the bottom of the left marketing panel (desktop) and below
@@ -1147,6 +1380,7 @@ function DeHengLogoDisplay({ C, theme }: { C: DesignTokens; theme: string }) {
 const TABS: { id: TabId; labelKey: string; labelFallback: string }[] = [
     { id: "signin", labelKey: "signup.tabSignIn", labelFallback: "Sign In" },
     { id: "register", labelKey: "signup.tabRegister", labelFallback: "Register" },
+    { id: "otp", labelKey: "signup.tabOtp", labelFallback: "Phone / OTP" },
 ];
 
 // Main page
@@ -1417,6 +1651,7 @@ export default function Signup() {
                                     database={database}
                                 />
                             )}
+                            {tab === "otp" && <OtpAuthForm />}
                         </div>
                     </div>
 

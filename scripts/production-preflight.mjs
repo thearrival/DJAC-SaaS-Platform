@@ -115,8 +115,8 @@ addRequired(
 
 addRequired(
     "DATABASE_URL_FORMAT",
-    isValidUrl(get("DATABASE_URL"), ["mysql:", "mariadb:"]),
-    "DATABASE_URL must be a valid mysql:// or mariadb:// URL.",
+    isValidUrl(get("DATABASE_URL"), ["postgresql:", "postgres:", "mysql:", "mariadb:"]),
+    "DATABASE_URL must be a valid postgresql://, postgres://, mysql://, or mariadb:// URL.",
 );
 
 const appUrl = get("APP_URL");

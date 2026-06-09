@@ -19,6 +19,7 @@ import { startInteractionRetentionScheduler } from "../interaction-retention";
 import { startTrialReminderScheduler } from "../trial-reminder-scheduler";
 import { startDeadlineAlertScheduler } from "../deadline-alert-scheduler";
 import { startReportScheduler } from "../report-scheduler";
+import { closeAssessmentQueue } from "../ai/queueFactory";
 import { ENV } from "./env";
 import { parsedEnv } from "../services/config-schema";
 import { closeDbPool } from "../db";
@@ -322,7 +323,12 @@ if (isMainModule) {
 
 function shutdown(signal: string) {
   console.info(`[Server] ${signal} received — shutting down gracefully`);
-  Promise.all([closeDbPool(), closeRateLimiter()])
+  const forcedExit = setTimeout(() => {
+      console.warn("[Server] Forced shutdown after 10s timeout");
+      process.exit(1);
+  }, 10_000);
+  forcedExit.unref();
+  Promise.all([closeDbPool(), closeRateLimiter(), closeAssessmentQueue()])
     .then(() => {
       console.info("[Server] Resources released — exiting.");
       process.exit(0);

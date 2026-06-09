@@ -45,7 +45,9 @@ import {
 import {
     findLocalUserByEmail,
     findLocalUserById,
+    findLocalUserByPhone,
     checkEmailExists,
+    checkPhoneExists,
     listLocalUsersForAdmin,
     insertLocalUser,
     updateLocalUserLastSignedIn,
@@ -56,8 +58,10 @@ import {
     enableLocalUserMfa,
     disableLocalUserMfa,
     consumeLocalUserBackupCode,
+    verifyLocalUserEmail,
     type LocalUser,
 } from "./local-auth-store";
+import { sendOtp, verifyOtp } from "./services/otp";
 
 // â”€â”€â”€ TOTP helper (otplib v13 functional API shim matching authenticator API) â”€â”€
 const authenticator = {
@@ -103,6 +107,7 @@ const registerSchema = z.discriminatedUnion("userType", [
         name: z.string().trim().min(2, "Full name must be at least 2 characters").max(255),
         email: emailSchema,
         password: passwordSchema,
+        phoneNumber: z.string().trim().max(20).optional(),
         preferredLocale: z.enum(["en", "ar", "zh"]).default("en"),
     }),
     z.object({
@@ -110,6 +115,7 @@ const registerSchema = z.discriminatedUnion("userType", [
         name: z.string().trim().min(2, "Full name must be at least 2 characters").max(255),
         email: emailSchema,
         password: passwordSchema,
+        phoneNumber: z.string().trim().max(20).optional(),
         companyName: z.string().trim().min(2, "Company name must be at least 2 characters").max(255),
         jobTitle: z.string().trim().min(2, "Job title must be at least 2 characters").max(120),
         industry: z.string().trim().max(120).optional(),
@@ -133,17 +139,22 @@ export const localAuthRouter = router({
                 });
             }
 
+            const normalizedEmail = input.email.toLowerCase();
+            if (await checkEmailExists(normalizedEmail)) {
+                throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists." });
+            }
+
+            const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
+
             if (!db) {
-                if (await checkEmailExists(input.email)) {
-                    throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists." });
-                }
-                const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
-                const newUser = createLocalMemoryUser({
+                createLocalMemoryUser({
                     name: input.name,
-                    email: input.email,
+                    email: normalizedEmail,
+                    phoneNumber: input.phoneNumber ?? null,
                     passwordHash,
                     userType: input.userType,
-                    preferredLocale: input.preferredLocale,
+                    preferredLocale: input.preferredLocale ?? "en",
+                    status: "pending",
                     ...(input.userType === "professional"
                         ? {
                             companyName: input.companyName,
@@ -153,39 +164,39 @@ export const localAuthRouter = router({
                         }
                         : {}),
                 });
-                const token = await signJwt({ sub: newUser.id, type: "local", userType: newUser.userType });
-                ctx.res.cookie(LOCAL_AUTH_COOKIE, token, cookieOptions());
-                void recordAuditEvent(ctx, { category: "auth", action: "user.register", entityType: "localUsers", entityId: newUser.id, localUserId: newUser.id, payload: { userType: newUser.userType, email: newUser.email } });
-                return { user: safeUser(newUser) };
+            } else {
+                await insertLocalUser({
+                    name: input.name,
+                    email: normalizedEmail,
+                    phoneNumber: input.phoneNumber ?? null,
+                    passwordHash,
+                    userType: input.userType,
+                    preferredLocale: input.preferredLocale ?? "en",
+                    status: "pending",
+                    ...(input.userType === "professional"
+                        ? {
+                            companyName: input.companyName,
+                            jobTitle: input.jobTitle,
+                            industry: input.industry ?? null,
+                            complianceResponsibility: input.complianceResponsibility ?? null,
+                        }
+                        : {}),
+                });
             }
 
-            if (await checkEmailExists(input.email)) {
-                throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists." });
-            }
+            void recordAuditEvent(ctx, { category: "auth", action: "user.register", entityType: "localUsers", payload: { userType: input.userType, email: normalizedEmail } });
+            broadcastSSE("user_registered", { email: normalizedEmail, userType: input.userType, ts: new Date().toISOString() });
 
-            const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
-            const newUser = await insertLocalUser({
-                name: input.name,
-                email: input.email,
-                passwordHash,
-                userType: input.userType,
-                preferredLocale: input.preferredLocale,
-                status: "active",
-                ...(input.userType === "professional"
-                    ? {
-                        companyName: input.companyName,
-                        jobTitle: input.jobTitle,
-                        industry: input.industry ?? null,
-                        complianceResponsibility: input.complianceResponsibility ?? null,
-                    }
-                    : {}),
-            });
+            // Send OTP for verification — user must verify before logging in
+            void (async () => {
+                try {
+                    await sendOtp({ identifier: normalizedEmail, purpose: "register" });
+                } catch (e) {
+                    console.warn("[localAuth] Failed to send registration OTP:", e);
+                }
+            })();
 
-            const token = await signJwt({ sub: newUser.id, type: "local", userType: newUser.userType });
-            ctx.res.cookie(LOCAL_AUTH_COOKIE, token, cookieOptions());
-            void recordAuditEvent(ctx, { category: "auth", action: "user.register", entityType: "localUsers", entityId: newUser.id, localUserId: newUser.id, payload: { userType: newUser.userType, email: newUser.email } });
-            broadcastSSE("user_registered", { userId: newUser.id, email: newUser.email, userType: newUser.userType, ts: new Date().toISOString() });
-            return { user: safeUser(newUser) };
+            return { pendingVerification: true as const, identifier: normalizedEmail };
         }),
 
     /** Login with email + password */
@@ -321,7 +332,7 @@ export const localAuthRouter = router({
             const user = await findLocalUserByEmail(input.email);
             const activeUser = user?.status === "active" ? user : null;
 
-            if (activeUser) {
+            if (activeUser && activeUser.passwordHash) {
                 const resetToken = await signJwt(
                     {
                         sub: String(activeUser.id),
@@ -370,7 +381,7 @@ export const localAuthRouter = router({
             if (!user || user.status !== "active") {
                 throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
             }
-            if (user.passwordHash.slice(0, 8) !== payload["pwHint"]) {
+            if (!user.passwordHash || user.passwordHash.slice(0, 8) !== payload["pwHint"]) {
                 throw new TRPCError({ code: "BAD_REQUEST", message: "This reset link has already been used." });
             }
 
@@ -431,6 +442,7 @@ export const localAuthRouter = router({
             }
             const user = await findLocalUserById(userId);
             if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
+            if (!user.passwordHash) throw new TRPCError({ code: "BAD_REQUEST", message: "Account uses OTP login. Set a password first." });
             const valid = await bcrypt.compare(input.currentPassword, user.passwordHash);
             if (!valid) throw new TRPCError({ code: "UNAUTHORIZED", message: "Current password is incorrect." });
 
@@ -505,6 +517,7 @@ export const localAuthRouter = router({
             }
             const user = await findLocalUserById(userId);
             if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
+            if (!user.passwordHash) throw new TRPCError({ code: "BAD_REQUEST", message: "Account uses OTP login. Set a password first." });
             const valid = await bcrypt.compare(input.password, user.passwordHash);
             if (!valid) throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect password." });
             await disableLocalUserMfa(userId);
@@ -559,6 +572,159 @@ export const localAuthRouter = router({
             ctx.res.cookie(LOCAL_AUTH_COOKIE, sessionToken, cookieOptions());
             void recordAuditEvent(ctx, { category: "auth", action: "user.login", entityType: "localUsers", entityId: userId, localUserId: userId, payload: { method: "local_2fa" } });
             return { user: safeUser(user) };
+        }),
+
+    // ─── Email verification ─────────────────────────────────────────────────
+
+    /** Send a verification email to the currently logged-in user. */
+    sendVerificationEmail: publicProcedure.mutation(async ({ ctx }) => {
+        const token = getSessionTokenFromRequest(ctx.req);
+        if (!token) throw new TRPCError({ code: "UNAUTHORIZED", message: "Not logged in." });
+        const payload = await verifyJwt(token);
+        const userId = parseJwtUserId(payload?.sub);
+        if (!userId) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid session." });
+
+        const user = await findLocalUserById(userId);
+        if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
+        if (user.verifiedAt) throw new TRPCError({ code: "BAD_REQUEST", message: "Email is already verified." });
+        if (!user.email) throw new TRPCError({ code: "BAD_REQUEST", message: "No email address on file. Add an email in Account Settings." });
+
+        const verifyToken = await signJwt(
+            { sub: String(user.id), purpose: "email-verify" },
+            "24h",
+        );
+        const verifyUrl = `${ENV.appUrl}/verify-email?token=${encodeURIComponent(verifyToken)}`;
+
+        await sendEmail({
+            to: user.email,
+            subject: "DJAC: Verify your email address",
+            html: `<p>Hello ${user.name},</p><p>Please verify your DJAC account email by clicking the link below. This link expires in 24 hours.</p><p><a href="${verifyUrl}">Verify Email Address</a></p><p>If you did not create a DJAC account, you can safely ignore this email.</p><p>— Yalla Hack DJAC Team</p>`,
+            text: `Hello ${user.name},\n\nVerify your DJAC account:\n${verifyUrl}\n\nExpires in 24 hours.\n\nIf you did not create this account, ignore this email.`,
+        });
+
+        void recordAuditEvent(ctx, { category: "auth", action: "email.verify.request", entityType: "localUsers", entityId: userId, localUserId: userId, payload: {} });
+        return { success: true as const };
+    }),
+
+    /** Complete email verification using the one-time JWT from the verification email. */
+    verifyEmail: publicProcedure
+        .input(z.object({ token: z.string().min(1) }))
+        .mutation(async ({ input, ctx }) => {
+            let payload: Record<string, unknown>;
+            try {
+                payload = (await verifyJwt(input.token)) ?? (() => { throw new Error(); })();
+            } catch {
+                throw new TRPCError({ code: "BAD_REQUEST", message: "The verification link is invalid or has expired." });
+            }
+
+            if (payload["purpose"] !== "email-verify" || typeof payload["sub"] !== "string") {
+                throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid verification token." });
+            }
+
+            const userId = parseInt(payload["sub"] as string, 10);
+            if (!Number.isFinite(userId)) {
+                throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid verification token." });
+            }
+
+            const user = await findLocalUserById(userId);
+            if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
+            if (user.verifiedAt) throw new TRPCError({ code: "BAD_REQUEST", message: "Email is already verified." });
+
+            await verifyLocalUserEmail(userId);
+            void recordAuditEvent(ctx, { category: "auth", action: "email.verify.complete", entityType: "localUsers", entityId: userId, localUserId: userId, payload: {} });
+            return { success: true as const };
+        }),
+
+    // ─── OTP-based authentication ─────────────────────────────────────
+
+    /** Send OTP for login or registration via email or phone */
+    sendOtp: publicProcedure
+        .input(z.object({
+            identifier: z.string().trim().min(3).max(320),
+            purpose: z.enum(["login", "register"]),
+        }))
+        .mutation(async ({ input, ctx }) => {
+            const result = await sendOtp({ identifier: input.identifier, purpose: input.purpose });
+            if (!result.success) {
+                throw new TRPCError({ code: "BAD_REQUEST", message: result.message });
+            }
+            void recordAuditEvent(ctx, { category: "auth", action: "otp.sent", entityType: "otpCodes", payload: { identifier: input.identifier.replace(/(.{3}).*(@.*)/, "$1***$2"), purpose: input.purpose } });
+            return { success: true as const };
+        }),
+
+    /** Verify OTP — logs in existing user or creates a new account if registering */
+    verifyOtp: publicProcedure
+        .input(z.object({
+            identifier: z.string().trim().min(3).max(320),
+            code: z.string().length(6).regex(/^\d{6}$/),
+            purpose: z.enum(["login", "register"]),
+            name: z.string().trim().min(2).max(255).optional(),
+        }))
+        .mutation(async ({ input, ctx }) => {
+            const db = await getDb();
+            if (!db && !isLocalMemoryFallbackEnabled()) {
+                throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: getDatabaseUnavailableMessage() });
+            }
+
+            const result = await verifyOtp({ identifier: input.identifier, code: input.code, purpose: input.purpose });
+            if (!result.success) {
+                throw new TRPCError({ code: "UNAUTHORIZED", message: result.message });
+            }
+
+            const isPhone = /^\+?[1-9]/.test(input.identifier);
+            const existing = isPhone
+                ? await findLocalUserByPhone(input.identifier)
+                : await findLocalUserByEmail(input.identifier.toLowerCase());
+
+            // Login: must have existing user
+            if (input.purpose === "login") {
+                if (!existing) {
+                    throw new TRPCError({ code: "NOT_FOUND", message: "No account found with this identifier. Please register first." });
+                }
+                if (existing.status === "suspended") {
+                    throw new TRPCError({ code: "FORBIDDEN", message: "Account suspended." });
+                }
+                await updateLocalUserLastSignedIn(existing.id);
+                const token = await signJwt({ sub: existing.id, type: "local", userType: existing.userType });
+                ctx.res.cookie(LOCAL_AUTH_COOKIE, token, cookieOptions());
+                void recordAuditEvent(ctx, { category: "auth", action: "user.login", entityType: "localUsers", entityId: existing.id, localUserId: existing.id, payload: { method: "otp", userType: existing.userType } });
+                broadcastSSE("user_login", { userId: existing.id, email: existing.email, userType: existing.userType, ts: new Date().toISOString() });
+                return { user: safeUser(existing) };
+            }
+
+            // Register: create if not exists, or activate existing
+            if (existing) {
+                // Activate account if it was pending
+                if (existing.status === "pending") {
+                    await updateLocalUserStatus(existing.id, "active");
+                }
+                await updateLocalUserLastSignedIn(existing.id);
+                const token = await signJwt({ sub: existing.id, type: "local", userType: existing.userType });
+                ctx.res.cookie(LOCAL_AUTH_COOKIE, token, cookieOptions());
+                void recordAuditEvent(ctx, { category: "auth", action: "user.login", entityType: "localUsers", entityId: existing.id, localUserId: existing.id, payload: { method: "otp_register", userType: existing.userType } });
+                broadcastSSE("user_login", { userId: existing.id, email: existing.email, userType: existing.userType, ts: new Date().toISOString() });
+                return { user: safeUser(existing) };
+            }
+
+            // Create new account
+            const normalizedEmail = isPhone ? null : input.identifier.toLowerCase();
+            const normalizedPhone = isPhone ? input.identifier : null;
+            const newUser = await insertLocalUser({
+                name: input.name ?? (isPhone ? "User" : input.identifier.split("@")[0]),
+                email: normalizedEmail ?? "",
+                phoneNumber: normalizedPhone,
+                passwordHash: "", // OTP-only accounts have no password
+                userType: "visitor",
+                preferredLocale: "en",
+                status: "active",
+                verifiedAt: new Date(), // OTP verification = email/phone verified
+            });
+
+            const token = await signJwt({ sub: newUser.id, type: "local", userType: newUser.userType });
+            ctx.res.cookie(LOCAL_AUTH_COOKIE, token, cookieOptions());
+            void recordAuditEvent(ctx, { category: "auth", action: "user.register", entityType: "localUsers", entityId: newUser.id, localUserId: newUser.id, payload: { method: "otp", userType: newUser.userType } });
+            broadcastSSE("user_registered", { userId: newUser.id, email: newUser.email, phone: newUser.phoneNumber, userType: newUser.userType, ts: new Date().toISOString() });
+            return { user: safeUser(newUser) };
         }),
 });
 

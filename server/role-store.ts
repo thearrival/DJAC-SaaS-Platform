@@ -53,7 +53,7 @@ export async function assignUserRole(
 export async function assignLocalUserRole(
     targetLocalUserId: number,
     newUserType: LocalUserType,
-): Promise<{ id: number; name: string; email: string; userType: string } | null> {
+): Promise<{ id: number; name: string; email: string | null; userType: string } | null> {
     const db = await getDb();
     if (!db) return null;
     const [target] = await db

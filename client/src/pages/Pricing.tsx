@@ -188,7 +188,7 @@ export default function Pricing() {
 
     const handleSelectPlan = (plan: PlanKey) => {
         if (plan === "enterprise") {
-            window.location.href = "mailto:support@yalla-hack.net?subject=DJAC Enterprise Inquiry";
+            window.location.href = "mailto:sales@yalla-hack.com?subject=DJAC Enterprise Inquiry";
             return;
         }
 
@@ -786,7 +786,7 @@ export default function Pricing() {
                                 {t("pricing.startFreeTrialCta", "Start Free Trial ->")}
                             </button>
                         </Link>
-                        <a href="mailto:support@yalla-hack.net?subject=DJAC Demo Request" style={{ textDecoration: "none" }}>
+                        <a href="mailto:sales@yalla-hack.com?subject=DJAC Demo Request" style={{ textDecoration: "none" }}>
                             <button
                                 type="button"
                                 style={{

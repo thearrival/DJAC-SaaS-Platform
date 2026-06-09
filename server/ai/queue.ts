@@ -111,6 +111,7 @@ export interface AssessmentQueue {
     getHistoryDiagnostics(userId: number): Promise<AssessmentHistoryDiagnostics>;
     clearHistory(userId: number): Promise<AssessmentHistoryClearResult>;
     subscribe(listener: QueueSnapshotListener): () => void;
+    close(): Promise<void>;
 }
 
 const QUEUE_IDLE_DELAY_MS = 20;
@@ -343,6 +344,13 @@ export class InMemoryAssessmentQueue implements AssessmentQueue {
         return () => {
             this.listeners.delete(listener);
         };
+    }
+
+    async close(): Promise<void> {
+        this.jobs.clear();
+        this.persistedSnapshots.clear();
+        this.listeners.clear();
+        this.queue.length = 0;
     }
 
     private schedule() {

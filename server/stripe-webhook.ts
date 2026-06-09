@@ -182,6 +182,19 @@ export async function processStripeEvent(
             const interval = (session.metadata?.interval as "monthly" | "quarterly" | "biannual" | "annual") ?? "monthly";
             const tier = resolveTier(plan, interval);
 
+            // Insert billingEvent FIRST as idempotency marker before any data mutations.
+            // Prevents duplicate processing if a crash occurs between the org/subscription
+            // mutation and the event insert (the unique constraint on stripeEventId acts as
+            // the idempotency guard on retry).
+            await db.insert(billingEvents).values({
+                organizationId: orgId,
+                stripeEventId: event.id,
+                eventType: event.type,
+                status: "pending",
+                description: `Checkout completed — plan: ${plan}/${interval}`,
+                rawPayload: JSON.stringify(event.data.object),
+            });
+
             await db
                 .update(organizations)
                 .set({ plan, stripeCustomerId: String(session.customer ?? "") })
@@ -200,14 +213,11 @@ export async function processStripeEvent(
                 stripeMetadata: JSON.stringify(session.metadata ?? {}),
             });
 
-            await db.insert(billingEvents).values({
-                organizationId: orgId,
-                stripeEventId: event.id,
-                eventType: event.type,
-                status: "success",
-                description: `Checkout completed — plan: ${plan}/${interval}`,
-                rawPayload: JSON.stringify(event.data.object),
-            });
+            // Update billing event status to success now that all mutations are complete
+            await db
+                .update(billingEvents)
+                .set({ status: "success" })
+                .where(eq(billingEvents.stripeEventId, event.id));
             break;
         }
 
@@ -230,6 +240,9 @@ export async function processStripeEvent(
                 ?? "";
             const priceId: string = invoice.lines?.data?.[0]?.price?.id ?? "";
             const planInfo = resolvePlanFromPriceId(priceId);
+            if (!planInfo && priceId) {
+                console.error("[Stripe Webhook] Unknown price ID — plan not resolved:", priceId);
+            }
             if (subId && planInfo) {
                 const tier = resolveTier(planInfo.plan, planInfo.interval);
                 await upsertSubscriptionRecord(db, {
@@ -314,6 +327,9 @@ export async function processStripeEvent(
 
             const priceId: string = sub.items?.data?.[0]?.price?.id ?? "";
             const planInfo = resolvePlanFromPriceId(priceId);
+            if (!planInfo && priceId) {
+                console.error("[Stripe Webhook] Unknown price ID on subscription update — plan not resolved:", priceId);
+            }
             if (planInfo) {
                 const tier = resolveTier(planInfo.plan, planInfo.interval);
 

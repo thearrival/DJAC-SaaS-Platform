@@ -377,4 +377,13 @@ export class RedisAssessmentQueue implements AssessmentQueue {
             }
         }
     }
+
+    async close(): Promise<void> {
+        if (this.worker) {
+            await this.worker.close();
+        }
+        await this.queue.close();
+        this.records.clear();
+        this.listeners.clear();
+    }
 }

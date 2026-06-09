@@ -8,6 +8,20 @@
       "when": 1780940858669,
       "tag": "0000_initial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749482260000,
+      "tag": "0001_add_admin_tables_and_verified_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749486000000,
+      "tag": "0002_add_otp_and_phone_google_sso",
+      "breakpoints": true
     }
   ]
 }
