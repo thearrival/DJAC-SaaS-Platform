@@ -24,21 +24,7 @@ export async function findLocalUserByEmail(email: string): Promise<LocalUser | n
         if (!isLocalMemoryFallbackEnabled()) return null;
         return localMemoryUsers.find(u => u.email === email) ?? null;
     }
-    // Select specific columns to avoid errors if phoneNumber column doesn't exist yet
-    const [row] = await db
-        .select({
-            id: localUsers.id, name: localUsers.name, email: localUsers.email,
-            phoneNumber: localUsers.phoneNumber, passwordHash: localUsers.passwordHash,
-            userType: localUsers.userType, companyName: localUsers.companyName,
-            jobTitle: localUsers.jobTitle, industry: localUsers.industry,
-            complianceResponsibility: localUsers.complianceResponsibility,
-            preferredLocale: localUsers.preferredLocale, status: localUsers.status,
-            lastSignedIn: localUsers.lastSignedIn, totpSecret: localUsers.totpSecret,
-            mfaEnabled: localUsers.mfaEnabled, mfaBackupCodes: localUsers.mfaBackupCodes,
-            verifiedAt: localUsers.verifiedAt, createdAt: localUsers.createdAt,
-            updatedAt: localUsers.updatedAt,
-        })
-        .from(localUsers).where(eq(localUsers.email, email)).limit(1);
+    const [row] = await db.select().from(localUsers).where(eq(localUsers.email, email)).limit(1);
     return row ?? null;
 }
 
@@ -48,20 +34,7 @@ export async function findLocalUserById(id: number): Promise<LocalUser | null> {
         if (!isLocalMemoryFallbackEnabled()) return null;
         return localMemoryUsers.find(u => u.id === id) ?? null;
     }
-    const [row] = await db
-        .select({
-            id: localUsers.id, name: localUsers.name, email: localUsers.email,
-            phoneNumber: localUsers.phoneNumber, passwordHash: localUsers.passwordHash,
-            userType: localUsers.userType, companyName: localUsers.companyName,
-            jobTitle: localUsers.jobTitle, industry: localUsers.industry,
-            complianceResponsibility: localUsers.complianceResponsibility,
-            preferredLocale: localUsers.preferredLocale, status: localUsers.status,
-            lastSignedIn: localUsers.lastSignedIn, totpSecret: localUsers.totpSecret,
-            mfaEnabled: localUsers.mfaEnabled, mfaBackupCodes: localUsers.mfaBackupCodes,
-            verifiedAt: localUsers.verifiedAt, createdAt: localUsers.createdAt,
-            updatedAt: localUsers.updatedAt,
-        })
-        .from(localUsers).where(eq(localUsers.id, id)).limit(1);
+    const [row] = await db.select().from(localUsers).where(eq(localUsers.id, id)).limit(1);
     return row ?? null;
 }
 
@@ -75,26 +48,20 @@ export async function checkEmailExists(email: string): Promise<boolean> {
     return rows.length > 0;
 }
 
+/**
+ * Find user by phone — uses email field as fallback since phoneNumber
+ * column may not exist in DB yet. Phone lookup goes through OTP service
+ * which stores identifiers independently in otpCodes table.
+ */
 export async function findLocalUserByPhone(phone: string): Promise<LocalUser | null> {
+    // Since phoneNumber column may not exist in DB, phone-only users
+    // are stored with email = phone. After migration 0002, use phoneNumber column.
     const db = await getDb();
     if (!db) {
         if (!isLocalMemoryFallbackEnabled()) return null;
-        return localMemoryUsers.find(u => u.phoneNumber === phone) ?? null;
+        return localMemoryUsers.find(u => u.email === phone) ?? null;
     }
-    const [row] = await db
-        .select({
-            id: localUsers.id, name: localUsers.name, email: localUsers.email,
-            phoneNumber: localUsers.phoneNumber, passwordHash: localUsers.passwordHash,
-            userType: localUsers.userType, companyName: localUsers.companyName,
-            jobTitle: localUsers.jobTitle, industry: localUsers.industry,
-            complianceResponsibility: localUsers.complianceResponsibility,
-            preferredLocale: localUsers.preferredLocale, status: localUsers.status,
-            lastSignedIn: localUsers.lastSignedIn, totpSecret: localUsers.totpSecret,
-            mfaEnabled: localUsers.mfaEnabled, mfaBackupCodes: localUsers.mfaBackupCodes,
-            verifiedAt: localUsers.verifiedAt, createdAt: localUsers.createdAt,
-            updatedAt: localUsers.updatedAt,
-        })
-        .from(localUsers).where(eq(localUsers.phoneNumber, phone)).limit(1);
+    const [row] = await db.select().from(localUsers).where(eq(localUsers.email, phone)).limit(1);
     return row ?? null;
 }
 
@@ -102,20 +69,20 @@ export async function checkPhoneExists(phone: string): Promise<boolean> {
     const db = await getDb();
     if (!db) {
         if (!isLocalMemoryFallbackEnabled()) return false;
-        return localMemoryUsers.some(u => u.phoneNumber === phone);
+        return localMemoryUsers.some(u => u.email === phone);
     }
-    const rows = await db.select({ id: localUsers.id }).from(localUsers).where(eq(localUsers.phoneNumber, phone)).limit(1);
+    const rows = await db.select({ id: localUsers.id }).from(localUsers).where(eq(localUsers.email, phone)).limit(1);
     return rows.length > 0;
 }
 
 export async function listLocalUsersForAdmin(): Promise<Pick<LocalUser,
-    "id" | "name" | "email" | "phoneNumber" | "userType" | "companyName" | "jobTitle" | "industry" |
+    "id" | "name" | "email" | "userType" | "companyName" | "jobTitle" | "industry" |
     "status" | "preferredLocale" | "lastSignedIn" | "createdAt">[]> {
     const db = await getDb();
     if (!db) {
         if (!isLocalMemoryFallbackEnabled()) return [];
         return localMemoryUsers.map(u => ({
-            id: u.id, name: u.name, email: u.email, phoneNumber: u.phoneNumber, userType: u.userType,
+            id: u.id, name: u.name, email: u.email, userType: u.userType,
             companyName: u.companyName, jobTitle: u.jobTitle, industry: u.industry,
             status: u.status, preferredLocale: u.preferredLocale,
             lastSignedIn: u.lastSignedIn, createdAt: u.createdAt,
@@ -123,7 +90,7 @@ export async function listLocalUsersForAdmin(): Promise<Pick<LocalUser,
     }
     return db.select({
         id: localUsers.id, name: localUsers.name, email: localUsers.email,
-        phoneNumber: localUsers.phoneNumber, userType: localUsers.userType, companyName: localUsers.companyName,
+        userType: localUsers.userType, companyName: localUsers.companyName,
         jobTitle: localUsers.jobTitle, industry: localUsers.industry,
         status: localUsers.status, preferredLocale: localUsers.preferredLocale,
         lastSignedIn: localUsers.lastSignedIn, createdAt: localUsers.createdAt,
@@ -230,12 +197,16 @@ export async function consumeLocalUserBackupCode(id: number, remainingCodes: str
     await db.update(localUsers).set({ mfaBackupCodes: JSON.stringify(remainingCodes), lastSignedIn: new Date() }).where(eq(localUsers.id, id));
 }
 
+/**
+ * Mark email as verified — uses status field since verifiedAt column
+ * may not exist in DB yet. After migration 0002, use verifiedAt column.
+ */
 export async function verifyLocalUserEmail(id: number): Promise<void> {
     const db = await getDb();
     if (!db) {
         const mem = localMemoryUsers.find(u => u.id === id);
-        if (mem) { mem.verifiedAt = new Date(); mem.updatedAt = new Date(); }
+        if (mem) { mem.status = "active"; mem.updatedAt = new Date(); }
         return;
     }
-    await db.update(localUsers).set({ verifiedAt: new Date(), updatedAt: new Date() }).where(eq(localUsers.id, id));
+    await db.update(localUsers).set({ status: "active", updatedAt: new Date() }).where(eq(localUsers.id, id));
 }

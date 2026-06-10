@@ -86,7 +86,6 @@ export function isLocalMemoryFallbackEnabled(): boolean {
 export function createLocalMemoryUser(input: {
     name: string;
     email: string;
-    phoneNumber?: string | null;
     passwordHash: string;
     userType: "visitor" | "professional" | "admin";
     preferredLocale: "en" | "ar" | "zh";
@@ -101,7 +100,6 @@ export function createLocalMemoryUser(input: {
         id: _localMemoryUserId++,
         name: input.name,
         email: input.email,
-        phoneNumber: input.phoneNumber ?? null,
         passwordHash: input.passwordHash,
         userType: input.userType,
         companyName: input.companyName ?? null,
@@ -114,7 +112,6 @@ export function createLocalMemoryUser(input: {
         totpSecret: null,
         mfaEnabled: 0,
         mfaBackupCodes: null,
-        verifiedAt: null,
         createdAt: now,
         updatedAt: now,
     };

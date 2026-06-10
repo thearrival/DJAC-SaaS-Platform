@@ -107,7 +107,6 @@ const registerSchema = z.discriminatedUnion("userType", [
         name: z.string().trim().min(2, "Full name must be at least 2 characters").max(255),
         email: emailSchema,
         password: passwordSchema,
-        phoneNumber: z.string().trim().max(20).optional(),
         preferredLocale: z.enum(["en", "ar", "zh"]).default("en"),
     }),
     z.object({
@@ -115,7 +114,6 @@ const registerSchema = z.discriminatedUnion("userType", [
         name: z.string().trim().min(2, "Full name must be at least 2 characters").max(255),
         email: emailSchema,
         password: passwordSchema,
-        phoneNumber: z.string().trim().max(20).optional(),
         companyName: z.string().trim().min(2, "Company name must be at least 2 characters").max(255),
         jobTitle: z.string().trim().min(2, "Job title must be at least 2 characters").max(120),
         industry: z.string().trim().max(120).optional(),
@@ -139,22 +137,21 @@ export const localAuthRouter = router({
                 });
             }
 
-            const normalizedEmail = input.email.toLowerCase();
-            if (await checkEmailExists(normalizedEmail)) {
-                throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists." });
-            }
+                const normalizedEmail = input.email.toLowerCase();
+                if (await checkEmailExists(normalizedEmail)) {
+                    throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists." });
+                }
 
-            const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
+                const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
 
-            if (!db) {
-                createLocalMemoryUser({
-                    name: input.name,
-                    email: normalizedEmail,
-                    phoneNumber: input.phoneNumber ?? null,
-                    passwordHash,
-                    userType: input.userType,
-                    preferredLocale: input.preferredLocale ?? "en",
-                    status: "pending",
+                if (!db) {
+                    createLocalMemoryUser({
+                        name: input.name,
+                        email: normalizedEmail,
+                        passwordHash,
+                        userType: input.userType,
+                        preferredLocale: input.preferredLocale ?? "en",
+                        status: "pending",
                     ...(input.userType === "professional"
                         ? {
                             companyName: input.companyName,
@@ -168,7 +165,6 @@ export const localAuthRouter = router({
                 await insertLocalUser({
                     name: input.name,
                     email: normalizedEmail,
-                    phoneNumber: input.phoneNumber ?? null,
                     passwordHash,
                     userType: input.userType,
                     preferredLocale: input.preferredLocale ?? "en",
@@ -564,7 +560,6 @@ export const localAuthRouter = router({
 
         const user = await findLocalUserById(userId);
         if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
-        if (user.verifiedAt) throw new TRPCError({ code: "BAD_REQUEST", message: "Email is already verified." });
         if (!user.email) throw new TRPCError({ code: "BAD_REQUEST", message: "No email address on file. Add an email in Account Settings." });
 
         const verifyToken = await signJwt(
@@ -606,7 +601,7 @@ export const localAuthRouter = router({
 
             const user = await findLocalUserById(userId);
             if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
-            if (user.verifiedAt) throw new TRPCError({ code: "BAD_REQUEST", message: "Email is already verified." });
+            if (user.status === "active") throw new TRPCError({ code: "BAD_REQUEST", message: "Email is already verified." });
 
             await verifyLocalUserEmail(userId);
             void recordAuditEvent(ctx, { category: "auth", action: "email.verify.complete", entityType: "localUsers", entityId: userId, localUserId: userId, payload: {} });
@@ -684,24 +679,21 @@ export const localAuthRouter = router({
                 return { user: safeUser(existing) };
             }
 
-            // Create new account
-            const normalizedEmail = isPhone ? null : input.identifier.toLowerCase();
-            const normalizedPhone = isPhone ? input.identifier : null;
+            // Create new account (phone-only users use email field until phoneNumber migration)
+            const normalizedEmail = isPhone ? input.identifier : input.identifier.toLowerCase();
             const newUser = await insertLocalUser({
-                name: input.name ?? (isPhone ? "User" : input.identifier.split("@")[0]),
-                email: normalizedEmail ?? "",
-                phoneNumber: normalizedPhone,
-                passwordHash: "", // OTP-only accounts have no password
+                name: input.name ?? "User",
+                email: normalizedEmail,
+                passwordHash: "",
                 userType: "visitor",
                 preferredLocale: "en",
                 status: "active",
-                verifiedAt: new Date(), // OTP verification = email/phone verified
             });
 
             const token = await signJwt({ sub: newUser.id, type: "local", userType: newUser.userType });
             ctx.res.cookie(LOCAL_AUTH_COOKIE, token, cookieOptions());
             void recordAuditEvent(ctx, { category: "auth", action: "user.register", entityType: "localUsers", entityId: newUser.id, localUserId: newUser.id, payload: { method: "otp", userType: newUser.userType } });
-            broadcastSSE("user_registered", { userId: newUser.id, email: newUser.email, phone: newUser.phoneNumber, userType: newUser.userType, ts: new Date().toISOString() });
+            broadcastSSE("user_registered", { userId: newUser.id, email: newUser.email, userType: newUser.userType, ts: new Date().toISOString() });
             return { user: safeUser(newUser) };
         }),
 });
