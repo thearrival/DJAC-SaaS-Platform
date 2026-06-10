@@ -104,18 +104,20 @@ const passwordSchema = z
 const registerSchema = z.discriminatedUnion("userType", [
     z.object({
         userType: z.literal("visitor"),
-        name: z.string().trim().min(2, "Full name must be at least 2 characters").max(255),
+        name: z.string().trim().min(2).max(255),
         email: emailSchema,
         password: passwordSchema,
+        phoneNumber: z.string().trim().max(20).optional(),
         preferredLocale: z.enum(["en", "ar", "zh"]).default("en"),
     }),
     z.object({
         userType: z.literal("professional"),
-        name: z.string().trim().min(2, "Full name must be at least 2 characters").max(255),
+        name: z.string().trim().min(2).max(255),
         email: emailSchema,
         password: passwordSchema,
-        companyName: z.string().trim().min(2, "Company name must be at least 2 characters").max(255),
-        jobTitle: z.string().trim().min(2, "Job title must be at least 2 characters").max(120),
+        phoneNumber: z.string().trim().max(20).optional(),
+        companyName: z.string().trim().min(2).max(255),
+        jobTitle: z.string().trim().min(2).max(120),
         industry: z.string().trim().max(120).optional(),
         complianceResponsibility: z.string().trim().max(1000).optional(),
         preferredLocale: z.enum(["en", "ar", "zh"]).default("en"),
@@ -148,6 +150,7 @@ export const localAuthRouter = router({
                     createLocalMemoryUser({
                         name: input.name,
                         email: normalizedEmail,
+                        phoneNumber: input.phoneNumber ?? null,
                         passwordHash,
                         userType: input.userType,
                         preferredLocale: input.preferredLocale ?? "en",
@@ -165,6 +168,7 @@ export const localAuthRouter = router({
                 await insertLocalUser({
                     name: input.name,
                     email: normalizedEmail,
+                    phoneNumber: input.phoneNumber ?? null,
                     passwordHash,
                     userType: input.userType,
                     preferredLocale: input.preferredLocale ?? "en",
@@ -601,7 +605,7 @@ export const localAuthRouter = router({
 
             const user = await findLocalUserById(userId);
             if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
-            if (user.status === "active") throw new TRPCError({ code: "BAD_REQUEST", message: "Email is already verified." });
+            if (user.verifiedAt) throw new TRPCError({ code: "BAD_REQUEST", message: "Email is already verified." });
 
             await verifyLocalUserEmail(userId);
             void recordAuditEvent(ctx, { category: "auth", action: "email.verify.complete", entityType: "localUsers", entityId: userId, localUserId: userId, payload: {} });
@@ -684,10 +688,12 @@ export const localAuthRouter = router({
             const newUser = await insertLocalUser({
                 name: input.name ?? "User",
                 email: normalizedEmail,
+                phoneNumber: isPhone ? input.identifier : null,
                 passwordHash: "",
                 userType: "visitor",
                 preferredLocale: "en",
                 status: "active",
+                verifiedAt: new Date(),
             });
 
             const token = await signJwt({ sub: newUser.id, type: "local", userType: newUser.userType });

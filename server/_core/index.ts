@@ -20,6 +20,7 @@ import { startTrialReminderScheduler } from "../trial-reminder-scheduler";
 import { startDeadlineAlertScheduler } from "../deadline-alert-scheduler";
 import { startReportScheduler } from "../report-scheduler";
 import { closeAssessmentQueue } from "../ai/queueFactory";
+import { ensureMigrated } from "./auto-migrate";
 import { ENV } from "./env";
 import { parsedEnv } from "../services/config-schema";
 import { closeDbPool } from "../db";
@@ -258,6 +259,10 @@ export async function createApp() {
 async function startServer() {
   const app = await createApp();
   const server = createServer(app);
+
+  // Auto-migrate DB schema before accepting traffic
+  void ensureMigrated();
+
   server.keepAliveTimeout = ENV.httpKeepAliveTimeoutMs;
   server.headersTimeout = Math.max(ENV.httpHeadersTimeoutMs, ENV.httpKeepAliveTimeoutMs + 1_000);
   server.requestTimeout = ENV.httpRequestTimeoutMs;

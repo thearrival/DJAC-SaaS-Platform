@@ -1,7 +1,9 @@
 import { createApp } from "../server/_core/index";
+import { ensureMigrated } from "../server/_core/auto-migrate";
 
 let cachedApp: any = null;
 let initError: string | null = null;
+let migrationRun = false;
 
 function getPath(req: any): string {
   const url: string = req.url || "";
@@ -40,6 +42,10 @@ export default async function handler(req: any, res: any) {
         cachedApp = await createApp();
         steps.createOk = true;
         steps.createMs = Date.now() - steps.createStart;
+        if (!migrationRun) {
+          migrationRun = true;
+          void ensureMigrated();
+        }
       } catch (e) {
         initError = e instanceof Error ? e.message : String(e);
         steps.error = initError;

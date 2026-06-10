@@ -567,6 +567,7 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
     // ── Common fields
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [termsAccepted, setTermsAccepted] = useState(false);
@@ -677,7 +678,7 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
         }
 
         const extras = JSON.stringify({ role, orgName, jobTitle, licenseNumber, licenseAuthority, selectedTags, crNumber, countryHQ, industrySector, empRange, designation, vendorCategory, certifications, primaryMarket });
-        const base = { name, email, password } as const;
+        const base = { name, email, password, phoneNumber: phoneNumber || undefined } as const;
         if (roleDef.userType === "visitor") {
             regMut.mutate({ userType: "visitor", ...base });
         } else {
@@ -790,22 +791,26 @@ function RoleRegisterForm({ role, onBack, onSwitchToSignIn, database }: {
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-                {/* Common: name + email */}
+                {/* Common: name + email + phone */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     <div style={{ position: "relative" }}>
                         <User size={12} style={mkIcon(C, undefined, dir)} />
                         <input required minLength={2} value={name} onChange={e => setName(e.target.value)}
                             placeholder={t("signup.fullName", "Full name")}
-                            style={{ ...mkWithIcon(C, dir), fontSize: 12.5 }} autoComplete="name"
-                            aria-label={t("signup.fullName", "Full name")} />
+                            style={{ ...mkWithIcon(C, dir), fontSize: 12.5 }} autoComplete="name" />
                     </div>
                     <div style={{ position: "relative" }}>
                         <Mail size={12} style={mkIcon(C, undefined, dir)} />
                         <input required type="email" value={email} onChange={e => setEmail(e.target.value)}
-                            placeholder={role === "government" ? t("signup.officialEmail", "Official email") : t("signup.workEmail", "Work email")}
-                            style={{ ...mkWithIcon(C, dir), fontSize: 12.5 }} autoComplete="email"
-                            aria-label={t("signup.workEmail", "Work email")} />
+                            placeholder={t("signup.workEmail", "Work email")}
+                            style={{ ...mkWithIcon(C, dir), fontSize: 12.5 }} autoComplete="email" />
                     </div>
+                </div>
+                <div style={{ position: "relative" }}>
+                    <Smartphone size={12} style={mkIcon(C, undefined, dir)} />
+                    <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
+                        placeholder={t("signup.phoneNumber", "Phone with country code (optional)")}
+                        style={{ ...mkWithIcon(C, dir), fontSize: 12.5 }} autoComplete="tel" />
                 </div>
 
                 {/* Compliance Officer */}

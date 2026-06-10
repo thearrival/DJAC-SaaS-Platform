@@ -209,6 +209,7 @@ export const localUsers = pgTable("localUsers", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 320 }).unique(),
+  phoneNumber: varchar("phoneNumber", { length: 20 }).unique(),
   passwordHash: varchar("passwordHash", { length: 72 }),
   userType: userTypeEnum("userType").default("visitor").notNull(),
   companyName: varchar("companyName", { length: 255 }),
@@ -221,14 +222,10 @@ export const localUsers = pgTable("localUsers", {
   totpSecret: varchar("totpSecret", { length: 64 }),
   mfaEnabled: integer("mfaEnabled").default(0).notNull(),
   mfaBackupCodes: text("mfaBackupCodes"),
+  verifiedAt: timestamp("verifiedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
-
-// Columns not yet in production DB — references for type safety only,
-// will be activated once migration 0002 is applied.
-// phoneNumber: varchar("phoneNumber", { length: 20 }).unique(),
-// verifiedAt: timestamp("verifiedAt"),
 
 export type LocalUser = typeof localUsers.$inferSelect;
 export type InsertLocalUser = typeof localUsers.$inferInsert;
