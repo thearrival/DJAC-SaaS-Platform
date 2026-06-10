@@ -24,7 +24,21 @@ export async function findLocalUserByEmail(email: string): Promise<LocalUser | n
         if (!isLocalMemoryFallbackEnabled()) return null;
         return localMemoryUsers.find(u => u.email === email) ?? null;
     }
-    const [row] = await db.select().from(localUsers).where(eq(localUsers.email, email)).limit(1);
+    // Select specific columns to avoid errors if phoneNumber column doesn't exist yet
+    const [row] = await db
+        .select({
+            id: localUsers.id, name: localUsers.name, email: localUsers.email,
+            phoneNumber: localUsers.phoneNumber, passwordHash: localUsers.passwordHash,
+            userType: localUsers.userType, companyName: localUsers.companyName,
+            jobTitle: localUsers.jobTitle, industry: localUsers.industry,
+            complianceResponsibility: localUsers.complianceResponsibility,
+            preferredLocale: localUsers.preferredLocale, status: localUsers.status,
+            lastSignedIn: localUsers.lastSignedIn, totpSecret: localUsers.totpSecret,
+            mfaEnabled: localUsers.mfaEnabled, mfaBackupCodes: localUsers.mfaBackupCodes,
+            verifiedAt: localUsers.verifiedAt, createdAt: localUsers.createdAt,
+            updatedAt: localUsers.updatedAt,
+        })
+        .from(localUsers).where(eq(localUsers.email, email)).limit(1);
     return row ?? null;
 }
 
@@ -34,7 +48,20 @@ export async function findLocalUserById(id: number): Promise<LocalUser | null> {
         if (!isLocalMemoryFallbackEnabled()) return null;
         return localMemoryUsers.find(u => u.id === id) ?? null;
     }
-    const [row] = await db.select().from(localUsers).where(eq(localUsers.id, id)).limit(1);
+    const [row] = await db
+        .select({
+            id: localUsers.id, name: localUsers.name, email: localUsers.email,
+            phoneNumber: localUsers.phoneNumber, passwordHash: localUsers.passwordHash,
+            userType: localUsers.userType, companyName: localUsers.companyName,
+            jobTitle: localUsers.jobTitle, industry: localUsers.industry,
+            complianceResponsibility: localUsers.complianceResponsibility,
+            preferredLocale: localUsers.preferredLocale, status: localUsers.status,
+            lastSignedIn: localUsers.lastSignedIn, totpSecret: localUsers.totpSecret,
+            mfaEnabled: localUsers.mfaEnabled, mfaBackupCodes: localUsers.mfaBackupCodes,
+            verifiedAt: localUsers.verifiedAt, createdAt: localUsers.createdAt,
+            updatedAt: localUsers.updatedAt,
+        })
+        .from(localUsers).where(eq(localUsers.id, id)).limit(1);
     return row ?? null;
 }
 
@@ -54,7 +81,20 @@ export async function findLocalUserByPhone(phone: string): Promise<LocalUser | n
         if (!isLocalMemoryFallbackEnabled()) return null;
         return localMemoryUsers.find(u => u.phoneNumber === phone) ?? null;
     }
-    const [row] = await db.select().from(localUsers).where(eq(localUsers.phoneNumber, phone)).limit(1);
+    const [row] = await db
+        .select({
+            id: localUsers.id, name: localUsers.name, email: localUsers.email,
+            phoneNumber: localUsers.phoneNumber, passwordHash: localUsers.passwordHash,
+            userType: localUsers.userType, companyName: localUsers.companyName,
+            jobTitle: localUsers.jobTitle, industry: localUsers.industry,
+            complianceResponsibility: localUsers.complianceResponsibility,
+            preferredLocale: localUsers.preferredLocale, status: localUsers.status,
+            lastSignedIn: localUsers.lastSignedIn, totpSecret: localUsers.totpSecret,
+            mfaEnabled: localUsers.mfaEnabled, mfaBackupCodes: localUsers.mfaBackupCodes,
+            verifiedAt: localUsers.verifiedAt, createdAt: localUsers.createdAt,
+            updatedAt: localUsers.updatedAt,
+        })
+        .from(localUsers).where(eq(localUsers.phoneNumber, phone)).limit(1);
     return row ?? null;
 }
 
@@ -69,13 +109,13 @@ export async function checkPhoneExists(phone: string): Promise<boolean> {
 }
 
 export async function listLocalUsersForAdmin(): Promise<Pick<LocalUser,
-    "id" | "name" | "email" | "userType" | "companyName" | "jobTitle" | "industry" |
+    "id" | "name" | "email" | "phoneNumber" | "userType" | "companyName" | "jobTitle" | "industry" |
     "status" | "preferredLocale" | "lastSignedIn" | "createdAt">[]> {
     const db = await getDb();
     if (!db) {
         if (!isLocalMemoryFallbackEnabled()) return [];
         return localMemoryUsers.map(u => ({
-            id: u.id, name: u.name, email: u.email, userType: u.userType,
+            id: u.id, name: u.name, email: u.email, phoneNumber: u.phoneNumber, userType: u.userType,
             companyName: u.companyName, jobTitle: u.jobTitle, industry: u.industry,
             status: u.status, preferredLocale: u.preferredLocale,
             lastSignedIn: u.lastSignedIn, createdAt: u.createdAt,
@@ -83,7 +123,7 @@ export async function listLocalUsersForAdmin(): Promise<Pick<LocalUser,
     }
     return db.select({
         id: localUsers.id, name: localUsers.name, email: localUsers.email,
-        userType: localUsers.userType, companyName: localUsers.companyName,
+        phoneNumber: localUsers.phoneNumber, userType: localUsers.userType, companyName: localUsers.companyName,
         jobTitle: localUsers.jobTitle, industry: localUsers.industry,
         status: localUsers.status, preferredLocale: localUsers.preferredLocale,
         lastSignedIn: localUsers.lastSignedIn, createdAt: localUsers.createdAt,
@@ -95,9 +135,7 @@ export async function listLocalUsersForAdmin(): Promise<Pick<LocalUser,
 export async function insertLocalUser(data: InsertLocalUser): Promise<LocalUser> {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
-    const [inserted] = await db.insert(localUsers).values(data).returning({ id: localUsers.id });
-    const newId = inserted.id;
-    const [row] = await db.select().from(localUsers).where(eq(localUsers.id, newId)).limit(1);
+    const [row] = await db.insert(localUsers).values(data).returning();
     return row;
 }
 

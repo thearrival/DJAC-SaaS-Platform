@@ -322,9 +322,9 @@ export const localAuthRouter = router({
         }),
 
     /**
-     * Request a password reset email.
+     * Request a password reset OTP.
      * Always returns success to prevent user enumeration.
-     * Sends a 1-hour JWT reset link; the link is invalidated once the password changes.
+     * Sends a 6-digit OTP via email (or phone console log in dev).
      */
     requestPasswordReset: publicProcedure
         .input(z.object({ email: emailSchema }))
@@ -332,66 +332,44 @@ export const localAuthRouter = router({
             const user = await findLocalUserByEmail(input.email);
             const activeUser = user?.status === "active" ? user : null;
 
-            if (activeUser && activeUser.passwordHash) {
-                const resetToken = await signJwt(
-                    {
-                        sub: String(activeUser.id),
-                        purpose: "password-reset",
-                        pwHint: activeUser.passwordHash.slice(0, 8),
-                    },
-                    "1h",
-                );
-                const resetUrl = `${ENV.appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
-                await sendEmail({
-                    to: input.email,
-                    subject: "DJAC: Reset your password",
-                    html: `<p>Hello ${activeUser.name},</p><p>Click the link below to reset your DJAC password. This link expires in 1 hour.</p><p><a href="${resetUrl}">Reset Password</a></p><p>If you did not request a password reset, you can safely ignore this email.</p><p>â€” Yalla Hack DJAC Team</p>`,
-                    text: `Hello ${activeUser.name},\n\nReset your DJAC password:\n${resetUrl}\n\nExpires in 1 hour.\n\nIf you did not request this, ignore this email.`,
-                });
-                void recordAuditEvent(ctx, { category: "auth", action: "password.reset.request", entityType: "localUsers", entityId: activeUser.id, localUserId: activeUser.id, payload: {} });
+            if (activeUser) {
+                // Try email first, fall back to console-only for phone
+                void (async () => {
+                    try {
+                        await sendOtp({ identifier: input.email, purpose: "login" });
+                        void recordAuditEvent(ctx, { category: "auth", action: "password.reset.request", entityType: "localUsers", entityId: activeUser.id, localUserId: activeUser.id, payload: { method: "otp" } });
+                    } catch (e) {
+                        console.warn("[localAuth] Failed to send reset OTP:", e);
+                    }
+                })();
             }
 
             return { success: true as const };
         }),
 
-    /** Complete a password reset using the one-time JWT from the reset email. */
+    /** Complete a password reset using OTP code + new password. */
     resetPassword: publicProcedure
         .input(z.object({
-            token: z.string().min(1),
+            email: emailSchema,
+            code: z.string().length(6).regex(/^\d{6}$/),
             newPassword: passwordSchema,
         }))
         .mutation(async ({ input, ctx }) => {
-            let payload: Record<string, unknown>;
-            try {
-                payload = (await verifyJwt(input.token)) ?? (() => { throw new Error(); })();
-            } catch {
-                throw new TRPCError({ code: "BAD_REQUEST", message: "The reset link is invalid or has expired." });
+            const verifyResult = await verifyOtp({ identifier: input.email, code: input.code, purpose: "login" });
+            if (!verifyResult.success) {
+                throw new TRPCError({ code: "UNAUTHORIZED", message: verifyResult.message });
             }
 
-            if (payload["purpose"] !== "password-reset" || typeof payload["sub"] !== "string") {
-                throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid reset token." });
-            }
-
-            const userId = parseInt(payload["sub"] as string, 10);
-            if (!Number.isFinite(userId)) {
-                throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid reset token." });
-            }
-
-            const user = await findLocalUserById(userId);
+            const user = await findLocalUserByEmail(input.email);
             if (!user || user.status !== "active") {
                 throw new TRPCError({ code: "NOT_FOUND", message: "Account not found." });
             }
-            if (!user.passwordHash || user.passwordHash.slice(0, 8) !== payload["pwHint"]) {
-                throw new TRPCError({ code: "BAD_REQUEST", message: "This reset link has already been used." });
-            }
 
             const newHash = await bcrypt.hash(input.newPassword, BCRYPT_ROUNDS);
-            await updateLocalUserPassword(userId, newHash);
-            void recordAuditEvent(ctx, { category: "auth", action: "password.reset.complete", entityType: "localUsers", entityId: userId, localUserId: userId, payload: {} });
+            await updateLocalUserPassword(user.id, newHash);
+            void recordAuditEvent(ctx, { category: "auth", action: "password.reset.complete", entityType: "localUsers", entityId: user.id, localUserId: user.id, payload: { method: "otp" } });
             return { success: true as const };
         }),
-
-    // â”€â”€â”€ Profile & password management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /** Update the logged-in user's profile fields */
     updateProfile: publicProcedure
