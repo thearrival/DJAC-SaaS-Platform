@@ -22,7 +22,6 @@ import {
     Loader2,
     Plus,
     ShieldAlert,
-    ShieldCheck,
     Trash2,
     XCircle,
 } from "lucide-react";

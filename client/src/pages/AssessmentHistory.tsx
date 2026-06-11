@@ -17,7 +17,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { Link } from "wouter";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -307,8 +306,8 @@ function JobCard({
     const assessment = job.result?.assessment;
     const inputSummary = job.result?.inputSummary;
 
-    const criticalCount = assessment?.gaps.filter(g => g.severity === "critical").length ?? 0;
-    const highCount = assessment?.gaps.filter(g => g.severity === "high").length ?? 0;
+    const _criticalCount = assessment?.gaps.filter(g => g.severity === "critical").length ?? 0;
+    const _highCount = assessment?.gaps.filter(g => g.severity === "high").length ?? 0;
 
     return (
         <Card

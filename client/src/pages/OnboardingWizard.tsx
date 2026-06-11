@@ -18,7 +18,7 @@ export default function OnboardingWizard() {
     usePageTitle("Onboarding");
     const { t } = useLocale();
     const [, navigate] = useLocation();
-    const utils = trpc.useUtils();
+    const _utils = trpc.useUtils();
 
     const [activeStep, setActiveStep] = useState(0);
     const [selectedJurisdiction, setSelectedJurisdiction] = useState<"China" | "Saudi Arabia" | "Both" | "Other">("Both");

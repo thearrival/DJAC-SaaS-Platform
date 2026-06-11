@@ -347,7 +347,7 @@ function Badge({ value }: { value: string }) {
 
 function JsonPreview({ value, title }: { value: string | null; title: string }) {
     if (!value) return <span className="text-slate-600 text-xs">No {title.toLowerCase()}</span>;
-    let formatted = value;
+    let formatted: string;
     try {
         formatted = JSON.stringify(JSON.parse(value), null, 2);
     } catch {
@@ -376,7 +376,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
             .catch((e: unknown) => { setError(e instanceof Error ? e.message : "Failed to load"); setLoading(false); });
     };
 
-    useEffect(() => { loadDetail(); }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { loadDetail(); }, [userId]);
 
     const handleSuspend = async (suspend: boolean) => {
         setActionLoading(suspend ? "suspend" : "unsuspend");
@@ -436,8 +436,8 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                                     <span className="text-slate-500">Plan:</span><span className="text-white">{detail.user.organizationPlan ?? "—"}</span>
                                     <span className="text-slate-500">Registered:</span><span className="text-white">{new Date(detail.user.createdAt).toLocaleString()}</span>
                                     <span className="text-slate-500">Last Login:</span><span className="text-white">{detail.user.lastLoginAt ? new Date(detail.user.lastLoginAt).toLocaleString() : "Never"}</span>
-                                    <span className="text-slate-500">Email Verified:</span><span className={Boolean(detail.user.isEmailVerified) ? "text-emerald-400" : "text-red-400"}>{Boolean(detail.user.isEmailVerified) ? "Yes" : "No"}</span>
-                                    <span className="text-slate-500">MFA:</span><span className={Boolean(detail.user.isMfaEnabled) ? "text-emerald-400" : "text-slate-500"}>{Boolean(detail.user.isMfaEnabled) ? "Enabled" : "Disabled"}</span>
+                                    <span className="text-slate-500">Email Verified:</span><span className={detail.user.isEmailVerified ? "text-emerald-400" : "text-red-400"}>{detail.user.isEmailVerified ? "Yes" : "No"}</span>
+                                    <span className="text-slate-500">MFA:</span><span className={detail.user.isMfaEnabled ? "text-emerald-400" : "text-slate-500"}>{detail.user.isMfaEnabled ? "Enabled" : "Disabled"}</span>
                                 </div>
                                 <div className="flex items-center gap-2 pt-3 border-t border-slate-700/40">
                                     {detail.user.status === "suspended" ? (
@@ -519,7 +519,7 @@ function OrganizationDetailModal({ orgId, onClose }: { orgId: number; onClose: (
             .catch((e: unknown) => { setError(e instanceof Error ? e.message : "Failed to load"); setLoading(false); });
     };
 
-    useEffect(() => { loadDetail(); }, [orgId]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => { loadDetail(); }, [orgId]);
 
     const handleSuspend = async (suspend: boolean) => {
         setActionLoading(suspend ? "suspend" : "unsuspend");
@@ -1350,10 +1350,10 @@ function RealtimeBar({ realtime, sseConnected }: { realtime: RealtimeStats | nul
             </span>
             <span className="text-slate-700 flex-shrink-0">|</span>
             <span className="flex-shrink-0 text-slate-400"><span className="text-white font-semibold tabular-nums">{realtime.activeSessions}</span> sessions</span>
-            <span className="flex-shrink-0 text-slate-400"><span className="text-white font-semibold tabular-nums">{realtime.recentActions}</span> actions /5min</span>
-            <span className="flex-shrink-0 text-slate-400"><span className="text-white font-semibold tabular-nums">{realtime.newUsersLastHour}</span> new users /hr</span>
+            <span className="flex-shrink-0 text-slate-400"><span className="text-white font-semibold tabular-nums">{realtime.recentActions}</span> actions /5min</span>
+            <span className="flex-shrink-0 text-slate-400"><span className="text-white font-semibold tabular-nums">{realtime.newUsersLastHour}</span> new users /hr</span>
             <span className="flex-shrink-0 text-slate-400"><span className="text-white font-semibold tabular-nums">{realtime.sseClients}</span> SSE</span>
-            <span className={`flex-shrink-0 ml-auto px-2 py-0.5 rounded text-[10px] font-medium border ${realtime.dbStatus === "healthy" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>DB {realtime.dbStatus}</span>
+            <span className={`flex-shrink-0 ml-auto px-2 py-0.5 rounded text-[10px] font-medium border ${realtime.dbStatus === "healthy" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>DB {realtime.dbStatus}</span>
             <span className="flex-shrink-0 text-slate-700">{new Date(realtime.ts).toLocaleTimeString()}</span>
         </div>
     );
@@ -1435,7 +1435,7 @@ function RealtimeTab({
                             <div>
                                 <div className="flex items-center justify-between text-sm mb-1.5">
                                     <span className="text-slate-400">Heap usage</span>
-                                    <span className="text-white font-medium text-xs">{system.memory.heapUsed} / {system.memory.heapTotal} MB ({Math.round(system.memory.heapUsed / system.memory.heapTotal * 100)}%)</span>
+                                    <span className="text-white font-medium text-xs">{system.memory.heapUsed} / {system.memory.heapTotal} MB ({Math.round(system.memory.heapUsed / system.memory.heapTotal * 100)}%)</span>
                                 </div>
                                 <div className="w-full bg-slate-700/50 rounded-full h-1.5">
                                     <div

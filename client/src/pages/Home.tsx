@@ -99,7 +99,6 @@ export default function Home() {
       contactEmail: prev.contactEmail || (effectiveUser.email ?? ""),
       organizationName: prev.organizationName || (user?.organizationName ?? ""),
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, localUser]);
 
   const submitAccessRequest = async () => {

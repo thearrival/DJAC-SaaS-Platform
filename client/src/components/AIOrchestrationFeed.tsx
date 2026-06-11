@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import {
     Bot, CheckCircle2, Clock, AlertTriangle, Loader2,
     Shield, FileSearch2, Brain, Scale, Sparkles,
-    ClipboardCheck, Archive, Play, Cpu, Zap,
+    ClipboardCheck, Archive, Cpu, Zap,
     Activity, WifiOff,
 } from "lucide-react";
 

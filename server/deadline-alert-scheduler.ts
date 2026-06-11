@@ -21,7 +21,7 @@
  * Does nothing when SMTP is not configured (sendEmail falls back to console).
  */
 
-import { and, eq, isNull, lte, gte, inArray } from "drizzle-orm";
+import { and, eq, lte, gte, inArray } from "drizzle-orm";
 import {
     complianceDeadlines,
     organizations,

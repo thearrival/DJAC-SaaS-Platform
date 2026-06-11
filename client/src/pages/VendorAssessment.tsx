@@ -19,17 +19,15 @@
 
 import type React from "react";
 import { useState, useMemo } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertCircle, CheckCircle, XCircle, TrendingUp, AlertTriangle, X, Building2, Globe2, ShieldCheck, Sparkles, FileCheck } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, AlertTriangle, X, Building2, Globe2, ShieldCheck, Sparkles, FileCheck } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useLocale } from '@/contexts/useLocale';
@@ -1040,7 +1038,7 @@ function calculateRiskScores(
 function generateRecommendations(gaps: GapItem[]): string[] {
   const recommendations: string[] = [];
   const criticalGaps = gaps.filter(g => g.severity === 'Critical');
-  const highGaps = gaps.filter(g => g.severity === 'High');
+    const _highGaps = gaps.filter(g => g.severity === 'High');
 
   if (criticalGaps.length > 0) {
     recommendations.push(`CRITICAL: Address ${criticalGaps.length} critical compliance/infrastructure issues immediately before market entry.`);
@@ -1121,7 +1119,7 @@ function SeverityBadge({
   return <Badge className={colorMap[severity]}>{labels[severity]}</Badge>;
 }
 
-function ScoreGauge({ score, label, locale }: { score: number; label: string; locale: Locale }) {
+function ScoreGauge({ score, label }: { score: number; label: string; locale: Locale }) {
   const color = score >= 75 ? 'text-green-600' : score >= 50 ? 'text-yellow-600' : 'text-red-600';
   return (
     <div className="text-center p-4">
@@ -1158,7 +1156,7 @@ function RiskBadge({
   );
 }
 
-function getExecutiveSummary(result: AssessmentResult, locale: Locale, copy: typeof COPY[Locale]) {
+function getExecutiveSummary(result: AssessmentResult, locale: Locale, _copy: typeof COPY[Locale]) {
   const criticalCount = result.gaps.filter(gap => gap.severity === 'Critical').length;
   const highCount = result.gaps.filter(gap => gap.severity === 'High').length;
 
@@ -1488,7 +1486,7 @@ export default function VendorAssessment() {
     setOtherDataHostingLocationsError('');
   };
 
-  const handleToggleArray = (
+  const _handleToggleArray = (
     setter: React.Dispatch<React.SetStateAction<any>>,
     path: string,
     value: string

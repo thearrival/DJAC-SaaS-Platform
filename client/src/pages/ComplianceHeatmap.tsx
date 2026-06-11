@@ -79,7 +79,7 @@ const SEVERITY_TEXT: Record<Severity, string> = {
     none: "var(--muted-foreground)",
 };
 
-const SEVERITY_ORDER: Record<Severity, number> = {
+const _SEVERITY_ORDER: Record<Severity, number> = {
     critical: 4,
     high: 3,
     medium: 2,
@@ -246,7 +246,7 @@ export default function ComplianceHeatmap() {
     const criticalCount = allCells.filter((c) => c.maxSeverity === "critical").length;
     const highCount = allCells.filter((c) => c.maxSeverity === "high").length;
     const mediumCount = allCells.filter((c) => c.maxSeverity === "medium").length;
-    const lowCount = allCells.filter((c) => c.maxSeverity === "low" || c.maxSeverity === "none").length;
+    const _lowCount = allCells.filter((c) => c.maxSeverity === "low" || c.maxSeverity === "none").length;
     const totalPairs = FRAMEWORKS.length * (FRAMEWORKS.length - 1);
 
     const selectedRow = selectedCell

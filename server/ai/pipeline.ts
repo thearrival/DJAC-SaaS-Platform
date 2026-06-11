@@ -1,4 +1,3 @@
-import { and, eq } from "drizzle-orm";
 import type { Vendor } from "../../drizzle/schema";
 import { complianceControls, frameworks } from "../../drizzle/schema";
 import { getDb } from "../db";
@@ -428,7 +427,7 @@ function runSynthesizer(assessment: SupplierAssessmentResult): string[] {
     return Array.from(new Set(plan));
 }
 
-function mergeExtractedFacts(
+function _mergeExtractedFacts(
     baselineFacts: ExtractedFact[],
     additionalFacts: ExtractedFact[]
 ): ExtractedFact[] {
@@ -451,7 +450,7 @@ function mergeExtractedFacts(
     return merged;
 }
 
-function mergeRecommendations(existing: string[], additional: string[]): string[] {
+function _mergeRecommendations(existing: string[], additional: string[]): string[] {
     const merged = Array.from(new Set([...additional, ...existing]));
     return merged.slice(0, 120);
 }
@@ -549,7 +548,7 @@ export async function executeAssessmentPipeline(
     reportStage: StageReporter
 ): Promise<AiAssessmentReport> {
     const rawDocumentText = input.rawDocumentText?.trim() || "";
-    const requestedEngine = input.engine ?? ENV.aiAssessmentEngineDefault;
+    const _requestedEngine = input.engine ?? ENV.aiAssessmentEngineDefault;
 
     reportStage("gatekeeper", "Security Gatekeeper scanning payload.");
     runSecurityGatekeeper(rawDocumentText);
@@ -566,7 +565,7 @@ export async function executeAssessmentPipeline(
             rawDocumentText,
         }
     );
-    let extractedFacts = externalFacts && externalFacts.length > 0
+    const extractedFacts = externalFacts && externalFacts.length > 0
         ? externalFacts.slice(0, 200)
         : runExtractor(input.vendor, intake);
 
@@ -582,7 +581,7 @@ export async function executeAssessmentPipeline(
             ragControls,
         }
     );
-    let assessment = externalAssessment || runJudge(input.vendor, extractedFacts);
+    const assessment = externalAssessment || runJudge(input.vendor, extractedFacts);
 
     reportStage("synthesizer", "Strategic synthesizer drafting remediation plan.");
     let remediationPlan =

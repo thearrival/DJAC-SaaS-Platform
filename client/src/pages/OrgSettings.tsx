@@ -51,7 +51,7 @@ function daysLeft(date: Date | string | null | undefined): number | null {
 
 // ─── Section divider ──────────────────────────────────────────────────────────
 
-function SectionHeading({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
+function _SectionHeading({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
     return (
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground/70 uppercase tracking-wider mb-3">
             <Icon size={14} className="shrink-0" />

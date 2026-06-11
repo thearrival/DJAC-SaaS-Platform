@@ -542,7 +542,7 @@ function RiskKPIBar({ counts, activePipes, isDark, C }: {
             borderBottom: `1px solid ${C.border}`,
             background: isDark ? "rgba(3,8,20,0.65)" : "rgba(233,244,255,0.75)",
         }}>
-            {tiles.map((tile, i) => (
+            {tiles.map((tile, _i) => (
                 <div key={tile.label} style={{
                     flex: 1, display: "flex", alignItems: "center", gap: 8,
                     padding: "7px 14px",

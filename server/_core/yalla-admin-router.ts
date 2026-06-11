@@ -653,7 +653,7 @@ async function handleOverview(_req: Request, res: Response): Promise<void> {
             newOrgsToday: newOrgsRow?.[0]?.total ?? 0,
             paidOrgs: revenueRow?.[0]?.total ?? 0,
         });
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Failed to fetch overview stats" });
     }
 }

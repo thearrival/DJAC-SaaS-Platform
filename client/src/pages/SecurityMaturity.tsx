@@ -44,7 +44,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, ChevronRight, Plus, Shield, Trash2, TrendingUp } from "lucide-react";
+import { CheckCircle2, Plus, Shield, Trash2, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 // ─── Constants ────────────────────────────────────────────────────────────────

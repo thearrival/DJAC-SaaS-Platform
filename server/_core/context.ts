@@ -21,7 +21,7 @@ export type TrpcContext = {
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
-  let user: User | null = null;
+  let user: User | null;
   let organizationId: number | null = null;
   let organizationRole: OrganizationMember["role"] | null = null;
 

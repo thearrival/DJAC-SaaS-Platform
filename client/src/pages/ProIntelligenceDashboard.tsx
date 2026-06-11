@@ -325,7 +325,7 @@ function SectionLabel({
 // ── Framework Coverage Radar (SVG hexagonal) ──────────────────────────────────
 function FrameworkRadar({ C, isDark }: { C: Colors; isDark: boolean }) {
     const cx = 110, cy = 100, maxR = 72;
-    const n = FRAMEWORKS.length;
+    const _n = FRAMEWORKS.length;
 
     const toXY = (angleDeg: number, r: number) => {
         const rad = (angleDeg * Math.PI) / 180;

@@ -139,7 +139,7 @@ export default function ReportCenter() {
     });
 
     const emailReportMutation = trpc.compliance.emailReport.useMutation({
-        onSuccess(data) {
+        onSuccess(_data) {
             setIsEmailDialogOpen(false);
             toast.success(t("reportCenter.toastEmailSent", "Report email sent"), {
                 description: `${t("reportCenter.emailRecipient", "Recipient")}: ${recipientEmail}`,
@@ -235,14 +235,14 @@ export default function ReportCenter() {
             setReportType((data.reportType as ReportType) ?? "full_compliance");
             toast.success(t("reportCenter.toastSharedReport", "Shared report loaded"));
         }
-    }, [reportByTokenQuery.data]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [reportByTokenQuery.data]);
 
     useEffect(() => {
         if (reportByTokenQuery.error) {
             toast.error(t("reportCenter.toastShareInvalid", "Share link is expired or invalid"));
             setLocation("/report-center");
         }
-    }, [reportByTokenQuery.error]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [reportByTokenQuery.error]);
 
     function handleCreateShare() {
         if (!result) return;

@@ -9,7 +9,6 @@ import { eq, and, lt } from "drizzle-orm";
 import { otpCodes } from "../../drizzle/schema";
 import { getDb } from "../db";
 import { sendEmail } from "../email";
-import { ENV } from "../_core/env";
 
 const OTP_EXPIRY_MINUTES = 5;
 const OTP_MAX_ATTEMPTS = 5;
@@ -51,14 +50,6 @@ export async function sendOtp(input: SendOtpInput): Promise<{ success: boolean; 
 
     const normalized = input.identifier.trim().toLowerCase();
 
-    // Rate limit: max 3 OTPs per 5-minute window per identifier
-    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
-    const recent = await db
-        .select({ id: otpCodes.id })
-        .from(otpCodes)
-        .where(and(eq(otpCodes.identifier, normalized), lt(otpCodes.createdAt, fiveMinAgo) ? undefined : undefined))
-        .limit(1);
-    // Re-check: count recent
     const recentCount = await db
         .select()
         .from(otpCodes)

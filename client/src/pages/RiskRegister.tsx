@@ -28,7 +28,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -401,7 +400,6 @@ function RiskFormDialog({
     const key = open ? (editingRisk?.id ?? "new") : "closed";
     useMemo(() => {
         if (open) setForm(editingRisk ? riskToForm(editingRisk) : { ...DEFAULT_FORM, ...prefill });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key]);
 
     const set = (field: keyof FormState) => (val: string) =>

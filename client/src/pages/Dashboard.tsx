@@ -14,7 +14,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, C
 import {
   AlertTriangle, ShieldAlert, Globe2, CheckCircle2,
   Activity, ArrowRight, Zap, GitBranch, AlertCircle,
-  TrendingDown, Shield, Clock, RefreshCw,
+  Shield, Clock,
   Wrench, BookOpen, ClipboardCheck,
 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -24,19 +24,6 @@ import { toast } from "sonner";
 // Accent colors are theme-aware — defined inside Dashboard via useTheme().
 
 // Sub-components
-
-function RelIcon({ type }: { type: string }) {
-  const s = { width: 14, height: 14, flexShrink: 0, color: type === "conflict" ? "var(--djac-red)" : type === "gap" ? "var(--djac-orange)" : type === "overlap" ? "var(--djac-cyan)" : type === "dependency" ? "var(--djac-purple)" : "var(--djac-yellow)" };
-  switch (type) {
-    case "conflict": return <AlertCircle style={s} />;
-    case "gap": return <TrendingDown style={s} />;
-    case "overlap": return <CheckCircle2 style={s} />;
-    case "dependency": return <GitBranch style={s} />;
-    case "coordination":
-    case "harmonization": return <Zap style={s} />;
-    default: return <Shield style={s} />;
-  }
-}
 
 function GaugeArc({ value, color, label }: { value: number; color: string; label: string }) {
   const r = 68, cx = 100, cy = 96;

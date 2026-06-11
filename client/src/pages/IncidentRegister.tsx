@@ -33,13 +33,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
-    CardHeader,
-    CardTitle,
 } from "@/components/ui/card";
 import { QueryErrorPanel } from "@/components/ui/query-error-panel";
 import { Checkbox } from "@/components/ui/checkbox";

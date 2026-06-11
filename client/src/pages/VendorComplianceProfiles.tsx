@@ -26,8 +26,6 @@ import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
-    CardHeader,
-    CardTitle,
 } from "@/components/ui/card";
 import {
     Dialog,
@@ -45,7 +43,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    Activity,
     AlertTriangle,
     ArrowUpRight,
     BarChart2,
@@ -61,24 +58,6 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type RiskLevel = "critical" | "high" | "medium" | "low";
-
-type VendorRow = {
-    id: number;
-    vendorName: string;
-    headquartersLocation: string | null;
-    riskTier: string | null;
-    assessmentCount: number;
-    avgAssessmentScore: number | null;
-    openGaps: number;
-    criticalGaps: number;
-    openRisks: number;
-    criticalRisks: number;
-    openRemediations: number;
-    openIncidents: number;
-    criticalIncidents: number;
-    compositeScore: number;
-    riskLevel: RiskLevel;
-};
 
 // ─── Colour helpers ───────────────────────────────────────────────────────────
 

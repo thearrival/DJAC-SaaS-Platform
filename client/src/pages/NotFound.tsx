@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 
 export default function NotFound() {
   usePageTitle("Page Not Found");
-  const [location, setLocation] = useLocation();
+  const [_location, setLocation] = useLocation();
   const { t, direction } = useLocale();
 
   const handleHome = () => setLocation("/dashboard");

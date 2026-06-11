@@ -231,7 +231,7 @@ function ScorePill({
     );
 }
 
-function GapItem({ gap, idx, vendorId }: { gap: SupplierGap; idx: number; vendorId: number }) {
+function GapItem({ gap, idx: _idx, vendorId }: { gap: SupplierGap; idx: number; vendorId: number }) {
     const [open, setOpen] = useState(false);
     const [, navigate] = useLocation();
 
@@ -747,7 +747,7 @@ export default function GapTracker() {
             .filter(entry => entry.assessment.gaps.length > 0 || (severityFilter === "all" && jurisFilter === "all"));
     }, [data, severityFilter, jurisFilter]);
 
-    const isRTL = false; // locale direction handled by DashboardLayout
+    const _isRTL = false; // locale direction handled by DashboardLayout
 
     return (
         <div className="djac-page">

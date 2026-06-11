@@ -188,8 +188,8 @@ function computeTipPos(
                 : "left"
             : placement;
 
-    let top = 0;
-    let left = 0;
+    let top: number;
+    let left: number;
 
     switch (effective) {
         case "right":

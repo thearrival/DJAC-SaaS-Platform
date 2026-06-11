@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { sounds } from "@/lib/sounds";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
 import {
     Dialog,
     DialogContent,
@@ -365,7 +365,7 @@ function TaskFormDialog({
     editMode: boolean;
     t: (key: string, fallback: string) => string;
 }) {
-    const [form, setForm] = useState<TaskFormValues>(initial);
+    const [_form, setForm] = useState<TaskFormValues>(initial);
 
     // Sync when dialog opens with new initial values
     const prevOpen = usePrevious(open);
@@ -373,7 +373,7 @@ function TaskFormDialog({
         // reset on open
     }
     // Use a key on Dialog to reset state instead:
-    const set = (field: keyof TaskFormValues) => (value: string) =>
+    const _set = (field: keyof TaskFormValues) => (value: string) =>
         setForm(f => ({ ...f, [field]: value }));
 
     // Synchronize form when initial changes (e.g., pre-fill from URL)

@@ -21,7 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Loader2, RefreshCw, ShieldCheck, Users, Layers, Calendar, ChevronDown, ExternalLink, ArrowRight, AlertCircle } from "lucide-react";
+import { Loader2, RefreshCw, ShieldCheck, Users, Layers, Calendar, ChevronDown, ExternalLink, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -90,7 +90,7 @@ function CompanyDashboardContent() {
         ? allUsers
         : allUsers.filter(u => u.role === roleFilter);
 
-    const healthPct = useMemo(() => {
+    const _healthPct = useMemo(() => {
         const tot = summary?.total ?? 0;
         if (!tot) return { completed: 0, overdue: 0, upcoming: 0 };
         return {

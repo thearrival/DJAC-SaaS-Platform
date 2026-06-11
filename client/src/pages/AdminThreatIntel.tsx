@@ -48,7 +48,6 @@ import {
     ShieldAlert,
     Trash2,
     Edit,
-    Eye,
     EyeOff,
 } from "lucide-react";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -231,7 +230,7 @@ export default function AdminThreatIntel() {
     const [editItem, setEditItem] = useState<ThreatIntelItem | null>(null);
     const [form, setForm] = useState<ItemForm>({ ...emptyForm });
 
-    const ctx = trpc.useUtils();
+    const _ctx = trpc.useUtils();
 
     // Use feed with no filters to get all items from the current org context
     const { data: feedItems = [], isLoading, isError, refetch } = trpc.threatIntel.feed.useQuery(

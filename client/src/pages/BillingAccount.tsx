@@ -6,7 +6,7 @@ import { useLocalAuth } from "@/hooks/useLocalAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
 import {
-    CreditCard, Clock, CheckCircle2, AlertTriangle, XCircle,
+    CreditCard, Clock, AlertTriangle, XCircle,
     Building2, ExternalLink, RefreshCw, Crown, Shield, Zap,
     ArrowUpRight, Receipt, Calendar,
 } from "lucide-react";

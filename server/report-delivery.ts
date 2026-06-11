@@ -133,11 +133,12 @@ function sanitizeFallbackText(value: string) {
         .replace(/[\u201C\u201D]/g, '"')
         .replace(/[\u2018\u2019]/g, "'")
         .replace(/[\u{1F534}\u{1F7E0}\u{1F7E1}\u{1F7E2}]/gu, "*") // Replace colored circle emoji
+        // eslint-disable-next-line no-control-regex
         .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, "")
         .trim();
 }
 
-function toTemplateHeading(value: string, locale: ReportLocale) {
+function _toTemplateHeading(value: string, locale: ReportLocale) {
     if (locale === "en") {
         return value.toUpperCase();
     }
@@ -462,7 +463,7 @@ async function resolvePdfFonts(pdf: PDFDocument, locale: ReportLocale): Promise<
     };
 }
 
-function markdownToStyledLines(markdown: string): StyledLine[] {
+function _markdownToStyledLines(markdown: string): StyledLine[] {
     const lines: StyledLine[] = [];
 
     for (const rawLine of markdown.split(/\r?\n/)) {
@@ -761,8 +762,8 @@ async function buildPdfBuffer(options: ReportOptions, report: GeneratedReportMod
 
     // Load watermark PDF (reference background) — gracefully skipped when absent
     const watermarkPath = path.resolve(process.cwd(), "audit", "templates", "report-watermark.pdf");
-    let watermarkPdfDoc: PDFDocument | null = null;
-    let watermarkPage: PDFPage | null = null;
+    let watermarkPdfDoc: PDFDocument | null;
+    let watermarkPage: PDFPage | null;
     let wm: PDFEmbeddedPage | null = null;
     try {
         const watermarkBytes = await fs.readFile(watermarkPath);
@@ -771,11 +772,8 @@ async function buildPdfBuffer(options: ReportOptions, report: GeneratedReportMod
         watermarkPage = watermarkPdfDoc.getPage(0);
         wm = await pdf.embedPage(watermarkPage);
         if (!wm) throw new Error("Failed to embed watermark page");
-    } catch (err) {
-        // Missing or unreadable watermark is non-fatal — PDF is generated without it
-        console.warn("[DJAC PDF] Watermark skipped:", (err as Error).message);
-        watermarkPdfDoc = null;
-        watermarkPage = null;
+    } catch (_err) {
+        console.warn("[DJAC PDF] Watermark skipped:", (_err as Error).message);
         wm = null;
     }
     const fonts = await resolvePdfFonts(pdf, options.locale);
@@ -798,23 +796,23 @@ async function buildPdfBuffer(options: ReportOptions, report: GeneratedReportMod
     const marginX = 56.7;
     const marginY = 71;
     const safeWidth = pageWidth - 2 * marginX;
-    const safeHeight = pageHeight - 2 * marginY;
+    const _safeHeight = pageHeight - 2 * marginY;
     // Report layout constants
     const HEADER_H = 80;
     const FOOTER_H = 52;
-    const sectionSpacing = 20;
-    const lineHeight = 15;
-    const normalizeText = (value: string) => (fonts.supportsUnicode ? value : sanitizeFallbackText(value));
-    const subtitle = normalizeText(extractSubtitle(report.markdown));
-    const sidebarQuote = normalizeText(extractSidebarQuote(report.markdown));
+    const _sectionSpacing = 20;
+    const _lineHeight = 15;
+    const _normalizeText = (value: string) => (fonts.supportsUnicode ? value : sanitizeFallbackText(value));
+    const _subtitle = _normalizeText(extractSubtitle(report.markdown));
+    const _sidebarQuote = _normalizeText(extractSidebarQuote(report.markdown));
     const bodyMarkdown = stripCoverContent(report.markdown);
     // Parse Markdown into blocks (headings, paragraphs, tables)
     const blocks = parseMarkdownBlocks(bodyMarkdown);
-    const normalizedTitle = options.locale === "en"
-        ? normalizeText(report.title).toUpperCase()
-        : normalizeText(report.title);
+    const _normalizedTitle = options.locale === "en"
+        ? _normalizeText(report.title).toUpperCase()
+        : _normalizeText(report.title);
     // const normalizedTemplateName = normalizeText(ENV.reportTemplateName);
-    const reportIdLabel = normalizeText(`Report ID: ${report.reportId}`);
+    const _reportIdLabel = _normalizeText(`Report ID: ${report.reportId}`);
     const pages = [] as Array<{ page: ReturnType<PDFDocument["addPage"]>; cursorY: number }>;
 
 
@@ -844,7 +842,7 @@ async function buildPdfBuffer(options: ReportOptions, report: GeneratedReportMod
                     width: dims.width,
                     height: dims.height,
                 });
-            } catch { }
+            } catch { /* logo unavailable, skip */ }
         } else {
             // Text fallback when logo file is unavailable
             const yhText = "YALLA HACK";
@@ -1023,7 +1021,7 @@ async function buildPdfBuffer(options: ReportOptions, report: GeneratedReportMod
                 current = createPage();
                 y = pageHeight - marginY - HEADER_H;
             }
-            y = draw_section_heading(current.page, y, normalizeText(block.text), block.level);
+            y = draw_section_heading(current.page, y, _normalizeText(block.text), block.level);
             continue;
         }
         // Overflow guard for paragraphs
@@ -1033,14 +1031,14 @@ async function buildPdfBuffer(options: ReportOptions, report: GeneratedReportMod
         }
         // Paragraph
         if (block.kind === "paragraph") {
-            y = draw_section_paragraph(current.page, y, normalizeText(block.text), block.bold);
+            y = draw_section_paragraph(current.page, y, _normalizeText(block.text), block.bold);
             continue;
         }
         // Table
         if (block.kind === "table") {
             y = draw_section_table(
                 current.page, y,
-                block.rows.map(row => row.map(cell => normalizeText(cell)))
+                block.rows.map(row => row.map(cell => _normalizeText(cell)))
             );
             continue;
         }
@@ -1068,11 +1066,11 @@ export async function generateComplianceReportPdf(options: ReportOptions): Promi
     const report = generateComplianceReport(options);
     // Try DOCX-to-PDF conversion first (template-native)
     const docxBuffer = await buildDocxBuffer(options, report);
-    let pdfBuffer = null;
+    let pdfBuffer: Buffer | null;
     let renderMode: "template-native" | "rendered" = "template-native";
     try {
         pdfBuffer = await tryConvertDocxToNativePdf(docxBuffer);
-    } catch (err) {
+    } catch {
         pdfBuffer = null;
     }
     if (!pdfBuffer) {

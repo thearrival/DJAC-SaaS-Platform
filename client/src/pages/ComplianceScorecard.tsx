@@ -490,7 +490,7 @@ export default function ComplianceScorecard() {
                                         paddingAngle={3}
                                         dataKey="value"
                                         nameKey="name"
-                                        label={({ name, percent }: { name: string; percent: number }) =>
+                                        label={({ percent }: { name: string; percent: number }) =>
                                             `${(percent * 100).toFixed(0)}%`
                                         }
                                         labelLine={false}

@@ -7,7 +7,6 @@ import { organizations, organizationMembers, localUsers, users } from "../drizzl
 import { getDb } from "./db";
 
 type OrgRole = "owner" | "admin" | "compliance_officer" | "analyst";
-type MemberStatus = "active" | "invited";
 
 // ─── Store functions ──────────────────────────────────────────────────────────
 

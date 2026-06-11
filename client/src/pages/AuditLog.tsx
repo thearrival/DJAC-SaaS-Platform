@@ -15,7 +15,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -46,7 +46,6 @@ import {
 
 // ─── Action category badge mapping ───────────────────────────────────────────
 
-type BadgeVariant = "default" | "outline" | "secondary" | "destructive";
 
 const ACTION_BADGE: Record<string, { label: string; cls: string }> = {
     // Auth

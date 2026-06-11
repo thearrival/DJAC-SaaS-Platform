@@ -2,7 +2,7 @@
  * deadline-store.ts — CRUD for complianceDeadlines.
  * Falls back to in-memory seeded global deadlines when DB is unavailable.
  */
-import { and, eq, isNull, lt, gte, desc, or } from "drizzle-orm";
+import { and, eq, isNull, desc, or } from "drizzle-orm";
 import { getDb } from "./db";
 import { complianceDeadlines, organizationMembers, users, type ComplianceDeadline, type InsertComplianceDeadline } from "../drizzle/schema";
 
@@ -185,7 +185,7 @@ const GLOBAL_DEADLINES: ComplianceDeadline[] = [
     },
 ];
 
-let memoryDeadlines: ComplianceDeadline[] = [...GLOBAL_DEADLINES];
+const memoryDeadlines: ComplianceDeadline[] = [...GLOBAL_DEADLINES];
 let nextId = GLOBAL_DEADLINES.length + 1;
 
 // ---------------------------------------------------------------------------

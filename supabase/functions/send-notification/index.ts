@@ -35,7 +35,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const { userId, title, content, category, entityType, entityId, sendEmail } = parsed.data;
+    const { userId: _userId, title, content, category, entityType, entityId, sendEmail: _sendEmail } = parsed.data;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

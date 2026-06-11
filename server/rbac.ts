@@ -10,7 +10,7 @@
  *   3. Full DENY — when no match found
  */
 
-import { eq, and, or, isNull } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { rolePermissions, userOnboarding } from "../drizzle/schema";
 import { getDb } from "./db";
 import {

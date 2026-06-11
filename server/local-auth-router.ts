@@ -38,16 +38,13 @@ import {
     parseJwtUserId,
     getSessionTokenFromRequest,
     isLocalMemoryFallbackEnabled,
-    localMemoryUsers,
     createLocalMemoryUser,
-    resolveLocalSession,
 } from "./services/local-jwt";
 import {
     findLocalUserByEmail,
     findLocalUserById,
     findLocalUserByPhone,
     checkEmailExists,
-    checkPhoneExists,
     listLocalUsersForAdmin,
     insertLocalUser,
     updateLocalUserLastSignedIn,

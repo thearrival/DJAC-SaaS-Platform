@@ -142,7 +142,7 @@ export interface PermissionFlags {
   canInvite: boolean;
 }
 
-const DENY: PermissionFlags = { canView: false, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false };
+const _DENY: PermissionFlags = { canView: false, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false };
 const VIEW_ONLY: PermissionFlags = { canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false };
 const STANDARD: PermissionFlags = { canView: true, canCreate: true, canEdit: true, canDelete: false, canExport: true, canInvite: false };
 const FULL: PermissionFlags = { canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true };

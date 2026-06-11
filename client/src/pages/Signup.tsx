@@ -20,9 +20,9 @@ import { useLocale } from "@/contexts/useLocale";
 import { useTheme } from "@/contexts/useTheme";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { TourGuide, setTourPending } from "@/components/TourGuide";
 import { DeHengFooter } from "@/components/DeHengFooter";
 import { sounds } from "@/lib/sounds";
+import { setTourPending } from "@/components/TourGuide";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // ─── Error helpers ─────────────────────────────────────────────────────────────
@@ -1180,76 +1180,6 @@ function IpRegistrationSection({ C }: { C: DesignTokens }) {
                     </div>
                 ))}
             </div>
-        </div>
-    );
-}
-
-// ─── DeHeng Law Offices partner logo display ────────────────────────────────
-function DeHengLogoDisplay({ C, theme }: { C: DesignTokens; theme: string }) {
-    const isDark = theme === "dark";
-
-    // Logo is white-on-transparent.
-    // Dark mode  → keep white, add subtle contrast lift.
-    // Light mode → invert to near-black, then tint to match brand navy (#020B45).
-    const logoFilter = isDark
-        ? "brightness(0.96) contrast(1.08)"
-        : "brightness(0) saturate(100%) invert(8%) sepia(60%) saturate(2800%) hue-rotate(216deg) brightness(96%) contrast(102%)";
-
-    return (
-        <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center",
-            marginBottom: 24, paddingBottom: 20,
-            borderBottom: `1px solid ${C.border}`,
-            animation: "djacFadeUp 0.35s ease both",
-        }}>
-            {/* "Official Legal Partner" label */}
-            <p style={{
-                fontSize: 9, letterSpacing: "0.13em", textTransform: "uppercase" as const,
-                color: C.muted, margin: "0 0 14px", fontWeight: 600,
-            }}>Official Legal Partner</p>
-
-            {/* Logo image — white SVG/PNG, theme-filtered to always be visible */}
-            <div style={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                minHeight: 52, padding: "2px 0",
-            }}>
-                <img
-                    src="/deheng-logo.png"
-                    alt="DeHeng Law Offices"
-                    draggable={false}
-                    style={{
-                        height: 46,
-                        maxWidth: 240,
-                        width: "auto",
-                        display: "block",
-                        filter: logoFilter,
-                        transition: "filter 0.25s ease",
-                        userSelect: "none",
-                    }}
-                    onError={(e) => {
-                        // Graceful fallback to styled text if image fails to load
-                        (e.currentTarget as HTMLImageElement).style.display = "none";
-                        const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
-                        if (fallback) fallback.style.display = "flex";
-                    }}
-                />
-                {/* Text fallback (hidden unless image fails) */}
-                <div style={{ display: "none", alignItems: "center", gap: 6 }}>
-                    <span style={{
-                        fontFamily: "Georgia, 'Noto Serif SC', serif",
-                        fontSize: 22,
-                        fontWeight: 700,
-                        color: C.text,
-                        letterSpacing: "1.5px",
-                    }}>德恒 DeHeng</span>
-                </div>
-            </div>
-
-            {/* Est. footnote */}
-            <p style={{
-                fontSize: 8.5, color: C.muted, margin: "10px 0 0",
-                letterSpacing: "0.06em",
-            }}>Est. 1993 · Global Practice</p>
         </div>
     );
 }

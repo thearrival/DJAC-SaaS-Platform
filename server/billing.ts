@@ -34,9 +34,8 @@ import {
     subscriptions,
     billingEvents,
     type Organization,
-    type Subscription,
 } from "../drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
     TRIAL_DAYS,
     daysRemainingInTrial,

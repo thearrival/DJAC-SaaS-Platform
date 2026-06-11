@@ -27,13 +27,11 @@ import React, {
     useEffect,
     useRef,
     useState,
-    useCallback,
     type ReactNode,
 } from "react";
 import {
     Shield,
     Globe2,
-    FileCheck2,
     Lock,
     Activity,
     ArrowRight,

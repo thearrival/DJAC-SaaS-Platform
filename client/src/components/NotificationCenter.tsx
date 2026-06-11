@@ -9,7 +9,7 @@
  * Read state is persisted in localStorage.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, AlertTriangle, CheckCircle2, Clock, XCircle, ServerCrash, ChevronRight } from "lucide-react";
+import { Bell, AlertTriangle, CheckCircle2, Clock, XCircle, ChevronRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocale } from "@/contexts/useLocale";
 import { formatDate } from "@/lib/intl";

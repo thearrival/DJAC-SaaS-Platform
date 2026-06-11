@@ -16,7 +16,6 @@ import {
     type AdminNotification,
     type ConsultationRequest,
     type Framework,
-    type User,
 } from "../drizzle/schema";
 import {
     getDb,
@@ -333,7 +332,7 @@ export async function createAccessRequest(input: AccessRequestInput) {
         status: "new" as const,
     };
 
-    let record: AccessRequest | null = null;
+    let record: AccessRequest | null;
     if (!db) {
         record = {
             id: accessRequestId++,
@@ -397,7 +396,7 @@ export async function createConsultationRequest(input: ConsultationRequestInput)
         assignedAdminUserId: null,
     };
 
-    let record: ConsultationRequest | null = null;
+    let record: ConsultationRequest | null;
     if (!db) {
         record = {
             id: consultationRequestId++,

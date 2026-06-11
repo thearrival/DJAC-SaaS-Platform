@@ -24,7 +24,6 @@ import {
 import { useLocale } from "@/contexts/useLocale";
 import {
     Activity,
-    AlertTriangle,
     ArrowLeftRight,
     BarChart2,
     Bell,

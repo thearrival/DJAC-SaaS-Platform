@@ -15,7 +15,7 @@
  *   • Delete with confirmation
  */
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import type React from "react";
 import { trpc } from "@/lib/trpc";
 import { useLocale } from "@/contexts/useLocale";
@@ -30,13 +30,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
-    CardHeader,
-    CardTitle,
 } from "@/components/ui/card";
 import {
     Dialog,

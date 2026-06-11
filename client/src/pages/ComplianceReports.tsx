@@ -36,10 +36,8 @@ import {
 import {
     AlertTriangle,
     ArrowRight,
-    BarChart2,
     BookOpen,
     Building2,
-    CalendarCheck2,
     ClipboardCheck,
     Download,
     RefreshCw,
