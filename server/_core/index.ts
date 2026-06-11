@@ -26,9 +26,10 @@ import { parsedEnv } from "../services/config-schema";
 import { closeDbPool } from "../db";
 import { nanoid } from "nanoid";
 import { checkRateLimit, closeRateLimiter } from "./rateLimiter";
-import { getSecurityHeadersForRequest, shouldBypassApiRateLimit, getClientIp } from "./security";
+import { getSecurityHeadersForRequest, shouldBypassApiRateLimit, getClientIp, parseCspReport } from "./security";
 import { createYallaAdminRouter } from "./yalla-admin-router";
 import { checkProductionEnv } from "./env";
+import { logger } from "./logger";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -224,8 +225,18 @@ export async function createApp() {
 
   registerOAuthRoutes(app);
 
-  app.post("/api/csp-report", (_req: Request, _res: Response) => {
-    _res.status(204).end();
+  app.post("/api/csp-report", (req: Request, res: Response) => {
+    const report = parseCspReport(req.body);
+    const isReportOnly = req.query.ro === "1";
+    if (report && Object.keys(report).length > 0) {
+      const blockedUri = String(report["blocked-uri"] ?? "unknown");
+      const violatedDirective = String(report["violated-directive"] ?? "unknown");
+      const sourceFile = String(report["source-file"] ?? "");
+      logger.warn({ category: "security", cspReport: report, reportOnly: isReportOnly },
+        `CSP violation: ${violatedDirective} blocked ${blockedUri}${sourceFile ? ` in ${sourceFile}` : ""}`
+      );
+    }
+    res.status(204).end();
   });
 
   // ─── tRPC ───────────────────────────────────────────────────────────────────

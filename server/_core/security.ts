@@ -1,4 +1,5 @@
 import type { Request } from "express";
+import { ENV } from "./env";
 
 interface SecurityHeaderOptions {
     pathname: string;
@@ -80,29 +81,44 @@ function shouldDisableCaching(pathname: string): boolean {
     return normalized.startsWith("/api/") || shouldNoIndex(normalized);
 }
 
-export function getSecurityHeadersForRequest({ pathname, isHttps }: SecurityHeaderOptions): Record<string, string> {
-    const normalized = normalizePath(pathname);
-    const cspParts = [
+function buildCsp(isProduction: boolean): string[] {
+    const parts = [
         "default-src 'self'",
         "base-uri 'self'",
         "object-src 'none'",
-        // 'unsafe-inline' is retained for Vite HMR/inline styles in dev;
-        // production builds should move toward nonce-based CSP in a future pass.
-        "script-src 'self' 'unsafe-inline' https://js.stripe.com",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: blob: https:",
         "font-src 'self' data: https://fonts.gstatic.com",
         "connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io",
         "frame-src https://js.stripe.com https://hooks.stripe.com",
         "form-action 'self'",
         "frame-ancestors 'none'",
-        // Report CSP violations to our own endpoint for observability.
         "report-uri /api/csp-report",
     ];
 
-    if (isHttps) {
-        cspParts.push("upgrade-insecure-requests");
+    if (isProduction) {
+        // Production: strict CSP with hash-based inline script support.
+        // Vite generates hashed assets so no inline scripts need 'unsafe-inline'.
+        // strict-dynamic propagates trust to scripts loaded by allowed scripts.
+        parts.push("script-src 'self' https://js.stripe.com 'strict-dynamic'");
+        parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
+    } else {
+        // Development: relaxed CSP for Vite HMR and DX tooling.
+        parts.push("script-src 'self' 'unsafe-inline' https://js.stripe.com");
+        parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
     }
+
+    return parts;
+}
+
+export function getSecurityHeadersForRequest({ pathname, isHttps }: SecurityHeaderOptions): Record<string, string> {
+    const normalized = normalizePath(pathname);
+    const isProduction = ENV.isProduction;
+    const cspParts = buildCsp(isProduction);
+
+    // Report-Only CSP uses a relaxed policy to detect violations without blocking.
+    const roCspParts = buildCsp(false).map(p =>
+        p.startsWith("report-uri") ? "report-uri /api/csp-report?ro=1" : p
+    );
 
     const headers: Record<string, string> = {
         "X-Content-Type-Options": "nosniff",
@@ -117,6 +133,7 @@ export function getSecurityHeadersForRequest({ pathname, isHttps }: SecurityHead
         // Do NOT set it to "'none'" — that is a malformed value that browsers
         // may handle inconsistently.
         "Content-Security-Policy": cspParts.join("; "),
+        "Content-Security-Policy-Report-Only": roCspParts.join("; "),
     };
 
     if (shouldNoIndex(normalized)) {
@@ -134,6 +151,13 @@ export function getSecurityHeadersForRequest({ pathname, isHttps }: SecurityHead
     }
 
     return headers;
+}
+
+export function parseCspReport(body: unknown): Record<string, unknown> {
+    if (!body || typeof body !== "object") return {};
+    const report = (body as Record<string, unknown>)["csp-report"];
+    if (!report || typeof report !== "object") return {};
+    return report as Record<string, unknown>;
 }
 
 /**
