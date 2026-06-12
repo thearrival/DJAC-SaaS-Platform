@@ -47,6 +47,9 @@ export default defineConfig(({ mode }) => {
       target: "es2020",
       // Skip the gzip/brotli size report during build — saves ~5-10s in CI.
       reportCompressedSize: false,
+      // Marketing/public chunks are separate from the SPA bundle and don't
+      // meaningfully benefit from warning at 500 kB.
+      chunkSizeWarningLimit: 600,
       // Ensure React is always resolved to a single copy so that Radix UI,
       // framer-motion and any other packages calling React.forwardRef at
       // module-init time never receive `undefined`.
