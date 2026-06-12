@@ -6,11 +6,9 @@
   "devCommand": "pnpm dev",
   "functions": {
     "api/index.mjs": {
-      "memory": 512,
-      "maxDuration": 30
+      "maxDuration": 60
     },
     "api/ping.ts": {
-      "memory": 512,
       "maxDuration": 30
     }
   },
