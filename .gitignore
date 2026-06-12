@@ -125,3 +125,6 @@ audit/*.log
 .vercel
 
 .env*
+
+# Generated Vercel serverless bundle (produced by scripts/prebuild-vercel.mjs)
+api/index.mjs
