@@ -8,6 +8,37 @@ import { ENV } from "../_core/env";
 
 let migrationApplied = false;
 
+async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<void> {
+    try {
+        const { complianceFrameworks } = await import(
+            "../../scripts/compliance-reference-data.mjs"
+        );
+
+        let seeded = 0;
+        for (const fw of complianceFrameworks) {
+            await db.execute(sql`
+                INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
+                VALUES (${fw.code}, ${fw.name}, ${fw.country}, ${fw.description ?? null}, ${fw.scope ?? null}, ${fw.enforcementAuthority ?? null}, ${fw.maxPenalty ?? null})
+                ON CONFLICT ("code") DO UPDATE SET
+                    "name" = EXCLUDED."name",
+                    "country" = EXCLUDED."country",
+                    "description" = EXCLUDED."description",
+                    "scope" = EXCLUDED."scope",
+                    "enforcementAuthority" = EXCLUDED."enforcementAuthority",
+                    "maxPenalty" = EXCLUDED."maxPenalty",
+                    "updatedAt" = NOW()
+            `);
+            seeded++;
+        }
+
+        if (!ENV.isProduction) {
+            console.info(`[Migrate] Seeded ${seeded} compliance frameworks.`);
+        }
+    } catch (err) {
+        console.warn("[Migrate] Compliance seed data could not be loaded (fallback will be used):", (err as Error).message);
+    }
+}
+
 export async function ensureMigrated(): Promise<void> {
     if (migrationApplied) return;
 
@@ -85,6 +116,9 @@ export async function ensureMigrated(): Promise<void> {
         for (const idx of indexes) {
             await db.execute(sql.raw(idx));
         }
+
+        // Seed compliance reference data into DB (idempotent upserts)
+        await seedComplianceFrameworks(db);
 
         migrationApplied = true;
         if (!ENV.isProduction) {
