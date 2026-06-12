@@ -18,7 +18,7 @@ export function getAssessmentQueue(): AssessmentQueue {
         } else {
             try {
                 queueSingleton = new RedisAssessmentQueue(redisUrl);
-                console.log("[AI Orchestrator] Redis queue mode enabled.");
+                console.info("[AI Orchestrator] Redis queue mode enabled.");
                 return queueSingleton;
             } catch (error) {
                 console.warn(
@@ -32,7 +32,7 @@ export function getAssessmentQueue(): AssessmentQueue {
     queueSingleton = new InMemoryAssessmentQueue({
         historyFilePath: ENV.aiJobHistoryFile,
     });
-    console.log("[AI Orchestrator] In-memory queue mode enabled.");
+    console.info("[AI Orchestrator] In-memory queue mode enabled.");
     return queueSingleton;
 }
 
@@ -40,7 +40,7 @@ export async function closeAssessmentQueue(): Promise<void> {
     if (queueSingleton) {
         try {
             await queueSingleton.close();
-            console.log("[AI Orchestrator] Queue closed.");
+            console.info("[AI Orchestrator] Queue closed.");
         } catch (err) {
             console.warn("[AI Orchestrator] Error closing queue:", err);
         }

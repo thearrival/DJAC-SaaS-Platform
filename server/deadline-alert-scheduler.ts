@@ -206,7 +206,7 @@ async function runAlertCheck(): Promise<void> {
     }
 
     if (sent > 0) {
-        console.log(`[DeadlineAlert] Sent ${sent} alert email(s).`);
+        console.info(`[DeadlineAlert] Sent ${sent} alert email(s).`);
     }
 }
 
@@ -228,7 +228,7 @@ export function startDeadlineAlertScheduler(): () => void {
     void run(); // Run immediately on startup
     const timer = setInterval(() => void run(), INTERVAL_MS);
 
-    console.log("[DeadlineAlert] Scheduler started. Interval: 2h.");
+    console.info("[DeadlineAlert] Scheduler started. Interval: 2h.");
 
     return () => clearInterval(timer);
 }

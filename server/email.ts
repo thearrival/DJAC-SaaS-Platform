@@ -20,7 +20,7 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
     if (!smtpHost || !smtpUser || !smtpPass) {
         // No SMTP configured — log to console in dev, silently no-op in prod
         if (isDevelopment) {
-            console.log(
+            console.info(
                 `\n[EMAIL — no SMTP configured]\nTo: ${payload.to}\nSubject: ${payload.subject}\n\n${payload.text ?? payload.html}\n`
             );
         }

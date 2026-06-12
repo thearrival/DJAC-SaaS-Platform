@@ -84,7 +84,7 @@ export async function sendOtp(input: SendOtpInput): Promise<{ success: boolean; 
         });
     } else {
         // Phone: log to console in dev, would use SMS provider in production
-        console.log(`[OTP] Code for ${normalized}: ${code} (expires in ${OTP_EXPIRY_MINUTES}min)`);
+        console.info(`[OTP] Code for ${normalized}: ${code} (expires in ${OTP_EXPIRY_MINUTES}min)`);
     }
 
     return { success: true, message: "Verification code sent." };

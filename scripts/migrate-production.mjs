@@ -51,7 +51,8 @@ async function waitForDatabase(url) {
         } catch (err) {
             if (attempt === MAX_CONNECT_ATTEMPTS) {
                 throw new Error(
-                    `Database never became available after ${MAX_CONNECT_ATTEMPTS} attempts. Last error: ${err.message}`
+                    `Database never became available after ${MAX_CONNECT_ATTEMPTS} attempts. Last error: ${err.message}`,
+                    { cause: err }
                 );
             }
             process.stdout.write(
@@ -166,7 +167,8 @@ async function run() {
                 await client.query("ROLLBACK");
                 throw new Error(
                     `Migration failed in file "${file}": ${err.message}\n` +
-                    `Failing statement (truncated): ${err.message}`
+                    `Failing statement (truncated): ${err.message}`,
+                    { cause: err }
                 );
             }
         }

@@ -149,7 +149,7 @@ async function runReminderCheck(): Promise<void> {
     }
 
     if (sent > 0) {
-        console.log(`[TrialReminder] Sent ${sent} reminder email(s).`);
+        console.info(`[TrialReminder] Sent ${sent} reminder email(s).`);
     }
 }
 
@@ -171,7 +171,7 @@ export function startTrialReminderScheduler(): () => void {
     void run(); // Run immediately on startup
     const timer = setInterval(() => void run(), INTERVAL_MS);
 
-    console.log("[TrialReminder] Scheduler started. Interval: 6h.");
+    console.info("[TrialReminder] Scheduler started. Interval: 6h.");
 
     return () => clearInterval(timer);
 }

@@ -5,7 +5,7 @@ const HOUR_MS = 60 * 60 * 1000;
 
 export function startInteractionRetentionScheduler(): () => void {
     if (!ENV.interactionRetentionAutoRun) {
-        console.log("[InteractionRetention] Auto-run disabled.");
+        console.info("[InteractionRetention] Auto-run disabled.");
         return () => undefined;
     }
 
@@ -21,7 +21,7 @@ export function startInteractionRetentionScheduler(): () => void {
         running = true;
         try {
             const result = await enforceInteractionRetention(ENV.interactionRetentionDays, false);
-            console.log(
+            console.info(
                 `[InteractionRetention] Completed. Deleted ${result.deletedLogs} logs older than ${result.retentionDays} days.`
             );
         } catch (error) {
@@ -36,7 +36,7 @@ export function startInteractionRetentionScheduler(): () => void {
         void run();
     }, intervalMs);
 
-    console.log(
+    console.info(
         `[InteractionRetention] Scheduler started. Every ${ENV.interactionRetentionIntervalHours}h, retention=${ENV.interactionRetentionDays}d.`
     );
 

@@ -209,7 +209,7 @@ export function registerAssessmentWebSocketServer(server: HttpServer) {
         });
     });
 
-    console.log(`[AI Orchestrator] WebSocket streaming enabled at ${wsPath}`);
+    console.info(`[AI Orchestrator] WebSocket streaming enabled at ${wsPath}`);
 
     return () => {
         unsubscribe();

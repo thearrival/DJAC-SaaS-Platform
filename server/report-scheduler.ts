@@ -112,7 +112,7 @@ async function sendOrgReport(
         });
 
         if (ENV.isDevelopment) {
-            console.log(`[report-scheduler] ${label} report sent to ${email} for org ${orgId} (${orgName})`);
+            console.info(`[report-scheduler] ${label} report sent to ${email} for org ${orgId} (${orgName})`);
         }
     } catch (err) {
         console.error(`[report-scheduler] failed to send ${cadence} report for org ${orgId}:`, err);

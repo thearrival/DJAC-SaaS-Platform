@@ -88,7 +88,7 @@ export async function ensureMigrated(): Promise<void> {
 
         migrationApplied = true;
         if (!ENV.isProduction) {
-            console.log("[Migrate] Schema auto-migration complete.");
+            console.info("[Migrate] Schema auto-migration complete.");
         }
     } catch (err) {
         // Don't crash the server if migration fails — log and continue

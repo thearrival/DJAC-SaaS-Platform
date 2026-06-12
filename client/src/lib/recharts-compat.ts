@@ -10,7 +10,6 @@
 import * as RC from "recharts";
 import type React from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RCProps = Record<string, any>;
 
 export const AreaChart = RC.AreaChart as unknown as React.FC<RCProps>;

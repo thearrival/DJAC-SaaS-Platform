@@ -22,7 +22,6 @@ import type { Request, Response } from "express";
 // several fields (invoice.subscription → invoice.parent.subscription_details,
 // subscription.current_period_* removed, etc.) and we prefer runtime safety
 // over fighting the latest type changes.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObj = Record<string, any>;
 import { ENV } from "./_core/env";
 import { getDb } from "./db";
@@ -166,7 +165,7 @@ export async function processStripeEvent(
     };
 
     if (await idempotencyGuard()) {
-        console.log("[Stripe Webhook] Duplicate event ignored:", event.id);
+        console.info("[Stripe Webhook] Duplicate event ignored:", event.id);
         return;
     }
 

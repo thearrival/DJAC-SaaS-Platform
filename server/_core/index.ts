@@ -313,7 +313,7 @@ async function startServer() {
   });
 
   server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+    console.info(`Server running on http://localhost:${port}/`);
     void getSystemReadiness()
       .then((readiness) => {
         if (readiness.scaling.readyForHighScale) {

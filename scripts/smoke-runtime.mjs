@@ -38,7 +38,7 @@ async function fetchWithHint(url, hint, init) {
         return await fetch(url, init);
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        throw new Error(`${hint} Request: ${url}. Root cause: ${message}`);
+        throw new Error(`${hint} Request: ${url}. Root cause: ${message}`, { cause: error });
     }
 }
 
@@ -124,7 +124,7 @@ async function run() {
     const meBody = await me.text();
     log("me", me.status, meBody.slice(0, 220));
     assert(me.status === 200, "localAuth.me should return success");
-    assert(meBody.includes(`\"email\":\"${email}\"`), "localAuth.me should include the new user");
+    assert(meBody.includes(`"email":"${email}"`), "localAuth.me should include the new user");
 
     const login = await postTrpc("localAuth.login", {
         email,

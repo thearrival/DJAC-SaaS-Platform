@@ -157,7 +157,6 @@ export async function resolveLocalAuthUser(
 
 // ─── Path 1: OAuth session ────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function resolveOAuthUser(req: any): Promise<User | null> {
     try {
         return await sdk.authenticateRequest(req);
