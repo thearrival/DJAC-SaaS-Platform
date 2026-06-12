@@ -95,19 +95,13 @@ async function checkDatabaseReadiness(): Promise<ServiceReadiness> {
 }
 
 async function checkRedisReadiness(): Promise<ServiceReadiness> {
-    if (ENV.aiQueueMode !== "redis") {
+    if (ENV.aiQueueMode !== "redis" || !ENV.redisUrl) {
         return {
             enabled: false,
             ready: true,
-            details: "Redis is not required for the current queue mode.",
-        };
-    }
-
-    if (!ENV.redisUrl) {
-        return {
-            enabled: true,
-            ready: false,
-            details: "REDIS_URL is not configured.",
+            details: !ENV.redisUrl
+                ? "REDIS_URL is not configured. Using in-memory fallback."
+                : "Redis is not required for the current queue mode.",
         };
     }
 
