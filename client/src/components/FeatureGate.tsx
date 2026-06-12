@@ -44,7 +44,7 @@ export function FeatureGate({ plan, feature, children }: FeatureGateProps) {
     const [, navigate] = useLocation();
 
     // Obtain the current org plan from the billing tRPC route
-    const { data: trialStatus } = trpc.billing.getSubscriptionStatus.useQuery(undefined, {
+    const { data: trialStatus, isLoading, isError } = trpc.billing.getSubscriptionStatus.useQuery(undefined, {
         retry: false,
         staleTime: 60_000,
     });
@@ -60,11 +60,16 @@ export function FeatureGate({ plan, feature, children }: FeatureGateProps) {
     }
 
     // While loading plan info, render children optimistically
-    if (!trialStatus) {
+    if (isLoading) {
         return <>{children}</>;
     }
 
-    const currentPlan: string = trialStatus.plan ?? "free_trial";
+    // If query failed, render children (billing errors shouldn't lock out features)
+    if (isError) {
+        return <>{children}</>;
+    }
+
+    const currentPlan: string = trialStatus?.plan ?? "free_trial";
     const currentLevel = PLAN_LEVEL[currentPlan] ?? 0;
     const requiredLevel = PLAN_LEVEL[plan] ?? 1;
 

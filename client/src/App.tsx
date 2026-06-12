@@ -102,6 +102,19 @@ function RootRoute() {
       </div>
     );
   }
+  if (meQuery.isError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background p-8 text-center">
+        <p className="text-destructive text-sm">Failed to load session. Please try again.</p>
+        <button onClick={() => meQuery.refetch()} className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition-colors">
+          Retry
+        </button>
+        <a href="/signup" className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors">
+          Go to Signup
+        </a>
+      </div>
+    );
+  }
   return <Signup />;
 }
 

@@ -21,6 +21,7 @@ import {
     ExternalLink,
     Loader2,
     Plus,
+    RefreshCw,
     ShieldAlert,
     Trash2,
     XCircle,
@@ -668,6 +669,38 @@ export default function VendorRiskDashboard() {
                                 <div style={{ width: 48, height: 18, borderRadius: 4, background: "var(--djac-border)" }} />
                             </div>
                         ))}
+                    </div>
+                ) : vendorsQuery.isError ? (
+                    <div style={{ padding: 64, textAlign: "center" }}>
+                        <AlertTriangle
+                            size={40}
+                            style={{ color: "var(--djac-destructive)", marginBottom: 16 }}
+                        />
+                        <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>
+                            {t("vendorRisk.errorTitle", "Failed to load vendors")}
+                        </p>
+                        <p style={{ fontSize: 13, color: "var(--djac-muted)", marginBottom: 24 }}>
+                            {t("vendorRisk.errorDesc", "An error occurred while fetching vendor data. Please try again.")}
+                        </p>
+                        <button
+                            onClick={() => vendorsQuery.refetch()}
+                            style={{
+                                padding: "10px 20px",
+                                borderRadius: 8,
+                                background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                                border: "none",
+                                color: "#fff",
+                                fontSize: 13,
+                                fontWeight: 700,
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                            }}
+                        >
+                            <RefreshCw size={14} />
+                            {t("vendorRisk.retry", "Retry")}
+                        </button>
                     </div>
                 ) : isEmpty ? (
                     <div style={{ padding: 64, textAlign: "center" }}>

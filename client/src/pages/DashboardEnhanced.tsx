@@ -976,6 +976,18 @@ export default function DashboardEnhanced() {
                     </Card>
                   </div>
                 </>
+              ) : comparisonMatrixQuery.isError ? (
+                <div className="rounded-xl border border-destructive/40 bg-destructive/5 py-12 text-center">
+                  <p className="text-sm text-muted-foreground">{comparisonMatrixQuery.error?.message ?? t("enhanced.matrixLoadError", "Failed to load matrix data.")}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 h-7 text-xs"
+                    onClick={() => { void comparisonMatrixQuery.refetch(); }}
+                  >
+                    {t("common.retry", "Retry")}
+                  </Button>
+                </div>
               ) : comparisonQuery.isError ? (
                 <div className="rounded-xl border border-destructive/40 bg-destructive/5 py-12 text-center">
                   <p className="text-sm text-muted-foreground">{comparisonQuery.error?.message ?? t("enhanced.comparisonLoadError", "Failed to load comparison data.")}</p>
@@ -983,9 +995,7 @@ export default function DashboardEnhanced() {
                     variant="outline"
                     size="sm"
                     className="mt-3 h-7 text-xs"
-                    onClick={() => {
-                      void comparisonQuery.refetch();
-                    }}
+                    onClick={() => { void comparisonQuery.refetch(); }}
                   >
                     {t("common.retry", "Retry")}
                   </Button>
