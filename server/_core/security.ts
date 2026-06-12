@@ -88,7 +88,7 @@ function buildCsp(isProduction: boolean): string[] {
         "object-src 'none'",
         "img-src 'self' data: blob: https:",
         "font-src 'self' data: https://fonts.gstatic.com",
-        "connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io",
+        "connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co",
         "frame-src https://js.stripe.com https://hooks.stripe.com",
         "form-action 'self'",
         "frame-ancestors 'none'",

@@ -22,6 +22,12 @@
       "dest": "/api/index?api_path=$1"
     },
     {
+      "src": "/assets/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
       "src": "/((?!api/|assets/|\\.well-known/)[^.]*)$",
       "dest": "/index.html"
     }

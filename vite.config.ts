@@ -89,6 +89,21 @@ export default defineConfig(({ mode }) => {
               return "icons";
             }
 
+            // Framer Motion — large and used on most pages
+            if (id.includes("framer-motion")) {
+              return "framer";
+            }
+
+            // Form validation — loaded only on forms (signup, settings, etc.)
+            if (id.includes("react-hook-form") || id.includes("zod") || id.includes("@hookform")) {
+              return "form-libs";
+            }
+
+            // Date handling — loaded only on pages with date pickers
+            if (id.includes("date-fns") || id.includes("dayjs") || id.includes("moment")) {
+              return "date-libs";
+            }
+
             // Stripe SDK is large and only needed on billing pages.
             if (id.includes("stripe")) {
               return "stripe-sdk";
@@ -97,6 +112,11 @@ export default defineConfig(({ mode }) => {
             // PDF/report generation is rarely executed — keep separate.
             if (id.includes("pdf-lib") || id.includes("fontkit") || id.includes("pizzip")) {
               return "pdf-vendor";
+            }
+
+            // jose (JWT) — crypto lib, only needed for auth
+            if (id.includes("jose")) {
+              return "crypto-libs";
             }
 
             return "vendor";

@@ -204,7 +204,10 @@ export async function getSystemReadiness() {
         aiQueueMode: ENV.aiQueueMode,
     });
 
-    const ok = database.ready && aiOrchestrator.ready && redis.ready && billing.ready;
+    const ok = database.ready
+        && (billing.enabled ? billing.ready : true)
+        && (redis.enabled ? redis.ready : true)
+        && (aiOrchestrator.enabled ? aiOrchestrator.ready : true);
 
     return {
         ok,

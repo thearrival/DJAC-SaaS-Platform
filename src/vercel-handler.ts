@@ -87,7 +87,14 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    if (!cachedApp && !initError) cachedApp = await createApp();
+    if (!cachedApp && !initError) {
+      cachedApp = await createApp();
+      // Run migration synchronously before accepting any traffic
+      if (!migrationRun) {
+        migrationRun = true;
+        await ensureMigrated();
+      }
+    }
     if (!cachedApp) { res.status(500).json({ error: "Express app failed to initialize", message: initError }); return; }
     cachedApp(req, res);
   } catch (err) {
