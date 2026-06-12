@@ -55,6 +55,17 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_migrate")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      await ensureMigrated();
+      res.status(200).json({ ok: true, message: "Migration completed", node: process.version });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/_dbcheck")) {
     try {
       if (!cachedApp && !initError) cachedApp = await createApp();
