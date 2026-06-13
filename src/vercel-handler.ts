@@ -130,6 +130,46 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_schema-check")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      const dbModule = await import("../server/db");
+      const db = await dbModule.getDb();
+      if (!db) { res.status(200).json({ ok: false, error: "DB not connected" }); return; }
+
+      // Check key tables for missing columns vs Drizzle schema
+      const checks: Record<string, string[]> = {};
+      const expected: Record<string, string[]> = {
+        localUsers: ["phoneNumber", "verifiedAt", "mfaEnabled", "mfaBackupCodes", "totpSecret"],
+        complianceControls: ["applicability"],
+        yallaAdminSessions: [],
+        auditLogs: [],
+        otpCodes: [],
+      };
+
+      const { sql } = await import("drizzle-orm");
+      for (const [table, cols] of Object.entries(expected)) {
+        if (cols.length === 0) continue;
+        const result = await db.execute(sql.raw(
+          `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='${table}'`
+        ));
+        const existing = new Set(result.rows.map(r => r.column_name));
+        const missing = cols.filter(c => !existing.has(c));
+        if (missing.length > 0) checks[table] = missing;
+      }
+
+      res.status(200).json({
+        ok: Object.keys(checks).length === 0,
+        missingColumns: checks,
+        message: Object.keys(checks).length === 0 ? "All expected columns present" : "Some columns are missing",
+        node: process.version,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/_seed-controls")) {
     try {
       if (!cachedApp && !initError) cachedApp = await createApp();
