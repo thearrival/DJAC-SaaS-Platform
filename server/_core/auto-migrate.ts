@@ -82,6 +82,9 @@ export async function ensureMigrated(): Promise<void> {
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "phoneNumber" varchar(20)
         `);
         await db.execute(sql`
+            ALTER TABLE "complianceControls" ADD COLUMN IF NOT EXISTS "applicability" varchar(255)
+        `);
+        await db.execute(sql`
             CREATE UNIQUE INDEX IF NOT EXISTS "localUsers_phoneNumber_idx"
             ON "localUsers" ("phoneNumber") WHERE "phoneNumber" IS NOT NULL
         `);
