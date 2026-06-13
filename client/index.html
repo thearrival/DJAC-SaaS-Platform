@@ -82,18 +82,28 @@
   <script>
     (function () {
       var _errors = [];
+      var _recovered = false;
       function showOverlay(msg) {
         var el = document.getElementById('djac-boot-error');
         if (!el) {
           el = document.createElement('div');
           el.id = 'djac-boot-error';
           el.className = 'djac-boot-error-overlay';
-          el.innerHTML = '<div class="djac-boot-error-card"><h2 class="djac-boot-error-title">DJAC Startup Error</h2><pre id="djac-boot-error-msg" class="djac-boot-error-msg"></pre></div>';
+          el.innerHTML = '<div class="djac-boot-error-card"><h2 class="djac-boot-error-title">DJAC Startup Error</h2><pre id="djac-boot-error-msg" class="djac-boot-error-msg"></pre><button id="djac-boot-error-retry" style="margin-top:12px;padding:8px 20px;border-radius:8px;border:none;background:#dc2626;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Clear Cache & Reload</button></div>';
           document.body.appendChild(el);
+          document.getElementById('djac-boot-error-retry').onclick = function() {
+            if ('caches' in window) {
+              caches.keys().then(function(keys) {
+                keys.forEach(function(k) { caches.delete(k); });
+              });
+            }
+            window.location.reload(true);
+          };
         }
         document.getElementById('djac-boot-error-msg').textContent = _errors.join('\n\n');
       }
       window.addEventListener('error', function (e) {
+        if (_recovered) return;
         var msg = (e.error && e.error.stack) ? e.error.stack : (e.message + ' (' + e.filename + ':' + e.lineno + ')');
         _errors.push(msg);
         var root = document.getElementById('djac-app-root');
