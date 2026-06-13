@@ -10,11 +10,11 @@ let migrationApplied = false;
 
 async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<void> {
     try {
-        const { complianceFrameworks } = await import(
-            "../../scripts/compliance-reference-data.mjs"
-        );
+        const mod = await import("../../scripts/compliance-reference-data.mjs");
+        const { complianceFrameworks, complianceControls } = mod;
 
-        let seeded = 0;
+        // Seed frameworks
+        let seededFw = 0;
         for (const fw of complianceFrameworks) {
             await db.execute(sql`
                 INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
@@ -28,26 +28,8 @@ async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeo
                     "maxPenalty" = EXCLUDED."maxPenalty",
                     "updatedAt" = NOW()
             `);
-            seeded++;
+            seededFw++;
         }
-
-        if (!ENV.isProduction) {
-            console.info(`[Migrate] Seeded ${seeded} compliance frameworks.`);
-        }
-    } catch (err) {
-        console.warn("[Migrate] Compliance seed data could not be loaded (fallback will be used):", (err as Error).message);
-    }
-}
-
-async function seedComplianceControls(db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<void> {
-    try {
-        const mod = await import("../../scripts/compliance-reference-data.mjs");
-        const complianceControls = mod.complianceControls;
-        if (!Array.isArray(complianceControls) || complianceControls.length === 0) {
-            console.info(`[Migrate] Controls array empty or not found (got ${typeof complianceControls}).`);
-            return;
-        }
-        console.info(`[Migrate] Loaded ${complianceControls.length} controls for seeding.`);
 
         // Resolve framework codes to IDs
         const fwRows = await db.execute(sql`SELECT "id", "code" FROM "frameworks"`);
@@ -56,7 +38,7 @@ async function seedComplianceControls(db: NonNullable<Awaited<ReturnType<typeof 
             codeToId.set(row.code, row.id);
         }
 
-        // Build single batch INSERT for performance
+        // Seed controls — single batch INSERT
         const rows: string[] = [];
         for (const ctrl of complianceControls) {
             const frameworkId = codeToId.get(ctrl.frameworkCode);
@@ -81,11 +63,11 @@ async function seedComplianceControls(db: NonNullable<Awaited<ReturnType<typeof 
             `));
         }
 
-        if (!ENV.isProduction || rows.length > 0) {
-            console.info(`[Migrate] Seeded ${rows.length} compliance controls.`);
+        if (!ENV.isProduction) {
+            console.info(`[Migrate] Seeded ${seededFw} frameworks + ${rows.length} controls.`);
         }
     } catch (err) {
-        console.warn("[Migrate] Controls seed failed to start:", (err as Error).message);
+        console.warn("[Migrate] Compliance seed data could not be loaded (fallback will be used):", (err as Error).message);
     }
 }
 
@@ -196,7 +178,6 @@ export async function ensureMigrated(): Promise<void> {
 
         // Seed compliance reference data into DB (idempotent upserts)
         await seedComplianceFrameworks(db);
-        await seedComplianceControls(db);
 
         migrationApplied = true;
         if (!ENV.isProduction) {
