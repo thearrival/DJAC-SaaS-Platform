@@ -33,7 +33,7 @@ async function seed() {
   await client.connect();
 
   try {
-    const { complianceFrameworks, complianceControls } = await import(
+    const { complianceFrameworks, complianceControls, complianceRelationships } = await import(
       "./compliance-reference-data.mjs"
     );
 
@@ -88,6 +88,25 @@ async function seed() {
          ON CONFLICT ("frameworkId", "controlCode") DO NOTHING`
       );
       console.log(`[seed-compliance] Seeded ${values.length} compliance controls.`);
+    }
+
+    // Seed framework relationships
+    const relValues = [];
+    for (const rel of complianceRelationships) {
+      const srcId = codeToId.get(rel.sourceFrameworkCode);
+      const tgtId = codeToId.get(rel.targetFrameworkCode);
+      if (!srcId || !tgtId) continue;
+      const esc = (s) => s ? `'${s.replace(/'/g, "''")}'` : "NULL";
+      relValues.push(`(${srcId}, ${tgtId}, ${esc(rel.relationshipType)}, ${esc(rel.description)}, ${esc(rel.severity)}, ${esc(rel.riskLevel)}, ${esc(rel.mitigation)})`);
+    }
+
+    if (relValues.length > 0) {
+      await client.query(
+        `INSERT INTO "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId", "relationshipType", "description", "severity", "riskLevel", "mitigation")
+         VALUES ${relValues.join(", ")}
+         ON CONFLICT ("sourceFrameworkId", "targetFrameworkId") DO NOTHING`
+      );
+      console.log(`[seed-compliance] Seeded ${relValues.length} framework relationships.`);
     }
 
     console.log("[seed-compliance] Complete.");
