@@ -46,6 +46,11 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NODE_ENV: production
 
+      - name: Seed Compliance Data
+        run: node scripts/seed-compliance.mjs
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Install Vercel CLI
         run: pnpm add -g vercel@latest
 
