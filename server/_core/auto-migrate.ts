@@ -10,11 +10,11 @@ let migrationApplied = false;
 
 async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<void> {
     try {
-        const mod = await import("../../scripts/compliance-reference-data.mjs");
-        const { complianceFrameworks, complianceControls } = mod;
+        const { complianceFrameworks } = await import(
+            "../../scripts/compliance-reference-data.mjs"
+        );
 
-        // Seed frameworks
-        let seededFw = 0;
+        let seeded = 0;
         for (const fw of complianceFrameworks) {
             await db.execute(sql`
                 INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
@@ -28,43 +28,11 @@ async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeo
                     "maxPenalty" = EXCLUDED."maxPenalty",
                     "updatedAt" = NOW()
             `);
-            seededFw++;
-        }
-
-        // Resolve framework codes to IDs
-        const fwRows = await db.execute(sql`SELECT "id", "code" FROM "frameworks"`);
-        const codeToId = new Map<string, number>();
-        for (const row of fwRows.rows as Array<{ id: number; code: string }>) {
-            codeToId.set(row.code, row.id);
-        }
-
-        // Seed controls — single batch INSERT
-        const rows: string[] = [];
-        for (const ctrl of complianceControls) {
-            const frameworkId = codeToId.get(ctrl.frameworkCode);
-            if (!frameworkId) continue;
-            const row = [
-                frameworkId,
-                `'${(ctrl.controlCode as string).replace(/'/g, "''")}'`,
-                `'${(ctrl.controlName as string).replace(/'/g, "''")}'`,
-                ctrl.category ? `'${(ctrl.category as string).replace(/'/g, "''")}'` : "NULL",
-                ctrl.description ? `'${(ctrl.description as string).replace(/'/g, "''")}'` : "NULL",
-                ctrl.requirement ? `'${(ctrl.requirement as string).replace(/'/g, "''")}'` : "NULL",
-                ctrl.applicability ? `'${(ctrl.applicability as string).replace(/'/g, "''")}'` : "NULL",
-            ].join(", ");
-            rows.push(`(${row})`);
-        }
-
-        if (rows.length > 0) {
-            await db.execute(sql.raw(`
-                INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
-                VALUES ${rows.join(", ")}
-                ON CONFLICT ("frameworkId", "controlCode") DO NOTHING
-            `));
+            seeded++;
         }
 
         if (!ENV.isProduction) {
-            console.info(`[Migrate] Seeded ${seededFw} frameworks + ${rows.length} controls.`);
+            console.info(`[Migrate] Seeded ${seeded} compliance frameworks.`);
         }
     } catch (err) {
         console.warn("[Migrate] Compliance seed data could not be loaded (fallback will be used):", (err as Error).message);
