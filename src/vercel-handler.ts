@@ -170,6 +170,53 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_seed-relationships")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      const dbModule = await import("../server/db");
+      const db = await dbModule.getDb();
+      if (!db) { res.status(200).json({ ok: false, error: "Database not connected" }); return; }
+
+      const mod = await import("../scripts/compliance-reference-data.mjs");
+      const { complianceRelationships } = mod;
+      const { sql } = await import("drizzle-orm");
+
+      // Get framework code→id map
+      const fwRows = await db.execute(sql`SELECT "id", "code" FROM "frameworks"`);
+      const codeToId = new Map();
+      for (const row of fwRows.rows) codeToId.set(row.code, row.id);
+
+      // Create unique index if missing
+      await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`);
+
+      const batchSize = 30;
+      const offset = parseInt(req.query?.offset || "0", 10);
+      const batch = complianceRelationships.slice(offset, offset + batchSize);
+      let seeded = 0;
+
+      for (const rel of batch) {
+        const srcId = codeToId.get(rel.sourceFrameworkCode);
+        const tgtId = codeToId.get(rel.targetFrameworkCode);
+        if (!srcId || !tgtId) continue;
+        const exist = await db.execute(sql`
+          SELECT 1 FROM "frameworkRelationships" WHERE "sourceFrameworkId" = ${srcId} AND "targetFrameworkId" = ${tgtId} LIMIT 1
+        `);
+        if (exist.rows.length > 0) continue;
+        await db.execute(sql`
+          INSERT INTO "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId", "relationshipType", "description", "severity", "riskLevel", "mitigation")
+          VALUES (${srcId}, ${tgtId}, ${rel.relationshipType}, ${rel.description ?? null}, ${rel.severity ?? null}, ${rel.riskLevel ?? null}, ${rel.mitigation ?? null})
+        `);
+        seeded++;
+      }
+
+      const hasMore = offset + batchSize < complianceRelationships.length;
+      res.status(200).json({ ok: true, seeded, offset, total: complianceRelationships.length, hasMore, nextOffset: hasMore ? offset + batchSize : null });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/_seed-controls")) {
     try {
       if (!cachedApp && !initError) cachedApp = await createApp();
