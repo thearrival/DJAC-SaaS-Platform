@@ -32,6 +32,12 @@
       }
     },
     {
+      "src": "/index.html",
+      "headers": {
+        "cache-control": "no-cache, must-revalidate"
+      }
+    },
+    {
       "src": "/((?!api/|assets/|\\.well-known/)[^.]*)$",
       "dest": "/index.html"
     }
