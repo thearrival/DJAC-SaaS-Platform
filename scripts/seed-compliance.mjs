@@ -11,7 +11,6 @@
  */
 
 import pg from "pg";
-import { fixSslMode } from "../server/_core/ssl-helper.js";
 
 const dbUrl = process.env.DATABASE_URL;
 if (!dbUrl) {
@@ -19,8 +18,13 @@ if (!dbUrl) {
   process.exit(1);
 }
 
+// Ensure SSL mode is set for Supabase connections
+const fixedUrl = dbUrl.includes("sslmode=") ? dbUrl
+  : dbUrl.includes("?") ? `${dbUrl}&sslmode=no-verify`
+  : `${dbUrl}?sslmode=no-verify`;
+
 const client = new pg.Client({
-  connectionString: fixSslMode(dbUrl),
+  connectionString: fixedUrl,
   ssl: { rejectUnauthorized: false },
 });
 
