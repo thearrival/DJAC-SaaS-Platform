@@ -55,6 +55,30 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_preflight")) {
+    try {
+      const { ENV } = await import("../server/_core/env");
+      const db = await import("../server/db");
+      const dbClient = await db.getDb();
+      const checks: Record<string, boolean> = {
+        NODE_ENV_production: ENV.isProduction,
+        JWT_SECRET_set: ENV.cookieSecret.length >= 32,
+        DATABASE_URL_set: ENV.databaseUrl.length > 0,
+        APP_URL_set: ENV.appUrl.length > 0,
+        DB_connected: !!dbClient,
+        billing_configured: ENV.stripeSecretKey.length > 0,
+        redis_configured: ENV.redisUrl.length > 0,
+        sentry_configured: ENV.sentryDsn.length > 0,
+        smtp_configured: ENV.smtpHost.length > 0,
+      };
+      const allOk = Object.values(checks).every(Boolean);
+      res.status(200).json({ ok: allOk, checks, node: process.version });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/_migrate")) {
     try {
       if (!cachedApp && !initError) cachedApp = await createApp();
