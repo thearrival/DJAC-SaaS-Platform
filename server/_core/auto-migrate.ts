@@ -41,9 +41,13 @@ async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeo
 
 async function seedComplianceControls(db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<void> {
     try {
-        const { complianceControls } = await import(
-            "../../scripts/compliance-reference-data.mjs"
-        );
+        const mod = await import("../../scripts/compliance-reference-data.mjs");
+        const complianceControls = mod.complianceControls;
+        if (!Array.isArray(complianceControls) || complianceControls.length === 0) {
+            console.info(`[Migrate] Controls array empty or not found (got ${typeof complianceControls}).`);
+            return;
+        }
+        console.info(`[Migrate] Loaded ${complianceControls.length} controls for seeding.`);
 
         // Resolve framework codes to IDs
         const fwRows = await db.execute(sql`SELECT "id", "code" FROM "frameworks"`);
