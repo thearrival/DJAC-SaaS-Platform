@@ -34,7 +34,7 @@
     {
       "src": "/index.html",
       "headers": {
-        "cache-control": "no-cache, must-revalidate"
+        "cache-control": "no-store, max-age=0"
       }
     },
     {
