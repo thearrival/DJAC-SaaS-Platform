@@ -33,7 +33,7 @@
     },
     {
       "src": "/((?!api/|assets/|\\.well-known/)[^.]*)$",
-      "dest": "/index.html",
+      "dest": "/index.html?v=3",
       "headers": {
         "cache-control": "no-store"
       }
