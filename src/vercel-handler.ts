@@ -158,10 +158,17 @@ export default async function handler(req: any, res: any) {
       for (const ctrl of batch) {
         const fid = codeToId.get(ctrl.frameworkCode);
         if (!fid) continue;
+        // Check existence first to avoid ON CONFLICT requirement
+        const exist = await db.execute(sql`
+          SELECT 1 FROM "complianceControls"
+          WHERE "frameworkId" = ${fid} AND "controlCode" = ${ctrl.controlCode}
+          LIMIT 1
+        `);
+        if (exist.rows.length > 0) continue;
+
         await db.execute(sql`
           INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
           VALUES (${fid}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
-          ON CONFLICT ("frameworkId", "controlCode") DO NOTHING
         `);
         seeded++;
       }
