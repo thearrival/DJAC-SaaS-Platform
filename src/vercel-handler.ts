@@ -55,6 +55,39 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_stats")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      const db = await import("../server/db");
+      const dbClient = await db.getDb();
+      const stats: Record<string, unknown> = {
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        node: process.version,
+        dbConnected: !!dbClient,
+      };
+      if (dbClient) {
+        try {
+          const { sql } = await import("drizzle-orm");
+          const userCount = await dbClient.execute(sql`SELECT COUNT(*)::int as count FROM "localUsers"`);
+          const orgCount = await dbClient.execute(sql`SELECT COUNT(*)::int as count FROM "organizations"`);
+          const fwCount = await dbClient.execute(sql`SELECT COUNT(*)::int as count FROM "frameworks"`);
+          const vendorCount = await dbClient.execute(sql`SELECT COUNT(*)::int as count FROM "vendors"`);
+          stats.users = (userCount.rows[0] as Record<string, unknown>).count;
+          stats.organizations = (orgCount.rows[0] as Record<string, unknown>).count;
+          stats.frameworks = (fwCount.rows[0] as Record<string, unknown>).count;
+          stats.vendors = (vendorCount.rows[0] as Record<string, unknown>).count;
+        } catch {
+          stats.dbError = "Could not query database tables";
+        }
+      }
+      res.status(200).json({ ok: true, ...stats });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/_preflight")) {
     try {
       const { ENV } = await import("../server/_core/env");

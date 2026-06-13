@@ -65,17 +65,27 @@ export default defineConfig(({ mode }) => {
               return "charts";
             }
 
-            // React core MUST be in its own chunk and loaded first.
-            // @radix-ui calls React.forwardRef at module-init time, so it
-            // must be in the same chunk as React or import from react-vendor
-            // before any side-effects run. Merging radix-ui into react-vendor
-            // is the safest fix — it guarantees React is defined when
-            // forwardRef is accessed.
+            // React core + ALL React-dependent libraries MUST load in order.
+            // Any library calling React.createContext/useState/etc at module-init
+            // time will crash if React isn't loaded first. Merge them all here.
             if (
               id.includes("react") ||
               id.includes("react-dom") ||
               id.includes("scheduler") ||
-              id.includes("@radix-ui")
+              id.includes("@radix-ui") ||
+              id.includes("framer-motion") ||
+              id.includes("sonner") ||
+              id.includes("wouter") ||
+              id.includes("cmdk") ||
+              id.includes("vaul") ||
+              id.includes("next-themes") ||
+              id.includes("input-otp") ||
+              id.includes("react-resizable-panels") ||
+              id.includes("embla-carousel") ||
+              id.includes("react-day-picker") ||
+              id.includes("react-markdown") ||
+              id.includes("react-hook-form") ||
+              id.includes("@hookform")
             ) {
               return "react-vendor";
             }
@@ -92,18 +102,13 @@ export default defineConfig(({ mode }) => {
               return "icons";
             }
 
-            // Framer Motion — large and used on most pages
-            if (id.includes("framer-motion")) {
-              return "framer";
-            }
-
             // Form validation — loaded only on forms (signup, settings, etc.)
-            if (id.includes("react-hook-form") || id.includes("zod") || id.includes("@hookform")) {
+            if (id.includes("zod") && !id.includes("react")) {
               return "form-libs";
             }
 
             // Date handling — loaded only on pages with date pickers
-            if (id.includes("date-fns") || id.includes("dayjs") || id.includes("moment")) {
+            if (id.includes("date-fns") || id.includes("dayjs")) {
               return "date-libs";
             }
 
