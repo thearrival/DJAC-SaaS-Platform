@@ -24,6 +24,28 @@ function getPath(req: any): string {
 export default async function handler(req: any, res: any) {
   const path = getPath(req);
 
+  if (path.startsWith("/api/status")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      const dbModule = await import("../server/db");
+      const db = await dbModule.getDb();
+      const { ENV } = await import("../server/_core/env");
+      res.status(200).json({
+        ok: true,
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        service: "djac-tool",
+        node: process.version,
+        uptime: process.uptime(),
+        dbConnected: !!db,
+        env: ENV.isProduction ? "production" : "development",
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/health") || path.startsWith("/health")) {
     res.status(200).json({ ok: true, status: "healthy", timestamp: new Date().toISOString(), service: "djac-tool", node: process.version });
     return;
