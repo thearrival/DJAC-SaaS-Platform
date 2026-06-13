@@ -98,6 +98,10 @@ export default async function handler(req: any, res: any) {
     if (!cachedApp) { res.status(500).json({ error: "Express app failed to initialize", message: initError }); return; }
     cachedApp(req, res);
   } catch (err) {
-    res.status(500).json({ error: "Internal server error", message: err instanceof Error ? err.message : String(err) });
+    res.status(500).json({
+      error: "Internal server error",
+      message: err instanceof Error ? err.message : String(err),
+      ref: `ERR-${Date.now().toString(36).toUpperCase()}`
+    });
   }
 }

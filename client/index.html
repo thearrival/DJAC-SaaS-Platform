@@ -13,6 +13,7 @@
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <meta name="theme-color" content="#0a0a0f" />
   <link rel="canonical" href="https://app.yalla-hack.ae/" />
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website" />
@@ -227,6 +228,13 @@
     </div>
   </noscript>
   <script type="module" src="/src/main.tsx"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js").catch(function () {});
+      });
+    }
+  </script>
 </body>
 
 </html>
