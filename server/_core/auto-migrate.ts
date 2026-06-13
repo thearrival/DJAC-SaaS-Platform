@@ -53,30 +53,37 @@ async function seedComplianceControls(db: NonNullable<Awaited<ReturnType<typeof 
         }
 
         let seeded = 0;
+        let failed = 0;
         for (const ctrl of complianceControls) {
             const frameworkId = codeToId.get(ctrl.frameworkCode);
-            if (!frameworkId) continue;
+            if (!frameworkId) { failed++; continue; }
 
-            // Check if control already exists for this framework
-            const existing = await db.execute(sql`
-                SELECT 1 FROM "complianceControls"
-                WHERE "frameworkId" = ${frameworkId} AND "controlCode" = ${ctrl.controlCode}
-                LIMIT 1
-            `);
-            if (existing.rows.length > 0) continue;
+            try {
+                const existing = await db.execute(sql`
+                    SELECT 1 FROM "complianceControls"
+                    WHERE "frameworkId" = ${frameworkId} AND "controlCode" = ${ctrl.controlCode}
+                    LIMIT 1
+                `);
+                if (existing.rows.length > 0) continue;
 
-            await db.execute(sql`
-                INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
-                VALUES (${frameworkId}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
-            `);
-            seeded++;
+                await db.execute(sql`
+                    INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
+                    VALUES (${frameworkId}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
+                `);
+                seeded++;
+            } catch (err) {
+                failed++;
+                if (failed <= 3) {
+                    console.warn(`[Migrate] Control seed failed for ${ctrl.frameworkCode}/${ctrl.controlCode}:`, (err as Error).message);
+                }
+            }
         }
 
-        if (!ENV.isProduction) {
-            console.info(`[Migrate] Seeded ${seeded} compliance controls.`);
+        if (!ENV.isProduction || seeded > 0 || failed > 0) {
+            console.info(`[Migrate] Seeded ${seeded} compliance controls (${failed} skipped/failed).`);
         }
     } catch (err) {
-        console.warn("[Migrate] Compliance controls seed failed:", (err as Error).message);
+        console.warn("[Migrate] Controls seed failed to start:", (err as Error).message);
     }
 }
 
