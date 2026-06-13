@@ -130,6 +130,57 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_seed-controls")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      const dbModule = await import("../server/db");
+      const db = await dbModule.getDb();
+      if (!db) { res.status(200).json({ ok: false, error: "Database not connected" }); return; }
+
+      const mod = await import("../scripts/compliance-reference-data.mjs");
+      const controls = mod.complianceControls;
+      const { sql } = await import("drizzle-orm");
+
+      // Get framework code→id map
+      const fwRows = await db.execute(sql`SELECT "id", "code" FROM "frameworks"`);
+      const codeToId = new Map();
+      for (const row of fwRows.rows) codeToId.set(row.code, row.id);
+
+      // Ensure unique index
+      await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`);
+
+      // Process in batches of 50 to stay under timeout
+      const batchSize = 50;
+      const offset = parseInt(req.query?.offset || "0", 10);
+      const batch = controls.slice(offset, offset + batchSize);
+      let seeded = 0;
+
+      for (const ctrl of batch) {
+        const fid = codeToId.get(ctrl.frameworkCode);
+        if (!fid) continue;
+        await db.execute(sql`
+          INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
+          VALUES (${fid}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
+          ON CONFLICT ("frameworkId", "controlCode") DO NOTHING
+        `);
+        seeded++;
+      }
+
+      const hasMore = offset + batchSize < controls.length;
+      res.status(200).json({
+        ok: true,
+        seeded,
+        offset,
+        total: controls.length,
+        hasMore,
+        nextOffset: hasMore ? offset + batchSize : null,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/_preflight")) {
     try {
       const { ENV } = await import("../server/_core/env");
