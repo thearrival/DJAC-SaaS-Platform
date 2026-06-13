@@ -551,7 +551,13 @@ async function loadLogoBytes() {
 
 async function buildDocxBuffer(options: ReportOptions, report: GeneratedReportModel): Promise<Buffer> {
     const templatePath = path.resolve(process.cwd(), "audit", "templates", "official-report-template.docx");
-    const templateBytes = await fs.readFile(templatePath);
+
+    let templateBytes: Buffer;
+    try {
+        templateBytes = await fs.readFile(templatePath);
+    } catch {
+        return buildMinimalDocxBuffer(report);
+    }
 
     try {
         const zip = new PizZip(templateBytes);

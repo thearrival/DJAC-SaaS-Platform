@@ -109,22 +109,26 @@ async function run() {
         "consultation request should succeed in permissive mode"
     );
 
-    const cookiePair = (register.setCookie.split(";")[0] || "").trim();
-    assert(cookiePair.startsWith("djac_local_session="), "register should set local auth cookie");
+    const registerBody = JSON.parse(register.text);
+    const needsVerification = registerBody?.result?.data?.json?.pendingVerification === true;
 
-    const me = await fetchWithHint(
-        `${baseUrl}/api/trpc/localAuth.me`,
-        `Unable to resolve session lookup. Ensure server is running and cookie handling is enabled.`,
-        {
-            headers: {
-                cookie: cookiePair,
-            },
-        }
-    );
-    const meBody = await me.text();
-    log("me", me.status, meBody.slice(0, 220));
-    assert(me.status === 200, "localAuth.me should return success");
-    assert(meBody.includes(`"email":"${email}"`), "localAuth.me should include the new user");
+    if (needsVerification) {
+        // OTP/verification flow: no session cookie until verified
+        log("register", "pendingVerification=true (OTP flow — no session cookie expected)");
+    } else {
+        const cookiePair = (register.setCookie.split(";")[0] || "").trim();
+        assert(cookiePair.startsWith("djac_local_session="), "register should set local auth cookie");
+
+        const me = await fetchWithHint(
+            `${baseUrl}/api/trpc/localAuth.me`,
+            "Unable to resolve session lookup. Ensure server is running and cookie handling is enabled.",
+            { headers: { cookie: cookiePair } }
+        );
+        const meBody = await me.text();
+        log("me", me.status, meBody.slice(0, 220));
+        assert(me.status === 200, "localAuth.me should return success");
+        assert(meBody.includes(`"email":"${email}"`), "localAuth.me should include the new user");
+    }
 
     const login = await postTrpc("localAuth.login", {
         email,
@@ -133,39 +137,26 @@ async function run() {
     log("login", login.status, login.text.slice(0, 220));
     assert(login.status === 200, "localAuth.login should succeed with valid credentials");
 
+    const sessionCookie = (login.setCookie || register.setCookie || "").split(";")[0].trim();
+
     const report = await postTrpc(
         "compliance.report",
-        {
-            jurisdiction: "both",
-            locale: "en",
-        },
-        {
-            cookie: cookiePair,
-        }
+        { jurisdiction: "both", locale: "en" },
+        { cookie: sessionCookie }
     );
     log("report", report.status, report.text.slice(0, 220));
 
     const reportPdf = await postTrpc(
         "compliance.reportPdf",
-        {
-            jurisdiction: "both",
-            locale: "en",
-        },
-        {
-            cookie: cookiePair,
-        }
+        { jurisdiction: "both", locale: "en" },
+        { cookie: sessionCookie }
     );
     log("reportPdf", reportPdf.status, reportPdf.text.slice(0, 220));
 
     const reportDocx = await postTrpc(
         "compliance.reportDocx",
-        {
-            jurisdiction: "both",
-            locale: "en",
-        },
-        {
-            cookie: cookiePair,
-        }
+        { jurisdiction: "both", locale: "en" },
+        { cookie: sessionCookie }
     );
     log("reportDocx", reportDocx.status, reportDocx.text.slice(0, 220));
 
