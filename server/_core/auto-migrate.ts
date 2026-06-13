@@ -52,29 +52,33 @@ async function seedComplianceControls(db: NonNullable<Awaited<ReturnType<typeof 
             codeToId.set(row.code, row.id);
         }
 
-        let seeded = 0;
-        let failed = 0;
+        // Build single batch INSERT for performance
+        const rows: string[] = [];
         for (const ctrl of complianceControls) {
             const frameworkId = codeToId.get(ctrl.frameworkCode);
-            if (!frameworkId) { failed++; continue; }
-
-            try {
-                await db.execute(sql`
-                    INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
-                    VALUES (${frameworkId}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
-                    ON CONFLICT ("frameworkId", "controlCode") DO NOTHING
-                `);
-                seeded++;
-            } catch (err) {
-                failed++;
-                if (failed <= 2) {
-                    console.warn(`[Migrate] Control seed failed for ${ctrl.frameworkCode}/${ctrl.controlCode}:`, (err as Error).message);
-                }
-            }
+            if (!frameworkId) continue;
+            const row = [
+                frameworkId,
+                `'${(ctrl.controlCode as string).replace(/'/g, "''")}'`,
+                `'${(ctrl.controlName as string).replace(/'/g, "''")}'`,
+                ctrl.category ? `'${(ctrl.category as string).replace(/'/g, "''")}'` : "NULL",
+                ctrl.description ? `'${(ctrl.description as string).replace(/'/g, "''")}'` : "NULL",
+                ctrl.requirement ? `'${(ctrl.requirement as string).replace(/'/g, "''")}'` : "NULL",
+                ctrl.applicability ? `'${(ctrl.applicability as string).replace(/'/g, "''")}'` : "NULL",
+            ].join(", ");
+            rows.push(`(${row})`);
         }
 
-        if (!ENV.isProduction || seeded > 0 || failed > 0) {
-            console.info(`[Migrate] Seeded ${seeded} compliance controls (${failed} skipped/failed).`);
+        if (rows.length > 0) {
+            await db.execute(sql.raw(`
+                INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
+                VALUES ${rows.join(", ")}
+                ON CONFLICT ("frameworkId", "controlCode") DO NOTHING
+            `));
+        }
+
+        if (!ENV.isProduction || rows.length > 0) {
+            console.info(`[Migrate] Seeded ${rows.length} compliance controls.`);
         }
     } catch (err) {
         console.warn("[Migrate] Controls seed failed to start:", (err as Error).message);
