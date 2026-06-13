@@ -59,21 +59,15 @@ async function seedComplianceControls(db: NonNullable<Awaited<ReturnType<typeof 
             if (!frameworkId) { failed++; continue; }
 
             try {
-                const existing = await db.execute(sql`
-                    SELECT 1 FROM "complianceControls"
-                    WHERE "frameworkId" = ${frameworkId} AND "controlCode" = ${ctrl.controlCode}
-                    LIMIT 1
-                `);
-                if (existing.rows.length > 0) continue;
-
                 await db.execute(sql`
                     INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
                     VALUES (${frameworkId}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
+                    ON CONFLICT ("frameworkId", "controlCode") DO NOTHING
                 `);
                 seeded++;
             } catch (err) {
                 failed++;
-                if (failed <= 3) {
+                if (failed <= 2) {
                     console.warn(`[Migrate] Control seed failed for ${ctrl.frameworkCode}/${ctrl.controlCode}:`, (err as Error).message);
                 }
             }
@@ -185,6 +179,12 @@ export async function ensureMigrated(): Promise<void> {
         for (const idx of indexes) {
             await db.execute(sql.raw(idx));
         }
+
+        // Ensure unique constraint for compliance controls seeding
+        await db.execute(sql`
+            CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx"
+            ON "complianceControls" ("frameworkId", "controlCode")
+        `);
 
         // Seed compliance reference data into DB (idempotent upserts)
         await seedComplianceFrameworks(db);
