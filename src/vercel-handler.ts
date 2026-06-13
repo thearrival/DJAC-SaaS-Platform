@@ -110,6 +110,26 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_db-tables")) {
+    try {
+      if (!cachedApp && !initError) cachedApp = await createApp();
+      const dbModule = await import("../server/db");
+      const db = await dbModule.getDb();
+      if (!db) { res.status(200).json({ ok: false, error: "Database not connected" }); return; }
+      const { sql } = await import("drizzle-orm");
+      const tables = await db.execute(sql`
+        SELECT table_name FROM information_schema.tables
+        WHERE table_schema = 'public'
+        ORDER BY table_name
+      `);
+      const names = tables.rows.map((r: Record<string, unknown>) => r.table_name);
+      res.status(200).json({ ok: true, count: names.length, tables: names, node: process.version });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/_preflight")) {
     try {
       const { ENV } = await import("../server/_core/env");
