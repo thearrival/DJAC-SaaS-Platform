@@ -39,6 +39,47 @@ async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeo
     }
 }
 
+async function seedComplianceControls(db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<void> {
+    try {
+        const { complianceControls } = await import(
+            "../../scripts/compliance-reference-data.mjs"
+        );
+
+        // Resolve framework codes to IDs
+        const fwRows = await db.execute(sql`SELECT "id", "code" FROM "frameworks"`);
+        const codeToId = new Map<string, number>();
+        for (const row of fwRows.rows as Array<{ id: number; code: string }>) {
+            codeToId.set(row.code, row.id);
+        }
+
+        let seeded = 0;
+        for (const ctrl of complianceControls) {
+            const frameworkId = codeToId.get(ctrl.frameworkCode);
+            if (!frameworkId) continue;
+
+            // Check if control already exists for this framework
+            const existing = await db.execute(sql`
+                SELECT 1 FROM "complianceControls"
+                WHERE "frameworkId" = ${frameworkId} AND "controlCode" = ${ctrl.controlCode}
+                LIMIT 1
+            `);
+            if (existing.rows.length > 0) continue;
+
+            await db.execute(sql`
+                INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
+                VALUES (${frameworkId}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
+            `);
+            seeded++;
+        }
+
+        if (!ENV.isProduction) {
+            console.info(`[Migrate] Seeded ${seeded} compliance controls.`);
+        }
+    } catch (err) {
+        console.warn("[Migrate] Compliance controls seed failed:", (err as Error).message);
+    }
+}
+
 export async function ensureMigrated(): Promise<void> {
     if (migrationApplied) return;
 
@@ -140,6 +181,7 @@ export async function ensureMigrated(): Promise<void> {
 
         // Seed compliance reference data into DB (idempotent upserts)
         await seedComplianceFrameworks(db);
+        await seedComplianceControls(db);
 
         migrationApplied = true;
         if (!ENV.isProduction) {
