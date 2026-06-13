@@ -98,6 +98,27 @@ export async function ensureMigrated(): Promise<void> {
             )
         `);
 
+        // Ensure core audit table exists (may be missing if only auto-migrate ran)
+        await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "auditLogs" (
+                "id"             serial        PRIMARY KEY,
+                "userId"         integer,
+                "localUserId"    integer,
+                "organizationId" integer,
+                "actorRole"      varchar(64),
+                "category"       varchar(64)   NOT NULL,
+                "action"         varchar(120)  NOT NULL,
+                "entityType"     varchar(120),
+                "entityId"       integer,
+                "targetEntity"   varchar(255),
+                "outcome"        varchar(32)   NOT NULL DEFAULT 'success',
+                "payload"        text,
+                "ipHash"         varchar(64),
+                "userAgent"      varchar(512),
+                "createdAt"      timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+
         // Performance indexes (safe with IF NOT EXISTS)
         const indexes = [
             `CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
