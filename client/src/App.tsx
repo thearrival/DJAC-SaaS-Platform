@@ -17,6 +17,7 @@ const CookieConsentBanner = lazy(() =>
 );
 
 const Home = lazy(() => import("./pages/Home"));
+const AdminHealth = lazy(() => import("./pages/AdminHealth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const DevComponentShowcase = import.meta.env.DEV
   ? lazy(() => import("./pages/ComponentShowcase"))
@@ -118,6 +119,9 @@ function Router() {
       )}
       <Route path={"/privacy"}>
         <PrivacyPolicy />
+      </Route>
+      <Route path={"/admin/health"}>
+        <AdminHealth />
       </Route>
       <Route path={"/terms"}>
         <TermsOfService />
