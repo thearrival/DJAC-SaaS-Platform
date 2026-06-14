@@ -88,11 +88,11 @@ export default function OnboardingWizard() {
 
     const stepTitles = useMemo(
         () => [
-            t("wizard.step1", "Organization Setup"),
-            t("wizard.step2", "Jurisdiction Focus"),
-            t("wizard.step3", "Vendor Selection"),
-            t("wizard.step4", "Run Assessment"),
-            t("wizard.step5", "Generate Report"),
+            t("wizard.step1", "🏢 Organization Setup"),
+            t("wizard.step2", "🌍 Jurisdiction Focus"),
+            t("wizard.step3", "🔍 Vendor Selection"),
+            t("wizard.step4", "🤖 Run Assessment"),
+            t("wizard.step5", "📄 Generate Report"),
         ] as const,
         [t]
     );
@@ -152,7 +152,7 @@ export default function OnboardingWizard() {
                         {t("wizard.title", "5-Step Enterprise Onboarding Wizard")}
                     </CardTitle>
                     <CardDescription>
-                        {t("wizard.subtitle", "Complete setup from organization to first compliance report in one guided flow.")}
+                        {t("wizard.subtitle", "Welcome aboard! 🚀 In 5 minutes, you'll set up your organization, pick your compliance jurisdictions, assess a vendor, and generate your first AI-powered compliance report. Let's get started!")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
