@@ -90,6 +90,16 @@ export const complianceFrameworks = [
     maxPenalty: "Up to SAR 5M and possible additional sanctions",
   },
   {
+    code: "UAE-PDPL",
+    name: "UAE Federal Personal Data Protection Law",
+    country: "United Arab Emirates",
+    description:
+      "UAE's comprehensive federal data protection law governing personal data processing, cross-border transfers, and data subject rights across all Emirates.",
+    scope: "All controllers and processors handling personal data in the UAE, including free zones.",
+    enforcementAuthority: "UAE Data Office / TDRA",
+    maxPenalty: "Up to AED 5M and potential business suspension",
+  },
+  {
     code: "NCA",
     name: "National Cybersecurity Authority Framework Baseline",
     country: "Saudi Arabia",
