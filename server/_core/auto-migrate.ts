@@ -146,6 +146,10 @@ export async function ensureMigrated(): Promise<void> {
             CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx"
             ON "complianceControls" ("frameworkId", "controlCode")
         `);
+        await db.execute(sql`
+            CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx"
+            ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")
+        `);
 
         // Seed compliance reference data into DB (idempotent upserts)
         await seedComplianceFrameworks(db);
