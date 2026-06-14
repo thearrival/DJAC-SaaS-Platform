@@ -24,6 +24,12 @@ export default function AdminHealth() {
 
   useEffect(() => { fetchData(); const t = setInterval(fetchData, 30000); return () => clearInterval(t); }, []);
 
+  const services = [
+    { label: "Database", ok: stats?.dbConnected, icon: Database },
+    { label: "Frameworks", ok: (stats?.frameworks as number) > 0, icon: BookOpen },
+    { label: "Users", ok: true, icon: Users, detail: stats?.users },
+  ];
+
   if (loading && !stats) {
     return (
       <div className="djac-page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
@@ -31,10 +37,6 @@ export default function AdminHealth() {
       </div>
     );
   }
-    { label: "Database", ok: stats?.dbConnected, icon: Database },
-    { label: "Frameworks", ok: (stats?.frameworks as number) > 0, icon: BookOpen },
-    { label: "Users", ok: true, icon: Users, detail: stats?.users },
-  ];
 
   return (
     <div className="djac-page">
