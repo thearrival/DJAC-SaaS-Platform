@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import { WelcomeBanner } from "@/components/WelcomeBanner";
 
 // Design tokens (Yalla-Hack design spec dark theme)
 // Accent colors are theme-aware — defined inside Dashboard via useTheme().
@@ -229,6 +230,7 @@ export default function Dashboard() {
   // Render
   return (
     <div className="djac-page">
+      <WelcomeBanner />
       <div className="djac-dash-root" style={{ color: C.text }}>
 
         {/* Header */}

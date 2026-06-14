@@ -74,86 +74,93 @@ const TOUR_STEPS: TourStep[] = [
         titleFallback: "Welcome to DJAC! 👋",
         descKey: "tour.step0Desc",
         descFallback:
-            "This quick tour will guide you through the key features of the platform. " +
-            "You can skip at any time or restart it from Account Settings.",
+            "Your all-in-one compliance platform for China–Saudi cross-border operations.\n\n" +
+            "📊 Compliance tracking  •  🤖 AI-powered reports\n" +
+            "🔍 Vendor risk analysis  •  📅 Deadline monitoring\n\n" +
+            "In 7 quick steps, you'll master the essentials. Let's go! 🚀",
     },
     {
         targetId: "tour-menu-dashboard",
         titleKey: "tour.step1Title",
-        titleFallback: "Your Compliance Command Center",
+        titleFallback: "📊 Dashboard — Your Command Center",
         descKey: "tour.step1Desc",
         descFallback:
-            "The Dashboard shows your real-time compliance score, risk gauges, " +
-            "framework coverage, and upcoming deadlines at a glance.",
+            "See everything at a glance: compliance score, risk levels, upcoming deadlines, " +
+            "and framework coverage. This is your home base — check it daily.",
         placement: "right",
     },
     {
         targetId: "tour-menu-analysis",
         titleKey: "tour.step2Title",
-        titleFallback: "Framework Analysis",
+        titleFallback: "🔍 Framework Analysis — Compare Laws",
         descKey: "tour.step2Desc",
         descFallback:
-            "Compare PIPL, CSL, DSL, PDPL, and NCA side-by-side. Visualise overlaps, " +
-            "conflicts, and harmonisation opportunities across all 5 frameworks.",
+            "Compare PIPL, CSL, DSL, PDPL, and NCA side-by-side. " +
+            "Spot overlaps, conflicts, and gaps across Saudi and Chinese regulations instantly.",
         placement: "right",
     },
     {
         targetId: "tour-menu-vendor-assessment",
         titleKey: "tour.step3Title",
-        titleFallback: "Vendor Assessment",
+        titleFallback: "🏢 Vendor Risk — Assess Third Parties",
         descKey: "tour.step3Desc",
         descFallback:
-            "Upload a vendor profile and our AI pipeline will score its compliance " +
-            "alignment, flag data-residency gaps, and generate a risk report.",
-        placement: "right",
-    },
-    {
-        targetId: "tour-menu-pro-intelligence",
-        titleKey: "tour.step4Title",
-        titleFallback: "Pro Intelligence Dashboard",
-        descKey: "tour.step4Desc",
-        descFallback:
-            "Real-time Sino-Gulf regulatory heatmap, live AI pipeline transparency, " +
-            "enforcement pulse feed, and PIPL penalty calculator — all in one view.",
+            "Upload a vendor profile and our AI scores compliance alignment, " +
+            "flags data-residency gaps, and generates a risk report in seconds.",
         placement: "right",
     },
     {
         targetId: "tour-menu-report-center",
-        titleKey: "tour.step5Title",
-        titleFallback: "Report Center",
-        descKey: "tour.step5Desc",
+        titleKey: "tour.step4Title",
+        titleFallback: "📄 Reports — Generate & Share",
+        descKey: "tour.step4Desc",
         descFallback:
-            "Generate AI-powered PDF or DOCX compliance reports, share them via " +
-            "time-limited signed links, and schedule weekly or monthly auto-delivery.",
+            "One click → AI-powered PDF or DOCX compliance report. " +
+            "Share via secure time-limited links. Schedule auto-delivery weekly or monthly.",
         placement: "right",
     },
     {
         targetId: "tour-menu-calendar",
+        titleKey: "tour.step5Title",
+        titleFallback: "📅 Calendar — Never Miss a Deadline",
+        descKey: "tour.step5Desc",
+        descFallback:
+            "Track PIPL, CSL, PDPL, and NCA deadlines. " +
+            "DJAC emails you 30, 7, and 1 day before each one. Stress-free compliance.",
+        placement: "right",
+    },
+    {
+        targetId: "tour-menu-pro-intelligence",
         titleKey: "tour.step6Title",
-        titleFallback: "Compliance Calendar",
+        titleFallback: "🌍 Pro Intelligence — Live Regulatory Feed",
         descKey: "tour.step6Desc",
         descFallback:
-            "Track PIPL, CSL, PDPL, and NCA regulatory deadlines. DJAC sends " +
-            "email reminders 30, 7, and 1 day before each due date.",
+            "Real-time Sino-Gulf regulatory updates, enforcement actions, " +
+            "penalty calculators, and AI pipeline transparency. For power users.",
         placement: "right",
     },
     {
         targetId: "tour-menu-account-settings",
         titleKey: "tour.step7Title",
-        titleFallback: "Account Settings",
+        titleFallback: "⚙️ Settings — Secure Your Account",
         descKey: "tour.step7Desc",
         descFallback:
-            "Update your profile, change your password, and enable two-factor " +
-            "authentication (TOTP) with backup codes for enterprise-grade security.",
+            "🔐 Enable two-factor auth (TOTP)  •  👤 Update profile\n" +
+            "🌐 Switch language (EN/AR/ZH)  •  🎨 Toggle dark mode\n" +
+            "All under Account Settings.",
         placement: "right",
     },
     {
         titleKey: "tour.step8Title",
-        titleFallback: "You're All Set! 🎉",
+        titleFallback: "You're Ready! 🎉",
         descKey: "tour.step8Desc",
         descFallback:
-            "DJAC is ready to work. Start by running a vendor assessment or " +
-            "generating your first compliance report. Happy auditing!",
+            "✅ Take the tour — done!\n\n" +
+            "Start here:\n" +
+            "1️⃣ Run a Vendor Assessment\n" +
+            "2️⃣ Generate your first Compliance Report\n" +
+            "3️⃣ Check the Compliance Calendar\n\n" +
+            "DJAC has your back. Go make compliance easy! 💪",
     },
 ];
 
