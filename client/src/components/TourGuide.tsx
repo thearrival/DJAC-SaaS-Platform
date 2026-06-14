@@ -70,7 +70,7 @@ export interface TourStep {
 // ── Default tour steps (English fallbacks + translation key hooks) ─────────────
 const TOUR_STEPS: TourStep[] = [
     {
-        titleKey: "tour.step0Title",
+        titleKey: "tour.v2.step0Title",
         titleFallback: "Welcome to DJAC! 👋",
         descKey: "tour.step0Desc",
         descFallback:
@@ -512,7 +512,7 @@ export function TourGuide() {
                             ? t("tour.complete", "Complete!")
                             : isFirst
                                 ? t("tour.welcome", "Welcome")
-                                : `${t("tour.step", "Step")} ${stepIdx} / ${TOUR_STEPS.length - 2}`}
+                                : `${t("tour.v2.step", "Step")} ${stepIdx} / ${TOUR_STEPS.length - 2}`}
                     </div>
                     {/* Progress bar */}
                     <div style={{ flex: 1, marginLeft: 14, height: 3, background: "rgba(255,255,255,0.10)", borderRadius: 2, overflow: "hidden" }}>
