@@ -82,16 +82,42 @@ export async function sendOtp(input: SendOtpInput): Promise<{ success: boolean; 
     let delivered = false;
 
     if (!isPhone(normalized)) {
-        // Email OTP — send via SMTP
-        const subject = input.purpose === "register"
-            ? "DJAC: Your email verification code"
-            : "DJAC: Your sign-in code";
-        delivered = await sendEmail({
-            to: normalized,
-            subject,
-            html: `<p>Your DJAC verification code is:</p><h2 style="font-size:32px;letter-spacing:8px;font-family:monospace;">${code}</h2><p>This code expires in ${OTP_EXPIRY_MINUTES} minutes. If you did not request this code, please ignore this email.</p>`,
-            text: `Your DJAC verification code is: ${code}\n\nExpires in ${OTP_EXPIRY_MINUTES} minutes.\n\nIf you did not request this code, ignore this message.`,
-        });
+        // Professional branded OTP email
+        const isRegister = input.purpose === "register";
+        const subject = isRegister
+            ? "DJAC — Verify Your Account"
+            : "DJAC — Security Verification Code";
+        const actionLabel = isRegister ? "verify your account" : "sign in securely";
+
+        const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
+  <tr><td style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);padding:32px 40px;text-align:center">
+    <h1 style="color:#ffffff;font-size:22px;font-weight:700;margin:0;letter-spacing:-0.3px">DJAC Compliance Platform</h1>
+  </td></tr>
+  <tr><td style="padding:40px">
+    <h2 style="color:#1e1b4b;font-size:18px;font-weight:700;margin:0 0 12px">Security Verification</h2>
+    <p style="color:#52525b;font-size:15px;line-height:1.6;margin:0 0 28px">Use the code below to ${actionLabel}. This code is valid for ${OTP_EXPIRY_MINUTES} minutes.</p>
+    <div style="background:#f8f7ff;border:2px dashed #6366f1;border-radius:10px;padding:24px;text-align:center;margin-bottom:28px">
+      <span style="font-size:36px;font-weight:800;letter-spacing:12px;color:#312e81;font-family:'Courier New',monospace">${code}</span>
+    </div>
+    <p style="color:#a1a1aa;font-size:13px;line-height:1.6;margin:0 0 8px">If you did not request this code, please ignore this email. Your account security has not been compromised.</p>
+    <p style="color:#a1a1aa;font-size:13px;line-height:1.6;margin:0">For security reasons, never share this code with anyone.</p>
+  </td></tr>
+  <tr><td style="background:#fafafa;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7">
+    <p style="color:#a1a1aa;font-size:12px;margin:0">DJAC Tool — China-Saudi Compliance Intelligence<br>&copy; ${new Date().getFullYear()} DJAC. All rights reserved.</p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+        const text = `DJAC Compliance Platform\n========================\n\nYour security verification code is: ${code}\n\nThis code expires in ${OTP_EXPIRY_MINUTES} minutes.\nUse it to ${actionLabel}.\n\nIf you did not request this code, ignore this message.\nYour account security has not been compromised.\n\nDJAC Tool — China-Saudi Compliance Intelligence`;
+
+        delivered = await sendEmail({ to: normalized, subject, html, text });
     } else {
         // Phone OTP — no SMS provider configured, so log to console and also try email if SMTP is set
         console.info(`[OTP] Phone OTP for ${normalized} — SMS provider not configured. Code logged above.`);
