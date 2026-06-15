@@ -275,6 +275,31 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  if (path.startsWith("/api/_smtp-test")) {
+    try {
+      const { ENV } = await import("../server/_core/env");
+      const { sendEmail } = await import("../server/email");
+      const testEmail = req.query?.to || "test@example.com";
+      const sent = await sendEmail({
+        to: String(testEmail),
+        subject: "DJAC SMTP Test",
+        html: "<p>This is a test email from DJAC platform to verify SMTP configuration.</p>",
+        text: "This is a test email from DJAC platform to verify SMTP configuration.",
+      });
+      res.status(200).json({
+        ok: sent,
+        smtpConfigured: !!(ENV.smtpHost && ENV.smtpUser && ENV.smtpPass),
+        smtpHost: ENV.smtpHost ? `${ENV.smtpHost}:${ENV.smtpPort}` : "not set",
+        smtpFrom: ENV.smtpFrom || "not set",
+        message: sent ? "Test email sent successfully" : "SMTP delivery failed — check server logs",
+        node: process.version,
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+    return;
+  }
+
   if (path.startsWith("/api/_preflight")) {
     try {
       const { ENV } = await import("../server/_core/env");
