@@ -45,6 +45,7 @@ import {
     findLocalUserById,
     findLocalUserByPhone,
     checkEmailExists,
+    checkPhoneExists,
     listLocalUsersForAdmin,
     insertLocalUser,
     updateLocalUserLastSignedIn,
@@ -139,6 +140,9 @@ export const localAuthRouter = router({
                 const normalizedEmail = input.email.toLowerCase();
                 if (await checkEmailExists(normalizedEmail)) {
                     throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists." });
+                }
+                if (input.phoneNumber && await checkPhoneExists(input.phoneNumber)) {
+                    throw new TRPCError({ code: "CONFLICT", message: "An account with this phone number already exists." });
                 }
 
                 const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
