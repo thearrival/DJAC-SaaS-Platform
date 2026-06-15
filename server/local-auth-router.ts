@@ -185,15 +185,12 @@ export const localAuthRouter = router({
             broadcastSSE("user_registered", { email: normalizedEmail, userType: input.userType, ts: new Date().toISOString() });
 
             // Send OTP for verification — user must verify before logging in
-            void (async () => {
-                try {
-                    await sendOtp({ identifier: normalizedEmail, purpose: "register" });
-                } catch (e) {
-                    console.warn("[localAuth] Failed to send registration OTP:", e);
-                }
-            })();
+            const otpResult = await sendOtp({ identifier: normalizedEmail, purpose: "register" }).catch((e) => {
+                console.warn("[localAuth] Failed to send registration OTP:", e);
+                return { success: false, message: "OTP delivery failed", code: undefined as string | undefined };
+            });
 
-            return { pendingVerification: true as const, identifier: normalizedEmail };
+            return { pendingVerification: true as const, identifier: normalizedEmail, otpMessage: otpResult.message, ...(otpResult.code ? { otpCode: otpResult.code } : {}) };
         }),
 
     /** Login with email + password */
@@ -330,15 +327,12 @@ export const localAuthRouter = router({
             const activeUser = user?.status === "active" ? user : null;
 
             if (activeUser) {
-                // Try email first, fall back to console-only for phone
-                void (async () => {
-                    try {
-                        await sendOtp({ identifier: input.email, purpose: "login" });
-                        void recordAuditEvent(ctx, { category: "auth", action: "password.reset.request", entityType: "localUsers", entityId: activeUser.id, localUserId: activeUser.id, payload: { method: "otp" } });
-                    } catch (e) {
-                        console.warn("[localAuth] Failed to send reset OTP:", e);
-                    }
-                })();
+                const otpResult = await sendOtp({ identifier: input.email, purpose: "login" }).catch((e) => {
+                    console.warn("[localAuth] Failed to send reset OTP:", e);
+                    return { success: false, message: "OTP delivery failed", code: undefined as string | undefined };
+                });
+                void recordAuditEvent(ctx, { category: "auth", action: "password.reset.request", entityType: "localUsers", entityId: activeUser.id, localUserId: activeUser.id, payload: { method: "otp" } });
+                return { success: true as const, ...(otpResult.code ? { otpCode: otpResult.code, otpMessage: otpResult.message } : {}) };
             }
 
             return { success: true as const };
