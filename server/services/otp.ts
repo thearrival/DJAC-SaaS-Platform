@@ -99,12 +99,9 @@ export async function sendOtp(input: SendOtpInput): Promise<{ success: boolean; 
     }
 
     if (delivered) {
-        return { success: true, message: `Verification code sent to ${normalized}.`, code };
+        return { success: true, message: `Verification code sent to ${normalized}.` };
     }
-    const fallbackMsg = isPhone(normalized)
-        ? "SMS provider not configured — code is: " + code
-        : "Email not configured — your code is: " + code;
-    return { success: true, message: fallbackMsg, code };
+    return { success: true, message: `Email not configured — your code is: ${code}`, code };
 }
 
 export async function verifyOtp(input: VerifyOtpInput): Promise<{ success: boolean; message: string }> {
