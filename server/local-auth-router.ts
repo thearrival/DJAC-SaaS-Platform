@@ -621,7 +621,7 @@ export const localAuthRouter = router({
                 throw new TRPCError({ code: "BAD_REQUEST", message: result.message });
             }
             void recordAuditEvent(ctx, { category: "auth", action: "otp.sent", entityType: "otpCodes", payload: { identifier: input.identifier.replace(/(.{3}).*(@.*)/, "$1***$2"), purpose: input.purpose } });
-            return { success: true as const };
+            return { success: true as const, message: result.message, ...(result.code ? { code: result.code } : {}) };
         }),
 
     /** Verify OTP — logs in existing user or creates a new account if registering */
