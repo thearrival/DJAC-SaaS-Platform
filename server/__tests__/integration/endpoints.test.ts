@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 
-describe("API — Endpoint Availability", () => {
-  const BASE = process.env.SMOKE_BASE_URL || "http://localhost:3000";
+const BASE = process.env.SMOKE_BASE_URL || "";
+const SKIP = !BASE;
+
+describe.runIf(!SKIP)("API — Endpoint Availability", () => {
 
   it("GET /api/health returns healthy", async () => {
     const res = await fetch(`${BASE}/api/health`);
@@ -65,9 +67,7 @@ describe("API — Endpoint Availability", () => {
   });
 });
 
-describe("API — SPA Pages", () => {
-  const BASE = process.env.SMOKE_BASE_URL || "http://localhost:3000";
-
+describe.runIf(!SKIP)("API — SPA Pages", () => {
   const pages = ["", "signup", "login", "pricing", "privacy", "terms", "forgot-password"];
 
   for (const page of pages) {
