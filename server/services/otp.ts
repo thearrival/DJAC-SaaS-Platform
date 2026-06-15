@@ -1,14 +1,19 @@
 /**
- * OTP Service — SMS / Email One-Time Password authentication.
+ * OTP Service — Email/Phone One-Time Password authentication.
  *
  * Generates time-limited 6-digit codes, stored as SHA-256 hashes.
  * Supports login and registration via email or phone number.
+ *
+ * When SMTP is not configured or fails, codes are:
+ *   1. Logged to Vercel console (retrievable via `vercel logs`)
+ *   2. Returned in API response in development mode
  */
 import { createHash } from "node:crypto";
 import { eq, and, lt } from "drizzle-orm";
 import { otpCodes } from "../../drizzle/schema";
 import { getDb } from "../db";
 import { sendEmail } from "../email";
+import { ENV } from "../_core/env";
 
 const OTP_EXPIRY_MINUTES = 5;
 const OTP_MAX_ATTEMPTS = 5;
@@ -94,9 +99,12 @@ export async function sendOtp(input: SendOtpInput): Promise<{ success: boolean; 
     }
 
     if (delivered) {
-        return { success: true, message: `Verification code sent to ${normalized}.` };
+        return { success: true, message: `Verification code sent to ${normalized}.`, ...(ENV.isDevelopment ? { code } : {}) };
     }
-    return { success: true, message: `Verification code generated. ${isPhone(normalized) ? "SMS delivery not configured — check server logs or contact support." : "Email delivery failed — check server logs or contact support."}` };
+    const fallbackMsg = isPhone(normalized)
+        ? "SMS provider not configured. Check server logs for the code."
+        : "Email delivery failed. Check server logs or contact support.";
+    return { success: true, message: `Verification code generated. ${fallbackMsg}`, ...(ENV.isDevelopment ? { code } : {}) };
 }
 
 export async function verifyOtp(input: VerifyOtpInput): Promise<{ success: boolean; message: string }> {
