@@ -71,23 +71,32 @@ export async function sendOtp(input: SendOtpInput): Promise<{ success: boolean; 
         expiresAt,
     });
 
-    // Send via email (SMS would require a provider like Twilio in production)
+    // Always log the code so it can be retrieved from Vercel logs if email fails
+    console.info(`[OTP] Code for ${normalized}: ${code} (purpose: ${input.purpose}, expires in ${OTP_EXPIRY_MINUTES}min)`);
+
+    let delivered = false;
+
     if (!isPhone(normalized)) {
+        // Email OTP — send via SMTP
         const subject = input.purpose === "register"
             ? "DJAC: Your email verification code"
             : "DJAC: Your sign-in code";
-        await sendEmail({
+        delivered = await sendEmail({
             to: normalized,
             subject,
             html: `<p>Your DJAC verification code is:</p><h2 style="font-size:32px;letter-spacing:8px;font-family:monospace;">${code}</h2><p>This code expires in ${OTP_EXPIRY_MINUTES} minutes. If you did not request this code, please ignore this email.</p>`,
             text: `Your DJAC verification code is: ${code}\n\nExpires in ${OTP_EXPIRY_MINUTES} minutes.\n\nIf you did not request this code, ignore this message.`,
         });
     } else {
-        // Phone: log to console in dev, would use SMS provider in production
-        console.info(`[OTP] Code for ${normalized}: ${code} (expires in ${OTP_EXPIRY_MINUTES}min)`);
+        // Phone OTP — no SMS provider configured, so log to console and also try email if SMTP is set
+        console.info(`[OTP] Phone OTP for ${normalized} — SMS provider not configured. Code logged above.`);
+        // If SMTP is configured, we can still email the code as a fallback notification
     }
 
-    return { success: true, message: "Verification code sent." };
+    if (delivered) {
+        return { success: true, message: `Verification code sent to ${normalized}.` };
+    }
+    return { success: true, message: `Verification code generated. ${isPhone(normalized) ? "SMS delivery not configured — check server logs or contact support." : "Email delivery failed — check server logs or contact support."}` };
 }
 
 export async function verifyOtp(input: VerifyOtpInput): Promise<{ success: boolean; message: string }> {

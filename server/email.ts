@@ -1,7 +1,7 @@
 /**
- * Thin email helper for DJAC.
- * Uses nodemailer when SMTP credentials are configured (SMTP_HOST + SMTP_USER + SMTP_PASS).
- * Falls back to console logging in development when SMTP is not configured.
+ * Email helper for DJAC.
+ * Uses nodemailer when SMTP credentials are configured.
+ * Falls back to console logging in development.
  */
 import nodemailer from "nodemailer";
 import { ENV } from "./_core/env";
@@ -13,32 +13,36 @@ export interface EmailPayload {
     text?: string;
 }
 
-export async function sendEmail(payload: EmailPayload): Promise<void> {
+export async function sendEmail(payload: EmailPayload): Promise<boolean> {
     const { smtpHost, smtpPort, smtpUser, smtpPass, smtpFrom, isDevelopment } = ENV;
     const from = smtpFrom || "DJAC Platform <noreply@yalla-hack.net>";
 
     if (!smtpHost || !smtpUser || !smtpPass) {
-        // No SMTP configured — log to console in dev, silently no-op in prod
         if (isDevelopment) {
-            console.info(
-                `\n[EMAIL — no SMTP configured]\nTo: ${payload.to}\nSubject: ${payload.subject}\n\n${payload.text ?? payload.html}\n`
-            );
+            console.info(`\n[EMAIL] No SMTP configured.\nTo: ${payload.to}\nSubject: ${payload.subject}\n${payload.text ?? payload.html}\n`);
         }
-        return;
+        return false;
     }
 
-    const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: ENV.smtpSecure,
-        auth: { user: smtpUser, pass: smtpPass },
-    });
+    try {
+        const transporter = nodemailer.createTransport({
+            host: smtpHost,
+            port: smtpPort,
+            secure: ENV.smtpSecure,
+            auth: { user: smtpUser, pass: smtpPass },
+            connectionTimeout: 10000,
+            greetingTimeout: 5000,
+            socketTimeout: 10000,
+        });
 
-    await transporter.sendMail({
-        from,
-        to: payload.to,
-        subject: payload.subject,
-        html: payload.html,
-        text: payload.text,
-    });
+        await transporter.sendMail({ from, to: payload.to, subject: payload.subject, html: payload.html, text: payload.text });
+        transporter.close();
+        console.info(`[EMAIL] Sent to ${payload.to}: "${payload.subject}"`);
+        return true;
+    } catch (err) {
+        console.error(`[EMAIL] Failed to send to ${payload.to}:`, (err as Error).message);
+        // Log the content so it can be retrieved from logs if needed
+        console.info(`[EMAIL] Content (not delivered): ${payload.subject} — ${payload.text ?? ""}`.slice(0, 300));
+        return false;
+    }
 }
