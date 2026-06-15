@@ -47,7 +47,7 @@ export interface VerifyOtpInput {
     purpose: "login" | "register";
 }
 
-export async function sendOtp(input: SendOtpInput): Promise<{ success: boolean; message: string }> {
+export async function sendOtp(input: SendOtpInput): Promise<{ success: boolean; message: string; code?: string }> {
     const db = await getDb();
     if (!db) {
         return { success: false, message: "Database unavailable. Please try again later." };
