@@ -139,7 +139,7 @@ function CopyButton({ text }: { text: string }) {
         setTimeout(() => setCopied(false), 2000);
       })
       .catch(() => {
-        /* clipboard unavailable — silently ignore */
+        toast.error("Could not copy to clipboard. Please copy manually.");
       });
   }
   return (

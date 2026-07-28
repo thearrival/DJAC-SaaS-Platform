@@ -26,7 +26,7 @@ export default function AdminHealth() {
       setStatus(preRes);
       setStats(statsRes);
     } catch {
-      // Silently handle fetch errors — UI shows stale data
+      console.warn("[AdminHealth] fetch failed — showing stale data");
     }
     setLoading(false);
   };

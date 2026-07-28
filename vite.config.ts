@@ -126,7 +126,10 @@ export default defineConfig(({ mode }) => {
               return "crypto-libs";
             }
 
-            return "vendor";
+            // Catch-all: merge into react-vendor to avoid circular chunk warnings
+            // (vendor -> react-vendor -> vendor) that Vite reports when two
+            // manual chunks reference each other across the default boundary.
+            return "react-vendor";
           },
         },
       },

@@ -78,7 +78,9 @@ function useCopyToClipboard() {
         setCopied(key);
         setTimeout(() => setCopied(null), 2000);
       })
-      .catch(() => {});
+      .catch(() => {
+        console.warn("[LawLibrary] clipboard copy failed");
+      });
   }, []);
   return { copied, copy };
 }

@@ -47,8 +47,49 @@ export default function CrossBorderDataFlow() {
   const [selectedTarget, setSelectedTarget] = useState<string>("");
   const [viewMode, setViewMode] = useState("matrix");
 
+  const isLoading = matrixQ.isLoading || jurisdictionsQ.isLoading;
+  const isError = matrixQ.isError || jurisdictionsQ.isError;
   const matrix = matrixQ.data ?? [];
   const jurisdictions = jurisdictionsQ.data ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+              <ArrowLeftRight className="h-7 w-7 text-primary" />
+              Cross-Border Data Flow
+            </h1>
+          </div>
+        </div>
+        <div className="flex items-center justify-center py-20 text-muted-foreground">
+          <LoaderCircle className="h-6 w-6 animate-spin mr-2" />
+          Loading cross-border data…
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+              <ArrowLeftRight className="h-7 w-7 text-primary" />
+              Cross-Border Data Flow
+            </h1>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <XCircle className="h-8 w-8 mb-3 text-destructive" />
+          <p>Failed to load cross-border data flow information.</p>
+          <p className="text-xs mt-1">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
 
   const filteredMatrix = useMemo(() => {
     return matrix.filter(row => {

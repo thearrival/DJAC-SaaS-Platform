@@ -3,6 +3,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { TourGuide } from "@/components/TourGuide";
 import { CommandPalette } from "@/components/CommandPalette";
+import RouteErrorBoundary from "@/components/RouteErrorBoundary";
 import { sounds } from "@/lib/sounds";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -1094,7 +1095,9 @@ function DashboardLayoutContent({
                 </div>
               }
             >
-              {children}
+              <RouteErrorBoundary>
+                {children}
+              </RouteErrorBoundary>
             </Suspense>
           </div>
         </main>
