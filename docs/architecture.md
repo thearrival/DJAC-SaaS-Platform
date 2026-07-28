@@ -2,7 +2,9 @@
 
 ## Overview
 
-DJAC is a multi-tenant compliance management SaaS platform designed for organizations operating in Saudi Arabia and China. It provides framework mapping, risk assessment, vendor management, and continuous compliance monitoring.
+DJAC is a multi-tenant compliance management SaaS platform that currently supports cross-border compliance workflows and is being evolved into a global compliance intelligence platform. It provides framework mapping, risk assessment, vendor management, and continuous compliance monitoring.
+
+For the structured expansion spec, see [docs/global-platform/README.md](global-platform/README.md).
 
 ## Architecture Diagram
 
@@ -43,21 +45,21 @@ DJAC is a multi-tenant compliance management SaaS platform designed for organiza
 
 ## Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Frontend** | React 19, TypeScript, Vite | SPA dashboard |
-| **UI** | Tailwind CSS 4, Radix UI, Framer Motion | Responsive components |
-| **State** | @tanstack/react-query, tRPC | Data fetching & mutations |
-| **Backend** | Node.js, Express, tRPC | API server |
-| **Database** | PostgreSQL 17 (Supabase), Drizzle ORM | Data persistence |
-| **Auth** | Supabase Auth + Custom JWT | Authentication |
-| **Queue** | BullMQ + Redis (Upstash) | Background jobs |
-| **Billing** | Stripe | Subscription management |
-| **AI** | OpenAI GPT-4o | Compliance analysis |
-| **Storage** | Supabase Storage / AWS S3 | File uploads |
-| **Email** | Resend / SMTP | Notifications |
-| **Monitoring** | Sentry, Umami | Error tracking, analytics |
-| **CI/CD** | GitHub Actions, Vercel | Deployment pipeline |
+| Layer          | Technology                              | Purpose                   |
+| -------------- | --------------------------------------- | ------------------------- |
+| **Frontend**   | React 19, TypeScript, Vite              | SPA dashboard             |
+| **UI**         | Tailwind CSS 4, Radix UI, Framer Motion | Responsive components     |
+| **State**      | @tanstack/react-query, tRPC             | Data fetching & mutations |
+| **Backend**    | Node.js, Express, tRPC                  | API server                |
+| **Database**   | PostgreSQL 17 (Supabase), Drizzle ORM   | Data persistence          |
+| **Auth**       | Supabase Auth + Custom JWT              | Authentication            |
+| **Queue**      | BullMQ + Redis (Upstash)                | Background jobs           |
+| **Billing**    | Stripe                                  | Subscription management   |
+| **AI**         | OpenAI GPT-4o                           | Compliance analysis       |
+| **Storage**    | Supabase Storage / AWS S3               | File uploads              |
+| **Email**      | Resend / SMTP                           | Notifications             |
+| **Monitoring** | Sentry, Umami                           | Error tracking, analytics |
+| **CI/CD**      | GitHub Actions, Vercel                  | Deployment pipeline       |
 
 ## Database Schema
 

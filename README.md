@@ -6,6 +6,8 @@ A production-ready, multi-tenant compliance management SaaS platform tailored fo
 
 DJAC provides comprehensive compliance management including framework mapping, risk assessment, vendor management, continuous threat monitoring, and AI-powered reporting.
 
+For the expanded global product vision and architecture spec, see [docs/global-platform/README.md](docs/global-platform/README.md).
+
 ## Architecture
 
 ```
@@ -17,18 +19,18 @@ React SPA (Vite) → tRPC API (Express) → PostgreSQL (Supabase)
 
 ## Tech Stack
 
-| Layer | Stack |
-|-------|-------|
-| Frontend | React 19, TypeScript, Tailwind CSS 4, Radix UI, Recharts |
-| Backend | Node.js, Express, tRPC, Drizzle ORM |
-| Database | PostgreSQL 17 (Supabase) |
-| Auth | Supabase Auth + Custom JWT + OAuth (Google/GitHub) |
-| Queue | BullMQ + Redis |
-| Billing | Stripe |
-| AI | OpenAI GPT-4o |
-| Edge | Supabase Edge Functions (Deno) |
-| CI/CD | GitHub Actions → Vercel |
-| Monitoring | Sentry, Umami |
+| Layer      | Stack                                                    |
+| ---------- | -------------------------------------------------------- |
+| Frontend   | React 19, TypeScript, Tailwind CSS 4, Radix UI, Recharts |
+| Backend    | Node.js, Express, tRPC, Drizzle ORM                      |
+| Database   | PostgreSQL 17 (Supabase)                                 |
+| Auth       | Supabase Auth + Custom JWT + OAuth (Google/GitHub)       |
+| Queue      | BullMQ + Redis                                           |
+| Billing    | Stripe                                                   |
+| AI         | OpenAI GPT-4o                                            |
+| Edge       | Supabase Edge Functions (Deno)                           |
+| CI/CD      | GitHub Actions → Vercel                                  |
+| Monitoring | Sentry, Umami                                            |
 
 ## Quick Start
 
@@ -127,6 +129,7 @@ See [Deployment Guide](./docs/deployment.md) for detailed instructions.
 ## CI/CD
 
 GitHub Actions workflows:
+
 - **CI** - Lint, typecheck, test, build on every PR
 - **Deploy Staging** - Auto-deploys develop branch to staging
 - **Deploy Production** - Auto-deploys main branch to production
