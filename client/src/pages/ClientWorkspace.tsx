@@ -1978,6 +1978,13 @@ export default function ClientWorkspace() {
                     {globalRegistrySummaryQuery.data.frameworks} frameworks
                   </Badge>
                   <Badge variant="secondary">
+                    {globalRegistrySummaryQuery.data.jurisdictions}{" "}
+                    jurisdictions
+                  </Badge>
+                  <Badge variant="secondary">
+                    {globalRegistrySummaryQuery.data.categories} categories
+                  </Badge>
+                  <Badge variant="secondary">
                     {globalRegistrySummaryQuery.data.editions} editions
                   </Badge>
                   <Badge variant="secondary">

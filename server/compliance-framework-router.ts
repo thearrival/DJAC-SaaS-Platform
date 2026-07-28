@@ -25,9 +25,14 @@ import {
   getGlobalFrameworkPackByCode,
   getGlobalRegistrySummary,
   listGlobalAIAgents,
+  listGlobalAuthorities,
+  listGlobalFrameworkCategories,
   listGlobalFrameworkPacks,
+  listGlobalFrameworkPacksByCategory,
+  listGlobalFrameworkPacksByJurisdiction,
   listGlobalFrameworkPacksByRegion,
   listGlobalIndustryEditions,
+  listGlobalJurisdictions,
   searchGlobalRegistry,
   type GlobalRegion,
 } from "./global-compliance-registry";
@@ -79,6 +84,18 @@ export const complianceFrameworkRouter = router({
       return listGlobalFrameworkPacksByRegion(input);
     }),
 
+  globalFrameworksByJurisdiction: publicProcedure
+    .input(z.string().trim().min(1).max(120))
+    .query(({ input }) => {
+      return listGlobalFrameworkPacksByJurisdiction(input);
+    }),
+
+  globalFrameworksByCategory: publicProcedure
+    .input(z.string().trim().min(1).max(120))
+    .query(({ input }) => {
+      return listGlobalFrameworkPacksByCategory(input);
+    }),
+
   globalFrameworkByCode: publicProcedure
     .input(z.string().trim().min(1).max(120))
     .query(({ input }) => {
@@ -87,6 +104,18 @@ export const complianceFrameworkRouter = router({
 
   globalIndustryEditions: publicProcedure.query(() => {
     return listGlobalIndustryEditions();
+  }),
+
+  globalJurisdictions: publicProcedure.query(() => {
+    return listGlobalJurisdictions();
+  }),
+
+  globalFrameworkCategories: publicProcedure.query(() => {
+    return listGlobalFrameworkCategories();
+  }),
+
+  globalAuthorities: publicProcedure.query(() => {
+    return listGlobalAuthorities();
   }),
 
   globalAiAgents: publicProcedure.query(() => {

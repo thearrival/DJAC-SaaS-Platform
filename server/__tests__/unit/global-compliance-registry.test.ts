@@ -5,6 +5,11 @@ import {
   GLOBAL_AI_AGENTS,
   buildGlobalGraphSeed,
   getGlobalFrameworkPackByCode,
+  listGlobalAuthorities,
+  listGlobalFrameworkCategories,
+  listGlobalFrameworkPacksByCategory,
+  listGlobalFrameworkPacksByJurisdiction,
+  listGlobalJurisdictions,
   getGlobalRegistrySummary,
   listGlobalFrameworkPacksByRegion,
   searchGlobalRegistry,
@@ -42,9 +47,29 @@ describe("Global compliance registry", () => {
     expect(graph.nodes.length).toBe(summary.graphNodes);
     expect(graph.edges.length).toBe(summary.graphEdges);
     expect(summary.regions).toBe(7);
+    expect(summary.jurisdictions).toBeGreaterThan(20);
+    expect(summary.categories).toBeGreaterThan(10);
+    expect(summary.authorities).toBeGreaterThan(10);
     expect(summary.frameworks).toBe(GLOBAL_FRAMEWORK_PACKS.length);
     expect(summary.editions).toBe(GLOBAL_INDUSTRY_EDITIONS.length);
     expect(summary.agents).toBe(GLOBAL_AI_AGENTS.length);
+  });
+
+  it("should expose jurisdictions, categories, and authorities for faceted navigation", () => {
+    const jurisdictions = listGlobalJurisdictions();
+    const categories = listGlobalFrameworkCategories();
+    const authorities = listGlobalAuthorities();
+
+    expect(jurisdictions).toContain("United States");
+    expect(jurisdictions).toContain("European Union");
+    expect(categories).toContain("privacy");
+    expect(authorities).toContain("NIST");
+    expect(
+      listGlobalFrameworkPacksByJurisdiction("United States").length
+    ).toBeGreaterThan(10);
+    expect(
+      listGlobalFrameworkPacksByCategory("privacy").length
+    ).toBeGreaterThan(5);
   });
 
   it("should support search across frameworks, editions, and agents", () => {

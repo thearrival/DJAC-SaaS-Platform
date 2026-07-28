@@ -56,6 +56,9 @@ export type GraphEdge = {
 
 export type GlobalRegistrySummary = {
   regions: number;
+  jurisdictions: number;
+  categories: number;
+  authorities: number;
   frameworks: number;
   editions: number;
   agents: number;
@@ -1516,6 +1519,42 @@ export function listGlobalFrameworkPacksByRegion(
   return GLOBAL_FRAMEWORK_PACKS.filter(pack => pack.region === region);
 }
 
+export function listGlobalFrameworkPacksByJurisdiction(
+  jurisdiction: string
+): GlobalFrameworkPack[] {
+  const normalized = jurisdiction.trim().toLowerCase();
+  return GLOBAL_FRAMEWORK_PACKS.filter(
+    pack => pack.jurisdiction.toLowerCase() === normalized
+  );
+}
+
+export function listGlobalFrameworkPacksByCategory(
+  category: string
+): GlobalFrameworkPack[] {
+  const normalized = category.trim().toLowerCase();
+  return GLOBAL_FRAMEWORK_PACKS.filter(
+    pack => pack.category.toLowerCase() === normalized
+  );
+}
+
+export function listGlobalJurisdictions(): string[] {
+  return [
+    ...new Set(GLOBAL_FRAMEWORK_PACKS.map(pack => pack.jurisdiction)),
+  ].sort((a, b) => a.localeCompare(b));
+}
+
+export function listGlobalFrameworkCategories(): string[] {
+  return [...new Set(GLOBAL_FRAMEWORK_PACKS.map(pack => pack.category))].sort(
+    (a, b) => a.localeCompare(b)
+  );
+}
+
+export function listGlobalAuthorities(): string[] {
+  return [...new Set(GLOBAL_FRAMEWORK_PACKS.map(pack => pack.authority))].sort(
+    (a, b) => a.localeCompare(b)
+  );
+}
+
 export function getGlobalFrameworkPackByCode(
   code: string
 ): GlobalFrameworkPack | null {
@@ -1608,8 +1647,15 @@ export function buildGlobalGraphSeed(): {
 
 export function getGlobalRegistrySummary(): GlobalRegistrySummary {
   const graph = buildGlobalGraphSeed();
+  const jurisdictions = listGlobalJurisdictions();
+  const categories = listGlobalFrameworkCategories();
+  const authorities = listGlobalAuthorities();
+
   return {
     regions: GLOBAL_REGIONS.length,
+    jurisdictions: jurisdictions.length,
+    categories: categories.length,
+    authorities: authorities.length,
     frameworks: GLOBAL_FRAMEWORK_PACKS.length,
     editions: GLOBAL_INDUSTRY_EDITIONS.length,
     agents: GLOBAL_AI_AGENTS.length,
