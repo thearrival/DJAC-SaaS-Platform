@@ -41,10 +41,55 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { useLocalAuth } from "@/hooks/useLocalAuth";
 import { useNotificationBadge } from "@/hooks/useNotificationBadge";
 import { useRbac } from "@/hooks/useRbac";
-import { Activity, ArrowLeftRight, BarChart2, Bell, BookOpen, Bot, Briefcase, Building2, CalendarCheck2, CalendarDays, ClipboardCheck, ClipboardList, CreditCard, Crown, FileDown, FileSearch, FileText, FolderCheck, Key, LayoutDashboard, LayoutGrid, ListChecks, LogIn, LogOut, MessageSquareText, PanelLeft, PieChart, Scale, Search, Server, Settings, Shield, ShieldAlert, ShieldCheck, ShieldOff, Sparkles, TrendingUp, UserCheck, UserPlus, Users, Wrench, type LucideIcon } from "lucide-react";
+import {
+  Activity,
+  ArrowLeftRight,
+  BarChart2,
+  Bell,
+  BookOpen,
+  Bot,
+  Briefcase,
+  Building2,
+  CalendarCheck2,
+  CalendarDays,
+  ClipboardCheck,
+  ClipboardList,
+  CreditCard,
+  Crown,
+  FileDown,
+  FileSearch,
+  FileText,
+  FolderCheck,
+  Globe,
+  Key,
+  LayoutDashboard,
+  LayoutGrid,
+  ListChecks,
+  LogIn,
+  LogOut,
+  MessageSquareText,
+  Network,
+  PanelLeft,
+  PieChart,
+  Scale,
+  Search,
+  Server,
+  Settings,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldOff,
+  Sparkles,
+  TrendingUp,
+  UserCheck,
+  UserPlus,
+  Users,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import { CSSProperties, Suspense, useEffect, useRef, useState } from "react";
 import { useLocation, Redirect } from "wouter";
-import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import TrialBanner from "./TrialBanner";
 
 type MenuItem = {
@@ -72,6 +117,37 @@ const menuGroups: MenuGroup[] = [
         labelKey: "layout.menuDashboard",
         labelFallback: "Dashboard",
         path: "/dashboard",
+      },
+    ],
+  },
+  // ── Global Intelligence ────────────────────────────────────────────────────
+  {
+    groupKey: "layout.groupGlobal",
+    groupFallback: "Global Intelligence",
+    items: [
+      {
+        icon: Globe,
+        labelKey: "layout.menuGlobalRegistry",
+        labelFallback: "Global Registry",
+        path: "/global-registry",
+      },
+      {
+        icon: Network,
+        labelKey: "layout.menuKnowledgeGraph",
+        labelFallback: "Knowledge Graph",
+        path: "/knowledge-graph",
+      },
+      {
+        icon: Building2,
+        labelKey: "layout.menuIndustryEditions",
+        labelFallback: "Industry Editions",
+        path: "/industry-editions",
+      },
+      {
+        icon: Bot,
+        labelKey: "layout.menuAiAgents",
+        labelFallback: "AI Agent Network",
+        path: "/ai-agents",
       },
     ],
   },
@@ -473,29 +549,41 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
   const [, navigate] = useLocation();
   const currentPath = window.location.pathname;
 
+  const { data, isLoading, isError } = trpc.rbac.onboardingStatus.useQuery(
+    undefined,
+    {
+      retry: false,
+      staleTime: 60_000,
+    }
+  );
+
+  const isComplete = data?.complete ?? true;
+  const isOnWizardPage = currentPath === "/onboarding-wizard";
+  const shouldRedirect =
+    !isSuperAdmin &&
+    !isPlatformAdmin &&
+    !isLoading &&
+    !isError &&
+    !isComplete &&
+    !isOnWizardPage;
+
+  // Redirect to onboarding wizard if onboarding not complete
+  useEffect(() => {
+    if (shouldRedirect) {
+      navigate("/onboarding-wizard");
+    }
+  }, [shouldRedirect, navigate]);
+
   // Admin users skip onboarding enforcement
   if (isSuperAdmin || isPlatformAdmin) return <>{children}</>;
-
-  const { data, isLoading, isError } = trpc.rbac.onboardingStatus.useQuery(undefined, {
-    retry: false,
-    staleTime: 60_000,
-  });
 
   // While loading, render children optimistically to avoid flash
   if (isLoading) return <>{children}</>;
   // On error, allow access (don't block users from the platform)
   if (isError) return <>{children}</>;
 
-  const isComplete = data?.complete ?? true;
-  const isOnWizardPage = currentPath === "/onboarding-wizard";
-
   // If onboarding complete or already on wizard page, proceed normally
   if (isComplete || isOnWizardPage) return <>{children}</>;
-
-  // Redirect to onboarding wizard if not complete
-  useEffect(() => {
-    navigate("/onboarding-wizard");
-  }, [navigate]);
 
   return null;
 }
@@ -533,7 +621,8 @@ function DashboardLayoutContent({
   const sidebarRef = useRef<HTMLDivElement>(null);
   const displayName = user?.name ?? localUser?.name ?? "-";
   const displayEmail = user?.email ?? localUser?.email ?? "-";
-  const avatarLetter = (user?.name ?? localUser?.name)?.charAt(0).toUpperCase() ?? "?";
+  const avatarLetter =
+    (user?.name ?? localUser?.name)?.charAt(0).toUpperCase() ?? "?";
   const handleSignOut = (destination: string) => {
     setShowSignOutDialog(false);
     sounds.navigate();
@@ -556,26 +645,30 @@ function DashboardLayoutContent({
       window.location.href = destination;
     });
   };
-  const { isCompanyAdmin, isPlatformAdmin, isSuperAdmin, isLegacyAdmin } = useRbac();
+  const { isCompanyAdmin, isPlatformAdmin, isSuperAdmin, isLegacyAdmin } =
+    useRbac();
   const notifBadge = useNotificationBadge();
   const adminGroup: MenuGroup | null =
     isCompanyAdmin || isPlatformAdmin || isLegacyAdmin || isSuperAdmin
       ? {
-        groupKey: "layout.groupAdmin",
-        groupFallback: "Administration",
-        items: [
-          ...(isCompanyAdmin ? companyMenuItems : []),
-          ...(isPlatformAdmin || isLegacyAdmin ? adminMenuItems : []),
-          ...(isSuperAdmin ? superAdminMenuItems : []),
-        ],
-      }
+          groupKey: "layout.groupAdmin",
+          groupFallback: "Administration",
+          items: [
+            ...(isCompanyAdmin ? companyMenuItems : []),
+            ...(isPlatformAdmin || isLegacyAdmin ? adminMenuItems : []),
+            ...(isSuperAdmin ? superAdminMenuItems : []),
+          ],
+        }
       : null;
-  const allGroups: MenuGroup[] = adminGroup ? [...menuGroups, adminGroup] : menuGroups;
+  const allGroups: MenuGroup[] = adminGroup
+    ? [...menuGroups, adminGroup]
+    : menuGroups;
   const flatMenuItems = allGroups.flatMap(g => g.items);
-  const activeMenuItem = flatMenuItems.find(item =>
-    location === item.path ||
-    location.startsWith(item.path + "/") ||
-    item.aliases?.some(a => location === a || location.startsWith(a + "/"))
+  const activeMenuItem = flatMenuItems.find(
+    item =>
+      location === item.path ||
+      location.startsWith(item.path + "/") ||
+      item.aliases?.some(a => location === a || location.startsWith(a + "/"))
   );
   const isMobile = useIsMobile();
 
@@ -591,9 +684,7 @@ function DashboardLayoutContent({
       const rect = sidebarRef.current?.getBoundingClientRect();
       if (!rect) return;
       const newWidth =
-        direction === "rtl"
-          ? rect.right - e.clientX
-          : e.clientX - rect.left;
+        direction === "rtl" ? rect.right - e.clientX : e.clientX - rect.left;
       if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
         setSidebarWidth(newWidth);
       }
@@ -623,10 +714,7 @@ function DashboardLayoutContent({
       <TourGuide />
       <CommandPalette open={cmdOpen} onOpenChange={setCmdOpen} />
       {/* Skip-to-main: visible on keyboard focus for accessibility */}
-      <a
-        href="#main-content"
-        className="djac-skip-link"
-      >
+      <a href="#main-content" className="djac-skip-link">
         Skip to main content
       </a>
       <div className="relative" ref={sidebarRef}>
@@ -692,14 +780,20 @@ function DashboardLayoutContent({
                     const isActive =
                       location === item.path ||
                       location.startsWith(item.path + "/") ||
-                      (item.aliases?.some(a => location === a || location.startsWith(a + "/")) ?? false);
+                      (item.aliases?.some(
+                        a => location === a || location.startsWith(a + "/")
+                      ) ??
+                        false);
                     // Derive tour-id from path for the spotlight system
                     const tourId = `tour-menu-${item.path.replace(/^\//, "").replace(/\//g, "-")}`;
                     return (
                       <SidebarMenuItem key={item.path}>
                         <SidebarMenuButton
                           isActive={isActive}
-                          onClick={() => { sounds.navigate(); setLocation(item.path); }}
+                          onClick={() => {
+                            sounds.navigate();
+                            setLocation(item.path);
+                          }}
                           tooltip={t(item.labelKey, item.labelFallback)}
                           className="h-9 transition-all font-normal"
                           data-tour-id={tourId}
@@ -708,14 +802,15 @@ function DashboardLayoutContent({
                             <item.icon
                               className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
                             />
-                            {item.path === "/notifications" && notifBadge > 0 && (
-                              <span
-                                className="absolute -top-1.5 -end-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground leading-none"
-                                aria-label={`${notifBadge} unread notifications`}
-                              >
-                                {notifBadge > 9 ? "9+" : notifBadge}
-                              </span>
-                            )}
+                            {item.path === "/notifications" &&
+                              notifBadge > 0 && (
+                                <span
+                                  className="absolute -top-1.5 -end-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground leading-none"
+                                  aria-label={`${notifBadge} unread notifications`}
+                                >
+                                  {notifBadge > 9 ? "9+" : notifBadge}
+                                </span>
+                              )}
                           </div>
                           <span>{t(item.labelKey, item.labelFallback)}</span>
                           {item.path === "/notifications" && notifBadge > 0 && (
@@ -735,9 +830,7 @@ function DashboardLayoutContent({
           <SidebarFooter className="p-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
-                  className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-start group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
+                <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-start group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <Avatar className="h-9 w-9 border shrink-0">
                     <AvatarFallback className="text-xs font-medium">
                       {avatarLetter}
@@ -758,11 +851,14 @@ function DashboardLayoutContent({
                           Admin
                         </span>
                       )}
-                      {isCompanyAdmin && !isPlatformAdmin && !isLegacyAdmin && !isSuperAdmin && (
-                        <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-blue-500/15 text-blue-600 dark:text-blue-400">
-                          Co.
-                        </span>
-                      )}
+                      {isCompanyAdmin &&
+                        !isPlatformAdmin &&
+                        !isLegacyAdmin &&
+                        !isSuperAdmin && (
+                          <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-blue-500/15 text-blue-600 dark:text-blue-400">
+                            Co.
+                          </span>
+                        )}
                     </div>
                     <p className="text-xs text-muted-foreground truncate mt-1.5">
                       {displayEmail}
@@ -772,7 +868,10 @@ function DashboardLayoutContent({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
-                  onClick={() => { sounds.open(); setShowSignOutDialog(true); }}
+                  onClick={() => {
+                    sounds.open();
+                    setShowSignOutDialog(true);
+                  }}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="me-2 h-4 w-4" />
@@ -791,7 +890,10 @@ function DashboardLayoutContent({
                   {t("layout.signOutTitle", "Sign out of DJAC?")}
                 </DialogTitle>
                 <DialogDescription>
-                  {t("layout.signOutDesc", "Choose what to do after signing out.")}
+                  {t(
+                    "layout.signOutDesc",
+                    "Choose what to do after signing out."
+                  )}
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col gap-2 pt-2">
@@ -801,8 +903,15 @@ function DashboardLayoutContent({
                 >
                   <LogIn className="h-4 w-4 text-primary shrink-0" />
                   <div>
-                    <p className="font-medium">{t("layout.signInAgain", "Sign in again")}</p>
-                    <p className="text-xs text-muted-foreground">{t("layout.signInAgainDesc", "Return to the sign-in page")}</p>
+                    <p className="font-medium">
+                      {t("layout.signInAgain", "Sign in again")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t(
+                        "layout.signInAgainDesc",
+                        "Return to the sign-in page"
+                      )}
+                    </p>
                   </div>
                 </button>
                 <button
@@ -811,8 +920,12 @@ function DashboardLayoutContent({
                 >
                   <UserPlus className="h-4 w-4 text-primary shrink-0" />
                   <div>
-                    <p className="font-medium">{t("layout.registerNew", "Register new account")}</p>
-                    <p className="text-xs text-muted-foreground">{t("layout.registerNewDesc", "Create a new DJAC account")}</p>
+                    <p className="font-medium">
+                      {t("layout.registerNew", "Register new account")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("layout.registerNewDesc", "Create a new DJAC account")}
+                    </p>
                   </div>
                 </button>
                 <button
@@ -821,12 +934,22 @@ function DashboardLayoutContent({
                 >
                   <Users className="h-4 w-4 text-primary shrink-0" />
                   <div>
-                    <p className="font-medium">{t("layout.switchAccount", "Switch account")}</p>
-                    <p className="text-xs text-muted-foreground">{t("layout.switchAccountDesc", "Sign in as a different user")}</p>
+                    <p className="font-medium">
+                      {t("layout.switchAccount", "Switch account")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t(
+                        "layout.switchAccountDesc",
+                        "Sign in as a different user"
+                      )}
+                    </p>
                   </div>
                 </button>
                 <button
-                  onClick={() => { sounds.close(); setShowSignOutDialog(false); }}
+                  onClick={() => {
+                    sounds.close();
+                    setShowSignOutDialog(false);
+                  }}
                   className="mt-1 rounded-lg border px-4 py-2 text-sm text-muted-foreground hover:bg-accent transition-colors w-full"
                 >
                   {t("layout.cancel", "Cancel")}
@@ -843,7 +966,7 @@ function DashboardLayoutContent({
           }}
           style={{ zIndex: 50 }}
         />
-      </div >
+      </div>
 
       <SidebarInset>
         {isMobile ? (
@@ -894,7 +1017,11 @@ function DashboardLayoutContent({
               {/* Current date — locale aware */}
               <span className="hidden lg:block text-xs text-muted-foreground font-medium tabular-nums">
                 {new Intl.DateTimeFormat(
-                  locale === "ar" ? "ar-SA" : locale === "zh" ? "zh-CN" : "en-US",
+                  locale === "ar"
+                    ? "ar-SA"
+                    : locale === "zh"
+                      ? "zh-CN"
+                      : "en-US",
                   { weekday: "short", month: "short", day: "numeric" }
                 ).format(new Date())}
               </span>
@@ -914,8 +1041,12 @@ function DashboardLayoutContent({
                 <Search className="h-3.5 w-3.5" />
                 <span>Search…</span>
                 <span className="ms-1 flex items-center gap-0.5 opacity-60">
-                  <kbd className="rounded bg-muted px-1 py-0.5 text-[10px] font-medium">⌘</kbd>
-                  <kbd className="rounded bg-muted px-1 py-0.5 text-[10px] font-medium">K</kbd>
+                  <kbd className="rounded bg-muted px-1 py-0.5 text-[10px] font-medium">
+                    ⌘
+                  </kbd>
+                  <kbd className="rounded bg-muted px-1 py-0.5 text-[10px] font-medium">
+                    K
+                  </kbd>
                 </span>
               </button>
               <NotificationCenter />
@@ -924,17 +1055,26 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main id="main-content" className="djac-main-surface flex-1 min-h-[calc(100vh-3.5rem)] bg-background p-4 sm:p-5 lg:p-6">
+        <main
+          id="main-content"
+          className="djac-main-surface flex-1 min-h-[calc(100vh-3.5rem)] bg-background p-4 sm:p-5 lg:p-6"
+        >
           <TrialBanner />
           <div className="djac-page-enter">
             {/* Inner Suspense catches lazy-page chunk loading WITHOUT unmounting
                 the sidebar/layout. The top-level Suspense in App.tsx handles
                 the very first app boot only. */}
-            <Suspense fallback={
-              <div className="flex items-center justify-center min-h-[40vh]">
-                <div className="djac-page-spinner" aria-label="Loading page" role="status" />
-              </div>
-            }>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center min-h-[40vh]">
+                  <div
+                    className="djac-page-spinner"
+                    aria-label="Loading page"
+                    role="status"
+                  />
+                </div>
+              }
+            >
               {children}
             </Suspense>
           </div>

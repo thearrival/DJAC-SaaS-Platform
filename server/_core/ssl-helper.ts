@@ -8,7 +8,7 @@
 export function fixSslMode(url: string): string {
   if (!url) return url;
   if (url.includes("sslmode")) {
-    return url.replace(/sslmode=\w+/g, "sslmode=no-verify");
+    return url.replace(/sslmode=[^&]+/g, "sslmode=no-verify");
   }
   const sep = url.includes("?") ? "&" : "?";
   return url + sep + "sslmode=no-verify";

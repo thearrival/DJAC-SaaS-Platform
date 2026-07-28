@@ -17,13 +17,13 @@ describe("Compliance Reference Data", () => {
   });
 
   it("should include both China and Saudi Arabia frameworks", () => {
-    const countries = new Set(complianceFrameworks.map((f) => f.country));
+    const countries = new Set(complianceFrameworks.map(f => f.country));
     expect(countries.has("China")).toBe(true);
     expect(countries.has("Saudi Arabia")).toBe(true);
   });
 
   it("should include PIPL, CSL, DSL, PDPL frameworks", () => {
-    const codes = complianceFrameworks.map((f) => f.code);
+    const codes = complianceFrameworks.map(f => f.code);
     expect(codes).toContain("PIPL");
     expect(codes).toContain("CSL");
     expect(codes).toContain("DSL");
@@ -45,7 +45,7 @@ describe("Compliance Reference Data", () => {
   });
 
   it("controls should reference valid framework codes", () => {
-    const frameworkCodes = new Set(complianceFrameworks.map((f) => f.code));
+    const frameworkCodes = new Set(complianceFrameworks.map(f => f.code));
     for (const ctrl of complianceControls) {
       expect(frameworkCodes.has(ctrl.frameworkCode as string)).toBe(true);
     }
@@ -64,7 +64,7 @@ describe("Compliance Reference Data", () => {
   });
 
   it("relationships should reference valid framework codes", () => {
-    const frameworkCodes = new Set(complianceFrameworks.map((f) => f.code));
+    const frameworkCodes = new Set(complianceFrameworks.map(f => f.code));
     for (const rel of complianceRelationships) {
       expect(frameworkCodes.has(rel.sourceFrameworkCode as string)).toBe(true);
       expect(frameworkCodes.has(rel.targetFrameworkCode as string)).toBe(true);

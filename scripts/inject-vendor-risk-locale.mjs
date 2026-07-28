@@ -4,7 +4,8 @@ const f = "client/src/contexts/LocaleContext.tsx";
 let t = readFileSync(f, "utf8");
 
 // AR translations for vendorRisk.*
-const arKeys = [
+const arKeys =
+  [
     `        "vendorRisk.title": "\u0644\u0648\u062d\u0629 \u0645\u062e\u0627\u0637\u0631 \u0627\u0644\u0645\u0648\u0631\u062f\u064a\u0646",`,
     `        "vendorRisk.subtitle": "\u0627\u0644\u0648\u0636\u0639 \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a \u0644\u0644\u0645\u062e\u0627\u0637\u0631 \u0639\u0628\u0631 \u062c\u0645\u064a\u0639 \u0627\u0644\u0645\u0648\u0631\u062f\u064a\u0646 \u0627\u0644\u062e\u0627\u0631\u062c\u064a\u064a\u0646 \u0627\u0644\u0645\u0633\u062c\u0644\u064a\u0646.",`,
     `        "vendorRisk.addVendor": "\u062a\u0633\u062c\u064a\u0644 \u0645\u0648\u0631\u062f",`,
@@ -22,10 +23,11 @@ const arKeys = [
     `        "vendorRisk.colJurisdiction": "\u0627\u0644\u0646\u0637\u0627\u0642\u0627\u062a \u0627\u0644\u0642\u0627\u0646\u0648\u0646\u064a\u0629",`,
     `        "vendorRisk.colAdded": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0625\u0636\u0627\u0641\u0629",`,
     `        "vendorRisk.colActions": "",`,
-].join("\n") + "\n";
+  ].join("\n") + "\n";
 
 // ZH translations for vendorRisk.*
-const zhKeys = [
+const zhKeys =
+  [
     `        "vendorRisk.title": "\u4f5b\u4f9b\u5546\u98ce\u9669\u4eea\u8868\u677f",`,
     `        "vendorRisk.subtitle": "\u6240\u6709\u5df2\u6ce8\u518c\u7b2c\u4e09\u65b9\u4f5b\u4f9b\u5546\u7684\u6574\u4f53\u98ce\u9669\u6001\u52bf\u3002",`,
     `        "vendorRisk.addVendor": "\u6ce8\u518c\u4f5b\u4f9b\u5546",`,
@@ -43,21 +45,27 @@ const zhKeys = [
     `        "vendorRisk.colJurisdiction": "\u53f8\u6cd5\u7ba1\u8f96\u533a",`,
     `        "vendorRisk.colAdded": "\u6dfb\u52a0\u65f6\u95f4",`,
     `        "vendorRisk.colActions": "",`,
-].join("\n") + "\n";
+  ].join("\n") + "\n";
 
 // Detect line endings
-const crlf = t.includes('\r\n');
-const NL = crlf ? '\r\n' : '\n';
+const crlf = t.includes("\r\n");
+const NL = crlf ? "\r\n" : "\n";
 
 // Find first key after `ar: {` and insert before it
-const arAnchor = 'ar: {' + NL + '        "locale.label"';
-const zhAnchor = 'zh: {' + NL + '        "locale.label"';
+const arAnchor = "ar: {" + NL + '        "locale.label"';
+const zhAnchor = "zh: {" + NL + '        "locale.label"';
 
 if (!t.includes(arAnchor)) throw new Error("AR anchor not found");
 if (!t.includes(zhAnchor)) throw new Error("ZH anchor not found");
 
-t = t.replace(arAnchor, 'ar: {' + NL + arKeys.replace(/\n/g, NL) + '        "locale.label"');
-t = t.replace(zhAnchor, 'zh: {' + NL + zhKeys.replace(/\n/g, NL) + '        "locale.label"');
+t = t.replace(
+  arAnchor,
+  "ar: {" + NL + arKeys.replace(/\n/g, NL) + '        "locale.label"'
+);
+t = t.replace(
+  zhAnchor,
+  "zh: {" + NL + zhKeys.replace(/\n/g, NL) + '        "locale.label"'
+);
 
 writeFileSync(f, t, "utf8");
 console.log("done — vendorRisk AR/ZH keys inserted");

@@ -19,9 +19,11 @@ if (!dbUrl) {
 }
 
 // Ensure SSL mode is set for Supabase connections
-const fixedUrl = dbUrl.includes("sslmode=") ? dbUrl
-  : dbUrl.includes("?") ? `${dbUrl}&sslmode=no-verify`
-  : `${dbUrl}?sslmode=no-verify`;
+const fixedUrl = dbUrl.includes("sslmode=")
+  ? dbUrl
+  : dbUrl.includes("?")
+    ? `${dbUrl}&sslmode=no-verify`
+    : `${dbUrl}?sslmode=no-verify`;
 
 const client = new pg.Client({
   connectionString: fixedUrl,
@@ -33,11 +35,15 @@ async function seed() {
   await client.connect();
 
   try {
-    const { complianceFrameworks, complianceControls, complianceRelationships } = await import(
-      "./compliance-reference-data.mjs"
-    );
+    const {
+      complianceFrameworks,
+      complianceControls,
+      complianceRelationships,
+    } = await import("./compliance-reference-data.mjs");
 
-    console.log(`[seed-compliance] Loaded ${complianceFrameworks.length} frameworks, ${complianceControls.length} controls.`);
+    console.log(
+      `[seed-compliance] Loaded ${complianceFrameworks.length} frameworks, ${complianceControls.length} controls.`
+    );
 
     // Seed frameworks
     let fwCount = 0;
@@ -53,7 +59,15 @@ async function seed() {
            "enforcementAuthority" = EXCLUDED."enforcementAuthority",
            "maxPenalty" = EXCLUDED."maxPenalty",
            "updatedAt" = NOW()`,
-        [fw.code, fw.name, fw.country, fw.description ?? null, fw.scope ?? null, fw.enforcementAuthority ?? null, fw.maxPenalty ?? null]
+        [
+          fw.code,
+          fw.name,
+          fw.country,
+          fw.description ?? null,
+          fw.scope ?? null,
+          fw.enforcementAuthority ?? null,
+          fw.maxPenalty ?? null,
+        ]
       );
       fwCount++;
     }
@@ -77,8 +91,10 @@ async function seed() {
     for (const ctrl of complianceControls) {
       const frameworkId = codeToId.get(ctrl.frameworkCode);
       if (!frameworkId) continue;
-      const esc = (s) => s ? `'${s.replace(/'/g, "''")}'` : "NULL";
-      values.push(`(${frameworkId}, ${esc(ctrl.controlCode)}, ${esc(ctrl.controlName)}, ${esc(ctrl.category)}, ${esc(ctrl.description)}, ${esc(ctrl.requirement)}, ${esc(ctrl.applicability)})`);
+      const esc = s => (s ? `'${s.replace(/'/g, "''")}'` : "NULL");
+      values.push(
+        `(${frameworkId}, ${esc(ctrl.controlCode)}, ${esc(ctrl.controlName)}, ${esc(ctrl.category)}, ${esc(ctrl.description)}, ${esc(ctrl.requirement)}, ${esc(ctrl.applicability)})`
+      );
     }
 
     if (values.length > 0) {
@@ -87,7 +103,9 @@ async function seed() {
          VALUES ${values.join(", ")}
          ON CONFLICT ("frameworkId", "controlCode") DO NOTHING`
       );
-      console.log(`[seed-compliance] Seeded ${values.length} compliance controls.`);
+      console.log(
+        `[seed-compliance] Seeded ${values.length} compliance controls.`
+      );
     }
 
     // Seed framework relationships
@@ -96,8 +114,10 @@ async function seed() {
       const srcId = codeToId.get(rel.sourceFrameworkCode);
       const tgtId = codeToId.get(rel.targetFrameworkCode);
       if (!srcId || !tgtId) continue;
-      const esc = (s) => s ? `'${s.replace(/'/g, "''")}'` : "NULL";
-      relValues.push(`(${srcId}, ${tgtId}, ${esc(rel.relationshipType)}, ${esc(rel.description)}, ${esc(rel.severity)}, ${esc(rel.riskLevel)}, ${esc(rel.mitigation)})`);
+      const esc = s => (s ? `'${s.replace(/'/g, "''")}'` : "NULL");
+      relValues.push(
+        `(${srcId}, ${tgtId}, ${esc(rel.relationshipType)}, ${esc(rel.description)}, ${esc(rel.severity)}, ${esc(rel.riskLevel)}, ${esc(rel.mitigation)})`
+      );
     }
 
     if (relValues.length > 0) {
@@ -106,7 +126,9 @@ async function seed() {
          VALUES ${relValues.join(", ")}
          ON CONFLICT ("sourceFrameworkId", "targetFrameworkId") DO NOTHING`
       );
-      console.log(`[seed-compliance] Seeded ${relValues.length} framework relationships.`);
+      console.log(
+        `[seed-compliance] Seeded ${relValues.length} framework relationships.`
+      );
     }
 
     console.log("[seed-compliance] Complete.");

@@ -1,8 +1,14 @@
 import { defineConfig } from "drizzle-kit";
 
-const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_PRISMA_URL;
+const connectionString =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.POSTGRES_PRISMA_URL;
 if (!connectionString) {
-  throw new Error("DATABASE_URL or POSTGRES_URL is required to run drizzle commands");
+  throw new Error(
+    "DATABASE_URL or POSTGRES_URL is required to run drizzle commands"
+  );
 }
 
 export default defineConfig({
@@ -11,6 +17,9 @@ export default defineConfig({
   dialect: "postgresql",
   dbCredentials: {
     url: connectionString,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+    ssl:
+      process.env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false,
   },
 });

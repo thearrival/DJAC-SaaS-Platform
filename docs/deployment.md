@@ -38,6 +38,7 @@ pnpm dev
 ## Database Migrations
 
 ### Via Drizzle (TypeScript schema)
+
 ```bash
 # Generate migration from schema changes
 pnpm drizzle-kit generate
@@ -47,6 +48,7 @@ pnpm db:migrate
 ```
 
 ### Via Supabase CLI (SQL)
+
 ```bash
 # Push SQL migrations to linked project
 supabase db push
@@ -91,18 +93,18 @@ supabase functions serve
 
 ### Required GitHub Secrets
 
-| Secret | Description |
-|--------|-------------|
-| `SUPABASE_ACCESS_TOKEN` | Supabase CLI access token |
-| `SUPABASE_DB_PASSWORD` | Supabase database password |
-| `VERCEL_TOKEN` | Vercel deployment token |
-| `VERCEL_ORG_ID` | Vercel organization ID |
-| `VERCEL_PROJECT_ID` | Vercel project ID |
-| `DATABASE_URL` | Production database URL |
-| `JWT_SECRET` | JWT signing secret |
-| `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key |
-| `APP_URL` | Production app URL |
+| Secret                  | Description                |
+| ----------------------- | -------------------------- |
+| `SUPABASE_ACCESS_TOKEN` | Supabase CLI access token  |
+| `SUPABASE_DB_PASSWORD`  | Supabase database password |
+| `VERCEL_TOKEN`          | Vercel deployment token    |
+| `VERCEL_ORG_ID`         | Vercel organization ID     |
+| `VERCEL_PROJECT_ID`     | Vercel project ID          |
+| `DATABASE_URL`          | Production database URL    |
+| `JWT_SECRET`            | JWT signing secret         |
+| `SUPABASE_URL`          | Supabase project URL       |
+| `SUPABASE_ANON_KEY`     | Supabase anonymous key     |
+| `APP_URL`               | Production app URL         |
 
 ## Production Deployment (Manual)
 

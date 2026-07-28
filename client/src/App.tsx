@@ -10,10 +10,20 @@ import { trpc } from "@/lib/trpc";
 import { resolveDefaultThemeForPath } from "@shared/themePolicy";
 
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
-const ParticleField = lazy(() => import("./components/ParticleField").then((module) => ({ default: module.ParticleField })));
-const CyberGrid = lazy(() => import("./components/CyberGrid").then((module) => ({ default: module.CyberGrid })));
+const ParticleField = lazy(() =>
+  import("./components/ParticleField").then(module => ({
+    default: module.ParticleField,
+  }))
+);
+const CyberGrid = lazy(() =>
+  import("./components/CyberGrid").then(module => ({
+    default: module.CyberGrid,
+  }))
+);
 const CookieConsentBanner = lazy(() =>
-  import("./components/CookieConsentBanner").then((module) => ({ default: module.CookieConsentBanner }))
+  import("./components/CookieConsentBanner").then(module => ({
+    default: module.CookieConsentBanner,
+  }))
 );
 
 const Home = lazy(() => import("./pages/Home"));
@@ -47,7 +57,9 @@ const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const VendorRiskDashboard = lazy(() => import("./pages/VendorRiskDashboard"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const ProIntelligenceDashboard = lazy(() => import("./pages/ProIntelligenceDashboard"));
+const ProIntelligenceDashboard = lazy(
+  () => import("./pages/ProIntelligenceDashboard")
+);
 const AccountSettings = lazy(() => import("./pages/AccountSettings"));
 const TransferChecker = lazy(() => import("./pages/TransferChecker"));
 const TeamMembers = lazy(() => import("./pages/TeamMembers"));
@@ -64,7 +76,9 @@ const RiskRegister = lazy(() => import("./pages/RiskRegister"));
 const PolicyManager = lazy(() => import("./pages/PolicyManager"));
 const IncidentRegister = lazy(() => import("./pages/IncidentRegister"));
 const AuditSchedule = lazy(() => import("./pages/AuditSchedule"));
-const VendorComplianceProfiles = lazy(() => import("./pages/VendorComplianceProfiles"));
+const VendorComplianceProfiles = lazy(
+  () => import("./pages/VendorComplianceProfiles")
+);
 const ComplianceReports = lazy(() => import("./pages/ComplianceReports"));
 const ContinuousCompliance = lazy(() => import("./pages/ContinuousCompliance"));
 const EvidenceLocker = lazy(() => import("./pages/EvidenceLocker"));
@@ -77,9 +91,22 @@ const ThreatIntelFeed = lazy(() => import("./pages/ThreatIntelFeed"));
 const SecurityMaturity = lazy(() => import("./pages/SecurityMaturity"));
 const AdminServiceRequests = lazy(() => import("./pages/AdminServiceRequests"));
 const AdminThreatIntel = lazy(() => import("./pages/AdminThreatIntel"));
-const YallaAdminAccessBootstrap = lazy(() => import("./pages/yalla-admin/YallaAdminAccessBootstrap"));
-const YallaAdminLogin = lazy(() => import("./pages/yalla-admin/YallaAdminLogin"));
-const YallaAdminPortal = lazy(() => import("./pages/yalla-admin/YallaAdminPortal"));
+const YallaAdminAccessBootstrap = lazy(
+  () => import("./pages/yalla-admin/YallaAdminAccessBootstrap")
+);
+const YallaAdminLogin = lazy(
+  () => import("./pages/yalla-admin/YallaAdminLogin")
+);
+const YallaAdminPortal = lazy(
+  () => import("./pages/yalla-admin/YallaAdminPortal")
+);
+const AdminDashboard = lazy(() => import("./pages/yalla-admin/AdminDashboard"));
+const GlobalRegistry = lazy(() => import("./pages/GlobalRegistry"));
+const GlobalKnowledgeGraph = lazy(() => import("./pages/GlobalKnowledgeGraph"));
+const GlobalIndustryEditions = lazy(
+  () => import("./pages/GlobalIndustryEditions")
+);
+const GlobalAIAgents = lazy(() => import("./pages/GlobalAIAgents"));
 
 // Root route: redirect already-authenticated users straight to /dashboard;
 // non-authenticated users see the Signup/Login page.
@@ -93,7 +120,7 @@ function RootRoute() {
   useEffect(() => {
     if (meQuery.data) {
       const r = new URLSearchParams(window.location.search).get("r");
-      navigate((r && r.startsWith("/")) ? r : "/dashboard", { replace: true });
+      navigate(r && r.startsWith("/") ? r : "/dashboard", { replace: true });
     }
   }, [meQuery.data, navigate]);
   if (meQuery.isLoading) {
@@ -157,6 +184,9 @@ function Router() {
       <Route path={"/yalla-hack-owners-console/login"}>
         <YallaAdminLogin />
       </Route>
+      <Route path={"/yalla-hack-owners-console/dashboard"}>
+        <AdminDashboard />
+      </Route>
       <Route path={"/yalla-hack-owners-console"}>
         <YallaAdminPortal />
       </Route>
@@ -172,6 +202,18 @@ function Router() {
           <Switch>
             <Route path={"/dashboard"}>
               <Dashboard />
+            </Route>
+            <Route path={"/global-registry"}>
+              <GlobalRegistry />
+            </Route>
+            <Route path={"/knowledge-graph"}>
+              <GlobalKnowledgeGraph />
+            </Route>
+            <Route path={"/industry-editions"}>
+              <GlobalIndustryEditions />
+            </Route>
+            <Route path={"/ai-agents"}>
+              <GlobalAIAgents />
             </Route>
             <Route path={"/home"}>
               <Home />
@@ -336,17 +378,20 @@ function ThemedAppShell() {
   const defaultTheme = resolveDefaultThemeForPath(location);
 
   return (
-    <ThemeProvider
-      defaultTheme={defaultTheme}
-      switchable
-    >
+    <ThemeProvider defaultTheme={defaultTheme} switchable>
       <TooltipProvider>
         <Toaster />
         <Suspense
           fallback={
             <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
-              <div className="djac-page-spinner" aria-label="Loading" role="status" />
-              <span className="text-xs text-muted-foreground tracking-wide select-none">Loading…</span>
+              <div
+                className="djac-page-spinner"
+                aria-label="Loading"
+                role="status"
+              />
+              <span className="text-xs text-muted-foreground tracking-wide select-none">
+                Loading…
+              </span>
             </div>
           }
         >

@@ -18,26 +18,26 @@ const sseClients = new Set<Response>();
 // ─── Client lifecycle ─────────────────────────────────────────────────────────
 
 export function addSSEClient(res: Response): void {
-    sseClients.add(res);
+  sseClients.add(res);
 }
 
 export function removeSSEClient(res: Response): void {
-    sseClients.delete(res);
+  sseClients.delete(res);
 }
 
 export function getSSEClientCount(): number {
-    return sseClients.size;
+  return sseClients.size;
 }
 
 // ─── Broadcast ────────────────────────────────────────────────────────────────
 
 export function broadcastSSE(event: string, data: unknown): void {
-    const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-    for (const client of sseClients) {
-        try {
-            client.write(msg);
-        } catch {
-            sseClients.delete(client);
-        }
+  const msg = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+  for (const client of sseClients) {
+    try {
+      client.write(msg);
+    } catch {
+      sseClients.delete(client);
     }
+  }
 }

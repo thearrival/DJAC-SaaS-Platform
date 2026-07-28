@@ -2,10 +2,7 @@ import { describe, it, expect } from "vitest";
 
 describe("Supabase Client — Configuration Validation", () => {
   it("should accept valid Supabase URL format", () => {
-    const validUrls = [
-      "https://abc.supabase.co",
-      "https://xyz123.supabase.co",
-    ];
+    const validUrls = ["https://abc.supabase.co", "https://xyz123.supabase.co"];
     for (const url of validUrls) {
       expect(url).toMatch(/^https:\/\/[a-z0-9]+\.supabase\.co$/);
     }

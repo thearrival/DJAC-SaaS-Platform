@@ -10,15 +10,15 @@ const workspaceRoot = process.cwd();
 export default defineConfig(({ mode }) => {
   const isProductionBuild = mode === "production";
 
-  const enableManusRuntime = !isProductionBuild && (
-    process.env.ENABLE_MANUS_RUNTIME === "true" ||
-    process.env.VITE_ENABLE_MANUS_RUNTIME === "true"
-  );
+  const enableManusRuntime =
+    !isProductionBuild &&
+    (process.env.ENABLE_MANUS_RUNTIME === "true" ||
+      process.env.VITE_ENABLE_MANUS_RUNTIME === "true");
 
-  const enableJsxLoc = !isProductionBuild && (
-    process.env.ENABLE_JSX_LOC === "true" ||
-    process.env.VITE_ENABLE_JSX_LOC === "true"
-  );
+  const enableJsxLoc =
+    !isProductionBuild &&
+    (process.env.ENABLE_JSX_LOC === "true" ||
+      process.env.VITE_ENABLE_JSX_LOC === "true");
 
   const plugins = [
     react(),
@@ -85,17 +85,12 @@ export default defineConfig(({ mode }) => {
               id.includes("react-day-picker") ||
               id.includes("react-markdown") ||
               id.includes("react-hook-form") ||
-              id.includes("@hookform")
-            ) {
-              return "react-vendor";
-            }
-
-            if (
+              id.includes("@hookform") ||
               id.includes("@tanstack/react-query") ||
               id.includes("@trpc") ||
               id.includes("superjson")
             ) {
-              return "data-client";
+              return "react-vendor";
             }
 
             if (id.includes("lucide-react")) {
@@ -118,7 +113,11 @@ export default defineConfig(({ mode }) => {
             }
 
             // PDF/report generation is rarely executed — keep separate.
-            if (id.includes("pdf-lib") || id.includes("fontkit") || id.includes("pizzip")) {
+            if (
+              id.includes("pdf-lib") ||
+              id.includes("fontkit") ||
+              id.includes("pizzip")
+            ) {
               return "pdf-vendor";
             }
 
@@ -132,9 +131,9 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    // Drop console.* and debugger statements from production bundles.
+    // Only drop debugger in production — keep console.warn/error for runtime error reporting.
     esbuild: {
-      drop: isProductionBuild ? ["console", "debugger"] : [],
+      drop: isProductionBuild ? ["debugger"] : [],
     },
     server: {
       host: true,

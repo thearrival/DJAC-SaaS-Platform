@@ -8,13 +8,15 @@
    (no Google Fonts dependency) with generous fallbacks.
 ────────────────────────────────────────────────────────────────────────── */
 @theme inline {
-  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, -apple-system,
+  --font-sans:
+    "Inter", "Segoe UI", ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "Cascadia Code", "Fira Code",
-    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-mono:
+    "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace,
+    "SFMono-Regular", Menlo, Consolas, monospace;
   --font-display: "Space Grotesk", "Inter", "Segoe UI", sans-serif;
   /* Semantic color tokens for animation system */
-  --color-success: oklch(0.80 0.25 155);
+  --color-success: oklch(0.8 0.25 155);
   --color-warning: oklch(0.78 0.22 70);
   --color-info: oklch(0.88 0.15 200);
 }
@@ -61,15 +63,15 @@
 :root {
   /* ── DJAC Light Theme ── */
   --radius: 0.65rem;
-  --primary: oklch(0.60 0.22 290);
+  --primary: oklch(0.6 0.22 290);
   /* #9359EC purple */
   --primary-foreground: oklch(1 0 0);
   /* Charts (same accent palette in both modes) */
   --chart-1: oklch(0.875 0.135 196);
   /* cyan */
-  --chart-2: oklch(0.60 0.22 290);
+  --chart-2: oklch(0.6 0.22 290);
   /* purple */
-  --chart-3: oklch(0.875 0.20 145);
+  --chart-3: oklch(0.875 0.2 145);
   /* green */
   --chart-4: oklch(0.62 0.25 27);
   /* red */
@@ -95,24 +97,24 @@
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.86 0.02 264);
   --input: oklch(0.86 0.02 264);
-  --ring: oklch(0.60 0.22 290);
+  --ring: oklch(0.6 0.22 290);
   /* Sidebar */
   --sidebar: oklch(0.94 0.015 264);
   --sidebar-foreground: oklch(0.115 0.095 264);
-  --sidebar-primary: oklch(0.60 0.22 290);
+  --sidebar-primary: oklch(0.6 0.22 290);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0 0 0 / 5%);
   --sidebar-accent-foreground: oklch(0.115 0.095 264);
   --sidebar-border: oklch(0 0 0 / 8%);
-  --sidebar-ring: oklch(0.60 0.22 290);
+  --sidebar-ring: oklch(0.6 0.22 290);
   /* ── DJAC inline-style color tokens (light) ── */
-  --djac-bg: #F0F4FF;
-  --djac-bg-deep: #FFFFFF;
+  --djac-bg: #f0f4ff;
+  --djac-bg-deep: #ffffff;
   --djac-card: rgba(4, 15, 97, 0.04);
   --djac-card-hi: rgba(4, 15, 97, 0.07);
   --djac-border: rgba(4, 15, 97, 0.11);
   --djac-border-hi: rgba(0, 100, 200, 0.35);
-  --djac-text: #020B45;
+  --djac-text: #020b45;
   --djac-muted: rgba(2, 11, 69, 0.55);
   --djac-input-bg: rgba(4, 15, 97, 0.05);
   --djac-input-border: rgba(4, 15, 97, 0.14);
@@ -139,11 +141,11 @@
 
 .dark {
   /* ── DJAC Dark Theme ── */
-  --primary: oklch(0.60 0.22 290);
+  --primary: oklch(0.6 0.22 290);
   --primary-foreground: oklch(1 0 0);
   --chart-1: oklch(0.875 0.135 196);
-  --chart-2: oklch(0.60 0.22 290);
-  --chart-3: oklch(0.875 0.20 145);
+  --chart-2: oklch(0.6 0.22 290);
+  --chart-3: oklch(0.875 0.2 145);
   --chart-4: oklch(0.62 0.25 27);
   --chart-5: oklch(0.83 0.18 97);
   --background: oklch(0.115 0.095 264);
@@ -162,35 +164,35 @@
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 8%);
-  --ring: oklch(0.60 0.22 290);
+  --ring: oklch(0.6 0.22 290);
   --sidebar: oklch(0.085 0.065 264);
   --sidebar-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.60 0.22 290);
+  --sidebar-primary: oklch(0.6 0.22 290);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(1 0 0 / 8%);
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(1 0 0 / 7%);
-  --sidebar-ring: oklch(0.60 0.22 290);
+  --sidebar-ring: oklch(0.6 0.22 290);
   /* ── DJAC inline-style color tokens (dark) ── */
-  --djac-bg: #040F61;
-  --djac-bg-deep: #020B45;
+  --djac-bg: #040f61;
+  --djac-bg-deep: #020b45;
   --djac-card: rgba(255, 255, 255, 0.044);
   --djac-card-hi: rgba(255, 255, 255, 0.075);
   --djac-border: rgba(255, 255, 255, 0.09);
   --djac-border-hi: rgba(0, 247, 255, 0.45);
-  --djac-text: #FFFFFF;
-  --djac-muted: #9CA3AF;
+  --djac-text: #ffffff;
+  --djac-muted: #9ca3af;
   --djac-input-bg: rgba(255, 255, 255, 0.06);
   --djac-input-border: rgba(255, 255, 255, 0.13);
-  --djac-nav-bg: rgba(4, 15, 97, 0.90);
+  --djac-nav-bg: rgba(4, 15, 97, 0.9);
   --djac-section-alt: rgba(2, 11, 69, 0.65);
   /* ── DJAC accent colors (dark: electric neon palette) ── */
-  --djac-cyan: #00F7FF;
-  --djac-green: #01FF7F;
-  --djac-red: #FF1744;
-  --djac-orange: #FF6B2B;
-  --djac-yellow: #FFD600;
-  --djac-purple: #9359EC;
+  --djac-cyan: #00f7ff;
+  --djac-green: #01ff7f;
+  --djac-red: #ff1744;
+  --djac-orange: #ff6b2b;
+  --djac-yellow: #ffd600;
+  --djac-purple: #9359ec;
   /* ── Semantic HSL channel vars — dark (electric neon) ── */
   --success: 152 100% 50%;
   --success-foreground: 230 92% 12%;
@@ -219,8 +221,7 @@
   *::after {
     transition-property:
       color, background-color, border-color, outline-color,
-      text-decoration-color, fill, stroke,
-      box-shadow, opacity;
+      text-decoration-color, fill, stroke, box-shadow, opacity;
     transition-duration: 220ms;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     /* All sizing is relative — no fixed pixel overrides */
@@ -228,7 +229,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
@@ -237,7 +237,6 @@
   }
 
   @media print {
-
     *,
     *::before,
     *::after {
@@ -317,7 +316,6 @@
 }
 
 @layer components {
-
   /**
    * Custom container utility that centers content and adds responsive padding.
    *
@@ -363,14 +361,28 @@
 
   /* Shared action-option button style used by account and sign-out dialogs. */
   .djac-option-btn {
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, color-mix(in oklab, hsl(var(--card)) 88%, hsl(var(--accent)) 12%) 100%);
-    border-color: color-mix(in oklab, hsl(var(--border)) 78%, hsl(var(--primary)) 22%);
-    box-shadow: 0 6px 20px -16px color-mix(in oklab, hsl(var(--primary)) 55%, transparent 45%);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card)) 0%,
+      color-mix(in oklab, hsl(var(--card)) 88%, hsl(var(--accent)) 12%) 100%
+    );
+    border-color: color-mix(
+      in oklab,
+      hsl(var(--border)) 78%,
+      hsl(var(--primary)) 22%
+    );
+    box-shadow: 0 6px 20px -16px
+      color-mix(in oklab, hsl(var(--primary)) 55%, transparent 45%);
   }
 
   .djac-option-btn:hover {
-    border-color: color-mix(in oklab, hsl(var(--border)) 62%, hsl(var(--primary)) 38%);
-    box-shadow: 0 12px 28px -20px color-mix(in oklab, hsl(var(--primary)) 65%, transparent 35%);
+    border-color: color-mix(
+      in oklab,
+      hsl(var(--border)) 62%,
+      hsl(var(--primary)) 38%
+    );
+    box-shadow: 0 12px 28px -20px
+      color-mix(in oklab, hsl(var(--primary)) 65%, transparent 35%);
     transform: translateY(-1px);
   }
 
@@ -438,14 +450,14 @@ html[dir="rtl"] .text-end {
 }
 
 /* Global: flip mr-2 inside flex containers for icon spacing */
-html[dir="rtl"] .flex.items-center>.mr-2,
-html[dir="rtl"] .flex.items-start>.mr-2 {
+html[dir="rtl"] .flex.items-center > .mr-2,
+html[dir="rtl"] .flex.items-start > .mr-2 {
   margin-right: 0;
   margin-left: 0.5rem;
 }
 
-html[dir="rtl"] .flex.items-center>.mr-3,
-html[dir="rtl"] .flex.items-start>.mr-3 {
+html[dir="rtl"] .flex.items-center > .mr-3,
+html[dir="rtl"] .flex.items-start > .mr-3 {
   margin-right: 0;
   margin-left: 0.75rem;
 }
@@ -502,9 +514,21 @@ html[dir="rtl"] .djac-topbar {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(1200px 520px at 4% -8%, color-mix(in oklab, hsl(var(--primary)) 14%, transparent 86%), transparent 62%),
-    radial-gradient(820px 420px at 100% 0%, color-mix(in oklab, hsl(var(--chart-1)) 10%, transparent 90%), transparent 64%),
-    linear-gradient(180deg, color-mix(in oklab, hsl(var(--background)) 94%, hsl(var(--card)) 6%) 0%, hsl(var(--background)) 100%);
+    radial-gradient(
+      1200px 520px at 4% -8%,
+      color-mix(in oklab, hsl(var(--primary)) 14%, transparent 86%),
+      transparent 62%
+    ),
+    radial-gradient(
+      820px 420px at 100% 0%,
+      color-mix(in oklab, hsl(var(--chart-1)) 10%, transparent 90%),
+      transparent 64%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, hsl(var(--background)) 94%, hsl(var(--card)) 6%) 0%,
+      hsl(var(--background)) 100%
+    );
 }
 
 .djac-page-enter {
@@ -593,31 +617,31 @@ html[dir="rtl"] .djac-topbar {
   }
 }
 
-.djac-stagger>* {
+.djac-stagger > * {
   animation: djac-fade-up 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.djac-stagger>*:nth-child(1) {
+.djac-stagger > *:nth-child(1) {
   animation-delay: 0ms;
 }
 
-.djac-stagger>*:nth-child(2) {
+.djac-stagger > *:nth-child(2) {
   animation-delay: 40ms;
 }
 
-.djac-stagger>*:nth-child(3) {
+.djac-stagger > *:nth-child(3) {
   animation-delay: 80ms;
 }
 
-.djac-stagger>*:nth-child(4) {
+.djac-stagger > *:nth-child(4) {
   animation-delay: 120ms;
 }
 
-.djac-stagger>*:nth-child(5) {
+.djac-stagger > *:nth-child(5) {
   animation-delay: 160ms;
 }
 
-.djac-stagger>*:nth-child(n+6) {
+.djac-stagger > *:nth-child(n + 6) {
   animation-delay: 200ms;
 }
 
@@ -626,7 +650,7 @@ html[dir="rtl"] .djac-topbar {
     animation: none;
   }
 
-  .djac-stagger>* {
+  .djac-stagger > * {
     animation: none;
   }
 }
@@ -676,7 +700,6 @@ html[dir="rtl"] .djac-topbar {
 }
 
 @media (max-width: 600px) {
-
   .djac-dash-kpi-grid,
   .djac-dash-modules-strip,
   .djac-dash-fw-grid,
@@ -696,31 +719,45 @@ html[dir="rtl"] .djac-topbar {
 
 /* ── KPI card lift on hover ─────────────────────────────────────────────── */
 .djac-kpi-hover {
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .djac-kpi-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 28px -10px color-mix(in oklab, var(--djac-border-hi) 55%, transparent 45%);
+  box-shadow: 0 8px 28px -10px
+    color-mix(in oklab, var(--djac-border-hi) 55%, transparent 45%);
   border-color: var(--djac-border-hi) !important;
 }
 
 /* ── Glow accent utilities ──────────────────────────────────────────────── */
 .djac-glow-cyan {
-  box-shadow: 0 0 0 1px var(--djac-cyan), 0 4px 20px -6px color-mix(in oklab, var(--djac-cyan) 50%, transparent 50%);
+  box-shadow:
+    0 0 0 1px var(--djac-cyan),
+    0 4px 20px -6px color-mix(in oklab, var(--djac-cyan) 50%, transparent 50%);
 }
 
 .djac-glow-green {
-  box-shadow: 0 0 0 1px var(--djac-green), 0 4px 20px -6px color-mix(in oklab, var(--djac-green) 50%, transparent 50%);
+  box-shadow:
+    0 0 0 1px var(--djac-green),
+    0 4px 20px -6px color-mix(in oklab, var(--djac-green) 50%, transparent 50%);
 }
 
 .djac-glow-red {
-  box-shadow: 0 0 0 1px var(--djac-red), 0 4px 20px -6px color-mix(in oklab, var(--djac-red) 50%, transparent 50%);
+  box-shadow:
+    0 0 0 1px var(--djac-red),
+    0 4px 20px -6px color-mix(in oklab, var(--djac-red) 50%, transparent 50%);
 }
 
 /* ── Gradient text ──────────────────────────────────────────────────────── */
 .djac-gradient-text {
-  background: linear-gradient(135deg, var(--djac-cyan) 0%, var(--djac-purple) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--djac-cyan) 0%,
+    var(--djac-purple) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -728,10 +765,10 @@ html[dir="rtl"] .djac-topbar {
 
 /* ── Pulsing live dot ───────────────────────────────────────────────────── */
 @keyframes djac-pulse-ring {
-
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--djac-red) 70%, transparent 30%);
+    box-shadow: 0 0 0 0
+      color-mix(in oklab, var(--djac-red) 70%, transparent 30%);
   }
 
   50% {
@@ -744,10 +781,10 @@ html[dir="rtl"] .djac-topbar {
 }
 
 @keyframes djac-pulse-green {
-
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--djac-green) 70%, transparent 30%);
+    box-shadow: 0 0 0 0
+      color-mix(in oklab, var(--djac-green) 70%, transparent 30%);
   }
 
   50% {
@@ -780,7 +817,11 @@ html[dir="rtl"] .djac-topbar {
 /* ── Sidebar active item accent bar ─────────────────────────────────────── */
 [data-sidebar="menu-button"][data-active="true"] {
   position: relative;
-  background: color-mix(in oklab, hsl(var(--primary)) 12%, hsl(var(--sidebar-accent)) 88%) !important;
+  background: color-mix(
+    in oklab,
+    hsl(var(--primary)) 12%,
+    hsl(var(--sidebar-accent)) 88%
+  ) !important;
   color: hsl(var(--primary)) !important;
   font-weight: 600 !important;
 }
@@ -863,7 +904,7 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 }
 
 .djac-section-6 {
-  animation: djac-fade-up 0.35s 0.40s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: djac-fade-up 0.35s 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .djac-section-7 {
@@ -895,7 +936,6 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 }
 
 @media (max-width: 1100px) {
-
   .djac-home-feature-grid,
   .djac-home-steps-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -933,7 +973,7 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
     align-items: stretch;
   }
 
-  .djac-home-hero-actions>* {
+  .djac-home-hero-actions > * {
     width: 100%;
   }
 
@@ -960,7 +1000,6 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .djac-section-1,
   .djac-section-2,
   .djac-section-2b,
@@ -994,14 +1033,21 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 }
 
 .djac-shimmer-bar {
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
   background-size: 200% 100%;
   animation: djac-shimmer 2.2s linear infinite;
 }
 
 /* ── Insight card accent border glow on hover ───────────────────────────── */
 .djac-insight-card {
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease;
 }
 
 .djac-insight-card:hover {
@@ -1011,7 +1057,7 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 
 /* ── Sidebar group label polish ─────────────────────────────────────────── */
 /* Subtle top divider between every sidebar group except the first. */
-[data-sidebar="group"]+[data-sidebar="group"] {
+[data-sidebar="group"] + [data-sidebar="group"] {
   border-top: 1px solid var(--djac-border);
   margin-top: 4px;
   padding-top: 4px;
@@ -1244,7 +1290,6 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
    .djac-three-col       generic 3-col (3→2→1 col)
 ────────────────────────────────────────────────────────────────────────── */
 @layer components {
-
   .djac-page {
     display: flex;
     flex-direction: column;
@@ -1448,7 +1493,7 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
     gap: var(--djac-sp-2);
   }
 
-  .djac-filter-bar>* {
+  .djac-filter-bar > * {
     flex-shrink: 0;
   }
 
@@ -1499,7 +1544,12 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 
   /* ── Skeleton loader ─────────────────────────────────────────────────── */
   .djac-skeleton {
-    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted) / 60%) 50%, hsl(var(--muted)) 75%);
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted) / 60%) 50%,
+      hsl(var(--muted)) 75%
+    );
     background-size: 200% 100%;
     animation: djac-shimmer 1.8s linear infinite;
     border-radius: var(--djac-radius-sm);
@@ -1677,7 +1727,6 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 
   /* iOS Safari: prevent auto-zoom on inputs smaller than 16px */
   @supports (-webkit-touch-callout: none) {
-
     input,
     select,
     textarea {
@@ -1705,9 +1754,11 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
    Parallels .djac-glass-card but with tighter blur + stronger primary glow.
 ────────────────────────────────────────────────────────────────────────── */
 .glass-card {
-  background: linear-gradient(135deg,
-      hsla(230, 70%, 16%, 0.8),
-      hsla(230, 70%, 12%, 0.6));
+  background: linear-gradient(
+    135deg,
+    hsla(230, 70%, 16%, 0.8),
+    hsla(230, 70%, 12%, 0.6)
+  );
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border: 1px solid hsla(185, 100%, 49%, 0.12);
@@ -1733,18 +1784,14 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
    Linear gradients for text effects on hero + animation component headlines.
 ────────────────────────────────────────────────────────────────────────── */
 .text-gradient-cyan {
-  background: linear-gradient(135deg,
-      hsl(185, 100%, 49%),
-      hsl(185, 80%, 40%));
+  background: linear-gradient(135deg, hsl(185, 100%, 49%), hsl(185, 80%, 40%));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-purple {
-  background: linear-gradient(135deg,
-      hsl(260, 74%, 56%),
-      hsl(270, 100%, 60%));
+  background: linear-gradient(135deg, hsl(260, 74%, 56%), hsl(270, 100%, 60%));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1773,7 +1820,6 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
    Verified at 90 / 100 / 110 / 125 / 150 / 175 / 200% browser zoom.
 ────────────────────────────────────────────────────────────────────────── */
 @layer base {
-
   /* Sidebar content clips gracefully instead of overflowing */
   [data-sidebar="menu-button"] span {
     overflow: hidden;
@@ -1814,7 +1860,6 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 
 /* Safari: prevent elastic overscroll from shifting the shell */
 @supports (-webkit-overflow-scrolling: touch) {
-
   html,
   body {
     overscroll-behavior-y: none;
@@ -1837,9 +1882,8 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
    Compliance reports / audit logs are routinely printed or exported to PDF.
 ────────────────────────────────────────────────────────────────────────── */
 @media print {
-
   [data-sidebar="sidebar"],
-  [data-sidebar="inset"]>.djac-topbar,
+  [data-sidebar="inset"] > .djac-topbar,
   .djac-topbar,
   .djac-skip-link,
   [data-sonner-toaster],
@@ -1885,11 +1929,17 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 
 /* ── Glass card ─────────────────────────────────────────────────────────── */
 .glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .glass-card:hover {
@@ -1899,7 +1949,11 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 
 .light .glass-card,
 :root:not(.dark) .glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(240, 244, 255, 0.55) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(240, 244, 255, 0.55) 100%
+  );
   border: 1px solid rgba(4, 15, 97, 0.09);
 }
 
@@ -1920,7 +1974,9 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
 /* ── Glow border ────────────────────────────────────────────────────────── */
 .glow-border {
   border: 1px solid hsla(185, 100%, 49%, 0.2);
-  box-shadow: inset 0 0 30px hsla(185, 100%, 49%, 0.03), var(--glow-cyan);
+  box-shadow:
+    inset 0 0 30px hsla(185, 100%, 49%, 0.03),
+    var(--glow-cyan);
 }
 
 /* ── Gradient text ──────────────────────────────────────────────────────── */

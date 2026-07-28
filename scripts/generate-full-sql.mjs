@@ -12,10 +12,13 @@ while ((match = tableRegex.exec(schema)) !== null) {
 }
 
 console.log(`Found ${tables.length} tables`);
-tables.forEach((t) => console.log(`  ${t.varName} -> "${t.tableName}"`));
+tables.forEach(t => console.log(`  ${t.varName} -> "${t.tableName}"`));
 
 // Generate CREATE TABLE SQL for each table
 // (This is a simplified version - in reality you'd use Drizzle's push function)
-writeFileSync("./drizzle/all-tables.txt", tables.map((t) => t.tableName).join("\n"));
+writeFileSync(
+  "./drizzle/all-tables.txt",
+  tables.map(t => t.tableName).join("\n")
+);
 
 console.log("\nTable list written to drizzle/all-tables.txt");

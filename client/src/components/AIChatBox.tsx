@@ -128,7 +128,7 @@ export function AIChatBox({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Filter out system messages
-  const displayMessages = messages.filter((msg) => msg.role !== "system");
+  const displayMessages = messages.filter(msg => msg.role !== "system");
 
   // Calculate min-height for last assistant message to push user message to top
   const [minHeightForLastMessage, setMinHeightForLastMessage] = useState(0);
@@ -144,7 +144,8 @@ export function AIChatBox({
       // - user message: 40px (item height) + 16px (margin-top from space-y-4) = 56px
       // Note: margin-bottom is not counted because it naturally pushes the assistant message down
       const userMessageReservedHeight = 56;
-      const calculatedHeight = scrollAreaHeight - 32 - userMessageReservedHeight;
+      const calculatedHeight =
+        scrollAreaHeight - 32 - userMessageReservedHeight;
 
       setMinHeightForLastMessage(Math.max(0, calculatedHeight));
     }
@@ -153,14 +154,14 @@ export function AIChatBox({
   // Scroll to bottom helper function with smooth animation
   const scrollToBottom = () => {
     const viewport = scrollAreaRef.current?.querySelector(
-      '[data-radix-scroll-area-viewport]'
+      "[data-radix-scroll-area-viewport]"
     ) as HTMLDivElement;
 
     if (viewport) {
       requestAnimationFrame(() => {
         viewport.scrollTo({
           top: viewport.scrollHeight,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       });
     }
@@ -206,7 +207,8 @@ export function AIChatBox({
                 <Sparkles className="size-12 opacity-20" />
                 <p className="text-sm">{emptyStateMessage}</p>
                 <p className="text-xs text-center max-w-md">
-                  Use the prompt box below to ask for regulatory comparisons, evidence checklists, or draft responses.
+                  Use the prompt box below to ask for regulatory comparisons,
+                  evidence checklists, or draft responses.
                 </p>
               </div>
 
@@ -228,7 +230,12 @@ export function AIChatBox({
           </div>
         ) : (
           <ScrollArea className="h-full">
-            <div className="flex flex-col space-y-4 p-4" role="log" aria-live="polite" aria-label="AI conversation">
+            <div
+              className="flex flex-col space-y-4 p-4"
+              role="log"
+              aria-live="polite"
+              aria-label="AI conversation"
+            >
               {displayMessages.map((message, index) => {
                 // Apply min-height to last message only if NOT loading (when loading, the loading indicator gets it)
                 const isLastMessage = index === displayMessages.length - 1;
@@ -318,7 +325,7 @@ export function AIChatBox({
           <Textarea
             ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             aria-label="Chat message input"
@@ -340,10 +347,19 @@ export function AIChatBox({
             )}
           </Button>
         </div>
-        <p id="chat-input-hint" className="text-[11px] text-muted-foreground/70 select-none">
-          <kbd className="rounded border border-border px-1 font-sans text-[10px]">Enter</kbd> to send
+        <p
+          id="chat-input-hint"
+          className="text-[11px] text-muted-foreground/70 select-none"
+        >
+          <kbd className="rounded border border-border px-1 font-sans text-[10px]">
+            Enter
+          </kbd>{" "}
+          to send
           {" · "}
-          <kbd className="rounded border border-border px-1 font-sans text-[10px]">Shift+Enter</kbd> for new line
+          <kbd className="rounded border border-border px-1 font-sans text-[10px]">
+            Shift+Enter
+          </kbd>{" "}
+          for new line
         </p>
       </form>
     </div>

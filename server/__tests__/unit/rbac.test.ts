@@ -8,7 +8,15 @@ import {
   type ModuleSlug,
 } from "../../../shared/const";
 
-type UserRole = "user" | "admin" | "basic_user" | "professional_user" | "company_admin" | "platform_admin" | "yalla_hack_employee" | "super_admin";
+type UserRole =
+  | "user"
+  | "admin"
+  | "basic_user"
+  | "professional_user"
+  | "company_admin"
+  | "platform_admin"
+  | "yalla_hack_employee"
+  | "super_admin";
 
 const ROLE_HIERARCHY: Record<UserRole, number> = {
   user: 0,
@@ -27,7 +35,13 @@ function hasMinRoleLegacy(userRole: UserRole, requiredRole: UserRole): boolean {
 
 describe("RBAC - Role Hierarchy (Legacy)", () => {
   it("super_admin should have all permissions", () => {
-    const roles: UserRole[] = ["user", "admin", "company_admin", "platform_admin", "super_admin"];
+    const roles: UserRole[] = [
+      "user",
+      "admin",
+      "company_admin",
+      "platform_admin",
+      "super_admin",
+    ];
     for (const role of roles) {
       expect(hasMinRoleLegacy("super_admin", role)).toBe(true);
     }
@@ -72,9 +86,14 @@ describe("RBAC - Production Role Hierarchy (shared/const)", () => {
 });
 
 describe("RBAC - Module Permission Matrix", () => {
-  const orgRoles: OrgRole[] = ["analyst", "compliance_officer", "admin", "owner"];
+  const orgRoles: OrgRole[] = [
+    "analyst",
+    "compliance_officer",
+    "admin",
+    "owner",
+  ];
 
-  orgRoles.forEach((role) => {
+  orgRoles.forEach(role => {
     it(`${role} should have permissions defined for all module slugs`, () => {
       const perms = DEFAULT_ORG_ROLE_PERMISSIONS[role];
       for (const slug of MODULE_SLUGS) {
@@ -95,10 +114,18 @@ describe("RBAC - Module Permission Matrix", () => {
 
   it("should have at least VIEW_ONLY access for all roles on all compliance modules", () => {
     const complianceModules: ModuleSlug[] = [
-      "asset_inventory", "vendor_assessment", "gap_tracker",
-      "remediation_planner", "risk_register", "policy_manager",
-      "incident_register", "audit_schedule", "compliance_tracker",
-      "compliance_reports", "report_center", "compliance_heatmap",
+      "asset_inventory",
+      "vendor_assessment",
+      "gap_tracker",
+      "remediation_planner",
+      "risk_register",
+      "policy_manager",
+      "incident_register",
+      "audit_schedule",
+      "compliance_tracker",
+      "compliance_reports",
+      "report_center",
+      "compliance_heatmap",
       "compliance_calendar",
     ];
 

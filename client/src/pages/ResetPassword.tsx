@@ -8,12 +8,12 @@ import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function ResetPassword() {
-    usePageTitle("Reset Password — DJAC");
-    const [, navigate] = useLocation();
+  usePageTitle("Reset Password — DJAC");
+  const [, navigate] = useLocation();
 
-    useEffect(() => {
-        navigate("/forgot-password", { replace: true });
-    }, [navigate]);
+  useEffect(() => {
+    navigate("/forgot-password", { replace: true });
+  }, [navigate]);
 
-    return null;
+  return null;
 }

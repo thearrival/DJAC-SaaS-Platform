@@ -31,18 +31,21 @@ import { recordUserInteraction } from "./interaction-logger";
 // ── Schemas ────────────────────────────────────────────────────────────────
 
 const chatMessageSchema = z.object({
-    role: z.enum(["user", "assistant"]),
-    content: z.string().max(2000),
+  role: z.enum(["user", "assistant"]),
+  content: z.string().max(2000),
 });
 
 const chatInputSchema = z.object({
-    /** Full conversation history including the latest user message at the end */
-    messages: z.array(chatMessageSchema).min(1).max(30),
-    /**
-     * Optional jurisdiction to bias the knowledge-base search.
-     * Omit or pass "all" to search across all jurisdictions.
-     */
-    jurisdiction: z.enum(["all", "China", "Saudi Arabia"]).optional().default("all"),
+  /** Full conversation history including the latest user message at the end */
+  messages: z.array(chatMessageSchema).min(1).max(30),
+  /**
+   * Optional jurisdiction to bias the knowledge-base search.
+   * Omit or pass "all" to search across all jurisdictions.
+   */
+  jurisdiction: z
+    .enum(["all", "China", "Saudi Arabia"])
+    .optional()
+    .default("all"),
 });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -64,122 +67,123 @@ Guidelines:
 `;
 
 function buildSystemPrompt(query: string, jurisdiction: string): string {
-    // Search the law knowledge base for up to 4 relevant entries
-    const results = searchLawKnowledge(query, 4);
+  // Search the law knowledge base for up to 4 relevant entries
+  const results = searchLawKnowledge(query, 4);
 
-    if (results.length === 0) {
-        return SYSTEM_PROMPT_PREFIX + "\n\nNo specific regulatory references matched this query — answer from general knowledge.";
-    }
-
-    const contextBlocks = results.map((r) => {
-        const highlights = r.highlights
-            .slice(0, 2)
-            .map((h) => `  [${h.title}]: ${h.excerpt}`)
-            .join("\n");
-        return `## ${r.title} (${r.jurisdiction}, ${r.frameworkCodes.join(", ")})\n${r.summary}\n${highlights}`;
-    });
-
-    const jurisdictionNote =
-        jurisdiction === "all"
-            ? ""
-            : `\n\nFocus your answer on regulations applicable in ${jurisdiction}.`;
-
+  if (results.length === 0) {
     return (
-        SYSTEM_PROMPT_PREFIX +
-        "\n\n--- Relevant regulatory context ---\n\n" +
-        contextBlocks.join("\n\n") +
-        jurisdictionNote
+      SYSTEM_PROMPT_PREFIX +
+      "\n\nNo specific regulatory references matched this query — answer from general knowledge."
     );
+  }
+
+  const contextBlocks = results.map(r => {
+    const highlights = r.highlights
+      .slice(0, 2)
+      .map(h => `  [${h.title}]: ${h.excerpt}`)
+      .join("\n");
+    return `## ${r.title} (${r.jurisdiction}, ${r.frameworkCodes.join(", ")})\n${r.summary}\n${highlights}`;
+  });
+
+  const jurisdictionNote =
+    jurisdiction === "all"
+      ? ""
+      : `\n\nFocus your answer on regulations applicable in ${jurisdiction}.`;
+
+  return (
+    SYSTEM_PROMPT_PREFIX +
+    "\n\n--- Relevant regulatory context ---\n\n" +
+    contextBlocks.join("\n\n") +
+    jurisdictionNote
+  );
 }
 
 // ── Router ─────────────────────────────────────────────────────────────────
 
 export const complianceChatRouter = router({
-    /**
-     * chat — Send a message and receive an AI compliance response.
-     *
-     * The client should maintain the full message history and pass it on each
-     * request so the LLM has conversational context.
-     */
-    chat: activeOrgProcedure
-        .input(chatInputSchema)
-        .mutation(async ({ ctx, input }) => {
-            await requireModulePermission(ctx, "pro_intelligence", "canView");
-            const { messages, jurisdiction } = input;
+  /**
+   * chat — Send a message and receive an AI compliance response.
+   *
+   * The client should maintain the full message history and pass it on each
+   * request so the LLM has conversational context.
+   */
+  chat: activeOrgProcedure
+    .input(chatInputSchema)
+    .mutation(async ({ ctx, input }) => {
+      await requireModulePermission(ctx, "pro_intelligence", "canView");
+      const { messages, jurisdiction } = input;
 
-            // The last message should always be from the user
-            const lastMessage = messages[messages.length - 1];
-            if (lastMessage.role !== "user") {
-                throw new TRPCError({
-                    code: "BAD_REQUEST",
-                    message: "The last message must be from the user.",
-                });
-            }
+      // The last message should always be from the user
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role !== "user") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The last message must be from the user.",
+        });
+      }
 
-            // Build RAG system prompt from law knowledge base
-            const systemPrompt = buildSystemPrompt(lastMessage.content, jurisdiction);
+      // Build RAG system prompt from law knowledge base
+      const systemPrompt = buildSystemPrompt(lastMessage.content, jurisdiction);
 
-            // LLM not configured — return a graceful fallback
-            if (!ENV.forgeApiKey && !parsedEnv.OPENAI_API_KEY) {
-                void recordUserInteraction(ctx, {
-                    context: "complianceChat.chat",
-                    action: "compliance_chat_fallback",
-                    entityType: "ai_response",
-                    outputRef: { reason: "llm_not_configured" },
-                });
-                return {
-                    role: "assistant" as const,
-                    content:
-                        "The AI compliance assistant is not yet configured on this deployment. " +
-                        "Please contact your administrator to set up the OpenAI API key (OPENAI_API_KEY environment variable).",
-                    citations: [] as string[],
-                    fallback: true,
-                };
-            }
+      // LLM not configured — return a graceful fallback
+      if (!ENV.forgeApiKey && !parsedEnv.OPENAI_API_KEY) {
+        void recordUserInteraction(ctx, {
+          context: "complianceChat.chat",
+          action: "compliance_chat_fallback",
+          entityType: "ai_response",
+          outputRef: { reason: "llm_not_configured" },
+        });
+        return {
+          role: "assistant" as const,
+          content:
+            "The AI compliance assistant is not yet configured on this deployment. " +
+            "Please contact your administrator to set up the OpenAI API key (OPENAI_API_KEY environment variable).",
+          citations: [] as string[],
+          fallback: true,
+        };
+      }
 
-            try {
-                const result = await invokeLLM({
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        ...messages.map((m) => ({ role: m.role, content: m.content })),
-                    ],
-                    maxTokens: 1024,
-                });
+      try {
+        const result = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages.map(m => ({ role: m.role, content: m.content })),
+          ],
+          maxTokens: 1024,
+        });
 
-                const reply = result.choices[0]?.message?.content;
-                const replyText =
-                    typeof reply === "string"
-                        ? reply
-                        : Array.isArray(reply)
-                            ? reply
-                                .map((p) => (p.type === "text" ? p.text : ""))
-                                .join("")
-                            : "Sorry, I could not generate a response. Please try again.";
+        const reply = result.choices[0]?.message?.content;
+        const replyText =
+          typeof reply === "string"
+            ? reply
+            : Array.isArray(reply)
+              ? reply.map(p => (p.type === "text" ? p.text : "")).join("")
+              : "Sorry, I could not generate a response. Please try again.";
 
-                // Record usage for analytics
-                void recordUserInteraction(ctx, {
-                    context: "complianceChat.chat",
-                    action: "compliance_chat_response",
-                    entityType: "ai_response",
-                    outputRef: {
-                        jurisdiction,
-                        tokens: result.usage?.total_tokens ?? 0,
-                    },
-                });
+        // Record usage for analytics
+        void recordUserInteraction(ctx, {
+          context: "complianceChat.chat",
+          action: "compliance_chat_response",
+          entityType: "ai_response",
+          outputRef: {
+            jurisdiction,
+            tokens: result.usage?.total_tokens ?? 0,
+          },
+        });
 
-                return {
-                    role: "assistant" as const,
-                    content: replyText,
-                    citations: [] as string[],
-                    fallback: false,
-                };
-            } catch (err) {
-                const message =
-                    err instanceof Error ? err.message : "Unknown LLM error";
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: `AI service error: ${message}`,
-                });
-            }
-        }),
+        return {
+          role: "assistant" as const,
+          content: replyText,
+          citations: [] as string[],
+          fallback: false,
+        };
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Unknown LLM error";
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `AI service error: ${message}`,
+        });
+      }
+    }),
 });

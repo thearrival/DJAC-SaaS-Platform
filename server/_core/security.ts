@@ -2,162 +2,168 @@ import type { Request } from "express";
 import { ENV } from "./env";
 
 interface SecurityHeaderOptions {
-    pathname: string;
-    isHttps: boolean;
+  pathname: string;
+  isHttps: boolean;
 }
 
 const NO_INDEX_PATH_PREFIXES = [
-    "/api/",
-    "/dashboard",
-    "/vendor-assessment",
-    "/vendor-risk",
-    "/market-entry",
-    "/client-workspace",
-    "/admin-control-center",
-    "/operations",
-    "/laws",
-    "/compliance-tracker",
-    "/report-center",
-    "/billing",
-    "/compliance-calendar",
-    "/onboarding-wizard",
-    "/saas-metrics",
-    "/heatmap",
-    "/notifications",
-    "/company/dashboard",
-    "/superadmin/dashboard",
-    "/pro-intelligence",
-    "/account-settings",
-    "/team-members",
-    "/org-settings",
-    "/invite-accept",
-    "/audit-log",
-    "/compliance-scorecard",
-    "/api-keys",
-    "/gap-tracker",
-    "/assessment-history",
-    "/vendor/",
-    "/remediation-planner",
-    "/risk-register",
-    "/policy-manager",
-    "/incident-register",
-    "/audit-schedule",
-    "/vendor-compliance",
-    "/compliance-reports",
-    "/continuous-compliance",
-    "/evidence-locker",
-    "/dsr-tracker",
-    "/login",
-    "/signup",
-    "/forgot-password",
-    "/reset-password",
+  "/api/",
+  "/dashboard",
+  "/vendor-assessment",
+  "/vendor-risk",
+  "/market-entry",
+  "/client-workspace",
+  "/admin-control-center",
+  "/operations",
+  "/laws",
+  "/compliance-tracker",
+  "/report-center",
+  "/billing",
+  "/compliance-calendar",
+  "/onboarding-wizard",
+  "/saas-metrics",
+  "/heatmap",
+  "/notifications",
+  "/company/dashboard",
+  "/superadmin/dashboard",
+  "/pro-intelligence",
+  "/account-settings",
+  "/team-members",
+  "/org-settings",
+  "/invite-accept",
+  "/audit-log",
+  "/compliance-scorecard",
+  "/api-keys",
+  "/gap-tracker",
+  "/assessment-history",
+  "/vendor/",
+  "/remediation-planner",
+  "/risk-register",
+  "/policy-manager",
+  "/incident-register",
+  "/audit-schedule",
+  "/vendor-compliance",
+  "/compliance-reports",
+  "/continuous-compliance",
+  "/evidence-locker",
+  "/dsr-tracker",
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
 ];
 
 function normalizePath(pathname: string): string {
-    const [withoutQuery] = pathname.split(/[?#]/, 1);
-    const normalized = withoutQuery.trim().toLowerCase();
-    return normalized || "/";
+  const [withoutQuery] = pathname.split(/[?#]/, 1);
+  const normalized = withoutQuery.trim().toLowerCase();
+  return normalized || "/";
 }
 
 export function shouldBypassApiRateLimit(pathname: string): boolean {
-    const normalized = normalizePath(pathname);
-    return normalized === "/api/health" ||
-        normalized === "/api/healthz" ||
-        normalized === "/api/readiness" ||
-        normalized === "/api/readyz" ||
-        normalized === "/health" ||
-        normalized === "/healthz" ||
-        normalized === "/readiness" ||
-        normalized === "/readyz";
+  const normalized = normalizePath(pathname);
+  return (
+    normalized === "/api/health" ||
+    normalized === "/api/healthz" ||
+    normalized === "/api/readiness" ||
+    normalized === "/api/readyz" ||
+    normalized === "/health" ||
+    normalized === "/healthz" ||
+    normalized === "/readiness" ||
+    normalized === "/readyz"
+  );
 }
 
 function shouldNoIndex(pathname: string): boolean {
-    const normalized = normalizePath(pathname);
-    return NO_INDEX_PATH_PREFIXES.some(prefix => normalized === prefix || normalized.startsWith(prefix));
+  const normalized = normalizePath(pathname);
+  return NO_INDEX_PATH_PREFIXES.some(
+    prefix => normalized === prefix || normalized.startsWith(prefix)
+  );
 }
 
 function shouldDisableCaching(pathname: string): boolean {
-    const normalized = normalizePath(pathname);
-    return normalized.startsWith("/api/") || shouldNoIndex(normalized);
+  const normalized = normalizePath(pathname);
+  return normalized.startsWith("/api/") || shouldNoIndex(normalized);
 }
 
 function buildCsp(isProduction: boolean): string[] {
-    const parts = [
-        "default-src 'self'",
-        "base-uri 'self'",
-        "object-src 'none'",
-        "img-src 'self' data: blob: https:",
-        "font-src 'self' data: https://fonts.gstatic.com",
-        "connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co",
-        "frame-src https://js.stripe.com https://hooks.stripe.com",
-        "form-action 'self'",
-        "frame-ancestors 'none'",
-        "report-uri /api/csp-report",
-    ];
+  const parts = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co",
+    "frame-src https://js.stripe.com https://hooks.stripe.com",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "report-uri /api/csp-report",
+  ];
 
-    if (isProduction) {
-        // Production: strict CSP with hash-based inline script support.
-        // Vite generates hashed assets so no inline scripts need 'unsafe-inline'.
-        // strict-dynamic propagates trust to scripts loaded by allowed scripts.
-        parts.push("script-src 'self' https://js.stripe.com 'strict-dynamic'");
-        parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
-    } else {
-        // Development: relaxed CSP for Vite HMR and DX tooling.
-        parts.push("script-src 'self' 'unsafe-inline' https://js.stripe.com");
-        parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
-    }
+  if (isProduction) {
+    parts.push("script-src 'self' https://js.stripe.com 'strict-dynamic'");
+    parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
+    parts.push("upgrade-insecure-requests");
+  } else {
+    parts.push("script-src 'self' 'unsafe-inline' https://js.stripe.com");
+    parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
+  }
 
-    return parts;
+  return parts;
 }
 
-export function getSecurityHeadersForRequest({ pathname, isHttps }: SecurityHeaderOptions): Record<string, string> {
-    const normalized = normalizePath(pathname);
-    const isProduction = ENV.isProduction;
-    const cspParts = buildCsp(isProduction);
+export function getSecurityHeadersForRequest({
+  pathname,
+  isHttps,
+}: SecurityHeaderOptions): Record<string, string> {
+  const normalized = normalizePath(pathname);
+  const isProduction = ENV.isProduction;
+  const cspParts = buildCsp(isProduction);
 
-    // Report-Only CSP uses a relaxed policy to detect violations without blocking.
-    const roCspParts = buildCsp(false).map(p =>
-        p.startsWith("report-uri") ? "report-uri /api/csp-report?ro=1" : p
-    );
+  // Report-Only CSP uses a relaxed policy to detect violations without blocking.
+  const roCspParts = buildCsp(false).map(p =>
+    p.startsWith("report-uri") ? "report-uri /api/csp-report?ro=1" : p
+  );
 
-    const headers: Record<string, string> = {
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Permissions-Policy": "camera=(), microphone=(), geolocation=(), browsing-topics=()",
-        "Cross-Origin-Opener-Policy": "same-origin",
-        "Cross-Origin-Resource-Policy": "same-origin",
-        "Origin-Agent-Cluster": "?1",
-        // Omitting Timing-Allow-Origin is the correct way to block cross-origin
-        // pages from reading Resource Timing data (header absent = no access).
-        // Do NOT set it to "'none'" — that is a malformed value that browsers
-        // may handle inconsistently.
-        "Content-Security-Policy": cspParts.join("; "),
-        "Content-Security-Policy-Report-Only": roCspParts.join("; "),
-    };
+  const headers: Record<string, string> = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy":
+      "camera=(), microphone=(), geolocation=(), browsing-topics=(), usb=(), midi=(), sync-xhr=(), magnetometer=(), gyroscope=(), serial=(), fullscreen=(self)",
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Resource-Policy": "same-origin",
+    "Origin-Agent-Cluster": "?1",
+    // Omitting Timing-Allow-Origin is the correct way to block cross-origin
+    // pages from reading Resource Timing data (header absent = no access).
+    // Do NOT set it to "'none'" — that is a malformed value that browsers
+    // may handle inconsistently.
+    "Content-Security-Policy": cspParts.join("; "),
+    "Content-Security-Policy-Report-Only": roCspParts.join("; "),
+  };
 
-    if (shouldNoIndex(normalized)) {
-        headers["X-Robots-Tag"] = "noindex, nofollow, noarchive, nosnippet";
-    }
+  if (shouldNoIndex(normalized)) {
+    headers["X-Robots-Tag"] = "noindex, nofollow, noarchive, nosnippet";
+  }
 
-    if (shouldDisableCaching(normalized)) {
-        headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private";
-        headers.Pragma = "no-cache";
-        headers.Expires = "0";
-    }
+  if (shouldDisableCaching(normalized)) {
+    headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private";
+    headers.Pragma = "no-cache";
+    headers.Expires = "0";
+  }
 
-    if (isHttps) {
-        headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload";
-    }
+  if (isHttps) {
+    headers["Strict-Transport-Security"] =
+      "max-age=63072000; includeSubDomains; preload";
+  }
 
-    return headers;
+  return headers;
 }
 
 export function parseCspReport(body: unknown): Record<string, unknown> {
-    if (!body || typeof body !== "object") return {};
-    const report = (body as Record<string, unknown>)["csp-report"];
-    if (!report || typeof report !== "object") return {};
-    return report as Record<string, unknown>;
+  if (!body || typeof body !== "object") return {};
+  const report = (body as Record<string, unknown>)["csp-report"];
+  if (!report || typeof report !== "object") return {};
+  return report as Record<string, unknown>;
 }
 
 /**
@@ -168,21 +174,23 @@ export function parseCspReport(body: unknown): Record<string, unknown> {
  * trusted proxy) rather than the first (injectable by the client).
  */
 export function getClientIp(req: Request): string {
-    const cfConnectingIp = req.headers["cf-connecting-ip"];
-    if (typeof cfConnectingIp === "string" && cfConnectingIp.trim()) {
-        return cfConnectingIp.trim();
-    }
+  const cfConnectingIp = req.headers["cf-connecting-ip"];
+  if (typeof cfConnectingIp === "string" && cfConnectingIp.trim()) {
+    return cfConnectingIp.trim();
+  }
 
-    const realIp = req.headers["x-real-ip"];
-    if (typeof realIp === "string" && realIp.trim()) {
-        return realIp.trim();
-    }
+  const realIp = req.headers["x-real-ip"];
+  if (typeof realIp === "string" && realIp.trim()) {
+    return realIp.trim();
+  }
 
-    const forwardedFor = req.headers["x-forwarded-for"];
-    const forwardedValue = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
-    if (forwardedValue && typeof forwardedValue === "string") {
-        return forwardedValue.split(",")[0].trim();
-    }
+  const forwardedFor = req.headers["x-forwarded-for"];
+  const forwardedValue = Array.isArray(forwardedFor)
+    ? forwardedFor[0]
+    : forwardedFor;
+  if (forwardedValue && typeof forwardedValue === "string") {
+    return forwardedValue.split(",")[0].trim();
+  }
 
-    return req.ip || req.socket.remoteAddress || "unknown";
+  return req.ip || req.socket.remoteAddress || "unknown";
 }

@@ -58,8 +58,14 @@ describe("CTEM — computeExploitabilityScore", () => {
   });
 
   it("factors in simulation success probability", () => {
-    const highProb = computeExploitabilityScore([], [{ successProbability: 90 }]);
-    const lowProb = computeExploitabilityScore([], [{ successProbability: 10 }]);
+    const highProb = computeExploitabilityScore(
+      [],
+      [{ successProbability: 90 }]
+    );
+    const lowProb = computeExploitabilityScore(
+      [],
+      [{ successProbability: 10 }]
+    );
     expect(highProb).toBeGreaterThan(lowProb);
   });
 
@@ -134,7 +140,9 @@ describe("CTEM — computeRiskScore", () => {
     handlesPersonalData: true,
     handlesCriticalData: false,
   };
-  const vulns = [{ severity: "high" as const, isPatched: false, exploitAvailable: true }];
+  const vulns = [
+    { severity: "high" as const, isPatched: false, exploitAvailable: true },
+  ];
   const simulations = [{ successProbability: 60 }];
 
   it("returns a structured risk score object", () => {

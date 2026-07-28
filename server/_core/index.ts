@@ -4,7 +4,11 @@ import { initialiseSentry, sentryErrorHandler } from "./sentry";
 // can wrap imported modules.
 initialiseSentry();
 import compression from "compression";
-import express, { type NextFunction, type Request, type Response } from "express";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
@@ -23,11 +27,21 @@ import { closeAssessmentQueue } from "../ai/queueFactory";
 import { ensureMigrated } from "./auto-migrate";
 import { ENV } from "./env";
 import { parsedEnv } from "../services/config-schema";
-import { closeDbPool } from "../db";
+import { closeDbPool, getDbPoolStats } from "../db";
 import { nanoid } from "nanoid";
-import { checkRateLimit, closeRateLimiter } from "./rateLimiter";
-import { getSecurityHeadersForRequest, shouldBypassApiRateLimit, getClientIp, parseCspReport } from "./security";
+import {
+  checkRateLimit,
+  closeRateLimiter,
+  getRateLimiterStats,
+} from "./rateLimiter";
+import {
+  getSecurityHeadersForRequest,
+  shouldBypassApiRateLimit,
+  getClientIp,
+  parseCspReport,
+} from "./security";
 import { createYallaAdminRouter } from "./yalla-admin-router";
+import { createAdminDashboardRouter } from "./admin-dashboard-router";
 import { checkProductionEnv } from "./env";
 import { logger } from "./logger";
 import path from "path";
@@ -62,14 +76,19 @@ function apiRateLimit(req: Request, res: Response, next: NextFunction) {
 
   const key = getClientKey(req);
   checkRateLimit(key, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS)
-    .then((result) => {
+    .then(result => {
       res.setHeader("X-RateLimit-Limit", String(result.limit));
       res.setHeader("X-RateLimit-Remaining", String(result.remaining));
       res.setHeader("X-RateLimit-Reset", String(result.resetAt));
       if (!result.allowed) {
-        const retryAfter = Math.max(1, result.resetAt - Math.floor(Date.now() / 1000));
+        const retryAfter = Math.max(
+          1,
+          result.resetAt - Math.floor(Date.now() / 1000)
+        );
         res.setHeader("Retry-After", String(retryAfter));
-        res.status(429).json({ error: "Too many requests. Please retry shortly." });
+        res
+          .status(429)
+          .json({ error: "Too many requests. Please retry shortly." });
         return;
       }
       next();
@@ -93,11 +112,17 @@ function authRateLimit(req: Request, res: Response, next: NextFunction) {
 
   const key = `auth:${getClientKey(req)}`;
   checkRateLimit(key, AUTH_RATE_LIMIT_MAX, AUTH_RATE_LIMIT_WINDOW_MS)
-    .then((result) => {
+    .then(result => {
       if (!result.allowed) {
-        const retryAfter = Math.max(1, result.resetAt - Math.floor(Date.now() / 1000));
+        const retryAfter = Math.max(
+          1,
+          result.resetAt - Math.floor(Date.now() / 1000)
+        );
         res.setHeader("Retry-After", String(retryAfter));
-        res.status(429).json({ error: "Too many authentication attempts. Please wait before trying again." });
+        res.status(429).json({
+          error:
+            "Too many authentication attempts. Please wait before trying again.",
+        });
         return;
       }
       next();
@@ -106,12 +131,14 @@ function authRateLimit(req: Request, res: Response, next: NextFunction) {
 }
 
 // Allowed CORS origins: production APP_URL + localhost ports in dev.
-const CORS_ALLOWED_ORIGINS = new Set<string>([
-  ENV.appUrl,
-  ...(!ENV.isProduction
-    ? ["http://localhost:3000", "http://localhost:3001"]
-    : []),
-].filter(Boolean));
+const CORS_ALLOWED_ORIGINS = new Set<string>(
+  [
+    ENV.appUrl,
+    ...(!ENV.isProduction
+      ? ["http://localhost:3000", "http://localhost:3001"]
+      : []),
+  ].filter(Boolean)
+);
 
 function corsMiddleware(req: Request, res: Response, next: NextFunction) {
   const origin = req.headers["origin"];
@@ -121,8 +148,14 @@ function corsMiddleware(req: Request, res: Response, next: NextFunction) {
     res.setHeader("Vary", "Origin");
   }
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Requested-With"
+    );
     res.setHeader("Access-Control-Max-Age", "86400");
     res.status(204).end();
     return;
@@ -170,8 +203,24 @@ export async function createApp() {
     })
   );
 
-  app.use((_req: Request, res: Response, next: NextFunction) => {
-    res.setHeader("X-Request-ID", nanoid(21));
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const requestId = nanoid(21);
+    res.setHeader("X-Request-ID", requestId);
+    const start = Date.now();
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      logger.info(
+        {
+          requestId,
+          method: req.method,
+          path: req.path,
+          status: res.statusCode,
+          durationMs: duration,
+          query: Object.keys(req.query).length ? req.query : undefined,
+        },
+        `${req.method} ${req.path} ${res.statusCode} ${duration}ms`
+      );
+    });
     next();
   });
 
@@ -184,7 +233,7 @@ export async function createApp() {
   app.post(
     "/api/webhooks/stripe",
     express.raw({ type: "application/json" }),
-    (req, res) => void stripeWebhookHandler(req, res),
+    (req, res) => void stripeWebhookHandler(req, res)
   );
 
   app.use(express.json({ limit: "2mb" }));
@@ -197,12 +246,18 @@ export async function createApp() {
       status: "healthy",
       timestamp: new Date().toISOString(),
       service: "djac-tool",
-      env: ENV.isProduction ? "production" : (ENV.isDevelopment ? "development" : "test"),
+      env: ENV.isProduction
+        ? "production"
+        : ENV.isDevelopment
+          ? "development"
+          : "test",
       scaleProfile: {
         databasePoolSize: ENV.databasePoolSize,
+        databasePoolStats: getDbPoolStats(),
         redisConfigured: ENV.redisUrl.trim().length > 0,
         aiQueueMode: ENV.aiQueueMode,
       },
+      rateLimiter: getRateLimiterStats(),
     });
   };
 
@@ -230,9 +285,12 @@ export async function createApp() {
     const isReportOnly = req.query.ro === "1";
     if (report && Object.keys(report).length > 0) {
       const blockedUri = String(report["blocked-uri"] ?? "unknown");
-      const violatedDirective = String(report["violated-directive"] ?? "unknown");
+      const violatedDirective = String(
+        report["violated-directive"] ?? "unknown"
+      );
       const sourceFile = String(report["source-file"] ?? "");
-      logger.warn({ category: "security", cspReport: report, reportOnly: isReportOnly },
+      logger.warn(
+        { category: "security", cspReport: report, reportOnly: isReportOnly },
         `CSP violation: ${violatedDirective} blocked ${blockedUri}${sourceFile ? ` in ${sourceFile}` : ""}`
       );
     }
@@ -261,6 +319,7 @@ export async function createApp() {
   );
 
   app.use("/api/yalla-admin", createYallaAdminRouter());
+  app.use("/api/admin-dashboard", createAdminDashboardRouter());
 
   app.use(sentryErrorHandler());
 
@@ -275,7 +334,10 @@ async function startServer() {
   void ensureMigrated();
 
   server.keepAliveTimeout = ENV.httpKeepAliveTimeoutMs;
-  server.headersTimeout = Math.max(ENV.httpHeadersTimeoutMs, ENV.httpKeepAliveTimeoutMs + 1_000);
+  server.headersTimeout = Math.max(
+    ENV.httpHeadersTimeoutMs,
+    ENV.httpKeepAliveTimeoutMs + 1_000
+  );
   server.requestTimeout = ENV.httpRequestTimeoutMs;
   server.maxRequestsPerSocket = 1_000;
 
@@ -315,24 +377,29 @@ async function startServer() {
   server.listen(port, () => {
     console.info(`Server running on http://localhost:${port}/`);
     void getSystemReadiness()
-      .then((readiness) => {
+      .then(readiness => {
         if (readiness.scaling.readyForHighScale) {
           console.info("[Scale] High-scale production profile is active.");
           return;
         }
         if (readiness.scaling.warnings.length > 0) {
-          console.warn("[Scale] Readiness warnings:", readiness.scaling.warnings.join(" | "));
+          console.warn(
+            "[Scale] Readiness warnings:",
+            readiness.scaling.warnings.join(" | ")
+          );
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.warn("[Scale] Unable to evaluate readiness at startup:", error);
       });
   });
 }
 
 // Only start the HTTP server when run directly (not when imported by Vercel serverless handler).
-const isMainModule = process.argv[1] !== undefined &&
-  path.resolve(process.argv[1]) === path.resolve(import.meta.filename ?? fileURLToPath(import.meta.url));
+const isMainModule =
+  process.argv[1] !== undefined &&
+  path.resolve(process.argv[1]) ===
+    path.resolve(import.meta.filename ?? fileURLToPath(import.meta.url));
 if (isMainModule) {
   startServer().catch(console.error);
 }
@@ -340,8 +407,8 @@ if (isMainModule) {
 function shutdown(signal: string) {
   console.info(`[Server] ${signal} received — shutting down gracefully`);
   const forcedExit = setTimeout(() => {
-      console.warn("[Server] Forced shutdown after 10s timeout");
-      process.exit(1);
+    console.warn("[Server] Forced shutdown after 10s timeout");
+    process.exit(1);
   }, 10_000);
   forcedExit.unref();
   Promise.all([closeDbPool(), closeRateLimiter(), closeAssessmentQueue()])
@@ -349,7 +416,7 @@ function shutdown(signal: string) {
       console.info("[Server] Resources released — exiting.");
       process.exit(0);
     })
-    .catch((err) => {
+    .catch(err => {
       console.error("[Server] Shutdown error:", err);
       process.exit(1);
     });
@@ -357,3 +424,10 @@ function shutdown(signal: string) {
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("unhandledRejection", reason => {
+  console.error("[Server] Unhandled rejection:", reason);
+});
+process.on("uncaughtException", err => {
+  console.error("[Server] Uncaught exception:", err);
+  shutdown("UNCAUGHT_EXCEPTION");
+});

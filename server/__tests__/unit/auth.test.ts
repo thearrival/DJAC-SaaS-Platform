@@ -20,7 +20,11 @@ describe("Auth - password validation", () => {
   });
 
   it("should detect email format correctly", () => {
-    const validEmails = ["user@example.com", "test@djac.ai", "admin@saudia.gov.sa"];
+    const validEmails = [
+      "user@example.com",
+      "test@djac.ai",
+      "admin@saudia.gov.sa",
+    ];
     const invalidEmails = ["notanemail", "@missing.com", "spaced@ domain.com"];
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

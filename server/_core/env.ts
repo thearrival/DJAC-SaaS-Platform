@@ -2,27 +2,42 @@ import { parsedEnv } from "../services/config-schema";
 
 // ── Utility: dev-role parser ───────────────────────────────────────────────
 const parseDevRole = (
-  value: string | undefined,
-): | "user" | "admin" | "basic_user" | "professional_user"
-  | "company_admin" | "platform_admin" | "yalla_hack_employee" | "super_admin" => {
+  value: string | undefined
+):
+  | "user"
+  | "admin"
+  | "basic_user"
+  | "professional_user"
+  | "company_admin"
+  | "platform_admin"
+  | "yalla_hack_employee"
+  | "super_admin" => {
   const valid = [
-    "user", "admin", "basic_user", "professional_user",
-    "company_admin", "platform_admin", "yalla_hack_employee", "super_admin",
+    "user",
+    "admin",
+    "basic_user",
+    "professional_user",
+    "company_admin",
+    "platform_admin",
+    "yalla_hack_employee",
+    "super_admin",
   ] as const;
   return (valid as readonly string[]).includes(value ?? "")
-    ? (value as typeof valid[number])
+    ? (value as (typeof valid)[number])
     : "user";
 };
 
 // ── Utility: AI queue-mode resolver ───────────────────────────────────────
-function parseQueueMode(value: string | undefined): "in_memory" | "redis" | undefined {
+function parseQueueMode(
+  value: string | undefined
+): "in_memory" | "redis" | undefined {
   if (value === "redis" || value === "in_memory") return value;
   return undefined;
 }
 
 export function resolveAiQueueMode(
   value: string | undefined,
-  options: { isProduction: boolean; redisUrl?: string },
+  options: { isProduction: boolean; redisUrl?: string }
 ): "in_memory" | "redis" {
   const explicitMode = parseQueueMode(value);
   const hasRedis = Boolean((options.redisUrl ?? "").trim());
@@ -48,17 +63,26 @@ export const STRIPE_PRICE_ENV_KEYS = [
 type StripeEnvLike = {
   STRIPE_SECRET_KEY?: string | undefined;
   STRIPE_WEBHOOK_SECRET?: string | undefined;
-} & Partial<Record<typeof STRIPE_PRICE_ENV_KEYS[number], string | undefined>>;
+} & Partial<Record<(typeof STRIPE_PRICE_ENV_KEYS)[number], string | undefined>>;
 
 export function evaluateStripeBillingConfig(env: StripeEnvLike) {
-  const configuredPriceKeys = STRIPE_PRICE_ENV_KEYS.filter((key) => Boolean(env[key]?.trim()));
+  const configuredPriceKeys = STRIPE_PRICE_ENV_KEYS.filter(key =>
+    Boolean(env[key]?.trim())
+  );
   const hasSecretKey = Boolean(env.STRIPE_SECRET_KEY?.trim());
   const hasWebhookSecret = Boolean(env.STRIPE_WEBHOOK_SECRET?.trim());
-  const anyStripeConfigured = hasSecretKey || hasWebhookSecret || configuredPriceKeys.length > 0;
+  const anyStripeConfigured =
+    hasSecretKey || hasWebhookSecret || configuredPriceKeys.length > 0;
   const missing: string[] = [];
 
   if (!anyStripeConfigured) {
-    return { enabled: false, ready: true, partiallyConfigured: false, missing, configuredPriceCount: 0 };
+    return {
+      enabled: false,
+      ready: true,
+      partiallyConfigured: false,
+      missing,
+      configuredPriceCount: 0,
+    };
   }
 
   if (!hasSecretKey) missing.push("STRIPE_SECRET_KEY");
@@ -117,7 +141,8 @@ export const ENV = {
   reportTemplateName: parsedEnv.REPORT_TEMPLATE_NAME,
   interactionRetentionAutoRun: parsedEnv.INTERACTION_RETENTION_AUTORUN,
   interactionRetentionDays: parsedEnv.INTERACTION_RETENTION_DAYS,
-  interactionRetentionIntervalHours: parsedEnv.INTERACTION_RETENTION_INTERVAL_HOURS,
+  interactionRetentionIntervalHours:
+    parsedEnv.INTERACTION_RETENTION_INTERVAL_HOURS,
   allowInMemoryPersistenceFallback: parsedEnv.ALLOW_IN_MEMORY_PERSISTENCE,
   databasePoolSize: parsedEnv.DATABASE_POOL_SIZE,
   complianceCacheTtlMs: parsedEnv.COMPLIANCE_CACHE_TTL_MS,
@@ -149,16 +174,23 @@ export function checkProductionEnv(): void {
   const stripeBillingConfig = evaluateStripeBillingConfig({
     STRIPE_SECRET_KEY: parsedEnv.STRIPE_SECRET_KEY || undefined,
     STRIPE_WEBHOOK_SECRET: parsedEnv.STRIPE_WEBHOOK_SECRET || undefined,
-    STRIPE_PRICE_STARTER_MONTHLY: parsedEnv.STRIPE_PRICE_STARTER_MONTHLY || undefined,
-    STRIPE_PRICE_STARTER_QUARTERLY: parsedEnv.STRIPE_PRICE_STARTER_QUARTERLY || undefined,
-    STRIPE_PRICE_STARTER_BIANNUAL: parsedEnv.STRIPE_PRICE_STARTER_BIANNUAL || undefined,
-    STRIPE_PRICE_STARTER_ANNUAL: parsedEnv.STRIPE_PRICE_STARTER_ANNUAL || undefined,
+    STRIPE_PRICE_STARTER_MONTHLY:
+      parsedEnv.STRIPE_PRICE_STARTER_MONTHLY || undefined,
+    STRIPE_PRICE_STARTER_QUARTERLY:
+      parsedEnv.STRIPE_PRICE_STARTER_QUARTERLY || undefined,
+    STRIPE_PRICE_STARTER_BIANNUAL:
+      parsedEnv.STRIPE_PRICE_STARTER_BIANNUAL || undefined,
+    STRIPE_PRICE_STARTER_ANNUAL:
+      parsedEnv.STRIPE_PRICE_STARTER_ANNUAL || undefined,
     STRIPE_PRICE_PRO_MONTHLY: parsedEnv.STRIPE_PRICE_PRO_MONTHLY || undefined,
-    STRIPE_PRICE_PRO_QUARTERLY: parsedEnv.STRIPE_PRICE_PRO_QUARTERLY || undefined,
+    STRIPE_PRICE_PRO_QUARTERLY:
+      parsedEnv.STRIPE_PRICE_PRO_QUARTERLY || undefined,
     STRIPE_PRICE_PRO_BIANNUAL: parsedEnv.STRIPE_PRICE_PRO_BIANNUAL || undefined,
     STRIPE_PRICE_PRO_ANNUAL: parsedEnv.STRIPE_PRICE_PRO_ANNUAL || undefined,
-    STRIPE_PRICE_ENTERPRISE_MONTHLY: parsedEnv.STRIPE_PRICE_ENTERPRISE_MONTHLY || undefined,
-    STRIPE_PRICE_ENTERPRISE_ANNUAL: parsedEnv.STRIPE_PRICE_ENTERPRISE_ANNUAL || undefined,
+    STRIPE_PRICE_ENTERPRISE_MONTHLY:
+      parsedEnv.STRIPE_PRICE_ENTERPRISE_MONTHLY || undefined,
+    STRIPE_PRICE_ENTERPRISE_ANNUAL:
+      parsedEnv.STRIPE_PRICE_ENTERPRISE_ANNUAL || undefined,
   });
 
   if (!parsedEnv.JWT_SECRET) missingSecrets.push("JWT_SECRET");
@@ -184,13 +216,13 @@ export function checkProductionEnv(): void {
   if (stripeBillingConfig.partiallyConfigured) {
     console.warn(
       `[WARN] Stripe billing is partially configured. Missing: ${stripeBillingConfig.missing.join(", ")}. ` +
-      "Billing and checkout flows may not work until all STRIPE_* variables are set.",
+        "Billing and checkout flows may not work until all STRIPE_* variables are set."
     );
   }
 
   if (!parsedEnv.STRIPE_SECRET_KEY) {
     console.warn(
-      "[WARN] STRIPE_SECRET_KEY is not set. Billing and checkout flows are disabled until Stripe is configured.",
+      "[WARN] STRIPE_SECRET_KEY is not set. Billing and checkout flows are disabled until Stripe is configured."
     );
   }
 }

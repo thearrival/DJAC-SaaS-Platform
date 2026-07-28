@@ -69,21 +69,32 @@ describe("Billing - isTrialExpired", () => {
 
   it("should return false for non-trial plans", () => {
     expect(isTrialExpired({ plan: "starter", trialEndsAt: null })).toBe(false);
-    expect(isTrialExpired({ plan: "professional", trialEndsAt: new Date(Date.now() - 100_000) })).toBe(false);
+    expect(
+      isTrialExpired({
+        plan: "professional",
+        trialEndsAt: new Date(Date.now() - 100_000),
+      })
+    ).toBe(false);
   });
 
   it("should return false when trial is still active", () => {
     const future = new Date(Date.now() + 86_400_000);
-    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: future })).toBe(false);
+    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: future })).toBe(
+      false
+    );
   });
 
   it("should return true when trial has ended", () => {
     const past = new Date(Date.now() - 86_400_000);
-    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: past })).toBe(true);
+    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: past })).toBe(
+      true
+    );
   });
 
   it("should return true when trialEndsAt is null on free_trial", () => {
-    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: null })).toBe(true);
+    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: null })).toBe(
+      true
+    );
   });
 });
 
@@ -98,34 +109,77 @@ describe("Billing - isAccessAllowed", () => {
 
   it("should allow access during active trial", () => {
     const future = new Date(Date.now() + 86_400_000);
-    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: future })).toBe(true);
+    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: future })).toBe(
+      true
+    );
   });
 
   it("should deny access when trial expired and no subscription", () => {
     const past = new Date(Date.now() - 86_400_000);
-    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: past })).toBe(false);
-    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: past }, null)).toBe(false);
+    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: past })).toBe(
+      false
+    );
+    expect(
+      isAccessAllowed({ plan: "free_trial", trialEndsAt: past }, null)
+    ).toBe(false);
   });
 
   it("should allow access with active subscription", () => {
-    expect(isAccessAllowed({ plan: "starter", trialEndsAt: null }, { status: "active" })).toBe(true);
-    expect(isAccessAllowed({ plan: "professional", trialEndsAt: null }, { status: "trialing" })).toBe(true);
+    expect(
+      isAccessAllowed(
+        { plan: "starter", trialEndsAt: null },
+        { status: "active" }
+      )
+    ).toBe(true);
+    expect(
+      isAccessAllowed(
+        { plan: "professional", trialEndsAt: null },
+        { status: "trialing" }
+      )
+    ).toBe(true);
   });
 
   it("should deny access with non-active subscription statuses", () => {
-    expect(isAccessAllowed({ plan: "starter", trialEndsAt: null }, { status: "past_due" })).toBe(false);
-    expect(isAccessAllowed({ plan: "starter", trialEndsAt: null }, { status: "canceled" })).toBe(false);
-    expect(isAccessAllowed({ plan: "starter", trialEndsAt: null }, { status: "incomplete" })).toBe(false);
-    expect(isAccessAllowed({ plan: "starter", trialEndsAt: null }, { status: "paused" })).toBe(false);
+    expect(
+      isAccessAllowed(
+        { plan: "starter", trialEndsAt: null },
+        { status: "past_due" }
+      )
+    ).toBe(false);
+    expect(
+      isAccessAllowed(
+        { plan: "starter", trialEndsAt: null },
+        { status: "canceled" }
+      )
+    ).toBe(false);
+    expect(
+      isAccessAllowed(
+        { plan: "starter", trialEndsAt: null },
+        { status: "incomplete" }
+      )
+    ).toBe(false);
+    expect(
+      isAccessAllowed(
+        { plan: "starter", trialEndsAt: null },
+        { status: "paused" }
+      )
+    ).toBe(false);
   });
 
   it("should deny access with no subscription on non-trial plan", () => {
     expect(isAccessAllowed({ plan: "starter", trialEndsAt: null })).toBe(false);
-    expect(isAccessAllowed({ plan: "professional", trialEndsAt: null }, null)).toBe(false);
+    expect(
+      isAccessAllowed({ plan: "professional", trialEndsAt: null }, null)
+    ).toBe(false);
   });
 
   it("should prefer subscription status over trial status", () => {
     const past = new Date(Date.now() - 86_400_000);
-    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: past }, { status: "active" })).toBe(true);
+    expect(
+      isAccessAllowed(
+        { plan: "free_trial", trialEndsAt: past },
+        { status: "active" }
+      )
+    ).toBe(true);
   });
 });

@@ -1,204 +1,548 @@
-import { pgEnum, pgTable, serial, integer, varchar, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgEnum,
+  pgTable,
+  serial,
+  integer,
+  varchar,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ENUMS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const userTypeEnum = pgEnum("userType", [
-  "visitor", "professional", "admin", "basic_user", "professional_user",
-  "company_admin", "platform_admin", "yalla_hack_employee", "super_admin",
+  "visitor",
+  "professional",
+  "admin",
+  "basic_user",
+  "professional_user",
+  "company_admin",
+  "platform_admin",
+  "yalla_hack_employee",
+  "super_admin",
 ]);
 
 export const localeEnum = pgEnum("locale", ["en", "ar", "zh"]);
 
-export const userStatusEnum = pgEnum("userStatus", ["active", "pending", "suspended"]);
-
-export const roleEnum = pgEnum("role", [
-  "user", "admin", "basic_user", "professional_user", "company_admin",
-  "platform_admin", "yalla_hack_employee", "super_admin",
+export const userStatusEnum = pgEnum("userStatus", [
+  "active",
+  "pending",
+  "suspended",
 ]);
 
-export const userOAuthStatusEnum = pgEnum("userOAuthStatus", ["active", "invited", "suspended"]);
+export const roleEnum = pgEnum("role", [
+  "user",
+  "admin",
+  "basic_user",
+  "professional_user",
+  "company_admin",
+  "platform_admin",
+  "yalla_hack_employee",
+  "super_admin",
+]);
 
-export const accessRequestStatusEnum = pgEnum("accessRequestStatus", ["new", "reviewing", "approved", "archived"]);
+export const userOAuthStatusEnum = pgEnum("userOAuthStatus", [
+  "active",
+  "invited",
+  "suspended",
+]);
 
-export const consultationStatusEnum = pgEnum("consultationStatus", ["new", "in_review", "responded", "closed"]);
+export const accessRequestStatusEnum = pgEnum("accessRequestStatus", [
+  "new",
+  "reviewing",
+  "approved",
+  "archived",
+]);
+
+export const consultationStatusEnum = pgEnum("consultationStatus", [
+  "new",
+  "in_review",
+  "responded",
+  "closed",
+]);
 
 export const priorityEnum = pgEnum("priority", ["low", "medium", "high"]);
 
-export const severityEnum = pgEnum("severity", ["low", "medium", "high", "critical"]);
+export const severityEnum = pgEnum("severity", [
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
 
-export const criticalityEnum = pgEnum("criticality", ["low", "medium", "high", "critical"]);
+export const criticalityEnum = pgEnum("criticality", [
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
 
-export const actorTypeEnum = pgEnum("actorType", ["visitor", "client", "admin", "system"]);
+export const actorTypeEnum = pgEnum("actorType", [
+  "visitor",
+  "client",
+  "admin",
+  "system",
+]);
 
 export const notificationCategoryEnum = pgEnum("notificationCategory", [
-  "registration", "consultation", "assessment", "support", "system",
+  "registration",
+  "consultation",
+  "assessment",
+  "support",
+  "system",
 ]);
 
 export const relationshipTypeEnum = pgEnum("relationshipType", [
-  "overlap", "conflict", "harmonization", "coordination", "gap", "dependency",
+  "overlap",
+  "conflict",
+  "harmonization",
+  "coordination",
+  "gap",
+  "dependency",
 ]);
 
-export const mappingTypeEnum = pgEnum("mappingType", ["equivalent", "related", "conflicting", "complementary"]);
+export const mappingTypeEnum = pgEnum("mappingType", [
+  "equivalent",
+  "related",
+  "conflicting",
+  "complementary",
+]);
 
-export const assessmentStatusEnum = pgEnum("assessmentStatus", ["compliant", "partial", "non_compliant", "unknown"]);
+export const assessmentStatusEnum = pgEnum("assessmentStatus", [
+  "compliant",
+  "partial",
+  "non_compliant",
+  "unknown",
+]);
 
-export const jurisdictionEnum = pgEnum("jurisdiction", ["China", "Saudi Arabia", "Both", "Other"]);
+export const jurisdictionEnum = pgEnum("jurisdiction", [
+  "China",
+  "Saudi Arabia",
+  "Both",
+  "Other",
+]);
 
-export const planEnum = pgEnum("plan", ["free_trial", "starter", "professional", "enterprise"]);
+export const planEnum = pgEnum("plan", [
+  "free_trial",
+  "starter",
+  "professional",
+  "enterprise",
+]);
 
-export const paidPlanEnum = pgEnum("paidPlan", ["starter", "professional", "enterprise"]);
+export const paidPlanEnum = pgEnum("paidPlan", [
+  "starter",
+  "professional",
+  "enterprise",
+]);
 
-export const orgMemberRoleEnum = pgEnum("orgMemberRole", ["owner", "admin", "compliance_officer", "analyst"]);
+export const orgMemberRoleEnum = pgEnum("orgMemberRole", [
+  "owner",
+  "admin",
+  "compliance_officer",
+  "analyst",
+]);
 
-export const orgMemberStatusEnum = pgEnum("orgMemberStatus", ["active", "invited", "suspended"]);
+export const orgMemberStatusEnum = pgEnum("orgMemberStatus", [
+  "active",
+  "invited",
+  "suspended",
+]);
 
-export const billingIntervalEnum = pgEnum("billingInterval", ["monthly", "quarterly", "biannual", "annual"]);
+export const billingIntervalEnum = pgEnum("billingInterval", [
+  "monthly",
+  "quarterly",
+  "biannual",
+  "annual",
+]);
 
 export const subscriptionStatusEnum = pgEnum("subscriptionStatus", [
-  "trialing", "active", "past_due", "canceled", "incomplete", "paused",
+  "trialing",
+  "active",
+  "past_due",
+  "canceled",
+  "incomplete",
+  "paused",
 ]);
 
-export const billingEventStatusEnum = pgEnum("billingEventStatus", ["success", "failed", "pending", "refunded"]);
+export const billingEventStatusEnum = pgEnum("billingEventStatus", [
+  "success",
+  "failed",
+  "pending",
+  "refunded",
+]);
 
 export const reportTypeEnum = pgEnum("reportType", [
-  "full_compliance", "gap_analysis", "vendor_assessment",
-  "risk_assessment", "executive_summary", "regulatory_deadline",
+  "full_compliance",
+  "gap_analysis",
+  "vendor_assessment",
+  "risk_assessment",
+  "executive_summary",
+  "regulatory_deadline",
 ]);
 
-export const reportStatusEnum = pgEnum("reportStatus", ["generating", "ready", "failed", "archived"]);
+export const reportStatusEnum = pgEnum("reportStatus", [
+  "generating",
+  "ready",
+  "failed",
+  "archived",
+]);
 
 export const auditLogCategoryEnum = pgEnum("auditLogCategory", [
-  "auth", "data_write", "data_read", "role_change", "system", "billing",
+  "auth",
+  "data_write",
+  "data_read",
+  "role_change",
+  "system",
+  "billing",
 ]);
 
-export const auditLogOutcomeEnum = pgEnum("auditLogOutcome", ["success", "failure", "blocked"]);
+export const auditLogOutcomeEnum = pgEnum("auditLogOutcome", [
+  "success",
+  "failure",
+  "blocked",
+]);
 
-export const taskSeverityEnum = pgEnum("taskSeverity", ["critical", "high", "medium", "low"]);
+export const taskSeverityEnum = pgEnum("taskSeverity", [
+  "critical",
+  "high",
+  "medium",
+  "low",
+]);
 
-export const taskStatusEnum = pgEnum("taskStatus", ["open", "in_progress", "resolved", "accepted_risk"]);
+export const taskStatusEnum = pgEnum("taskStatus", [
+  "open",
+  "in_progress",
+  "resolved",
+  "accepted_risk",
+]);
 
-export const riskCategoryEnum = pgEnum("riskCategory", ["operational", "legal", "technical", "financial", "reputational"]);
+export const riskCategoryEnum = pgEnum("riskCategory", [
+  "operational",
+  "legal",
+  "technical",
+  "financial",
+  "reputational",
+]);
 
-export const treatmentEnum = pgEnum("treatment", ["accept", "mitigate", "transfer", "avoid"]);
+export const treatmentEnum = pgEnum("treatment", [
+  "accept",
+  "mitigate",
+  "transfer",
+  "avoid",
+]);
 
-export const riskStatusEnum = pgEnum("riskStatus", ["open", "in_treatment", "closed", "accepted"]);
+export const riskStatusEnum = pgEnum("riskStatus", [
+  "open",
+  "in_treatment",
+  "closed",
+  "accepted",
+]);
 
-export const policyTypeEnum = pgEnum("policyType", ["policy", "standard", "procedure", "guideline"]);
+export const policyTypeEnum = pgEnum("policyType", [
+  "policy",
+  "standard",
+  "procedure",
+  "guideline",
+]);
 
-export const policyStatusEnum = pgEnum("policyStatus", ["draft", "under_review", "approved", "active", "retired"]);
+export const policyStatusEnum = pgEnum("policyStatus", [
+  "draft",
+  "under_review",
+  "approved",
+  "active",
+  "retired",
+]);
 
 export const incidentTypeEnum = pgEnum("incidentType", [
-  "data_breach", "unauthorized_access", "policy_violation",
-  "system_outage", "third_party_breach", "other",
+  "data_breach",
+  "unauthorized_access",
+  "policy_violation",
+  "system_outage",
+  "third_party_breach",
+  "other",
 ]);
 
 export const incidentStatusEnum = pgEnum("incidentStatus", [
-  "open", "under_investigation", "contained", "resolved", "closed",
+  "open",
+  "under_investigation",
+  "contained",
+  "resolved",
+  "closed",
 ]);
 
-export const auditTypeEnum = pgEnum("auditType", ["internal", "external", "regulatory", "certification"]);
+export const auditTypeEnum = pgEnum("auditType", [
+  "internal",
+  "external",
+  "regulatory",
+  "certification",
+]);
 
-export const auditStatusEnum = pgEnum("auditStatus", ["planned", "in_progress", "completed", "cancelled"]);
+export const auditStatusEnum = pgEnum("auditStatus", [
+  "planned",
+  "in_progress",
+  "completed",
+  "cancelled",
+]);
 
-export const recurrenceEnum = pgEnum("recurrence", ["none", "monthly", "quarterly", "biannual", "annual"]);
+export const recurrenceEnum = pgEnum("recurrence", [
+  "none",
+  "monthly",
+  "quarterly",
+  "biannual",
+  "annual",
+]);
 
 export const ctemAssetTypeEnum = pgEnum("ctemAssetType", [
-  "web_application", "api_endpoint", "database", "cloud_service",
-  "network_device", "iot_device", "data_pipeline", "identity_provider",
-  "storage_bucket", "other",
+  "web_application",
+  "api_endpoint",
+  "database",
+  "cloud_service",
+  "network_device",
+  "iot_device",
+  "data_pipeline",
+  "identity_provider",
+  "storage_bucket",
+  "other",
 ]);
 
-export const regionEnum = pgEnum("region", ["China", "Saudi Arabia", "Cross-border", "Other"]);
+export const regionEnum = pgEnum("region", [
+  "China",
+  "Saudi Arabia",
+  "Cross-border",
+  "Other",
+]);
 
-export const assetStatusEnum = pgEnum("assetStatus", ["active", "inactive", "decommissioned"]);
+export const assetStatusEnum = pgEnum("assetStatus", [
+  "active",
+  "inactive",
+  "decommissioned",
+]);
 
-export const vulnSeverityEnum = pgEnum("vulnSeverity", ["critical", "high", "medium", "low", "informational"]);
+export const vulnSeverityEnum = pgEnum("vulnSeverity", [
+  "critical",
+  "high",
+  "medium",
+  "low",
+  "informational",
+]);
 
 export const simulationTypeEnum = pgEnum("simulationType", [
-  "lateral_movement", "privilege_escalation", "data_exfiltration",
-  "ransomware", "phishing", "api_abuse", "supply_chain",
-  "ddos", "insider_threat", "other",
+  "lateral_movement",
+  "privilege_escalation",
+  "data_exfiltration",
+  "ransomware",
+  "phishing",
+  "api_abuse",
+  "supply_chain",
+  "ddos",
+  "insider_threat",
+  "other",
 ]);
 
-export const priorityTierEnum = pgEnum("priorityTier", ["critical", "high", "medium", "low"]);
+export const priorityTierEnum = pgEnum("priorityTier", [
+  "critical",
+  "high",
+  "medium",
+  "low",
+]);
 
-export const runStatusEnum = pgEnum("runStatus", ["queued", "running", "completed", "failed"]);
+export const runStatusEnum = pgEnum("runStatus", [
+  "queued",
+  "running",
+  "completed",
+  "failed",
+]);
 
-export const triggeredByEnum = pgEnum("triggeredBy", ["manual", "scheduled", "webhook"]);
+export const triggeredByEnum = pgEnum("triggeredBy", [
+  "manual",
+  "scheduled",
+  "webhook",
+]);
 
-export const severityImpactEnum = pgEnum("severityImpact", ["critical", "high", "medium", "low"]);
+export const severityImpactEnum = pgEnum("severityImpact", [
+  "critical",
+  "high",
+  "medium",
+  "low",
+]);
 
 export const onboardingStageEnum = pgEnum("onboardingStage", [
-  "not_started", "account_type_selected", "org_created",
-  "org_joined", "jurisdiction_set", "completed",
+  "not_started",
+  "account_type_selected",
+  "org_created",
+  "org_joined",
+  "jurisdiction_set",
+  "completed",
 ]);
 
 export const accountIntentEnum = pgEnum("accountIntent", [
-  "compliance_professional", "legal_advisor", "enterprise_admin",
-  "consultant", "vendor", "government", "researcher",
+  "compliance_professional",
+  "legal_advisor",
+  "enterprise_admin",
+  "consultant",
+  "vendor",
+  "government",
+  "researcher",
 ]);
 
 export const evidenceSourceTypeEnum = pgEnum("evidenceSourceType", [
-  "audit_schedule", "policy", "risk", "gap", "remediation",
-  "ctem_asset", "incident", "general",
+  "audit_schedule",
+  "policy",
+  "risk",
+  "gap",
+  "remediation",
+  "ctem_asset",
+  "incident",
+  "general",
 ]);
 
 export const dsrRequestTypeEnum = pgEnum("dsrRequestType", [
-  "access", "rectification", "erasure", "portability",
-  "restriction", "objection", "explanation",
+  "access",
+  "rectification",
+  "erasure",
+  "portability",
+  "restriction",
+  "objection",
+  "explanation",
 ]);
 
-export const dsrJurisdictionEnum = pgEnum("dsrJurisdiction", ["China", "Saudi Arabia", "Other"]);
+export const dsrJurisdictionEnum = pgEnum("dsrJurisdiction", [
+  "China",
+  "Saudi Arabia",
+  "Other",
+]);
 
 export const dsrStatusEnum = pgEnum("dsrStatus", [
-  "received", "in_review", "pending_info", "completed", "rejected", "withdrawn",
+  "received",
+  "in_review",
+  "pending_info",
+  "completed",
+  "rejected",
+  "withdrawn",
 ]);
 
-export const dsrPriorityEnum = pgEnum("dsrPriority", ["normal", "high", "urgent"]);
+export const dsrPriorityEnum = pgEnum("dsrPriority", [
+  "normal",
+  "high",
+  "urgent",
+]);
 
 export const serviceTypeEnum = pgEnum("serviceType", [
-  "penetration_test", "red_team", "security_audit", "soc_support",
-  "incident_response", "consulting", "phishing_simulation",
-  "cloud_security_review", "vulnerability_assessment", "compliance_gap_assessment",
+  "penetration_test",
+  "red_team",
+  "security_audit",
+  "soc_support",
+  "incident_response",
+  "consulting",
+  "phishing_simulation",
+  "cloud_security_review",
+  "vulnerability_assessment",
+  "compliance_gap_assessment",
 ]);
 
-export const servicePriorityEnum = pgEnum("servicePriority", ["low", "medium", "high", "critical"]);
+export const servicePriorityEnum = pgEnum("servicePriority", [
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
 
 export const serviceStatusEnum = pgEnum("serviceStatus", [
-  "draft", "submitted", "under_review", "scoping", "approved",
-  "in_progress", "completed", "cancelled", "on_hold",
+  "draft",
+  "submitted",
+  "under_review",
+  "scoping",
+  "approved",
+  "in_progress",
+  "completed",
+  "cancelled",
+  "on_hold",
 ]);
 
 export const inventoryAssetTypeEnum = pgEnum("inventoryAssetType", [
-  "server", "workstation", "network_device", "cloud_service",
-  "saas_application", "database", "api_endpoint", "iot_device",
-  "mobile_device", "industrial_ot", "web_application",
-  "source_code_repo", "third_party_service",
+  "server",
+  "workstation",
+  "network_device",
+  "cloud_service",
+  "saas_application",
+  "database",
+  "api_endpoint",
+  "iot_device",
+  "mobile_device",
+  "industrial_ot",
+  "web_application",
+  "source_code_repo",
+  "third_party_service",
 ]);
 
-export const exposureEnum = pgEnum("exposure", ["internal", "vpn_only", "partner_only", "internet_facing"]);
+export const exposureEnum = pgEnum("exposure", [
+  "internal",
+  "vpn_only",
+  "partner_only",
+  "internet_facing",
+]);
 
-export const inventoryStatusEnum = pgEnum("inventoryStatus", ["active", "decommissioned", "under_review", "unknown"]);
+export const inventoryStatusEnum = pgEnum("inventoryStatus", [
+  "active",
+  "decommissioned",
+  "under_review",
+  "unknown",
+]);
 
-export const maturityLevelEnum = pgEnum("maturityLevel", ["initial", "developing", "defined", "managed", "optimized"]);
+export const maturityLevelEnum = pgEnum("maturityLevel", [
+  "initial",
+  "developing",
+  "defined",
+  "managed",
+  "optimized",
+]);
 
 export const threatCategoryEnum = pgEnum("threatCategory", [
-  "malware", "ransomware", "phishing", "apt", "zero_day",
-  "ddos", "supply_chain", "data_breach", "vulnerability",
-  "social_engineering", "insider_threat", "other",
+  "malware",
+  "ransomware",
+  "phishing",
+  "apt",
+  "zero_day",
+  "ddos",
+  "supply_chain",
+  "data_breach",
+  "vulnerability",
+  "social_engineering",
+  "insider_threat",
+  "other",
 ]);
 
-export const threatSeverityEnum = pgEnum("threatSeverity", ["info", "low", "medium", "high", "critical"]);
+export const threatSeverityEnum = pgEnum("threatSeverity", [
+  "info",
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
 
 export const tlpEnum = pgEnum("tlp", ["white", "green", "amber", "red"]);
 
-export const deadlineJurisdictionEnum = pgEnum("deadlineJurisdiction", ["China", "Saudi Arabia", "Both"]);
+export const deadlineJurisdictionEnum = pgEnum("deadlineJurisdiction", [
+  "China",
+  "Saudi Arabia",
+  "Both",
+]);
 
-export const deadlinePriorityEnum = pgEnum("deadlinePriority", ["low", "medium", "high", "critical"]);
+export const deadlinePriorityEnum = pgEnum("deadlinePriority", [
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
 
-export const deadlineStatusEnum = pgEnum("deadlineStatus", ["upcoming", "overdue", "completed", "waived"]);
+export const deadlineStatusEnum = pgEnum("deadlineStatus", [
+  "upcoming",
+  "overdue",
+  "completed",
+  "waived",
+]);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TABLES
@@ -298,7 +642,9 @@ export const consultationRequests = pgTable("consultationRequests", {
   techStackSummary: text("techStackSummary"),
   status: consultationStatusEnum("status").default("new").notNull(),
   priority: priorityEnum("priority").default("medium").notNull(),
-  assignedAdminUserId: integer("assignedAdminUserId").references(() => users.id),
+  assignedAdminUserId: integer("assignedAdminUserId").references(
+    () => users.id
+  ),
   adminResponse: text("adminResponse"),
   respondedAt: timestamp("respondedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -306,7 +652,8 @@ export const consultationRequests = pgTable("consultationRequests", {
 });
 
 export type ConsultationRequest = typeof consultationRequests.$inferSelect;
-export type InsertConsultationRequest = typeof consultationRequests.$inferInsert;
+export type InsertConsultationRequest =
+  typeof consultationRequests.$inferInsert;
 
 export const activityEvents = pgTable("activityEvents", {
   id: serial("id").primaryKey(),
@@ -360,7 +707,9 @@ export type InsertFramework = typeof frameworks.$inferInsert;
 
 export const complianceControls = pgTable("complianceControls", {
   id: serial("id").primaryKey(),
-  frameworkId: integer("frameworkId").notNull().references(() => frameworks.id),
+  frameworkId: integer("frameworkId")
+    .notNull()
+    .references(() => frameworks.id),
   controlCode: varchar("controlCode", { length: 100 }).notNull(),
   controlName: text("controlName").notNull(),
   category: varchar("category", { length: 100 }),
@@ -376,8 +725,12 @@ export type InsertComplianceControl = typeof complianceControls.$inferInsert;
 
 export const frameworkRelationships = pgTable("frameworkRelationships", {
   id: serial("id").primaryKey(),
-  sourceFrameworkId: integer("sourceFrameworkId").notNull().references(() => frameworks.id),
-  targetFrameworkId: integer("targetFrameworkId").notNull().references(() => frameworks.id),
+  sourceFrameworkId: integer("sourceFrameworkId")
+    .notNull()
+    .references(() => frameworks.id),
+  targetFrameworkId: integer("targetFrameworkId")
+    .notNull()
+    .references(() => frameworks.id),
   relationshipType: relationshipTypeEnum("relationshipType").notNull(),
   description: text("description"),
   severity: severityEnum("severity"),
@@ -388,12 +741,17 @@ export const frameworkRelationships = pgTable("frameworkRelationships", {
 });
 
 export type FrameworkRelationship = typeof frameworkRelationships.$inferSelect;
-export type InsertFrameworkRelationship = typeof frameworkRelationships.$inferInsert;
+export type InsertFrameworkRelationship =
+  typeof frameworkRelationships.$inferInsert;
 
 export const controlMappings = pgTable("controlMappings", {
   id: serial("id").primaryKey(),
-  sourceControlId: integer("sourceControlId").notNull().references(() => complianceControls.id),
-  targetControlId: integer("targetControlId").notNull().references(() => complianceControls.id),
+  sourceControlId: integer("sourceControlId")
+    .notNull()
+    .references(() => complianceControls.id),
+  targetControlId: integer("targetControlId")
+    .notNull()
+    .references(() => complianceControls.id),
   mappingType: mappingTypeEnum("mappingType").notNull(),
   alignmentScore: integer("alignmentScore"),
   notes: text("notes"),
@@ -406,12 +764,16 @@ export type InsertControlMapping = typeof controlMappings.$inferInsert;
 
 export const vendors = pgTable("vendors", {
   id: serial("id").primaryKey(),
-  userId: integer("userId").notNull().references(() => users.id),
+  userId: integer("userId")
+    .notNull()
+    .references(() => users.id),
   organizationId: integer("organizationId").references(() => organizations.id),
   vendorName: varchar("vendorName", { length: 255 }).notNull(),
   vendorDescription: text("vendorDescription"),
   industry: varchar("industry", { length: 100 }),
-  businessRegistrationNumber: varchar("businessRegistrationNumber", { length: 120 }),
+  businessRegistrationNumber: varchar("businessRegistrationNumber", {
+    length: 120,
+  }),
   headquartersLocation: varchar("headquartersLocation", { length: 120 }),
   primaryContactName: varchar("primaryContactName", { length: 255 }),
   primaryContactEmail: varchar("primaryContactEmail", { length: 320 }),
@@ -439,7 +801,9 @@ export type InsertVendor = typeof vendors.$inferInsert;
 
 export const techStackComponents = pgTable("techStackComponents", {
   id: serial("id").primaryKey(),
-  vendorId: integer("vendorId").notNull().references(() => vendors.id),
+  vendorId: integer("vendorId")
+    .notNull()
+    .references(() => vendors.id),
   componentName: varchar("componentName", { length: 255 }).notNull(),
   componentType: varchar("componentType", { length: 100 }),
   technology: varchar("technology", { length: 255 }),
@@ -454,8 +818,12 @@ export type InsertTechStackComponent = typeof techStackComponents.$inferInsert;
 
 export const vendorAssessments = pgTable("vendorAssessments", {
   id: serial("id").primaryKey(),
-  vendorId: integer("vendorId").notNull().references(() => vendors.id),
-  frameworkId: integer("frameworkId").notNull().references(() => frameworks.id),
+  vendorId: integer("vendorId")
+    .notNull()
+    .references(() => vendors.id),
+  frameworkId: integer("frameworkId")
+    .notNull()
+    .references(() => frameworks.id),
   assessmentDate: timestamp("assessmentDate").defaultNow().notNull(),
   complianceScore: integer("complianceScore"),
   riskLevel: severityEnum("riskLevel"),
@@ -471,12 +839,18 @@ export type InsertVendorAssessment = typeof vendorAssessments.$inferInsert;
 
 export const assessmentGaps = pgTable("assessmentGaps", {
   id: serial("id").primaryKey(),
-  assessmentId: integer("assessmentId").notNull().references(() => vendorAssessments.id),
-  controlId: integer("controlId").notNull().references(() => complianceControls.id),
+  assessmentId: integer("assessmentId")
+    .notNull()
+    .references(() => vendorAssessments.id),
+  controlId: integer("controlId")
+    .notNull()
+    .references(() => complianceControls.id),
   gapDescription: text("gapDescription"),
   severity: severityEnum("severity"),
   remediation: text("remediation"),
-  estimatedRemediationCost: varchar("estimatedRemediationCost", { length: 100 }),
+  estimatedRemediationCost: varchar("estimatedRemediationCost", {
+    length: 100,
+  }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
@@ -501,7 +875,9 @@ export const organizations = pgTable("organizations", {
   trialEndsAt: timestamp("trialEndsAt"),
   trialReminderDay3Sent: integer("trialReminderDay3Sent").default(0).notNull(),
   trialReminderDay6Sent: integer("trialReminderDay6Sent").default(0).notNull(),
-  trialExpiredNoticeSent: integer("trialExpiredNoticeSent").default(0).notNull(),
+  trialExpiredNoticeSent: integer("trialExpiredNoticeSent")
+    .default(0)
+    .notNull(),
   isActive: integer("isActive").default(1).notNull(),
   maxSeats: integer("maxSeats").default(5).notNull(),
   metadata: text("metadata"),
@@ -514,7 +890,9 @@ export type InsertOrganization = typeof organizations.$inferInsert;
 
 export const organizationMembers = pgTable("organizationMembers", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id),
   userId: integer("userId").references(() => users.id),
   localUserId: integer("localUserId").references(() => localUsers.id),
   role: orgMemberRoleEnum("role").default("analyst").notNull(),
@@ -532,8 +910,12 @@ export type InsertOrganizationMember = typeof organizationMembers.$inferInsert;
 
 export const subscriptions = pgTable("subscriptions", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id),
-  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 64 }).unique(),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", {
+    length: 64,
+  }).unique(),
   stripePriceId: varchar("stripePriceId", { length: 64 }),
   plan: paidPlanEnum("plan").notNull(),
   billingInterval: billingIntervalEnum("billingInterval").notNull(),
@@ -555,7 +937,9 @@ export type InsertSubscription = typeof subscriptions.$inferInsert;
 
 export const billingEvents = pgTable("billingEvents", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id),
   subscriptionId: integer("subscriptionId").references(() => subscriptions.id),
   stripeEventId: varchar("stripeEventId", { length: 64 }).unique(),
   eventType: varchar("eventType", { length: 120 }).notNull(),
@@ -572,9 +956,13 @@ export type InsertBillingEvent = typeof billingEvents.$inferInsert;
 
 export const complianceReports = pgTable("complianceReports", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id),
   generatedByUserId: integer("generatedByUserId").references(() => users.id),
-  generatedByLocalUserId: integer("generatedByLocalUserId").references(() => localUsers.id),
+  generatedByLocalUserId: integer("generatedByLocalUserId").references(
+    () => localUsers.id
+  ),
   title: varchar("title", { length: 255 }).notNull(),
   reportType: reportTypeEnum("reportType").notNull(),
   frameworks: text("frameworks").notNull(),
@@ -595,7 +983,9 @@ export type InsertComplianceReport = typeof complianceReports.$inferInsert;
 
 export const apiKeys = pgTable("apiKeys", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   createdByUserId: integer("createdByUserId").references(() => users.id),
   name: varchar("name", { length: 120 }).notNull(),
   keyHash: varchar("keyHash", { length: 64 }).notNull().unique(),
@@ -631,18 +1021,23 @@ export const userInteractionLogs = pgTable("userInteractionLogs", {
 export type UserInteractionLog = typeof userInteractionLogs.$inferSelect;
 export type InsertUserInteractionLog = typeof userInteractionLogs.$inferInsert;
 
-export const yallaAdminAccessLinkNonces = pgTable("yallaAdminAccessLinkNonces", {
-  id: serial("id").primaryKey(),
-  nonceHash: varchar("nonceHash", { length: 64 }).notNull().unique(),
-  redirectTarget: varchar("redirectTarget", { length: 255 }).notNull(),
-  expiresAt: timestamp("expiresAt").notNull(),
-  consumedAt: timestamp("consumedAt").defaultNow().notNull(),
-  consumedByIp: varchar("consumedByIp", { length: 64 }).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const yallaAdminAccessLinkNonces = pgTable(
+  "yallaAdminAccessLinkNonces",
+  {
+    id: serial("id").primaryKey(),
+    nonceHash: varchar("nonceHash", { length: 64 }).notNull().unique(),
+    redirectTarget: varchar("redirectTarget", { length: 255 }).notNull(),
+    expiresAt: timestamp("expiresAt").notNull(),
+    consumedAt: timestamp("consumedAt").defaultNow().notNull(),
+    consumedByIp: varchar("consumedByIp", { length: 64 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  }
+);
 
-export type YallaAdminAccessLinkNonce = typeof yallaAdminAccessLinkNonces.$inferSelect;
-export type InsertYallaAdminAccessLinkNonce = typeof yallaAdminAccessLinkNonces.$inferInsert;
+export type YallaAdminAccessLinkNonce =
+  typeof yallaAdminAccessLinkNonces.$inferSelect;
+export type InsertYallaAdminAccessLinkNonce =
+  typeof yallaAdminAccessLinkNonces.$inferInsert;
 
 export const complianceDeadlines = pgTable("complianceDeadlines", {
   id: serial("id").primaryKey(),
@@ -704,7 +1099,9 @@ export type InsertReportShare = typeof reportShares.$inferInsert;
 // ─── Remediation Tasks ────────────────────────────────────────────────────────
 export const remediationTasks = pgTable("remediationTasks", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   vendorId: integer("vendorId"),
   gapCode: varchar("gapCode", { length: 64 }),
   title: varchar("title", { length: 255 }).notNull(),
@@ -724,7 +1121,9 @@ export type InsertRemediationTask = typeof remediationTasks.$inferInsert;
 // ─── Risk Register ────────────────────────────────────────────────────────────
 export const riskRegister = pgTable("riskRegister", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   category: riskCategoryEnum("category").notNull().default("operational"),
@@ -748,7 +1147,9 @@ export type InsertRiskEntry = typeof riskRegister.$inferInsert;
 // ─── Compliance Policies ──────────────────────────────────────────────────────
 export const compliancePolicies = pgTable("compliancePolicies", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   policyCode: varchar("policyCode", { length: 64 }),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
@@ -773,7 +1174,9 @@ export type InsertCompliancePolicy = typeof compliancePolicies.$inferInsert;
 // ─── Compliance Incident Register ─────────────────────────────────────────────
 export const complianceIncidents = pgTable("complianceIncidents", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   incidentCode: varchar("incidentCode", { length: 64 }),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
@@ -789,7 +1192,9 @@ export const complianceIncidents = pgTable("complianceIncidents", {
   detectedAt: timestamp("detectedAt"),
   containedAt: timestamp("containedAt"),
   resolvedAt: timestamp("resolvedAt"),
-  regulatoryNotificationRequired: integer("regulatoryNotificationRequired").default(0).notNull(),
+  regulatoryNotificationRequired: integer("regulatoryNotificationRequired")
+    .default(0)
+    .notNull(),
   regulatoryNotificationSentAt: timestamp("regulatoryNotificationSentAt"),
   notificationDeadlineHours: integer("notificationDeadlineHours").default(72),
   rootCause: text("rootCause"),
@@ -805,7 +1210,9 @@ export type InsertComplianceIncident = typeof complianceIncidents.$inferInsert;
 // ─── Audit Schedules ──────────────────────────────────────────────────────────
 export const auditSchedules = pgTable("auditSchedules", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   auditType: auditTypeEnum("auditType").default("internal").notNull(),
@@ -832,8 +1239,12 @@ export type InsertAuditSchedule = typeof auditSchedules.$inferInsert;
 
 export const ctemAssets = pgTable("ctemAssets", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  vendorId: integer("vendorId").references(() => vendors.id, { onDelete: "set null" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  vendorId: integer("vendorId").references(() => vendors.id, {
+    onDelete: "set null",
+  }),
   assetName: varchar("assetName", { length: 255 }).notNull(),
   assetType: ctemAssetTypeEnum("assetType").notNull().default("other"),
   ipDomain: varchar("ipDomain", { length: 255 }),
@@ -853,7 +1264,9 @@ export type InsertCtemAsset = typeof ctemAssets.$inferInsert;
 
 export const ctemVulnerabilities = pgTable("ctemVulnerabilities", {
   id: serial("id").primaryKey(),
-  assetId: integer("assetId").notNull().references(() => ctemAssets.id, { onDelete: "cascade" }),
+  assetId: integer("assetId")
+    .notNull()
+    .references(() => ctemAssets.id, { onDelete: "cascade" }),
   cveId: varchar("cveId", { length: 64 }),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
@@ -874,8 +1287,12 @@ export type InsertCtemVulnerability = typeof ctemVulnerabilities.$inferInsert;
 
 export const ctemAttackSimulations = pgTable("ctemAttackSimulations", {
   id: serial("id").primaryKey(),
-  assetId: integer("assetId").notNull().references(() => ctemAssets.id, { onDelete: "cascade" }),
-  simulationType: simulationTypeEnum("simulationType").notNull().default("other"),
+  assetId: integer("assetId")
+    .notNull()
+    .references(() => ctemAssets.id, { onDelete: "cascade" }),
+  simulationType: simulationTypeEnum("simulationType")
+    .notNull()
+    .default("other"),
   successProbability: integer("successProbability").default(0).notNull(),
   executedAt: timestamp("executedAt").defaultNow().notNull(),
   outputSummary: text("outputSummary"),
@@ -883,11 +1300,14 @@ export const ctemAttackSimulations = pgTable("ctemAttackSimulations", {
 });
 
 export type CtemAttackSimulation = typeof ctemAttackSimulations.$inferSelect;
-export type InsertCtemAttackSimulation = typeof ctemAttackSimulations.$inferInsert;
+export type InsertCtemAttackSimulation =
+  typeof ctemAttackSimulations.$inferInsert;
 
 export const ctemRiskScores = pgTable("ctemRiskScores", {
   id: serial("id").primaryKey(),
-  assetId: integer("assetId").notNull().references(() => ctemAssets.id, { onDelete: "cascade" }),
+  assetId: integer("assetId")
+    .notNull()
+    .references(() => ctemAssets.id, { onDelete: "cascade" }),
   exposureScore: integer("exposureScore").default(0).notNull(),
   exploitabilityScore: integer("exploitabilityScore").default(0).notNull(),
   businessImpactScore: integer("businessImpactScore").default(0).notNull(),
@@ -902,8 +1322,12 @@ export type InsertCtemRiskScore = typeof ctemRiskScores.$inferInsert;
 
 export const continuousComplianceRuns = pgTable("continuousComplianceRuns", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  vendorId: integer("vendorId").references(() => vendors.id, { onDelete: "set null" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  vendorId: integer("vendorId").references(() => vendors.id, {
+    onDelete: "set null",
+  }),
   runStatus: runStatusEnum("runStatus").notNull().default("queued"),
   triggeredBy: triggeredByEnum("triggeredBy").notNull().default("manual"),
   aiJobId: varchar("aiJobId", { length: 64 }),
@@ -919,23 +1343,38 @@ export const continuousComplianceRuns = pgTable("continuousComplianceRuns", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
-export type ContinuousComplianceRun = typeof continuousComplianceRuns.$inferSelect;
-export type InsertContinuousComplianceRun = typeof continuousComplianceRuns.$inferInsert;
+export type ContinuousComplianceRun =
+  typeof continuousComplianceRuns.$inferSelect;
+export type InsertContinuousComplianceRun =
+  typeof continuousComplianceRuns.$inferInsert;
 
-export const complianceExposureMappings = pgTable("complianceExposureMappings", {
-  id: serial("id").primaryKey(),
-  vulnerabilityId: integer("vulnerabilityId").notNull().references(() => ctemVulnerabilities.id, { onDelete: "cascade" }),
-  frameworkId: integer("frameworkId").references(() => frameworks.id, { onDelete: "set null" }),
-  frameworkCode: varchar("frameworkCode", { length: 50 }),
-  controlId: integer("controlId").references(() => complianceControls.id, { onDelete: "set null" }),
-  controlCode: varchar("controlCode", { length: 100 }),
-  mappingReason: text("mappingReason").notNull(),
-  severityImpact: severityImpactEnum("severityImpact").notNull().default("medium"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export const complianceExposureMappings = pgTable(
+  "complianceExposureMappings",
+  {
+    id: serial("id").primaryKey(),
+    vulnerabilityId: integer("vulnerabilityId")
+      .notNull()
+      .references(() => ctemVulnerabilities.id, { onDelete: "cascade" }),
+    frameworkId: integer("frameworkId").references(() => frameworks.id, {
+      onDelete: "set null",
+    }),
+    frameworkCode: varchar("frameworkCode", { length: 50 }),
+    controlId: integer("controlId").references(() => complianceControls.id, {
+      onDelete: "set null",
+    }),
+    controlCode: varchar("controlCode", { length: 100 }),
+    mappingReason: text("mappingReason").notNull(),
+    severityImpact: severityImpactEnum("severityImpact")
+      .notNull()
+      .default("medium"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  }
+);
 
-export type ComplianceExposureMapping = typeof complianceExposureMappings.$inferSelect;
-export type InsertComplianceExposureMapping = typeof complianceExposureMappings.$inferInsert;
+export type ComplianceExposureMapping =
+  typeof complianceExposureMappings.$inferSelect;
+export type InsertComplianceExposureMapping =
+  typeof complianceExposureMappings.$inferInsert;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ▌ RBAC — Role-Based Access Control & Onboarding
@@ -944,7 +1383,9 @@ export type InsertComplianceExposureMapping = typeof complianceExposureMappings.
 export const userOnboarding = pgTable("userOnboarding", {
   id: serial("id").primaryKey(),
   userId: integer("userId").references(() => users.id, { onDelete: "cascade" }),
-  localUserId: integer("localUserId").references(() => localUsers.id, { onDelete: "cascade" }),
+  localUserId: integer("localUserId").references(() => localUsers.id, {
+    onDelete: "cascade",
+  }),
   stage: onboardingStageEnum("stage").default("not_started").notNull(),
   accountIntent: accountIntentEnum("accountIntent"),
   selectedLocale: localeEnum("selectedLocale").default("en").notNull(),
@@ -958,9 +1399,13 @@ export type InsertUserOnboarding = typeof userOnboarding.$inferInsert;
 
 export const rolePermissions = pgTable("rolePermissions", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   userId: integer("userId").references(() => users.id, { onDelete: "cascade" }),
-  localUserId: integer("localUserId").references(() => localUsers.id, { onDelete: "cascade" }),
+  localUserId: integer("localUserId").references(() => localUsers.id, {
+    onDelete: "cascade",
+  }),
   module: varchar("module", { length: 120 }).notNull(),
   canView: integer("canView").default(0).notNull(),
   canCreate: integer("canCreate").default(0).notNull(),
@@ -978,9 +1423,13 @@ export type InsertRolePermission = typeof rolePermissions.$inferInsert;
 
 export const vendorShares = pgTable("vendorShares", {
   id: serial("id").primaryKey(),
-  vendorId: integer("vendorId").notNull().references(() => vendors.id, { onDelete: "cascade" }),
+  vendorId: integer("vendorId")
+    .notNull()
+    .references(() => vendors.id, { onDelete: "cascade" }),
   shareToken: varchar("shareToken", { length: 64 }).notNull().unique(),
-  allowedOrgId: integer("allowedOrgId").references(() => organizations.id, { onDelete: "set null" }),
+  allowedOrgId: integer("allowedOrgId").references(() => organizations.id, {
+    onDelete: "set null",
+  }),
   expiresAt: timestamp("expiresAt"),
   viewCount: integer("viewCount").default(0).notNull(),
   createdByUserId: integer("createdByUserId").references(() => users.id),
@@ -994,8 +1443,12 @@ export type InsertVendorShare = typeof vendorShares.$inferInsert;
 
 export const regulatorOversightTargets = pgTable("regulatorOversightTargets", {
   id: serial("id").primaryKey(),
-  regulatorOrgId: integer("regulatorOrgId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  targetOrgId: integer("targetOrgId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  regulatorOrgId: integer("regulatorOrgId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  targetOrgId: integer("targetOrgId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   grantedByAdminId: integer("grantedByAdminId").references(() => users.id),
   expiresAt: timestamp("expiresAt"),
   isActive: integer("isActive").default(1).notNull(),
@@ -1004,8 +1457,10 @@ export const regulatorOversightTargets = pgTable("regulatorOversightTargets", {
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
-export type RegulatorOversightTarget = typeof regulatorOversightTargets.$inferSelect;
-export type InsertRegulatorOversightTarget = typeof regulatorOversightTargets.$inferInsert;
+export type RegulatorOversightTarget =
+  typeof regulatorOversightTargets.$inferSelect;
+export type InsertRegulatorOversightTarget =
+  typeof regulatorOversightTargets.$inferInsert;
 
 // ═══════════════════════════════════════════════════════════════════════
 // ▌ COMPLIANCE EVIDENCE LOCKER
@@ -1013,13 +1468,17 @@ export type InsertRegulatorOversightTarget = typeof regulatorOversightTargets.$i
 
 export const complianceEvidence = pgTable("complianceEvidence", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   sourceType: evidenceSourceTypeEnum("sourceType").notNull().default("general"),
   sourceId: integer("sourceId"),
   title: varchar("title", { length: 255 }).notNull(),
   url: varchar("url", { length: 1024 }).notNull(),
   description: text("description"),
-  addedByUserId: integer("addedByUserId").references(() => localUsers.id, { onDelete: "set null" }),
+  addedByUserId: integer("addedByUserId").references(() => localUsers.id, {
+    onDelete: "set null",
+  }),
   tags: varchar("tags", { length: 512 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -1034,7 +1493,9 @@ export type InsertComplianceEvidence = typeof complianceEvidence.$inferInsert;
 
 export const dsrRequests = pgTable("dsrRequests", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   requestType: dsrRequestTypeEnum("requestType").notNull(),
   jurisdiction: dsrJurisdictionEnum("jurisdiction").notNull().default("Other"),
   requesterName: varchar("requesterName", { length: 255 }).notNull(),
@@ -1044,7 +1505,10 @@ export const dsrRequests = pgTable("dsrRequests", {
   priority: dsrPriorityEnum("priority").notNull().default("normal"),
   dueDate: timestamp("dueDate").notNull(),
   completedAt: timestamp("completedAt"),
-  assignedToUserId: integer("assignedToUserId").references(() => localUsers.id, { onDelete: "set null" }),
+  assignedToUserId: integer("assignedToUserId").references(
+    () => localUsers.id,
+    { onDelete: "set null" }
+  ),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -1059,8 +1523,13 @@ export type InsertDsrRequest = typeof dsrRequests.$inferInsert;
 
 export const serviceRequests = pgTable("serviceRequests", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  requestedByUserId: integer("requestedByUserId").references(() => localUsers.id, { onDelete: "set null" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  requestedByUserId: integer("requestedByUserId").references(
+    () => localUsers.id,
+    { onDelete: "set null" }
+  ),
   serviceType: serviceTypeEnum("serviceType").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),
@@ -1069,7 +1538,10 @@ export const serviceRequests = pgTable("serviceRequests", {
   budgetRange: varchar("budgetRange", { length: 120 }),
   priority: servicePriorityEnum("priority").default("medium").notNull(),
   status: serviceStatusEnum("status").default("submitted").notNull(),
-  assignedToUserId: integer("assignedToUserId").references(() => localUsers.id, { onDelete: "set null" }),
+  assignedToUserId: integer("assignedToUserId").references(
+    () => localUsers.id,
+    { onDelete: "set null" }
+  ),
   internalNotes: text("internalNotes"),
   clientResponse: text("clientResponse"),
   respondedAt: timestamp("respondedAt"),
@@ -1087,7 +1559,9 @@ export type InsertServiceRequest = typeof serviceRequests.$inferInsert;
 
 export const assetInventory = pgTable("assetInventory", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
   assetType: inventoryAssetTypeEnum("assetType").notNull(),
   identifier: varchar("identifier", { length: 512 }),
@@ -1103,7 +1577,9 @@ export const assetInventory = pgTable("assetInventory", {
   openVulnCount: integer("openVulnCount").default(0).notNull(),
   tags: varchar("tags", { length: 512 }),
   notes: text("notes"),
-  addedByUserId: integer("addedByUserId").references(() => localUsers.id, { onDelete: "set null" }),
+  addedByUserId: integer("addedByUserId").references(() => localUsers.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
@@ -1115,31 +1591,49 @@ export type InsertAssetInventoryItem = typeof assetInventory.$inferInsert;
 // ▌ SECURITY MATURITY
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const securityMaturityAssessments = pgTable("securityMaturityAssessments", {
-  id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  title: varchar("title", { length: 255 }).notNull(),
-  frameworkRef: varchar("frameworkRef", { length: 64 }),
-  scoreGovernance: integer("scoreGovernance").default(1).notNull(),
-  scoreAssetManagement: integer("scoreAssetManagement").default(1).notNull(),
-  scoreAccessControl: integer("scoreAccessControl").default(1).notNull(),
-  scoreDataProtection: integer("scoreDataProtection").default(1).notNull(),
-  scoreNetworkSecurity: integer("scoreNetworkSecurity").default(1).notNull(),
-  scoreVulnerabilityMgmt: integer("scoreVulnerabilityMgmt").default(1).notNull(),
-  scoreIncidentResponse: integer("scoreIncidentResponse").default(1).notNull(),
-  scoreBackupRecovery: integer("scoreBackupRecovery").default(1).notNull(),
-  scoreThirdPartyRisk: integer("scoreThirdPartyRisk").default(1).notNull(),
-  scoreSecurityAwareness: integer("scoreSecurityAwareness").default(1).notNull(),
-  overallScore: integer("overallScore").default(0).notNull(),
-  maturityLevel: maturityLevelEnum("maturityLevel").default("initial").notNull(),
-  recommendations: text("recommendations"),
-  assessedByUserId: integer("assessedByUserId").references(() => localUsers.id, { onDelete: "set null" }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
-});
+export const securityMaturityAssessments = pgTable(
+  "securityMaturityAssessments",
+  {
+    id: serial("id").primaryKey(),
+    organizationId: integer("organizationId")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    title: varchar("title", { length: 255 }).notNull(),
+    frameworkRef: varchar("frameworkRef", { length: 64 }),
+    scoreGovernance: integer("scoreGovernance").default(1).notNull(),
+    scoreAssetManagement: integer("scoreAssetManagement").default(1).notNull(),
+    scoreAccessControl: integer("scoreAccessControl").default(1).notNull(),
+    scoreDataProtection: integer("scoreDataProtection").default(1).notNull(),
+    scoreNetworkSecurity: integer("scoreNetworkSecurity").default(1).notNull(),
+    scoreVulnerabilityMgmt: integer("scoreVulnerabilityMgmt")
+      .default(1)
+      .notNull(),
+    scoreIncidentResponse: integer("scoreIncidentResponse")
+      .default(1)
+      .notNull(),
+    scoreBackupRecovery: integer("scoreBackupRecovery").default(1).notNull(),
+    scoreThirdPartyRisk: integer("scoreThirdPartyRisk").default(1).notNull(),
+    scoreSecurityAwareness: integer("scoreSecurityAwareness")
+      .default(1)
+      .notNull(),
+    overallScore: integer("overallScore").default(0).notNull(),
+    maturityLevel: maturityLevelEnum("maturityLevel")
+      .default("initial")
+      .notNull(),
+    recommendations: text("recommendations"),
+    assessedByUserId: integer("assessedByUserId").references(
+      () => localUsers.id,
+      { onDelete: "set null" }
+    ),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  }
+);
 
-export type SecurityMaturityAssessment = typeof securityMaturityAssessments.$inferSelect;
-export type InsertSecurityMaturityAssessment = typeof securityMaturityAssessments.$inferInsert;
+export type SecurityMaturityAssessment =
+  typeof securityMaturityAssessments.$inferSelect;
+export type InsertSecurityMaturityAssessment =
+  typeof securityMaturityAssessments.$inferInsert;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ▌ THREAT INTELLIGENCE FEED
@@ -1147,7 +1641,9 @@ export type InsertSecurityMaturityAssessment = typeof securityMaturityAssessment
 
 export const threatIntelItems = pgTable("threatIntelItems", {
   id: serial("id").primaryKey(),
-  organizationId: integer("organizationId").references(() => organizations.id, { onDelete: "cascade" }),
+  organizationId: integer("organizationId").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
   title: varchar("title", { length: 255 }).notNull(),
   summary: text("summary").notNull(),
   threatActor: varchar("threatActor", { length: 180 }),
@@ -1160,7 +1656,9 @@ export const threatIntelItems = pgTable("threatIntelItems", {
   cveId: varchar("cveId", { length: 32 }),
   cvssScore: varchar("cvssScore", { length: 8 }),
   isActive: integer("isActive").default(1).notNull(),
-  createdByUserId: integer("createdByUserId").references(() => localUsers.id, { onDelete: "set null" }),
+  createdByUserId: integer("createdByUserId").references(() => localUsers.id, {
+    onDelete: "set null",
+  }),
   publishedAt: timestamp("publishedAt").defaultNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -1209,3 +1707,121 @@ export const otpCodes = pgTable("otpCodes", {
 
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type InsertOtpCode = typeof otpCodes.$inferInsert;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ▌ KNOWLEDGE GRAPH — Global Compliance Knowledge Graph
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const knowledgeGraphNodeKindEnum = pgEnum("knowledgeGraphNodeKind", [
+  "region",
+  "framework",
+  "standard",
+  "edition",
+  "agent",
+  "regulator",
+  "country",
+  "control",
+  "threat",
+  "vendor",
+  "certification",
+  "policy",
+  "technology",
+  "data_type",
+  "industry",
+  "risk_scenario",
+]);
+
+export const knowledgeGraphEdgeRelationEnum = pgEnum(
+  "knowledgeGraphEdgeRelation",
+  [
+    "contains",
+    "activates",
+    "supports",
+    "maps_to",
+    "requires",
+    "conflicts",
+    "depends_on",
+    "governs",
+    "references",
+    "impacts",
+    "mitigates",
+    "translates_to",
+    "equivalent_to",
+    "cross_border_to",
+  ]
+);
+
+export const knowledgeGraphNodes = pgTable("knowledgeGraphNodes", {
+  id: serial("id").primaryKey(),
+  nodeId: varchar("nodeId", { length: 120 }).notNull().unique(),
+  label: varchar("label", { length: 255 }).notNull(),
+  kind: knowledgeGraphNodeKindEnum("kind").notNull(),
+  description: text("description"),
+  region: varchar("region", { length: 120 }),
+  jurisdiction: varchar("jurisdiction", { length: 120 }),
+  metadata: text("metadata"),
+  organizationId: integer("organizationId").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
+  isCustom: integer("isCustom").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+
+export type KnowledgeGraphNode = typeof knowledgeGraphNodes.$inferSelect;
+export type InsertKnowledgeGraphNode = typeof knowledgeGraphNodes.$inferInsert;
+
+export const knowledgeGraphEdges = pgTable("knowledgeGraphEdges", {
+  id: serial("id").primaryKey(),
+  sourceNodeId: varchar("sourceNodeId", { length: 120 }).notNull(),
+  targetNodeId: varchar("targetNodeId", { length: 120 }).notNull(),
+  relation: knowledgeGraphEdgeRelationEnum("relation").notNull(),
+  weight: integer("weight").default(1).notNull(),
+  metadata: text("metadata"),
+  organizationId: integer("organizationId").references(() => organizations.id, {
+    onDelete: "cascade",
+  }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type KnowledgeGraphEdge = typeof knowledgeGraphEdges.$inferSelect;
+export type InsertKnowledgeGraphEdge = typeof knowledgeGraphEdges.$inferInsert;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ▌ AI AGENT RUNS — Multi-Agent Orchestration Log
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const aiAgentRunStatusEnum = pgEnum("aiAgentRunStatus", [
+  "queued",
+  "running",
+  "completed",
+  "failed",
+  "cancelled",
+]);
+
+export const aiAgentRuns = pgTable("aiAgentRuns", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  agentCode: varchar("agentCode", { length: 120 }).notNull(),
+  agentName: varchar("agentName", { length: 255 }).notNull(),
+  triggerType: varchar("triggerType", { length: 64 })
+    .default("manual")
+    .notNull(),
+  inputPayload: text("inputPayload"),
+  outputPayload: text("outputPayload"),
+  status: aiAgentRunStatusEnum("status").default("queued").notNull(),
+  startedAt: timestamp("startedAt"),
+  completedAt: timestamp("completedAt"),
+  errorMessage: text("errorMessage"),
+  durationMs: integer("durationMs"),
+  createdByUserId: integer("createdByUserId").references(() => localUsers.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+
+export type AiAgentRun = typeof aiAgentRuns.$inferSelect;
+export type InsertAiAgentRun = typeof aiAgentRuns.$inferInsert;

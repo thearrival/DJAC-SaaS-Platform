@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { parseJwtUserId, getSessionTokenFromRequest, LOCAL_AUTH_COOKIE } from "../../services/local-jwt";
+import {
+  parseJwtUserId,
+  getSessionTokenFromRequest,
+  LOCAL_AUTH_COOKIE,
+} from "../../services/local-jwt";
 
 describe("Local JWT - parseJwtUserId", () => {
   it("should return a number when given a number", () => {

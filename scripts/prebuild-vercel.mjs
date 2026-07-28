@@ -15,16 +15,22 @@ console.log("[prebuild] Compiling Vercel handler...");
 fs.mkdirSync(path.dirname(outfile), { recursive: true });
 
 const cmd = [
-  "npx", "esbuild",
-  "--bundle", "--platform=node", "--target=node20",
-  "--format=esm", "--packages=external", "--external:pg-native",
-  `"${entry}"`, `--outfile="${outfile}"`,
+  "npx",
+  "esbuild",
+  "--bundle",
+  "--platform=node",
+  "--target=node20",
+  "--format=esm",
+  "--packages=external",
+  "--external:pg-native",
+  `"${entry}"`,
+  `--outfile="${outfile}"`,
 ].join(" ");
 
 try {
   execSync(cmd, { stdio: "inherit", cwd: root });
 } catch {
-  const fb = `npx esbuild --bundle --platform=node --target=node20 --format=cjs --packages=external --external:pg-native "${entry.replace(/\\/g, '/')}" --outfile="${outfile.replace(/\\/g, '/')}"`;
+  const fb = `npx esbuild --bundle --platform=node --target=node20 --format=cjs --packages=external --external:pg-native "${entry.replace(/\\/g, "/")}" --outfile="${outfile.replace(/\\/g, "/")}"`;
   execSync(fb, { stdio: "inherit", cwd: root, shell: true });
 }
 

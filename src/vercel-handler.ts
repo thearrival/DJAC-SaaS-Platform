@@ -41,18 +41,35 @@ export default async function handler(req: any, res: any) {
         env: ENV.isProduction ? "production" : "development",
       });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
 
   if (path.startsWith("/api/health") || path.startsWith("/health")) {
-    res.status(200).json({ ok: true, status: "healthy", timestamp: new Date().toISOString(), service: "djac-tool", node: process.version });
+    res.status(200).json({
+      ok: true,
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      service: "djac-tool",
+      node: process.version,
+    });
     return;
   }
 
   if (path.startsWith("/api/_debug")) {
-    res.status(200).json({ ok: true, url: req.url, path, method: req.method, headers: req.headers, node: process.version, pid: process.pid, memory: process.memoryUsage() });
+    res.status(200).json({
+      ok: true,
+      url: req.url,
+      path,
+      method: req.method,
+      headers: req.headers,
+      node: process.version,
+      pid: process.pid,
+      memory: process.memoryUsage(),
+    });
     return;
   }
 
@@ -73,7 +90,13 @@ export default async function handler(req: any, res: any) {
         steps.error = initError;
       }
     }
-    res.status(200).json({ ok: true, steps, initError, hasApp: !!cachedApp, node: process.version });
+    res.status(200).json({
+      ok: true,
+      steps,
+      initError,
+      hasApp: !!cachedApp,
+      node: process.version,
+    });
     return;
   }
 
@@ -91,21 +114,35 @@ export default async function handler(req: any, res: any) {
       if (dbClient) {
         try {
           const { sql } = await import("drizzle-orm");
-          const userCount = await dbClient.execute(sql`SELECT COUNT(*)::int as count FROM "localUsers"`);
-          const orgCount = await dbClient.execute(sql`SELECT COUNT(*)::int as count FROM "organizations"`);
-          const fwCount = await dbClient.execute(sql`SELECT COUNT(*)::int as count FROM "frameworks"`);
-          const vendorCount = await dbClient.execute(sql`SELECT COUNT(*)::int as count FROM "vendors"`);
+          const userCount = await dbClient.execute(
+            sql`SELECT COUNT(*)::int as count FROM "localUsers"`
+          );
+          const orgCount = await dbClient.execute(
+            sql`SELECT COUNT(*)::int as count FROM "organizations"`
+          );
+          const fwCount = await dbClient.execute(
+            sql`SELECT COUNT(*)::int as count FROM "frameworks"`
+          );
+          const vendorCount = await dbClient.execute(
+            sql`SELECT COUNT(*)::int as count FROM "vendors"`
+          );
           stats.users = (userCount.rows[0] as Record<string, unknown>).count;
-          stats.organizations = (orgCount.rows[0] as Record<string, unknown>).count;
+          stats.organizations = (
+            orgCount.rows[0] as Record<string, unknown>
+          ).count;
           stats.frameworks = (fwCount.rows[0] as Record<string, unknown>).count;
-          stats.vendors = (vendorCount.rows[0] as Record<string, unknown>).count;
+          stats.vendors = (
+            vendorCount.rows[0] as Record<string, unknown>
+          ).count;
         } catch {
           stats.dbError = "Could not query database tables";
         }
       }
       res.status(200).json({ ok: true, ...stats });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
@@ -115,17 +152,29 @@ export default async function handler(req: any, res: any) {
       if (!cachedApp && !initError) cachedApp = await createApp();
       const dbModule = await import("../server/db");
       const db = await dbModule.getDb();
-      if (!db) { res.status(200).json({ ok: false, error: "Database not connected" }); return; }
+      if (!db) {
+        res.status(200).json({ ok: false, error: "Database not connected" });
+        return;
+      }
       const { sql } = await import("drizzle-orm");
       const tables = await db.execute(sql`
         SELECT table_name FROM information_schema.tables
         WHERE table_schema = 'public'
         ORDER BY table_name
       `);
-      const names = tables.rows.map((r: Record<string, unknown>) => r.table_name);
-      res.status(200).json({ ok: true, count: names.length, tables: names, node: process.version });
+      const names = tables.rows.map(
+        (r: Record<string, unknown>) => r.table_name
+      );
+      res.status(200).json({
+        ok: true,
+        count: names.length,
+        tables: names,
+        node: process.version,
+      });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
@@ -135,12 +184,21 @@ export default async function handler(req: any, res: any) {
       if (!cachedApp && !initError) cachedApp = await createApp();
       const dbModule = await import("../server/db");
       const db = await dbModule.getDb();
-      if (!db) { res.status(200).json({ ok: false, error: "DB not connected" }); return; }
+      if (!db) {
+        res.status(200).json({ ok: false, error: "DB not connected" });
+        return;
+      }
 
       // Check key tables for missing columns vs Drizzle schema
       const checks: Record<string, string[]> = {};
       const expected: Record<string, string[]> = {
-        localUsers: ["phoneNumber", "verifiedAt", "mfaEnabled", "mfaBackupCodes", "totpSecret"],
+        localUsers: [
+          "phoneNumber",
+          "verifiedAt",
+          "mfaEnabled",
+          "mfaBackupCodes",
+          "totpSecret",
+        ],
         complianceControls: ["applicability"],
         yallaAdminSessions: [],
         auditLogs: [],
@@ -150,9 +208,11 @@ export default async function handler(req: any, res: any) {
       const { sql } = await import("drizzle-orm");
       for (const [table, cols] of Object.entries(expected)) {
         if (cols.length === 0) continue;
-        const result = await db.execute(sql.raw(
-          `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='${table}'`
-        ));
+        const result = await db.execute(
+          sql.raw(
+            `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='${table}'`
+          )
+        );
         const existing = new Set(result.rows.map(r => r.column_name));
         const missing = cols.filter(c => !existing.has(c));
         if (missing.length > 0) checks[table] = missing;
@@ -161,11 +221,16 @@ export default async function handler(req: any, res: any) {
       res.status(200).json({
         ok: Object.keys(checks).length === 0,
         missingColumns: checks,
-        message: Object.keys(checks).length === 0 ? "All expected columns present" : "Some columns are missing",
+        message:
+          Object.keys(checks).length === 0
+            ? "All expected columns present"
+            : "Some columns are missing",
         node: process.version,
       });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
@@ -175,19 +240,26 @@ export default async function handler(req: any, res: any) {
       if (!cachedApp && !initError) cachedApp = await createApp();
       const dbModule = await import("../server/db");
       const db = await dbModule.getDb();
-      if (!db) { res.status(200).json({ ok: false, error: "Database not connected" }); return; }
+      if (!db) {
+        res.status(200).json({ ok: false, error: "Database not connected" });
+        return;
+      }
 
       const mod = await import("../scripts/compliance-reference-data.mjs");
       const { complianceRelationships } = mod;
       const { sql } = await import("drizzle-orm");
 
       // Get framework code→id map
-      const fwRows = await db.execute(sql`SELECT "id", "code" FROM "frameworks"`);
+      const fwRows = await db.execute(
+        sql`SELECT "id", "code" FROM "frameworks"`
+      );
       const codeToId = new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
 
       // Create unique index if missing
-      await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`);
+      await db.execute(
+        sql`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
+      );
 
       const batchSize = 30;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -210,9 +282,18 @@ export default async function handler(req: any, res: any) {
       }
 
       const hasMore = offset + batchSize < complianceRelationships.length;
-      res.status(200).json({ ok: true, seeded, offset, total: complianceRelationships.length, hasMore, nextOffset: hasMore ? offset + batchSize : null });
+      res.status(200).json({
+        ok: true,
+        seeded,
+        offset,
+        total: complianceRelationships.length,
+        hasMore,
+        nextOffset: hasMore ? offset + batchSize : null,
+      });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
@@ -222,19 +303,26 @@ export default async function handler(req: any, res: any) {
       if (!cachedApp && !initError) cachedApp = await createApp();
       const dbModule = await import("../server/db");
       const db = await dbModule.getDb();
-      if (!db) { res.status(200).json({ ok: false, error: "Database not connected" }); return; }
+      if (!db) {
+        res.status(200).json({ ok: false, error: "Database not connected" });
+        return;
+      }
 
       const mod = await import("../scripts/compliance-reference-data.mjs");
       const controls = mod.complianceControls;
       const { sql } = await import("drizzle-orm");
 
       // Get framework code→id map
-      const fwRows = await db.execute(sql`SELECT "id", "code" FROM "frameworks"`);
+      const fwRows = await db.execute(
+        sql`SELECT "id", "code" FROM "frameworks"`
+      );
       const codeToId = new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
 
       // Ensure unique index
-      await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`);
+      await db.execute(
+        sql`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
+      );
 
       // Process in batches of 50 to stay under timeout
       const batchSize = 50;
@@ -270,7 +358,9 @@ export default async function handler(req: any, res: any) {
         nextOffset: hasMore ? offset + batchSize : null,
       });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
@@ -291,11 +381,15 @@ export default async function handler(req: any, res: any) {
         smtpConfigured: !!(ENV.smtpHost && ENV.smtpUser && ENV.smtpPass),
         smtpHost: ENV.smtpHost ? `${ENV.smtpHost}:${ENV.smtpPort}` : "not set",
         smtpFrom: ENV.smtpFrom || "not set",
-        message: sent ? "Test email sent successfully" : "SMTP delivery failed — check server logs",
+        message: sent
+          ? "Test email sent successfully"
+          : "SMTP delivery failed — check server logs",
         node: process.version,
       });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
@@ -319,7 +413,9 @@ export default async function handler(req: any, res: any) {
       const allOk = Object.values(checks).every(Boolean);
       res.status(200).json({ ok: allOk, checks, node: process.version });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
@@ -328,9 +424,15 @@ export default async function handler(req: any, res: any) {
     try {
       if (!cachedApp && !initError) cachedApp = await createApp();
       await ensureMigrated();
-      res.status(200).json({ ok: true, message: "Migration completed", node: process.version });
+      res.status(200).json({
+        ok: true,
+        message: "Migration completed",
+        node: process.version,
+      });
     } catch (e) {
-      res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+      res
+        .status(500)
+        .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
     }
     return;
   }
@@ -346,11 +448,16 @@ export default async function handler(req: any, res: any) {
         ok: !!db,
         hasApp: !!cachedApp,
         hasDbUrl: !!dbUrl,
-        dbUrlPrefix: typeof dbUrl === "string" ? dbUrl.substring(0, 20) + "..." : "none",
+        dbUrlPrefix:
+          typeof dbUrl === "string" ? dbUrl.substring(0, 20) + "..." : "none",
         node: process.version,
       });
     } catch (e) {
-      res.status(200).json({ ok: false, error: e instanceof Error ? e.message : String(e), node: process.version });
+      res.status(200).json({
+        ok: false,
+        error: e instanceof Error ? e.message : String(e),
+        node: process.version,
+      });
     }
     return;
   }
@@ -364,13 +471,19 @@ export default async function handler(req: any, res: any) {
         await ensureMigrated();
       }
     }
-    if (!cachedApp) { res.status(500).json({ error: "Express app failed to initialize", message: initError }); return; }
+    if (!cachedApp) {
+      res.status(500).json({
+        error: "Express app failed to initialize",
+        message: initError,
+      });
+      return;
+    }
     cachedApp(req, res);
   } catch (err) {
     res.status(500).json({
       error: "Internal server error",
       message: err instanceof Error ? err.message : String(err),
-      ref: `ERR-${Date.now().toString(36).toUpperCase()}`
+      ref: `ERR-${Date.now().toString(36).toUpperCase()}`,
     });
   }
 }

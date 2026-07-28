@@ -7,10 +7,10 @@ const BASE_TITLE = "DJAC";
  * Format: "Page Name | DJAC"  (or just "DJAC" when title is empty)
  */
 export function usePageTitle(title: string): void {
-    useEffect(() => {
-        document.title = title ? `${title} | ${BASE_TITLE}` : BASE_TITLE;
-        return () => {
-            document.title = BASE_TITLE;
-        };
-    }, [title]);
+  useEffect(() => {
+    document.title = title ? `${title} | ${BASE_TITLE}` : BASE_TITLE;
+    return () => {
+      document.title = BASE_TITLE;
+    };
+  }, [title]);
 }

@@ -27,8 +27,9 @@ export const CartesianGrid = RC.CartesianGrid as unknown as React.FC<RCProps>;
 export const Tooltip = RC.Tooltip as unknown as React.FC<RCProps>;
 export const Legend = RC.Legend as unknown as React.FC<RCProps>;
 export const ReferenceLine = RC.ReferenceLine as unknown as React.FC<RCProps>;
-export const ResponsiveContainer = RC.ResponsiveContainer as unknown as React.FC<{
+export const ResponsiveContainer =
+  RC.ResponsiveContainer as unknown as React.FC<{
     width: string | number;
     height: number;
     children?: React.ReactNode;
-}>;
+  }>;

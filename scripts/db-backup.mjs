@@ -44,11 +44,12 @@ try {
   console.log(`[db-backup] Complete — ${sizeMB} MB`);
 
   // Keep only last 7 daily backups
-  const files = fs.readdirSync(backupDir)
+  const files = fs
+    .readdirSync(backupDir)
     .filter(f => f.startsWith("djac-saas-") && f.endsWith(".sql"))
     .sort()
     .reverse();
-  
+
   for (const old of files.slice(7)) {
     fs.unlinkSync(path.join(backupDir, old));
     console.log(`[db-backup] Removed old backup: ${old}`);

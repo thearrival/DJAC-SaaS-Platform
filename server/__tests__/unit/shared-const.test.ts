@@ -51,8 +51,12 @@ describe("shared/const - Platform Roles", () => {
 
 describe("shared/const - Organisation Roles", () => {
   it("should define org roles in ascending privilege order", () => {
-    expect(ORG_ROLE_LEVEL.analyst).toBeLessThan(ORG_ROLE_LEVEL.compliance_officer);
-    expect(ORG_ROLE_LEVEL.compliance_officer).toBeLessThan(ORG_ROLE_LEVEL.admin);
+    expect(ORG_ROLE_LEVEL.analyst).toBeLessThan(
+      ORG_ROLE_LEVEL.compliance_officer
+    );
+    expect(ORG_ROLE_LEVEL.compliance_officer).toBeLessThan(
+      ORG_ROLE_LEVEL.admin
+    );
     expect(ORG_ROLE_LEVEL.admin).toBeLessThan(ORG_ROLE_LEVEL.owner);
   });
 
@@ -122,55 +126,227 @@ describe("shared/const - Account Intents & Onboarding", () => {
 describe("shared/const - RBAC Permission Matrix", () => {
   it("should define permissions for all org roles", () => {
     const roles = Object.keys(DEFAULT_ORG_ROLE_PERMISSIONS);
-    expect(roles).toEqual(expect.arrayContaining(["analyst", "compliance_officer", "admin", "owner"]));
+    expect(roles).toEqual(
+      expect.arrayContaining([
+        "analyst",
+        "compliance_officer",
+        "admin",
+        "owner",
+      ])
+    );
   });
 
   it("analyst should have VIEW_ONLY on most modules", () => {
     const analystPerms = DEFAULT_ORG_ROLE_PERMISSIONS.analyst;
-    expect(analystPerms.asset_inventory).toEqual({ canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false });
-    expect(analystPerms.vendor_assessment).toEqual({ canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false });
-    expect(analystPerms.gap_tracker).toEqual({ canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false });
+    expect(analystPerms.asset_inventory).toEqual({
+      canView: true,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canExport: false,
+      canInvite: false,
+    });
+    expect(analystPerms.vendor_assessment).toEqual({
+      canView: true,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canExport: false,
+      canInvite: false,
+    });
+    expect(analystPerms.gap_tracker).toEqual({
+      canView: true,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canExport: false,
+      canInvite: false,
+    });
   });
 
   it("analyst should have STANDARD access on service_requests", () => {
-    expect(DEFAULT_ORG_ROLE_PERMISSIONS.analyst.service_requests).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: false, canExport: true, canInvite: false });
+    expect(DEFAULT_ORG_ROLE_PERMISSIONS.analyst.service_requests).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: false,
+      canExport: true,
+      canInvite: false,
+    });
   });
 
   it("compliance_officer should have STANDARD access on most modules", () => {
     const coPerms = DEFAULT_ORG_ROLE_PERMISSIONS.compliance_officer;
-    expect(coPerms.asset_inventory).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: false, canExport: true, canInvite: false });
-    expect(coPerms.remediation_planner).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: false, canExport: true, canInvite: false });
+    expect(coPerms.asset_inventory).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: false,
+      canExport: true,
+      canInvite: false,
+    });
+    expect(coPerms.remediation_planner).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: false,
+      canExport: true,
+      canInvite: false,
+    });
   });
 
   it("compliance_officer should have VIEW_ONLY on law_library and framework_analysis", () => {
-    expect(DEFAULT_ORG_ROLE_PERMISSIONS.compliance_officer.law_library).toEqual({ canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false });
-    expect(DEFAULT_ORG_ROLE_PERMISSIONS.compliance_officer.framework_analysis).toEqual({ canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false });
+    expect(DEFAULT_ORG_ROLE_PERMISSIONS.compliance_officer.law_library).toEqual(
+      {
+        canView: true,
+        canCreate: false,
+        canEdit: false,
+        canDelete: false,
+        canExport: false,
+        canInvite: false,
+      }
+    );
+    expect(
+      DEFAULT_ORG_ROLE_PERMISSIONS.compliance_officer.framework_analysis
+    ).toEqual({
+      canView: true,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canExport: false,
+      canInvite: false,
+    });
   });
 
   it("admin should have FULL access on most modules", () => {
     const adminPerms = DEFAULT_ORG_ROLE_PERMISSIONS.admin;
-    expect(adminPerms.asset_inventory).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
-    expect(adminPerms.vendor_assessment).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
-    expect(adminPerms.gap_tracker).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
+    expect(adminPerms.asset_inventory).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
+    expect(adminPerms.vendor_assessment).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
+    expect(adminPerms.gap_tracker).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
   });
 
   it("admin should have restricted access on sensitive modules", () => {
     const adminPerms = DEFAULT_ORG_ROLE_PERMISSIONS.admin;
-    expect(adminPerms.api_keys).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: false, canExport: true, canInvite: false });
-    expect(adminPerms.team_members).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: false, canExport: true, canInvite: false });
-    expect(adminPerms.org_settings).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: false, canExport: true, canInvite: false });
-    expect(adminPerms.audit_log).toEqual({ canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false });
-    expect(adminPerms.billing).toEqual({ canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false });
+    expect(adminPerms.api_keys).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: false,
+      canExport: true,
+      canInvite: false,
+    });
+    expect(adminPerms.team_members).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: false,
+      canExport: true,
+      canInvite: false,
+    });
+    expect(adminPerms.org_settings).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: false,
+      canExport: true,
+      canInvite: false,
+    });
+    expect(adminPerms.audit_log).toEqual({
+      canView: true,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canExport: false,
+      canInvite: false,
+    });
+    expect(adminPerms.billing).toEqual({
+      canView: true,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canExport: false,
+      canInvite: false,
+    });
   });
 
   it("owner should have FULL access on ALL modules including sensitive ones", () => {
     const ownerPerms = DEFAULT_ORG_ROLE_PERMISSIONS.owner;
-    expect(ownerPerms.api_keys).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
-    expect(ownerPerms.team_members).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
-    expect(ownerPerms.org_settings).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
-    expect(ownerPerms.audit_log).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
-    expect(ownerPerms.billing).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
-    expect(ownerPerms.law_library).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
-    expect(ownerPerms.framework_analysis).toEqual({ canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true });
+    expect(ownerPerms.api_keys).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
+    expect(ownerPerms.team_members).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
+    expect(ownerPerms.org_settings).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
+    expect(ownerPerms.audit_log).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
+    expect(ownerPerms.billing).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
+    expect(ownerPerms.law_library).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
+    expect(ownerPerms.framework_analysis).toEqual({
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true,
+    });
   });
 });

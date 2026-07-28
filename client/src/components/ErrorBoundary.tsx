@@ -44,8 +44,8 @@ class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </h2>
             <p className="text-sm text-muted-foreground text-center mb-1 max-w-sm">
-              An unexpected error occurred. The team has been notified.
-              Try reloading or going back to the dashboard.
+              An unexpected error occurred. The team has been notified. Try
+              reloading or going back to the dashboard.
             </p>
             <p className="text-xs text-muted-foreground/60 mb-6 font-mono">
               Ref: {this.state.errorId}
@@ -78,7 +78,9 @@ class ErrorBoundary extends Component<Props, State> {
                 Reload Page
               </button>
               <button
-                onClick={() => { window.location.href = "/dashboard"; }}
+                onClick={() => {
+                  window.location.href = "/dashboard";
+                }}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium",
                   "border border-border bg-background text-foreground",

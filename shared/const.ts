@@ -1,11 +1,15 @@
 export const COOKIE_NAME = "app_session_id";
 export const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
 export const AXIOS_TIMEOUT_MS = 30_000;
-export const UNAUTHED_ERR_MSG = 'Authentication required (10001)';
-export const NOT_ADMIN_ERR_MSG = 'You do not have the required permission (10002)';
-export const NOT_PLATFORM_ADMIN_ERR_MSG = 'Platform administrator access required (10003)';
-export const NOT_SUPER_ADMIN_ERR_MSG = 'Super administrator access required (10004)';
-export const NOT_COMPANY_ADMIN_ERR_MSG = 'Company administrator access required (10005)';
+export const UNAUTHED_ERR_MSG = "Authentication required (10001)";
+export const NOT_ADMIN_ERR_MSG =
+  "You do not have the required permission (10002)";
+export const NOT_PLATFORM_ADMIN_ERR_MSG =
+  "Platform administrator access required (10003)";
+export const NOT_SUPER_ADMIN_ERR_MSG =
+  "Super administrator access required (10004)";
+export const NOT_COMPANY_ADMIN_ERR_MSG =
+  "Company administrator access required (10005)";
 
 /** All supported platform roles in least-to-most-privileged order */
 export const PLATFORM_ROLES = [
@@ -20,7 +24,7 @@ export const PLATFORM_ROLES = [
   "admin",
 ] as const;
 
-export type PlatformRole = typeof PLATFORM_ROLES[number];
+export type PlatformRole = (typeof PLATFORM_ROLES)[number];
 
 /** Numeric privilege level per role — higher = more access */
 export const ROLE_LEVEL: Record<PlatformRole, number> = {
@@ -35,7 +39,10 @@ export const ROLE_LEVEL: Record<PlatformRole, number> = {
 };
 
 /** Returns true when the actor role has at least the required privilege level */
-export function hasMinRole(actorRole: string | undefined | null, required: PlatformRole): boolean {
+export function hasMinRole(
+  actorRole: string | undefined | null,
+  required: PlatformRole
+): boolean {
   const actorLevel = ROLE_LEVEL[actorRole as PlatformRole] ?? 0;
   return actorLevel >= ROLE_LEVEL[required];
 }
@@ -50,7 +57,7 @@ export const ORG_ROLES = [
   "owner",
 ] as const;
 
-export type OrgRole = typeof ORG_ROLES[number];
+export type OrgRole = (typeof ORG_ROLES)[number];
 
 /** Numeric privilege level per org role — higher = more access */
 export const ORG_ROLE_LEVEL: Record<OrgRole, number> = {
@@ -61,7 +68,10 @@ export const ORG_ROLE_LEVEL: Record<OrgRole, number> = {
 };
 
 /** Returns true when the actor's org role meets the minimum required level */
-export function hasMinOrgRole(actorRole: string | undefined | null, required: OrgRole): boolean {
+export function hasMinOrgRole(
+  actorRole: string | undefined | null,
+  required: OrgRole
+): boolean {
   const actorLevel = ORG_ROLE_LEVEL[actorRole as OrgRole] ?? 0;
   return actorLevel >= ORG_ROLE_LEVEL[required];
 }
@@ -79,7 +89,7 @@ export const ACCOUNT_INTENTS = [
   "researcher",
 ] as const;
 
-export type AccountIntent = typeof ACCOUNT_INTENTS[number];
+export type AccountIntent = (typeof ACCOUNT_INTENTS)[number];
 
 /** All supported onboarding wizard stages */
 export const ONBOARDING_STAGES = [
@@ -91,7 +101,7 @@ export const ONBOARDING_STAGES = [
   "completed",
 ] as const;
 
-export type OnboardingStage = typeof ONBOARDING_STAGES[number];
+export type OnboardingStage = (typeof ONBOARDING_STAGES)[number];
 
 // ─── Module Slugs ─────────────────────────────────────────────────────────────
 
@@ -129,7 +139,7 @@ export const MODULE_SLUGS = [
   "saas_metrics",
 ] as const;
 
-export type ModuleSlug = typeof MODULE_SLUGS[number];
+export type ModuleSlug = (typeof MODULE_SLUGS)[number];
 
 // ─── RBAC Permission Flags ────────────────────────────────────────────────────
 
@@ -142,14 +152,45 @@ export interface PermissionFlags {
   canInvite: boolean;
 }
 
-const _DENY: PermissionFlags = { canView: false, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false };
-const VIEW_ONLY: PermissionFlags = { canView: true, canCreate: false, canEdit: false, canDelete: false, canExport: false, canInvite: false };
-const STANDARD: PermissionFlags = { canView: true, canCreate: true, canEdit: true, canDelete: false, canExport: true, canInvite: false };
-const FULL: PermissionFlags = { canView: true, canCreate: true, canEdit: true, canDelete: true, canExport: true, canInvite: true };
+const _DENY: PermissionFlags = {
+  canView: false,
+  canCreate: false,
+  canEdit: false,
+  canDelete: false,
+  canExport: false,
+  canInvite: false,
+};
+const VIEW_ONLY: PermissionFlags = {
+  canView: true,
+  canCreate: false,
+  canEdit: false,
+  canDelete: false,
+  canExport: false,
+  canInvite: false,
+};
+const STANDARD: PermissionFlags = {
+  canView: true,
+  canCreate: true,
+  canEdit: true,
+  canDelete: false,
+  canExport: true,
+  canInvite: false,
+};
+const FULL: PermissionFlags = {
+  canView: true,
+  canCreate: true,
+  canEdit: true,
+  canDelete: true,
+  canExport: true,
+  canInvite: true,
+};
 
 /** Default per-module permissions for each org role.
  *  These serve as the fallback when no `rolePermissions` row exists for the user. */
-export const DEFAULT_ORG_ROLE_PERMISSIONS: Record<OrgRole, Partial<Record<ModuleSlug, PermissionFlags>>> = {
+export const DEFAULT_ORG_ROLE_PERMISSIONS: Record<
+  OrgRole,
+  Partial<Record<ModuleSlug, PermissionFlags>>
+> = {
   analyst: {
     asset_inventory: VIEW_ONLY,
     vendor_assessment: VIEW_ONLY,
@@ -274,4 +315,3 @@ export const ONBOARDING_GATE_RULES: Record<OnboardingStage, string[]> = {
   jurisdiction_set: [],
   completed: ["*"], // wildcard — all routes accessible
 };
-

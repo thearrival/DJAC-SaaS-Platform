@@ -45,8 +45,12 @@ console.log(line);
 console.log(`\n  YALLA_ADMIN_USERNAME=${username}`);
 console.log(`  YALLA_ADMIN_PASSWORD=${passwordHash}`);
 console.log(`\n  Also generate and set these if not done yet:`);
-console.log(`  YALLA_ADMIN_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")`);
-console.log(`  YALLA_ADMIN_JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")`);
+console.log(
+  `  YALLA_ADMIN_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")`
+);
+console.log(
+  `  YALLA_ADMIN_JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")`
+);
 console.log("\n" + line);
 console.log("  ⚠  This output will NOT be shown again.");
 console.log("     Store the raw password in a password manager NOW.");

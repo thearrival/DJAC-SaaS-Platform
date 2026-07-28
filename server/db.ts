@@ -8,7 +8,9 @@ import { fixSslMode } from "./_core/ssl-helper";
 let _db: ReturnType<typeof drizzle> | null = null;
 let _pool: pg.Pool | null = null;
 let _lastDbCheckFailedAt = 0;
-const DB_RETRY_BACKOFF_MS = 10_000;
+let _consecutiveFailures = 0;
+const DB_RETRY_BACKOFF_MIN_MS = 1_000;
+const DB_RETRY_BACKOFF_MAX_MS = 60_000;
 let devUserOverride: Partial<User> = {};
 
 function buildDevBypassUser(): User | null {
@@ -54,14 +56,41 @@ export function getDatabaseUnavailableMessage() {
   return "Database unavailable. Verify DATABASE_URL connectivity and ensure the database server is running.";
 }
 
+function getBackoffDelay(): number {
+  const base =
+    DB_RETRY_BACKOFF_MIN_MS * Math.pow(2, Math.min(_consecutiveFailures, 8));
+  const capped = Math.min(base, DB_RETRY_BACKOFF_MAX_MS);
+  const jitter = Math.random() * 0.3 * capped;
+  return Math.floor(capped + jitter);
+}
+
+async function verifyPoolAlive(pool: pg.Pool): Promise<boolean> {
+  try {
+    const client = await pool.connect();
+    await client.query("SELECT 1");
+    client.release();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function getDb() {
-  if (_db) return _db;
+  if (_db && _pool) {
+    const alive = await verifyPoolAlive(_pool);
+    if (!alive) {
+      console.warn("[Database] Pool connection lost — reconnecting");
+      await closeDbPool();
+    } else {
+      return _db;
+    }
+  }
 
   const databaseUrl = ENV.databaseUrl;
   if (!databaseUrl) return null;
 
   const now = Date.now();
-  if (now - _lastDbCheckFailedAt < DB_RETRY_BACKOFF_MS) {
+  if (now - _lastDbCheckFailedAt < getBackoffDelay()) {
     return null;
   }
 
@@ -73,6 +102,12 @@ export async function getDb() {
       _pool = new pg.Pool({
         connectionString: sslUrl,
         max: connectionLimit,
+        idleTimeoutMillis: 30_000,
+        connectionTimeoutMillis: 5_000,
+      });
+
+      _pool.on("error", (err: Error) => {
+        console.error("[Database] Pool error:", err.message);
       });
 
       const client = await _pool.connect();
@@ -80,21 +115,43 @@ export async function getDb() {
       client.release();
 
       _db = drizzle(_pool);
+      _consecutiveFailures = 0;
       console.info(`[Database] Pool created — max=${connectionLimit}`);
     } else {
       const client = new pg.Client(fixSslMode(databaseUrl));
       await client.connect();
       await client.end();
       _db = drizzle(fixSslMode(databaseUrl));
+      _consecutiveFailures = 0;
     }
+    _lastDbCheckFailedAt = 0;
     return _db;
   } catch (error) {
     _lastDbCheckFailedAt = now;
-    console.warn("[Database] Connection unavailable:", String(error));
+    _consecutiveFailures++;
+    console.warn(
+      `[Database] Connection unavailable (attempt #${_consecutiveFailures}):`,
+      String(error)
+    );
     _pool = null;
     _db = null;
     return null;
   }
+}
+
+export function getDbPoolStats(): {
+  connected: boolean;
+  poolSize: number;
+  idleCount: number;
+  waitingCount: number;
+} | null {
+  if (!_pool) return null;
+  return {
+    connected: true,
+    poolSize: _pool.totalCount,
+    idleCount: _pool.idleCount,
+    waitingCount: _pool.waitingCount,
+  };
 }
 
 export async function closeDbPool(): Promise<void> {
@@ -217,7 +274,11 @@ export async function getUserByOpenId(openId: string) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
@@ -233,7 +294,11 @@ export async function getUserById(userId: number) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -244,10 +309,17 @@ export async function listUsersForAdmin(limit = 200) {
     return devUser ? [devUser] : [];
   }
 
-  return db.select().from(users).orderBy(desc(users.lastActivityAt), desc(users.lastSignedIn)).limit(limit);
+  return db
+    .select()
+    .from(users)
+    .orderBy(desc(users.lastActivityAt), desc(users.lastSignedIn))
+    .limit(limit);
 }
 
-export async function updateUserProfile(userId: number, updates: UpdateUserProfileInput) {
+export async function updateUserProfile(
+  userId: number,
+  updates: UpdateUserProfileInput
+) {
   const db = await getDb();
   if (!db) {
     const devUser = buildDevBypassUser();
@@ -268,7 +340,12 @@ export async function updateUserProfile(userId: number, updates: UpdateUserProfi
     lastActivityAt: new Date(),
   };
 
-  const entries = Object.entries(updates) as Array<[keyof UpdateUserProfileInput, UpdateUserProfileInput[keyof UpdateUserProfileInput]]>;
+  const entries = Object.entries(updates) as Array<
+    [
+      keyof UpdateUserProfileInput,
+      UpdateUserProfileInput[keyof UpdateUserProfileInput],
+    ]
+  >;
   for (const [key, value] of entries) {
     if (value === undefined) continue;
     updateSet[key] = value;
@@ -291,5 +368,8 @@ export async function touchUserActivity(userId: number) {
     return;
   }
 
-  await db.update(users).set({ lastActivityAt: new Date() }).where(eq(users.id, userId));
+  await db
+    .update(users)
+    .set({ lastActivityAt: new Date() })
+    .where(eq(users.id, userId));
 }

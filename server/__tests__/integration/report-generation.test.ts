@@ -87,8 +87,14 @@ describe("Report Generation", () => {
   });
 
   it("should generate unique report IDs", () => {
-    const id1 = generateComplianceReport({ jurisdiction: "Saudi Arabia", locale: "en" }).reportId;
-    const id2 = generateComplianceReport({ jurisdiction: "China", locale: "en" }).reportId;
+    const id1 = generateComplianceReport({
+      jurisdiction: "Saudi Arabia",
+      locale: "en",
+    }).reportId;
+    const id2 = generateComplianceReport({
+      jurisdiction: "China",
+      locale: "en",
+    }).reportId;
     expect(id1).not.toBe(id2);
   });
 });

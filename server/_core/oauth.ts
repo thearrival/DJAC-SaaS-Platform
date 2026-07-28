@@ -3,6 +3,7 @@ import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import { logger } from "./logger";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -44,11 +45,14 @@ export function registerOAuthRoutes(app: Express) {
       });
 
       const cookieOptions = getSessionCookieOptions(req);
-      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+      res.cookie(COOKIE_NAME, sessionToken, {
+        ...cookieOptions,
+        maxAge: ONE_YEAR_MS,
+      });
 
       res.redirect(302, "/");
     } catch (error) {
-      console.error("[OAuth] Callback failed", error);
+      logger.error({ error }, "OAuth callback failed");
       res.status(500).json({ error: "OAuth callback failed" });
     }
   });

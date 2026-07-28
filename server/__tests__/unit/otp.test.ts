@@ -8,20 +8,20 @@ const OTP_MAX_ATTEMPTS = 5;
 const OTP_LENGTH = 6;
 
 function generateCode(): string {
-    const digits = "0123456789";
-    let code = "";
-    for (let i = 0; i < OTP_LENGTH; i++) {
-        code += digits[Math.floor(Math.random() * digits.length)];
-    }
-    return code;
+  const digits = "0123456789";
+  let code = "";
+  for (let i = 0; i < OTP_LENGTH; i++) {
+    code += digits[Math.floor(Math.random() * digits.length)];
+  }
+  return code;
 }
 
 function hashCode(code: string): string {
-    return createHash("sha256").update(code).digest("hex");
+  return createHash("sha256").update(code).digest("hex");
 }
 
 function isPhone(identifier: string): boolean {
-    return /^\+?[1-9]\d{6,14}$/.test(identifier.replace(/[\s\-()]/g, ""));
+  return /^\+?[1-9]\d{6,14}$/.test(identifier.replace(/[\s\-()]/g, ""));
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────────

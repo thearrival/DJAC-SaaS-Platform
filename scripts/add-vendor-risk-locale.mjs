@@ -8,13 +8,19 @@ import { fileURLToPath } from "url";
 import path from "path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const filePath = path.join(__dirname, "../client/src/contexts/LocaleContext.tsx");
+const filePath = path.join(
+  __dirname,
+  "../client/src/contexts/LocaleContext.tsx"
+);
 
 let content = readFileSync(filePath, "utf-8");
 const originalContent = content;
 
 function hasVendorRiskKeysInSection(sectionText) {
-  return sectionText.includes('"vendorRisk.title"') && sectionText.includes('"vendorRisk.colAdded"');
+  return (
+    sectionText.includes('"vendorRisk.title"') &&
+    sectionText.includes('"vendorRisk.colAdded"')
+  );
 }
 
 function getLocaleSection(contentText, localeKey) {

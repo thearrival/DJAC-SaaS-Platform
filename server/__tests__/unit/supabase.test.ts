@@ -29,7 +29,8 @@ describe("Supabase Integration", () => {
   });
 
   it("should validate Supabase URL format", () => {
-    const url = process.env.SUPABASE_URL || "https://gcsoeumdjrejfxuovfcw.supabase.co";
+    const url =
+      process.env.SUPABASE_URL || "https://gcsoeumdjrejfxuovfcw.supabase.co";
     expect(url).toMatch(/^https?:\/\/.+\.supabase\.co$/);
   });
 });

@@ -8,15 +8,17 @@ import { ENV } from "../_core/env";
 
 let migrationApplied = false;
 
-async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<void> {
-    try {
-        const { complianceFrameworks } = await import(
-            "../../scripts/compliance-reference-data.mjs"
-        );
+async function seedComplianceFrameworks(
+  db: NonNullable<Awaited<ReturnType<typeof getDb>>>
+): Promise<void> {
+  try {
+    const { complianceFrameworks } = await import(
+      "../../scripts/compliance-reference-data.mjs"
+    );
 
-        let seeded = 0;
-        for (const fw of complianceFrameworks) {
-            await db.execute(sql`
+    let seeded = 0;
+    for (const fw of complianceFrameworks) {
+      await db.execute(sql`
                 INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
                 VALUES (${fw.code}, ${fw.name}, ${fw.country}, ${fw.description ?? null}, ${fw.scope ?? null}, ${fw.enforcementAuthority ?? null}, ${fw.maxPenalty ?? null})
                 ON CONFLICT ("code") DO UPDATE SET
@@ -28,30 +30,33 @@ async function seedComplianceFrameworks(db: NonNullable<Awaited<ReturnType<typeo
                     "maxPenalty" = EXCLUDED."maxPenalty",
                     "updatedAt" = NOW()
             `);
-            seeded++;
-        }
-
-        if (!ENV.isProduction) {
-            console.info(`[Migrate] Seeded ${seeded} compliance frameworks.`);
-        }
-    } catch (err) {
-        console.warn("[Migrate] Compliance seed data could not be loaded (fallback will be used):", (err as Error).message);
+      seeded++;
     }
+
+    if (!ENV.isProduction) {
+      console.info(`[Migrate] Seeded ${seeded} compliance frameworks.`);
+    }
+  } catch (err) {
+    console.warn(
+      "[Migrate] Compliance seed data could not be loaded (fallback will be used):",
+      (err as Error).message
+    );
+  }
 }
 
 export async function ensureMigrated(): Promise<void> {
-    if (migrationApplied) return;
+  if (migrationApplied) return;
 
-    const db = await getDb();
-    if (!db) return; // No DB connection — skip (in-memory mode)
+  const db = await getDb();
+  if (!db) return; // No DB connection — skip (in-memory mode)
 
-    try {
-        // Migration 0001: admin tables + performance indexes + verifiedAt
-        await db.execute(sql`
+  try {
+    // Migration 0001: admin tables + performance indexes + verifiedAt
+    await db.execute(sql`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "verifiedAt" timestamp
         `);
 
-        await db.execute(sql`
+    await db.execute(sql`
             CREATE TABLE IF NOT EXISTS "yallaAdminSessions" (
                 "id"            varchar(64)   NOT NULL PRIMARY KEY,
                 "adminUsername" varchar(120)  NOT NULL,
@@ -64,7 +69,7 @@ export async function ensureMigrated(): Promise<void> {
             )
         `);
 
-        await db.execute(sql`
+    await db.execute(sql`
             CREATE TABLE IF NOT EXISTS "yallaAdminAuditLogs" (
                 "id"            serial        PRIMARY KEY,
                 "sessionId"     varchar(64),
@@ -77,19 +82,19 @@ export async function ensureMigrated(): Promise<void> {
             )
         `);
 
-        // Migration 0002: phoneNumber + otpCodes
-        await db.execute(sql`
+    // Migration 0002: phoneNumber + otpCodes
+    await db.execute(sql`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "phoneNumber" varchar(20)
         `);
-        await db.execute(sql`
+    await db.execute(sql`
             ALTER TABLE "complianceControls" ADD COLUMN IF NOT EXISTS "applicability" varchar(255)
         `);
-        await db.execute(sql`
+    await db.execute(sql`
             CREATE UNIQUE INDEX IF NOT EXISTS "localUsers_phoneNumber_idx"
             ON "localUsers" ("phoneNumber") WHERE "phoneNumber" IS NOT NULL
         `);
 
-        await db.execute(sql`
+    await db.execute(sql`
             CREATE TABLE IF NOT EXISTS "otpCodes" (
                 "id"         serial        PRIMARY KEY,
                 "identifier" varchar(320)  NOT NULL,
@@ -101,8 +106,8 @@ export async function ensureMigrated(): Promise<void> {
             )
         `);
 
-        // Ensure core audit table exists (may be missing if only auto-migrate ran)
-        await db.execute(sql`
+    // Ensure core audit table exists (may be missing if only auto-migrate ran)
+    await db.execute(sql`
             CREATE TABLE IF NOT EXISTS "auditLogs" (
                 "id"             serial        PRIMARY KEY,
                 "userId"         integer,
@@ -122,44 +127,47 @@ export async function ensureMigrated(): Promise<void> {
             )
         `);
 
-        // Performance indexes (safe with IF NOT EXISTS)
-        const indexes = [
-            `CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
-            `CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
-            `CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
-            `CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
-            `CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
-            `CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
-            `CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
-            `CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
-            `CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
-            `CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
-            `CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`,
-        ];
+    // Performance indexes (safe with IF NOT EXISTS)
+    const indexes = [
+      `CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
+      `CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
+      `CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
+      `CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
+      `CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
+      `CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
+      `CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
+      `CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
+      `CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
+      `CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
+      `CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`,
+    ];
 
-        for (const idx of indexes) {
-            await db.execute(sql.raw(idx));
-        }
+    for (const idx of indexes) {
+      await db.execute(sql.raw(idx));
+    }
 
-        // Ensure unique constraint for compliance controls seeding
-        await db.execute(sql`
+    // Ensure unique constraint for compliance controls seeding
+    await db.execute(sql`
             CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx"
             ON "complianceControls" ("frameworkId", "controlCode")
         `);
-        await db.execute(sql`
+    await db.execute(sql`
             CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx"
             ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")
         `);
 
-        // Seed compliance reference data into DB (idempotent upserts)
-        await seedComplianceFrameworks(db);
+    // Seed compliance reference data into DB (idempotent upserts)
+    await seedComplianceFrameworks(db);
 
-        migrationApplied = true;
-        if (!ENV.isProduction) {
-            console.info("[Migrate] Schema auto-migration complete.");
-        }
-    } catch (err) {
-        // Don't crash the server if migration fails — log and continue
-        console.warn("[Migrate] Auto-migration failed (may already be applied):", (err as Error).message);
+    migrationApplied = true;
+    if (!ENV.isProduction) {
+      console.info("[Migrate] Schema auto-migration complete.");
     }
+  } catch (err) {
+    // Don't crash the server if migration fails — log and continue
+    console.warn(
+      "[Migrate] Auto-migration failed (may already be applied):",
+      (err as Error).message
+    );
+  }
 }

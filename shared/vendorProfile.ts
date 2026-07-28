@@ -28,18 +28,89 @@ export const vendorIndustryValues = [
 
 export type VendorIndustry = (typeof vendorIndustryValues)[number];
 
-export const vendorIndustryOptions: ReadonlyArray<VendorOption<VendorIndustry>> = [
-  { value: "software-saas", labels: { en: "Software / SaaS", zh: "软件 / SaaS", ar: "البرمجيات / SaaS" } },
-  { value: "cloud-digital-infrastructure", labels: { en: "Cloud / Digital Infrastructure", zh: "云与数字基础设施", ar: "السحابة والبنية الرقمية" } },
-  { value: "financial-services", labels: { en: "Financial Services", zh: "金融服务", ar: "الخدمات المالية" } },
-  { value: "healthcare-life-sciences", labels: { en: "Healthcare / Life Sciences", zh: "医疗与生命科学", ar: "الرعاية الصحية وعلوم الحياة" } },
-  { value: "government-public-sector", labels: { en: "Government / Public Sector", zh: "政府 / 公共部门", ar: "الحكومة والقطاع العام" } },
-  { value: "telecommunications", labels: { en: "Telecommunications", zh: "电信", ar: "الاتصالات" } },
-  { value: "energy-utilities", labels: { en: "Energy / Utilities", zh: "能源 / 公用事业", ar: "الطاقة والمرافق" } },
-  { value: "manufacturing-operational-technology", labels: { en: "Manufacturing / OT", zh: "制造 / OT", ar: "التصنيع / التقنية التشغيلية" } },
-  { value: "retail-ecommerce", labels: { en: "Retail / E-commerce", zh: "零售 / 电商", ar: "التجزئة / التجارة الإلكترونية" } },
-  { value: "logistics-supply-chain", labels: { en: "Logistics / Supply Chain", zh: "物流 / 供应链", ar: "اللوجستيات / سلاسل الإمداد" } },
-  { value: "professional-services", labels: { en: "Professional Services", zh: "专业服务", ar: "الخدمات المهنية" } },
+export const vendorIndustryOptions: ReadonlyArray<
+  VendorOption<VendorIndustry>
+> = [
+  {
+    value: "software-saas",
+    labels: {
+      en: "Software / SaaS",
+      zh: "软件 / SaaS",
+      ar: "البرمجيات / SaaS",
+    },
+  },
+  {
+    value: "cloud-digital-infrastructure",
+    labels: {
+      en: "Cloud / Digital Infrastructure",
+      zh: "云与数字基础设施",
+      ar: "السحابة والبنية الرقمية",
+    },
+  },
+  {
+    value: "financial-services",
+    labels: { en: "Financial Services", zh: "金融服务", ar: "الخدمات المالية" },
+  },
+  {
+    value: "healthcare-life-sciences",
+    labels: {
+      en: "Healthcare / Life Sciences",
+      zh: "医疗与生命科学",
+      ar: "الرعاية الصحية وعلوم الحياة",
+    },
+  },
+  {
+    value: "government-public-sector",
+    labels: {
+      en: "Government / Public Sector",
+      zh: "政府 / 公共部门",
+      ar: "الحكومة والقطاع العام",
+    },
+  },
+  {
+    value: "telecommunications",
+    labels: { en: "Telecommunications", zh: "电信", ar: "الاتصالات" },
+  },
+  {
+    value: "energy-utilities",
+    labels: {
+      en: "Energy / Utilities",
+      zh: "能源 / 公用事业",
+      ar: "الطاقة والمرافق",
+    },
+  },
+  {
+    value: "manufacturing-operational-technology",
+    labels: {
+      en: "Manufacturing / OT",
+      zh: "制造 / OT",
+      ar: "التصنيع / التقنية التشغيلية",
+    },
+  },
+  {
+    value: "retail-ecommerce",
+    labels: {
+      en: "Retail / E-commerce",
+      zh: "零售 / 电商",
+      ar: "التجزئة / التجارة الإلكترونية",
+    },
+  },
+  {
+    value: "logistics-supply-chain",
+    labels: {
+      en: "Logistics / Supply Chain",
+      zh: "物流 / 供应链",
+      ar: "اللوجستيات / سلاسل الإمداد",
+    },
+  },
+  {
+    value: "professional-services",
+    labels: {
+      en: "Professional Services",
+      zh: "专业服务",
+      ar: "الخدمات المهنية",
+    },
+  },
   { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
 ];
 
@@ -59,17 +130,67 @@ export const vendorServiceTypeValues = [
 
 export type VendorServiceType = (typeof vendorServiceTypeValues)[number];
 
-export const vendorServiceTypeOptions: ReadonlyArray<VendorOption<VendorServiceType>> = [
+export const vendorServiceTypeOptions: ReadonlyArray<
+  VendorOption<VendorServiceType>
+> = [
   { value: "saas", labels: { en: "SaaS", zh: "SaaS", ar: "البرمجيات كخدمة" } },
   { value: "paas", labels: { en: "PaaS", zh: "PaaS", ar: "المنصة كخدمة" } },
-  { value: "iaas", labels: { en: "IaaS", zh: "IaaS", ar: "البنية التحتية كخدمة" } },
-  { value: "managed-service-provider", labels: { en: "Managed Service Provider", zh: "托管服务提供商", ar: "مزود خدمات مُدارة" } },
-  { value: "managed-security-service-provider", labels: { en: "Managed Security Service Provider", zh: "托管安全服务提供商", ar: "مزود خدمات أمنية مُدارة" } },
-  { value: "payment-processor", labels: { en: "Payment Processor", zh: "支付处理商", ar: "معالج مدفوعات" } },
-  { value: "telecom-network", labels: { en: "Telecom / Network Provider", zh: "电信 / 网络提供商", ar: "مزود اتصالات / شبكة" } },
-  { value: "colocation-data-center", labels: { en: "Colocation / Data Center", zh: "机房托管 / 数据中心", ar: "استضافة / مركز بيانات" } },
-  { value: "business-process-outsourcing", labels: { en: "Business Process Outsourcing", zh: "业务流程外包", ar: "الاستعانة بمصادر خارجية للعمليات" } },
-  { value: "professional-services", labels: { en: "Professional Services", zh: "专业服务", ar: "الخدمات المهنية" } },
+  {
+    value: "iaas",
+    labels: { en: "IaaS", zh: "IaaS", ar: "البنية التحتية كخدمة" },
+  },
+  {
+    value: "managed-service-provider",
+    labels: {
+      en: "Managed Service Provider",
+      zh: "托管服务提供商",
+      ar: "مزود خدمات مُدارة",
+    },
+  },
+  {
+    value: "managed-security-service-provider",
+    labels: {
+      en: "Managed Security Service Provider",
+      zh: "托管安全服务提供商",
+      ar: "مزود خدمات أمنية مُدارة",
+    },
+  },
+  {
+    value: "payment-processor",
+    labels: { en: "Payment Processor", zh: "支付处理商", ar: "معالج مدفوعات" },
+  },
+  {
+    value: "telecom-network",
+    labels: {
+      en: "Telecom / Network Provider",
+      zh: "电信 / 网络提供商",
+      ar: "مزود اتصالات / شبكة",
+    },
+  },
+  {
+    value: "colocation-data-center",
+    labels: {
+      en: "Colocation / Data Center",
+      zh: "机房托管 / 数据中心",
+      ar: "استضافة / مركز بيانات",
+    },
+  },
+  {
+    value: "business-process-outsourcing",
+    labels: {
+      en: "Business Process Outsourcing",
+      zh: "业务流程外包",
+      ar: "الاستعانة بمصادر خارجية للعمليات",
+    },
+  },
+  {
+    value: "professional-services",
+    labels: {
+      en: "Professional Services",
+      zh: "专业服务",
+      ar: "الخدمات المهنية",
+    },
+  },
   { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
 ];
 
@@ -88,16 +209,46 @@ export const vendorCloudProviderValues = [
 
 export type VendorCloudProvider = (typeof vendorCloudProviderValues)[number];
 
-export const vendorCloudProviderOptions: ReadonlyArray<VendorOption<VendorCloudProvider>> = [
+export const vendorCloudProviderOptions: ReadonlyArray<
+  VendorOption<VendorCloudProvider>
+> = [
   { value: "aws", labels: { en: "AWS", zh: "AWS", ar: "AWS" } },
-  { value: "azure", labels: { en: "Microsoft Azure", zh: "微软 Azure", ar: "مايكروسوفت Azure" } },
-  { value: "gcp", labels: { en: "Google Cloud", zh: "谷歌云", ar: "Google Cloud" } },
-  { value: "oracle-cloud", labels: { en: "Oracle Cloud", zh: "甲骨文云", ar: "Oracle Cloud" } },
-  { value: "alibaba-cloud", labels: { en: "Alibaba Cloud", zh: "阿里云", ar: "Alibaba Cloud" } },
-  { value: "huawei-cloud", labels: { en: "Huawei Cloud", zh: "华为云", ar: "Huawei Cloud" } },
-  { value: "tencent-cloud", labels: { en: "Tencent Cloud", zh: "腾讯云", ar: "Tencent Cloud" } },
-  { value: "stc-cloud", labels: { en: "stc Cloud", zh: "stc 云", ar: "stc Cloud" } },
-  { value: "private-cloud", labels: { en: "Private Cloud / VMware", zh: "私有云 / VMware", ar: "سحابة خاصة / VMware" } },
+  {
+    value: "azure",
+    labels: { en: "Microsoft Azure", zh: "微软 Azure", ar: "مايكروسوفت Azure" },
+  },
+  {
+    value: "gcp",
+    labels: { en: "Google Cloud", zh: "谷歌云", ar: "Google Cloud" },
+  },
+  {
+    value: "oracle-cloud",
+    labels: { en: "Oracle Cloud", zh: "甲骨文云", ar: "Oracle Cloud" },
+  },
+  {
+    value: "alibaba-cloud",
+    labels: { en: "Alibaba Cloud", zh: "阿里云", ar: "Alibaba Cloud" },
+  },
+  {
+    value: "huawei-cloud",
+    labels: { en: "Huawei Cloud", zh: "华为云", ar: "Huawei Cloud" },
+  },
+  {
+    value: "tencent-cloud",
+    labels: { en: "Tencent Cloud", zh: "腾讯云", ar: "Tencent Cloud" },
+  },
+  {
+    value: "stc-cloud",
+    labels: { en: "stc Cloud", zh: "stc 云", ar: "stc Cloud" },
+  },
+  {
+    value: "private-cloud",
+    labels: {
+      en: "Private Cloud / VMware",
+      zh: "私有云 / VMware",
+      ar: "سحابة خاصة / VMware",
+    },
+  },
   { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
 ];
 
@@ -109,13 +260,32 @@ export const vendorHostingEnvironmentValues = [
   "hybrid",
 ] as const;
 
-export type VendorHostingEnvironment = (typeof vendorHostingEnvironmentValues)[number];
+export type VendorHostingEnvironment =
+  (typeof vendorHostingEnvironmentValues)[number];
 
-export const vendorHostingEnvironmentOptions: ReadonlyArray<VendorOption<VendorHostingEnvironment>> = [
-  { value: "on-premises", labels: { en: "On-premises", zh: "本地部署", ar: "داخل المؤسسة" } },
-  { value: "private-cloud", labels: { en: "Private Cloud", zh: "私有云", ar: "سحابة خاصة" } },
-  { value: "single-public-cloud", labels: { en: "Single Public Cloud", zh: "单一公有云", ar: "سحابة عامة واحدة" } },
-  { value: "multi-cloud", labels: { en: "Multi-cloud", zh: "多云", ar: "متعدد السحابات" } },
+export const vendorHostingEnvironmentOptions: ReadonlyArray<
+  VendorOption<VendorHostingEnvironment>
+> = [
+  {
+    value: "on-premises",
+    labels: { en: "On-premises", zh: "本地部署", ar: "داخل المؤسسة" },
+  },
+  {
+    value: "private-cloud",
+    labels: { en: "Private Cloud", zh: "私有云", ar: "سحابة خاصة" },
+  },
+  {
+    value: "single-public-cloud",
+    labels: {
+      en: "Single Public Cloud",
+      zh: "单一公有云",
+      ar: "سحابة عامة واحدة",
+    },
+  },
+  {
+    value: "multi-cloud",
+    labels: { en: "Multi-cloud", zh: "多云", ar: "متعدد السحابات" },
+  },
   { value: "hybrid", labels: { en: "Hybrid", zh: "混合", ar: "هجينة" } },
 ];
 
@@ -135,19 +305,46 @@ export const vendorCountryValues = [
 
 export type VendorCountry = (typeof vendorCountryValues)[number];
 
-export const vendorCountryOptions: ReadonlyArray<VendorOption<VendorCountry>> = [
-  { value: "saudi-arabia", labels: { en: "Saudi Arabia", zh: "沙特阿拉伯", ar: "المملكة العربية السعودية" } },
-  { value: "china", labels: { en: "China", zh: "中国", ar: "الصين" } },
-  { value: "united-arab-emirates", labels: { en: "United Arab Emirates", zh: "阿联酋", ar: "الإمارات العربية المتحدة" } },
-  { value: "bahrain", labels: { en: "Bahrain", zh: "巴林", ar: "البحرين" } },
-  { value: "singapore", labels: { en: "Singapore", zh: "新加坡", ar: "سنغافورة" } },
-  { value: "india", labels: { en: "India", zh: "印度", ar: "الهند" } },
-  { value: "germany", labels: { en: "Germany", zh: "德国", ar: "ألمانيا" } },
-  { value: "netherlands", labels: { en: "Netherlands", zh: "荷兰", ar: "هولندا" } },
-  { value: "united-kingdom", labels: { en: "United Kingdom", zh: "英国", ar: "المملكة المتحدة" } },
-  { value: "united-states", labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" } },
-  { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
-];
+export const vendorCountryOptions: ReadonlyArray<VendorOption<VendorCountry>> =
+  [
+    {
+      value: "saudi-arabia",
+      labels: {
+        en: "Saudi Arabia",
+        zh: "沙特阿拉伯",
+        ar: "المملكة العربية السعودية",
+      },
+    },
+    { value: "china", labels: { en: "China", zh: "中国", ar: "الصين" } },
+    {
+      value: "united-arab-emirates",
+      labels: {
+        en: "United Arab Emirates",
+        zh: "阿联酋",
+        ar: "الإمارات العربية المتحدة",
+      },
+    },
+    { value: "bahrain", labels: { en: "Bahrain", zh: "巴林", ar: "البحرين" } },
+    {
+      value: "singapore",
+      labels: { en: "Singapore", zh: "新加坡", ar: "سنغافورة" },
+    },
+    { value: "india", labels: { en: "India", zh: "印度", ar: "الهند" } },
+    { value: "germany", labels: { en: "Germany", zh: "德国", ar: "ألمانيا" } },
+    {
+      value: "netherlands",
+      labels: { en: "Netherlands", zh: "荷兰", ar: "هولندا" },
+    },
+    {
+      value: "united-kingdom",
+      labels: { en: "United Kingdom", zh: "英国", ar: "المملكة المتحدة" },
+    },
+    {
+      value: "united-states",
+      labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
+    },
+    { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
+  ];
 
 export const vendorJurisdictionValues = [
   "saudi-arabia",
@@ -161,14 +358,42 @@ export const vendorJurisdictionValues = [
 
 export type VendorJurisdiction = (typeof vendorJurisdictionValues)[number];
 
-export const vendorJurisdictionOptions: ReadonlyArray<VendorOption<VendorJurisdiction>> = [
-  { value: "saudi-arabia", labels: { en: "Saudi Arabia", zh: "沙特阿拉伯", ar: "المملكة العربية السعودية" } },
+export const vendorJurisdictionOptions: ReadonlyArray<
+  VendorOption<VendorJurisdiction>
+> = [
+  {
+    value: "saudi-arabia",
+    labels: {
+      en: "Saudi Arabia",
+      zh: "沙特阿拉伯",
+      ar: "المملكة العربية السعودية",
+    },
+  },
   { value: "china", labels: { en: "China", zh: "中国", ar: "الصين" } },
-  { value: "gcc", labels: { en: "GCC", zh: "海合会", ar: "مجلس التعاون الخليجي" } },
-  { value: "eu-eea", labels: { en: "EU / EEA", zh: "欧盟 / 欧洲经济区", ar: "الاتحاد الأوروبي / المنطقة الاقتصادية الأوروبية" } },
-  { value: "united-kingdom", labels: { en: "United Kingdom", zh: "英国", ar: "المملكة المتحدة" } },
-  { value: "united-states", labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" } },
-  { value: "apac", labels: { en: "APAC", zh: "亚太", ar: "آسيا والمحيط الهادئ" } },
+  {
+    value: "gcc",
+    labels: { en: "GCC", zh: "海合会", ar: "مجلس التعاون الخليجي" },
+  },
+  {
+    value: "eu-eea",
+    labels: {
+      en: "EU / EEA",
+      zh: "欧盟 / 欧洲经济区",
+      ar: "الاتحاد الأوروبي / المنطقة الاقتصادية الأوروبية",
+    },
+  },
+  {
+    value: "united-kingdom",
+    labels: { en: "United Kingdom", zh: "英国", ar: "المملكة المتحدة" },
+  },
+  {
+    value: "united-states",
+    labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
+  },
+  {
+    value: "apac",
+    labels: { en: "APAC", zh: "亚太", ar: "آسيا والمحيط الهادئ" },
+  },
 ];
 
 export const vendorComplianceStandardValues = [
@@ -184,19 +409,51 @@ export const vendorComplianceStandardValues = [
   "privacy-impact-assessment-program",
 ] as const;
 
-export type VendorComplianceStandard = (typeof vendorComplianceStandardValues)[number];
+export type VendorComplianceStandard =
+  (typeof vendorComplianceStandardValues)[number];
 
-export const vendorComplianceStandardOptions: ReadonlyArray<VendorOption<VendorComplianceStandard>> = [
-  { value: "iso-27001", labels: { en: "ISO 27001", zh: "ISO 27001", ar: "ISO 27001" } },
-  { value: "iso-27701", labels: { en: "ISO 27701", zh: "ISO 27701", ar: "ISO 27701" } },
-  { value: "soc-2-type-ii", labels: { en: "SOC 2 Type II", zh: "SOC 2 Type II", ar: "SOC 2 Type II" } },
+export const vendorComplianceStandardOptions: ReadonlyArray<
+  VendorOption<VendorComplianceStandard>
+> = [
+  {
+    value: "iso-27001",
+    labels: { en: "ISO 27001", zh: "ISO 27001", ar: "ISO 27001" },
+  },
+  {
+    value: "iso-27701",
+    labels: { en: "ISO 27701", zh: "ISO 27701", ar: "ISO 27701" },
+  },
+  {
+    value: "soc-2-type-ii",
+    labels: { en: "SOC 2 Type II", zh: "SOC 2 Type II", ar: "SOC 2 Type II" },
+  },
   { value: "pci-dss", labels: { en: "PCI DSS", zh: "PCI DSS", ar: "PCI DSS" } },
-  { value: "csa-star", labels: { en: "CSA STAR", zh: "CSA STAR", ar: "CSA STAR" } },
-  { value: "nist-csf-aligned", labels: { en: "NIST CSF aligned", zh: "符合 NIST CSF", ar: "متوافق مع NIST CSF" } },
+  {
+    value: "csa-star",
+    labels: { en: "CSA STAR", zh: "CSA STAR", ar: "CSA STAR" },
+  },
+  {
+    value: "nist-csf-aligned",
+    labels: {
+      en: "NIST CSF aligned",
+      zh: "符合 NIST CSF",
+      ar: "متوافق مع NIST CSF",
+    },
+  },
   { value: "nca-ecc", labels: { en: "NCA ECC", zh: "NCA ECC", ar: "NCA ECC" } },
   { value: "nca-ccc", labels: { en: "NCA CCC", zh: "NCA CCC", ar: "NCA CCC" } },
-  { value: "mlps-2.0", labels: { en: "MLPS 2.0", zh: "MLPS 2.0", ar: "MLPS 2.0" } },
-  { value: "privacy-impact-assessment-program", labels: { en: "Privacy impact assessment program", zh: "隐私影响评估计划", ar: "برنامج تقييم أثر الخصوصية" } },
+  {
+    value: "mlps-2.0",
+    labels: { en: "MLPS 2.0", zh: "MLPS 2.0", ar: "MLPS 2.0" },
+  },
+  {
+    value: "privacy-impact-assessment-program",
+    labels: {
+      en: "Privacy impact assessment program",
+      zh: "隐私影响评估计划",
+      ar: "برنامج تقييم أثر الخصوصية",
+    },
+  },
 ];
 
 export const vendorDataProcessingActivityValues = [
@@ -212,30 +469,110 @@ export const vendorDataProcessingActivityValues = [
   "cross-border-data-transfer",
 ] as const;
 
-export type VendorDataProcessingActivity = (typeof vendorDataProcessingActivityValues)[number];
+export type VendorDataProcessingActivity =
+  (typeof vendorDataProcessingActivityValues)[number];
 
-export const vendorDataProcessingActivityOptions: ReadonlyArray<VendorOption<VendorDataProcessingActivity>> = [
-  { value: "customer-personal-data", labels: { en: "Customer personal data", zh: "客户个人数据", ar: "البيانات الشخصية للعملاء" } },
-  { value: "employee-data", labels: { en: "Employee data", zh: "员工数据", ar: "بيانات الموظفين" } },
-  { value: "financial-payment-data", labels: { en: "Financial / payment data", zh: "金融 / 支付数据", ar: "البيانات المالية / بيانات الدفع" } },
-  { value: "health-biometric-data", labels: { en: "Health / biometric data", zh: "健康 / 生物识别数据", ar: "البيانات الصحية / البيومترية" } },
-  { value: "security-telemetry-logs", labels: { en: "Security telemetry / logs", zh: "安全遥测 / 日志", ar: "قياسات الأمن / السجلات" } },
-  { value: "source-code-intellectual-property", labels: { en: "Source code / intellectual property", zh: "源代码 / 知识产权", ar: "الشفرة المصدرية / الملكية الفكرية" } },
-  { value: "operational-technology-data", labels: { en: "Operational technology data", zh: "运营技术数据", ar: "بيانات التقنية التشغيلية" } },
-  { value: "identity-access-data", labels: { en: "Identity / access data", zh: "身份 / 访问数据", ar: "بيانات الهوية / الوصول" } },
-  { value: "backup-disaster-recovery-data", labels: { en: "Backup / disaster recovery data", zh: "备份 / 灾备数据", ar: "بيانات النسخ الاحتياطي / التعافي من الكوارث" } },
-  { value: "cross-border-data-transfer", labels: { en: "Cross-border data transfer", zh: "跨境数据传输", ar: "نقل البيانات عبر الحدود" } },
+export const vendorDataProcessingActivityOptions: ReadonlyArray<
+  VendorOption<VendorDataProcessingActivity>
+> = [
+  {
+    value: "customer-personal-data",
+    labels: {
+      en: "Customer personal data",
+      zh: "客户个人数据",
+      ar: "البيانات الشخصية للعملاء",
+    },
+  },
+  {
+    value: "employee-data",
+    labels: { en: "Employee data", zh: "员工数据", ar: "بيانات الموظفين" },
+  },
+  {
+    value: "financial-payment-data",
+    labels: {
+      en: "Financial / payment data",
+      zh: "金融 / 支付数据",
+      ar: "البيانات المالية / بيانات الدفع",
+    },
+  },
+  {
+    value: "health-biometric-data",
+    labels: {
+      en: "Health / biometric data",
+      zh: "健康 / 生物识别数据",
+      ar: "البيانات الصحية / البيومترية",
+    },
+  },
+  {
+    value: "security-telemetry-logs",
+    labels: {
+      en: "Security telemetry / logs",
+      zh: "安全遥测 / 日志",
+      ar: "قياسات الأمن / السجلات",
+    },
+  },
+  {
+    value: "source-code-intellectual-property",
+    labels: {
+      en: "Source code / intellectual property",
+      zh: "源代码 / 知识产权",
+      ar: "الشفرة المصدرية / الملكية الفكرية",
+    },
+  },
+  {
+    value: "operational-technology-data",
+    labels: {
+      en: "Operational technology data",
+      zh: "运营技术数据",
+      ar: "بيانات التقنية التشغيلية",
+    },
+  },
+  {
+    value: "identity-access-data",
+    labels: {
+      en: "Identity / access data",
+      zh: "身份 / 访问数据",
+      ar: "بيانات الهوية / الوصول",
+    },
+  },
+  {
+    value: "backup-disaster-recovery-data",
+    labels: {
+      en: "Backup / disaster recovery data",
+      zh: "备份 / 灾备数据",
+      ar: "بيانات النسخ الاحتياطي / التعافي من الكوارث",
+    },
+  },
+  {
+    value: "cross-border-data-transfer",
+    labels: {
+      en: "Cross-border data transfer",
+      zh: "跨境数据传输",
+      ar: "نقل البيانات عبر الحدود",
+    },
+  },
 ];
 
-export const vendorCriticalityLevelValues = ["low", "moderate", "high", "mission-critical"] as const;
+export const vendorCriticalityLevelValues = [
+  "low",
+  "moderate",
+  "high",
+  "mission-critical",
+] as const;
 
-export type VendorCriticalityLevel = (typeof vendorCriticalityLevelValues)[number];
+export type VendorCriticalityLevel =
+  (typeof vendorCriticalityLevelValues)[number];
 
-export const vendorCriticalityLevelOptions: ReadonlyArray<VendorOption<VendorCriticalityLevel>> = [
+export const vendorCriticalityLevelOptions: ReadonlyArray<
+  VendorOption<VendorCriticalityLevel>
+> = [
   { value: "low", labels: { en: "Low", zh: "低", ar: "منخفض" } },
   { value: "moderate", labels: { en: "Moderate", zh: "中", ar: "متوسط" } },
   { value: "high", labels: { en: "High", zh: "高", ar: "مرتفع" } },
-  { value: "mission-critical", labels: { en: "Mission critical", zh: "关键核心", ar: "حرج للغاية" } },
+  {
+    value: "mission-critical",
+    labels: { en: "Mission critical", zh: "关键核心", ar: "حرج للغاية" },
+  },
 ];
 
 export const vendorRiskTierValues = [
@@ -247,18 +584,48 @@ export const vendorRiskTierValues = [
 
 export type VendorRiskTier = (typeof vendorRiskTierValues)[number];
 
-export const vendorRiskTierOptions: ReadonlyArray<VendorOption<VendorRiskTier>> = [
-  { value: "tier-1-critical", labels: { en: "Tier 1 - Critical", zh: "一级 - 关键", ar: "المستوى 1 - حرج" } },
-  { value: "tier-2-high", labels: { en: "Tier 2 - High", zh: "二级 - 高", ar: "المستوى 2 - مرتفع" } },
-  { value: "tier-3-moderate", labels: { en: "Tier 3 - Moderate", zh: "三级 - 中", ar: "المستوى 3 - متوسط" } },
-  { value: "tier-4-low", labels: { en: "Tier 4 - Low", zh: "四级 - 低", ar: "المستوى 4 - منخفض" } },
+export const vendorRiskTierOptions: ReadonlyArray<
+  VendorOption<VendorRiskTier>
+> = [
+  {
+    value: "tier-1-critical",
+    labels: {
+      en: "Tier 1 - Critical",
+      zh: "一级 - 关键",
+      ar: "المستوى 1 - حرج",
+    },
+  },
+  {
+    value: "tier-2-high",
+    labels: { en: "Tier 2 - High", zh: "二级 - 高", ar: "المستوى 2 - مرتفع" },
+  },
+  {
+    value: "tier-3-moderate",
+    labels: {
+      en: "Tier 3 - Moderate",
+      zh: "三级 - 中",
+      ar: "المستوى 3 - متوسط",
+    },
+  },
+  {
+    value: "tier-4-low",
+    labels: { en: "Tier 4 - Low", zh: "四级 - 低", ar: "المستوى 4 - منخفض" },
+  },
 ];
 
-export const vendorDependencyLevelValues = ["none", "limited", "material", "extensive"] as const;
+export const vendorDependencyLevelValues = [
+  "none",
+  "limited",
+  "material",
+  "extensive",
+] as const;
 
-export type VendorDependencyLevel = (typeof vendorDependencyLevelValues)[number];
+export type VendorDependencyLevel =
+  (typeof vendorDependencyLevelValues)[number];
 
-export const vendorDependencyLevelOptions: ReadonlyArray<VendorOption<VendorDependencyLevel>> = [
+export const vendorDependencyLevelOptions: ReadonlyArray<
+  VendorOption<VendorDependencyLevel>
+> = [
   { value: "none", labels: { en: "None", zh: "无", ar: "لا يوجد" } },
   { value: "limited", labels: { en: "Limited", zh: "有限", ar: "محدود" } },
   { value: "material", labels: { en: "Material", zh: "重要", ar: "جوهري" } },
@@ -529,7 +896,9 @@ export function getVendorOptionLabel<T extends string>(
   return humanizeVendorValue(String(value));
 }
 
-export function parseVendorMultiValue(value: string | null | undefined): string[] {
+export function parseVendorMultiValue(
+  value: string | null | undefined
+): string[] {
   if (!value) {
     return [];
   }
@@ -545,7 +914,9 @@ export function parseVendorMultiValue(value: string | null | undefined): string[
 }
 
 export function serializeVendorMultiValue(values: readonly string[]): string {
-  return Array.from(new Set(values.map(value => value.trim()).filter(Boolean))).join(";");
+  return Array.from(
+    new Set(values.map(value => value.trim()).filter(Boolean))
+  ).join(";");
 }
 
 function humanizeVendorValue(value: string): string {

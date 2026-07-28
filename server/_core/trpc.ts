@@ -1,4 +1,11 @@
-import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG, NOT_PLATFORM_ADMIN_ERR_MSG, NOT_SUPER_ADMIN_ERR_MSG, NOT_COMPANY_ADMIN_ERR_MSG, hasMinRole } from '../../shared/const';
+import {
+  NOT_ADMIN_ERR_MSG,
+  UNAUTHED_ERR_MSG,
+  NOT_PLATFORM_ADMIN_ERR_MSG,
+  NOT_SUPER_ADMIN_ERR_MSG,
+  NOT_COMPANY_ADMIN_ERR_MSG,
+  hasMinRole,
+} from "../../shared/const";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
@@ -63,7 +70,10 @@ const requireOrgAdmin = t.middleware(async opts => {
     });
   }
 
-  if (!ctx.organizationRole || !["owner", "admin"].includes(ctx.organizationRole)) {
+  if (
+    !ctx.organizationRole ||
+    !["owner", "admin"].includes(ctx.organizationRole)
+  ) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Organization admin access required.",
@@ -98,7 +108,7 @@ export const adminProcedure = t.procedure.use(
         user: ctx.user,
       },
     });
-  }),
+  })
 );
 
 /** orgProcedure + trial/access enforcement: throws FORBIDDEN when trial has expired */
@@ -114,7 +124,11 @@ const requireActiveAccess = t.middleware(async opts => {
     const db = await getDb();
     if (db) {
       const [org] = await db
-        .select({ plan: organizations.plan, trialEndsAt: organizations.trialEndsAt, isActive: organizations.isActive })
+        .select({
+          plan: organizations.plan,
+          trialEndsAt: organizations.trialEndsAt,
+          isActive: organizations.isActive,
+        })
         .from(organizations)
         .where(eq(organizations.id, ctx.organizationId));
 
@@ -147,10 +161,13 @@ export const companyAdminProcedure = t.procedure.use(
       throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
     }
     if (!hasMinRole(ctx.user.role, "company_admin")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: NOT_COMPANY_ADMIN_ERR_MSG });
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: NOT_COMPANY_ADMIN_ERR_MSG,
+      });
     }
     return next({ ctx: { ...ctx, user: ctx.user } });
-  }),
+  })
 );
 
 /**
@@ -165,10 +182,13 @@ export const platformAdminProcedure = t.procedure.use(
       throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
     }
     if (!hasMinRole(ctx.user.role, "platform_admin")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: NOT_PLATFORM_ADMIN_ERR_MSG });
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: NOT_PLATFORM_ADMIN_ERR_MSG,
+      });
     }
     return next({ ctx: { ...ctx, user: ctx.user } });
-  }),
+  })
 );
 
 /**
@@ -182,10 +202,13 @@ export const yallaHackProcedure = t.procedure.use(
       throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
     }
     if (!hasMinRole(ctx.user.role, "yalla_hack_employee")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: NOT_PLATFORM_ADMIN_ERR_MSG });
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: NOT_PLATFORM_ADMIN_ERR_MSG,
+      });
     }
     return next({ ctx: { ...ctx, user: ctx.user } });
-  }),
+  })
 );
 
 /**
@@ -199,10 +222,13 @@ export const superAdminProcedure = t.procedure.use(
       throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
     }
     if (!hasMinRole(ctx.user.role, "super_admin")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: NOT_SUPER_ADMIN_ERR_MSG });
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: NOT_SUPER_ADMIN_ERR_MSG,
+      });
     }
     return next({ ctx: { ...ctx, user: ctx.user } });
-  }),
+  })
 );
 
 // ─── Organisation Role–Scoped Procedures ─────────────────────────────────────
@@ -214,7 +240,10 @@ export const superAdminProcedure = t.procedure.use(
 const requireComplianceOfficer = t.middleware(async opts => {
   const { ctx, next } = opts;
   const allowed = ["owner", "admin", "compliance_officer"] as const;
-  if (!ctx.organizationRole || !(allowed as readonly string[]).includes(ctx.organizationRole)) {
+  if (
+    !ctx.organizationRole ||
+    !(allowed as readonly string[]).includes(ctx.organizationRole)
+  ) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Compliance officer access required (10006).",
@@ -231,7 +260,9 @@ const requireComplianceOfficer = t.middleware(async opts => {
 });
 
 /** orgProcedure restricted to compliance officers, admins, and owners */
-export const complianceOfficerProcedure = orgProcedure.use(requireComplianceOfficer);
+export const complianceOfficerProcedure = orgProcedure.use(
+  requireComplianceOfficer
+);
 
 /**
  * Requires the caller to have completed the onboarding wizard
@@ -252,9 +283,11 @@ const requireOnboardingComplete = t.middleware(async opts => {
 
   const db = await getDb();
   if (db) {
-    const localUserId = (ctx.user as { localUserId?: number }).localUserId ?? null;
+    const localUserId =
+      (ctx.user as { localUserId?: number }).localUserId ?? null;
     const conditions = [eq(userOnboarding.userId, ctx.user.id)];
-    if (localUserId) conditions.push(eq(userOnboarding.localUserId, localUserId));
+    if (localUserId)
+      conditions.push(eq(userOnboarding.localUserId, localUserId));
 
     const [row] = await db
       .select({ stage: userOnboarding.stage })
@@ -276,4 +309,6 @@ const requireOnboardingComplete = t.middleware(async opts => {
 });
 
 /** protectedProcedure that additionally requires completed onboarding */
-export const onboardedProcedure = protectedProcedure.use(requireOnboardingComplete);
+export const onboardedProcedure = protectedProcedure.use(
+  requireOnboardingComplete
+);

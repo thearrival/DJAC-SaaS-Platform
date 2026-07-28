@@ -9,11 +9,10 @@ import { activeOrgProcedure, router } from "./_core/trpc";
 import { requireModulePermission } from "./_core/permission-guard";
 import { getOrgScorecard } from "./scorecard-store";
 
-
 // ─── Router ─────────────────────────────────────────────────────────────────
 export const scorecardRouter = router({
-    orgScorecard: activeOrgProcedure.query(async ({ ctx }) => {
-        await requireModulePermission(ctx, "compliance_tracker", "canView");
-        return getOrgScorecard(ctx.organizationId ?? -1, ctx.user.id);
-    }),
+  orgScorecard: activeOrgProcedure.query(async ({ ctx }) => {
+    await requireModulePermission(ctx, "compliance_tracker", "canView");
+    return getOrgScorecard(ctx.organizationId ?? -1, ctx.user.id);
+  }),
 });

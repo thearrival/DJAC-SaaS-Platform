@@ -23,10 +23,10 @@
 
 import { and, eq, lte, gte, inArray } from "drizzle-orm";
 import {
-    complianceDeadlines,
-    organizations,
-    organizationMembers,
-    users,
+  complianceDeadlines,
+  organizations,
+  organizationMembers,
+  users,
 } from "../drizzle/schema";
 import { getDb } from "./db";
 import { sendEmail } from "./email";
@@ -41,38 +41,45 @@ const sentSet = new Set<string>();
 type Milestone = "30d" | "7d" | "1d";
 
 function daysUntil(deadlineDate: Date): number {
-    return (deadlineDate.getTime() - Date.now()) / DAY_MS;
+  return (deadlineDate.getTime() - Date.now()) / DAY_MS;
 }
 
 function getMilestone(daysLeft: number): Milestone | null {
-    if (daysLeft < 0) return null; // already past
-    if (daysLeft <= 1.5) return "1d";
-    if (daysLeft <= 7.5) return "7d";
-    if (daysLeft <= 30.5) return "30d";
-    return null;
+  if (daysLeft < 0) return null; // already past
+  if (daysLeft <= 1.5) return "1d";
+  if (daysLeft <= 7.5) return "7d";
+  if (daysLeft <= 30.5) return "30d";
+  return null;
 }
 
 function buildSubject(milestone: Milestone, deadlineTitle: string): string {
-    if (milestone === "1d") return `DJAC: URGENT — "${deadlineTitle}" deadline is tomorrow`;
-    if (milestone === "7d") return `DJAC: "${deadlineTitle}" deadline in 7 days`;
-    return `DJAC: "${deadlineTitle}" deadline in 30 days`;
+  if (milestone === "1d")
+    return `DJAC: URGENT — "${deadlineTitle}" deadline is tomorrow`;
+  if (milestone === "7d") return `DJAC: "${deadlineTitle}" deadline in 7 days`;
+  return `DJAC: "${deadlineTitle}" deadline in 30 days`;
 }
 
 function buildEmailHtml(
-    recipientName: string,
-    milestone: Milestone,
-    deadline: { title: string; frameworkCode: string; jurisdiction: string; description: string | null },
-    calendarUrl: string,
+  recipientName: string,
+  milestone: Milestone,
+  deadline: {
+    title: string;
+    frameworkCode: string;
+    jurisdiction: string;
+    description: string | null;
+  },
+  calendarUrl: string
 ): string {
-    const dayLabel = milestone === "1d" ? "tomorrow" : milestone === "7d" ? "7 days" : "30 days";
-    const urgencyStyle =
-        milestone === "1d"
-            ? "background:#7f1d1d;border-left:4px solid #ef4444;"
-            : milestone === "7d"
-                ? "background:#78350f;border-left:4px solid #f59e0b;"
-                : "background:#1e3a5f;border-left:4px solid #3b82f6;";
+  const dayLabel =
+    milestone === "1d" ? "tomorrow" : milestone === "7d" ? "7 days" : "30 days";
+  const urgencyStyle =
+    milestone === "1d"
+      ? "background:#7f1d1d;border-left:4px solid #ef4444;"
+      : milestone === "7d"
+        ? "background:#78350f;border-left:4px solid #f59e0b;"
+        : "background:#1e3a5f;border-left:4px solid #3b82f6;";
 
-    return `
+  return `
 <p>Dear ${recipientName},</p>
 <div style="${urgencyStyle}padding:12px 16px;border-radius:6px;margin:16px 0;">
   <strong style="font-size:15px;">${deadline.title}</strong><br/>
@@ -86,149 +93,173 @@ ${deadline.description ? `<p style="font-size:13px;opacity:0.8;">${deadline.desc
 }
 
 function buildEmailText(
-    recipientName: string,
-    milestone: Milestone,
-    deadline: { title: string; frameworkCode: string; jurisdiction: string },
-    calendarUrl: string,
+  recipientName: string,
+  milestone: Milestone,
+  deadline: { title: string; frameworkCode: string; jurisdiction: string },
+  calendarUrl: string
 ): string {
-    const dayLabel = milestone === "1d" ? "tomorrow" : milestone === "7d" ? "7 days" : "30 days";
-    return `Dear ${recipientName},\n\nCompliance deadline due in ${dayLabel}:\n${deadline.title} (${deadline.frameworkCode} · ${deadline.jurisdiction})\n\nView calendar: ${calendarUrl}\n\n— The DJAC / Yalla Hack Team`;
+  const dayLabel =
+    milestone === "1d" ? "tomorrow" : milestone === "7d" ? "7 days" : "30 days";
+  return `Dear ${recipientName},\n\nCompliance deadline due in ${dayLabel}:\n${deadline.title} (${deadline.frameworkCode} · ${deadline.jurisdiction})\n\nView calendar: ${calendarUrl}\n\n— The DJAC / Yalla Hack Team`;
 }
 
 async function runAlertCheck(): Promise<void> {
-    const db = await getDb();
-    if (!db) return;
+  const db = await getDb();
+  if (!db) return;
 
-    const now = new Date();
-    const horizon = new Date(now.getTime() + 31 * DAY_MS);
+  const now = new Date();
+  const horizon = new Date(now.getTime() + 31 * DAY_MS);
 
-    // Fetch upcoming deadlines within the next 31 days
-    const upcoming = await db
-        .select()
-        .from(complianceDeadlines)
-        .where(
-            and(
-                eq(complianceDeadlines.status, "upcoming"),
-                gte(complianceDeadlines.deadlineDate, now),
-                lte(complianceDeadlines.deadlineDate, horizon),
-            ),
-        );
+  // Fetch upcoming deadlines within the next 31 days
+  const upcoming = await db
+    .select()
+    .from(complianceDeadlines)
+    .where(
+      and(
+        eq(complianceDeadlines.status, "upcoming"),
+        gte(complianceDeadlines.deadlineDate, now),
+        lte(complianceDeadlines.deadlineDate, horizon)
+      )
+    );
 
-    if (upcoming.length === 0) return;
+  if (upcoming.length === 0) return;
 
-    const calendarUrl = `${ENV.appUrl}/compliance-calendar`;
-    let sent = 0;
+  const calendarUrl = `${ENV.appUrl}/compliance-calendar`;
+  let sent = 0;
 
-    // Separate global vs org-specific
-    const globalDeadlines = upcoming.filter((d) => d.organizationId == null);
-    const orgDeadlines = upcoming.filter((d) => d.organizationId != null);
+  // Separate global vs org-specific
+  const globalDeadlines = upcoming.filter(d => d.organizationId == null);
+  const orgDeadlines = upcoming.filter(d => d.organizationId != null);
 
-    // ── Global deadlines → email all org billing contacts ──────────────────
-    if (globalDeadlines.length > 0) {
-        const activeOrgs = await db
-            .select({ id: organizations.id, name: organizations.name, billingEmail: organizations.billingEmail })
-            .from(organizations)
-            .where(inArray(organizations.plan, ["free_trial", "professional", "enterprise", "starter"]));
+  // ── Global deadlines → email all org billing contacts ──────────────────
+  if (globalDeadlines.length > 0) {
+    const activeOrgs = await db
+      .select({
+        id: organizations.id,
+        name: organizations.name,
+        billingEmail: organizations.billingEmail,
+      })
+      .from(organizations)
+      .where(
+        inArray(organizations.plan, [
+          "free_trial",
+          "professional",
+          "enterprise",
+          "starter",
+        ])
+      );
 
-        for (const deadline of globalDeadlines) {
-            const daysLeft = daysUntil(deadline.deadlineDate);
-            const milestone = getMilestone(daysLeft);
-            if (!milestone) continue;
+    for (const deadline of globalDeadlines) {
+      const daysLeft = daysUntil(deadline.deadlineDate);
+      const milestone = getMilestone(daysLeft);
+      if (!milestone) continue;
 
-            for (const org of activeOrgs) {
-                if (!org.billingEmail) continue;
-                const dedupKey = `${deadline.id}:${org.id}:${milestone}`;
-                if (sentSet.has(dedupKey)) continue;
-
-                await sendEmail({
-                    to: org.billingEmail,
-                    subject: buildSubject(milestone, deadline.title),
-                    html: buildEmailHtml(org.name, milestone, deadline, calendarUrl),
-                    text: buildEmailText(org.name, milestone, deadline, calendarUrl),
-                });
-
-                sentSet.add(dedupKey);
-                sent++;
-            }
-        }
-    }
-
-    // ── Org-specific deadlines → email owner/admin/compliance_officer members ─
-    for (const deadline of orgDeadlines) {
-        const daysLeft = daysUntil(deadline.deadlineDate);
-        const milestone = getMilestone(daysLeft);
-        if (!milestone) continue;
-
-        const dedupKey = `${deadline.id}:${milestone}`;
+      for (const org of activeOrgs) {
+        if (!org.billingEmail) continue;
+        const dedupKey = `${deadline.id}:${org.id}:${milestone}`;
         if (sentSet.has(dedupKey)) continue;
 
-        // Join org members to users to get email addresses
-        const members = await db
-            .select({ email: users.email, name: users.name })
-            .from(organizationMembers)
-            .innerJoin(users, eq(organizationMembers.userId, users.id))
-            .where(
-                and(
-                    eq(organizationMembers.organizationId, deadline.organizationId!),
-                    eq(organizationMembers.status, "active"),
-                    inArray(organizationMembers.role, ["owner", "admin", "compliance_officer"]),
-                ),
-            );
-
-        // Also check inviteEmail for invited but active compliance officers
-        const invitedEmails = await db
-            .select({ inviteEmail: organizationMembers.inviteEmail })
-            .from(organizationMembers)
-            .where(
-                and(
-                    eq(organizationMembers.organizationId, deadline.organizationId!),
-                    eq(organizationMembers.status, "invited"),
-                    inArray(organizationMembers.role, ["owner", "admin", "compliance_officer"]),
-                ),
-            );
-
-        const allEmails = [
-            ...members.filter((m) => m.email).map((m) => ({ email: m.email!, name: m.name ?? "Team" })),
-            ...invitedEmails.filter((m) => m.inviteEmail).map((m) => ({ email: m.inviteEmail!, name: "Team" })),
-        ];
-
-        for (const recipient of allEmails) {
-            await sendEmail({
-                to: recipient.email,
-                subject: buildSubject(milestone, deadline.title),
-                html: buildEmailHtml(recipient.name, milestone, deadline, calendarUrl),
-                text: buildEmailText(recipient.name, milestone, deadline, calendarUrl),
-            });
-            sent++;
-        }
+        await sendEmail({
+          to: org.billingEmail,
+          subject: buildSubject(milestone, deadline.title),
+          html: buildEmailHtml(org.name, milestone, deadline, calendarUrl),
+          text: buildEmailText(org.name, milestone, deadline, calendarUrl),
+        });
 
         sentSet.add(dedupKey);
+        sent++;
+      }
+    }
+  }
+
+  // ── Org-specific deadlines → email owner/admin/compliance_officer members ─
+  for (const deadline of orgDeadlines) {
+    const daysLeft = daysUntil(deadline.deadlineDate);
+    const milestone = getMilestone(daysLeft);
+    if (!milestone) continue;
+
+    const dedupKey = `${deadline.id}:${milestone}`;
+    if (sentSet.has(dedupKey)) continue;
+
+    // Join org members to users to get email addresses
+    const members = await db
+      .select({ email: users.email, name: users.name })
+      .from(organizationMembers)
+      .innerJoin(users, eq(organizationMembers.userId, users.id))
+      .where(
+        and(
+          eq(organizationMembers.organizationId, deadline.organizationId!),
+          eq(organizationMembers.status, "active"),
+          inArray(organizationMembers.role, [
+            "owner",
+            "admin",
+            "compliance_officer",
+          ])
+        )
+      );
+
+    // Also check inviteEmail for invited but active compliance officers
+    const invitedEmails = await db
+      .select({ inviteEmail: organizationMembers.inviteEmail })
+      .from(organizationMembers)
+      .where(
+        and(
+          eq(organizationMembers.organizationId, deadline.organizationId!),
+          eq(organizationMembers.status, "invited"),
+          inArray(organizationMembers.role, [
+            "owner",
+            "admin",
+            "compliance_officer",
+          ])
+        )
+      );
+
+    const allEmails = [
+      ...members
+        .filter(m => m.email)
+        .map(m => ({ email: m.email!, name: m.name ?? "Team" })),
+      ...invitedEmails
+        .filter(m => m.inviteEmail)
+        .map(m => ({ email: m.inviteEmail!, name: "Team" })),
+    ];
+
+    for (const recipient of allEmails) {
+      await sendEmail({
+        to: recipient.email,
+        subject: buildSubject(milestone, deadline.title),
+        html: buildEmailHtml(recipient.name, milestone, deadline, calendarUrl),
+        text: buildEmailText(recipient.name, milestone, deadline, calendarUrl),
+      });
+      sent++;
     }
 
-    if (sent > 0) {
-        console.info(`[DeadlineAlert] Sent ${sent} alert email(s).`);
-    }
+    sentSet.add(dedupKey);
+  }
+
+  if (sent > 0) {
+    console.info(`[DeadlineAlert] Sent ${sent} alert email(s).`);
+  }
 }
 
 export function startDeadlineAlertScheduler(): () => void {
-    let running = false;
+  let running = false;
 
-    const run = async () => {
-        if (running) return;
-        running = true;
-        try {
-            await runAlertCheck();
-        } catch (err) {
-            console.warn("[DeadlineAlert] Scheduler run failed:", err);
-        } finally {
-            running = false;
-        }
-    };
+  const run = async () => {
+    if (running) return;
+    running = true;
+    try {
+      await runAlertCheck();
+    } catch (err) {
+      console.warn("[DeadlineAlert] Scheduler run failed:", err);
+    } finally {
+      running = false;
+    }
+  };
 
-    void run(); // Run immediately on startup
-    const timer = setInterval(() => void run(), INTERVAL_MS);
+  void run(); // Run immediately on startup
+  const timer = setInterval(() => void run(), INTERVAL_MS);
 
-    console.info("[DeadlineAlert] Scheduler started. Interval: 2h.");
+  console.info("[DeadlineAlert] Scheduler started. Interval: 2h.");
 
-    return () => clearInterval(timer);
+  return () => clearInterval(timer);
 }

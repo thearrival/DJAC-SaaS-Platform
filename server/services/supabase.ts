@@ -47,7 +47,11 @@ export async function verifySupabaseSession(token: string) {
   return data.user;
 }
 
-export async function createSupabaseUser(email: string, password: string, metadata?: Record<string, unknown>) {
+export async function createSupabaseUser(
+  email: string,
+  password: string,
+  metadata?: Record<string, unknown>
+) {
   const admin = getSupabaseAdmin();
   if (!admin) throw new Error("Supabase admin client not configured");
 
@@ -80,7 +84,7 @@ export async function uploadFile(
   bucket: string,
   path: string,
   file: Blob | ArrayBuffer | Uint8Array,
-  contentType?: string,
+  contentType?: string
 ) {
   const storage = getStorageBucket(bucket);
   if (!storage) throw new Error("Supabase storage not configured");

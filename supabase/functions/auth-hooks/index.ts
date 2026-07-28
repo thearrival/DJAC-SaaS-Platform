@@ -23,7 +23,7 @@ serve(async (req: Request) => {
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
     if (action === "user.created" || action === "user.updated") {
@@ -37,7 +37,7 @@ serve(async (req: Request) => {
           role: "user",
           status: "active",
         },
-        { onConflict: "openId", ignoreDuplicates: false },
+        { onConflict: "openId", ignoreDuplicates: false }
       );
 
       if (error) {

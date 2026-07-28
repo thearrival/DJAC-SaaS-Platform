@@ -17,42 +17,59 @@ const JURISDICTION_VALUES = ["China", "Saudi Arabia", "Both", "Other"] as const;
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
 const updateOrgSchema = z.object({
-    name: z.string().trim().min(2, "Organization name must be at least 2 characters").max(255).optional(),
-    billingEmail: z.string().trim().email().max(320).optional(),
-    industry: z.string().trim().max(120).optional(),
-    primaryJurisdiction: z.enum(JURISDICTION_VALUES).optional(),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Organization name must be at least 2 characters")
+    .max(255)
+    .optional(),
+  billingEmail: z.string().trim().email().max(320).optional(),
+  industry: z.string().trim().max(120).optional(),
+  primaryJurisdiction: z.enum(JURISDICTION_VALUES).optional(),
 });
 
 // ─── Router ──────────────────────────────────────────────────────────────────
 
 export const orgSettingsRouter = router({
+  /**
+   * Returns the current organization's full profile.
+   * Available to all org members (read-only for analyst / compliance_officer).
+   */
+  get: orgProcedure.query(async ({ ctx }) => {
+    await requireModulePermission(ctx, "org_settings", "canView");
+    const org = await getOrgSettings(
+      ctx.organizationId as number,
+      ctx.organizationRole ?? "analyst"
+    );
+    if (!org)
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Organization not found",
+      });
+    return org;
+  }),
 
-    /**
-     * Returns the current organization's full profile.
-     * Available to all org members (read-only for analyst / compliance_officer).
-     */
-    get: orgProcedure.query(async ({ ctx }) => {
-        await requireModulePermission(ctx, "org_settings", "canView");
-        const org = await getOrgSettings(ctx.organizationId as number, ctx.organizationRole ?? "analyst");
-        if (!org) throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
-        return org;
+  /**
+   * Update editable fields.  Owner and admin only.
+   * Slug and plan are intentionally excluded — those are system-managed.
+   */
+  update: orgAdminProcedure
+    .input(updateOrgSchema)
+    .mutation(async ({ ctx, input }) => {
+      await requireModulePermission(ctx, "org_settings", "canEdit");
+      if (Object.keys(input).length === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "No fields to update",
+        });
+      }
+      if (ctx.organizationId < 0) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cannot update dev virtual organization",
+        });
+      }
+      await updateOrgSettings(ctx.organizationId as number, input);
+      return { success: true as const };
     }),
-
-    /**
-     * Update editable fields.  Owner and admin only.
-     * Slug and plan are intentionally excluded — those are system-managed.
-     */
-    update: orgAdminProcedure
-        .input(updateOrgSchema)
-        .mutation(async ({ ctx, input }) => {
-            await requireModulePermission(ctx, "org_settings", "canEdit");
-            if (Object.keys(input).length === 0) {
-                throw new TRPCError({ code: "BAD_REQUEST", message: "No fields to update" });
-            }
-            if (ctx.organizationId < 0) {
-                throw new TRPCError({ code: "FORBIDDEN", message: "Cannot update dev virtual organization" });
-            }
-            await updateOrgSettings(ctx.organizationId as number, input);
-            return { success: true as const };
-        }),
 });

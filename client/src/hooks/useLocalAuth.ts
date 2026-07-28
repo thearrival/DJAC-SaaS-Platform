@@ -11,32 +11,32 @@ import { trpc } from "@/lib/trpc";
  * - `logout`:      clears the local session cookie and redirects to /login
  */
 export function useLocalAuth() {
-    const [, navigate] = useLocation();
+  const [, navigate] = useLocation();
 
-    const meQuery = trpc.localAuth.me.useQuery(undefined, {
-        retry: false,
-        staleTime: 60_000,
-        refetchOnWindowFocus: false,
-    });
+  const meQuery = trpc.localAuth.me.useQuery(undefined, {
+    retry: false,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
 
-    const utils = trpc.useUtils();
+  const utils = trpc.useUtils();
 
-    const logoutMut = trpc.localAuth.logout.useMutation({
-        onSuccess: () => {
-            utils.localAuth.me.invalidate();
-            navigate("/login");
-        },
-        onError: () => {
-            // Force client-side logout even if server request fails
-            utils.localAuth.me.invalidate();
-            navigate("/login");
-        },
-    });
+  const logoutMut = trpc.localAuth.logout.useMutation({
+    onSuccess: () => {
+      utils.localAuth.me.invalidate();
+      navigate("/login");
+    },
+    onError: () => {
+      // Force client-side logout even if server request fails
+      utils.localAuth.me.invalidate();
+      navigate("/login");
+    },
+  });
 
-    return {
-        localUser: meQuery.data ?? null,
-        isLocalAuth: !!meQuery.data,
-        isLoading: meQuery.isLoading,
-        logout: () => logoutMut.mutate(),
-    };
+  return {
+    localUser: meQuery.data ?? null,
+    isLocalAuth: !!meQuery.data,
+    isLoading: meQuery.isLoading,
+    logout: () => logoutMut.mutate(),
+  };
 }

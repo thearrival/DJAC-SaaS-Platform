@@ -7,7 +7,13 @@ const NotificationInput = z.object({
   userId: z.number(),
   title: z.string().min(1).max(255),
   content: z.string().optional(),
-  category: z.enum(["registration", "consultation", "assessment", "support", "system"]),
+  category: z.enum([
+    "registration",
+    "consultation",
+    "assessment",
+    "support",
+    "system",
+  ]),
   entityType: z.string().optional(),
   entityId: z.number().optional(),
   sendEmail: z.boolean().default(false),
@@ -35,11 +41,19 @@ serve(async (req: Request) => {
       });
     }
 
-    const { userId: _userId, title, content, category, entityType, entityId, sendEmail: _sendEmail } = parsed.data;
+    const {
+      userId: _userId,
+      title,
+      content,
+      category,
+      entityType,
+      entityId,
+      sendEmail: _sendEmail,
+    } = parsed.data;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
     const { data, error } = await supabase

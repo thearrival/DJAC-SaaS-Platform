@@ -8,7 +8,12 @@ const _isProduction = process.env.NODE_ENV === "production";
 const _isDevelopment = process.env.NODE_ENV === "development";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function intEnv(raw: string | undefined, fallback: number, min: number, max: number): number {
+function intEnv(
+  raw: string | undefined,
+  fallback: number,
+  min: number,
+  max: number
+): number {
   if (!raw) return fallback;
   const n = Number.parseInt(raw, 10);
   if (Number.isNaN(n)) return fallback;
@@ -32,8 +37,15 @@ export const parsedEnv = {
   VITE_APP_ID: process.env.VITE_APP_ID ?? "",
   JWT_SECRET:
     process.env.JWT_SECRET ??
-    (!_isProduction ? "djac-dev-local-only-not-for-production-use-set-jwt-secret" : ""),
-  DATABASE_URL: process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_PRISMA_URL || "",
+    (!_isProduction
+      ? "djac-dev-local-only-not-for-production-use-set-jwt-secret"
+      : ""),
+  DATABASE_URL:
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.POSTGRES_PRISMA_URL ||
+    "",
   OAUTH_SERVER_URL: process.env.OAUTH_SERVER_URL ?? "",
   OWNER_OPEN_ID: process.env.OWNER_OPEN_ID ?? "",
   APP_URL: (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""),
@@ -59,8 +71,18 @@ export const parsedEnv = {
   REDIS_URL: process.env.REDIS_URL ?? "",
   AGENT_SWARM_BASE_URL: process.env.AGENT_SWARM_BASE_URL ?? "",
   AI_WEBSOCKET_PATH: process.env.AI_WEBSOCKET_PATH ?? "/ws/ai-jobs",
-  AI_VALIDATOR_MAX_RETRIES: intEnv(process.env.AI_VALIDATOR_MAX_RETRIES, 1, 0, 5),
-  AI_JOB_TIMEOUT_MS: intEnv(process.env.AI_JOB_TIMEOUT_MS, 45_000, 1_000, 300_000),
+  AI_VALIDATOR_MAX_RETRIES: intEnv(
+    process.env.AI_VALIDATOR_MAX_RETRIES,
+    1,
+    0,
+    5
+  ),
+  AI_JOB_TIMEOUT_MS: intEnv(
+    process.env.AI_JOB_TIMEOUT_MS,
+    45_000,
+    1_000,
+    300_000
+  ),
   AI_RAG_TOP_K: intEnv(process.env.AI_RAG_TOP_K, 12, 1, 100),
 
   // ── Stripe / Billing ──────────────────────────────────────────────────────
@@ -77,29 +99,39 @@ export const parsedEnv = {
 
   // ── Reporting ─────────────────────────────────────────────────────────────
   REPORT_TEMPLATE_NAME:
-    strEnv(process.env.REPORT_TEMPLATE_NAME, "Yalla Hack Official Report Template") ||
-    "Yalla Hack Official Report Template",
+    strEnv(
+      process.env.REPORT_TEMPLATE_NAME,
+      "Yalla Hack Official Report Template"
+    ) || "Yalla Hack Official Report Template",
 
   // ── Interaction retention ─────────────────────────────────────────────────
   INTERACTION_RETENTION_AUTORUN: boolEnv(
     process.env.INTERACTION_RETENTION_AUTORUN,
-    _isProduction,
+    _isProduction
   ),
-  INTERACTION_RETENTION_DAYS: intEnv(process.env.INTERACTION_RETENTION_DAYS, 90, 7, 365),
+  INTERACTION_RETENTION_DAYS: intEnv(
+    process.env.INTERACTION_RETENTION_DAYS,
+    90,
+    7,
+    365
+  ),
   INTERACTION_RETENTION_INTERVAL_HOURS: intEnv(
     process.env.INTERACTION_RETENTION_INTERVAL_HOURS,
     24,
     1,
-    168,
+    168
   ),
 
   // ── Database ──────────────────────────────────────────────────────────────
-  ALLOW_IN_MEMORY_PERSISTENCE: boolEnv(process.env.ALLOW_IN_MEMORY_PERSISTENCE, _isDevelopment),
+  ALLOW_IN_MEMORY_PERSISTENCE: boolEnv(
+    process.env.ALLOW_IN_MEMORY_PERSISTENCE,
+    _isDevelopment
+  ),
   DATABASE_POOL_SIZE: intEnv(
     process.env.DATABASE_POOL_SIZE,
     _isProduction ? 25 : 5,
     1,
-    100,
+    100
   ),
 
   // ── HTTP / Timeouts ───────────────────────────────────────────────────────
@@ -107,23 +139,42 @@ export const parsedEnv = {
     process.env.COMPLIANCE_CACHE_TTL_MS,
     _isProduction ? 60_000 : 10_000,
     1_000,
-    3_600_000,
+    3_600_000
   ),
-  HTTP_KEEP_ALIVE_TIMEOUT_MS: intEnv(process.env.HTTP_KEEP_ALIVE_TIMEOUT_MS, 65_000, 1_000, 300_000),
-  HTTP_HEADERS_TIMEOUT_MS: intEnv(process.env.HTTP_HEADERS_TIMEOUT_MS, 66_000, 2_000, 300_000),
-  HTTP_REQUEST_TIMEOUT_MS: intEnv(process.env.HTTP_REQUEST_TIMEOUT_MS, 120_000, 1_000, 600_000),
+  HTTP_KEEP_ALIVE_TIMEOUT_MS: intEnv(
+    process.env.HTTP_KEEP_ALIVE_TIMEOUT_MS,
+    65_000,
+    1_000,
+    300_000
+  ),
+  HTTP_HEADERS_TIMEOUT_MS: intEnv(
+    process.env.HTTP_HEADERS_TIMEOUT_MS,
+    66_000,
+    2_000,
+    300_000
+  ),
+  HTTP_REQUEST_TIMEOUT_MS: intEnv(
+    process.env.HTTP_REQUEST_TIMEOUT_MS,
+    120_000,
+    1_000,
+    600_000
+  ),
 
   // ── Stripe price IDs ──────────────────────────────────────────────────────
   STRIPE_PRICE_STARTER_MONTHLY: process.env.STRIPE_PRICE_STARTER_MONTHLY ?? "",
-  STRIPE_PRICE_STARTER_QUARTERLY: process.env.STRIPE_PRICE_STARTER_QUARTERLY ?? "",
-  STRIPE_PRICE_STARTER_BIANNUAL: process.env.STRIPE_PRICE_STARTER_BIANNUAL ?? "",
+  STRIPE_PRICE_STARTER_QUARTERLY:
+    process.env.STRIPE_PRICE_STARTER_QUARTERLY ?? "",
+  STRIPE_PRICE_STARTER_BIANNUAL:
+    process.env.STRIPE_PRICE_STARTER_BIANNUAL ?? "",
   STRIPE_PRICE_STARTER_ANNUAL: process.env.STRIPE_PRICE_STARTER_ANNUAL ?? "",
   STRIPE_PRICE_PRO_MONTHLY: process.env.STRIPE_PRICE_PRO_MONTHLY ?? "",
   STRIPE_PRICE_PRO_QUARTERLY: process.env.STRIPE_PRICE_PRO_QUARTERLY ?? "",
   STRIPE_PRICE_PRO_BIANNUAL: process.env.STRIPE_PRICE_PRO_BIANNUAL ?? "",
   STRIPE_PRICE_PRO_ANNUAL: process.env.STRIPE_PRICE_PRO_ANNUAL ?? "",
-  STRIPE_PRICE_ENTERPRISE_MONTHLY: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY ?? "",
-  STRIPE_PRICE_ENTERPRISE_ANNUAL: process.env.STRIPE_PRICE_ENTERPRISE_ANNUAL ?? "",
+  STRIPE_PRICE_ENTERPRISE_MONTHLY:
+    process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY ?? "",
+  STRIPE_PRICE_ENTERPRISE_ANNUAL:
+    process.env.STRIPE_PRICE_ENTERPRISE_ANNUAL ?? "",
 
   // ── Supabase ────────────────────────────────────────────────────────────
   SUPABASE_URL: process.env.SUPABASE_URL ?? "",
@@ -134,7 +185,8 @@ export const parsedEnv = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "",
 
   // ── Report generation ─────────────────────────────────────────────────────
-  REPORT_NATIVE_PDF_CONVERSION: process.env.REPORT_NATIVE_PDF_CONVERSION !== "false",
+  REPORT_NATIVE_PDF_CONVERSION:
+    process.env.REPORT_NATIVE_PDF_CONVERSION !== "false",
 
   // ── Server ────────────────────────────────────────────────────────────────
   PORT: intEnv(process.env.PORT, 3000, 1, 65_535),
@@ -148,7 +200,12 @@ export const parsedEnv = {
   YALLA_ADMIN_PASSWORD: strEnv(process.env.YALLA_ADMIN_PASSWORD),
   YALLA_ADMIN_IP_ALLOWLIST: strEnv(process.env.YALLA_ADMIN_IP_ALLOWLIST),
   YALLA_ADMIN_JWT_SECRET: strEnv(process.env.YALLA_ADMIN_JWT_SECRET),
-  YALLA_ADMIN_SESSION_TTL_HOURS: intEnv(process.env.YALLA_ADMIN_SESSION_TTL_HOURS, 8, 1, 72),
+  YALLA_ADMIN_SESSION_TTL_HOURS: intEnv(
+    process.env.YALLA_ADMIN_SESSION_TTL_HOURS,
+    8,
+    1,
+    72
+  ),
 } as const;
 
 export type ParsedEnv = typeof parsedEnv;

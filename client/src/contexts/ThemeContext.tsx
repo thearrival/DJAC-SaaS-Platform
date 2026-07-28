@@ -29,15 +29,21 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     if (switchable && typeof window !== "undefined") {
-      return parseStoredMode(window.localStorage.getItem(THEME_MODE_STORAGE_KEY));
+      return parseStoredMode(
+        window.localStorage.getItem(THEME_MODE_STORAGE_KEY)
+      );
     }
     return "auto";
   });
 
   const [theme, setTheme] = useState<Theme>(() => {
     if (switchable && typeof window !== "undefined") {
-      const storedTheme = parseStoredTheme(window.localStorage.getItem(THEME_STORAGE_KEY));
-      const storedMode = parseStoredMode(window.localStorage.getItem(THEME_MODE_STORAGE_KEY));
+      const storedTheme = parseStoredTheme(
+        window.localStorage.getItem(THEME_STORAGE_KEY)
+      );
+      const storedMode = parseStoredMode(
+        window.localStorage.getItem(THEME_MODE_STORAGE_KEY)
+      );
       if (storedTheme && storedMode === "manual") {
         return storedTheme;
       }
@@ -75,9 +81,9 @@ export function ThemeProvider({
 
   const toggleTheme = switchable
     ? () => {
-      setThemeMode("manual");
-      setTheme(prev => (prev === "light" ? "dark" : "light"));
-    }
+        setThemeMode("manual");
+        setTheme(prev => (prev === "light" ? "dark" : "light"));
+      }
     : undefined;
 
   return (

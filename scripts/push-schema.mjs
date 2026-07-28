@@ -21,11 +21,15 @@ async function main() {
   } catch (err) {
     // If migration fails due to existing objects, try direct SQL
     if (err.message?.includes("already exists")) {
-      console.log("[push] Some objects already exist - running supplementary tables.");
+      console.log(
+        "[push] Some objects already exist - running supplementary tables."
+      );
 
       // Get the generated SQL and filter only CREATE TABLE IF NOT EXISTS
       const fs = await import("fs");
-      const files = fs.readdirSync("./drizzle").filter(f => f.endsWith(".sql") && /^\d+/.test(f));
+      const files = fs
+        .readdirSync("./drizzle")
+        .filter(f => f.endsWith(".sql") && /^\d+/.test(f));
       files.sort();
 
       for (const file of files) {
@@ -45,15 +49,25 @@ async function main() {
           let finalStmt = trimmed;
           if (trimmed.toUpperCase().startsWith("CREATE TABLE")) {
             if (!trimmed.toUpperCase().includes("IF NOT EXISTS")) {
-              finalStmt = trimmed.replace("CREATE TABLE", "CREATE TABLE IF NOT EXISTS");
+              finalStmt = trimmed.replace(
+                "CREATE TABLE",
+                "CREATE TABLE IF NOT EXISTS"
+              );
             }
           }
 
           // Wrap CREATE INDEX in IF NOT EXISTS
-          if (trimmed.toUpperCase().startsWith("CREATE INDEX") || trimmed.toUpperCase().startsWith("CREATE UNIQUE INDEX")) {
+          if (
+            trimmed.toUpperCase().startsWith("CREATE INDEX") ||
+            trimmed.toUpperCase().startsWith("CREATE UNIQUE INDEX")
+          ) {
             if (!trimmed.toUpperCase().includes("IF NOT EXISTS")) {
-              finalStmt = trimmed.replace("CREATE INDEX", "CREATE INDEX IF NOT EXISTS")
-                .replace("CREATE UNIQUE INDEX", "CREATE UNIQUE INDEX IF NOT EXISTS");
+              finalStmt = trimmed
+                .replace("CREATE INDEX", "CREATE INDEX IF NOT EXISTS")
+                .replace(
+                  "CREATE UNIQUE INDEX",
+                  "CREATE UNIQUE INDEX IF NOT EXISTS"
+                );
             }
           }
 

@@ -42,7 +42,7 @@ serve(async (req: Request) => {
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
     const { error: logError } = await supabase.from("auditLogs").insert({
@@ -58,13 +58,20 @@ serve(async (req: Request) => {
       console.error("Failed to log webhook event:", logError);
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      received: { event, organizationId, timestamp: new Date().toISOString() },
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        received: {
+          event,
+          organizationId,
+          timestamp: new Date().toISOString(),
+        },
+      }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,

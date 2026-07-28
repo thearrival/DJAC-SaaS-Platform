@@ -62,7 +62,9 @@ describe("local-jwt — getSessionTokenFromRequest edge cases", () => {
     const token = "eyJhbGciOiJIUzI1NiJ9.test";
     expect(
       getSessionTokenFromRequest({
-        headers: { cookie: `other=val; ${LOCAL_AUTH_COOKIE}=${token}; another=x` },
+        headers: {
+          cookie: `other=val; ${LOCAL_AUTH_COOKIE}=${token}; another=x`,
+        },
       })
     ).toBe(token);
   });

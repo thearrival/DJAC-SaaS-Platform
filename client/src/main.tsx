@@ -1,5 +1,5 @@
 import { trpc } from "@/lib/trpc";
-import { UNAUTHED_ERR_MSG } from '@shared/const';
+import { UNAUTHED_ERR_MSG } from "@shared/const";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 // Build: v3 — cache-bust redeploy
@@ -9,7 +9,9 @@ import App from "./App";
 import "./index.css";
 
 const injectAnalyticsScript = () => {
-  const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT as string | undefined;
+  const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT as
+    | string
+    | undefined;
   const websiteId = import.meta.env.VITE_ANALYTICS_WEBSITE_ID as
     | string
     | undefined;
@@ -64,7 +66,8 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   // Already on the login page — don't redirect again (prevents reload loops).
   const { pathname } = window.location;
-  if (pathname === "/login" || pathname === "/signup" || pathname === "/") return;
+  if (pathname === "/login" || pathname === "/signup" || pathname === "/")
+    return;
 
   // Use SPA navigation (History pushState) instead of a hard reload so the
   // React tree stays alive and the sidebar/layout doesn't flash.
@@ -109,14 +112,18 @@ if (typeof window !== "undefined") {
   window.addEventListener("error", () => {
     const root = document.getElementById(APP_ROOT_ID);
     if (root && root.childElementCount === 0) {
-      renderStartupFallback("A startup error prevented the dashboard from rendering.");
+      renderStartupFallback(
+        "A startup error prevented the dashboard from rendering."
+      );
     }
   });
 
   window.addEventListener("unhandledrejection", () => {
     const root = document.getElementById(APP_ROOT_ID);
     if (root && root.childElementCount === 0) {
-      renderStartupFallback("A browser compatibility issue interrupted startup.");
+      renderStartupFallback(
+        "A browser compatibility issue interrupted startup."
+      );
     }
   });
 }
@@ -130,5 +137,7 @@ try {
     </trpc.Provider>
   );
 } catch {
-  renderStartupFallback("Please refresh the page or update your browser and try again.");
+  renderStartupFallback(
+    "Please refresh the page or update your browser and try again."
+  );
 }

@@ -1,32 +1,156 @@
 import { eq, and } from "drizzle-orm";
 import { getDb } from "./db";
-import { frameworks, frameworkRelationships, complianceControls } from "../drizzle/schema";
+import {
+  frameworks,
+  frameworkRelationships,
+  complianceControls,
+} from "../drizzle/schema";
 
 export async function getControlCategoryHeatmap() {
   const db = await getDb();
 
   // ── Static fallback so the page works even without a DB ──────────────────
   const staticFallback = [
-    { frameworkId: 1, frameworkCode: "PDPL", frameworkName: "Saudi PDPL", category: "Consent & Transparency", count: 5 },
-    { frameworkId: 1, frameworkCode: "PDPL", frameworkName: "Saudi PDPL", category: "Data Subject Rights", count: 4 },
-    { frameworkId: 1, frameworkCode: "PDPL", frameworkName: "Saudi PDPL", category: "Data Security", count: 3 },
-    { frameworkId: 1, frameworkCode: "PDPL", frameworkName: "Saudi PDPL", category: "Data Transfer", count: 2 },
-    { frameworkId: 1, frameworkCode: "PDPL", frameworkName: "Saudi PDPL", category: "Governance", count: 3 },
-    { frameworkId: 2, frameworkCode: "PIPL", frameworkName: "China PIPL", category: "Consent & Transparency", count: 6 },
-    { frameworkId: 2, frameworkCode: "PIPL", frameworkName: "China PIPL", category: "Data Subject Rights", count: 5 },
-    { frameworkId: 2, frameworkCode: "PIPL", frameworkName: "China PIPL", category: "Data Security", count: 4 },
-    { frameworkId: 2, frameworkCode: "PIPL", frameworkName: "China PIPL", category: "Data Transfer", count: 3 },
-    { frameworkId: 2, frameworkCode: "PIPL", frameworkName: "China PIPL", category: "Governance", count: 2 },
-    { frameworkId: 3, frameworkCode: "NCA-ECC", frameworkName: "NCA ECC", category: "Data Security", count: 7 },
-    { frameworkId: 3, frameworkCode: "NCA-ECC", frameworkName: "NCA ECC", category: "Risk Management", count: 5 },
-    { frameworkId: 3, frameworkCode: "NCA-ECC", frameworkName: "NCA ECC", category: "Network Security", count: 6 },
-    { frameworkId: 3, frameworkCode: "NCA-ECC", frameworkName: "NCA ECC", category: "Access Control", count: 4 },
-    { frameworkId: 3, frameworkCode: "NCA-ECC", frameworkName: "NCA ECC", category: "Governance", count: 3 },
-    { frameworkId: 4, frameworkCode: "CSL", frameworkName: "China CSL", category: "Data Security", count: 5 },
-    { frameworkId: 4, frameworkCode: "CSL", frameworkName: "China CSL", category: "Network Security", count: 4 },
-    { frameworkId: 4, frameworkCode: "CSL", frameworkName: "China CSL", category: "Risk Management", count: 3 },
-    { frameworkId: 4, frameworkCode: "CSL", frameworkName: "China CSL", category: "Incident Response", count: 4 },
-    { frameworkId: 4, frameworkCode: "CSL", frameworkName: "China CSL", category: "Governance", count: 2 },
+    {
+      frameworkId: 1,
+      frameworkCode: "PDPL",
+      frameworkName: "Saudi PDPL",
+      category: "Consent & Transparency",
+      count: 5,
+    },
+    {
+      frameworkId: 1,
+      frameworkCode: "PDPL",
+      frameworkName: "Saudi PDPL",
+      category: "Data Subject Rights",
+      count: 4,
+    },
+    {
+      frameworkId: 1,
+      frameworkCode: "PDPL",
+      frameworkName: "Saudi PDPL",
+      category: "Data Security",
+      count: 3,
+    },
+    {
+      frameworkId: 1,
+      frameworkCode: "PDPL",
+      frameworkName: "Saudi PDPL",
+      category: "Data Transfer",
+      count: 2,
+    },
+    {
+      frameworkId: 1,
+      frameworkCode: "PDPL",
+      frameworkName: "Saudi PDPL",
+      category: "Governance",
+      count: 3,
+    },
+    {
+      frameworkId: 2,
+      frameworkCode: "PIPL",
+      frameworkName: "China PIPL",
+      category: "Consent & Transparency",
+      count: 6,
+    },
+    {
+      frameworkId: 2,
+      frameworkCode: "PIPL",
+      frameworkName: "China PIPL",
+      category: "Data Subject Rights",
+      count: 5,
+    },
+    {
+      frameworkId: 2,
+      frameworkCode: "PIPL",
+      frameworkName: "China PIPL",
+      category: "Data Security",
+      count: 4,
+    },
+    {
+      frameworkId: 2,
+      frameworkCode: "PIPL",
+      frameworkName: "China PIPL",
+      category: "Data Transfer",
+      count: 3,
+    },
+    {
+      frameworkId: 2,
+      frameworkCode: "PIPL",
+      frameworkName: "China PIPL",
+      category: "Governance",
+      count: 2,
+    },
+    {
+      frameworkId: 3,
+      frameworkCode: "NCA-ECC",
+      frameworkName: "NCA ECC",
+      category: "Data Security",
+      count: 7,
+    },
+    {
+      frameworkId: 3,
+      frameworkCode: "NCA-ECC",
+      frameworkName: "NCA ECC",
+      category: "Risk Management",
+      count: 5,
+    },
+    {
+      frameworkId: 3,
+      frameworkCode: "NCA-ECC",
+      frameworkName: "NCA ECC",
+      category: "Network Security",
+      count: 6,
+    },
+    {
+      frameworkId: 3,
+      frameworkCode: "NCA-ECC",
+      frameworkName: "NCA ECC",
+      category: "Access Control",
+      count: 4,
+    },
+    {
+      frameworkId: 3,
+      frameworkCode: "NCA-ECC",
+      frameworkName: "NCA ECC",
+      category: "Governance",
+      count: 3,
+    },
+    {
+      frameworkId: 4,
+      frameworkCode: "CSL",
+      frameworkName: "China CSL",
+      category: "Data Security",
+      count: 5,
+    },
+    {
+      frameworkId: 4,
+      frameworkCode: "CSL",
+      frameworkName: "China CSL",
+      category: "Network Security",
+      count: 4,
+    },
+    {
+      frameworkId: 4,
+      frameworkCode: "CSL",
+      frameworkName: "China CSL",
+      category: "Risk Management",
+      count: 3,
+    },
+    {
+      frameworkId: 4,
+      frameworkCode: "CSL",
+      frameworkName: "China CSL",
+      category: "Incident Response",
+      count: 4,
+    },
+    {
+      frameworkId: 4,
+      frameworkCode: "CSL",
+      frameworkName: "China CSL",
+      category: "Governance",
+      count: 2,
+    },
   ];
 
   if (!db) return staticFallback;
@@ -45,17 +169,33 @@ export async function getControlCategoryHeatmap() {
       countMap.set(key, (countMap.get(key) ?? 0) + 1);
     }
 
-    const fwMap = new Map(allFrameworks.map((f) => [f.id, f]));
-    const rows: { frameworkId: number; frameworkCode: string; frameworkName: string; category: string; count: number }[] = [];
+    const fwMap = new Map(allFrameworks.map(f => [f.id, f]));
+    const rows: {
+      frameworkId: number;
+      frameworkCode: string;
+      frameworkName: string;
+      category: string;
+      count: number;
+    }[] = [];
 
     countMap.forEach((count, key) => {
       const [fwIdStr, category] = key.split("::");
       const fw = fwMap.get(Number(fwIdStr));
       if (!fw) return;
-      rows.push({ frameworkId: fw.id, frameworkCode: fw.code, frameworkName: fw.name, category, count });
+      rows.push({
+        frameworkId: fw.id,
+        frameworkCode: fw.code,
+        frameworkName: fw.name,
+        category,
+        count,
+      });
     });
 
-    return rows.sort((a, b) => a.frameworkCode.localeCompare(b.frameworkCode) || a.category.localeCompare(b.category));
+    return rows.sort(
+      (a, b) =>
+        a.frameworkCode.localeCompare(b.frameworkCode) ||
+        a.category.localeCompare(b.category)
+    );
   } catch {
     return staticFallback;
   }
@@ -69,7 +209,9 @@ const RELATIONSHIP_ACTIONS = {
   gap: "Highlight regulatory blind spots and legal validation points.",
 } as const;
 
-function normalizeRelationshipType(type: string): keyof typeof RELATIONSHIP_ACTIONS {
+function normalizeRelationshipType(
+  type: string
+): keyof typeof RELATIONSHIP_ACTIONS {
   if (type === "harmonization") return "coordination";
   if (type === "coordination") return "coordination";
   if (type === "overlap") return "overlap";
@@ -79,17 +221,34 @@ function normalizeRelationshipType(type: string): keyof typeof RELATIONSHIP_ACTI
   return "overlap";
 }
 
-export async function getAdvancedComparison(framework1Id: number, framework2Id: number) {
+export async function getAdvancedComparison(
+  framework1Id: number,
+  framework2Id: number
+) {
   const db = await getDb();
   if (!db) return null;
 
-  const fw1 = await db.select().from(frameworks).where(eq(frameworks.id, framework1Id)).limit(1);
-  const fw2 = await db.select().from(frameworks).where(eq(frameworks.id, framework2Id)).limit(1);
+  const fw1 = await db
+    .select()
+    .from(frameworks)
+    .where(eq(frameworks.id, framework1Id))
+    .limit(1);
+  const fw2 = await db
+    .select()
+    .from(frameworks)
+    .where(eq(frameworks.id, framework2Id))
+    .limit(1);
 
   if (!fw1.length || !fw2.length) return null;
 
-  const controls1 = await db.select().from(complianceControls).where(eq(complianceControls.frameworkId, framework1Id));
-  const controls2 = await db.select().from(complianceControls).where(eq(complianceControls.frameworkId, framework2Id));
+  const controls1 = await db
+    .select()
+    .from(complianceControls)
+    .where(eq(complianceControls.frameworkId, framework1Id));
+  const controls2 = await db
+    .select()
+    .from(complianceControls)
+    .where(eq(complianceControls.frameworkId, framework2Id));
 
   const relationshipsRaw = await db
     .select()
@@ -101,7 +260,7 @@ export async function getAdvancedComparison(framework1Id: number, framework2Id: 
       )
     );
 
-  const relationships = relationshipsRaw.map((row) => {
+  const relationships = relationshipsRaw.map(row => {
     const relationshipType = normalizeRelationshipType(row.relationshipType);
     return {
       ...row,
@@ -111,8 +270,8 @@ export async function getAdvancedComparison(framework1Id: number, framework2Id: 
     };
   });
 
-  const overlappingControls = controls1.filter((c1) =>
-    controls2.some((c2) => c1.category === c2.category)
+  const overlappingControls = controls1.filter(c1 =>
+    controls2.some(c2 => c1.category === c2.category)
   );
 
   return {
@@ -132,7 +291,10 @@ export async function getAdvancedComparison(framework1Id: number, framework2Id: 
   };
 }
 
-export async function getVulnerabilityAnalysis(framework1Id: number, framework2Id: number) {
+export async function getVulnerabilityAnalysis(
+  framework1Id: number,
+  framework2Id: number
+) {
   const db = await getDb();
   if (!db) return null;
 
@@ -146,7 +308,7 @@ export async function getVulnerabilityAnalysis(framework1Id: number, framework2I
       )
     );
 
-  const vulnerabilities = relationships.map((rel) => ({
+  const vulnerabilities = relationships.map(rel => ({
     type: rel.relationshipType,
     severity: rel.severity,
     mitigation: rel.mitigation,
@@ -155,10 +317,11 @@ export async function getVulnerabilityAnalysis(framework1Id: number, framework2I
 
   return {
     totalVulnerabilities: vulnerabilities.length,
-    criticalCount: vulnerabilities.filter((v) => v.severity === "critical").length,
-    highCount: vulnerabilities.filter((v) => v.severity === "high").length,
-    mediumCount: vulnerabilities.filter((v) => v.severity === "medium").length,
-    lowCount: vulnerabilities.filter((v) => v.severity === "low").length,
+    criticalCount: vulnerabilities.filter(v => v.severity === "critical")
+      .length,
+    highCount: vulnerabilities.filter(v => v.severity === "high").length,
+    mediumCount: vulnerabilities.filter(v => v.severity === "medium").length,
+    lowCount: vulnerabilities.filter(v => v.severity === "low").length,
     vulnerabilities: vulnerabilities,
     overallRisk: calculateOverallRisk(vulnerabilities),
   };
@@ -171,15 +334,17 @@ export async function getRelationshipHeatmap() {
   const allFrameworks = await db.select().from(frameworks);
   const allRelationships = await db.select().from(frameworkRelationships);
 
-  const heatmapData = allFrameworks.map((fw1) =>
-    allFrameworks.map((fw2) => {
-      if (fw1.id === fw2.id) return { source: fw1.code, target: fw2.code, value: 0, type: "self" };
+  const heatmapData = allFrameworks.map(fw1 =>
+    allFrameworks.map(fw2 => {
+      if (fw1.id === fw2.id)
+        return { source: fw1.code, target: fw2.code, value: 0, type: "self" };
 
       const rel = allRelationships.find(
-        (r) => r.sourceFrameworkId === fw1.id && r.targetFrameworkId === fw2.id
+        r => r.sourceFrameworkId === fw1.id && r.targetFrameworkId === fw2.id
       );
 
-      if (!rel) return { source: fw1.code, target: fw2.code, value: 0, type: "none" };
+      if (!rel)
+        return { source: fw1.code, target: fw2.code, value: 0, type: "none" };
 
       const value =
         rel.severity === "critical"
@@ -221,8 +386,10 @@ function calculateComplianceScore(relationships: any[]): number {
 }
 
 function calculateRiskLevel(relationships: any[]): string {
-  const criticalCount = relationships.filter((r) => r.severity === "critical").length;
-  const highCount = relationships.filter((r) => r.severity === "high").length;
+  const criticalCount = relationships.filter(
+    r => r.severity === "critical"
+  ).length;
+  const highCount = relationships.filter(r => r.severity === "high").length;
 
   if (criticalCount > 0) return "critical";
   if (criticalCount === 0 && highCount > 2) return "high";
@@ -231,11 +398,14 @@ function calculateRiskLevel(relationships: any[]): string {
 }
 
 function calculateOverallRisk(vulnerabilities: any[]): string {
-  const criticalCount = vulnerabilities.filter((v) => v.severity === "critical").length;
-  const highCount = vulnerabilities.filter((v) => v.severity === "high").length;
+  const criticalCount = vulnerabilities.filter(
+    v => v.severity === "critical"
+  ).length;
+  const highCount = vulnerabilities.filter(v => v.severity === "high").length;
 
   if (criticalCount > 1) return "CRITICAL - Immediate action required";
-  if (criticalCount === 1 || highCount > 2) return "HIGH - Urgent attention needed";
+  if (criticalCount === 1 || highCount > 2)
+    return "HIGH - Urgent attention needed";
   if (highCount > 0) return "MEDIUM - Plan remediation";
   return "LOW - Monitor and maintain";
 }
@@ -243,10 +413,14 @@ function calculateOverallRisk(vulnerabilities: any[]): string {
 function generateInsights(fw1: any, fw2: any, relationships: any[]): string[] {
   const insights: string[] = [];
 
-  const conflicts = relationships.filter((r) => r.relationshipType === "conflict");
-  const overlaps = relationships.filter((r) => r.relationshipType === "overlap");
-  const gaps = relationships.filter((r) => r.relationshipType === "gap");
-  const coordinations = relationships.filter((r) => r.relationshipType === "coordination");
+  const conflicts = relationships.filter(
+    r => r.relationshipType === "conflict"
+  );
+  const overlaps = relationships.filter(r => r.relationshipType === "overlap");
+  const gaps = relationships.filter(r => r.relationshipType === "gap");
+  const coordinations = relationships.filter(
+    r => r.relationshipType === "coordination"
+  );
 
   if (conflicts.length > 0) {
     insights.push(
@@ -273,11 +447,15 @@ function generateInsights(fw1: any, fw2: any, relationships: any[]): string[] {
   }
 
   if (coordinations.length > 0) {
-    insights.push(`✓ COORDINATED: ${coordinations.length} coordination opportunity(ies) identified for aligned implementation.`);
+    insights.push(
+      `✓ COORDINATED: ${coordinations.length} coordination opportunity(ies) identified for aligned implementation.`
+    );
   }
 
   if (conflicts.length === 0 && overlaps.length > 0) {
-    insights.push(`✓ COMPATIBLE: Frameworks are largely compatible with proper controls implementation.`);
+    insights.push(
+      `✓ COMPATIBLE: Frameworks are largely compatible with proper controls implementation.`
+    );
   }
 
   return insights;

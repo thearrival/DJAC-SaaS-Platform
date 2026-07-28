@@ -34,7 +34,7 @@ serve(async (req: Request) => {
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
     const { data: report, error: fetchError } = await supabase
@@ -60,7 +60,7 @@ serve(async (req: Request) => {
     } else if (format === "csv") {
       const headers = Object.keys(report).join(",");
       const values = Object.values(report)
-        .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+        .map(v => `"${String(v ?? "").replace(/"/g, '""')}"`)
         .join(",");
       exportData = `${headers}\n${values}`;
       contentType = "text/csv";
