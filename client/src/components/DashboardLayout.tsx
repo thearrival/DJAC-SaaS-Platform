@@ -59,6 +59,7 @@ import {
   FileDown,
   FileSearch,
   FileText,
+  FlaskConical,
   FolderCheck,
   Globe,
   Key,
@@ -193,6 +194,18 @@ const menuGroups: MenuGroup[] = [
         labelFallback: "AI Compliance Chat",
         path: "/compliance-chat",
       },
+      {
+        icon: Bell,
+        labelKey: "layout.menuRegulatoryChanges",
+        labelFallback: "Regulatory Changes",
+        path: "/regulatory-changes",
+      },
+      {
+        icon: ArrowLeftRight,
+        labelKey: "layout.menuCrossBorder",
+        labelFallback: "Cross-Border Data Flow",
+        path: "/cross-border-data-flow",
+      },
     ],
   },
   // ── Cyber Operations ─────────────────────────────────────────────────────
@@ -272,6 +285,12 @@ const menuGroups: MenuGroup[] = [
         labelKey: "layout.menuAuditSchedule",
         labelFallback: "Audit Schedule",
         path: "/audit-schedule",
+      },
+      {
+        icon: FlaskConical,
+        labelKey: "layout.menuSimulation",
+        labelFallback: "Compliance Simulation",
+        path: "/compliance-simulation",
       },
       {
         icon: Activity,

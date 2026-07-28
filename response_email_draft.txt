@@ -1,0 +1,26 @@
+Subject: Response to Deposit Request — Case [1-15066433901] — DJAC TOOL Source Code Uploaded
+
+Dear Examining Attorney,
+
+This email confirms that I have uploaded the required deposit material in response to your request for the computer program source code.
+
+Case Number: [1-15066433901]
+THREAD ID: [THREAD ID:1-6ZIZ4GW]
+Application Title: DJAC TOOL — Global Enterprise Compliance Intelligence Platform
+Author: Ismail Ahamed Hassan Awad
+
+The uploaded PDF (DJAC_TOOL_GLOBAL_SOURCE_CODE_US_COPYRIGHT_DEPOSIT.pdf) contains:
+
+1. A title page with the case number, thread ID, and author information
+2. The first 25 pages of production source code (core infrastructure)
+3. The last 25 pages of production source code (compliance intelligence & AI)
+4. A technical certification confirming the code was hand-coded and independently developed
+
+The submission complies with Circular 61 requirements. All confidential information has been redacted. The source code is actual production code — no fabricated, placeholder, or artificially generated material is included.
+
+Please let me know if you require any further information or additional materials.
+
+Respectfully,
+
+Ismail Ahamed Hassan Awad
+Author & Developer, DJAC TOOL

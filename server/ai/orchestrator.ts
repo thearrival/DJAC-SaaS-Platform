@@ -1,6 +1,13 @@
 import { ENV } from "../_core/env";
 import { executeAssessmentPipeline } from "./pipeline";
 import { persistAssessmentReport } from "./persistence";
+import {
+  dispatchPipeline,
+  getAgentPool,
+  getAgentPoolStats,
+  getAgentCapabilities,
+  resetAgentPool,
+} from "./agent-registry";
 import type {
   AssessmentHistoryClearResult,
   AssessmentHistoryDiagnostics,
@@ -12,17 +19,30 @@ import { getAssessmentQueue } from "./queueFactory";
 const queue = getAssessmentQueue();
 
 queue.setWorker(async (job, onProgress) => {
-  const report = await executeAssessmentPipeline(
-    {
-      source: job.source,
-      engine: job.engine,
-      vendor: job.vendor,
-      rawDocumentText: job.rawDocumentText,
-    },
-    (stage, message) => {
-      onProgress({ stage, message });
-    }
-  );
+  const useDispatch = job.source === "vendor_profile" && !job.rawDocumentText;
+
+  let report;
+  if (useDispatch) {
+    const result = await dispatchPipeline(
+      {
+        source: job.source,
+        vendor: job.vendor,
+        rawDocumentText: job.rawDocumentText,
+      },
+      (stage, message) => onProgress({ stage, message })
+    );
+    report = result.report;
+  } else {
+    report = await executeAssessmentPipeline(
+      {
+        source: job.source,
+        engine: job.engine,
+        vendor: job.vendor,
+        rawDocumentText: job.rawDocumentText,
+      },
+      (stage, message) => onProgress({ stage, message })
+    );
+  }
 
   onProgress({
     stage: "persistence",
@@ -96,4 +116,17 @@ export async function runAssessmentSync(input: AssessmentJobInput) {
     job: finished,
     report: finished.result,
   };
+}
+
+export function getAgentPoolStatus() {
+  return {
+    agents: getAgentPool(),
+    stats: getAgentPoolStats(),
+    capabilities: getAgentCapabilities(),
+  };
+}
+
+export function resetAllAgents() {
+  resetAgentPool();
+  return { ok: true };
 }

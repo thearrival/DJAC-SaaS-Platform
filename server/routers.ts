@@ -32,6 +32,9 @@ import { threatIntelRouter } from "./threat-intel-router";
 import { securityMaturityRouter } from "./security-maturity-router";
 import { googleAuthRouter } from "./google-auth-router";
 import { knowledgeGraphRouter } from "./knowledge-graph-router";
+import { regulatoryChangeRouter } from "./regulatory-change-router";
+import { complianceSimulationRouter } from "./compliance-simulation-router";
+import { crossBorderDataFlowRouter } from "./cross-border-data-flow-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -63,6 +66,9 @@ export const appRouter = router({
   securityMaturity: securityMaturityRouter,
   googleAuth: googleAuthRouter,
   knowledgeGraph: knowledgeGraphRouter,
+  regulatoryChanges: regulatoryChangeRouter,
+  complianceSimulation: complianceSimulationRouter,
+  crossBorderFlow: crossBorderDataFlowRouter,
   deadlines: deadlineRouter,
   auth: authRouter,
   compliance: complianceFrameworkRouter,

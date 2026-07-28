@@ -1,8 +1,10 @@
 export type Locale = "en" | "ar" | "zh";
 
+export type ExtendedLocale = Locale | "fr" | "es" | "de" | "ja" | "ko" | "pt";
+
 export type LocaleContextValue = {
-  locale: Locale;
-  setLocale: (locale: Locale) => void;
+  locale: ExtendedLocale;
+  setLocale: (locale: ExtendedLocale) => void;
   direction: "ltr" | "rtl";
   t: (key: string, fallback: string) => string;
 };

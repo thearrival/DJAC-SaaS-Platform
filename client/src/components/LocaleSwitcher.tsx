@@ -1,5 +1,6 @@
 import { useLocale } from "@/contexts/useLocale";
 import { useIsMobile } from "@/hooks/useMobile";
+import type { ExtendedLocale } from "@/contexts/localeTypes";
 import { Check, Languages } from "lucide-react";
 import {
   DropdownMenu,
@@ -8,10 +9,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const LOCALES = [
+const LOCALES: {
+  value: ExtendedLocale;
+  flag: string;
+  short: string;
+  label: string;
+}[] = [
   { value: "en", flag: "🇬🇧", short: "EN", label: "English" },
   { value: "ar", flag: "🇸🇦", short: "AR", label: "العربية" },
   { value: "zh", flag: "🇨🇳", short: "ZH", label: "中文" },
+  { value: "fr", flag: "🇫🇷", short: "FR", label: "Français" },
+  { value: "es", flag: "🇪🇸", short: "ES", label: "Español" },
+  { value: "de", flag: "🇩🇪", short: "DE", label: "Deutsch" },
+  { value: "ja", flag: "🇯🇵", short: "JA", label: "日本語" },
+  { value: "ko", flag: "🇰🇷", short: "KO", label: "한국어" },
+  { value: "pt", flag: "🇧🇷", short: "PT", label: "Português" },
 ] as const;
 
 export function LocaleSwitcher() {

@@ -1293,7 +1293,7 @@ function ScoreGauge({
 }: {
   score: number;
   label: string;
-  locale: Locale;
+  locale: import("@/contexts/localeTypes").ExtendedLocale;
 }) {
   const color =
     score >= 75

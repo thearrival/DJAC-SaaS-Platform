@@ -107,6 +107,9 @@ const GlobalIndustryEditions = lazy(
   () => import("./pages/GlobalIndustryEditions")
 );
 const GlobalAIAgents = lazy(() => import("./pages/GlobalAIAgents"));
+const RegulatoryChangeFeed = lazy(() => import("./pages/RegulatoryChangeFeed"));
+const ComplianceSimulation = lazy(() => import("./pages/ComplianceSimulation"));
+const CrossBorderDataFlow = lazy(() => import("./pages/CrossBorderDataFlow"));
 
 // Root route: redirect already-authenticated users straight to /dashboard;
 // non-authenticated users see the Signup/Login page.
@@ -362,6 +365,15 @@ function Router() {
             </Route>
             <Route path={"/admin/threat-intel"}>
               <AdminThreatIntel />
+            </Route>
+            <Route path={"/regulatory-changes"}>
+              <RegulatoryChangeFeed />
+            </Route>
+            <Route path={"/compliance-simulation"}>
+              <ComplianceSimulation />
+            </Route>
+            <Route path={"/cross-border-data-flow"}>
+              <CrossBorderDataFlow />
             </Route>
             <Route>
               <NotFound />

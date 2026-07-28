@@ -10,7 +10,7 @@ const NODES = [
   { id: "db", icon: Database, color: "var(--djac-red)" },
 ] as const;
 
-const NODE_LABELS: Record<string, Record<"en" | "ar" | "zh", string>> = {
+const NODE_LABELS: Record<string, Record<string, string>> = {
   globe: { en: "Ingestion", ar: "الاستيعاب", zh: "采集" },
   shield: { en: "Classify", ar: "التصنيف", zh: "分类" },
   lock: { en: "Encrypt", ar: "التشفير", zh: "加密" },

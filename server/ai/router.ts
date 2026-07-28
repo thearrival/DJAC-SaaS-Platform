@@ -1,7 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { ENV } from "../_core/env";
-import { activeOrgProcedure, protectedProcedure, router } from "../_core/trpc";
+import {
+  activeOrgProcedure,
+  adminProcedure,
+  protectedProcedure,
+  router,
+} from "../_core/trpc";
 import {
   requireModulePermission,
   requireModulePermissionIfOrgContext,
@@ -15,6 +20,8 @@ import {
   getAssessmentJob,
   listAssessmentJobsForUser,
   waitForAssessmentJob,
+  getAgentPoolStatus,
+  resetAllAgents,
 } from "./orchestrator";
 
 const submitAssessmentSchema = z.object({
@@ -220,4 +227,12 @@ export const aiRouter = router({
         persisted: hit.persistence,
       } as const;
     }),
+
+  agentStatus: protectedProcedure.query(() => {
+    return getAgentPoolStatus();
+  }),
+
+  resetAgents: adminProcedure.mutation(() => {
+    return resetAllAgents();
+  }),
 });
