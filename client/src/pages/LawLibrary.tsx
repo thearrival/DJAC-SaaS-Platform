@@ -368,7 +368,7 @@ export default function LawLibrary() {
         <p className="text-sm" style={{ color: "var(--djac-muted)" }}>
           {t(
             "laws.subtitle",
-            "Search across China and Saudi cybersecurity laws in plain language — no legal degree required."
+            "Search across global cybersecurity and privacy laws in plain language — no legal degree required."
           )}
         </p>
       </div>

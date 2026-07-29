@@ -260,9 +260,7 @@ export default function VendorRiskDashboard() {
     dir: "desc",
   });
   const [filter, setFilter] = useState<VendorRiskTier | "">("");
-  const [jurisFilter, setJurisFilter] = useState<"China" | "Saudi Arabia" | "">(
-    ""
-  );
+  const [jurisFilter, setJurisFilter] = useState<string>("");
   const [deleteTarget, setDeleteTarget] = useState<{
     id: number;
     name: string;
@@ -748,7 +746,17 @@ export default function VendorRiskDashboard() {
           >
             {t("vendorRisk.filterJuris", "Jurisdiction:")}
           </span>
-          {(["", "China", "Saudi Arabia"] as const).map(j => {
+          {(
+            [
+              "",
+              "China",
+              "Saudi Arabia",
+              "EU",
+              "US",
+              "Brazil",
+              "Global",
+            ] as const
+          ).map(j => {
             const active = jurisFilter === j;
             const label = j === "" ? t("vendorRisk.filterAll", "All") : j;
             return (

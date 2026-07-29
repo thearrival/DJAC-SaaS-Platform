@@ -14,7 +14,7 @@ export type ComplianceRiskLevel = "critical" | "high" | "medium" | "low";
 
 export type ComplianceObligation = {
   id: string;
-  country: "Saudi Arabia" | "China";
+  country: "Saudi Arabia" | "China" | "EU" | "US" | "Brazil";
   framework: string;
   requirement: string;
   frequency: ComplianceFrequency;
@@ -427,7 +427,7 @@ export function listComplianceObligations(): ComplianceObligation[] {
 }
 
 export function getObligationsByCountry(
-  country: "Saudi Arabia" | "China"
+  country: "Saudi Arabia" | "China" | "EU" | "US" | "Brazil"
 ): ComplianceObligation[] {
   return COMPLIANCE_OBLIGATIONS.filter(o => o.country === country);
 }

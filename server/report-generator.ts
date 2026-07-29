@@ -19,7 +19,14 @@ import {
 import { listLawKnowledge } from "./legal-knowledge";
 
 export type ReportLocale = "en" | "ar" | "zh";
-export type ReportJurisdiction = "Saudi Arabia" | "China" | "both";
+export type ReportJurisdiction =
+  | "Saudi Arabia"
+  | "China"
+  | "EU"
+  | "US"
+  | "Brazil"
+  | "Global"
+  | "both";
 export type ReportType =
   | "full_compliance"
   | "gap_analysis"

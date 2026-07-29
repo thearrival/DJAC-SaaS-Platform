@@ -310,6 +310,15 @@ function OrgSetupForm({ onSuccess }: { onSuccess: () => void }) {
               <SelectItem value="Saudi Arabia">
                 {t("billing.jurisdictionSaudi", "Saudi Arabia Only")}
               </SelectItem>
+              <SelectItem value="EU">
+                {t("billing.jurisdictionEU", "EU Only")}
+              </SelectItem>
+              <SelectItem value="US">
+                {t("billing.jurisdictionUS", "US Only")}
+              </SelectItem>
+              <SelectItem value="Brazil">
+                {t("billing.jurisdictionBrazil", "Brazil Only")}
+              </SelectItem>
               <SelectItem value="Other">
                 {t("billing.jurisdictionOther", "Other")}
               </SelectItem>

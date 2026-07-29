@@ -150,11 +150,10 @@ export default function TermsOfService() {
           <Section title="2. Description of Service" C={C}>
             <p>
               DJAC is a SaaS compliance intelligence platform that provides
-              AI-assisted analysis of regulatory requirements in the Kingdom of
-              Saudi Arabia and the People's Republic of China, including PIPL,
-              PDPL, NCA, CSL, DSL, and MLPS 2.0 frameworks. The Service includes
-              document analysis, vendor risk assessments, compliance calendars,
-              and report generation.
+              AI-assisted analysis of regulatory requirements across global
+              jurisdictions, including GDPR, CCPA, LGPD, PIPL, PDPL, NCA, and
+              more. The Service includes document analysis, vendor risk
+              assessments, compliance calendars, and report generation.
             </p>
             <p>
               <strong>

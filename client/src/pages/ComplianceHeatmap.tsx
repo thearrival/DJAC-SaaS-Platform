@@ -293,7 +293,7 @@ export default function ComplianceHeatmap() {
         <p className="text-sm text-muted-foreground">
           {t(
             "heatmap.subtitle",
-            "Cross-framework relationship severity matrix — China & Saudi Arabia regulatory landscape"
+            "Cross-framework relationship severity matrix — global regulatory landscape"
           )}
         </p>
       </div>

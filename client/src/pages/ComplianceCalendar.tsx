@@ -41,7 +41,14 @@ import {
 
 type Priority = "low" | "medium" | "high" | "critical";
 type Status = "upcoming" | "overdue" | "completed" | "waived";
-type Jurisdiction = "China" | "Saudi Arabia" | "Both";
+type Jurisdiction =
+  | "China"
+  | "Saudi Arabia"
+  | "EU"
+  | "US"
+  | "Brazil"
+  | "Global"
+  | "Both";
 
 type Translate = (key: string, fallback: string) => string;
 
@@ -98,6 +105,10 @@ const FRAMEWORK_COLORS: Record<string, string> = {
 const JURISDICTION_FLAG: Record<Jurisdiction, string> = {
   China: "🇨🇳",
   "Saudi Arabia": "🇸🇦",
+  EU: "🇪🇺",
+  US: "🇺🇸",
+  Brazil: "🇧🇷",
+  Global: "🌍",
   Both: "🌐",
 };
 
@@ -451,6 +462,18 @@ export default function ComplianceCalendar() {
                       </SelectItem>
                       <SelectItem value="Saudi Arabia">
                         🇸🇦 {t("calendar.countrySaudiArabia", "Saudi Arabia")}
+                      </SelectItem>
+                      <SelectItem value="EU">
+                        🇪🇺 {t("calendar.countryEU", "EU")}
+                      </SelectItem>
+                      <SelectItem value="US">
+                        🇺🇸 {t("calendar.countryUS", "US")}
+                      </SelectItem>
+                      <SelectItem value="Brazil">
+                        🇧🇷 {t("calendar.countryBrazil", "Brazil")}
+                      </SelectItem>
+                      <SelectItem value="Global">
+                        🌍 {t("calendar.countryGlobal", "Global")}
                       </SelectItem>
                       <SelectItem value="Both">
                         🌐 {t("calendar.countryBoth", "Both")}

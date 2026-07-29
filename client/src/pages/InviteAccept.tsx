@@ -447,7 +447,7 @@ function InviteLayout({ children }: { children: React.ReactNode }) {
         >
           {t(
             "invite.layout.footer",
-            "DJAC Tool · Enterprise Compliance Intelligence · Saudi Arabia · China · UAE"
+            "DJAC Tool · Enterprise Compliance Intelligence · Global"
           )}
         </p>
       </div>

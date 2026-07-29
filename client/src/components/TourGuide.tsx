@@ -100,8 +100,8 @@ const TOUR_STEPS: TourStep[] = [
     titleFallback: "🔍 Framework Analysis — Compare Laws",
     descKey: "tour.step2Desc",
     descFallback:
-      "Compare PIPL, CSL, DSL, PDPL, and NCA side-by-side. " +
-      "Spot overlaps, conflicts, and gaps across Saudi and Chinese regulations instantly.",
+      "Compare frameworks side-by-side across global regulations including GDPR, CCPA, LGPD, PIPL, and PDPL. " +
+      "Spot overlaps, conflicts, and gaps instantly.",
     placement: "right",
   },
   {

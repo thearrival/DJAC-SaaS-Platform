@@ -231,7 +231,7 @@ export const complianceFrameworkRouter = router({
   }),
 
   timetableByCountry: publicProcedure
-    .input(z.enum(["Saudi Arabia", "China"]))
+    .input(z.enum(["Saudi Arabia", "China", "EU", "US", "Brazil"]))
     .query(({ input }) => {
       return getObligationsByCountry(input);
     }),
@@ -244,7 +244,15 @@ export const complianceFrameworkRouter = router({
   report: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum(["Saudi Arabia", "China", "both"]),
+        jurisdiction: z.enum([
+          "Saudi Arabia",
+          "China",
+          "EU",
+          "US",
+          "Brazil",
+          "Global",
+          "both",
+        ]),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -292,7 +300,15 @@ export const complianceFrameworkRouter = router({
   reportPdf: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum(["Saudi Arabia", "China", "both"]),
+        jurisdiction: z.enum([
+          "Saudi Arabia",
+          "China",
+          "EU",
+          "US",
+          "Brazil",
+          "Global",
+          "both",
+        ]),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -341,7 +357,15 @@ export const complianceFrameworkRouter = router({
   reportDocx: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum(["Saudi Arabia", "China", "both"]),
+        jurisdiction: z.enum([
+          "Saudi Arabia",
+          "China",
+          "EU",
+          "US",
+          "Brazil",
+          "Global",
+          "both",
+        ]),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -390,7 +414,15 @@ export const complianceFrameworkRouter = router({
   emailReport: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum(["Saudi Arabia", "China", "both"]),
+        jurisdiction: z.enum([
+          "Saudi Arabia",
+          "China",
+          "EU",
+          "US",
+          "Brazil",
+          "Global",
+          "both",
+        ]),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -442,7 +474,15 @@ export const complianceFrameworkRouter = router({
   createShareLink: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum(["Saudi Arabia", "China", "both"]),
+        jurisdiction: z.enum([
+          "Saudi Arabia",
+          "China",
+          "EU",
+          "US",
+          "Brazil",
+          "Global",
+          "both",
+        ]),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -481,7 +521,14 @@ export const complianceFrameworkRouter = router({
         throw new Error("SHARE_NOT_FOUND");
       }
       const report = generateComplianceReport({
-        jurisdiction: share.jurisdiction as "Saudi Arabia" | "China" | "both",
+        jurisdiction: share.jurisdiction as
+          | "Saudi Arabia"
+          | "China"
+          | "EU"
+          | "US"
+          | "Brazil"
+          | "Global"
+          | "both",
         locale: share.locale,
         reportType: share.reportType as Parameters<
           typeof generateComplianceReport

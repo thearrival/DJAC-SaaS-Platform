@@ -42,6 +42,10 @@ import {
 const JURISDICTION_OPTIONS = [
   { value: "China", label: "China (CN)" },
   { value: "Saudi Arabia", label: "Saudi Arabia (SA)" },
+  { value: "EU", label: "European Union (EU)" },
+  { value: "US", label: "United States (US)" },
+  { value: "Brazil", label: "Brazil (BR)" },
+  { value: "Global", label: "Global" },
   { value: "Both", label: "Both — China & Saudi Arabia" },
   { value: "Other", label: "Other / Custom" },
 ] as const;

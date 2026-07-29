@@ -14,7 +14,17 @@ export const deadlineRouter = router({
     .input(
       z
         .object({
-          jurisdiction: z.enum(["China", "Saudi Arabia", "Both"]).optional(),
+          jurisdiction: z
+            .enum([
+              "China",
+              "Saudi Arabia",
+              "EU",
+              "US",
+              "Brazil",
+              "Global",
+              "Both",
+            ])
+            .optional(),
           status: z
             .enum(["upcoming", "overdue", "completed", "waived"])
             .optional(),
@@ -52,7 +62,15 @@ export const deadlineRouter = router({
         title: z.string().trim().min(3).max(255),
         description: z.string().trim().max(2000).optional(),
         deadlineDate: z.string().datetime(),
-        jurisdiction: z.enum(["China", "Saudi Arabia", "Both"]),
+        jurisdiction: z.enum([
+          "China",
+          "Saudi Arabia",
+          "EU",
+          "US",
+          "Brazil",
+          "Global",
+          "Both",
+        ]),
         priority: z.enum(["low", "medium", "high", "critical"]).optional(),
         assignedToUserId: z.number().int().positive().optional(),
       })

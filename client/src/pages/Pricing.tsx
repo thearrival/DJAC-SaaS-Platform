@@ -173,7 +173,7 @@ const FAQ = [
   },
   {
     q: "Which compliance frameworks are covered?",
-    a: "DJAC covers China's PIPL, CSL, DSL and Saudi Arabia's PDPL and NCA frameworks. Enterprise customers can request additional framework integrations.",
+    a: "DJAC covers 140+ global frameworks including GDPR, CCPA, LGPD, PIPL, PDPL, NCA, and more. Enterprise customers can request additional framework integrations.",
   },
   {
     q: "Is our data secure?",
@@ -447,7 +447,7 @@ export default function Pricing() {
           >
             {t(
               "pricing.heroSubtitle",
-              "Enterprise-grade compliance intelligence for China & Saudi Arabia. Affordable for startups, scalable for enterprises."
+              "Enterprise-grade compliance intelligence for global markets. Affordable for startups, scalable for enterprises."
             )}
           </p>
 
@@ -966,7 +966,7 @@ export default function Pricing() {
           >
             {t(
               "pricing.ctaSubtitle",
-              "No credit card required. Full access to all features. Cancel anytime. Join compliance teams across China and Saudi Arabia."
+              "No credit card required. Full access to all features. Cancel anytime. Join compliance teams across 50+ countries worldwide."
             )}
           </p>
           <div

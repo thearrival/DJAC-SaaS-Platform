@@ -120,6 +120,10 @@ export const assessmentStatusEnum = pgEnum("assessmentStatus", [
 export const jurisdictionEnum = pgEnum("jurisdiction", [
   "China",
   "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
+  "Global",
   "Both",
   "Other",
 ]);
@@ -567,6 +571,10 @@ export const regulatoryChangeStatusEnum = pgEnum("regulatoryChangeStatus", [
 export const deadlineJurisdictionEnum = pgEnum("deadlineJurisdiction", [
   "China",
   "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
+  "Global",
   "Both",
 ]);
 

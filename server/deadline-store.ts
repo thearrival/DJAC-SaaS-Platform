@@ -201,7 +201,14 @@ let nextId = GLOBAL_DEADLINES.length + 1;
 // ---------------------------------------------------------------------------
 export type DeadlineFilters = {
   organizationId?: number | null;
-  jurisdiction?: "China" | "Saudi Arabia" | "Both";
+  jurisdiction?:
+    | "China"
+    | "Saudi Arabia"
+    | "EU"
+    | "US"
+    | "Brazil"
+    | "Global"
+    | "Both";
   status?: "upcoming" | "overdue" | "completed" | "waived";
   frameworkCode?: string;
   limit?: number;
@@ -273,7 +280,14 @@ export type CreateDeadlineInput = {
   title: string;
   description?: string;
   deadlineDate: Date;
-  jurisdiction: "China" | "Saudi Arabia" | "Both";
+  jurisdiction:
+    | "China"
+    | "Saudi Arabia"
+    | "EU"
+    | "US"
+    | "Brazil"
+    | "Global"
+    | "Both";
   priority?: "low" | "medium" | "high" | "critical";
   assignedToUserId?: number | null;
 };

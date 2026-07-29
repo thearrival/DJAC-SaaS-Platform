@@ -454,7 +454,7 @@ export default function DataSubjectRequests() {
           <p className="djac-page-subtitle">
             {t(
               "dsr.pageSubtitle",
-              "Manage PIPL (China) and PDPL (Saudi Arabia) data subject rights requests with deadline tracking."
+              "Manage data subject rights requests across global jurisdictions (GDPR, CCPA, PIPL, PDPL, LGPD and more) with deadline tracking."
             )}
           </p>
         </div>

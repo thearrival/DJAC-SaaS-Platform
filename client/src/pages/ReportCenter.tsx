@@ -49,7 +49,14 @@ import {
 import { sounds } from "@/lib/sounds";
 import { toast } from "sonner";
 
-type Jurisdiction = "Saudi Arabia" | "China" | "both";
+type Jurisdiction =
+  | "Saudi Arabia"
+  | "China"
+  | "EU"
+  | "US"
+  | "Brazil"
+  | "Global"
+  | "both";
 type ReportLocale = "en" | "ar" | "zh";
 type ReportType =
   | "full_compliance"
@@ -565,20 +572,36 @@ export default function ReportCenter() {
                 />
               </SelectTrigger>
               <SelectContent>
-                {(["Saudi Arabia", "China", "both"] as Jurisdiction[]).map(
-                  j => (
-                    <SelectItem key={j} value={j}>
-                      {j === "Saudi Arabia"
-                        ? t("reportCenter.jurisdictionSaudi", "Saudi Arabia")
-                        : j === "China"
-                          ? t("reportCenter.jurisdictionChina", "China")
-                          : t(
-                              "reportCenter.jurisdictionBoth",
-                              "Both Jurisdictions"
-                            )}
-                    </SelectItem>
-                  )
-                )}
+                {(
+                  [
+                    "Saudi Arabia",
+                    "China",
+                    "EU",
+                    "US",
+                    "Brazil",
+                    "Global",
+                    "both",
+                  ] as Jurisdiction[]
+                ).map(j => (
+                  <SelectItem key={j} value={j}>
+                    {j === "Saudi Arabia"
+                      ? t("reportCenter.jurisdictionSaudi", "Saudi Arabia")
+                      : j === "China"
+                        ? t("reportCenter.jurisdictionChina", "China")
+                        : j === "EU"
+                          ? t("reportCenter.jurisdictionEU", "EU")
+                          : j === "US"
+                            ? t("reportCenter.jurisdictionUS", "US")
+                            : j === "Brazil"
+                              ? t("reportCenter.jurisdictionBrazil", "Brazil")
+                              : j === "Global"
+                                ? t("reportCenter.jurisdictionGlobal", "Global")
+                                : t(
+                                    "reportCenter.jurisdictionBoth",
+                                    "Both Jurisdictions"
+                                  )}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

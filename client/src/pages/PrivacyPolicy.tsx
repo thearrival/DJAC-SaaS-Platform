@@ -260,12 +260,11 @@ export default function PrivacyPolicy() {
           <Section title="7. Cross-Border Data Transfers" C={C}>
             <p>
               The Service is designed to assist with regulatory compliance in
-              the Kingdom of Saudi Arabia (KSA) and the People's Republic of
-              China (PRC). Data processing may occur on servers located outside
-              your country of residence. Where we transfer personal data
-              internationally, we apply appropriate safeguards in accordance
-              with Article 49 of China's PIPL and Article 26 of Saudi Arabia's
-              PDPL.
+              multiple global jurisdictions. Data processing may occur on
+              servers located outside your country of residence. Where we
+              transfer personal data internationally, we apply appropriate
+              safeguards in accordance with Article 49 of China's PIPL and
+              Article 26 of Saudi Arabia's PDPL.
             </p>
           </Section>
 

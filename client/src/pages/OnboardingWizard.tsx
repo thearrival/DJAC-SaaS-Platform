@@ -42,7 +42,14 @@ export default function OnboardingWizard() {
 
   const [activeStep, setActiveStep] = useState(0);
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<
-    "China" | "Saudi Arabia" | "Both" | "Other"
+    | "China"
+    | "Saudi Arabia"
+    | "EU"
+    | "US"
+    | "Brazil"
+    | "Both"
+    | "Other"
+    | "Global"
   >("Both");
   const [selectedVendorId, setSelectedVendorId] = useState<number | null>(null);
   const [assessmentResult, setAssessmentResult] = useState<{

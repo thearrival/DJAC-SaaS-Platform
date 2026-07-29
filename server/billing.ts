@@ -192,7 +192,15 @@ export async function createOrganizationForUser(params: {
   name: string;
   billingEmail: string;
   industry?: string;
-  primaryJurisdiction?: "China" | "Saudi Arabia" | "Both" | "Other";
+  primaryJurisdiction?:
+    | "China"
+    | "Saudi Arabia"
+    | "EU"
+    | "US"
+    | "Brazil"
+    | "Global"
+    | "Both"
+    | "Other";
   ownerUserId?: number;
   ownerLocalUserId?: number;
 }): Promise<Organization> {
@@ -482,7 +490,16 @@ export const billingRouter = router({
         billingEmail: z.string().email(),
         industry: z.string().max(120).optional(),
         primaryJurisdiction: z
-          .enum(["China", "Saudi Arabia", "Both", "Other"])
+          .enum([
+            "China",
+            "Saudi Arabia",
+            "EU",
+            "US",
+            "Brazil",
+            "Global",
+            "Both",
+            "Other",
+          ])
           .optional(),
       })
     )

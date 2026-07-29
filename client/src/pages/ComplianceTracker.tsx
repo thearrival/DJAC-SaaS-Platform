@@ -225,7 +225,7 @@ function ObligationCard({
   );
 }
 
-function CountryTab({ country }: { country: "Saudi Arabia" | "China" }) {
+function CountryTab({ country }: { country: string }) {
   const { t } = useLocale();
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState<RiskFilterLevel>("all");
@@ -235,9 +235,12 @@ function CountryTab({ country }: { country: "Saudi Arabia" | "China" }) {
     isLoading,
     error: countryError,
     refetch: refetchCountry,
-  } = trpc.compliance.timetableByCountry.useQuery(country, {
-    refetchOnWindowFocus: false,
-  });
+  } = trpc.compliance.timetableByCountry.useQuery(
+    country as "China" | "Saudi Arabia" | "EU" | "US" | "Brazil",
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
   useEffect(() => {
     if (countryError)
       toast.error(
@@ -699,7 +702,7 @@ function SummaryCards() {
               <div>
                 <p className="text-2xl font-bold text-foreground">{saCount}</p>
                 <p className="text-xs text-muted-foreground">
-                  {t("tracker.saObligations", "Saudi Obligations")}
+                  {t("tracker.saObligations", "Saudi Arabia Obligations")}
                 </p>
               </div>
             </div>
@@ -788,7 +791,7 @@ export default function ComplianceTracker() {
       <SummaryCards />
 
       <Tabs defaultValue="saudi" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="saudi" className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4" />
             {t("tracker.tabSaudi", "🇸🇦 Saudi Arabia")}
@@ -796,6 +799,18 @@ export default function ComplianceTracker() {
           <TabsTrigger value="china" className="flex items-center gap-2">
             <Globe2 className="h-4 w-4" />
             {t("tracker.tabChina", "🇨🇳 China")}
+          </TabsTrigger>
+          <TabsTrigger value="eu" className="flex items-center gap-2">
+            <Globe2 className="h-4 w-4" />
+            {t("tracker.tabEU", "🇪🇺 EU")}
+          </TabsTrigger>
+          <TabsTrigger value="us" className="flex items-center gap-2">
+            <Globe2 className="h-4 w-4" />
+            {t("tracker.tabUS", "🇺🇸 US")}
+          </TabsTrigger>
+          <TabsTrigger value="brazil" className="flex items-center gap-2">
+            <Globe2 className="h-4 w-4" />
+            {t("tracker.tabBrazil", "🇧🇷 Brazil")}
           </TabsTrigger>
           <TabsTrigger value="comparison" className="flex items-center gap-2">
             <ArrowLeftRight className="h-4 w-4" />
@@ -842,6 +857,66 @@ export default function ComplianceTracker() {
             </CardHeader>
             <CardContent>
               <CountryTab country="China" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="eu">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe2 className="h-5 w-5 text-blue-600" />
+                {t("tracker.euTitle", "EU — Compliance Obligations")}
+              </CardTitle>
+              <CardDescription>
+                {t(
+                  "tracker.euDesc",
+                  "GDPR, DGA, AI Act, NIS2, and other EU regulatory obligations."
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CountryTab country="EU" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="us">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe2 className="h-5 w-5 text-indigo-600" />
+                {t("tracker.usTitle", "US — Compliance Obligations")}
+              </CardTitle>
+              <CardDescription>
+                {t(
+                  "tracker.usDesc",
+                  "CCPA, HIPAA, SOX, GLBA, and other US federal and state regulatory obligations."
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CountryTab country="US" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="brazil">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe2 className="h-5 w-5 text-emerald-600" />
+                {t("tracker.brazilTitle", "Brazil — Compliance Obligations")}
+              </CardTitle>
+              <CardDescription>
+                {t(
+                  "tracker.brazilDesc",
+                  "LGPD, Marco Civil da Internet, and other Brazilian regulatory obligations."
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CountryTab country="Brazil" />
             </CardContent>
           </Card>
         </TabsContent>
