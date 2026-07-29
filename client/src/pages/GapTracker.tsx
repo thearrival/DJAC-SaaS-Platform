@@ -549,11 +549,11 @@ function VendorCard({ entry }: { entry: GapEntry }) {
           >
             <ScorePill label="Overall" score={assessment.overallScore} />
             <ScorePill
-              label="China"
+              label="APAC"
               score={assessment.jurisdictionScores.china}
             />
             <ScorePill
-              label="Saudi Arabia"
+              label="EMEA"
               score={assessment.jurisdictionScores.saudiArabia}
             />
           </div>

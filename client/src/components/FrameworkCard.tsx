@@ -44,6 +44,12 @@ export function FrameworkCard({
         ? "var(--djac-yellow)"
         : "var(--djac-red)";
 
+  const countryColors: Record<string, string> = {
+    China: "var(--djac-red)",
+    "Saudi Arabia": "var(--djac-green)",
+  };
+  const countryColor = countryColors[country] ?? "var(--djac-muted)";
+
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     const rect = cardRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -216,13 +222,9 @@ export function FrameworkCard({
             style={{
               fontSize: 9,
               fontWeight: 600,
-              color:
-                country === "China" ? "var(--djac-red)" : "var(--djac-green)",
-              background:
-                country === "China"
-                  ? "var(--djac-red)1E"
-                  : "var(--djac-green)14",
-              border: `1px solid ${country === "China" ? "var(--djac-red)47" : "var(--djac-green)38"}`,
+              color: countryColor,
+              background: `${countryColor}1E`,
+              border: `1px solid ${countryColor}47`,
               borderRadius: 99,
               padding: "2px 7px",
             }}

@@ -1107,7 +1107,7 @@ export default function Dashboard() {
                   const score = fwScores[fw.code] ?? 70;
                   const scoreCol =
                     score >= 80 ? C.green : score >= 60 ? C.yellow : C.red;
-                  const isCn = fw.country === "China";
+                  const countryTagLabel = fw.country ?? "Unknown";
                   const cfCount = conflictsFor(fw.code);
                   const totalRel = (matrix ?? []).filter(
                     r => r.source === fw.code || r.target === fw.code
@@ -1198,10 +1198,10 @@ export default function Dashboard() {
                         }}
                       >
                         <Tag
-                          text={`${isCn ? "🇨🇳" : "🇸🇦"} ${isCn ? t("dashboard.countryChina", "China") : t("dashboard.countrySaudiArabia", "Saudi Arabia")}`}
-                          bg={isCn ? `${C.red}1E` : `${C.green}14`}
-                          border={isCn ? `${C.red}47` : `${C.green}38`}
-                          color={isCn ? C.red : C.green}
+                          text={countryTagLabel}
+                          bg={`${C.cyan}1E`}
+                          border={`${C.cyan}47`}
+                          color={C.cyan}
                         />
                         <div style={{ textAlign: "right" }}>
                           <span

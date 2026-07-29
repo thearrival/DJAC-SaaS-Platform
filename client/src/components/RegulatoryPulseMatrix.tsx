@@ -239,6 +239,11 @@ export function RegulatoryPulseMatrix() {
     [isDark]
   );
 
+  const jurisdictionLabelMap: Record<string, string> = {
+    cn: "APAC",
+    sa: "EMEA",
+  };
+
   const TOOLTIP_STYLE = useMemo<React.CSSProperties>(
     () => ({
       background: isDark ? "#0D1B6E" : "#f8faff",
@@ -399,9 +404,7 @@ export function RegulatoryPulseMatrix() {
                 >
                   {j === "all"
                     ? "All"
-                    : j === "cn"
-                      ? "🇨🇳 China"
-                      : "🇸🇦 Saudi Arabia"}
+                    : jurisdictionLabelMap[j] ?? j}
                 </button>
               ))}
             </div>

@@ -895,15 +895,15 @@ export default function Home() {
             frameworks={[
               {
                 code: "PIPL",
-                name: "Personal Information Protection Law (China)",
+                name: "Personal Information Protection Law",
                 year: "2021",
               },
               {
                 code: "CSL",
-                name: "Cybersecurity Law (China)",
+                name: "Cybersecurity Law",
                 year: "2017 / 2026",
               },
-              { code: "DSL", name: "Data Security Law (China)", year: "2021" },
+              { code: "DSL", name: "Data Security Law", year: "2021" },
               {
                 code: "APPI",
                 name: "Act on Protection of Personal Info (Japan)",
@@ -934,22 +934,22 @@ export default function Home() {
               },
               {
                 code: "PDPL-KSA",
-                name: "Personal Data Protection Law (Saudi)",
+                name: "Personal Data Protection Law",
                 year: "2022",
               },
               {
                 code: "NCA-ECC",
-                name: "Essential Cybersecurity Controls (Saudi)",
+                name: "Essential Cybersecurity Controls",
                 year: "2018",
               },
               {
                 code: "NCA-CCC",
-                name: "Cloud Cybersecurity Controls (Saudi)",
+                name: "Cloud Cybersecurity Controls",
                 year: "2020",
               },
               {
                 code: "NCA-CSCC",
-                name: "Cyber Supply Chain Risk Management (Saudi)",
+                name: "Cyber Supply Chain Risk Management",
                 year: "2022",
               },
               {

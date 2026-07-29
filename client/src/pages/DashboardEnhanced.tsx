@@ -1508,7 +1508,7 @@ export default function DashboardEnhanced() {
                             <div className="mt-3 grid gap-3 md:grid-cols-2">
                               <div>
                                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                  {t("home.saudi", "Saudi Arabia")}
+                                  {t("home.emea", "EMEA")}
                                 </p>
                                 <p className="mt-1 text-sm text-foreground">
                                   {row.saudiArabia}
@@ -1516,7 +1516,7 @@ export default function DashboardEnhanced() {
                               </div>
                               <div>
                                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                  {t("home.china", "China")}
+                                  {t("home.apac", "APAC")}
                                 </p>
                                 <p className="mt-1 text-sm text-foreground">
                                   {row.china}

@@ -1671,7 +1671,7 @@ export default function ClientWorkspace() {
                       {previewResult.jurisdictionScores.china}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {t("client.previewChina", "China")}
+                      {t("client.previewAPAC", "APAC")}
                     </p>
                   </div>
                   <div className="rounded border px-3 py-2 text-center">
@@ -1679,7 +1679,7 @@ export default function ClientWorkspace() {
                       {previewResult.jurisdictionScores.saudiArabia}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {t("client.previewSaudi", "Saudi Arabia")}
+                      {t("client.previewEMEA", "EMEA")}
                     </p>
                   </div>
                 </div>
@@ -1998,7 +1998,7 @@ export default function ClientWorkspace() {
             </div>
             <div className="rounded-lg border border-border p-3">
               <h3 className="text-sm font-semibold">
-                {t("client.saudiArabia", "Saudi Arabia")}
+                {t("client.emea", "EMEA")}
               </h3>
               {saudiFrameworksQuery.isLoading ? (
                 <p
@@ -2042,7 +2042,7 @@ export default function ClientWorkspace() {
             </div>
             <div className="rounded-lg border border-border p-3">
               <h3 className="text-sm font-semibold">
-                {t("client.china", "China")}
+                {t("client.apac", "APAC")}
               </h3>
               {chinaFrameworksQuery.isLoading ? (
                 <p

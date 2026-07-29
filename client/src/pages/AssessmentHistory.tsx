@@ -377,8 +377,8 @@ function JobCard({
   vendorId?: number;
   scoreLabels: {
     overall: string;
-    china: string;
-    saudiArabia: string;
+    region1: string;
+    region2: string;
   };
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -540,11 +540,11 @@ function JobCard({
                 score={assessment.overallScore}
               />
               <ScoreMini
-                label={scoreLabels.china}
+                label={scoreLabels.region1}
                 score={assessment.jurisdictionScores.china}
               />
               <ScoreMini
-                label={scoreLabels.saudiArabia}
+                label={scoreLabels.region2}
                 score={assessment.jurisdictionScores.saudiArabia}
               />
             </div>
@@ -725,8 +725,8 @@ export default function AssessmentHistory() {
   const scoreLabels = useMemo(
     () => ({
       overall: t("assessmentHistory.scoreOverall", "Overall"),
-      china: t("assessmentHistory.scoreChina", "China"),
-      saudiArabia: t("assessmentHistory.scoreKSA", "Saudi Arabia"),
+      region1: t("assessmentHistory.scoreRegion1", "APAC"),
+      region2: t("assessmentHistory.scoreRegion2", "EMEA"),
     }),
     [t]
   );

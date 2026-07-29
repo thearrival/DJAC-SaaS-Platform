@@ -522,12 +522,12 @@ export function AIOrchestrationFeed() {
           <MiniGauge
             value={assessment.jurisdictionScores?.china ?? 0}
             color={isDark ? "#FF6B2B" : "#ea580c"}
-            label={`${t("assessmentHistory.scoreChina", "China")} (PIPL)`}
+            label={`${t("assessmentHistory.scoreRegion1", "APAC")} (PIPL)`}
           />
           <MiniGauge
             value={assessment.jurisdictionScores?.saudiArabia ?? 0}
             color={isDark ? "#FFD600" : "#d97706"}
-            label={`${t("assessmentHistory.scoreKSA", "Saudi Arabia")} (PDPL)`}
+            label={`${t("assessmentHistory.scoreRegion2", "EMEA")} (PDPL)`}
           />
           <div style={{ flex: 1 }}>
             <div

@@ -585,11 +585,11 @@ export default function VendorDetail() {
             />
             <ScoreArc
               score={assessment.jurisdictionScores.china}
-              label={t("vendorDetail.scoreChina", "China (CN)")}
+              label={t("vendorDetail.scoreAPAC", "APAC")}
             />
             <ScoreArc
               score={assessment.jurisdictionScores.saudiArabia}
-              label={t("vendorDetail.scoreKSA", "Saudi Arabia")}
+              label={t("vendorDetail.scoreEMEA", "EMEA")}
             />
 
             <Separator
