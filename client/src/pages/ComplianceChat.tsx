@@ -4,7 +4,7 @@
  * Phase 49 — AI Compliance Chatbot
  *
  * Interactive Q&A page powered by the DJAC law knowledge base + LLM.
- * Users can ask free-form questions about PIPL, CSL, DSL, PDPL, and NCA
+ * Users can ask free-form questions about global compliance frameworks
  * and receive grounded, citation-aware answers.
  */
 import { useState } from "react";
@@ -26,17 +26,17 @@ import { toast as sonnerToast } from "sonner";
 // ── Suggested starter prompts (EN) ──────────────────────────────────────────
 
 const SUGGESTED_PROMPTS = [
-  "What are the key obligations under China's PIPL for cross-border data transfers?",
+  "What are the key obligations under GDPR for cross-border data transfers?",
   "How does Saudi Arabia's PDPL define 'personal data' and what does it protect?",
-  "What is the difference between CSL and DSL in China?",
+  "What is the difference between China's PIPL and GDPR's approach to consent?",
   "How do NCA Essential Cybersecurity Controls apply to financial institutions in Saudi Arabia?",
-  "Can a company transfer employee data from China to Saudi Arabia? What steps are required?",
-  "What are the penalties for PIPL non-compliance in China?",
-  "What is a Standard Contract (SC) under PIPL Art. 38?",
-  "Does Saudi Arabia's PDPL have an adequacy decision equivalent?",
+  "What steps are required to transfer data from the EU to the US under the DPF?",
+  "What are the penalties for GDPR non-compliance in the EU?",
+  "What is a Data Protection Impact Assessment (DPIA) and when is it required?",
+  "Does LGPD in Brazil have requirements similar to GDPR's DPO role?",
 ];
 
-type Jurisdiction = "all" | "China" | "Saudi Arabia";
+type Jurisdiction = "all" | "China" | "Saudi Arabia" | "EU" | "Brazil" | "US";
 
 export default function ComplianceChat() {
   const { t } = useLocale();
@@ -74,6 +74,12 @@ export default function ComplianceChat() {
     setMessages(newMessages);
 
     // Only send user/assistant messages to the server (no system role)
+    const apiJurisdiction: "all" | "China" | "Saudi Arabia" =
+      jurisdiction === "EU" ||
+      jurisdiction === "Brazil" ||
+      jurisdiction === "US"
+        ? "all"
+        : jurisdiction;
     chatMutation.mutate({
       messages: newMessages
         .filter(m => m.role === "user" || m.role === "assistant")
@@ -81,7 +87,7 @@ export default function ComplianceChat() {
           role: m.role as "user" | "assistant",
           content: m.content,
         })),
-      jurisdiction,
+      jurisdiction: apiJurisdiction,
     });
   };
 
@@ -104,7 +110,7 @@ export default function ComplianceChat() {
             <p className="text-sm text-muted-foreground">
               {t(
                 "chat.subtitle",
-                "Ask anything about PIPL, CSL, DSL, PDPL, and NCA frameworks"
+                "Ask anything about GDPR, PIPL, PDPL, LGPD, and other global frameworks"
               )}
             </p>
           </div>
@@ -131,6 +137,15 @@ export default function ComplianceChat() {
                 </SelectItem>
                 <SelectItem value="Saudi Arabia">
                   {t("chat.jurisdictionSaudi", "Saudi Arabia")}
+                </SelectItem>
+                <SelectItem value="EU">
+                  {t("chat.jurisdictionEU", "EU")}
+                </SelectItem>
+                <SelectItem value="Brazil">
+                  {t("chat.jurisdictionBrazil", "Brazil")}
+                </SelectItem>
+                <SelectItem value="US">
+                  {t("chat.jurisdictionUSA", "United States")}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -180,7 +195,7 @@ export default function ComplianceChat() {
       <p className="text-center text-xs text-muted-foreground/60">
         {t(
           "chat.footerNote",
-          "Powered by DJAC law knowledge base · China (PIPL, CSL, DSL) · Saudi Arabia (PDPL, NCA)"
+          "Powered by DJAC law knowledge base · GDPR · PIPL · PDPL · LGPD · and more"
         )}
       </p>
     </div>

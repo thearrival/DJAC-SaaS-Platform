@@ -1095,9 +1095,7 @@ function DashboardLayoutContent({
                 </div>
               }
             >
-              <RouteErrorBoundary>
-                {children}
-              </RouteErrorBoundary>
+              <RouteErrorBoundary>{children}</RouteErrorBoundary>
             </Suspense>
           </div>
         </main>

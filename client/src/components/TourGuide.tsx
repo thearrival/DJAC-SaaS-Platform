@@ -79,7 +79,7 @@ const TOUR_STEPS: TourStep[] = [
     titleFallback: "Welcome to DJAC! 👋",
     descKey: "tour.step0Desc",
     descFallback:
-      "Your all-in-one compliance platform for China–Saudi cross-border operations.\n\n" +
+      "Your all-in-one compliance platform for global cross-border operations.\n\n" +
       "📊 Compliance tracking  •  🤖 AI-powered reports\n" +
       "🔍 Vendor risk analysis  •  📅 Deadline monitoring\n\n" +
       "In 7 quick steps, you'll master the essentials. Let's go! 🚀",

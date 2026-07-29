@@ -289,6 +289,10 @@ export default function DataSubjectRequests() {
   const [patchingId, setPatchingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<{
+    requesterName?: string;
+    requesterEmail?: string;
+  }>({});
 
   // Form state
   const [form, setForm] = useState({
@@ -358,13 +362,20 @@ export default function DataSubjectRequests() {
       priority: "normal",
       notes: "",
     });
+    setErrors({});
   }
 
   function handleCreate() {
-    if (!form.requesterName.trim() || !form.requesterEmail.trim()) {
-      toast.error("Requester name and email are required");
+    const next: { requesterName?: string; requesterEmail?: string } = {};
+    if (!form.requesterName.trim())
+      next.requesterName = "Requester name is required";
+    if (!form.requesterEmail.trim())
+      next.requesterEmail = "Requester email is required";
+    if (Object.keys(next).length) {
+      setErrors(next);
       return;
     }
+    setErrors({});
     setSaving(true);
     createMutation.mutate({
       requestType: form.requestType,
@@ -806,10 +817,15 @@ export default function DataSubjectRequests() {
                 id="dsr-name"
                 placeholder="Full name of the data subject"
                 value={form.requesterName}
-                onChange={e =>
-                  setForm(f => ({ ...f, requesterName: e.target.value }))
-                }
+                onChange={e => {
+                  setForm(f => ({ ...f, requesterName: e.target.value }));
+                  if (errors.requesterName)
+                    setErrors(p => ({ ...p, requesterName: undefined }));
+                }}
               />
+              {errors.requesterName && (
+                <p className="text-sm text-red-400">{errors.requesterName}</p>
+              )}
             </div>
 
             {/* Requester Email */}
@@ -822,10 +838,15 @@ export default function DataSubjectRequests() {
                 type="email"
                 placeholder="subject@example.com"
                 value={form.requesterEmail}
-                onChange={e =>
-                  setForm(f => ({ ...f, requesterEmail: e.target.value }))
-                }
+                onChange={e => {
+                  setForm(f => ({ ...f, requesterEmail: e.target.value }));
+                  if (errors.requesterEmail)
+                    setErrors(p => ({ ...p, requesterEmail: undefined }));
+                }}
               />
+              {errors.requesterEmail && (
+                <p className="text-sm text-red-400">{errors.requesterEmail}</p>
+              )}
             </div>
 
             {/* Type + Jurisdiction */}

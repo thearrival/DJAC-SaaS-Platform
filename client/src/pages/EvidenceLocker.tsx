@@ -191,6 +191,7 @@ export default function EvidenceLocker() {
     description: "",
     tags: "",
   });
+  const [errors, setErrors] = useState<{ title?: string; url?: string }>({});
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -234,13 +235,18 @@ export default function EvidenceLocker() {
       description: "",
       tags: "",
     });
+    setErrors({});
   }
 
   function handleAdd() {
-    if (!form.title.trim() || !form.url.trim()) {
-      toast.error("Title and URL are required");
+    const next: { title?: string; url?: string } = {};
+    if (!form.title.trim()) next.title = "Title is required";
+    if (!form.url.trim()) next.url = "Document URL is required";
+    if (Object.keys(next).length) {
+      setErrors(next);
       return;
     }
+    setErrors({});
     setSaving(true);
     addMutation.mutate({
       title: form.title.trim(),
@@ -563,8 +569,15 @@ export default function EvidenceLocker() {
                 id="ev-title"
                 placeholder="e.g. Q2 Audit Report – PDPL Compliance"
                 value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                onChange={e => {
+                  setForm(f => ({ ...f, title: e.target.value }));
+                  if (errors.title)
+                    setErrors(p => ({ ...p, title: undefined }));
+                }}
               />
+              {errors.title && (
+                <p className="text-sm text-red-400">{errors.title}</p>
+              )}
             </div>
 
             {/* URL */}
@@ -577,8 +590,14 @@ export default function EvidenceLocker() {
                 type="url"
                 placeholder="https://..."
                 value={form.url}
-                onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
+                onChange={e => {
+                  setForm(f => ({ ...f, url: e.target.value }));
+                  if (errors.url) setErrors(p => ({ ...p, url: undefined }));
+                }}
               />
+              {errors.url && (
+                <p className="text-sm text-red-400">{errors.url}</p>
+              )}
             </div>
 
             {/* Source Type + Source ID */}

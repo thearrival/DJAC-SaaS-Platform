@@ -244,24 +244,24 @@ export default function ServiceRequests() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total Requests"
-          value={requests.length}
+          value={isLoading ? "—" : requests.length}
           icon={<ClipboardList className="size-5 text-zinc-400" />}
         />
         <StatCard
           title="Active"
-          value={activeCount}
+          value={isLoading ? "—" : activeCount}
           icon={<Shield className="size-5 text-blue-400" />}
           accent="text-blue-400"
         />
         <StatCard
           title="Pending Review"
-          value={pendingReviewCount}
+          value={isLoading ? "—" : pendingReviewCount}
           icon={<Clock className="size-5 text-yellow-400" />}
           accent="text-yellow-400"
         />
         <StatCard
           title="Completed"
-          value={completedCount}
+          value={isLoading ? "—" : completedCount}
           icon={<CheckCircle2 className="size-5 text-green-400" />}
           accent="text-green-400"
         />
@@ -510,7 +510,7 @@ function StatCard({
   accent = "text-white",
 }: {
   title: string;
-  value: number;
+  value: number | string;
   icon: React.ReactNode;
   accent?: string;
 }) {

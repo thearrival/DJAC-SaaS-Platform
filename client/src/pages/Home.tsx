@@ -443,7 +443,7 @@ export default function Home() {
           }}
         >
           <Sparkles style={{ width: 12, height: 12 }} />
-          {t("home.badge", "China × Saudi Arabia · Compliance Intelligence")}
+          {t("home.badge", "Global · Compliance Intelligence Platform")}
         </div>
         <h1
           style={{
@@ -477,7 +477,7 @@ export default function Home() {
         >
           {t(
             "home.heroSubtitle",
-            "From China's CSL and PIPL to Saudi Arabia's PDPL and NCA — we map every regulation, flag every conflict, and track every deadline in real time, so your cross-border operations stay on the right side of the law."
+            "From APAC and EMEA to the Americas — we map every regulation, flag every conflict, and track every deadline in real time, so your cross-border operations stay on the right side of the law."
           )}
         </p>
         <div
@@ -786,7 +786,7 @@ export default function Home() {
                 title: t("home.step2Title", "Pick Your Frameworks"),
                 desc: t(
                   "home.step2Desc",
-                  "Select the laws that apply to your operations — China, Saudi Arabia, or both — and pair them for instant side-by-side analysis."
+                  "Select the regulations that apply across any jurisdiction — GDPR, PIPL, PDPL, LGPD, and more — for instant side-by-side analysis."
                 ),
               },
               {
@@ -881,191 +881,122 @@ export default function Home() {
         </h2>
         <div
           className="djac-home-framework-grid"
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 20,
+          }}
         >
-          {/* China */}
-          <div
-            style={{
-              background: "rgba(255,23,68,0.05)",
-              border: "1px solid rgba(255,23,68,0.22)",
-              borderRadius: 18,
-              padding: "32px 28px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 26,
-              }}
-            >
-              <span style={{ fontSize: 28 }}>🇨🇳</span>
-              <h3
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "#FF6B6B",
-                  margin: 0,
-                }}
-              >
-                {t("home.china", "China")}
-              </h3>
-            </div>
-            {[
+          {/* APAC */}
+          <RegionCard
+            flag="🌏"
+            title={t("home.apac", "Asia-Pacific")}
+            color={C.orange}
+            frameworks={[
               {
                 code: "PIPL",
-                name: t("home.pipl", "Personal Information Protection Law"),
+                name: "Personal Information Protection Law (China)",
                 year: "2021",
               },
               {
                 code: "CSL",
-                name: t("home.csl", "Cybersecurity Law (CSL 2026 Amendment)"),
+                name: "Cybersecurity Law (China)",
                 year: "2017 / 2026",
               },
+              { code: "DSL", name: "Data Security Law (China)", year: "2021" },
               {
-                code: "DSL",
-                name: t("home.dsl", "Data Security Law"),
-                year: "2021",
+                code: "APPI",
+                name: "Act on Protection of Personal Info (Japan)",
+                year: "2005",
               },
               {
-                code: "MLPS",
-                name: t(
-                  "home.frameworks.mlps",
-                  "Multi-Level Protection Scheme 2.0"
-                ),
-                year: "2019",
+                code: "PDPA-TH",
+                name: "Personal Data Protection Act (Thailand)",
+                year: "2022",
               },
-            ].map(fw => (
-              <div
-                key={fw.code}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  marginBottom: 16,
-                }}
-              >
-                <span
-                  style={{
-                    background: "rgba(255,70,70,0.15)",
-                    border: "1px solid rgba(255,70,70,0.3)",
-                    borderRadius: 7,
-                    color: "#FF7070",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    padding: "4px 10px",
-                    flexShrink: 0,
-                  }}
-                >
-                  {fw.code}
-                </span>
-                <div>
-                  <p style={{ fontSize: 13.5, fontWeight: 500, margin: 0 }}>
-                    {fw.name}
-                  </p>
-                  <p
-                    style={{ color: C.muted, fontSize: 11, margin: "2px 0 0" }}
-                  >
-                    {t("home.frameworks.effective", "Effective")} {fw.year}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Saudi Arabia */}
-          <div
-            style={{
-              background: "rgba(1,255,127,0.04)",
-              border: "1px solid rgba(1,255,127,0.18)",
-              borderRadius: 18,
-              padding: "32px 28px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 26,
-              }}
-            >
-              <span style={{ fontSize: 28 }}>🇸🇦</span>
-              <h3
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: C.green,
-                  margin: 0,
-                }}
-              >
-                {t("home.saudi", "Saudi Arabia")}
-              </h3>
-            </div>
-            {[
               {
-                code: "PDPL",
-                name: t("home.pdpl", "Personal Data Protection Law"),
+                code: "PDPA-SG",
+                name: "Personal Data Protection Act (Singapore)",
+                year: "2014",
+              },
+            ]}
+          />
+          {/* EMEA */}
+          <RegionCard
+            flag="🌍"
+            title={t("home.emea", "Europe & Middle East")}
+            color={C.cyan}
+            frameworks={[
+              {
+                code: "GDPR",
+                name: "General Data Protection Regulation (EU)",
+                year: "2018",
+              },
+              {
+                code: "PDPL-KSA",
+                name: "Personal Data Protection Law (Saudi)",
                 year: "2022",
               },
               {
                 code: "NCA-ECC",
-                name: t("home.nca", "Essential Cybersecurity Controls"),
+                name: "Essential Cybersecurity Controls (Saudi)",
                 year: "2018",
               },
               {
                 code: "NCA-CCC",
-                name: t(
-                  "home.frameworks.ncaCcc",
-                  "Cloud Cybersecurity Controls"
-                ),
+                name: "Cloud Cybersecurity Controls (Saudi)",
                 year: "2020",
               },
               {
                 code: "NCA-CSCC",
-                name: t(
-                  "home.frameworks.ncaCscc",
-                  "Cyber Supply Chain Risk Management"
-                ),
+                name: "Cyber Supply Chain Risk Management (Saudi)",
                 year: "2022",
               },
-            ].map(fw => (
-              <div
-                key={fw.code}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  marginBottom: 16,
-                }}
-              >
-                <span
-                  style={{
-                    background: "rgba(1,255,127,0.12)",
-                    border: "1px solid rgba(1,255,127,0.28)",
-                    borderRadius: 7,
-                    color: C.green,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    padding: "4px 10px",
-                    flexShrink: 0,
-                  }}
-                >
-                  {fw.code}
-                </span>
-                <div>
-                  <p style={{ fontSize: 13.5, fontWeight: 500, margin: 0 }}>
-                    {fw.name}
-                  </p>
-                  <p
-                    style={{ color: C.muted, fontSize: 11, margin: "2px 0 0" }}
-                  >
-                    {t("home.frameworks.effective", "Effective")} {fw.year}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              {
+                code: "PDPL-UA",
+                name: "Personal Data Protection Law (UAE)",
+                year: "2022",
+              },
+            ]}
+          />
+          {/* Americas */}
+          <RegionCard
+            flag="🌎"
+            title={t("home.americas", "Americas")}
+            color={C.yellow}
+            frameworks={[
+              {
+                code: "LGPD",
+                name: "Lei Geral de Proteção de Dados (Brazil)",
+                year: "2020",
+              },
+              {
+                code: "CCPA",
+                name: "California Consumer Privacy Act (US)",
+                year: "2020",
+              },
+              {
+                code: "CPRA",
+                name: "California Privacy Rights Act (US)",
+                year: "2023",
+              },
+              {
+                code: "PIPEDA",
+                name: "Personal Info Protection Act (Canada)",
+                year: "2001",
+              },
+              {
+                code: "Bill 64",
+                name: "Law 25 – Privacy Reform (Québec)",
+                year: "2023",
+              },
+              {
+                code: "COPPA",
+                name: "Children's Online Privacy Protection (US)",
+                year: "2000",
+              },
+            ]}
+          />
         </div>
       </section>
 
@@ -1255,7 +1186,7 @@ export default function Home() {
               <p style={{ color: C.muted, fontSize: 13, margin: "0 0 28px" }}>
                 {t(
                   "home.consultationCardSubtitle",
-                  "Ask for expert guidance on China-Saudi cross-border operations."
+                  "Ask for expert guidance on multi-jurisdiction cross-border operations."
                 )}
               </p>
               <p style={{ color: C.muted, fontSize: 11.5, margin: "0 0 12px" }}>
@@ -1497,6 +1428,82 @@ export default function Home() {
           {`${t("home.footer.copyright", "(c)")} ${year} ${t("home.footer.credits", "DJAC Tool · Powered by Yalla Hack ·")} ${t("home.footer", "Enterprise compliance intelligence for global operations.")}`}
         </p>
       </footer>
+    </div>
+  );
+}
+
+type FrameworkEntry = { code: string; name: string; year: string };
+
+function RegionCard({
+  flag,
+  title,
+  color,
+  frameworks,
+}: {
+  flag: string;
+  title: string;
+  color: string;
+  frameworks: FrameworkEntry[];
+}) {
+  const C_card = { muted: "var(--djac-muted)" };
+  return (
+    <div
+      style={{
+        background: `${color}06`,
+        border: `1px solid ${color}22`,
+        borderRadius: 18,
+        padding: "28px 24px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 22,
+        }}
+      >
+        <span style={{ fontSize: 24 }}>{flag}</span>
+        <h3 style={{ fontSize: 18, fontWeight: 700, color, margin: 0 }}>
+          {title}
+        </h3>
+      </div>
+      {frameworks.map(fw => (
+        <div
+          key={fw.code}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 14,
+          }}
+        >
+          <span
+            style={{
+              background: `${color}18`,
+              border: `1px solid ${color}35`,
+              borderRadius: 6,
+              color,
+              fontSize: 10.5,
+              fontWeight: 700,
+              padding: "3px 8px",
+              flexShrink: 0,
+            }}
+          >
+            {fw.code}
+          </span>
+          <div>
+            <p style={{ fontSize: 12.5, fontWeight: 500, margin: 0 }}>
+              {fw.name}
+            </p>
+            <p
+              style={{ color: C_card.muted, fontSize: 10.5, margin: "1px 0 0" }}
+            >
+              Effective {fw.year}
+            </p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

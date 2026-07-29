@@ -152,6 +152,7 @@ export default function SecurityMaturity() {
   const [showCreate, setShowCreate] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [title, setTitle] = useState("");
+  const [titleError, setTitleError] = useState("");
   const [framework, setFramework] = useState<string>("");
   const [recommendations, setRecommendations] = useState("");
   const [scores, setScores] = useState<DefaultScores>(DEFAULT_SCORES);
@@ -191,9 +192,10 @@ export default function SecurityMaturity() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) {
-      toast.error("Title is required.");
+      setTitleError("Title is required");
       return;
     }
+    setTitleError("");
     createMutation.mutate({
       title: title.trim(),
       frameworkRef: (framework as (typeof FRAMEWORKS)[number]) || undefined,
@@ -444,9 +446,15 @@ export default function SecurityMaturity() {
                 <Input
                   placeholder="e.g. Q2 2026 Self-Assessment"
                   value={title}
-                  onChange={e => setTitle(e.target.value)}
+                  onChange={e => {
+                    setTitle(e.target.value);
+                    if (titleError) setTitleError("");
+                  }}
                   className="bg-zinc-800 border-zinc-700"
                 />
+                {titleError && (
+                  <p className="text-sm text-red-400">{titleError}</p>
+                )}
               </div>
               <div className="space-y-1.5">
                 <Label>
