@@ -10,6 +10,7 @@ import {
   users,
 } from "../drizzle/schema";
 import { getDb } from "./db";
+import { ENV } from "./_core/env";
 
 type OrgRole = "owner" | "admin" | "compliance_officer" | "analyst";
 
@@ -39,7 +40,7 @@ export async function getMyOrg(orgId: number, role: string | null | undefined) {
       slug: "dev-org",
       plan: "enterprise" as const,
       maxSeats: 99,
-      billingEmail: "dev@localhost",
+      billingEmail: ENV.defaultBillingEmail,
       primaryJurisdiction: "Both" as const,
       industry: "Technology" as string | null,
       trialEndsAt: null as Date | null,

@@ -161,9 +161,11 @@ export async function resolveLocalAuthUser(
 
 // ─── Path 1: OAuth session ────────────────────────────────────────────────────
 
-export async function resolveOAuthUser(req: any): Promise<User | null> {
+export async function resolveOAuthUser(
+  req: IncomingMessage
+): Promise<User | null> {
   try {
-    return await sdk.authenticateRequest(req);
+    return await sdk.authenticateRequest(req as any);
   } catch {
     return null;
   }

@@ -157,6 +157,9 @@ export const ENV = {
   yallaAdminJwtSecret: parsedEnv.YALLA_ADMIN_JWT_SECRET,
   yallaAdminSessionTtlHours: parsedEnv.YALLA_ADMIN_SESSION_TTL_HOURS,
 
+  // ── Defaults ────────────────────────────────────────────────────────────
+  defaultBillingEmail: parsedEnv.DEFAULT_BILLING_EMAIL,
+
   // ── Supabase ──────────────────────────────────────────────────────────────
   supabaseUrl: parsedEnv.SUPABASE_URL,
   supabaseAnonKey: parsedEnv.SUPABASE_ANON_KEY,

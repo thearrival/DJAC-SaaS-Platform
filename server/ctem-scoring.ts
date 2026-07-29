@@ -193,7 +193,7 @@ export function deriveExposureMappings(
         controlId: null,
         controlCode: "ECC-2-1-1",
         mappingReason: `Vulnerability "${input.title}" affects access control mechanisms — directly linked to NCA ECC Access Management controls.`,
-        severityImpact: sev as any,
+        severityImpact: sev as "critical" | "high" | "medium" | "low",
       });
     }
     if (isChinaRegion) {
@@ -204,7 +204,7 @@ export function deriveExposureMappings(
         controlId: null,
         controlCode: "CSL-Art.21",
         mappingReason: `Vulnerability "${input.title}" affects authentication/access controls — relevant to CSL Art.21 network security obligations.`,
-        severityImpact: sev as any,
+        severityImpact: sev as "critical" | "high" | "medium" | "low",
       });
     }
   }
@@ -222,9 +222,11 @@ export function deriveExposureMappings(
         controlId: null,
         controlCode: "PDPL-Art.19",
         mappingReason: `Asset handles personal data and vulnerability "${input.title}" creates a data leakage risk — maps to PDPL Art.19 personal data security obligations.`,
-        severityImpact: (input.severity === "critical"
-          ? "critical"
-          : sev) as any,
+        severityImpact: (input.severity === "critical" ? "critical" : sev) as
+          | "critical"
+          | "high"
+          | "medium"
+          | "low",
       });
     }
     if (isChinaRegion) {
@@ -235,9 +237,11 @@ export function deriveExposureMappings(
         controlId: null,
         controlCode: "PIPL-Art.51",
         mappingReason: `Asset processes personal information and vulnerability "${input.title}" exposes data subjects — maps to PIPL Art.51 security measures requirements.`,
-        severityImpact: (input.severity === "critical"
-          ? "critical"
-          : sev) as any,
+        severityImpact: (input.severity === "critical" ? "critical" : sev) as
+          | "critical"
+          | "high"
+          | "medium"
+          | "low",
       });
     }
   }
@@ -251,9 +255,11 @@ export function deriveExposureMappings(
       controlId: null,
       controlCode: "DSL-Art.27",
       mappingReason: `Asset handles important/critical data under DSL and vulnerability "${input.title}" may lead to unauthorized data access — requires DSL Art.27 security management measures.`,
-      severityImpact: (input.severity === "critical"
-        ? "critical"
-        : "high") as any,
+      severityImpact: (input.severity === "critical" ? "critical" : "high") as
+        | "critical"
+        | "high"
+        | "medium"
+        | "low",
     });
   }
 
@@ -267,7 +273,7 @@ export function deriveExposureMappings(
         controlId: null,
         controlCode: "PIPL-Art.51",
         mappingReason: `Cryptographic weakness "${input.title}" undermines PIPL Art.51 requirement for encryption of personal information.`,
-        severityImpact: sev as any,
+        severityImpact: sev as "critical" | "high" | "medium" | "low",
       });
     }
     if (isSaudiRegion) {
@@ -278,7 +284,7 @@ export function deriveExposureMappings(
         controlId: null,
         controlCode: "ECC-2-3-1",
         mappingReason: `Cryptographic weakness "${input.title}" violates NCA ECC-2-3 cryptography controls.`,
-        severityImpact: sev as any,
+        severityImpact: sev as "critical" | "high" | "medium" | "low",
       });
     }
   }
@@ -292,7 +298,7 @@ export function deriveExposureMappings(
       controlId: null,
       controlCode: "CSL-Art.37",
       mappingReason: `Cross-border asset with vulnerability "${input.title}" — CSL Art.37 requires security assessment before any critical data cross-border transfer.`,
-      severityImpact: sev as any,
+      severityImpact: sev as "critical" | "high" | "medium" | "low",
     });
   }
 
@@ -348,7 +354,7 @@ export async function executeContinuousComplianceRun(params: {
         runStatus: "running",
         triggeredBy,
         startedAt: new Date(),
-      } satisfies Partial<InsertContinuousComplianceRun> as any)
+      } satisfies Partial<InsertContinuousComplianceRun>)
       .returning({ id: continuousComplianceRuns.id });
     runId = insertedRun.id;
   } else {
@@ -499,7 +505,9 @@ export async function executeContinuousComplianceRun(params: {
             )
             .limit(1);
           if (already.length === 0) {
-            await db.insert(complianceExposureMappings).values(m as any);
+            await db
+              .insert(complianceExposureMappings)
+              .values(m as InsertComplianceExposureMapping);
           }
         }
       }

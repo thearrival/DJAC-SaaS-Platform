@@ -29,7 +29,7 @@ export function inMemoryDemoData(orgId: number) {
       id: 1,
       assetName: "Customer API Gateway",
       assetType: "api_endpoint",
-      region: "China",
+      region: "APAC",
       isInternetFacing: 1,
       criticalityScore: 9,
       handlesPersonalData: 1,
@@ -39,7 +39,7 @@ export function inMemoryDemoData(orgId: number) {
       id: 2,
       assetName: "PDPL Consent Database",
       assetType: "database",
-      region: "Saudi Arabia",
+      region: "EMEA",
       isInternetFacing: 0,
       criticalityScore: 8,
       handlesPersonalData: 1,
@@ -49,7 +49,7 @@ export function inMemoryDemoData(orgId: number) {
       id: 3,
       assetName: "Admin Portal",
       assetType: "web_application",
-      region: "Cross-border",
+      region: "Global",
       isInternetFacing: 1,
       criticalityScore: 7,
       handlesPersonalData: 0,
@@ -59,7 +59,7 @@ export function inMemoryDemoData(orgId: number) {
       id: 4,
       assetName: "Cloud Storage - CN",
       assetType: "storage_bucket",
-      region: "China",
+      region: "APAC",
       isInternetFacing: 0,
       criticalityScore: 8,
       handlesPersonalData: 1,
@@ -69,7 +69,7 @@ export function inMemoryDemoData(orgId: number) {
       id: 5,
       assetName: "Auth / IdP Service",
       assetType: "identity_provider",
-      region: "Cross-border",
+      region: "Global",
       isInternetFacing: 1,
       criticalityScore: 10,
       handlesPersonalData: 1,
@@ -199,11 +199,30 @@ export async function listCtemAssets(
   filters?: { region?: string; vendorId?: number; status?: string }
 ): Promise<CtemAsset[]> {
   const db = await getDb();
-  if (!db) return inMemoryDemoData(orgId).assets as any[];
+  if (!db) return inMemoryDemoData(orgId).assets as any as CtemAsset[];
   const where = [eq(ctemAssets.organizationId, orgId)];
-  if (filters?.region) where.push(eq(ctemAssets.region, filters.region as any));
+  if (filters?.region)
+    where.push(
+      eq(
+        ctemAssets.region,
+        filters.region as
+          | "North America"
+          | "Europe"
+          | "APAC"
+          | "EMEA"
+          | "Latin America"
+          | "Africa"
+          | "Global"
+      )
+    );
   if (filters?.vendorId) where.push(eq(ctemAssets.vendorId, filters.vendorId));
-  if (filters?.status) where.push(eq(ctemAssets.status, filters.status as any));
+  if (filters?.status)
+    where.push(
+      eq(
+        ctemAssets.status,
+        filters.status as "active" | "inactive" | "decommissioned"
+      )
+    );
   return db
     .select()
     .from(ctemAssets)
@@ -235,16 +254,33 @@ export async function createCtemAsset(
       organizationId: orgId,
       vendorId: input.vendorId ?? undefined,
       assetName: input.assetName,
-      assetType: input.assetType,
+      assetType: input.assetType as
+        | "web_application"
+        | "api_endpoint"
+        | "database"
+        | "cloud_service"
+        | "network_device"
+        | "iot_device"
+        | "data_pipeline"
+        | "identity_provider"
+        | "storage_bucket"
+        | "other",
       ipDomain: input.ipDomain ?? undefined,
-      region: input.region,
+      region: input.region as
+        | "North America"
+        | "Europe"
+        | "APAC"
+        | "EMEA"
+        | "Latin America"
+        | "Africa"
+        | "Global",
       isInternetFacing: input.isInternetFacing ? 1 : 0,
       handlesPersonalData: input.handlesPersonalData ? 1 : 0,
       handlesCriticalData: input.handlesCriticalData ? 1 : 0,
       criticalityScore: input.criticalityScore,
-      status: input.status as any,
+      status: input.status as "active" | "inactive" | "decommissioned",
       notes: input.notes ?? undefined,
-    } as any)
+    })
     .returning({ id: ctemAssets.id });
   const id = inserted.id;
   const [row] = await db.select().from(ctemAssets).where(eq(ctemAssets.id, id));
@@ -285,9 +321,30 @@ export async function updateCtemAsset(
     .update(ctemAssets)
     .set({
       ...(patch.assetName !== undefined && { assetName: patch.assetName }),
-      ...(patch.assetType !== undefined && { assetType: patch.assetType }),
+      ...(patch.assetType !== undefined && {
+        assetType: patch.assetType as
+          | "web_application"
+          | "api_endpoint"
+          | "database"
+          | "cloud_service"
+          | "network_device"
+          | "iot_device"
+          | "data_pipeline"
+          | "identity_provider"
+          | "storage_bucket"
+          | "other",
+      }),
       ...(patch.ipDomain !== undefined && { ipDomain: patch.ipDomain }),
-      ...(patch.region !== undefined && { region: patch.region }),
+      ...(patch.region !== undefined && {
+        region: patch.region as
+          | "North America"
+          | "Europe"
+          | "APAC"
+          | "EMEA"
+          | "Latin America"
+          | "Africa"
+          | "Global",
+      }),
       ...(patch.isInternetFacing !== undefined && {
         isInternetFacing: patch.isInternetFacing ? 1 : 0,
       }),
@@ -300,9 +357,11 @@ export async function updateCtemAsset(
       ...(patch.criticalityScore !== undefined && {
         criticalityScore: patch.criticalityScore,
       }),
-      ...(patch.status !== undefined && { status: patch.status }),
+      ...(patch.status !== undefined && {
+        status: patch.status as "active" | "inactive" | "decommissioned",
+      }),
       ...(patch.notes !== undefined && { notes: patch.notes }),
-    } as any)
+    })
     .where(eq(ctemAssets.id, id));
   const [row] = await db.select().from(ctemAssets).where(eq(ctemAssets.id, id));
   return row;
@@ -328,7 +387,9 @@ export async function listCtemVulnerabilities(
   const db = await getDb();
   if (!db) {
     const { vulns } = inMemoryDemoData(orgId);
-    let result = vulns as any[];
+    let result = vulns as (CtemVulnerability & {
+      complianceMappings?: unknown[];
+    })[];
     if (filters?.exploitableOnly)
       result = result.filter(v => v.exploitAvailable);
     if (filters?.severity)
@@ -350,7 +411,17 @@ export async function listCtemVulnerabilities(
     vulnFilters.push(inArray(ctemVulnerabilities.assetId, orgAssetIds));
   }
   if (filters?.severity)
-    vulnFilters.push(eq(ctemVulnerabilities.severity, filters.severity as any));
+    vulnFilters.push(
+      eq(
+        ctemVulnerabilities.severity,
+        filters.severity as
+          | "critical"
+          | "high"
+          | "medium"
+          | "low"
+          | "informational"
+      )
+    );
   if (filters?.exploitableOnly)
     vulnFilters.push(eq(ctemVulnerabilities.exploitAvailable, 1));
 
@@ -408,7 +479,12 @@ export async function createCtemVulnerability(input: {
       cveId: input.cveId ?? null,
       title: input.title,
       description: input.description ?? null,
-      severity: input.severity as any,
+      severity: input.severity as
+        | "critical"
+        | "high"
+        | "medium"
+        | "low"
+        | "informational",
       cvssScore: input.cvssScore,
       exploitAvailable: input.exploitAvailable ? 1 : 0,
       isConfirmed: input.isConfirmed ? 1 : 0,
@@ -471,11 +547,23 @@ export async function listCtemRiskScores(
     return scores.map(s => {
       const a = assets.find((x: any) => x.id === s.assetId) as any;
       return { ...s, asset: a ?? null };
-    }) as any[];
+    }) as any as (CtemRiskScore & { asset: CtemAsset | null })[];
   }
   const assetFilters = [eq(ctemAssets.organizationId, orgId)];
   if (filters?.region)
-    assetFilters.push(eq(ctemAssets.region, filters.region as any));
+    assetFilters.push(
+      eq(
+        ctemAssets.region,
+        filters.region as
+          | "North America"
+          | "Europe"
+          | "APAC"
+          | "EMEA"
+          | "Latin America"
+          | "Africa"
+          | "Global"
+      )
+    );
   if (filters?.vendorId)
     assetFilters.push(eq(ctemAssets.vendorId, filters.vendorId));
 
@@ -490,7 +578,12 @@ export async function listCtemRiskScores(
     inArray(ctemRiskScores.assetId, assetIds),
   ];
   if (filters?.tier)
-    scoreFilters.push(eq(ctemRiskScores.priorityTier, filters.tier as any));
+    scoreFilters.push(
+      eq(
+        ctemRiskScores.priorityTier,
+        filters.tier as "critical" | "high" | "medium" | "low"
+      )
+    );
 
   const scores = await db
     .select()
@@ -658,7 +751,7 @@ export async function listCtemRuns(
         scoreDelta: -4,
         alertRaised: 0,
       },
-    ] as any[];
+    ] as ContinuousComplianceRun[];
   }
   return db
     .select()

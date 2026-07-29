@@ -1,3 +1,4 @@
+import type { Vendor } from "../../drizzle/schema";
 import { executeAssessmentPipeline } from "./pipeline";
 import type { AiJobStage, AiAssessmentReport } from "./schemas";
 
@@ -31,7 +32,7 @@ export type AgentInstance = {
 
 export type AgentDispatchInput = {
   source: "vendor_profile" | "document_upload";
-  vendor: any;
+  vendor: Vendor;
   rawDocumentText?: string;
   engine?: string;
 };

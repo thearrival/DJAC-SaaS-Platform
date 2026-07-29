@@ -4,7 +4,28 @@ import {
   frameworks,
   frameworkRelationships,
   complianceControls,
+  Framework,
 } from "../drizzle/schema";
+
+interface EnrichedRelationship {
+  id: number;
+  sourceFrameworkId: number;
+  targetFrameworkId: number;
+  relationshipType: string;
+  severity: string | null;
+  description: string | null;
+  riskLevel: string | null;
+  mitigation: string | null;
+  rawRelationshipType: string;
+  actionRecommendation: string;
+}
+
+interface VulnerabilityItem {
+  type: string;
+  severity: string | null;
+  mitigation: string | null;
+  description: string | null;
+}
 
 export async function getControlCategoryHeatmap() {
   const db = await getDb();
@@ -370,7 +391,9 @@ export async function getRelationshipHeatmap() {
   return heatmapData.flat();
 }
 
-function calculateComplianceScore(relationships: any[]): number {
+function calculateComplianceScore(
+  relationships: EnrichedRelationship[]
+): number {
   if (!relationships.length) return 100;
 
   const totalScore = relationships.reduce((score, rel) => {
@@ -385,7 +408,7 @@ function calculateComplianceScore(relationships: any[]): number {
   return Math.max(0, Math.min(100, totalScore));
 }
 
-function calculateRiskLevel(relationships: any[]): string {
+function calculateRiskLevel(relationships: EnrichedRelationship[]): string {
   const criticalCount = relationships.filter(
     r => r.severity === "critical"
   ).length;
@@ -397,7 +420,7 @@ function calculateRiskLevel(relationships: any[]): string {
   return "low";
 }
 
-function calculateOverallRisk(vulnerabilities: any[]): string {
+function calculateOverallRisk(vulnerabilities: VulnerabilityItem[]): string {
   const criticalCount = vulnerabilities.filter(
     v => v.severity === "critical"
   ).length;
@@ -410,7 +433,11 @@ function calculateOverallRisk(vulnerabilities: any[]): string {
   return "LOW - Monitor and maintain";
 }
 
-function generateInsights(fw1: any, fw2: any, relationships: any[]): string[] {
+function generateInsights(
+  fw1: Framework,
+  fw2: Framework,
+  relationships: EnrichedRelationship[]
+): string[] {
   const insights: string[] = [];
 
   const conflicts = relationships.filter(

@@ -4,6 +4,7 @@
 
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
+import { ENV } from "./_core/env";
 import { organizations } from "../drizzle/schema";
 
 type OrgPlan = "free_trial" | "starter" | "professional" | "enterprise";
@@ -55,7 +56,7 @@ export async function getOrgSettings(
       id: -1,
       slug: "dev-org",
       name: "Dev Organization",
-      billingEmail: "dev@localhost",
+      billingEmail: ENV.defaultBillingEmail,
       industry: "Technology",
       primaryJurisdiction: "Both",
       plan: "enterprise",

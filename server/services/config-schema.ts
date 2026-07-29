@@ -89,6 +89,12 @@ export const parsedEnv = {
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "",
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "",
 
+  // ── Defaults ───────────────────────────────────────────────────────────────
+  DEFAULT_BILLING_EMAIL: strEnv(
+    process.env.DEFAULT_BILLING_EMAIL,
+    "dev@localhost"
+  ),
+
   // ── SMTP ──────────────────────────────────────────────────────────────────
   SMTP_HOST: strEnv(process.env.SMTP_HOST),
   SMTP_PORT: intEnv(process.env.SMTP_PORT, 587, 1, 65_535),

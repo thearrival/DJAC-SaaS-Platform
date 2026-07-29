@@ -30,7 +30,7 @@ describe("Supabase Integration", () => {
 
   it("should validate Supabase URL format", () => {
     const url =
-      process.env.SUPABASE_URL || "https://gcsoeumdjrejfxuovfcw.supabase.co";
+      process.env.SUPABASE_URL || "https://placeholder-project.supabase.co";
     expect(url).toMatch(/^https?:\/\/.+\.supabase\.co$/);
   });
 });
