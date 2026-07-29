@@ -989,7 +989,12 @@ function PolicyCard({
               {/* Document link */}
               {policy.documentUrl && (
                 <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                  <a href={policy.documentUrl} target="_blank" rel="noreferrer">
+                  <a
+                    href={policy.documentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Open policy document"
+                  >
                     <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 </Button>
@@ -998,6 +1003,7 @@ function PolicyCard({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                aria-label="Edit policy"
                 onClick={() => onEdit(policy)}
               >
                 <Pencil className="h-3.5 w-3.5" />
@@ -1006,6 +1012,7 @@ function PolicyCard({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-destructive hover:text-destructive"
+                aria-label="Delete policy"
                 onClick={() => onDelete(policy)}
               >
                 <Trash2 className="h-3.5 w-3.5" />

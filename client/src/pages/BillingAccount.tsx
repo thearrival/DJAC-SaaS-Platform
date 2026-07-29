@@ -452,6 +452,16 @@ export default function BillingAccount() {
     );
   }
 
+  if (statusQuery.isLoading && !statusQuery.data) {
+    return (
+      <div className="djac-page" style={{ padding: 24, textAlign: "center" }}>
+        <p style={{ color: "var(--djac-muted)" }}>
+          {t("billing.loadingStatus", "Loading subscription...")}
+        </p>
+      </div>
+    );
+  }
+
   if (statusQuery.isError && !statusQuery.data) {
     return (
       <div className="djac-page">

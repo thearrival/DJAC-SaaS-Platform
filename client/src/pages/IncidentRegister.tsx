@@ -1232,6 +1232,7 @@ function IncidentCard({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
+                aria-label="Edit incident"
                 onClick={() => onEdit(i)}
               >
                 <Pencil className="h-3.5 w-3.5" />
@@ -1240,6 +1241,7 @@ function IncidentCard({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-destructive hover:text-destructive"
+                aria-label="Delete incident"
                 onClick={() => onDelete(i)}
               >
                 <Trash2 className="h-3.5 w-3.5" />

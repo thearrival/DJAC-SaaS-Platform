@@ -598,6 +598,7 @@ export default function LawLibrary() {
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8"
+                        aria-label={isCopied ? "Copied" : "Copy citation"}
                         title={isCopied ? "Copied!" : "Copy citation"}
                         onClick={() =>
                           copy(
@@ -620,6 +621,9 @@ export default function LawLibrary() {
                         size="icon"
                         variant="ghost"
                         className={`h-8 w-8 ${isBookmarked ? "text-amber-500" : ""}`}
+                        aria-label={
+                          isBookmarked ? "Remove bookmark" : "Bookmark article"
+                        }
                         title={
                           isBookmarked ? "Remove bookmark" : "Bookmark article"
                         }

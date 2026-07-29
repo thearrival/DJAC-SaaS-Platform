@@ -637,6 +637,7 @@ export default function AuditSchedule() {
                         size="sm"
                         variant="ghost"
                         className="h-7 w-7 p-0"
+                        aria-label="Edit audit"
                         onClick={() => openEdit(a)}
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -645,6 +646,7 @@ export default function AuditSchedule() {
                         size="sm"
                         variant="ghost"
                         className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                        aria-label="Delete audit"
                         onClick={() => setDeleteTarget(a.id)}
                       >
                         <Trash2 className="w-3.5 h-3.5" />

@@ -346,6 +346,7 @@ function MemberCard({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                aria-label="Remove member"
                 disabled={removePending}
               >
                 {removePending ? (
@@ -570,11 +571,12 @@ export default function TeamMembers() {
             variant="ghost"
             size="icon"
             className="h-9 w-9"
+            aria-label="Refresh"
+            title="Refresh"
             onClick={() => {
               void orgQuery.refetch();
               void listQuery.refetch();
             }}
-            title="Refresh"
           >
             <RefreshCw
               size={15}

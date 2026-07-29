@@ -376,6 +376,7 @@ function RiskCard({
               size="icon"
               variant="ghost"
               className="h-7 w-7"
+              aria-label={t("risk.sendRemediation", "Send to Remediation")}
               title={t("risk.sendRemediation", "Send to Remediation")}
               onClick={() => onSendRemediation(risk)}
             >
@@ -385,6 +386,7 @@ function RiskCard({
               size="icon"
               variant="ghost"
               className="h-7 w-7"
+              aria-label={t("common.edit", "Edit")}
               title={t("common.edit", "Edit")}
               onClick={() => onEdit(risk)}
             >
@@ -394,6 +396,7 @@ function RiskCard({
               size="icon"
               variant="ghost"
               className="h-7 w-7 text-destructive hover:text-destructive"
+              aria-label={t("common.delete", "Delete")}
               title={t("common.delete", "Delete")}
               onClick={() => onDelete(risk.id)}
             >

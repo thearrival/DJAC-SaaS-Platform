@@ -471,6 +471,7 @@ export default function AssetInventory() {
                             variant="ghost"
                             size="icon"
                             className="size-7"
+                            aria-label="Edit asset"
                             onClick={() => openEdit(asset)}
                           >
                             <Pencil className="size-3.5" />
@@ -479,6 +480,7 @@ export default function AssetInventory() {
                             variant="ghost"
                             size="icon"
                             className="size-7 text-red-400 hover:text-red-300"
+                            aria-label="Delete asset"
                             onClick={() => setDeleteId(asset.id)}
                           >
                             <Trash2 className="size-3.5" />

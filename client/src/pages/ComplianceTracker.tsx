@@ -598,6 +598,7 @@ function SummaryCards() {
     data: allObligations,
     error: summaryError,
     refetch: refetchSummary,
+    isLoading: summaryLoading,
   } = trpc.compliance.timetable.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
@@ -628,6 +629,17 @@ function SummaryCards() {
   const mostUrgent =
     allObligations?.filter(o => o.riskLevel === "critical").slice(0, 1)[0] ??
     allObligations?.filter(o => o.riskLevel === "high").slice(0, 1)[0];
+
+  if (summaryLoading && !allObligations) {
+    return (
+      <Card className="mb-4">
+        <CardContent className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+          <LoaderCircle className="h-5 w-5 animate-spin" />
+          {t("tracker.summaryLoading", "Loading summary...")}
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (summaryError && !allObligations) {
     return (
