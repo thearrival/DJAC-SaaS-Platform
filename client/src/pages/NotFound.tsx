@@ -124,8 +124,9 @@ export default function NotFound() {
             type="button"
             onClick={handleHome}
             style={{
-              background: "linear-gradient(135deg, #9359EC, #00F7FF)",
-              color: "#fff",
+              background:
+                "linear-gradient(135deg, var(--djac-purple, #9359EC), var(--djac-cyan, #00F7FF))",
+              color: "var(--primary-foreground, #fff)",
               border: "none",
               padding: "0.65rem 1.6rem",
               borderRadius: 8,
