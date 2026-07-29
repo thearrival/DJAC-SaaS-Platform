@@ -121,6 +121,10 @@ export default function OrgSettings() {
   const [billingEmail, setBillingEmail] = useState("");
   const [industry, setIndustry] = useState("");
   const [jurisdiction, setJurisdiction] = useState<string>("Both");
+  const [errors, setErrors] = useState<{
+    name?: string;
+    billingEmail?: string;
+  }>({});
 
   // Track unsaved changes
   const [dirty, setDirty] = useState(false);
@@ -142,6 +146,14 @@ export default function OrgSettings() {
   function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!isAdmin) return;
+    const next: { name?: string; billingEmail?: string } = {};
+    if (!name.trim()) next.name = "Organization name is required";
+    if (!billingEmail.trim()) next.billingEmail = "Billing email is required";
+    if (Object.keys(next).length) {
+      setErrors(next);
+      return;
+    }
+    setErrors({});
     updateMut.mutate({
       name: name || undefined,
       billingEmail: billingEmail || undefined,
@@ -336,6 +348,7 @@ export default function OrgSettings() {
                 value={name}
                 onChange={e => {
                   setName(e.target.value);
+                  if (errors.name) setErrors(p => ({ ...p, name: undefined }));
                   markDirty();
                 }}
                 placeholder={t(
@@ -345,6 +358,9 @@ export default function OrgSettings() {
                 disabled={!isAdmin || updateMut.isPending}
                 maxLength={255}
               />
+              {errors.name && (
+                <p className="text-sm text-red-400">{errors.name}</p>
+              )}
             </div>
 
             {/* Billing Email */}
@@ -362,12 +378,17 @@ export default function OrgSettings() {
                 value={billingEmail}
                 onChange={e => {
                   setBillingEmail(e.target.value);
+                  if (errors.billingEmail)
+                    setErrors(p => ({ ...p, billingEmail: undefined }));
                   markDirty();
                 }}
                 placeholder="billing@yourcompany.com"
                 disabled={!isAdmin || updateMut.isPending}
                 maxLength={320}
               />
+              {errors.billingEmail && (
+                <p className="text-sm text-red-400">{errors.billingEmail}</p>
+              )}
               <p className="text-xs text-muted-foreground">
                 {t(
                   "orgSettings.billingEmailNote",

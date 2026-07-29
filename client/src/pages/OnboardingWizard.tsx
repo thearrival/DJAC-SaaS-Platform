@@ -61,6 +61,10 @@ export default function OnboardingWizard() {
     billingEmail: "",
     industry: "",
   });
+  const [orgErrors, setOrgErrors] = useState<{
+    name?: string;
+    billingEmail?: string;
+  }>({});
 
   const subStatusQuery = trpc.billing.getSubscriptionStatus.useQuery(
     undefined,
@@ -177,7 +181,15 @@ export default function OnboardingWizard() {
   ]);
 
   const handleCreateOrganization = () => {
-    if (!orgForm.name.trim() || !orgForm.billingEmail.trim()) return;
+    const next: { name?: string; billingEmail?: string } = {};
+    if (!orgForm.name.trim()) next.name = "Organization name is required";
+    if (!orgForm.billingEmail.trim())
+      next.billingEmail = "Billing email is required";
+    if (Object.keys(next).length) {
+      setOrgErrors(next);
+      return;
+    }
+    setOrgErrors({});
     createOrgMutation.mutate({
       name: orgForm.name.trim(),
       billingEmail: orgForm.billingEmail.trim(),
@@ -355,31 +367,46 @@ export default function OnboardingWizard() {
                     <Label>{t("wizard.orgName", "Organization name")} *</Label>
                     <Input
                       value={orgForm.name}
-                      onChange={e =>
-                        setOrgForm(prev => ({ ...prev, name: e.target.value }))
-                      }
+                      onChange={e => {
+                        setOrgForm(prev => ({ ...prev, name: e.target.value }));
+                        if (orgErrors.name)
+                          setOrgErrors(p => ({ ...p, name: undefined }));
+                      }}
                       placeholder={t(
                         "wizard.orgNamePlaceholder",
                         "Acme Compliance"
                       )}
                     />
+                    {orgErrors.name && (
+                      <p className="text-sm text-red-400">{orgErrors.name}</p>
+                    )}
                   </div>
                   <div className="space-y-1">
                     <Label>{t("wizard.billingEmail", "Billing email")} *</Label>
                     <Input
                       type="email"
                       value={orgForm.billingEmail}
-                      onChange={e =>
+                      onChange={e => {
                         setOrgForm(prev => ({
                           ...prev,
                           billingEmail: e.target.value,
-                        }))
-                      }
+                        }));
+                        if (orgErrors.billingEmail)
+                          setOrgErrors(p => ({
+                            ...p,
+                            billingEmail: undefined,
+                          }));
+                      }}
                       placeholder={t(
                         "wizard.billingEmailPlaceholder",
                         "finance@company.com"
                       )}
                     />
+                    {orgErrors.billingEmail && (
+                      <p className="text-sm text-red-400">
+                        {orgErrors.billingEmail}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-1">

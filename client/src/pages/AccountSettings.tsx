@@ -115,6 +115,9 @@ function ProfileTab() {
   const [preferredLocale, setPreferredLocale] = useState<"en" | "ar" | "zh">(
     "en"
   );
+  const [errors, setErrors] = useState<{ name?: string; companyName?: string }>(
+    {}
+  );
 
   if (meQuery.isError && !meQuery.data) {
     return (
@@ -158,6 +161,14 @@ function ProfileTab() {
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    const next: { name?: string; companyName?: string } = {};
+    if (!name.trim()) next.name = "Full name is required";
+    if (!companyName.trim()) next.companyName = "Company name is required";
+    if (Object.keys(next).length) {
+      setErrors(next);
+      return;
+    }
+    setErrors({});
     updateMut.mutate({
       name,
       jobTitle,
@@ -188,9 +199,15 @@ function ProfileTab() {
               <Label>{t("accountSettings.fieldName", "Full Name")}</Label>
               <Input
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={e => {
+                  setName(e.target.value);
+                  if (errors.name) setErrors(p => ({ ...p, name: undefined }));
+                }}
                 placeholder="Your full name"
               />
+              {errors.name && (
+                <p className="text-sm text-red-400">{errors.name}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label>{t("accountSettings.fieldEmail", "Email")}</Label>
@@ -208,9 +225,16 @@ function ProfileTab() {
               <Label>{t("accountSettings.fieldCompany", "Company")}</Label>
               <Input
                 value={companyName}
-                onChange={e => setCompanyName(e.target.value)}
+                onChange={e => {
+                  setCompanyName(e.target.value);
+                  if (errors.companyName)
+                    setErrors(p => ({ ...p, companyName: undefined }));
+                }}
                 placeholder="Organisation name"
               />
+              {errors.companyName && (
+                <p className="text-sm text-red-400">{errors.companyName}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label>{t("accountSettings.fieldIndustry", "Industry")}</Label>
