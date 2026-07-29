@@ -390,7 +390,7 @@ function InviteLayout({ children }: { children: React.ReactNode }) {
                   letterSpacing: "0.01em",
                 }}
               >
-                Dual-Jurisdiction Assurance &amp; Compliance
+                Global Compliance Intelligence
               </span>
             </div>
           </div>

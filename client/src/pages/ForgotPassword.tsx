@@ -187,7 +187,7 @@ export default function ForgotPassword() {
               <span
                 style={{ color: C.muted, fontSize: 9, letterSpacing: "0.01em" }}
               >
-                Dual-Jurisdiction Assurance &amp; Compliance
+                Global Compliance Intelligence
               </span>
             </div>
           </div>

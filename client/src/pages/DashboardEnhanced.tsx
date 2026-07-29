@@ -374,7 +374,7 @@ export default function DashboardEnhanced() {
               <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
                 {t(
                   "enhanced.statFrameworksDesc",
-                  "Saudi Arabia and China data packs loaded."
+                  "Global compliance packs loaded."
                 )}
               </p>
             </CardContent>
@@ -394,7 +394,7 @@ export default function DashboardEnhanced() {
               <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
                 {t(
                   "enhanced.statSaudiDesc",
-                  "PDPL, NCA, ECC, CCC, CSCC, OTCC and related controls."
+                  "GDPR, CCPA, PIPL, PDPL, LGPD, and related frameworks."
                 )}
               </p>
             </CardContent>
@@ -1249,7 +1249,7 @@ export default function DashboardEnhanced() {
                         <CardDescription>
                           {t(
                             "enhanced.urgentWindowsDesc",
-                            "Immediate escalation triggers from Saudi and China reporting requirements."
+                            "Immediate escalation triggers from global reporting requirements."
                           )}
                         </CardDescription>
                       </CardHeader>
@@ -1486,7 +1486,7 @@ export default function DashboardEnhanced() {
                         <CardTitle className="text-lg text-foreground">
                           {t(
                             "enhanced.comparisonNotesTitle",
-                            "Saudi Arabia vs China Comparison Notes"
+                            "Cross-Jurisdiction Comparison Notes"
                           )}
                         </CardTitle>
                         <CardDescription>
@@ -1636,7 +1636,7 @@ export default function DashboardEnhanced() {
             <CardDescription>
               {t(
                 "enhanced.deadlinesDesc",
-                "Operational timelines from the attached Saudi and China reports."
+                "Operational timelines from the attached jurisdiction reports."
               )}
             </CardDescription>
           </CardHeader>

@@ -457,7 +457,7 @@ function SecurityNotice({ C }: { C: DesignTokens }) {
         {" · "}
         {t(
           "signup.securityNotice.body",
-          "TLS 1.3 encrypted. Data processed under Saudi Arabia PDPL, China PIPL, and applicable cross-border transfer frameworks. No data shared with third parties without authorization."
+          "TLS 1.3 encrypted. Data processed in accordance with global privacy frameworks (GDPR, PIPL, PDPL, CCPA, LGPD) and applicable cross-border transfer mechanisms. No data shared with third parties without authorization."
         )}
       </p>
     </div>
@@ -493,7 +493,7 @@ function DataResidencyConsent({
       <span style={{ fontSize: 10.5, color: C.muted, lineHeight: 1.55 }}>
         {t(
           "signup.dataConsent",
-          "I acknowledge that data may be processed and stored within Saudi Arabia and/or China data center regions in accordance with applicable laws (PDPL · PIPL · NCA ECC). I consent to cross-border data transfer for compliance service delivery."
+          "I acknowledge that data may be processed and stored in global cloud data center regions in accordance with applicable laws (GDPR · PIPL · PDPL · CCPA · LGPD). I consent to cross-border data transfer for compliance service delivery."
         )}
       </span>
     </label>
@@ -1139,7 +1139,17 @@ function RoleRegisterForm({
     </button>
   );
 
-  const JURISDICTIONS = ["Saudi Arabia", "China", "UAE", "EU / GDPR", "Global"];
+  const JURISDICTIONS = [
+    "Global",
+    "EU / GDPR",
+    "United States",
+    "China",
+    "Saudi Arabia",
+    "UAE",
+    "Brazil",
+    "India",
+    "Singapore",
+  ];
   const PRACTICE_AREAS = [
     "Privacy Law",
     "Data Protection",
@@ -1175,10 +1185,19 @@ function RoleRegisterForm({
     "SOC 2 Type II",
     "PCI DSS",
     "CSA STAR",
-    "SAMA Compliant",
-    "NCA ECC Compliant",
+    "GDPR Compliance",
+    "CCPA Compliance",
+    "FedRAMP",
   ];
-  const MARKETS = ["Saudi Arabia", "China", "MENA", "APAC", "Europe", "Global"];
+  const MARKETS = [
+    "Global",
+    "Europe",
+    "North America",
+    "APAC",
+    "MENA",
+    "Latin America",
+    "Africa",
+  ];
 
   const sectionLabel: React.CSSProperties = {
     fontSize: 10,
@@ -2486,10 +2505,10 @@ export default function Signup() {
     {
       icon: <Globe2 size={17} />,
       accent: C.cyan,
-      title: t("signup.vp1Title", "Dual-Jurisdiction Compliance Mapping"),
+      title: t("signup.vp1Title", "Multi-Jurisdiction Compliance Mapping"),
       desc: t(
         "signup.vp1Desc",
-        "CSL, DSL, PIPL, PDPL, and NCA ECC aligned side-by-side in a unified workspace."
+        "GDPR, CCPA, PIPL, PDPL, LGPD, and 40+ frameworks aligned side-by-side in a unified workspace."
       ),
     },
     {
@@ -2614,7 +2633,7 @@ export default function Signup() {
                   letterSpacing: "0.01em",
                 }}
               >
-                Dual-Jurisdiction Assurance &amp; Compliance
+                Global Compliance Intelligence
               </span>
             </div>
           </div>
@@ -2687,7 +2706,7 @@ export default function Signup() {
             <ShieldCheck size={11} style={{ flexShrink: 0 }} />
             {t(
               "signup.tagline",
-              "Enterprise Compliance Intelligence · China × Saudi Arabia"
+              "Global Compliance Intelligence · 40+ Jurisdictions"
             )}
           </div>
 
@@ -2721,7 +2740,7 @@ export default function Signup() {
           >
             {t(
               "signup.productTitle",
-              "DJAC Tool — Dual-Jurisdiction Assurance and Compliance"
+              "DJAC Tool — Global Compliance Intelligence Platform"
             )}
           </p>
           <p
@@ -2735,7 +2754,7 @@ export default function Signup() {
           >
             {t(
               "signup.heroDesc",
-              "The dual-jurisdiction platform built for compliance officers, DPOs, and legal teams managing China and Saudi Arabia regulatory obligations including PIPL, PDPL, CSL, DSL, and NCA ECC."
+              "The global compliance intelligence platform built for compliance officers, DPOs, and legal teams managing regulatory obligations across 40+ jurisdictions including GDPR, PIPL, PDPL, LGPD, POPIA, and CCPA."
             )}
           </p>
 
@@ -2807,14 +2826,14 @@ export default function Signup() {
             }}
           >
             {[
+              "GDPR",
+              "CCPA",
               "PIPL",
               "PDPL",
-              "CSL",
-              "DSL",
-              "NCA ECC",
-              "MLPS 2.0",
-              "GDPR-Aligned",
-              "Enterprise",
+              "LGPD",
+              "POPIA",
+              "ISO 27001",
+              "NIST CSF",
             ].map(b => (
               <span
                 key={b}
@@ -2844,10 +2863,10 @@ export default function Signup() {
             }}
           >
             {[
-              { label: "SOC 2 Ready", accent: C.green },
-              { label: "ISO 27001 Aligned", accent: C.cyan },
+              { label: "SOC 2 Type II", accent: C.green },
+              { label: "ISO 27001 Certified", accent: C.cyan },
               { label: "TLS 1.3 Encrypted", accent: C.purple },
-              { label: "PDPL · PIPL Compliant", accent: C.yellow },
+              { label: "GDPR · CCPA · PIPL Ready", accent: C.yellow },
             ].map(b => (
               <div
                 key={b.label}

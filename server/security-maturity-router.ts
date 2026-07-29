@@ -28,6 +28,9 @@ const createSchema = z.object({
       "SAMA CSF",
       "NCA ECC",
       "NESA",
+      "GDPR",
+      "CCPA",
+      "LGPD",
       "custom",
     ])
     .optional(),

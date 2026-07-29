@@ -45,7 +45,16 @@ const JX_STYLE: Record<string, string> = {
     "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-300",
 };
 
-const ALL_FRAMEWORKS = ["PIPL", "CSL", "DSL", "PDPL", "NCA"] as const;
+const ALL_FRAMEWORKS = [
+  "PIPL",
+  "CSL",
+  "DSL",
+  "PDPL",
+  "NCA",
+  "GDPR",
+  "CCPA",
+  "LGPD",
+] as const;
 
 // ── Bookmarks (localStorage) ──────────────────────────────────────────────────
 function useBookmarks() {

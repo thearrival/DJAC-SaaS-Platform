@@ -503,7 +503,7 @@ function ComparisonTab() {
         <p className="flex-1 text-sm text-muted-foreground">
           {t(
             "tracker.comparisonSideBySide",
-            "Side-by-side comparison of cybersecurity regulatory requirements in Saudi Arabia and China."
+            "Side-by-side comparison of cybersecurity regulatory requirements across jurisdictions."
           )}
         </p>
         <div className="relative">
@@ -780,7 +780,7 @@ export default function ComplianceTracker() {
         <p style={{ color: "var(--djac-muted)" }}>
           {t(
             "tracker.subtitle",
-            "Never miss a deadline. Track every obligation across Saudi and China frameworks — ranked by urgency."
+            "Never miss a deadline. Track every obligation across global frameworks — ranked by urgency."
           )}
         </p>
       </div>
@@ -853,13 +853,13 @@ export default function ComplianceTracker() {
                 <ArrowLeftRight className="h-5 w-5 text-primary" />
                 {t(
                   "tracker.comparisonTitle",
-                  "Saudi Arabia vs. China — Regulatory Comparison"
+                  "Cross-Jurisdiction — Regulatory Comparison"
                 )}
               </CardTitle>
               <CardDescription>
                 {t(
                   "tracker.comparisonDesc",
-                  "Structured comparison of key regulatory topics to help organizations understand similarities and differences for cross-border compliance planning."
+                  "Structured comparison of key regulatory topics across jurisdictions to help organizations understand similarities and differences for global compliance planning."
                 )}
               </CardDescription>
             </CardHeader>

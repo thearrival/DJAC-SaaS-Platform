@@ -67,7 +67,7 @@ type FrameworkNode = {
   label: string;
   x: number;
   y: number;
-  cluster: "china" | "saudi" | "cross-border";
+  cluster: "china" | "saudi" | "eu" | "us" | "cross-border";
 };
 
 type FrameworkEdge = {
@@ -84,6 +84,9 @@ const frameworkNodes: FrameworkNode[] = [
   { code: "PDPL", label: "PDPL", x: 420, y: 90, cluster: "saudi" },
   { code: "NCA-ECC", label: "NCA ECC", x: 460, y: 200, cluster: "saudi" },
   { code: "NCA-CCC", label: "NCA CCC", x: 380, y: 260, cluster: "saudi" },
+  { code: "GDPR", label: "GDPR", x: 280, y: 30, cluster: "eu" },
+  { code: "CCPA", label: "CCPA", x: 550, y: 30, cluster: "us" },
+  { code: "LGPD", label: "LGPD", x: 280, y: 340, cluster: "cross-border" },
 ];
 
 function frameworkClusterColor(cluster: FrameworkNode["cluster"]) {
@@ -93,6 +96,14 @@ function frameworkClusterColor(cluster: FrameworkNode["cluster"]) {
 
   if (cluster === "saudi") {
     return "#0f766e";
+  }
+
+  if (cluster === "eu") {
+    return "#7c3aed";
+  }
+
+  if (cluster === "us") {
+    return "#ea580c";
   }
 
   return "#7c3aed";
@@ -319,6 +330,9 @@ export default function AdminControlCenter() {
         { source: "MLPS", target: "NCA-ECC", relationship: "control baseline" },
         { source: "PIPL", target: "DSL", relationship: "china alignment" },
         { source: "PDPL", target: "NCA-CCC", relationship: "saudi alignment" },
+        { source: "GDPR", target: "PIPL", relationship: "privacy alignment" },
+        { source: "GDPR", target: "CCPA", relationship: "privacy alignment" },
+        { source: "CCPA", target: "LGPD", relationship: "privacy alignment" },
       ];
     }
     const knownCodes = new Set(frameworkNodes.map(n => n.code));
@@ -694,7 +708,13 @@ export default function AdminControlCenter() {
                   : normalizedCode.includes("NCA") &&
                       normalizedCode.includes("CCC")
                     ? "NCA-CCC"
-                    : null;
+                    : normalizedCode.includes("GDPR")
+                      ? "GDPR"
+                      : normalizedCode.includes("CCPA")
+                        ? "CCPA"
+                        : normalizedCode.includes("LGPD")
+                          ? "LGPD"
+                          : null;
 
       if (!canonicalCode) {
         continue;
@@ -1294,7 +1314,7 @@ export default function AdminControlCenter() {
             <CardDescription>
               {t(
                 "admin.matrixDesc",
-                "Operational load matrix for China and Saudi corridors across vendor presence, assessments, and critical gaps."
+                "Operational load matrix for global compliance corridors across vendor presence, assessments, and critical gaps."
               )}
             </CardDescription>
           </CardHeader>

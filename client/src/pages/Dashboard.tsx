@@ -533,7 +533,7 @@ export default function Dashboard() {
             <p style={{ color: C.muted, fontSize: 13, margin: "6px 0 0" }}>
               {t(
                 "dashboard.subtitle",
-                "Monitor and detect compliance drift across China-Saudi cross-border operations"
+                "Monitor and detect compliance drift across global cross-border operations"
               )}
             </p>
           </div>
@@ -675,7 +675,7 @@ export default function Dashboard() {
             accent={C.orange}
             sub={t(
               "dashboard.kpiHighRiskSub",
-              "Require dual-jurisdiction pipeline"
+              "Require multi-jurisdiction pipeline"
             )}
             icon={
               <ShieldAlert style={{ width: 20, height: 20, color: C.orange }} />
@@ -1059,7 +1059,7 @@ export default function Dashboard() {
                   &nbsp;·{" "}
                   {t(
                     "dashboard.frameworksSectionDesc",
-                    "CSL / DSL / PIPL (China) + PDPL / NCA (Saudi Arabia)"
+                    "GDPR / CCPA / PIPL / PDPL / LGPD (Global Coverage)"
                   )}
                 </p>
               </div>
@@ -1658,7 +1658,7 @@ export default function Dashboard() {
               ),
               body: t(
                 "dashboard.insightLocalizationBody",
-                "Both China (CSL/PIPL) and Saudi Arabia (PDPL) mandate strict in-jurisdiction data residency. Simultaneous cross-border operations require dual independent data pipelines — a shared pipeline violates one or both regimes."
+                "Multiple jurisdictions (GDPR, CCPA, PIPL, PDPL, LGPD) mandate strict in-jurisdiction data residency. Simultaneous cross-border operations require independent data pipelines per regime."
               ),
             },
             {
@@ -1674,7 +1674,7 @@ export default function Dashboard() {
               ),
               body: t(
                 "dashboard.insightConsentBody",
-                "PIPL requires explicit, purpose-specific, granular consent. PDPL aligns closely. A single unified consent layer satisfying both frameworks is feasible — reducing implementation cost by ~40%."
+                "GDPR and PIPL require explicit, purpose-specific, granular consent. PDPL aligns closely. A single unified consent layer satisfying multiple frameworks is feasible — reducing implementation cost by ~40%."
               ),
             },
             {
@@ -1695,7 +1695,7 @@ export default function Dashboard() {
               ),
               body: t(
                 "dashboard.insightEnforcementBody",
-                "China centralizes under CAC; Saudi Arabia splits between SDAIA (data privacy) and NCA (cybersecurity). Compliance programs must maintain separate notification chains and audit trails for each regulator."
+                "Each jurisdiction has distinct regulatory authorities — GDPR (DPAs), CCPA (CPPA), PIPL (CAC), PDPL (SDAIA). Compliance programs must maintain separate notification chains and audit trails for each regulator."
               ),
             },
           ].map((card, i) => (

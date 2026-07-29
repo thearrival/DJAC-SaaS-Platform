@@ -308,10 +308,13 @@ export const ctemAssetTypeEnum = pgEnum("ctemAssetType", [
 ]);
 
 export const regionEnum = pgEnum("region", [
-  "China",
-  "Saudi Arabia",
-  "Cross-border",
-  "Other",
+  "North America",
+  "Europe",
+  "APAC",
+  "EMEA",
+  "Latin America",
+  "Africa",
+  "Global",
 ]);
 
 export const assetStatusEnum = pgEnum("assetStatus", [
@@ -340,6 +343,26 @@ export const simulationTypeEnum = pgEnum("simulationType", [
   "insider_threat",
   "other",
 ]);
+
+export const complianceSimulationTypeEnum = pgEnum("complianceSimulationType", [
+  "readiness",
+  "gap_analysis",
+  "cost_estimate",
+  "cross_border",
+  "full",
+]);
+
+export const complianceSimulationRiskEnum = pgEnum("complianceSimulationRisk", [
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
+
+export const complianceSimulationStatusEnum = pgEnum(
+  "complianceSimulationStatus",
+  ["draft", "completed", "archived"]
+);
 
 export const priorityTierEnum = pgEnum("priorityTier", [
   "critical",
@@ -411,6 +434,9 @@ export const dsrRequestTypeEnum = pgEnum("dsrRequestType", [
 export const dsrJurisdictionEnum = pgEnum("dsrJurisdiction", [
   "China",
   "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
   "Other",
 ]);
 
@@ -524,6 +550,20 @@ export const threatSeverityEnum = pgEnum("threatSeverity", [
 
 export const tlpEnum = pgEnum("tlp", ["white", "green", "amber", "red"]);
 
+export const regulatoryChangeTypeEnum = pgEnum("regulatoryChangeType", [
+  "amendment",
+  "new_regulation",
+  "repeal",
+  "guidance",
+  "enforcement",
+]);
+
+export const regulatoryChangeStatusEnum = pgEnum("regulatoryChangeStatus", [
+  "pending",
+  "in_effect",
+  "superseded",
+]);
+
 export const deadlineJurisdictionEnum = pgEnum("deadlineJurisdiction", [
   "China",
   "Saudi Arabia",
@@ -611,6 +651,7 @@ export type AllTables = {
   vendorAssessments: typeof vendorAssessments;
   assessmentGaps: typeof assessmentGaps;
   auditLogs: typeof auditLogs;
+  regulatoryChanges: typeof regulatoryChanges;
 };
 
 export const accessRequests = pgTable("accessRequests", {
@@ -1248,7 +1289,7 @@ export const ctemAssets = pgTable("ctemAssets", {
   assetName: varchar("assetName", { length: 255 }).notNull(),
   assetType: ctemAssetTypeEnum("assetType").notNull().default("other"),
   ipDomain: varchar("ipDomain", { length: 255 }),
-  region: regionEnum("region").notNull().default("Other"),
+  region: regionEnum("region").notNull().default("Global"),
   isInternetFacing: integer("isInternetFacing").default(0).notNull(),
   handlesPersonalData: integer("handlesPersonalData").default(0).notNull(),
   handlesCriticalData: integer("handlesCriticalData").default(0).notNull(),
@@ -1786,6 +1827,71 @@ export const knowledgeGraphEdges = pgTable("knowledgeGraphEdges", {
 
 export type KnowledgeGraphEdge = typeof knowledgeGraphEdges.$inferSelect;
 export type InsertKnowledgeGraphEdge = typeof knowledgeGraphEdges.$inferInsert;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ▌ REGULATORY CHANGE DETECTION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const regulatoryChanges = pgTable("regulatoryChanges", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organizationId").references(() => organizations.id, {
+    onDelete: "set null",
+  }),
+  frameworkCode: varchar("frameworkCode", { length: 50 }).notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  changeType: regulatoryChangeTypeEnum("changeType").notNull(),
+  jurisdiction: text("jurisdiction").notNull(),
+  source: text("source").notNull(),
+  effectiveDate: timestamp("effectiveDate").notNull(),
+  publicationDate: timestamp("publicationDate").notNull(),
+  status: regulatoryChangeStatusEnum("status").notNull().default("pending"),
+  impact: text("impact").notNull(),
+  url: varchar("url", { length: 1024 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+
+export type RegulatoryChange = typeof regulatoryChanges.$inferSelect;
+export type InsertRegulatoryChange = typeof regulatoryChanges.$inferInsert;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ▌ COMPLIANCE SIMULATIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const complianceSimulations = pgTable("complianceSimulations", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organizationId")
+    .notNull()
+    .references(() => organizations.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  simulationType: complianceSimulationTypeEnum("simulationType").notNull(),
+  jurisdiction: text("jurisdiction").notNull(),
+  frameworks: text("frameworks").notNull(),
+  maturityScores: text("maturityScores").notNull(),
+  gapCounts: text("gapCounts").notNull(),
+  totalGaps: integer("totalGaps").default(0).notNull(),
+  costEstimateLow: integer("costEstimateLow"),
+  costEstimateHigh: integer("costEstimateHigh"),
+  costEstimateCurrency: text("costEstimateCurrency").default("USD").notNull(),
+  riskLevel: complianceSimulationRiskEnum("riskLevel")
+    .default("medium")
+    .notNull(),
+  status: complianceSimulationStatusEnum("status")
+    .default("completed")
+    .notNull(),
+  summary: text("summary"),
+  createdByUserId: integer("createdByUserId").references(() => localUsers.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+});
+
+export type ComplianceSimulation = typeof complianceSimulations.$inferSelect;
+export type InsertComplianceSimulation =
+  typeof complianceSimulations.$inferInsert;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ▌ AI AGENT RUNS — Multi-Agent Orchestration Log

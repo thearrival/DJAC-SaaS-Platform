@@ -327,7 +327,16 @@ export default function FrameworkAnalysis() {
                 )}
               </p>
               <div className="flex flex-wrap justify-center gap-2">
-                {["CSL", "DSL", "PIPL", "PDPL", "NCA ECC"].map(fw => (
+                {[
+                  "CSL",
+                  "DSL",
+                  "PIPL",
+                  "PDPL",
+                  "NCA ECC",
+                  "GDPR",
+                  "CCPA",
+                  "LGPD",
+                ].map(fw => (
                   <span
                     key={fw}
                     className="rounded-full border px-3 py-1 text-xs font-semibold text-muted-foreground border-border"

@@ -27,9 +27,9 @@ import { toast as sonnerToast } from "sonner";
 
 const SUGGESTED_PROMPTS = [
   "What are the key obligations under GDPR for cross-border data transfers?",
-  "How does Saudi Arabia's PDPL define 'personal data' and what does it protect?",
+  "How does Brazil's LGPD define 'personal data' and what does it protect?",
   "What is the difference between China's PIPL and GDPR's approach to consent?",
-  "How do NCA Essential Cybersecurity Controls apply to financial institutions in Saudi Arabia?",
+  "How do NIST CSF controls apply to financial institutions in the United States?",
   "What steps are required to transfer data from the EU to the US under the DPF?",
   "What are the penalties for GDPR non-compliance in the EU?",
   "What is a Data Protection Impact Assessment (DPIA) and when is it required?",

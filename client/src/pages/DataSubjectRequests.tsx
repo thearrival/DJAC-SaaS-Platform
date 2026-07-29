@@ -77,7 +77,7 @@ type RequestType =
   | "objection"
   | "explanation";
 
-type Jurisdiction = "China" | "Saudi Arabia" | "Other";
+type Jurisdiction = "China" | "Saudi Arabia" | "EU" | "US" | "Brazil" | "Other";
 
 type Status =
   | "received"
@@ -146,6 +146,9 @@ const PRIORITY_COLOURS: Record<Priority, string> = {
 const JURISDICTION_COLOURS: Record<Jurisdiction, string> = {
   China: "bg-red-500/10 text-red-400 border-red-500/30",
   "Saudi Arabia": "bg-green-500/10 text-green-500 border-green-500/30",
+  EU: "bg-blue-500/10 text-blue-500 border-blue-500/30",
+  US: "bg-purple-500/10 text-purple-500 border-purple-500/30",
+  Brazil: "bg-yellow-500/10 text-yellow-500 border-yellow-500/30",
   Other: "bg-slate-500/10 text-slate-400 border-slate-500/30",
 };
 
@@ -168,7 +171,14 @@ const STATUSES: Status[] = [
   "withdrawn",
 ];
 
-const JURISDICTIONS: Jurisdiction[] = ["China", "Saudi Arabia", "Other"];
+const JURISDICTIONS: Jurisdiction[] = [
+  "China",
+  "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
+  "Other",
+];
 const PRIORITIES: Priority[] = ["normal", "high", "urgent"];
 
 const OPEN_STATUSES: Status[] = ["received", "in_review", "pending_info"];
@@ -234,6 +244,9 @@ function formatDate(d: Date | string | null): string {
 function jurisdictionDeadline(j: Jurisdiction): string {
   if (j === "China") return "15 working days (PIPL)";
   if (j === "Saudi Arabia") return "30 days (PDPL)";
+  if (j === "EU") return "30 calendar days (GDPR)";
+  if (j === "US") return "45 calendar days (CCPA)";
+  if (j === "Brazil") return "15 working days (LGPD)";
   return "30 days";
 }
 

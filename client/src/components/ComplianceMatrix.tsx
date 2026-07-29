@@ -201,7 +201,16 @@ export function ComplianceMatrix() {
               <th className="text-left py-2 px-2 text-muted-foreground font-mono uppercase tracking-wider text-[10px]">
                 {copy.control}
               </th>
-              {["CSL", "DSL", "PIPL", "PDPL", "NCA"].map((f, i) => (
+              {[
+                "CSL",
+                "DSL",
+                "PIPL",
+                "PDPL",
+                "NCA",
+                "GDPR",
+                "CCPA",
+                "LGPD",
+              ].map((f, i) => (
                 <motion.th
                   key={f}
                   className="text-center py-2 px-2 text-primary font-mono uppercase tracking-wider text-[10px]"

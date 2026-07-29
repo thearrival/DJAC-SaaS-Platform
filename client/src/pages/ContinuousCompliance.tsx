@@ -137,7 +137,15 @@ const ASSET_TYPES = [
   "other",
 ] as const;
 
-const REGIONS = ["China", "Saudi Arabia", "Cross-border", "Other"] as const;
+const REGIONS = [
+  "North America",
+  "Europe",
+  "APAC",
+  "EMEA",
+  "Latin America",
+  "Africa",
+  "Global",
+] as const;
 type Region = (typeof REGIONS)[number];
 
 const SEVERITY_LEVELS = [
@@ -245,7 +253,7 @@ export default function ContinuousCompliance() {
   const [assetForm, setAssetForm] = useState({
     assetName: "",
     assetType: "other" as string,
-    region: "Other" as string,
+    region: "Global" as string,
     isInternetFacing: false,
     handlesPersonalData: false,
     handlesCriticalData: false,
@@ -567,7 +575,7 @@ export default function ContinuousCompliance() {
                 ? "—"
                 : (summary?.frameworkExposure?.length ?? 0)
           }
-          sub="CSL · DSL · PIPL · PDPL · NCA"
+          sub="GDPR · CCPA · PIPL · PDPL · LGPD"
           colour={TIER_COLOURS.medium}
         />
       </div>
@@ -1466,10 +1474,13 @@ export default function ContinuousCompliance() {
                     | "storage_bucket"
                     | "other",
                   region: assetForm.region as
-                    | "China"
-                    | "Saudi Arabia"
-                    | "Cross-border"
-                    | "Other",
+                    | "North America"
+                    | "Europe"
+                    | "APAC"
+                    | "EMEA"
+                    | "Latin America"
+                    | "Africa"
+                    | "Global",
                   ipDomain: assetForm.ipDomain || undefined,
                   isInternetFacing: assetForm.isInternetFacing,
                   handlesPersonalData: assetForm.handlesPersonalData,

@@ -590,7 +590,7 @@ const FEED: { t: string; msg: string; s: "ok" | "warn" | "err" }[] = [
   },
   {
     t: "00:00:03",
-    msg: "Saudi PDPL: 3 controller obligations resolved ✓",
+    msg: "GDPR Art. 27: representative appointment verified ✓",
     s: "ok",
   },
   {
@@ -943,9 +943,9 @@ export default function DJACHero() {
               animation: "slide-up .7s ease 1.3s both",
             }}
           >
-            Unify GDPR, Saudi PDPL, UAE DIFC, China PIPL, and 40+ global
-            frameworks into one intelligent workspace — powered by a multi-model
-            AI orchestration engine.
+            Unify GDPR, CCPA, LGPD, PIPL, PDPL, and 40+ global frameworks into
+            one intelligent workspace — powered by a multi-model AI
+            orchestration engine.
           </p>
 
           {/* CTA buttons */}
@@ -1117,7 +1117,7 @@ export default function DJACHero() {
                 description="Multi-model orchestration across GPT-4o, Claude, and Gemini. Parallel framework analysis with automatic gap detection and remediation scoring."
                 accent="#3b82f6"
                 items={[
-                  "GDPR · PDPL · DIFC · PDPA simultaneous scan",
+                  "GDPR · CCPA · LGPD · PIPL simultaneous scan",
                   "Automated control gap scoring 0–100",
                   "AI-generated remediation roadmaps",
                   "Framework-to-framework control mapping",

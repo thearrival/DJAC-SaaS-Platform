@@ -135,8 +135,8 @@ const SEVERITY_CONFIG: Record<
 };
 
 const JURISDICTION_LABEL: Record<GapJurisdiction, string> = {
-  china: "China",
-  saudi: "Saudi Arabia",
+  china: "APAC",
+  saudi: "EMEA",
   cross_border: "Cross-Border",
 };
 
@@ -820,7 +820,7 @@ export default function GapTracker() {
         >
           {t(
             "gapTracker.subtitle",
-            "Rule-based dual-jurisdiction compliance gap analysis across all registered vendors. Identifies PIPL, CSL, DSL, PDPL and NCA gaps with remediation guidance."
+            "Rule-based multi-jurisdiction compliance gap analysis across all registered vendors. Identifies GDPR, CCPA, PIPL, PDPL, LGPD, and NCA gaps with remediation guidance."
           )}
         </p>
       </div>

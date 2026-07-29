@@ -45,6 +45,36 @@ const regionPositions: Record<string, RegionPosition> = {
     color: "#0f766e",
     glow: "rgba(15, 118, 110, 0.35)",
   },
+  EU: {
+    x: 430,
+    y: 120,
+    color: "#7c3aed",
+    glow: "rgba(124, 58, 237, 0.35)",
+  },
+  "North America": {
+    x: 280,
+    y: 140,
+    color: "#ea580c",
+    glow: "rgba(234, 88, 12, 0.35)",
+  },
+  "Latin America": {
+    x: 340,
+    y: 280,
+    color: "#ca8a04",
+    glow: "rgba(202, 138, 4, 0.35)",
+  },
+  Africa: {
+    x: 510,
+    y: 310,
+    color: "#16a34a",
+    glow: "rgba(22, 163, 74, 0.35)",
+  },
+  APAC: {
+    x: 650,
+    y: 140,
+    color: "#dc2626",
+    glow: "rgba(220, 38, 38, 0.35)",
+  },
 };
 
 function metricLabel(
@@ -92,7 +122,7 @@ export function ComplianceRegionMap({
         <CardDescription>
           {t(
             "region.description",
-            "China-Saudi compliance corridor with drill-down by vendors, assessments, and critical gaps."
+            "Global compliance corridor with drill-down by vendors, assessments, and critical gaps."
           )}
         </CardDescription>
       </CardHeader>

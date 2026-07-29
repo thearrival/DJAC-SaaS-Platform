@@ -1938,7 +1938,7 @@ export default function ClientWorkspace() {
             <CardDescription>
               {t(
                 "client.regulatoryWatchDesc",
-                "Quick references for current China, Saudi, and global framework entries available in your environment."
+                "Quick references for current APAC, EMEA, and global framework entries available in your environment."
               )}
             </CardDescription>
           </CardHeader>

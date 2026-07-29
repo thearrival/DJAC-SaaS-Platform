@@ -17,7 +17,14 @@ export const REQUEST_TYPES = [
   "objection",
   "explanation",
 ] as const;
-export const JURISDICTIONS = ["China", "Saudi Arabia", "Other"] as const;
+export const JURISDICTIONS = [
+  "China",
+  "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
+  "Other",
+] as const;
 export const STATUSES = [
   "received",
   "in_review",

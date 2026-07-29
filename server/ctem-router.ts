@@ -50,7 +50,15 @@ const assetTypeEnum = z.enum([
   "storage_bucket",
   "other",
 ]);
-const regionEnum = z.enum(["China", "Saudi Arabia", "Cross-border", "Other"]);
+const regionEnum = z.enum([
+  "North America",
+  "Europe",
+  "APAC",
+  "EMEA",
+  "Latin America",
+  "Africa",
+  "Global",
+]);
 const severityEnum = z.enum([
   "critical",
   "high",
@@ -64,7 +72,7 @@ const assetInputSchema = z.object({
   assetName: z.string().trim().min(1).max(255),
   assetType: assetTypeEnum.default("other"),
   ipDomain: z.string().trim().max(255).optional().nullable(),
-  region: regionEnum.default("Other"),
+  region: regionEnum.default("Global"),
   isInternetFacing: z.boolean().default(false),
   handlesPersonalData: z.boolean().default(false),
   handlesCriticalData: z.boolean().default(false),

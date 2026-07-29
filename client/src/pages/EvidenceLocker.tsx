@@ -567,7 +567,7 @@ export default function EvidenceLocker() {
               </Label>
               <Input
                 id="ev-title"
-                placeholder="e.g. Q2 Audit Report – PDPL Compliance"
+                placeholder="e.g. Q2 Audit Report – GDPR Compliance"
                 value={form.title}
                 onChange={e => {
                   setForm(f => ({ ...f, title: e.target.value }));

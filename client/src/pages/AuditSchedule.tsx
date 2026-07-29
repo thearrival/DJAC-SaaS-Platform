@@ -93,6 +93,8 @@ const FRAMEWORKS = [
   "NCA CSCC",
   "ISO27001",
   "GDPR",
+  "CCPA",
+  "LGPD",
 ] as const;
 
 type AuditType = (typeof AUDIT_TYPES)[number];
@@ -693,7 +695,7 @@ export default function AuditSchedule() {
                 onChange={e => setActiveForm({ title: e.target.value })}
                 placeholder={t(
                   "audit.titlePlaceholder",
-                  "e.g. Annual PIPL Compliance Audit"
+                  "e.g. Annual GDPR Compliance Audit"
                 )}
               />
             </div>

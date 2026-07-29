@@ -1088,9 +1088,9 @@ function analyzeComplianceGaps(
       gaps.push({
         category: "DataResidency",
         severity: "High",
-        finding: "Critical services data not hosted in Saudi Arabia",
+        finding: "Critical services data not hosted in required jurisdiction",
         recommendation:
-          "Establish Saudi Arabia data centers for critical services; use local cloud providers or data residency agreements",
+          "Establish local data centers for critical services; use regional cloud providers or data residency agreements",
       });
     }
 

@@ -123,6 +123,7 @@ export const MODULE_SLUGS = [
   "report_center",
   "compliance_heatmap",
   "compliance_calendar",
+  "compliance_simulation",
   "vendor_compliance_profiles",
   "assessment_history",
   "service_requests",
@@ -134,6 +135,7 @@ export const MODULE_SLUGS = [
   "transfer_checker",
   "law_library",
   "framework_analysis",
+  "regulatory_changes",
   "billing",
   "admin_control_center",
   "saas_metrics",
@@ -215,6 +217,7 @@ export const DEFAULT_ORG_ROLE_PERMISSIONS: Record<
     transfer_checker: VIEW_ONLY,
     law_library: VIEW_ONLY,
     framework_analysis: VIEW_ONLY,
+    regulatory_changes: VIEW_ONLY,
   },
   compliance_officer: {
     asset_inventory: STANDARD,
@@ -240,6 +243,7 @@ export const DEFAULT_ORG_ROLE_PERMISSIONS: Record<
     transfer_checker: STANDARD,
     law_library: VIEW_ONLY,
     framework_analysis: VIEW_ONLY,
+    regulatory_changes: STANDARD,
   },
   admin: {
     asset_inventory: FULL,
@@ -269,6 +273,7 @@ export const DEFAULT_ORG_ROLE_PERMISSIONS: Record<
     transfer_checker: FULL,
     law_library: VIEW_ONLY,
     framework_analysis: VIEW_ONLY,
+    regulatory_changes: FULL,
     billing: VIEW_ONLY,
   },
   owner: {
@@ -299,6 +304,7 @@ export const DEFAULT_ORG_ROLE_PERMISSIONS: Record<
     transfer_checker: FULL,
     law_library: FULL,
     framework_analysis: FULL,
+    regulatory_changes: FULL,
     billing: FULL,
   },
 };

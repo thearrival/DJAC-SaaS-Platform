@@ -398,9 +398,9 @@ const messages: Record<string, Record<string, string>> = {
     "home.signIn": "Sign In",
     "home.heroTitle": "Compliance Made Clear",
     "home.heroLine1": "Built for",
-    "home.heroLine2": "China-Saudi Compliance",
+    "home.heroLine2": "Global Compliance Intelligence",
     "home.heroSubtitle":
-      "Handle China-Saudi cross-border compliance with confidence. DJAC brings CSL, DSL, PIPL, PDPL, and NCA into one focused workspace.",
+      "Handle cross-border compliance across 40+ jurisdictions with confidence. DJAC brings GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF, and more into one focused workspace.",
     "home.viewDashboard": "Open Dashboard",
     "home.frameworkAnalysis": "Framework Analysis",
     "home.vendorAssessment": "Market Entry Assessment",
@@ -435,7 +435,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.badge": "✦ Enterprise Compliance Platform",
     "home.trust": "Multilingual · Dark mode · AI-powered · Enterprise grade",
     "home.platformNote":
-      "Covering CSL 2026 · PIPL · DSL · PDPL · NCA · MLPS 2.0",
+      "Covering GDPR · CCPA · LGPD · POPIA · CSL 2026 · PIPL · DSL · PDPL · NCA · MLPS 2.0 · NIST CSF",
     "home.statsFrameworks": "10+",
     "home.statsFrameworksLabel": "Frameworks",
     "home.statsJurisdictions": "2",
@@ -450,7 +450,7 @@ const messages: Record<string, Record<string, string>> = {
       "Authenticate with your enterprise credentials to access the full compliance dashboard.",
     "home.step2Title": "Select Frameworks",
     "home.step2Desc":
-      "Choose from 10+ frameworks across China and Saudi Arabia — pair them for side-by-side analysis.",
+      "Choose from 40+ frameworks across all major jurisdictions — pair them for side-by-side analysis.",
     "home.step3Title": "Get Insights",
     "home.step3Desc":
       "Instantly see overlaps, conflicts, deadlines, and readiness gap reports — with full multilingual support.",
@@ -471,7 +471,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.sso": "Continue with Enterprise SSO",
     "home.consultationCardTitle": "Compliance Consultation",
     "home.consultationCardSubtitle":
-      "Ask for legal-technical guidance on China-Saudi operations and market entry strategy.",
+      "Ask for legal-technical guidance on cross-border compliance operations and market entry strategy.",
     "home.fieldContactName": "Contact Name",
     "home.fieldContactEmail": "Contact Email",
     "home.fieldConsultationOrg": "Organization",
@@ -550,7 +550,7 @@ const messages: Record<string, Record<string, string>> = {
 
     "calendar.title": "Compliance Calendar",
     "calendar.subtitle":
-      "Track regulatory deadlines across PIPL, CSL, DSL, PDPL and NCA frameworks",
+      "Track regulatory deadlines across GDPR, CCPA, LGPD, PIPL, CSL, DSL, PDPL, NCA and other global frameworks",
     "calendar.addDeadline": "Add Deadline",
     "calendar.newDeadline": "New Compliance Deadline",
     "calendar.framework": "Framework",
@@ -563,7 +563,7 @@ const messages: Record<string, Record<string, string>> = {
     "calendar.countryChina": "China",
     "calendar.countrySaudiArabia": "Saudi Arabia",
     "calendar.countryBoth": "Both",
-    "calendar.titlePlaceholder": "e.g. PIPL Annual Assessment Submission",
+    "calendar.titlePlaceholder": "e.g. GDPR Annual Data Protection Audit",
     "calendar.optional": "optional",
     "calendar.descriptionPlaceholder": "Brief description of the obligation",
     "calendar.priorityLow": "Low",
@@ -677,9 +677,9 @@ const messages: Record<string, Record<string, string>> = {
     "billing.billingEmail": "Billing Email",
     "billing.billingEmailPlaceholder": "billing@example.com",
     "billing.primaryJurisdiction": "Primary Jurisdiction",
-    "billing.jurisdictionBoth": "Both (China + Saudi Arabia)",
-    "billing.jurisdictionChina": "China Only",
-    "billing.jurisdictionSaudi": "Saudi Arabia Only",
+    "billing.jurisdictionBoth": "Global Coverage",
+    "billing.jurisdictionChina": "Asia-Pacific",
+    "billing.jurisdictionSaudi": "Europe",
     "billing.jurisdictionOther": "Other",
     "billing.creating": "Creating...",
     "billing.startTrial": "Start 7-Day Free Trial ->",
@@ -729,7 +729,7 @@ const messages: Record<string, Record<string, string>> = {
     "pricing.badgeTrial": "7-day free trial · No credit card required",
     "pricing.heroTitle": "Simple, Transparent Pricing",
     "pricing.heroSubtitle":
-      "Enterprise-grade compliance intelligence for China & Saudi Arabia. Affordable for startups, scalable for enterprises.",
+      "Enterprise-grade compliance intelligence for global operations. Affordable for startups, scalable for enterprises.",
     "pricing.best": "BEST",
     "pricing.mostPopular": "MOST POPULAR",
     "pricing.perMonth": "mo",
@@ -743,16 +743,16 @@ const messages: Record<string, Record<string, string>> = {
     "pricing.faqTitle": "Frequently Asked Questions",
     "pricing.ctaTitle": "Start Your 7-Day Free Trial Today",
     "pricing.ctaSubtitle":
-      "No credit card required. Full access to all features. Cancel anytime. Join compliance teams across China and Saudi Arabia.",
+      "No credit card required. Full access to all features. Cancel anytime. Join compliance teams across the globe.",
     "pricing.startFreeTrialCta": "Start Free Trial ->",
     "pricing.requestDemo": "Request a Demo",
-    "pricing.footerTagline": "Dual-Jurisdiction Assurance & Compliance.",
+    "pricing.footerTagline": "Global Compliance Intelligence Platform.",
     "pricing.footerPowered": "Powered by Yalla-Hack.",
     "pricing.plan.starter.name": "Starter",
     "pricing.plan.starter.tagline":
       "Perfect for startups and early-stage compliance.",
     "pricing.plan.starter.feature.1":
-      "5 compliance frameworks (PIPL, CSL, DSL, PDPL, NCA)",
+      "40+ compliance frameworks (GDPR, CCPA, PIPL, PDPL, LGPD, NIST CSF, etc.)",
     "pricing.plan.starter.feature.2": "Up to 5 vendor assessments per month",
     "pricing.plan.starter.feature.3": "AI-powered gap analysis",
     "pricing.plan.starter.feature.4": "Basic compliance dashboards",
@@ -825,8 +825,9 @@ const messages: Record<string, Record<string, string>> = {
     "pricing.plan.enterprise.price.biannual": "Custom",
     "pricing.plan.enterprise.price.annual": "From $2,000",
     "pricing.plan.enterprise.savings.annual": "Save 16%",
-    "pricing.why.1.title": "Dual Jurisdiction",
-    "pricing.why.1.desc": "China and Saudi Arabia frameworks in one platform",
+    "pricing.why.1.title": "Global Coverage",
+    "pricing.why.1.desc":
+      "40+ frameworks across all major jurisdictions in one platform",
     "pricing.why.2.title": "AI Risk Analysis",
     "pricing.why.2.desc": "Real-time scoring and gap identification",
     "pricing.why.3.title": "PDF Reports",
@@ -849,7 +850,7 @@ const messages: Record<string, Record<string, string>> = {
       "All major cards are supported through Stripe. Enterprise customers can request invoicing.",
     "pricing.faq.4.q": "Which frameworks are covered?",
     "pricing.faq.4.a":
-      "DJAC covers PIPL, CSL, DSL, PDPL, and NCA frameworks with cross-jurisdiction comparison.",
+      "DJAC covers GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF, and 40+ global frameworks with cross-jurisdiction comparison.",
     "pricing.faq.5.q": "Is our data secure?",
     "pricing.faq.5.a":
       "Data is encrypted in transit and at rest, with full audit logs for enterprise governance.",
@@ -908,7 +909,7 @@ const messages: Record<string, Record<string, string>> = {
       "Search cybersecurity and data-protection references and get to the right guidance faster.",
     "laws.searchTitle": "Search Legal Guidance",
     "laws.searchDesc":
-      "Search by framework, jurisdiction, control, or legal topic (for example: NCA, PDPL, CSL, PIPL, cross-border transfer).",
+      "Search by framework, jurisdiction, control, or legal topic (for example: GDPR, CCPA, NIST CSF, PIPL, PDPL, cross-border transfer).",
     "laws.searchPlaceholder":
       "Search by law, section, obligation, or penalty...",
     "laws.loading": "Loading legal references...",
@@ -929,7 +930,7 @@ const messages: Record<string, Record<string, string>> = {
 
     "supplier.title": "Market Entry Assessment",
     "supplier.subtitle":
-      "Build a company profile and generate China-Saudi readiness scores before market launch.",
+      "Build a company profile and generate global readiness scores across 40+ frameworks before market launch.",
     "supplier.add": "Add Company Profile",
     "supplier.create": "Create Profile",
     "supplier.preview": "Preview Score",
@@ -955,15 +956,15 @@ const messages: Record<string, Record<string, string>> = {
     "supplier.loadingSuppliers": "Loading assessments...",
     "supplier.noIndustry": "No industry supplied",
     "supplier.notProvided": "Not provided",
-    "supplier.dualScore": "Dual-Jurisdiction Compliance Score",
+    "supplier.dualScore": "Global Compliance Score",
     "supplier.scoreOverall": "Overall",
-    "supplier.scoreChina": "China Score",
-    "supplier.scoreSaudi": "Saudi Score",
+    "supplier.scoreChina": "Asia-Pacific Score",
+    "supplier.scoreSaudi": "Europe Score",
     "supplier.gapReport": "Gap Report",
     "supplier.noMajorGaps":
       "No major compliance gaps detected in the current company profile.",
     "supplier.runToGenerate":
-      "Run assessment to generate the dual-jurisdiction score and gap report.",
+      "Run assessment to generate the global compliance score and gap report.",
     "supplier.documentInputLabel": "Optional document evidence",
     "supplier.documentInputHint":
       "Paste policy text, contract clauses, or technical controls to run a document-aware assessment.",
@@ -975,7 +976,7 @@ const messages: Record<string, Record<string, string>> = {
     "supplier.engineLabel": "Assessment Engine",
     "supplier.engineNative": "DJAC Native Pipeline",
     "supplier.methodPoint1":
-      "This MVP uses deterministic rule-based scoring across the five core frameworks (PIPL, CSL, DSL, PDPL, NCA).",
+      "This MVP uses deterministic rule-based scoring across the core frameworks (GDPR, CCPA, LGPD, PIPL, PDPL, NIST, etc.).",
     "supplier.methodPoint2":
       "Scores combine localization evidence, cloud profile, and certification posture to generate a procurement-ready compliance baseline.",
     "supplier.running": "Assessment Running",
@@ -983,10 +984,11 @@ const messages: Record<string, Record<string, string>> = {
     "supplier.placeholderVendorName": "e.g., TechCorp Inc.",
     "supplier.placeholderIndustry": "e.g., Cloud Services",
     "supplier.placeholderCloudProvider": "e.g., AWS, Alibaba Cloud, Oracle",
-    "supplier.placeholderDataLocations": "e.g., China, Riyadh, Frankfurt",
+    "supplier.placeholderDataLocations": "e.g., US, EU, APAC, Middle East",
     "supplier.placeholderCertifications":
-      "e.g., ISO 27001, SOC 2 Type II, NCA ECC",
-    "supplier.placeholderOperatingCountries": "e.g., China, Saudi Arabia, UAE",
+      "e.g., ISO 27001, SOC 2 Type II, FedRAMP",
+    "supplier.placeholderOperatingCountries":
+      "e.g., US, Germany, Singapore, Brazil",
     "supplier.placeholderDescription":
       "Describe the company architecture and compliance posture",
     "supplier.progressTitle": "AI Orchestrator Progress",
@@ -1118,7 +1120,7 @@ const messages: Record<string, Record<string, string>> = {
     "region.title": "Operational Region Map",
     "region.badge": "Interactive",
     "region.description":
-      "China-Saudi compliance corridor with drill-down by vendors, assessments, and critical gaps.",
+      "Global compliance corridor with drill-down by region, vendors, assessments, and critical gaps.",
     "region.metricVendors": "Vendors",
     "region.metricAssessments": "Assessments",
     "region.metricCriticalGaps": "Critical Gaps",
@@ -1131,7 +1133,7 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.titlePrefix": "DJAC",
     "dashboard.titleAccent": "TOOL",
     "dashboard.subtitle":
-      "Your command center for China-Saudi cross-border compliance.",
+      "Your command center for global cross-border compliance.",
     "dashboard.frameworks": "Compliance Frameworks",
     "dashboard.loadingFrameworks": "Loading frameworks...",
     "dashboard.frameworkComparison": "Framework Comparison",
@@ -1151,20 +1153,20 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.matrixRelationships": "Relationships",
     "dashboard.insightLocalizationTitle": "Data Localization",
     "dashboard.insightLocalizationBody":
-      "China (CSL/PIPL) and Saudi Arabia (PDPL) both enforce strict localization expectations, so cross-border data flows need explicit operating controls.",
+      "Major global frameworks (GDPR, PIPL, PDPL, LGPD) enforce strict localization expectations, so cross-border data flows need explicit operating controls.",
     "dashboard.insightConsentTitle": "Consent Requirements",
     "dashboard.insightConsentBody":
       "All major frameworks require explicit consent for personal data processing, but thresholds and implementation details differ.",
     "dashboard.insightEnforcementTitle": "Enforcement Authorities",
     "dashboard.insightEnforcementBody":
-      "China enforcement is centralized through CAC, while Saudi oversight is shared across SDAIA and NCA.",
+      "Enforcement structures vary by jurisdiction — some centralized through a single authority, others distributed across multiple agencies.",
     "dashboard.headerActionFrameworkAnalysis": "Framework Analysis",
     "dashboard.headerActionRunAssessment": "Run Assessment",
     "dashboard.headerActionComplianceTracker": "Compliance Tracker",
     "dashboard.headerActionLawLibrary": "Law Library",
     "dashboard.kpiCriticalSub": "of {count} framework pairs",
-    "dashboard.kpiHighRiskSub": "Require dual-jurisdiction pipeline",
-    "dashboard.kpiFrameworksSub": "CSL · DSL · PIPL · PDPL · NCA",
+    "dashboard.kpiHighRiskSub": "Require multi-jurisdiction pipeline",
+    "dashboard.kpiFrameworksSub": "40+ Frameworks · Global Coverage",
     "dashboard.kpiPostureSub": "Derived from relationship graph",
     "dashboard.conflictActivityTitle": "Conflict Detection Activity",
     "dashboard.conflictActivityDesc":
@@ -1261,16 +1263,16 @@ const messages: Record<string, Record<string, string>> = {
     "analysis.searchControls": "Search controls, requirements…",
 
     "dashboard.keyDeadlines": "Key Regulatory Deadlines & Schedules",
-    "dashboard.viewSaObligations": "Open Saudi Obligations →",
-    "dashboard.viewCnObligations": "Open China Obligations →",
+    "dashboard.viewSaObligations": "Open EMEA Obligations →",
+    "dashboard.viewCnObligations": "Open APAC Obligations →",
     "dashboard.seeComparison": "Open Side-by-Side Comparison →",
     "dashboard.obligationsBadge": "obligations",
     "dashboard.cslInEffect": "CSL 2026 in effect",
     "dashboard.timeCriticalBadge": "urgent reports",
     "dashboard.crossBorderCompliance": "Cross-Border Compliance",
-    "dashboard.saudiFrameworkSummary": "NCA · SDAIA · ECC · PDPL",
-    "dashboard.chinaFrameworkSummary": "CAC · MPS · CSL · PIPL · MLPS 2.0",
-    "dashboard.crossBorderSummary": "CSL + DSL + PIPL vs. PDPL + ECC",
+    "dashboard.saudiFrameworkSummary": "EMEA: GDPR · PDPL · POPIA",
+    "dashboard.chinaFrameworkSummary": "APAC: PIPL · CSL · DSL · PDPA",
+    "dashboard.crossBorderSummary": "Cross-Border: GDPR + CCPA + LGPD + PIPL",
     "dashboard.deadlinePdplFullEnforcementTitle": "PDPL Full Enforcement",
     "dashboard.deadlinePdplFullEnforcementDate": "Sept 14, 2024",
     "dashboard.deadlinePdplFullEnforcementDesc":
@@ -1305,7 +1307,7 @@ const messages: Record<string, Record<string, string>> = {
 
     "tracker.title": "Compliance Obligation Tracker",
     "tracker.subtitle":
-      "Track deadlines, recurring obligations, and high-priority cybersecurity duties across Saudi Arabia and China.",
+      "Track deadlines, recurring obligations, and high-priority cybersecurity duties across 40+ jurisdictions.",
     "tracker.tabSaudi": "🇸🇦 Saudi Arabia",
     "tracker.tabChina": "🇨🇳 China",
     "tracker.tabComparison": "Side-by-Side Comparison",
@@ -1315,7 +1317,7 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.chinaTitle": "China — Compliance Obligations",
     "tracker.chinaDesc":
       "CAC (CSL, PIPL), MPS (MLPS 2.0), MIIT, and State Council regulatory obligations including the 2026 CSL amendments.",
-    "tracker.comparisonTitle": "Saudi Arabia vs. China — Regulatory Comparison",
+    "tracker.comparisonTitle": "Cross-Jurisdiction Regulatory Comparison",
     "tracker.comparisonDesc":
       "Structured comparison of key regulatory topics to help organizations understand similarities and differences for cross-border compliance planning.",
     "tracker.criticalObligations": "Critical Obligations",
@@ -1331,8 +1333,8 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.loadingComparison": "Loading comparison data...",
     "tracker.comparisonSideBySide":
       "Side-by-side comparison of cybersecurity regulatory requirements in Saudi Arabia and China.",
-    "tracker.saObligations": "Saudi Obligations",
-    "tracker.cnObligations": "China Obligations",
+    "tracker.saObligations": "EMEA Obligations",
+    "tracker.cnObligations": "APAC Obligations",
     "tracker.comparisonSearchPlaceholder": "Search topics...",
     "tracker.exportCsv": "Export CSV",
     "tracker.noComparisonData": "No comparison data available.",
@@ -1349,9 +1351,9 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.statFrameworksDesc":
       "Saudi Arabia and China reference packs are loaded and ready.",
     "enhanced.statSaudiDesc":
-      "PDPL, NCA, ECC, CCC, CSCC, and OTCC controls are available for analysis.",
+      "EMEA: GDPR, PDPL, POPIA controls and requirements are available for analysis.",
     "enhanced.statChinaDesc":
-      "CSL, DSL, PIPL, MLPS 2.0, and transfer obligations are ready for comparison.",
+      "APAC: PIPL, CSL, DSL, PDPA, and transfer obligations are ready for comparison.",
     "enhanced.statMatrixDesc":
       "Cross-framework relationships are loaded and ready for pair selection.",
     "enhanced.awaitingPair": "Awaiting pair selection",
@@ -1393,7 +1395,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.penaltyContext": "Penalty context",
     "enhanced.urgentWindowsTitle": "Urgent Reporting Windows",
     "enhanced.urgentWindowsDesc":
-      "Immediate escalation windows based on Saudi and China reporting obligations.",
+      "Immediate escalation windows based on global reporting obligations.",
     "enhanced.noUrgentWindows":
       "No urgent reporting windows found for the active pair.",
     "enhanced.riskQueueTitle": "Risk Action Queue",
@@ -1406,14 +1408,14 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.matrixActionsCol": "Actions",
     "enhanced.matrixUsePair": "Use Selected Pair",
     "enhanced.loadPair": "Load Selected Pair",
-    "enhanced.comparisonNotesTitle": "Saudi Arabia vs China Comparison Notes",
+    "enhanced.comparisonNotesTitle": "Cross-Jurisdiction Comparison Notes",
     "enhanced.comparisonNotesDesc":
       "A concise executive matrix generated from the cross-jurisdiction comparison report.",
     "enhanced.matrixActionGuidanceTitle": "Matrix Action Guidance",
     "enhanced.matrixActionGuidanceDesc":
       "Recommended handling steps for each relationship group from the integrated dataset.",
     "enhanced.deadlinesDesc":
-      "Operational timelines derived from Saudi and China regulatory reports.",
+      "Operational timelines derived from global regulatory reports.",
     "enhanced.noTimetableData":
       "No timetable data available for the selected jurisdictions.",
     "enhanced.legalBriefsTitle": "Legal Reference Briefs",
@@ -1508,8 +1510,8 @@ const messages: Record<string, Record<string, string>> = {
       "Estimated compliance snapshot based on the current form data.",
     "client.previewOverallScore": "Overall Score",
     "client.previewJurisdictions": "Jurisdiction Scores",
-    "client.previewChina": "China",
-    "client.previewSaudi": "Saudi Arabia",
+    "client.previewChina": "APAC",
+    "client.previewSaudi": "EMEA",
     "client.previewTopGaps": "Top Gaps",
     "client.previewDisclaimer":
       "This is a preview only. Save the vendor profile to persist and run the full AI-powered assessment.",
@@ -1538,9 +1540,9 @@ const messages: Record<string, Record<string, string>> = {
     "client.profileSavingHint": "Saving profile changes...",
     "client.regulatoryWatchTitle": "Regulatory Update Watch",
     "client.regulatoryWatchDesc":
-      "Quick references for current China and Saudi framework entries available in your environment.",
-    "client.saudiArabia": "Saudi Arabia",
-    "client.china": "China",
+      "Quick references for current global framework entries available in your environment.",
+    "client.saudiArabia": "EMEA",
+    "client.china": "APAC",
     "client.loadingFrameworks": "Loading frameworks...",
     "client.noFrameworksFound": "No frameworks available.",
     "client.regulatoryHint":
@@ -1694,15 +1696,15 @@ const messages: Record<string, Record<string, string>> = {
     "admin.noAssessmentsRecorded": "No assessments recorded yet.",
     "admin.matrixTitle": "Cross-Jurisdiction Comparison Matrix",
     "admin.matrixDesc":
-      "Operational load matrix for China and Saudi corridors across vendor presence, assessments, and critical gaps.",
+      "Operational load matrix for global compliance corridors across vendor presence, assessments, and critical gaps.",
     "admin.matrixNoData": "No region coverage metrics available yet.",
     "admin.matrixPressure": "Pressure",
     "admin.riskPressureIndex": "Risk Pressure Index",
     "admin.frameworkDiagramTitle": "Framework Relationship Diagram",
     "admin.frameworkDiagramDesc":
       "Canonical framework interdependencies with node size weighted by recent assessment volume.",
-    "admin.frameworkLegendChina": "Blue: China frameworks",
-    "admin.frameworkLegendSaudi": "Teal: Saudi frameworks",
+    "admin.frameworkLegendChina": "Blue: APAC frameworks",
+    "admin.frameworkLegendSaudi": "Teal: EMEA frameworks",
     "admin.frameworkLegendNode": "Node radius: assessment load",
     "admin.loadLabel": "load",
     "admin.aiFeedTitle": "Real-Time AI Pipeline Feed",
@@ -1839,34 +1841,35 @@ const messages: Record<string, Record<string, string>> = {
       "We typically respond within 24 hours. Check your inbox for next steps.",
     "signup.accessSubmitted":
       "Access request submitted — we'll be in touch within 24 hours.",
-    "signup.tagline": "China × Saudi Arabia — Compliance Intelligence",
-    "signup.heroLine1": "The only platform built for",
-    "signup.heroLine2": "China-Saudi compliance",
+    "signup.tagline": "Global Compliance Intelligence — 40+ Jurisdictions",
+    "signup.heroLine1": "Enterprise-Grade Compliance",
+    "signup.heroLine2": "for Cross-Border Operations",
     "signup.heroDesc":
-      "Navigate PIPL, PDPL, NCA, CSL, DSL, and MLPS 2.0 in one workspace. Real-time conflicts, AI answers, and market-entry gap analysis.",
-    "signup.vp1Title": "6 Frameworks, 2 Jurisdictions",
-    "signup.vp1Desc": "PIPL, PDPL, CSL, DSL, NCA, MLPS 2.0 — all in one place.",
+      "Navigate GDPR, CCPA, PIPL, PDPL, LGPD, and 40+ frameworks in one workspace. Real-time conflicts, AI answers, and global gap analysis.",
+    "signup.vp1Title": "Multi-Jurisdiction Mapping",
+    "signup.vp1Desc":
+      "GDPR, CCPA, PIPL, PDPL, LGPD, and 40+ frameworks — all in one place.",
     "signup.vp2Title": "Conflict Detection in Seconds",
     "signup.vp2Desc":
-      "Our relationship engine flags hidden clashes before they become fines.",
-    "signup.vp3Title": "3-Language AI Co-Pilot",
+      "Our relationship engine flags hidden clashes across jurisdictions before they become fines.",
+    "signup.vp3Title": "Multi-Language AI Co-Pilot",
     "signup.vp3Desc":
-      "Ask in Arabic, Chinese, or English — get cited regulatory answers instantly.",
-    "signup.vp4Title": "Market Entry Scan",
+      "Ask in Arabic, Chinese, English, or Spanish — get cited regulatory answers instantly.",
+    "signup.vp4Title": "Global Market Entry Scan",
     "signup.vp4Desc":
-      "Know your China or Saudi gaps before you launch — not after a regulator calls.",
+      "Know your compliance gaps in any jurisdiction before you launch — not after a regulator calls.",
     "signup.vp5Title": "Legal Library",
     "signup.vp5Desc":
-      "Every Article, obligation, and penalty searchable in plain language.",
+      "Every regulation, obligation, and penalty searchable in plain language across 40+ jurisdictions.",
     "signup.home": "Home",
-    "signup.stat1": "China-Saudi JVs tracked",
+    "signup.stat1": "Frameworks Mapped",
     "signup.stat2": "Full gap analysis",
     "signup.stat3": "Cost savings vs. law firms",
     "signup.securityNotice.header": "Secure Connection",
     "signup.securityNotice.body":
-      "TLS 1.3 encrypted. Data processed under Saudi Arabia PDPL, China PIPL, and applicable cross-border transfer frameworks. No data shared with third parties without authorization.",
+      "TLS 1.3 encrypted. Data processed in accordance with global privacy frameworks (GDPR, CCPA, PIPL, PDPL, LGPD) and applicable cross-border transfer mechanisms. No data shared with third parties without authorization.",
     "signup.dataConsent":
-      "I acknowledge that data may be processed and stored within Saudi Arabia and/or China data center regions in accordance with applicable laws (PDPL · PIPL · NCA ECC). I consent to cross-border data transfer for compliance service delivery.",
+      "I acknowledge that data may be processed and stored in global cloud data center regions in accordance with applicable laws (GDPR · PIPL · PDPL · CCPA · LGPD). I consent to cross-border data transfer for compliance service delivery.",
     "signup.showPassword": "Show password",
     "signup.hidePassword": "Hide password",
     "signup.strengthWeak": "Weak",
@@ -1962,13 +1965,13 @@ const messages: Record<string, Record<string, string>> = {
       "Use \u2190 \u2192 arrow keys or Space to navigate \u00b7 Esc to skip",
     "tour.step0Title": "Welcome to DJAC! \ud83d\udc4b",
     "tour.step0Desc":
-      "Your all-in-one compliance platform for China\u2013Saudi cross-border operations.\n\n\ud83d\udcca Compliance tracking  \u2022  \ud83e\udd16 AI-powered reports\n\ud83d\udd0d Vendor risk analysis  \u2022  \ud83d\udcc5 Deadline monitoring\n\nIn 7 quick steps, you'll master the essentials. Let's go! \ud83d\ude80",
+      "Your all-in-one compliance platform for global cross-border operations.\n\n\ud83d\udcca Compliance tracking  \u2022  \ud83e\udd16 AI-powered reports\n\ud83d\udd0d Vendor risk analysis  \u2022  \ud83d\udcc5 Deadline monitoring\n\nIn 7 quick steps, you'll master the essentials. Let's go! \ud83d\ude80",
     "tour.step1Title": "\ud83d\udcca Dashboard \u2014 Your Command Center",
     "tour.step1Desc":
       "See everything at a glance: compliance score, risk levels, upcoming deadlines, and framework coverage. This is your home base \u2014 check it daily.",
     "tour.step2Title": "\ud83d\udd0d Framework Analysis \u2014 Compare Laws",
     "tour.step2Desc":
-      "Compare PIPL, CSL, DSL, PDPL, and NCA side-by-side. Spot overlaps, conflicts, and gaps across Saudi and Chinese regulations instantly.",
+      "Compare GDPR, CCPA, PIPL, PDPL, LGPD, and 40+ frameworks side-by-side. Spot overlaps, conflicts, and gaps across global regulations instantly.",
     "tour.step3Title": "\ud83c\udfe2 Vendor Risk \u2014 Assess Third Parties",
     "tour.step3Desc":
       "Upload a vendor profile and our AI scores compliance alignment, flags data-residency gaps, and generates a risk report in seconds.",
@@ -1977,7 +1980,7 @@ const messages: Record<string, Record<string, string>> = {
       "One click \u2192 AI-powered PDF or DOCX compliance report. Share via secure time-limited links. Schedule auto-delivery weekly or monthly.",
     "tour.step5Title": "\ud83d\udcc5 Calendar \u2014 Never Miss a Deadline",
     "tour.step5Desc":
-      "Track PIPL, CSL, PDPL, and NCA deadlines. DJAC emails you 30, 7, and 1 day before each one. Stress-free compliance.",
+      "Track GDPR, CCPA, PIPL, PDPL, and global deadlines. DJAC emails you 30, 7, and 1 day before each one. Stress-free compliance.",
     "tour.step6Title":
       "\ud83c\udf0d Pro Intelligence \u2014 Live Regulatory Feed",
     "tour.step6Desc":
@@ -2000,7 +2003,7 @@ const messages: Record<string, Record<string, string>> = {
       "If an account exists for that email, we've sent a reset link. Check your inbox (and spam folder).",
     "forgot.backToLogin": "Back to login",
     "forgot.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Saudi Arabia · China · UAE",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · 40+ Jurisdictions",
     "reset.title": "Set new password",
     "reset.subtitle":
       "Choose a strong password with at least 8 characters, one uppercase letter, and one number.",
@@ -2015,7 +2018,7 @@ const messages: Record<string, Record<string, string>> = {
       "Your password has been changed. You can now sign in with your new password.",
     "reset.goToLogin": "Go to login",
     "reset.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Saudi Arabia · China · UAE",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · 40+ Jurisdictions",
     "forgot.badge": "Secure Reset",
     "forgot.emailAriaLabel": "Email address",
     "forgot.notice.header": "Security Notice",
@@ -2043,7 +2046,7 @@ const messages: Record<string, Record<string, string>> = {
     "invite.layout.notice":
       "Verified invitation link · TLS 1.3 · DJAC Compliance Platform",
     "invite.layout.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Saudi Arabia · China · UAE",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · 40+ Jurisdictions",
 
     "layout.menuProIntelligence": "Pro Intelligence",
     "proIntel.commandCenter": "Command Center",
@@ -2075,7 +2078,7 @@ const messages: Record<string, Record<string, string>> = {
     "regPulse.title": "Regulatory Pulse Matrix",
     "regPulse.enforcementActions": "Enforcement Actions",
     "regPulse.riskTrend": "Penalty Exposure Trend (12-month)",
-    "regPulse.calculator": "PIPL Penalty Calculator",
+    "regPulse.calculator": "GDPR Penalty Calculator",
     "regPulse.annualRevenue": "Estimated Annual Revenue (SAR / CNY)",
     "regPulse.personalDataOn":
       "\u26a1 Personal Data Component: ACTIVE (PIPL 5% cap)",
@@ -2294,7 +2297,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.fieldDataSubjects": "Affected Data Subjects",
     "incident.fieldNotifDeadline": "Notification Deadline (hours)",
     "incident.fieldRegulatoryNotif":
-      "Regulatory notification required (PIPL / GDPR / PDPL)",
+      "Regulatory notification required (GDPR / CCPA / PIPL / PDPL)",
     "incident.fieldFrameworks": "Affected Frameworks",
     "incident.fieldDataTypes": "Affected Data Types",
     "incident.fieldDescription": "Description",
@@ -2371,7 +2374,7 @@ const messages: Record<string, Record<string, string>> = {
     "audit.fieldDescription": "Description",
     "audit.fieldFindings": "Findings / Notes",
     "audit.fieldNotes": "Internal Notes",
-    "audit.titlePlaceholder": "e.g. Annual PIPL Compliance Audit",
+    "audit.titlePlaceholder": "e.g. Annual GDPR Compliance Audit",
     "audit.descPlaceholder": "Audit objectives and scope details\u2026",
     "audit.findingsPlaceholder":
       "Key findings, observations, recommendations\u2026",
@@ -2602,7 +2605,7 @@ const messages: Record<string, Record<string, string>> = {
     "transferChecker.volumeHigh": "High (1M+)",
     "gapTracker.title": "Vendor Compliance Gap Tracker",
     "gapTracker.subtitle":
-      "Rule-based dual-jurisdiction compliance gap analysis across all registered vendors.",
+      "Rule-based multi-jurisdiction compliance gap analysis across 40+ frameworks.",
     "gapTracker.statTotal": "Total Gaps",
     "gapTracker.statCritical": "Critical",
     "gapTracker.statHigh": "High",
@@ -2890,7 +2893,7 @@ const messages: Record<string, Record<string, string>> = {
     "signup.orgName": "Organisation name",
     "signup.practiceAreas": "Practice Areas",
     "signup.primaryMarket": "Primary market",
-    "signup.productTitle": "DJAC Tool — Dual-Jurisdiction Compliance",
+    "signup.productTitle": "DJAC Tool — Global Compliance Intelligence",
     "signup.selectMarket": "Primary market",
     "signup.termsConsent.and": "and",
     "signup.termsConsent.legal": "This constitutes a binding agreement.",
@@ -2909,7 +2912,7 @@ const messages: Record<string, Record<string, string>> = {
     "wizard.reportError": "Failed to generate report.",
     "ctem.pageTitle": "Continuous Compliance & CTEM",
     "ctem.pageSubtitle":
-      "Real-time threat exposure monitoring aligned with CSL, DSL, PIPL, PDPL and NCA frameworks",
+      "Real-time threat exposure monitoring aligned with NIST CSF, ISO 27001, GDPR, CCPA, PIPL, PDPL and 40+ frameworks",
     "ctem.assets": "Assets",
     "ctem.vulnerabilities": "Vulnerabilities",
     "ctem.exploitable": "Exploitable",
@@ -3011,7 +3014,7 @@ const messages: Record<string, Record<string, string>> = {
     "layout.menuComplianceChat": "AI Compliance Chat",
     "chat.title": "AI Compliance Assistant",
     "chat.subtitle":
-      "Ask anything about PIPL, CSL, DSL, PDPL, and NCA frameworks",
+      "Ask anything about GDPR, CCPA, LGPD, PIPL, PDPL, and 40+ global frameworks",
     "chat.jurisdictionAll": "All Jurisdictions",
     "chat.jurisdictionChina": "China",
     "chat.jurisdictionSaudi": "Saudi Arabia",
@@ -3019,16 +3022,16 @@ const messages: Record<string, Record<string, string>> = {
     "chat.disclaimer":
       "This assistant provides general regulatory guidance only and does not constitute legal advice. Always consult a qualified legal professional for specific compliance decisions.",
     "chat.inputPlaceholder":
-      "Ask about PIPL, PDPL, NCA, cross-border transfers…",
+      "Ask about GDPR, CCPA, PIPL, PDPL, cross-border transfers…",
     "chat.emptyState": "Ask a compliance question to get started",
     "chat.footerNote":
-      "Powered by DJAC law knowledge base · China (PIPL, CSL, DSL) · Saudi Arabia (PDPL, NCA)",
+      "Powered by DJAC knowledge base · GDPR · CCPA · LGPD · PIPL · PDPL · and 40+ global frameworks",
     "chat.error": "AI service error. Please try again.",
     "chat.fallbackWarning":
       "AI is not configured — showing placeholder response.",
     "dsr.pageTitle": "Data Subject Request Tracker",
     "dsr.pageSubtitle":
-      "Manage PIPL (China) and PDPL (Saudi Arabia) data subject rights requests with deadline tracking.",
+      "Manage data subject rights requests across GDPR, CCPA, PIPL, PDPL, LGPD and 40+ frameworks with deadline tracking.",
     "dsr.logRequest": "Log Request",
     "dsr.total": "Total Requests",
     "dsr.open": "Open",
@@ -3513,9 +3516,9 @@ const messages: Record<string, Record<string, string>> = {
     "home.signIn": "تسجيل الدخول",
     "home.heroTitle": "الامتثال بوضوح",
     "home.heroLine1": "مصممة من أجل",
-    "home.heroLine2": "الامتثال بين الصين والسعودية",
+    "home.heroLine2": "ذكاء الامتثال العالمي",
     "home.heroSubtitle":
-      "أدر الامتثال بين السعودية والصين بوضوح وثقة مع DJAC، وكل ما تحتاجه في لوحة واحدة.",
+      "أدر الامتثال العالمي بوضوح وثقة مع DJAC، وكل ما تحتاجه في لوحة واحدة.",
     "home.viewDashboard": "افتح اللوحة",
     "home.frameworkAnalysis": "تحليل الهياكل",
     "home.vendorAssessment": "تقييم دخول السوق",
@@ -3548,11 +3551,12 @@ const messages: Record<string, Record<string, string>> = {
     "home.badge": "✦ منصة امتثال مؤسسية",
     "home.trust":
       "متعدد اللغات · وضع داكن · مدعوم بالذكاء الاصطناعي · جاهز للمؤسسات",
-    "home.platformNote": "يغطي CSL 2026 · PIPL · DSL · PDPL · NCA · MLPS 2.0",
-    "home.statsFrameworks": "+10",
-    "home.statsFrameworksLabel": "الهياكل",
-    "home.statsJurisdictions": "2",
-    "home.statsJurisdictionsLabel": "ولايات قضائية",
+    "home.platformNote":
+      "يغطي GDPR · CCPA · LGPD · POPIA · CSL 2026 · PIPL · DSL · PDPL · NCA · MLPS 2.0",
+    "home.statsFrameworks": "+40",
+    "home.statsFrameworksLabel": "إطارًا",
+    "home.statsJurisdictions": "+40",
+    "home.statsJurisdictionsLabel": "ولاية قضائية",
     "home.statsControls": "+50",
     "home.statsControlsLabel": "ضوابط مُعيَّنة",
     "home.statsRealtime": "فوري",
@@ -3563,7 +3567,7 @@ const messages: Record<string, Record<string, string>> = {
       "سجّل دخولك بوثائق اعتماد مؤسستك للوصول إلى لوحة الامتثال الكاملة.",
     "home.step2Title": "اختر الهياكل",
     "home.step2Desc":
-      "اختر من أكثر من 10 هياكل تنظيمية في الصين والمملكة العربية السعودية وقارنها جنبًا إلى جنب.",
+      "اختر من أكثر من 40 إطارًا تنظيميًا عبر ولايات قضائية متعددة وقارنها جنبًا إلى جنب.",
     "home.step3Title": "احصل على الرؤى",
     "home.step3Desc":
       "شاهد فورًا التداخلات والتعارضات والمواعيد وتقارير فجوات الجاهزية مع دعم كامل متعدد اللغات.",
@@ -3790,9 +3794,9 @@ const messages: Record<string, Record<string, string>> = {
     "billing.billingEmail": "بريد الفوترة الإلكتروني",
     "billing.billingEmailPlaceholder": "billing@example.com",
     "billing.primaryJurisdiction": "الولاية القضائية الأساسية",
-    "billing.jurisdictionBoth": "كلتاهما (الصين + السعودية)",
-    "billing.jurisdictionChina": "الصين فقط",
-    "billing.jurisdictionSaudi": "السعودية فقط",
+    "billing.jurisdictionBoth": "تغطية عالمية",
+    "billing.jurisdictionChina": "آسيا والمحيط الهادئ",
+    "billing.jurisdictionSaudi": "أوروبا",
     "billing.jurisdictionOther": "أخرى",
     "billing.creating": "جارٍ الإنشاء...",
     "billing.startTrial": "ابدأ التجربة المجانية لمدة 7 أيام ->",
@@ -3841,7 +3845,7 @@ const messages: Record<string, Record<string, string>> = {
     "pricing.badgeTrial": "تجربة مجانية لمدة 7 أيام · بدون بطاقة ائتمانية",
     "pricing.heroTitle": "أسعار واضحة وشفافة",
     "pricing.heroSubtitle":
-      "ذكاء امتثال بمستوى مؤسسي للصين والسعودية. مناسب للشركات الناشئة وقابل للتوسع للمؤسسات.",
+      "ذكاء امتثال عالمي بمستوى مؤسسي. مناسب للشركات الناشئة وقابل للتوسع للمؤسسات.",
     "pricing.best": "الأفضل",
     "pricing.mostPopular": "الأكثر شيوعا",
     "pricing.perMonth": "شهر",
@@ -3858,13 +3862,13 @@ const messages: Record<string, Record<string, string>> = {
       "لا حاجة لبطاقة ائتمانية. وصول كامل إلى جميع الميزات. ألغِ الاشتراك في أي وقت.",
     "pricing.startFreeTrialCta": "ابدأ التجربة المجانية ->",
     "pricing.requestDemo": "اطلب عرضا تجريبيا",
-    "pricing.footerTagline": "ضمان وامتثال ثنائي الولاية القضائية.",
+    "pricing.footerTagline": "منصة ذكاء الامتثال العالمية.",
     "pricing.footerPowered": "بدعم من Yalla-Hack.",
     "pricing.plan.starter.name": "الخطة الأساسية",
     "pricing.plan.starter.tagline":
       "مثالية للشركات الناشئة ومراحل الامتثال المبكرة.",
     "pricing.plan.starter.feature.1":
-      "خمسة هياكل امتثال (PIPL وCSL وDSL وPDPL وNCA)",
+      "هياكل امتثال عالمية (GDPR وCCPA وPIPL وPDPL وLGPD وغيرها)",
     "pricing.plan.starter.feature.2": "حتى 5 تقييمات مورّدين شهريا",
     "pricing.plan.starter.feature.3": "تحليل فجوات مدعوم بالذكاء الاصطناعي",
     "pricing.plan.starter.feature.4": "لوحات امتثال أساسية",
@@ -3933,8 +3937,9 @@ const messages: Record<string, Record<string, string>> = {
     "pricing.plan.enterprise.price.biannual": "مخصص",
     "pricing.plan.enterprise.price.annual": "من $2,000",
     "pricing.plan.enterprise.savings.annual": "وفر 16%",
-    "pricing.why.1.title": "ولايتان قضائيتان",
-    "pricing.why.1.desc": "هياكل الصين والسعودية في منصة واحدة",
+    "pricing.why.1.title": "تغطية عالمية",
+    "pricing.why.1.desc":
+      "أكثر من 40 إطارًا عبر جميع الولايات القضائية في منصة واحدة",
     "pricing.why.2.title": "تحليل مخاطر بالذكاء الاصطناعي",
     "pricing.why.2.desc": "تقييم لحظي وتحديد دقيق للفجوات",
     "pricing.why.3.title": "تقارير PDF",
@@ -4264,8 +4269,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.headerActionComplianceTracker": "متابعة الامتثال",
     "dashboard.headerActionLawLibrary": "مكتبة الأنظمة",
     "dashboard.kpiCriticalSub": "من أصل {count} زوج أطر",
-    "dashboard.kpiHighRiskSub": "يتطلب خط تشغيل مزدوج الولاية",
-    "dashboard.kpiFrameworksSub": "CSL · DSL · PIPL · PDPL · NCA",
+    "dashboard.kpiHighRiskSub": "يتطلب خط تشغيل متعدد الولايات",
+    "dashboard.kpiFrameworksSub": "GDPR · CCPA · PIPL · PDPL · LGPD · NCA",
     "dashboard.kpiPostureSub": "مستمد من مخطط العلاقات",
     "dashboard.conflictActivityTitle": "نشاط اكتشاف التعارضات",
     "dashboard.conflictActivityDesc":
@@ -4368,9 +4373,9 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.cslInEffect": "CSL 2026 ساري المفعول",
     "dashboard.timeCriticalBadge": "تقارير عاجلة",
     "dashboard.crossBorderCompliance": "الامتثال العابر للحدود",
-    "dashboard.saudiFrameworkSummary": "NCA · SDAIA · ECC · PDPL",
-    "dashboard.chinaFrameworkSummary": "CAC · MPS · CSL · PIPL · MLPS 2.0",
-    "dashboard.crossBorderSummary": "CSL + DSL + PIPL مقابل PDPL + ECC",
+    "dashboard.saudiFrameworkSummary": "EMEA: GDPR · PDPL · POPIA",
+    "dashboard.chinaFrameworkSummary": "APAC: PIPL · CSL · DSL · PDPA",
+    "dashboard.crossBorderSummary": "عبر الحدود: GDPR + CCPA + LGPD + PIPL",
     "dashboard.deadlinePdplFullEnforcementTitle": "التنفيذ الكامل لـ PDPL",
     "dashboard.deadlinePdplFullEnforcementDate": "14 سبتمبر 2024",
     "dashboard.deadlinePdplFullEnforcementDesc":
@@ -4405,18 +4410,17 @@ const messages: Record<string, Record<string, string>> = {
 
     "tracker.title": "متتبع التزامات الامتثال",
     "tracker.subtitle":
-      "تابع المواعيد والالتزامات الدورية وأهم متطلبات الأمن السيبراني بين السعودية والصين.",
+      "تابع المواعيد والالتزامات الدورية وأهم متطلبات الامتثال عبر ولايات قضائية متعددة.",
     "tracker.tabSaudi": "🇸🇦 المملكة العربية السعودية",
     "tracker.tabChina": "🇨🇳 الصين",
     "tracker.tabComparison": "مقارنة جنبًا إلى جنب",
     "tracker.saudiTitle": "المملكة العربية السعودية — التزامات الامتثال",
     "tracker.saudiDesc":
-      "التزامات الهيئة الوطنية للأمن السيبراني (NCA: ECC وCCC وCSCC وOTCC) وهيئة البيانات والذكاء الاصطناعي (SDAIA: PDPL) مع المواعيد ومستويات المخاطر.",
+      "التزامات EMEA: GDPR وPDPL وPOPIA وNCA مع المواعيد ومستويات المخاطر.",
     "tracker.chinaTitle": "الصين — التزامات الامتثال",
     "tracker.chinaDesc":
-      "الالتزامات التنظيمية لـCAC وCSL وPIPL وMPS/MLPS 2.0 وMIIT بما في ذلك تعديلات قانون الأمن السيبراني لعام 2026.",
-    "tracker.comparisonTitle":
-      "المملكة العربية السعودية مقابل الصين — مقارنة تنظيمية",
+      "الالتزامات التنظيمية لـ APAC: PIPL وCSL وDSL وPDPA وMLPS 2.0.",
+    "tracker.comparisonTitle": "مقارنة تنظيمية عبر الولايات القضائية",
     "tracker.comparisonDesc":
       "مقارنة منظمة للموضوعات التنظيمية الرئيسية لمساعدة المنظمات على فهم أوجه التشابه والاختلاف لتخطيط الامتثال العابر للحدود.",
     "tracker.criticalObligations": "الالتزامات الحرجة",
@@ -4431,8 +4435,8 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.showDetails": "عرض التفاصيل",
     "tracker.loadingComparison": "جاري تحميل بيانات المقارنة...",
     "tracker.comparisonSideBySide":
-      "مقارنة جنبًا إلى جنب لمتطلبات الأمن السيبراني التنظيمية في المملكة العربية السعودية والصين.",
-    "tracker.saObligations": "الالتزامات السعودية",
+      "مقارنة جنبًا إلى جنب للمتطلبات التنظيمية عبر الولايات القضائية.",
+    "tracker.saObligations": "التزامات أوروبا والشرق الأوسط",
     "tracker.cnObligations": "الالتزامات الصينية",
     "tracker.comparisonSearchPlaceholder": "البحث في المواضيع...",
     "tracker.exportCsv": "تصدير CSV",
@@ -4447,11 +4451,12 @@ const messages: Record<string, Record<string, string>> = {
 
     "layout.menuTracker": "متتبع الامتثال",
 
-    "enhanced.statFrameworksDesc": "حزم مراجع السعودية والصين محمّلة وجاهزة.",
+    "enhanced.statFrameworksDesc":
+      "حزم مراجع عالمية محمّلة وجاهزة عبر 40+ إطارًا.",
     "enhanced.statSaudiDesc":
-      "ضوابط PDPL وNCA وECC وCCC وCSCC وOTCC متاحة للتحليل.",
+      "ضوابط EMEA: GDPR وPDPL وPOPIA وغيرها متاحة للتحليل.",
     "enhanced.statChinaDesc":
-      "ضوابط CSL وDSL وPIPL وMLPS 2.0 والتزامات النقل جاهزة للمقارنة.",
+      "ضوابط APAC: PIPL وCSL وDSL وPDPA وغيرها جاهزة للمقارنة.",
     "enhanced.statMatrixDesc":
       "علاقات الهياكل التنظيمية محمّلة وجاهزة لاختيار الأزواج.",
     "enhanced.awaitingPair": "في انتظار اختيار الزوج",
@@ -4492,7 +4497,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.penaltyContext": "سياق العقوبة",
     "enhanced.urgentWindowsTitle": "نوافذ الإبلاغ العاجل",
     "enhanced.urgentWindowsDesc":
-      "نوافذ تصعيد فورية بناء على متطلبات الإبلاغ في السعودية والصين.",
+      "نوافذ تصعيد فورية بناء على متطلبات الإبلاغ العالمية.",
     "enhanced.noUrgentWindows": "لا توجد نوافذ إبلاغ عاجل للزوج النشط.",
     "enhanced.riskQueueTitle": "قائمة انتظار إجراءات المخاطر",
     "enhanced.riskQueueDesc":
@@ -4504,14 +4509,14 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.matrixActionsCol": "الإجراءات",
     "enhanced.matrixUsePair": "استخدم الزوج المختار",
     "enhanced.loadPair": "تحميل الزوج المختار",
-    "enhanced.comparisonNotesTitle": "ملاحظات مقارنة المملكة مع الصين",
+    "enhanced.comparisonNotesTitle": "ملاحظات مقارنة عبر الولايات القضائية",
     "enhanced.comparisonNotesDesc":
       "مصفوفة تنفيذية موجزة مبنية على تقرير المقارنة العابر للولايات القضائية.",
     "enhanced.matrixActionGuidanceTitle": "إرشادات إجراءات المصفوفة",
     "enhanced.matrixActionGuidanceDesc":
       "خطوات معالجة موصى بها لكل مجموعة علاقات من البيانات المدمجة.",
     "enhanced.deadlinesDesc":
-      "جداول تشغيلية مستخلصة من التقارير التنظيمية في السعودية والصين.",
+      "جداول تشغيلية مستخلصة من المتطلبات التنظيمية العالمية.",
     "enhanced.noTimetableData":
       "لا تتوفر بيانات جدول زمني للولايات القضائية المختارة.",
     "enhanced.legalBriefsTitle": "ملخصات المراجع القانونية",
@@ -4922,34 +4927,35 @@ const messages: Record<string, Record<string, string>> = {
     "signup.requestSentSub":
       "نرد عادةً خلال 24 ساعة. تحقق من بريدك الإلكتروني للخطوات التالية.",
     "signup.accessSubmitted": "تم إرسال طلب الوصول — سنتواصل معك خلال 24 ساعة.",
-    "signup.tagline": "الصين × المملكة العربية السعودية — ذكاء الامتثال",
-    "signup.heroLine1": "المنصة المصممة لـ",
-    "signup.heroLine2": "الامتثال بين الصين والسعودية",
+    "signup.tagline": "ذكاء الامتثال العالمي — أكثر من 40 ولاية قضائية",
+    "signup.heroLine1": "منصة الامتثال",
+    "signup.heroLine2": "للمؤسسات العالمية",
     "signup.heroDesc":
-      "تنقّل بثقة بين PIPL وPDPL وNCA وCSL وDSL وMLPS 2.0 في مساحة عمل موحّدة. تعارضات فورية وإجابات بالذكاء الاصطناعي وتحليل فجوات دخول السوق.",
-    "signup.vp1Title": "6 هياكل، ولايتان قضائيتان",
+      "تنقّل بثقة بين GDPR وCCPA وPIPL وPDPL وLGPD وأكثر من 40 إطارًا تنظيميًا في مساحة عمل موحّدة. تعارضات فورية وإجابات بالذكاء الاصطناعي وتحليل فجوات عالمي.",
+    "signup.vp1Title": "ربط متعدد الولايات القضائية",
     "signup.vp1Desc":
-      "PIPL وPDPL وCSL وDSL وNCA وMLPS 2.0 — كل شيء في مكان واحد.",
+      "GDPR وCCPA وPIPL وPDPL وLGPD وأكثر من 40 إطارًا — كل شيء في مكان واحد.",
     "signup.vp2Title": "كشف التعارضات في ثوانٍ",
     "signup.vp2Desc":
-      "يرصد محرك العلاقات التعارضات الخفية قبل أن تتحوّل إلى غرامات.",
-    "signup.vp3Title": "مساعد ذكاء اصطناعي بـ 3 لغات",
+      "يرصد محرك العلاقات التعارضات الخفية عبر الولايات القضائية قبل أن تتحوّل إلى غرامات.",
+    "signup.vp3Title": "مساعد ذكاء اصطناعي متعدد اللغات",
     "signup.vp3Desc":
-      "اسأل بالعربية أو الصينية أو الإنجليزية واحصل على إجابات تنظيمية مستشهدة فورًا.",
-    "signup.vp4Title": "مسح دخول السوق",
+      "اسأل بالعربية أو الصينية أو الإنجليزية أو الإسبانية واحصل على إجابات تنظيمية مستشهدة فورًا.",
+    "signup.vp4Title": "مسح دخول السوق العالمي",
     "signup.vp4Desc":
-      "اكتشف فجواتك في الصين أو السعودية قبل الإطلاق — لا بعد مكالمة المنظّم.",
+      "اكتشف فجوات الامتثال في أي ولاية قضائية قبل الإطلاق — لا بعد مكالمة المنظّم.",
     "signup.vp5Title": "مكتبة قانونية",
-    "signup.vp5Desc": "كل مادة والتزام وعقوبة قابلة للبحث بلغة سهلة.",
+    "signup.vp5Desc":
+      "كل لائحة والتزام وعقوبة قابلة للبحث بلغة سهلة عبر 40+ ولاية قضائية.",
     "signup.home": "الرئيسية",
-    "signup.stat1": "شراكات سعودية-صينية مرصودة",
+    "signup.stat1": "أطر تنظيمية مرصودة",
     "signup.stat2": "تحليل كامل للفجوات",
     "signup.stat3": "توفير في التكلفة مقارنة بمكاتب المحاماة",
     "signup.securityNotice.header": "اتصال آمن",
     "signup.securityNotice.body":
-      "مشفّر عبر TLS 1.3. تتم معالجة البيانات وفقًا لنظام حماية البيانات الشخصية في المملكة العربية السعودية وPIPL في الصين وأطر نقل البيانات العابرة للحدود المعمول بها. لا تتم مشاركة أي بيانات مع أطراف ثالثة دون تفويض.",
+      "مشفّر عبر TLS 1.3. تتم معالجة البيانات وفقًا لأطر الخصوصية العالمية (GDPR وCCPA وPIPL وPDPL وLGPD) وآليات النقل العابر للحدود المعمول بها. لا تتم مشاركة أي بيانات مع أطراف ثالثة دون تفويض.",
     "signup.dataConsent":
-      "أقرّ بأنه قد تتم معالجة البيانات وتخزينها داخل مناطق مراكز البيانات في المملكة العربية السعودية و/أو الصين وفقًا للقوانين المعمول بها (PDPL · PIPL · NCA ECC). وأوافق على نقل البيانات عبر الحدود لتقديم خدمات الامتثال.",
+      "أقرّ بأنه قد تتم معالجة البيانات وتخزينها في مناطق مراكز البيانات السحابية العالمية وفقًا للقوانين المعمول بها (GDPR · PIPL · PDPL · CCPA · LGPD). وأوافق على نقل البيانات عبر الحدود لتقديم خدمات الامتثال.",
     "signup.showPassword": "إظهار كلمة المرور",
     "signup.hidePassword": "إخفاء كلمة المرور",
     "signup.strengthWeak": "ضعيفة",
@@ -5055,7 +5061,7 @@ const messages: Record<string, Record<string, string>> = {
     "tour.step0Title":
       "\u0645\u0631\u062d\u0628\u0627\u064b \u0628\u0643 \u0641\u064a DJAC!",
     "tour.step0Desc":
-      "\u0633\u062a\u0631\u0634\u062f\u0643 \u0647\u0630\u0647 \u0627\u0644\u062c\u0648\u0644\u0629 \u0639\u0628\u0631 \u0627\u0644\u0645\u064a\u0632\u0627\u062a \u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629.",
+      "\u0645\u0646\u0635\u0629 \u0627\u0644\u0627\u0645\u062a\u062b\u0627\u0644 \u0627\u0644\u0634\u0627\u0645\u0644\u0629 \u0644\u0639\u0645\u0644\u064a\u0627\u062a\u0643 \u0639\u0628\u0631 \u0627\u0644\u062d\u062f\u0648\u062f \u0627\u0644\u0639\u0627\u0644\u0645\u064a\u0629.\n\n\u062a\u062a\u0628\u0639 \u0627\u0644\u0627\u0645\u062a\u062b\u0627\u0644 \u00b7 \u062a\u0642\u0627\u0631\u064a\u0631 \u0628\u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a \u00b7 \u062a\u062d\u0644\u064a\u0644 \u0645\u062e\u0627\u0637\u0631 \u0627\u0644\u0645\u0648\u0631\u062f\u064a\u0646 \u00b7 \u0645\u0631\u0627\u0642\u0628\u0629 \u0627\u0644\u0645\u0648\u0627\u0639\u064a\u062f\n\n\u0641\u064a 7 \u062e\u0637\u0648\u0627\u062a \u0633\u0631\u064a\u0639\u0629\u060c \u0633\u062a\u062a\u0642\u0646 \u0627\u0644\u0623\u0633\u0627\u0633\u064a\u0627\u062a. \u0647\u064a\u0627 \u0628\u0646\u0627!",
     "tour.step1Title":
       "\u0645\u0631\u0643\u0632 \u0642\u064a\u0627\u062f\u0629 \u0627\u0644\u0627\u0645\u062a\u062b\u0627\u0644",
     "tour.step1Desc":
@@ -5097,8 +5103,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.successBody":
       "إذا كان هناك حساب مرتبط بهذا البريد، فقد أرسلنا رابط إعادة التعيين. تحقق من صندوق الوارد (والبريد غير المرغوب فيه).",
     "forgot.backToLogin": "العودة إلى تسجيل الدخول",
-    "forgot.footer":
-      "أداة DJAC · ذكاء امتثال مؤسسي · المملكة العربية السعودية · الصين · الإمارات",
+    "forgot.footer": "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · 40+ ولاية قضائية",
     "reset.title": "تعيين كلمة مرور جديدة",
     "reset.subtitle":
       "اختر كلمة مرور قوية تتكون من 8 أحرف على الأقل وحرف كبير ورقم واحد.",
@@ -5113,8 +5118,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.successBody":
       "تم تغيير كلمة مرورك. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.",
     "reset.goToLogin": "الانتقال إلى تسجيل الدخول",
-    "reset.footer":
-      "أداة DJAC · ذكاء امتثال مؤسسي · المملكة العربية السعودية · الصين · الإمارات",
+    "reset.footer": "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · 40+ ولاية قضائية",
     "forgot.badge": "إعادة تعيين آمنة",
     "forgot.emailAriaLabel": "عنوان البريد الإلكتروني",
     "forgot.notice.header": "تنبيه أمني",
@@ -5141,7 +5145,7 @@ const messages: Record<string, Record<string, string>> = {
     "pw.req.special": "حرف خاص واحد (!@#…)",
     "invite.layout.notice": "رابط دعوة موثّق · TLS 1.3 · منصة DJAC للامتثال",
     "invite.layout.footer":
-      "أداة DJAC · ذكاء امتثال مؤسسي · المملكة العربية السعودية · الصين · الإمارات",
+      "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · 40+ ولاية قضائية",
     "layout.menuProIntelligence": "الاستخبارات المتقدمة",
     "proIntel.commandCenter": "مركز القيادة",
     "proIntel.liveBadge": "مباشر",
@@ -5681,7 +5685,7 @@ const messages: Record<string, Record<string, string>> = {
     "transferChecker.volumeHigh": "مرتفع (1M+)",
     "gapTracker.title": "تتبع ثغرات امتثال الموردين",
     "gapTracker.subtitle":
-      "تحليل ثغرات الامتثال عبر ولايتين لجميع الموردين المسجلين.",
+      "تحليل ثغرات الامتثال متعدد الولايات القضائية عبر 40+ إطارًا لجميع الموردين المسجلين.",
     "gapTracker.statTotal": "إجمالي الثغرات",
     "gapTracker.statCritical": "حرج",
     "gapTracker.statHigh": "عال",
@@ -5960,7 +5964,7 @@ const messages: Record<string, Record<string, string>> = {
     "signup.orgName": "اسم المنظمة",
     "signup.practiceAreas": "مجالات الممارسة",
     "signup.primaryMarket": "السوق الرئيسية",
-    "signup.productTitle": "أداة DJAC — الامتثال ثنائي الاختصاص",
+    "signup.productTitle": "أداة DJAC — ذكاء الامتثال العالمي",
     "signup.selectMarket": "السوق الرئيسية",
     "signup.termsConsent.and": "و",
     "signup.termsConsent.legal": "يُعدّ هذا اتفاقية ملزمة.",
@@ -6079,7 +6083,8 @@ const messages: Record<string, Record<string, string>> = {
     "layout.menuDsrTracker": "متتبع طلبات أصحاب البيانات",
     "layout.menuComplianceChat": "محادثة الامتثال بالذكاء الاصطناعي",
     "chat.title": "مساعد الامتثال بالذكاء الاصطناعي",
-    "chat.subtitle": "اسأل أي شيء عن PIPL وCSL وDSL وPDPL وأطر NCA",
+    "chat.subtitle":
+      "اسأل أي شيء عن GDPR وCCPA وPIPL وPDPL وLGPD وأكثر من 40 إطارًا",
     "chat.jurisdictionAll": "جميع الولايات القضائية",
     "chat.jurisdictionChina": "الصين",
     "chat.jurisdictionSaudi": "المملكة العربية السعودية",
@@ -6090,13 +6095,13 @@ const messages: Record<string, Record<string, string>> = {
       "اسأل عن PIPL أو PDPL أو NCA أو عمليات النقل عبر الحدود…",
     "chat.emptyState": "اطرح سؤالاً حول الامتثال للبدء",
     "chat.footerNote":
-      "مدعوم بقاعدة المعرفة القانونية لـ DJAC · الصين (PIPL, CSL, DSL) · المملكة العربية السعودية (PDPL, NCA)",
+      "مدعوم بقاعدة المعرفة القانونية لـ DJAC · GDPR · CCPA · LGPD · PIPL · PDPL · وأكثر من 40 إطارًا عالميًا",
     "chat.error": "خطأ في خدمة الذكاء الاصطناعي. يرجى المحاولة مجدداً.",
     "chat.fallbackWarning":
       "الذكاء الاصطناعي غير مهيأ — يتم عرض استجابة بديلة.",
     "dsr.pageTitle": "متتبع طلبات حقوق أصحاب البيانات",
     "dsr.pageSubtitle":
-      "إدارة طلبات حقوق موضوعي البيانات بموجب PIPL (الصين) وPDPL (المملكة العربية السعودية) مع تتبع المواعيد.",
+      "إدارة طلبات حقوق موضوعي البيانات عبر GDPR وCCPA وPIPL وPDPL وLGPD وأكثر من 40 إطارًا مع تتبع المواعيد.",
     "dsr.logRequest": "تسجيل طلب",
     "dsr.total": "إجمالي الطلبات",
     "dsr.open": "مفتوحة",
@@ -6519,9 +6524,9 @@ const messages: Record<string, Record<string, string>> = {
     "home.signIn": "登录",
     "home.heroTitle": "让合规更清晰",
     "home.heroLine1": "专为",
-    "home.heroLine2": "中沙合规而打造",
+    "home.heroLine2": "全球合规智能",
     "home.heroSubtitle":
-      "借助 DJAC，自信应对中沙跨境合规，在一个平台清晰掌握 CSL、DSL、PIPL、PDPL 与 NCA 要点。",
+      "借助 DJAC，自信应对全球合规，在一个平台清晰掌握所有监管要点。",
     "home.viewDashboard": "打开仪表盘",
     "home.frameworkAnalysis": "框架分析",
     "home.vendorAssessment": "市场进入评估",
@@ -6549,13 +6554,14 @@ const messages: Record<string, Record<string, string>> = {
     "home.ctaSubtitle": "现在开始，几分钟拿到跨境合规评估结果。",
     "home.accessDashboard": "打开仪表盘",
     "home.signInNow": "登录后开始",
-    "home.footer": "面向全球运营的企业级合规分析。",
+    "home.footer": "面向全球运营的企业级合规分析。覆盖40+司法管辖区。",
     "home.badge": "✦ 企业合规平台",
     "home.trust": "多语言 · 深色模式 · AI 赋能 · 企业级",
-    "home.platformNote": "覆盖 CSL 2026 · PIPL · DSL · PDPL · NCA · MLPS 2.0",
-    "home.statsFrameworks": "10+",
-    "home.statsFrameworksLabel": "法规框架",
-    "home.statsJurisdictions": "2",
+    "home.platformNote":
+      "覆盖 GDPR · CCPA · LGPD · POPIA · CSL 2026 · PIPL · DSL · PDPL · NCA · MLPS 2.0",
+    "home.statsFrameworks": "40+",
+    "home.statsFrameworksLabel": "监管框架",
+    "home.statsJurisdictions": "40+",
     "home.statsJurisdictionsLabel": "司法管辖区",
     "home.statsControls": "50+",
     "home.statsControlsLabel": "已映射控制项",
@@ -6565,8 +6571,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.step1Title": "登录",
     "home.step1Desc": "使用企业凭据登录，即可访问完整的合规仪表盘。",
     "home.step2Title": "选择框架",
-    "home.step2Desc":
-      "从中国和沙特阿拉伯的10余个监管框架中进行选择，并进行并排分析。",
+    "home.step2Desc": "从40多个监管框架中进行选择，并进行并排分析。",
     "home.step3Title": "获取洞察",
     "home.step3Desc":
       "即时查看重叠、冲突、截止日期与就绪度差距报告，全程支持多语言。",
@@ -6784,9 +6789,9 @@ const messages: Record<string, Record<string, string>> = {
     "billing.billingEmail": "账单邮箱",
     "billing.billingEmailPlaceholder": "billing@example.com",
     "billing.primaryJurisdiction": "主要司法辖区",
-    "billing.jurisdictionBoth": "两者（中国 + 沙特阿拉伯）",
-    "billing.jurisdictionChina": "仅中国",
-    "billing.jurisdictionSaudi": "仅沙特阿拉伯",
+    "billing.jurisdictionBoth": "全球覆盖",
+    "billing.jurisdictionChina": "亚太地区",
+    "billing.jurisdictionSaudi": "欧洲",
     "billing.jurisdictionOther": "其他",
     "billing.creating": "创建中...",
     "billing.startTrial": "开始 7 天免费试用 ->",
@@ -6833,7 +6838,7 @@ const messages: Record<string, Record<string, string>> = {
     "pricing.badgeTrial": "7 天免费试用 · 无需信用卡",
     "pricing.heroTitle": "简单透明的定价",
     "pricing.heroSubtitle":
-      "面向中沙业务的企业级合规智能。适合初创团队，也能支撑大型企业扩展。",
+      "面向全球的企业级合规智能。适合初创团队，也能支撑大型企业扩展。",
     "pricing.best": "最佳",
     "pricing.mostPopular": "最受欢迎",
     "pricing.perMonth": "月",
@@ -6849,12 +6854,12 @@ const messages: Record<string, Record<string, string>> = {
     "pricing.ctaSubtitle": "无需信用卡，立即体验全部功能，可随时取消。",
     "pricing.startFreeTrialCta": "开始免费试用 ->",
     "pricing.requestDemo": "申请产品演示",
-    "pricing.footerTagline": "双法域合规保障与治理平台。",
+    "pricing.footerTagline": "全球合规智能平台。",
     "pricing.footerPowered": "由 Yalla-Hack 提供支持。",
     "pricing.plan.starter.name": "入门版",
     "pricing.plan.starter.tagline": "适合初创团队和早期合规建设。",
     "pricing.plan.starter.feature.1":
-      "5 大合规框架（PIPL、CSL、DSL、PDPL、NCA）",
+      "全球主要合规框架（GDPR、CCPA、PIPL、PDPL、LGPD 等）",
     "pricing.plan.starter.feature.2": "每月最多 5 次供应商评估",
     "pricing.plan.starter.feature.3": "AI 驱动差距分析",
     "pricing.plan.starter.feature.4": "基础合规看板",
@@ -6921,8 +6926,8 @@ const messages: Record<string, Record<string, string>> = {
     "pricing.plan.enterprise.price.biannual": "定制",
     "pricing.plan.enterprise.price.annual": "起 $2,000",
     "pricing.plan.enterprise.savings.annual": "省 16%",
-    "pricing.why.1.title": "双法域覆盖",
-    "pricing.why.1.desc": "中国与沙特框架统一在同一平台",
+    "pricing.why.1.title": "全球覆盖",
+    "pricing.why.1.desc": "40多个主要司法管辖区的框架统一在同一平台",
     "pricing.why.2.title": "AI 风险分析",
     "pricing.why.2.desc": "实时评分与差距识别",
     "pricing.why.3.title": "PDF 报告",
@@ -7214,33 +7219,33 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.matrixRelationships": "关系",
     "dashboard.insightLocalizationTitle": "数据本地化",
     "dashboard.insightLocalizationBody":
-      "中国（CSL/PIPL）与沙特（PDPL）都强调数据本地化，跨境数据流需要清晰的运营控制。",
+      "全球主要司法管辖区（如 GDPR、PIPL、PDPL、LGPD）都强调数据本地化，跨境数据流需要清晰的运营控制。",
     "dashboard.insightConsentTitle": "同意要求",
     "dashboard.insightConsentBody":
       "主流框架均要求个人数据处理取得明确同意，但适用门槛与执行细节并不相同。",
     "dashboard.insightEnforcementTitle": "执法机构",
     "dashboard.insightEnforcementBody":
-      "中国由 CAC 集中执法；沙特由 SDAIA 与 NCA 分工监管。",
+      "全球主要监管机构包括欧盟 EDPB、中国 CAC、沙特 SDAIA/NCA、美国 FTC 等。",
     "dashboard.headerActionFrameworkAnalysis": "框架分析",
     "dashboard.headerActionRunAssessment": "运行评估",
     "dashboard.headerActionComplianceTracker": "合规追踪",
     "dashboard.headerActionLawLibrary": "法规库",
     "dashboard.kpiCriticalSub": "共 {count} 组框架配对",
-    "dashboard.kpiHighRiskSub": "需要双法域执行管线",
-    "dashboard.kpiFrameworksSub": "CSL · DSL · PIPL · PDPL · NCA",
+    "dashboard.kpiHighRiskSub": "需要多司法管辖区执行管线",
+    "dashboard.kpiFrameworksSub": "GDPR · CCPA · PIPL · PDPL · LGPD · NCA",
     "dashboard.kpiPostureSub": "由关系图谱计算",
     "dashboard.conflictActivityTitle": "冲突检测活动",
     "dashboard.conflictActivityDesc":
       "框架关系配对指数 · {count} 组活跃配对 · 基于实时矩阵",
     "dashboard.severityDistributionTitle": "关系严重度分布",
-    "dashboard.severityDistributionDesc": "跨法域控制冲突按严重级别分布",
+    "dashboard.severityDistributionDesc": "跨司法管辖区控制冲突按严重级别分布",
     "dashboard.totalPairs": "共 {count} 组",
     "dashboard.pairsLabel": "配对",
     "dashboard.chartSeriesConflicts": "冲突",
     "dashboard.chartSeriesAssessments": "评估",
     "dashboard.frameworksSectionTitle": "合规框架",
     "dashboard.frameworksSectionDesc":
-      "CSL / DSL / PIPL（中国）+ PDPL / NCA（沙特）",
+      "GDPR / CCPA / LGPD / PIPL / PDPL / NCA / POPIA",
     "dashboard.frameworksLoadError": "加载合规框架失败。",
     "dashboard.matrixLoadError": "加载合规矩阵失败。",
     "dashboard.timetableLoadError": "加载合规时间表失败。",
@@ -7325,12 +7330,12 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.viewCnObligations": "打开中国义务 →",
     "dashboard.seeComparison": "打开并排对比视图 →",
     "dashboard.obligationsBadge": "项义务",
-    "dashboard.cslInEffect": "CSL 2026 已生效",
+    "dashboard.cslInEffect": "GDPR · CCPA · PIPL · PDPL · LGPD 已生效",
     "dashboard.timeCriticalBadge": "项紧急报告",
-    "dashboard.crossBorderCompliance": "跨境合规",
-    "dashboard.saudiFrameworkSummary": "NCA · SDAIA · ECC · PDPL",
-    "dashboard.chinaFrameworkSummary": "CAC · MPS · CSL · PIPL · MLPS 2.0",
-    "dashboard.crossBorderSummary": "CSL + DSL + PIPL 对比 PDPL + ECC",
+    "dashboard.crossBorderCompliance": "全球跨境合规",
+    "dashboard.saudiFrameworkSummary": "EMEA: GDPR · PDPL · POPIA",
+    "dashboard.chinaFrameworkSummary": "APAC: PIPL · CSL · DSL · PDPA",
+    "dashboard.crossBorderSummary": "跨境: GDPR + CCPA + LGPD + PIPL",
     "dashboard.deadlinePdplFullEnforcementTitle": "PDPL 全面实施",
     "dashboard.deadlinePdplFullEnforcementDate": "2024年9月14日",
     "dashboard.deadlinePdplFullEnforcementDesc": "沙特个人数据保护法全面生效",
@@ -7360,19 +7365,18 @@ const messages: Record<string, Record<string, string>> = {
 
     "tracker.title": "合规义务跟踪器",
     "tracker.subtitle":
-      "集中跟踪中沙两地的截止日期、周期性义务和高优先级网络安全要求。",
+      "集中跟踪跨司法管辖区的截止日期、周期性义务和高优先级合规要求。",
     "tracker.tabSaudi": "🇸🇦 沙特阿拉伯",
     "tracker.tabChina": "🇨🇳 中国",
     "tracker.tabComparison": "并排对比",
     "tracker.saudiTitle": "沙特阿拉伯 — 合规义务",
     "tracker.saudiDesc":
-      "NCA（ECC、CCC、CSCC、OTCC）和 SDAIA（PDPL）监管义务，含截止日期和风险等级。",
+      "EMEA: GDPR、PDPL、POPIA 监管义务，含截止日期和风险等级。",
     "tracker.chinaTitle": "中国 — 合规义务",
-    "tracker.chinaDesc":
-      "CAC（CSL、PIPL）、MPS（MLPS 2.0）、工业和信息化部及国务院监管义务，包括2026年网络安全法修正案。",
-    "tracker.comparisonTitle": "沙特阿拉伯与中国 — 监管对比",
+    "tracker.chinaDesc": "APAC: PIPL、CSL、DSL、PDPA 监管义务。",
+    "tracker.comparisonTitle": "跨司法管辖区监管对比",
     "tracker.comparisonDesc":
-      "结构化对比关键监管话题，帮助组织了解两国异同，为跨境合规规划提供参考。",
+      "结构化对比关键监管话题，帮助组织了解跨司法管辖区异同，为全球合规规划提供参考。",
     "tracker.criticalObligations": "关键义务",
     "tracker.otherObligations": "其他义务",
     "tracker.loadingObligations": "正在加载合规义务...",
@@ -7384,9 +7388,8 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.hideDetails": "收起详情",
     "tracker.showDetails": "展开详情",
     "tracker.loadingComparison": "正在加载对比数据...",
-    "tracker.comparisonSideBySide":
-      "沙特阿拉伯与中国网络安全监管要求的并排对比。",
-    "tracker.saObligations": "沙特义务",
+    "tracker.comparisonSideBySide": "跨司法管辖区监管要求的并排对比。",
+    "tracker.saObligations": "EMEA义务",
     "tracker.cnObligations": "中国义务",
     "tracker.comparisonSearchPlaceholder": "搜索主题...",
     "tracker.exportCsv": "导出CSV",
@@ -7401,9 +7404,9 @@ const messages: Record<string, Record<string, string>> = {
 
     "layout.menuTracker": "合规跟踪",
 
-    "enhanced.statFrameworksDesc": "中沙监管参考数据包已加载，可立即分析。",
-    "enhanced.statSaudiDesc": "PDPL、NCA、ECC、CCC、CSCC、OTCC 控制项已就绪。",
-    "enhanced.statChinaDesc": "CSL、DSL、PIPL、MLPS 2.0 及传输义务已就绪。",
+    "enhanced.statFrameworksDesc": "全球监管参考数据包已加载，覆盖40+框架。",
+    "enhanced.statSaudiDesc": "EMEA: GDPR、PDPL、POPIA 控制项和要求已就绪。",
+    "enhanced.statChinaDesc": "APAC: PIPL、CSL、DSL、PDPA 及传输义务已就绪。",
     "enhanced.statMatrixDesc": "跨框架关系已加载，可直接选择对比组合。",
     "enhanced.awaitingPair": "等待选择对比组合",
     "enhanced.swapButton": "切换组合",
@@ -7433,7 +7436,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.penaltyContext": "处罚背景",
     "enhanced.urgentWindowsTitle": "紧急报告窗口",
     "enhanced.urgentWindowsDesc":
-      "基于中沙报告义务识别需要立即上报的时间窗口。",
+      "基于全球报告义务识别需要立即上报的时间窗口。",
     "enhanced.noUrgentWindows": "当前对比组合未发现紧急报告窗口。",
     "enhanced.riskQueueTitle": "风险行动队列",
     "enhanced.riskQueueDesc": "将冲突、差距与依赖转化为可执行的整改队列。",
@@ -7444,12 +7447,13 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.matrixActionsCol": "行动项",
     "enhanced.matrixUsePair": "使用所选组合",
     "enhanced.loadPair": "加载所选组合",
-    "enhanced.comparisonNotesTitle": "沙特阿拉伯与中国对比说明",
-    "enhanced.comparisonNotesDesc": "由跨法域对比报告提炼出的简明执行矩阵。",
+    "enhanced.comparisonNotesTitle": "跨司法管辖区对比说明",
+    "enhanced.comparisonNotesDesc":
+      "由全球跨法域对比报告提炼出的简明执行矩阵。",
     "enhanced.matrixActionGuidanceTitle": "矩阵行动指南",
     "enhanced.matrixActionGuidanceDesc":
       "按关系分组提供来自集成数据集的处置建议。",
-    "enhanced.deadlinesDesc": "基于中沙监管报告生成的运营时间线。",
+    "enhanced.deadlinesDesc": "基于全球监管要求生成的运营时间线。",
     "enhanced.noTimetableData": "所选法域暂无时间表数据。",
     "enhanced.legalBriefsTitle": "法律参考摘要",
     "enhanced.legalBriefsDesc": "与所选框架关联的官方来源摘要与法律说明。",
@@ -7837,31 +7841,34 @@ const messages: Record<string, Record<string, string>> = {
     "signup.requestSentSub":
       "我们通常在 24 小时内回复。请查收收件箱获取后续步骤。",
     "signup.accessSubmitted": "访问申请已提交 — 我们将在 24 小时内与您联系。",
-    "signup.tagline": "中国 × 沙特阿拉伯 — 合规智能",
-    "signup.heroLine1": "专为",
-    "signup.heroLine2": "中沙合规而生的平台",
+    "signup.tagline": "全球合规智能 — 覆盖40多个司法管辖区",
+    "signup.heroLine1": "企业级合规平台",
+    "signup.heroLine2": "助力全球跨境运营",
     "signup.heroDesc":
-      "在统一工作区中处理 PIPL、PDPL、NCA、CSL、DSL 和 MLPS 2.0。实时冲突检测、AI 解答和市场准入差距分析。",
-    "signup.vp1Title": "6 个框架，2 个司法管辖区",
-    "signup.vp1Desc": "PIPL、PDPL、CSL、DSL、NCA、MLPS 2.0 — 一站汇聚。",
+      "在统一工作区中处理 GDPR、CCPA、PIPL、PDPL、LGPD 及 40 多个监管框架。实时冲突检测、AI 解答和全球差距分析。",
+    "signup.vp1Title": "多司法管辖区映射",
+    "signup.vp1Desc": "GDPR、CCPA、PIPL、PDPL、LGPD 及 40+ 框架 — 一站汇聚。",
     "signup.vp2Title": "秒级冲突检测",
-    "signup.vp2Desc": "我们的关系引擎在冲突变成罚款前发现隐藏矛盾。",
-    "signup.vp3Title": "三语 AI 助手",
-    "signup.vp3Desc": "用阿拉伯语、中文或英语提问，立即获得带引用的监管答案。",
-    "signup.vp4Title": "市场准入扫描",
+    "signup.vp2Desc":
+      "我们的关系引擎在跨司法管辖区的冲突变成罚款前发现隐藏矛盾。",
+    "signup.vp3Title": "多语言 AI 助手",
+    "signup.vp3Desc":
+      "用阿拉伯语、中文、英语或西班牙语提问，立即获得带引用的监管答案。",
+    "signup.vp4Title": "全球市场准入扫描",
     "signup.vp4Desc":
-      "进入中国或沙特市场前了解合规差距 — 而非等到监管机构来电。",
+      "进入任何司法管辖区前了解合规差距 — 而非等到监管机构来电。",
     "signup.vp5Title": "法律文献库",
-    "signup.vp5Desc": "每篇条款、义务和处罚均可用通俗语言检索。",
+    "signup.vp5Desc":
+      "覆盖 40+ 司法管辖区的每项法规、义务和处罚，均可用通俗语言检索。",
     "signup.home": "首页",
-    "signup.stat1": "已追踪中沙合资企业",
+    "signup.stat1": "已映射框架数量",
     "signup.stat2": "完整差距分析",
     "signup.stat3": "相较律师事务所的成本节省",
     "signup.securityNotice.header": "安全连接",
     "signup.securityNotice.body":
-      "采用 TLS 1.3 加密。数据将根据沙特阿拉伯 PDPL、中国 PIPL 以及适用的跨境传输框架进行处理。未经授权，不会与第三方共享任何数据。",
+      "采用 TLS 1.3 加密。数据将根据全球隐私框架（GDPR、CCPA、PIPL、PDPL、LGPD）以及适用的跨境传输机制进行处理。未经授权，不会与第三方共享任何数据。",
     "signup.dataConsent":
-      "我确认，数据可能会根据适用法律在沙特阿拉伯和/或中国的数据中心区域内处理和存储（PDPL · PIPL · NCA ECC）。我同意为提供合规服务而进行跨境数据传输。",
+      "我确认，数据可能会根据适用法律在全球云数据中心区域内处理和存储（GDPR · PIPL · PDPL · CCPA · LGPD）。我同意为提供合规服务而进行跨境数据传输。",
     "signup.showPassword": "显示密码",
     "signup.hidePassword": "隐藏密码",
     "signup.strengthWeak": "弱",
@@ -7954,7 +7961,7 @@ const messages: Record<string, Record<string, string>> = {
       "\u4f7f\u7528\u65b9\u5411\u952e\u5bfc\u822a\uff0cEsc \u8df3\u8fc7",
     "tour.step0Title": "\u6b22\u8fce\u4f7f\u7528 DJAC!",
     "tour.step0Desc":
-      "\u672c\u5bfc\u89c8\u5c06\u5e26\u60a8\u4e86\u89e3\u5e73\u53f0\u4e3b\u8981\u529f\u80fd\u3002",
+      "\u60a8\u7684\u5168\u7403\u8de8\u5883\u8fd0\u8425\u4e00\u7ad9\u5f0f\u5408\u89c4\u5e73\u53f0\u3002\n\n\u5408\u89c4\u8ddf\u8e2a \u00b7 AI\u62a5\u544a \u00b7 \u4f9b\u5e94\u5546\u98ce\u9669\u5206\u6790 \u00b7 \u622a\u6b62\u65e5\u76d1\u63a7\n\n7\u6b65\u638c\u63e1\u6838\u5fc3\u529f\u80fd\uff0c\u9a6c\u4e0a\u5f00\u59cb\uff01",
     "tour.step1Title": "\u5408\u89c4\u6307\u6325\u4e2d\u5fc3",
     "tour.step1Desc":
       "\u5b9e\u65f6\u5408\u89c4\u5206\u6570\u3001\u98ce\u9669\u4eea\u8868\u548c\u5373\u5c06\u622a\u6b62\u65e5\u671f\u603b\u89c8\u3002",
@@ -7989,7 +7996,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.successBody":
       "如果该邮箱有对应账户，我们已发送重置链接。请检查收件箱（和垃圾邮件文件夹）。",
     "forgot.backToLogin": "返回登录",
-    "forgot.footer": "DJAC 工具 · 企业级合规智能 · 沙特阿拉伯 · 中国 · 阿联酋",
+    "forgot.footer": "DJAC 工具 · 企业级合规智能 · 全球 · 40+ 司法管辖区",
     "reset.title": "设置新密码",
     "reset.subtitle": "请选择至少8个字符、包含大写字母和数字的强密码。",
     "reset.newPasswordPlaceholder": "新密码",
@@ -8001,7 +8008,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.successTitle": "密码已更新！",
     "reset.successBody": "您的密码已更改。现在可以使用新密码登录。",
     "reset.goToLogin": "前往登录",
-    "reset.footer": "DJAC 工具 · 企业级合规智能 · 沙特阿拉伯 · 中国 · 阿联酋",
+    "reset.footer": "DJAC 工具 · 企业级合规智能 · 全球 · 40+ 司法管辖区",
     "forgot.badge": "安全重置",
     "forgot.emailAriaLabel": "电子邮件地址",
     "forgot.notice.header": "安全提示",
@@ -8026,7 +8033,7 @@ const messages: Record<string, Record<string, string>> = {
     "pw.req.special": "一个特殊字符 (!@#…)",
     "invite.layout.notice": "已验证的邀请码链接 · TLS 1.3 · DJAC 合规平台",
     "invite.layout.footer":
-      "DJAC 工具 · 企业级合规智能 · 沙特阿拉伯 · 中国 · 阿联酋",
+      "DJAC 工具 · 企业级合规智能 · 全球 · 40+ 司法管辖区",
 
     "layout.menuProIntelligence": "专业情报",
     "proIntel.commandCenter": "指挥中心",
@@ -8558,7 +8565,7 @@ const messages: Record<string, Record<string, string>> = {
     "transferChecker.volumeHigh": "高量 (1M+)",
     "gapTracker.title": "供应商合规差距跟踪器",
     "gapTracker.subtitle":
-      "对所有已注册供应商进行基于规则的双司法合规差距分析。",
+      "对所有已注册供应商进行基于规则的多司法管辖区合规差距分析，覆盖40+框架。",
     "gapTracker.statTotal": "差距总数",
     "gapTracker.statCritical": "严重",
     "gapTracker.statHigh": "高",
@@ -8823,7 +8830,7 @@ const messages: Record<string, Record<string, string>> = {
     "signup.orgName": "组织名称",
     "signup.practiceAreas": "业务领域",
     "signup.primaryMarket": "主要市场",
-    "signup.productTitle": "DJAC 工具 — 双司法管辖合规",
+    "signup.productTitle": "DJAC 工具 — 全球合规智能",
     "signup.selectMarket": "主要市场",
     "signup.termsConsent.and": "和",
     "signup.termsConsent.legal": "这构成具有约束力的协议。",
@@ -8939,7 +8946,8 @@ const messages: Record<string, Record<string, string>> = {
     "layout.menuDsrTracker": "数据主体请求追踪器",
     "layout.menuComplianceChat": "AI合规聊天",
     "chat.title": "AI合规助手",
-    "chat.subtitle": "询问有关PIPL、CSL、DSL、PDPL和NCA框架的任何问题",
+    "chat.subtitle":
+      "询问有关GDPR、CCPA、PIPL、PDPL、LGPD及40多个全球框架的任何问题",
     "chat.jurisdictionAll": "所有管辖区",
     "chat.jurisdictionChina": "中国",
     "chat.jurisdictionSaudi": "沙特阿拉伯",
@@ -8949,12 +8957,12 @@ const messages: Record<string, Record<string, string>> = {
     "chat.inputPlaceholder": "询问有关PIPL、PDPL、NCA、跨境传输的问题…",
     "chat.emptyState": "提出合规问题以开始对话",
     "chat.footerNote":
-      "由DJAC法律知识库提供支持 · 中国（PIPL, CSL, DSL）· 沙特阿拉伯（PDPL, NCA）",
+      "由DJAC法律知识库提供支持 · GDPR · CCPA · LGPD · PIPL · PDPL · 及40多个全球框架",
     "chat.error": "AI服务错误，请重试。",
     "chat.fallbackWarning": "AI未配置——显示占位符响应。",
     "dsr.pageTitle": "数据主体请求追踪器",
     "dsr.pageSubtitle":
-      "管理PIPL（中国，15个工作日）和PDPL（沙特，30天）数据主体权利请求，并跟踪截止日期。",
+      "跨GDPR、CCPA、PIPL、PDPL、LGPD及40多个框架管理数据主体权利请求，并跟踪截止日期。",
     "dsr.logRequest": "记录请求",
     "dsr.total": "请求总数",
     "dsr.open": "待处理",

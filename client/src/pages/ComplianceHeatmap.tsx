@@ -26,7 +26,16 @@ interface MatrixRow {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const FRAMEWORKS = ["CSL", "DSL", "PIPL", "PDPL", "NCA"] as const;
+const FRAMEWORKS = [
+  "CSL",
+  "DSL",
+  "PIPL",
+  "PDPL",
+  "NCA",
+  "GDPR",
+  "CCPA",
+  "LGPD",
+] as const;
 type Framework = (typeof FRAMEWORKS)[number];
 
 const FRAMEWORK_LABELS: Record<Framework, { name: string; country: string }> = {
@@ -35,6 +44,9 @@ const FRAMEWORK_LABELS: Record<Framework, { name: string; country: string }> = {
   PIPL: { name: "Personal Information Protection", country: "China" },
   PDPL: { name: "Personal Data Protection Law", country: "Saudi Arabia" },
   NCA: { name: "National Cybersecurity Authority", country: "Saudi Arabia" },
+  GDPR: { name: "General Data Protection Regulation", country: "EU" },
+  CCPA: { name: "California Consumer Privacy Act", country: "US" },
+  LGPD: { name: "Lei Geral de Proteção de Dados", country: "Brazil" },
 };
 
 const RELATIONSHIP_TYPES: RelationshipType[] = [

@@ -111,6 +111,9 @@ const FRAMEWORKS = [
   "SAMA CSF",
   "NCA ECC",
   "NESA",
+  "GDPR",
+  "CCPA",
+  "LGPD",
   "custom",
 ] as const;
 

@@ -84,6 +84,8 @@ const FRAMEWORKS = [
   "NCA CSCC",
   "ISO27001",
   "GDPR",
+  "CCPA",
+  "LGPD",
 ] as const;
 
 type PolicyType = (typeof POLICY_TYPES)[number];
@@ -756,7 +758,7 @@ export default function PolicyManager() {
                 onChange={e =>
                   setForm(f => ({ ...f, controlReferences: e.target.value }))
                 }
-                placeholder="PIPL Art.28, NCA ECC-2-1-1, ISO27001 A.8.1"
+                placeholder="PIPL Art.28, NCA ECC-2-1-1, ISO27001 A.8.1, GDPR Art.32"
               />
               <p className="text-xs text-muted-foreground">
                 {t("policy.controlsHint", "Comma-separated control IDs")}

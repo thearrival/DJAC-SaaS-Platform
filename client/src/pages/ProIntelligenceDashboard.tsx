@@ -49,17 +49,17 @@ type Colors = {
 
 // ── Regulatory ticker items ───────────────────────────────────────────────────
 const TICKER_ITEMS = [
-  "🇨🇳  CAC — ¥14.5M penalty for Generative AI non-compliance · Feb 2025",
-  "🇸🇦  SDAIA — PDPL cross-border consent guidance updated · Jun 2025",
+  "🇪🇺  EU AI Act — First enforcement actions for high-risk AI systems · Jul 2025",
+  "🇪🇺  GDPR — Data protection representative guidance updated · Jul 2025",
   "âš¡  AI pipeline processed 1,200+ vendor documents this assessment cycle",
   "ðŸ”´  NCA Critical Infrastructure Data Residency Audit ongoing — ECC Controls 2.0",
-  "🇨🇳  DSL Art. 31 — Foreign-invested cloud entities under active CAC security review",
+  "🇺🇸  CCPA — CPRA amendments effective for employee data · Jan 2026",
   "✅  Singapore ↔ Hong Kong (SAR) corridor fully compliant — no transfer restrictions",
   "⚠️  Hong Kong (SAR) ↔ Shanghai requires CAC cross-border data transfer approval",
-  "ðŸ“‹  6 frameworks monitored: PIPL · PDPL · CSL · DSL · ECC · Gen AI Regulations",
-  "🛡️  DJAC AI Judge scoring 3 risk dimensions: Overall · China exposure · Saudi Arabia exposure",
-  "🇨🇳  CAC — ¥3.5M penalty for DSL Art. 31 foreign cloud violation · Apr 2025",
-  "🇸🇦  NCA ECC 2.0 mandates on-premise data residency for critical infrastructure",
+  "🌐  12 frameworks monitored: GDPR · CCPA · LGPD · PIPL · PDPL · NIST CSF · ISO 27001 · SOC 2 · PCI DSS · FedRAMP · POPIA · UAE PDPL",
+  "🛡️  DJAC AI Judge scoring 3 risk dimensions: Privacy · Security · Cross-border",
+  "🇧🇷  LGPD — ANPD issues new data transfer guidelines for international operations · Jul 2025",
+  "🇺🇸  NYDFS — Cybersecurity regulation updated for financial services · Jul 2025",
 ];
 
 // ── Framework data for radar chart ───────────────────────────────────────────

@@ -791,8 +791,8 @@ export default function Pricing() {
             {[
               {
                 icon: <Globe size={20} />,
-                title: "Dual Jurisdiction",
-                desc: "China + Saudi Arabia frameworks in one platform",
+                title: "Global Coverage",
+                desc: "40+ frameworks across all major jurisdictions in one platform",
               },
               {
                 icon: <BarChart3 size={20} />,
@@ -1028,10 +1028,7 @@ export default function Pricing() {
         }}
       >
         © {new Date().getFullYear()} DJAC -{" "}
-        {t(
-          "pricing.footerTagline",
-          "Dual-Jurisdiction Assurance & Compliance."
-        )}{" "}
+        {t("pricing.footerTagline", "Global Compliance Intelligence Platform.")}{" "}
         {t("pricing.footerPowered", "Powered by Yalla-Hack.")} &nbsp;
         <a
           href="mailto:support@yalla-hack.net"
