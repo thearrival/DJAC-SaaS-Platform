@@ -8,8 +8,8 @@ on:
 env:
   NODE_VERSION: "20"
   PNPM_VERSION: "10.4.1"
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_ORG_ID: "team_xS2mdeBXinbhSUdgWu1eKUEF"
+  VERCEL_PROJECT_ID: "prj_nzZ267pel57FCf9DBz4V9gUy7IWe"
 
 jobs:
   deploy-production:

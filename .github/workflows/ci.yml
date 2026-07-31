@@ -54,11 +54,12 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - run: supabase db lint
-      - run: supabase db diff --linked
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      - name: Start local Supabase stack
+        run: supabase start
+      - name: Lint migrations
+        run: supabase db lint
+      - name: Check for schema drift
+        run: supabase db diff --local
 
   build:
     name: Build
