@@ -94,7 +94,7 @@ const DEMO_ORGS = [
         treatment: "mitigate",
       },
       {
-        title: "Saudi PDPL consent records incomplete for marketing",
+        title: "PDPL consent records incomplete for marketing",
         category: "operational",
         likelihood: 3,
         impact: 4,
@@ -287,8 +287,7 @@ const DEMO_ORGS = [
     ],
     risks: [
       {
-        title:
-          "PIPL cross-border data transfer non-compliance for China clients",
+        title: "PIPL cross-border data transfer non-compliance",
         category: "regulatory",
         likelihood: 5,
         impact: 5,
@@ -302,7 +301,7 @@ const DEMO_ORGS = [
         treatment: "remediate",
       },
       {
-        title: "PDPL-KSA data localization not implemented for Saudi accounts",
+        title: "PDPL-KSA data localization not implemented",
         category: "regulatory",
         likelihood: 4,
         impact: 5,

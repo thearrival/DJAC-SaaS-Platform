@@ -45,6 +45,9 @@ export interface ReportScorecardSummary {
   overallScore: number;
   saudiScore: number | null;
   chinaScore: number | null;
+  euScore?: number | null;
+  usScore?: number | null;
+  brazilScore?: number | null;
   gapCount: number;
   criticalFindings: number;
   frameworksCovered: number;
@@ -110,6 +113,10 @@ const LABELS: Record<ReportLocale, Record<string, string>> = {
     topic: "Topic",
     saudi: "Saudi Arabia",
     china: "China",
+    eu: "EU",
+    us: "US",
+    brazil: "Brazil",
+    global: "Global",
     notes: "Notes",
     confidentialNotice:
       "⚠ CONFIDENTIAL — This document is intended solely for authorised audit and " +
@@ -172,6 +179,10 @@ const LABELS: Record<ReportLocale, Record<string, string>> = {
     topic: "الموضوع",
     saudi: "المملكة العربية السعودية",
     china: "الصين",
+    eu: "الاتحاد الأوروبي",
+    us: "الولايات المتحدة",
+    brazil: "البرازيل",
+    global: "عالمي",
     notes: "ملاحظات",
     confidentialNotice:
       "⚠ سري — هذه الوثيقة مخصصة حصرياً لأنشطة التدقيق ومراجعة الامتثال المعتمدة. يُحظر توزيعها دون إذن.",
@@ -231,6 +242,10 @@ const LABELS: Record<ReportLocale, Record<string, string>> = {
     topic: "主题",
     saudi: "沙特阿拉伯",
     china: "中国",
+    eu: "欧盟",
+    us: "美国",
+    brazil: "巴西",
+    global: "全球",
     notes: "备注",
     confidentialNotice:
       "⚠ 保密 — 本文件仅供授权审计及合规审查活动使用。未经授权不得分发。",
@@ -276,6 +291,35 @@ function chinaFrameworkBlock(locale: ReportLocale): string {
     `| **CSL** — Cybersecurity Law | CAC / MIIT | RMB 1,000,000 | Jun 2017 |\n` +
     `| **DSL** — Data Security Law | NPC / MIIT | RMB 10,000,000 | Sep 2021 |\n` +
     `| **MLPS 2.0** — Multi-Level Protection Scheme | MPS / MIIT | RMB 500,000 + criminal | Dec 2019 |\n`
+  );
+}
+
+function euFrameworkBlock(locale: ReportLocale): string {
+  return (
+    `| ${lbl(locale, "framework")} | ${lbl(locale, "authority")} | Max Penalty | Effective |\n` +
+    `|---|---|---|---|\n` +
+    `| **GDPR** — General Data Protection Regulation | EDPB / National DPAs | EUR 20M or 4% global revenue | May 2018 |\n` +
+    `| **NIS2** — Network and Information Security Directive | National CSIRTs / ENISA | Up to EUR 10M or 2% turnover | Oct 2024 |\n` +
+    `| **DORA** — Digital Operational Resilience Act | ESAs (EBA, EIOPA, ESMA) | Up to 2% of daily turnover | Jan 2025 |\n`
+  );
+}
+
+function usFrameworkBlock(locale: ReportLocale): string {
+  return (
+    `| ${lbl(locale, "framework")} | ${lbl(locale, "authority")} | Max Penalty | Effective |\n` +
+    `|---|---|---|---|\n` +
+    `| **CCPA/CPRA** — California Consumer Privacy Act | California AG / FTC | $7,500 per intentional violation | Jan 2020 / Jan 2023 |\n` +
+    `| **HIPAA** — Health Insurance Portability and Accountability Act | HHS / OCR | $1.5M per violation category | Apr 2003 |\n` +
+    `| **SOX** — Sarbanes-Oxley Act | SEC / PCAOB | $5M + 20 years imprisonment | Jul 2002 |\n`
+  );
+}
+
+function brazilFrameworkBlock(locale: ReportLocale): string {
+  return (
+    `| ${lbl(locale, "framework")} | ${lbl(locale, "authority")} | Max Penalty | Effective |\n` +
+    `|---|---|---|---|\n` +
+    `| **LGPD** — Lei Geral de Proteção de Dados | ANPD | 2% of Brazil revenue (max BRL 50M) | Sep 2020 |\n` +
+    `| **Marco Civil** — Internet Civil Rights Framework | MCTIC / Judiciary | Varies by violation | Jun 2014 |\n`
   );
 }
 
@@ -337,23 +381,93 @@ export function generateComplianceReport(opts: ReportOptions): {
   const compTable = getComparisonTable();
   const laws = listLawKnowledge();
 
-  const includeSaudi = jurisdiction !== "China";
-  const includeChina = jurisdiction !== "Saudi Arabia";
+  const JURISDICTION_FILTER: Record<string, { include: boolean }> = {
+    "Saudi Arabia": {
+      include:
+        jurisdiction !== "China" &&
+        jurisdiction !== "EU" &&
+        jurisdiction !== "US" &&
+        jurisdiction !== "Brazil",
+    },
+    China: {
+      include:
+        jurisdiction !== "Saudi Arabia" &&
+        jurisdiction !== "EU" &&
+        jurisdiction !== "US" &&
+        jurisdiction !== "Brazil",
+    },
+    EU: {
+      include:
+        jurisdiction !== "Saudi Arabia" &&
+        jurisdiction !== "China" &&
+        jurisdiction !== "US" &&
+        jurisdiction !== "Brazil",
+    },
+    US: {
+      include:
+        jurisdiction !== "Saudi Arabia" &&
+        jurisdiction !== "China" &&
+        jurisdiction !== "EU" &&
+        jurisdiction !== "Brazil",
+    },
+    Brazil: {
+      include:
+        jurisdiction !== "Saudi Arabia" &&
+        jurisdiction !== "China" &&
+        jurisdiction !== "EU" &&
+        jurisdiction !== "US",
+    },
+  };
   const includeBoth = jurisdiction === "both";
 
-  const filtered =
-    jurisdiction === "Saudi Arabia"
-      ? allObligations.filter(o => o.country === "Saudi Arabia")
-      : jurisdiction === "China"
-        ? allObligations.filter(o => o.country === "China")
-        : allObligations;
+  const filtered = JURISDICTION_FILTER[jurisdiction]
+    ? allObligations.filter(o => o.country === jurisdiction)
+    : allObligations;
 
   const criticalCount = filtered.filter(o => o.riskLevel === "critical").length;
   const highCount = filtered.filter(o => o.riskLevel === "high").length;
   const gapCount = criticalCount + highCount;
 
+  const includeSaudi =
+    jurisdiction !== "China" &&
+    jurisdiction !== "EU" &&
+    jurisdiction !== "US" &&
+    jurisdiction !== "Brazil";
+  const includeChina =
+    jurisdiction !== "Saudi Arabia" &&
+    jurisdiction !== "EU" &&
+    jurisdiction !== "US" &&
+    jurisdiction !== "Brazil";
+  const includeEU =
+    jurisdiction !== "Saudi Arabia" &&
+    jurisdiction !== "China" &&
+    jurisdiction !== "US" &&
+    jurisdiction !== "Brazil";
+  const includeUS =
+    jurisdiction !== "Saudi Arabia" &&
+    jurisdiction !== "China" &&
+    jurisdiction !== "EU" &&
+    jurisdiction !== "Brazil";
+  const includeBrazil =
+    jurisdiction !== "Saudi Arabia" &&
+    jurisdiction !== "China" &&
+    jurisdiction !== "EU" &&
+    jurisdiction !== "US";
+
   // ── Scorecard computation ─────────────────────────────────────
-  const frameworksCovered = includeBoth ? 7 : includeSaudi ? 3 : 4;
+  const frameworksCovered = includeBoth
+    ? 10
+    : includeSaudi
+      ? 3
+      : includeChina
+        ? 4
+        : includeEU
+          ? 2
+          : includeUS
+            ? 3
+            : includeBrazil
+              ? 1
+              : 4;
   const scoreFormula = (obligations: typeof filtered) => {
     const crit = obligations.filter(o => o.riskLevel === "critical").length;
     const high = obligations.filter(o => o.riskLevel === "high").length;
@@ -362,19 +476,15 @@ export function generateComplianceReport(opts: ReportOptions): {
   const overallScore = scoreFormula(filtered);
   const saudiObls = allObligations.filter(o => o.country === "Saudi Arabia");
   const chinaObls = allObligations.filter(o => o.country === "China");
+  const euObls = allObligations.filter(o => o.country === "EU");
+  const usObls = allObligations.filter(o => o.country === "US");
+  const brazilObls = allObligations.filter(o => o.country === "Brazil");
   const saudiScore = includeSaudi ? scoreFormula(saudiObls) : null;
   const chinaScore = includeChina ? scoreFormula(chinaObls) : null;
+  const euScore = includeEU ? scoreFormula(euObls) : null;
+  const usScore = includeUS ? scoreFormula(usObls) : null;
+  const brazilScore = includeBrazil ? scoreFormula(brazilObls) : null;
   const reportVersion = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.0`;
-  const scorecardSummary: ReportScorecardSummary = {
-    overallScore,
-    saudiScore,
-    chinaScore,
-    gapCount,
-    criticalFindings: criticalCount,
-    frameworksCovered,
-    obligationsCovered: filtered.length,
-    reportVersion,
-  };
 
   // ── Report type metadata ──────────────────────────────────────
   const REPORT_TYPE_TEMPLATES: Record<
@@ -433,6 +543,20 @@ export function generateComplianceReport(opts: ReportOptions): {
   const typeMeta = REPORT_TYPE_TEMPLATES[reportType];
   const reportTitle = `${lbl(locale, "title")} — ${typeMeta.titleSuffix[locale]}`;
   const templateName = typeMeta.templateName;
+  const scorecardSummary: ReportScorecardSummary = {
+    overallScore,
+    saudiScore,
+    chinaScore,
+    euScore,
+    usScore,
+    brazilScore,
+    gapCount,
+    criticalFindings: criticalCount,
+    frameworksCovered,
+    obligationsCovered: filtered.length,
+    reportVersion,
+  };
+
   const includeSection = (section: string) => {
     if (reportType === "full_compliance") return true;
     if (reportType === "executive_summary")
@@ -466,21 +590,43 @@ export function generateComplianceReport(opts: ReportOptions): {
     return true;
   };
 
-  const jurisdictionLabel = includeBoth
-    ? `${lbl(locale, "saudi")} & ${lbl(locale, "china")}`
+  const allSelected =
+    [includeSaudi, includeChina, includeEU, includeUS, includeBrazil].filter(
+      Boolean
+    ).length > 1 ||
+    jurisdiction === "Global" ||
+    jurisdiction === "both";
+  const jurisdictionLabel = allSelected
+    ? `${lbl(locale, "saudi")} & ${lbl(locale, "china")}${includeEU ? ` & ${lbl(locale, "eu")}` : ""}${includeUS ? ` & ${lbl(locale, "us")}` : ""}${includeBrazil ? ` & ${lbl(locale, "brazil")}` : ""}`
     : jurisdiction;
 
-  const authoritiesValue = includeBoth
-    ? "SDAIA, NCA, CAC, MIIT, MPS"
+  const authoritiesValue = allSelected
+    ? "SDAIA, NCA, CAC, MIIT, MPS, EDPB, FTC, ANPD"
     : includeSaudi
       ? "SDAIA, NCA, CITC"
-      : "CAC, MIIT, MPS, NPC";
+      : includeChina
+        ? "CAC, MIIT, MPS, NPC"
+        : includeEU
+          ? "EDPB, National DPAs"
+          : includeUS
+            ? "FTC, State AGs, HHS"
+            : includeBrazil
+              ? "ANPD"
+              : "CAC, MIIT, MPS, NPC";
 
-  const frameworksValue = includeBoth
-    ? "7 (PDPL, NCA-ECC, NCA-CCC, PIPL, CSL, DSL, MLPS 2.0)"
+  const frameworksValue = allSelected
+    ? "Multi (PDPL, NCA-ECC, NCA-CCC, PIPL, CSL, DSL, MLPS 2.0, GDPR, CCPA, LGPD)"
     : includeSaudi
       ? "3 (PDPL, NCA-ECC, NCA-CCC)"
-      : "4 (PIPL, CSL, DSL, MLPS 2.0)";
+      : includeChina
+        ? "4 (PIPL, CSL, DSL, MLPS 2.0)"
+        : includeEU
+          ? "2 (GDPR, NIS2)"
+          : includeUS
+            ? "3 (CCPA, HIPAA, SOX)"
+            : includeBrazil
+              ? "1 (LGPD)"
+              : "4 (PIPL, CSL, DSL, MLPS 2.0)";
 
   const L = (key: string) => lbl(locale, key);
   const parts: string[] = [];
@@ -511,10 +657,10 @@ export function generateComplianceReport(opts: ReportOptions): {
     `- Most high-risk gaps relate to incomplete documentation or missing DPO assignment.\n`
   );
   parts.push(
-    `- Penalty exposure is highest for unreported breaches and non-compliance with NCA-ECC.\n`
+    `- Penalty exposure is highest for unreported breaches and non-compliance with cybersecurity frameworks.\n`
   );
   parts.push(
-    `- Ongoing obligations require regular evidence pack updates for both SDAIA and CAC.\n`
+    `- Ongoing obligations require regular evidence pack updates for each applicable regulator.\n`
   );
   // Key statistics table
   parts.push(
@@ -542,16 +688,31 @@ export function generateComplianceReport(opts: ReportOptions): {
         `### ${L("chinaFrameworks")}\n\n${chinaFrameworkBlock(locale)}\n`
       );
     }
-    if (includeBoth && compTable.length > 0) {
-      const top = compTable.slice(0, 6);
+    if (includeEU) {
+      parts.push(`### EU Frameworks\n\n${euFrameworkBlock(locale)}\n`);
+    }
+    if (includeUS) {
+      parts.push(`### US Frameworks\n\n${usFrameworkBlock(locale)}\n`);
+    }
+    if (includeBrazil) {
+      parts.push(`### Brazil Frameworks\n\n${brazilFrameworkBlock(locale)}\n`);
+    }
+    if (compTable.length > 0) {
+      const hasEU = compTable.some(r => r.eu);
+      const hasUS = compTable.some(r => r.us);
+      const hasBrazil = compTable.some(r => r.brazil);
+      const extraCols = `${hasEU ? ` | ${L("eu")}` : ""}${hasUS ? ` | ${L("us")}` : ""}${hasBrazil ? ` | ${L("brazil")}` : ""}`;
+      const top = compTable.slice(0, 8);
       parts.push(
         `### ${L("crossJurisdiction")}\n\n` +
-          `| ${L("topic")} | ${L("saudi")} | ${L("china")} | ${L("notes")} |\n` +
-          `|---|---|---|---|\n` +
+          `| ${L("topic")} | ${L("saudi")} | ${L("china")}${extraCols} | ${L("notes")} |\n` +
+          `|${Array(3 + (hasEU ? 1 : 0) + (hasUS ? 1 : 0) + (hasBrazil ? 1 : 0))
+            .fill("---")
+            .join("|")}|\n` +
           top
             .map(
               r =>
-                `| ${r.topic} | ${r.saudiArabia} | ${r.china} | ${r.notes ?? ""} |`
+                `| ${r.topic} | ${r.saudiArabia} | ${r.china}${hasEU ? ` | ${r.eu ?? ""}` : ""}${hasUS ? ` | ${r.us ?? ""}` : ""}${hasBrazil ? ` | ${r.brazil ?? ""}` : ""} | ${r.notes ?? ""} |`
             )
             .join("\n") +
           "\n"

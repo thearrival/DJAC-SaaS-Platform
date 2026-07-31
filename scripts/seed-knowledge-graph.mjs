@@ -103,6 +103,12 @@ const GLOBAL_FRAMEWORK_PACKS = [
     jurisdiction: "United States",
   },
   {
+    code: "CCPA",
+    name: "California Consumer Privacy Act",
+    region: "North America",
+    jurisdiction: "United States",
+  },
+  {
     code: "CMMC",
     name: "Cybersecurity Maturity Model Certification",
     region: "North America",

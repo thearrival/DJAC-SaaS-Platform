@@ -31,7 +31,15 @@ export const assessmentSeveritySchema = z.enum([
 
 export const supplierGapSchema = z.object({
   code: z.string().trim().min(1).max(120),
-  jurisdiction: z.enum(["china", "saudi", "cross_border"]),
+  jurisdiction: z.enum([
+    "china",
+    "saudi",
+    "eu",
+    "us",
+    "brazil",
+    "cross_border",
+    "global",
+  ]),
   frameworks: z.array(z.string().trim().min(1).max(32)).min(1).max(8),
   severity: assessmentSeveritySchema,
   title: z.string().trim().min(1).max(240),
@@ -47,6 +55,10 @@ export const supplierAssessmentSchema = z.object({
   jurisdictionScores: z.object({
     china: z.number().int().min(0).max(100),
     saudiArabia: z.number().int().min(0).max(100),
+    eu: z.number().int().min(0).max(100),
+    us: z.number().int().min(0).max(100),
+    brazil: z.number().int().min(0).max(100),
+    global: z.number().int().min(0).max(100),
   }),
   status: z.enum(["compliant", "partial", "non_compliant"]),
   riskLevel: z.enum(["low", "medium", "high", "critical"]),

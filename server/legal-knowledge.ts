@@ -1,4 +1,11 @@
-type LawJurisdiction = "China" | "Saudi Arabia" | "Cross-border";
+type LawJurisdiction =
+  | "China"
+  | "Saudi Arabia"
+  | "Cross-border"
+  | "EU"
+  | "US"
+  | "Brazil"
+  | "Global";
 
 type LawSection = {
   title: string;
@@ -1516,6 +1523,294 @@ const LAW_KNOWLEDGE_BASE: LawKnowledgeEntry[] = [
       "Cybersecurity Law of the PRC (CSL) — 2026 Amendments (effective January 1, 2026)",
       "CAC Announcement on CSL Amendment",
       "DJAC Cybersecurity Compliance Database Report (2026)",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "eu-gdpr-compliance-guide",
+    title: "EU General Data Protection Regulation (GDPR) — Compliance Guide",
+    jurisdiction: "EU",
+    frameworkCodes: ["GDPR", "EU-DPA"],
+    summary:
+      "The GDPR (effective May 25, 2018) is the European Union's comprehensive data protection regulation. It governs processing of personal data of EU residents with strong consent, rights, breach notification, and cross-border transfer provisions.",
+    keyTopics: [
+      "lawful basis for processing (Art. 6-9)",
+      "data subject rights: access, erasure, portability, objection",
+      "right to erasure (right to be forgotten)",
+      "Data Protection Officer (DPO) appointment requirements",
+      "breach notification within 72 hours",
+      "Data Processing Agreement (DPA) requirements",
+      "cross-border transfer: adequacy, SCCs, BCRs",
+      "penalties up to 4% of annual global turnover",
+    ],
+    sections: [
+      {
+        title: "Lawful Basis and Consent",
+        excerpt:
+          "Processing requires a lawful basis under Art. 6: consent, contract, legal obligation, vital interests, public task, or legitimate interests. Consent must be freely given, specific, informed, and unambiguous. Special category data (Art. 9) requires explicit consent.",
+        keywords: [
+          "gdpr",
+          "lawful basis",
+          "consent",
+          "art 6",
+          "art 9",
+          "special categories",
+          "explicit consent",
+        ],
+      },
+      {
+        title: "Right to Erasure (Right to be Forgotten)",
+        excerpt:
+          "Data subjects have the right to have personal data erased without undue delay under Art. 17 where data is no longer necessary, consent is withdrawn, or processing is unlawful. Controllers must respond within 30 days.",
+        keywords: [
+          "right to erasure",
+          "right to be forgotten",
+          "art 17",
+          "deletion",
+          "30 days",
+        ],
+      },
+      {
+        title: "Data Protection Officer (DPO)",
+        excerpt:
+          "DPO appointment is mandatory under Art. 37 for public authorities, organizations engaged in large-scale systematic monitoring, or large-scale processing of special categories. The DPO must be independent, report to highest management, and serve as contact for supervisory authorities.",
+        keywords: [
+          "dpo",
+          "data protection officer",
+          "art 37",
+          "art 38",
+          "independent",
+          "supervisory authority",
+        ],
+      },
+      {
+        title: "Breach Notification",
+        excerpt:
+          "Under Art. 33, controllers must notify the supervisory authority of a personal data breach within 72 hours of becoming aware. Data subjects must be notified under Art. 34 if the breach poses high risk to their rights and freedoms.",
+        keywords: [
+          "breach notification",
+          "72 hours",
+          "art 33",
+          "art 34",
+          "data subject notification",
+          "supervisory authority",
+        ],
+      },
+      {
+        title: "Data Processing Agreement (DPA)",
+        excerpt:
+          "Under Art. 28, controllers must enter into a DPA with each processor. The DPA must specify subject-matter, duration, nature and purpose of processing, data types, and obligations of the processor. Sub-processors require prior specific or general written authorization.",
+        keywords: [
+          "dpa",
+          "data processing agreement",
+          "art 28",
+          "processor",
+          "sub-processor",
+          "written authorization",
+        ],
+      },
+      {
+        title: "Cross-Border Data Transfers",
+        excerpt:
+          "Transfers to third countries require an adequacy decision (Art. 45), Standard Contractual Clauses (Art. 46), Binding Corporate Rules, or derogations (Art. 49). Transfer Impact Assessments are required for SCC-based transfers.",
+        keywords: [
+          "cross-border transfer",
+          "adequacy",
+          "scc",
+          "bcr",
+          "art 45",
+          "art 46",
+          "art 49",
+          "tia",
+        ],
+      },
+    ],
+    sources: [
+      "EU General Data Protection Regulation (Regulation (EU) 2016/679)",
+      "EDPB Guidelines",
+      "EU GDPR — effective May 25, 2018",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "us-ccpa-compliance-guide",
+    title: "California Consumer Privacy Act (CCPA) — Compliance Overview",
+    jurisdiction: "US",
+    frameworkCodes: ["CCPA", "CPRA"],
+    summary:
+      "The CCPA (effective January 1, 2020), expanded by CPRA (January 1, 2023), grants California consumers rights over their personal information including the right to know, delete, and opt-out of sale or sharing.",
+    keyTopics: [
+      "consumer right to know what personal information is collected",
+      "right to delete personal information",
+      "right to opt-out of sale or sharing of personal information",
+      "right to non-discrimination for exercising rights",
+      "CPRA: sensitive data use limitations",
+      "contractual requirements with service providers",
+      "annual privacy policy updates",
+      "penalties up to $7,500 per intentional violation",
+    ],
+    sections: [
+      {
+        title: "Consumer Right to Know",
+        excerpt:
+          "Consumers have the right to request disclosure of categories and specific pieces of personal information collected, sources, business purpose for collection, and categories of third parties with whom it is shared. Businesses must respond within 45 days (extendable to 90).",
+        keywords: [
+          "ccpa",
+          "right to know",
+          "disclosure",
+          "consumer rights",
+          "45 days",
+          "personal information",
+        ],
+      },
+      {
+        title: "Right to Delete",
+        excerpt:
+          "Consumers may request deletion of personal information collected. Businesses must delete and direct service providers to delete unless an exception applies (e.g., complete transaction, detect security incidents, comply with legal obligation).",
+        keywords: [
+          "right to delete",
+          "consumer deletion",
+          "service provider",
+          "deletion exception",
+          "verifiable request",
+        ],
+      },
+      {
+        title: "Right to Opt-Out of Sale or Sharing",
+        excerpt:
+          "Consumers have the right to opt-out of the sale or sharing of their personal information. Businesses must provide a clear 'Do Not Sell or Share My Personal Information' link. Opt-out requests must be honored for at least 12 months.",
+        keywords: [
+          "opt-out",
+          "do not sell",
+          "data sharing",
+          "sale of data",
+          "12 months",
+          "opt out link",
+        ],
+      },
+      {
+        title: "Non-Discrimination",
+        excerpt:
+          "Businesses may not discriminate against consumers for exercising CCPA rights. This includes denying goods or services, charging different prices, providing different quality, or suggesting different treatment. Financial incentives for data collection are permitted with notice and consent.",
+        keywords: [
+          "non-discrimination",
+          "price discrimination",
+          "financial incentive",
+          "consumer rights",
+          "ccpa protections",
+        ],
+      },
+      {
+        title: "Service Provider Requirements",
+        excerpt:
+          "Service providers must process personal information only per written contract and for specified business purposes. They cannot retain, use, or disclose for any purpose other than the contract. Sub-processing requires authorization.",
+        keywords: [
+          "service provider",
+          "contract",
+          "business purpose",
+          "sub-processor",
+          "processing restrictions",
+        ],
+      },
+    ],
+    sources: [
+      "California Consumer Privacy Act (CCPA) — Civil Code §1798.100 et seq.",
+      "California Privacy Rights Act (CPRA) — effective January 1, 2023",
+      "CCPA Regulations (California Attorney General)",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "brazil-lgpd-compliance-guide",
+    title: "Brazil Lei Geral de Proteção de Dados (LGPD) — Compliance Guide",
+    jurisdiction: "Brazil",
+    frameworkCodes: ["LGPD", "ANPD"],
+    summary:
+      "The LGPD (effective September 18, 2020) is Brazil's comprehensive data protection law modelled closely on GDPR. It governs processing of personal data of individuals in Brazil with strong consent requirements, data subject rights, and cross-border transfer restrictions.",
+    keyTopics: [
+      "lawful bases for processing (Art. 7-11)",
+      "consent requirements for personal data processing",
+      "data subject rights: access, correction, anonymization, portability",
+      "Data Protection Officer (DPO) appointment",
+      "breach notification to ANPD within reasonable time",
+      "international transfer of personal data",
+      "penalties up to 2% of revenue in Brazil (max BRL 50 million)",
+      "ANPD enforcement and regulatory powers",
+    ],
+    sections: [
+      {
+        title: "Consent Requirements",
+        excerpt:
+          "Consent under LGPD Art. 8 must be freely given, specific, informed, and unambiguous. Consent for sensitive data (Art. 11) requires specific and prominent consent. Consent may be withdrawn at any time. Processing must cease upon withdrawal.",
+        keywords: [
+          "lgpd",
+          "consent",
+          "art 8",
+          "art 11",
+          "sensitive data",
+          "consent withdrawal",
+          "specific consent",
+        ],
+      },
+      {
+        title: "Data Protection Officer (DPO)",
+        excerpt:
+          "Under Art. 41, the controller must appoint a DPO responsible for accepting complaints from data subjects, receiving communications from ANPD, training staff, and executing compliance activities. The DPO's identity and contact must be publicly published.",
+        keywords: [
+          "dpo",
+          "data protection officer",
+          "art 41",
+          "anpd contact",
+          "compliance activities",
+          "public publication",
+        ],
+      },
+      {
+        title: "Breach Notification",
+        excerpt:
+          "Under Art. 48, the controller must notify ANPD of any security incident that may create risk or relevant damage within a reasonable time specified by ANPD. Data subjects must also be notified if the incident poses significant risk.",
+        keywords: [
+          "breach notification",
+          "anpd notification",
+          "art 48",
+          "security incident",
+          "reasonable time",
+          "data subject risk",
+        ],
+      },
+      {
+        title: "International Transfer of Personal Data",
+        excerpt:
+          "International transfers under Art. 33 require adequacy decision by ANPD, Standard Contractual Clauses, Binding Corporate Rules, specific contractual clauses, or consent. Organizations must assess recipient country's data protection levels.",
+        keywords: [
+          "international transfer",
+          "art 33",
+          "adequacy",
+          "scc",
+          "bcr",
+          "cross-border",
+          "anpd authorization",
+        ],
+      },
+      {
+        title: "Data Subject Rights",
+        excerpt:
+          "Under Art. 18, data subjects have rights to confirmation of processing, access, correction, anonymization/blocking/deletion of unnecessary data, portability to another service provider, deletion of personal data processed with consent, and information about public/private entities data is shared with.",
+        keywords: [
+          "data subject rights",
+          "art 18",
+          "access",
+          "correction",
+          "portability",
+          "deletion",
+          "anonymization",
+        ],
+      },
+    ],
+    sources: [
+      "Lei Geral de Proteção de Dados Pessoais (LGPD) — Lei nº 13.709/2018",
+      "ANPD Regulamentos e Diretrizes",
+      "LGPD — effective September 18, 2020",
     ],
     updatedAt: "2026-03-16",
   },

@@ -89,7 +89,7 @@ async function run() {
     contactEmail: email,
     organizationName: "Smoke Org",
     topic: "Market entry readiness",
-    jurisdictions: ["China"],
+    jurisdictions: ["China", "EU", "US", "Brazil"],
     summary:
       "This smoke test verifies consultation submission persistence and validation flow for runtime checks.",
   });

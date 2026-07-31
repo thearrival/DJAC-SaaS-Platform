@@ -402,9 +402,7 @@ export function RegulatoryPulseMatrix() {
                     transition: "all 0.2s",
                   }}
                 >
-                  {j === "all"
-                    ? "All"
-                    : jurisdictionLabelMap[j] ?? j}
+                  {j === "all" ? "All" : (jurisdictionLabelMap[j] ?? j)}
                 </button>
               ))}
             </div>

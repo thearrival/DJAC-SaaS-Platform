@@ -4,8 +4,8 @@ export const complianceFrameworks = [
     name: "Personal Information Protection Law",
     country: "China",
     description:
-      "China's personal information privacy law governing lawful processing, rights, and cross-border data transfer requirements.",
-    scope: "All organizations processing personal information in China.",
+      "Personal information privacy law governing lawful processing, rights, and cross-border data transfer requirements.",
+    scope: "All organizations processing personal information.",
     enforcementAuthority: "Cyberspace Administration of China (CAC)",
     maxPenalty: "Up to RMB 50M or 5% of annual turnover",
   },
@@ -14,7 +14,7 @@ export const complianceFrameworks = [
     name: "Cybersecurity Law",
     country: "China",
     description:
-      "China's foundational cybersecurity law for network operators and critical information infrastructure protection.",
+      "Foundational cybersecurity law for network operators and critical information infrastructure protection.",
     scope:
       "Network operators and critical information infrastructure operators.",
     enforcementAuthority: "Cyberspace Administration of China (CAC)",
@@ -26,7 +26,7 @@ export const complianceFrameworks = [
     country: "China",
     description:
       "National framework for data classification, important data protection, and risk-based security controls.",
-    scope: "All data processors within China.",
+    scope: "All data processors in applicable jurisdiction.",
     enforcementAuthority: "Cyberspace Administration of China (CAC)",
     maxPenalty: "Major fines and business restrictions for severe violations",
   },
@@ -36,7 +36,8 @@ export const complianceFrameworks = [
     country: "China",
     description:
       "Technical and administrative baseline for classifying and protecting information systems by risk level.",
-    scope: "All networked information systems operating in China.",
+    scope:
+      "All networked information systems operating in applicable jurisdiction.",
     enforcementAuthority: "MPS / CAC",
     maxPenalty:
       "Regulatory sanctions and mandatory remediation for non-compliance",
@@ -78,7 +79,7 @@ export const complianceFrameworks = [
     country: "China",
     description:
       "Rules for overseas data transfer pathways, including CAC assessment, contracts, and certification routes.",
-    scope: "Entities transferring personal or important data outside China.",
+    scope: "Entities transferring personal or important data cross-border.",
     enforcementAuthority: "CAC",
     maxPenalty: "Transfer suspension and administrative sanctions",
   },
@@ -89,7 +90,7 @@ export const complianceFrameworks = [
     description:
       "Saudi national privacy law for personal data processing, rights management, and breach notifications.",
     scope:
-      "All controllers and processors handling personal data in Saudi Arabia.",
+      "All controllers and processors handling personal data in applicable jurisdiction.",
     enforcementAuthority: "Saudi Data and AI Authority (SDAIA)",
     maxPenalty: "Up to SAR 5M and possible additional sanctions",
   },
@@ -131,7 +132,7 @@ export const complianceFrameworks = [
     country: "Saudi Arabia",
     description:
       "Mandatory baseline controls organized across governance, defense, resilience, third-party, and ICS domains.",
-    scope: "Government and critical entities in Saudi Arabia.",
+    scope: "Government and critical entities in applicable jurisdiction.",
     enforcementAuthority: "National Cybersecurity Authority (NCA)",
     maxPenalty:
       "Corrective actions and compliance enforcement for mandated entities",
@@ -143,7 +144,7 @@ export const complianceFrameworks = [
     description:
       "Cloud-specific extension of NCA controls covering CSP/CST responsibilities and cloud assurance.",
     scope:
-      "Cloud service providers and cloud service tenants operating in KSA.",
+      "Cloud service providers and cloud service tenants operating in applicable jurisdiction.",
     enforcementAuthority: "National Cybersecurity Authority (NCA)",
     maxPenalty: "Regulatory enforcement and cloud service restrictions",
   },
@@ -188,6 +189,36 @@ export const complianceFrameworks = [
     enforcementAuthority: "National Cybersecurity Authority (NCA)",
     maxPenalty: "Compliance directives and risk escalation actions",
   },
+  {
+    code: "GDPR",
+    name: "General Data Protection Regulation",
+    country: "EU",
+    description:
+      "EU data protection regulation governing personal data processing, rights, and cross-border transfer requirements.",
+    scope: "Controllers and processors in the EU or targeting EU residents.",
+    enforcementAuthority: "European Commission / DPAs",
+    maxPenalty: "Up to EUR 20M or 4% of annual global turnover",
+  },
+  {
+    code: "CCPA",
+    name: "California Consumer Privacy Act",
+    country: "US",
+    description:
+      "California privacy law for consumer rights, data collection transparency, and opt-out mechanisms.",
+    scope: "Organizations collecting personal data of California residents.",
+    enforcementAuthority: "California Privacy Protection Agency (CPPA)",
+    maxPenalty: "Up to USD 7,500 per intentional violation",
+  },
+  {
+    code: "LGPD",
+    name: "Lei Geral de Proteção de Dados",
+    country: "Brazil",
+    description:
+      "Brazilian data protection law governing personal data processing and rights.",
+    scope: "Controllers and processors handling Brazilian personal data.",
+    enforcementAuthority: "Autoridade Nacional de Proteção de Dados (ANPD)",
+    maxPenalty: "Up to 2% of revenue in Brazil (capped at BRL 50M)",
+  },
 ];
 
 export const complianceControls = [
@@ -201,7 +232,7 @@ export const complianceControls = [
       "Implement multi-level cybersecurity protection baseline controls for network infrastructure.",
     requirement:
       "Adopt MLPS baseline controls with monitoring, logging, and hardening safeguards.",
-    applicability: "Network operators and CIIOs in China.",
+    applicability: "Network operators and CIIOs in applicable jurisdiction.",
   },
   {
     frameworkCode: "CSL",
@@ -212,7 +243,7 @@ export const complianceControls = [
       "Major incidents require initial and detailed reporting to authorities in strict timelines.",
     requirement:
       "Submit initial report within 2 hours and detailed report within 24 hours.",
-    applicability: "Network operators and CIIOs in China.",
+    applicability: "Network operators and CIIOs in applicable jurisdiction.",
   },
   {
     frameworkCode: "CSL",
@@ -220,7 +251,7 @@ export const complianceControls = [
     controlName: "Critical Data Localization",
     category: "Data Transfer",
     description:
-      "CIIOs must retain critical and personal data in mainland China unless approved transfer applies.",
+      "CIIOs must retain critical and personal data in jurisdiction unless approved transfer applies.",
     requirement:
       "Store regulated data locally and complete security assessment before export.",
     applicability: "Critical information infrastructure operators.",
@@ -233,7 +264,7 @@ export const complianceControls = [
     description:
       "Maintain network operation logs and evidence for supervision and investigation.",
     requirement: "Retain relevant network logs for at least six months.",
-    applicability: "Network operators in China.",
+    applicability: "Network operators in applicable jurisdiction.",
   },
 
   // China - DSL
@@ -246,7 +277,7 @@ export const complianceControls = [
       "Classify data into general, important, and core categories with risk-based protections.",
     requirement:
       "Define data categories and apply controls proportional to classification level.",
-    applicability: "All data processors in China.",
+    applicability: "All data processors in applicable jurisdiction.",
   },
   {
     frameworkCode: "DSL",
@@ -256,7 +287,7 @@ export const complianceControls = [
     description:
       "Handlers of important data must submit annual security reports.",
     requirement: "Provide annual assessment report to competent regulator.",
-    applicability: "Important data handlers in China.",
+    applicability: "Important data handlers in applicable jurisdiction.",
   },
   {
     frameworkCode: "DSL",
@@ -266,7 +297,7 @@ export const complianceControls = [
     description:
       "Conduct ongoing data security risk assessments and rectify identified gaps.",
     requirement: "Document assessment outcomes and implement mitigation plans.",
-    applicability: "All data processors in China.",
+    applicability: "All data processors in applicable jurisdiction.",
   },
 
   // China - PIPL
@@ -278,7 +309,7 @@ export const complianceControls = [
     description:
       "Establish lawful basis and explicit consent mechanisms for PI processing.",
     requirement: "Obtain informed consent unless another legal basis applies.",
-    applicability: "All PI processors in China.",
+    applicability: "All PI processors in applicable jurisdiction.",
   },
   {
     frameworkCode: "PIPL",
@@ -289,7 +320,7 @@ export const complianceControls = [
       "Enable access, correction, deletion, portability, and objection workflows.",
     requirement:
       "Provide operational channels and response timelines for rights requests.",
-    applicability: "All PI processors in China.",
+    applicability: "All PI processors in applicable jurisdiction.",
   },
   {
     frameworkCode: "PIPL",
@@ -313,7 +344,7 @@ export const complianceControls = [
     requirement:
       "Collect guardian consent and maintain annual compliance reporting where applicable.",
     applicability:
-      "Organizations processing minors personal information in China.",
+      "Organizations processing minors personal information in applicable jurisdiction.",
   },
 
   // China - MLPS 2.0
@@ -325,7 +356,8 @@ export const complianceControls = [
     description:
       "Classify systems from Level 1 to Level 5 based on national security impact.",
     requirement: "Document and register MLPS level for covered systems.",
-    applicability: "All covered information systems in China.",
+    applicability:
+      "All covered information systems in applicable jurisdiction.",
   },
   {
     frameworkCode: "MLPS2",
@@ -347,7 +379,7 @@ export const complianceControls = [
       "Establish institutional, organizational, personnel, construction, and operations controls.",
     requirement:
       "Maintain formal governance, personnel controls, and operational procedures.",
-    applicability: "All covered systems in China.",
+    applicability: "All covered systems in applicable jurisdiction.",
   },
   {
     frameworkCode: "MLPS2",
@@ -369,7 +401,7 @@ export const complianceControls = [
     category: "Data Governance",
     description: "Formalize network data governance model and accountability.",
     requirement: "Define ownership, lifecycle controls, and risk thresholds.",
-    applicability: "Network data processors in China.",
+    applicability: "Network data processors in applicable jurisdiction.",
   },
   {
     frameworkCode: "NDSM",
@@ -380,7 +412,7 @@ export const complianceControls = [
       "Submit security reports for designated important data activities.",
     requirement:
       "Provide periodic compliance and risk reports to competent authorities.",
-    applicability: "Important data handlers in China.",
+    applicability: "Important data handlers in applicable jurisdiction.",
   },
 
   // China - CIIP
@@ -418,7 +450,7 @@ export const complianceControls = [
     requirement:
       "Report vulnerabilities to MIIT/CAC/MPS portal within 48 hours.",
     applicability:
-      "Entities discovering cybersecurity vulnerabilities in China.",
+      "Entities discovering cybersecurity vulnerabilities in applicable jurisdiction.",
   },
   {
     frameworkCode: "VULN",
@@ -442,7 +474,7 @@ export const complianceControls = [
       "Select valid transfer pathway based on data category, volume, and processor profile.",
     requirement:
       "Use CAC assessment, standard contract, or certification as required.",
-    applicability: "Entities transferring data overseas from China.",
+    applicability: "Entities transferring data cross-border.",
   },
   {
     frameworkCode: "CBDT",
@@ -575,7 +607,7 @@ export const complianceControls = [
     description:
       "Define CSP and tenant responsibilities for cloud security operations.",
     requirement: "Map control ownership and enforce shared accountability.",
-    applicability: "CSPs and cloud service tenants in KSA.",
+    applicability: "CSPs and cloud service tenants in applicable jurisdiction.",
   },
   {
     frameworkCode: "CCC",
@@ -583,10 +615,10 @@ export const complianceControls = [
     controlName: "Cloud Data Sovereignty",
     category: "Cloud Security",
     description:
-      "Protect regulated data location and handling in line with KSA requirements.",
+      "Protect regulated data location and handling in line with regulatory requirements.",
     requirement:
       "Apply cloud architecture and controls that enforce data sovereignty obligations.",
-    applicability: "Cloud workloads processing regulated Saudi data.",
+    applicability: "Cloud workloads processing regulated data.",
   },
 
   // Saudi Arabia - CSCC
@@ -690,7 +722,8 @@ export const complianceControls = [
     description:
       "Ensure legal basis and explicit consent for personal data processing.",
     requirement: "Collect and document consent where required by PDPL.",
-    applicability: "All personal data controllers/processors in Saudi Arabia.",
+    applicability:
+      "All personal data controllers/processors in applicable jurisdiction.",
   },
   {
     frameworkCode: "PDPL",
@@ -700,7 +733,8 @@ export const complianceControls = [
     description:
       "Enable rights access, correction, and deletion request handling.",
     requirement: "Provide rights workflow and response tracking.",
-    applicability: "All personal data controllers/processors in Saudi Arabia.",
+    applicability:
+      "All personal data controllers/processors in applicable jurisdiction.",
   },
   {
     frameworkCode: "PDPL",
@@ -711,7 +745,7 @@ export const complianceControls = [
       "Notify SDAIA and affected data subjects for qualifying breaches.",
     requirement:
       "Report personal data breach to SDAIA within 72 hours where required.",
-    applicability: "All personal data controllers in Saudi Arabia.",
+    applicability: "All personal data controllers in applicable jurisdiction.",
   },
   {
     frameworkCode: "PDPL",
@@ -722,7 +756,7 @@ export const complianceControls = [
       "Apply transfer restrictions and approval pathways for cross-border data movement.",
     requirement:
       "Complete adequacy, contractual, or regulator-approved transfer mechanisms.",
-    applicability: "Entities transferring personal data outside Saudi Arabia.",
+    applicability: "Entities transferring personal data cross-border.",
   },
 ];
 
@@ -787,7 +821,7 @@ export const complianceRelationships = [
     targetFrameworkCode: "NCA",
     relationshipType: "conflict",
     description:
-      "PIPL export pathways and Saudi sovereignty obligations can conflict for shared cross-border processing architectures.",
+      "PIPL export pathways and sovereignty obligations can conflict for shared cross-border processing architectures.",
     severity: "critical",
     riskLevel: "critical",
     mitigation:
@@ -875,7 +909,7 @@ export const complianceRelationships = [
     targetFrameworkCode: "NCA",
     relationshipType: "conflict",
     description:
-      "Data localization and transfer restrictions can conflict between Chinese and Saudi regulatory boundaries.",
+      "Data localization and transfer restrictions can conflict between regulatory boundaries.",
     severity: "critical",
     riskLevel: "critical",
     mitigation:
@@ -952,7 +986,7 @@ export const complianceRelationships = [
     targetFrameworkCode: "CIIP",
     relationshipType: "coordination",
     description:
-      "Critical system controls in Saudi context align with CIIP protection principles for critical infrastructure.",
+      "Critical system controls align with CIIP protection principles for critical infrastructure.",
     severity: "high",
     riskLevel: "high",
     mitigation:
@@ -1007,7 +1041,7 @@ export const complianceRelationships = [
     targetFrameworkCode: "NCA",
     relationshipType: "coordination",
     description:
-      "Vulnerability management in China and Saudi cybersecurity governance can be coordinated for unified triage operations.",
+      "Vulnerability management and cybersecurity governance can be coordinated for unified triage operations.",
     severity: "medium",
     riskLevel: "medium",
     mitigation:

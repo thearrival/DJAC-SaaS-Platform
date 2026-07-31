@@ -34,6 +34,39 @@ describe("Report Generation", () => {
     expect(report.markdown.length).toBeGreaterThan(500);
   });
 
+  it("should generate an EU compliance report", () => {
+    const report = generateComplianceReport({
+      jurisdiction: "EU",
+      locale: "en",
+    });
+
+    expect(report.reportId).toBeTruthy();
+    expect(report.markdown).toBeTruthy();
+    expect(report.markdown.length).toBeGreaterThan(500);
+  });
+
+  it("should generate a US compliance report", () => {
+    const report = generateComplianceReport({
+      jurisdiction: "US",
+      locale: "en",
+    });
+
+    expect(report.reportId).toBeTruthy();
+    expect(report.markdown).toBeTruthy();
+    expect(report.markdown.length).toBeGreaterThan(500);
+  });
+
+  it("should generate a Brazil compliance report", () => {
+    const report = generateComplianceReport({
+      jurisdiction: "Brazil",
+      locale: "en",
+    });
+
+    expect(report.reportId).toBeTruthy();
+    expect(report.markdown).toBeTruthy();
+    expect(report.markdown.length).toBeGreaterThan(500);
+  });
+
   it("should generate a combined both-jurisdiction report", () => {
     const report = generateComplianceReport({
       jurisdiction: "both",
@@ -95,6 +128,19 @@ describe("Report Generation", () => {
       jurisdiction: "China",
       locale: "en",
     }).reportId;
-    expect(id1).not.toBe(id2);
+    const id3 = generateComplianceReport({
+      jurisdiction: "EU",
+      locale: "en",
+    }).reportId;
+    const id4 = generateComplianceReport({
+      jurisdiction: "US",
+      locale: "en",
+    }).reportId;
+    const id5 = generateComplianceReport({
+      jurisdiction: "Brazil",
+      locale: "en",
+    }).reportId;
+    const ids = new Set([id1, id2, id3, id4, id5]);
+    expect(ids.size).toBe(5);
   });
 });

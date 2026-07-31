@@ -178,10 +178,25 @@ export function deriveExposureMappings(
   const titleLower = input.title.toLowerCase();
 
   const isChinaRegion =
-    input.assetRegion === "China" || input.assetRegion === "Cross-border";
+    input.assetRegion === "China" ||
+    input.assetRegion === "Cross-border" ||
+    input.assetRegion === "Global";
   const isSaudiRegion =
     input.assetRegion === "Saudi Arabia" ||
-    input.assetRegion === "Cross-border";
+    input.assetRegion === "Cross-border" ||
+    input.assetRegion === "Global";
+  const isEURegion =
+    input.assetRegion === "EU" ||
+    input.assetRegion === "Cross-border" ||
+    input.assetRegion === "Global";
+  const isUSRegion =
+    input.assetRegion === "US" ||
+    input.assetRegion === "Cross-border" ||
+    input.assetRegion === "Global";
+  const isBrazilRegion =
+    input.assetRegion === "Brazil" ||
+    input.assetRegion === "Cross-border" ||
+    input.assetRegion === "Global";
 
   // ── Access control → NCA ECC ──────────────────────────────────────────────
   if (/access|auth|privilege|credential|password|account/i.test(titleLower)) {
@@ -244,6 +259,51 @@ export function deriveExposureMappings(
           | "low",
       });
     }
+    if (isEURegion) {
+      results.push({
+        vulnerabilityId: input.vulnerabilityId,
+        frameworkCode: "GDPR",
+        frameworkId: null,
+        controlId: null,
+        controlCode: "GDPR-Art.32",
+        mappingReason: `Asset handles EU personal data and vulnerability "${input.title}" creates a data leakage risk — maps to GDPR Art.32 security of processing obligations.`,
+        severityImpact: (input.severity === "critical" ? "critical" : sev) as
+          | "critical"
+          | "high"
+          | "medium"
+          | "low",
+      });
+    }
+    if (isUSRegion) {
+      results.push({
+        vulnerabilityId: input.vulnerabilityId,
+        frameworkCode: "CCPA",
+        frameworkId: null,
+        controlId: null,
+        controlCode: "CCPA-Sec.1798.150",
+        mappingReason: `Asset handles consumer personal information and vulnerability "${input.title}" exposes data — relevant to CCPA private right of action for data breaches.`,
+        severityImpact: (input.severity === "critical" ? "critical" : sev) as
+          | "critical"
+          | "high"
+          | "medium"
+          | "low",
+      });
+    }
+    if (isBrazilRegion) {
+      results.push({
+        vulnerabilityId: input.vulnerabilityId,
+        frameworkCode: "LGPD",
+        frameworkId: null,
+        controlId: null,
+        controlCode: "LGPD-Art.46",
+        mappingReason: `Asset processes personal data in Brazil and vulnerability "${input.title}" creates a data leakage risk — maps to LGPD Art.46 security measures requirements.`,
+        severityImpact: (input.severity === "critical" ? "critical" : sev) as
+          | "critical"
+          | "high"
+          | "medium"
+          | "low",
+      });
+    }
   }
 
   // ── Critical data / cross-border transfer → DSL + PIPL ───────────────────
@@ -287,10 +347,32 @@ export function deriveExposureMappings(
         severityImpact: sev as "critical" | "high" | "medium" | "low",
       });
     }
+    if (isEURegion) {
+      results.push({
+        vulnerabilityId: input.vulnerabilityId,
+        frameworkCode: "GDPR",
+        frameworkId: null,
+        controlId: null,
+        controlCode: "GDPR-Art.32",
+        mappingReason: `Cryptographic weakness "${input.title}" undermines GDPR Art.32 requirement for encryption of personal data.`,
+        severityImpact: sev as "critical" | "high" | "medium" | "low",
+      });
+    }
+    if (isBrazilRegion) {
+      results.push({
+        vulnerabilityId: input.vulnerabilityId,
+        frameworkCode: "LGPD",
+        frameworkId: null,
+        controlId: null,
+        controlCode: "LGPD-Art.46",
+        mappingReason: `Cryptographic weakness "${input.title}" violates LGPD Art.46 requirement for appropriate technical security measures.`,
+        severityImpact: sev as "critical" | "high" | "medium" | "low",
+      });
+    }
   }
 
-  // ── Cross-border transfer exposure → CSL + PDPL ──────────────────────────
-  if (input.assetRegion === "Cross-border") {
+  // ── Cross-border transfer exposure → CSL + PDPL + GDPR ──────────────────
+  if (input.assetRegion === "Cross-border" || input.assetRegion === "Global") {
     results.push({
       vulnerabilityId: input.vulnerabilityId,
       frameworkCode: "CSL",
@@ -298,6 +380,15 @@ export function deriveExposureMappings(
       controlId: null,
       controlCode: "CSL-Art.37",
       mappingReason: `Cross-border asset with vulnerability "${input.title}" — CSL Art.37 requires security assessment before any critical data cross-border transfer.`,
+      severityImpact: sev as "critical" | "high" | "medium" | "low",
+    });
+    results.push({
+      vulnerabilityId: input.vulnerabilityId,
+      frameworkCode: "GDPR",
+      frameworkId: null,
+      controlId: null,
+      controlCode: "GDPR-Art.44",
+      mappingReason: `Cross-border asset with vulnerability "${input.title}" — GDPR Art.44 restricts cross-border data transfers to adequate jurisdictions.`,
       severityImpact: sev as "critical" | "high" | "medium" | "low",
     });
   }

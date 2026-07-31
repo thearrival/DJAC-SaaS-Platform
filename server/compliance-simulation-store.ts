@@ -113,12 +113,12 @@ export type SimulationComparison = {
 const SCENARIOS: SimulationScenario[] = [
   {
     id: "scenario-expand-saudi",
-    name: "Market Entry: Saudi Arabia",
+    name: "Market Entry: EMEA",
     description:
-      "Expand operations into Saudi Arabia with full PDPL and NCA ECC compliance.",
+      "Expand operations into EMEA with full PDPL-KSA, UAE-PDPL, and GDPR compliance.",
     type: "expansion",
-    targetJurisdictions: ["Saudi Arabia"],
-    applicableFrameworks: ["PDPL-KSA", "NCA-ECC"],
+    targetJurisdictions: ["Saudi Arabia", "UAE", "Qatar"],
+    applicableFrameworks: ["PDPL-KSA", "NCA-ECC", "GDPR"],
     complianceBurden: "high",
   },
   {
@@ -240,39 +240,50 @@ const GAP_PROBABILITIES: Record<string, Record<string, number>> = {
     "United Arab Emirates": 0.55,
     India: 0.6,
     Brazil: 0.4,
+    "European Union": 0.2,
   },
   CCPA: {
     "European Union": 0.65,
     China: 0.7,
     "Saudi Arabia": 0.5,
+    "United States": 0.3,
+    Brazil: 0.45,
   },
   "NIST-CSF-2": {
     "European Union": 0.3,
     China: 0.5,
     "Saudi Arabia": 0.4,
     Brazil: 0.35,
+    "United States": 0.25,
   },
   "PDPL-KSA": {
     "European Union": 0.55,
     China: 0.7,
     "United States": 0.5,
     "United Arab Emirates": 0.3,
+    "Saudi Arabia": 0.2,
+    Brazil: 0.5,
   },
   PIPL: {
     "European Union": 0.75,
     "United States": 0.7,
     "Saudi Arabia": 0.65,
     India: 0.4,
+    China: 0.25,
+    Brazil: 0.6,
   },
   LGPD: {
     "European Union": 0.35,
     "United States": 0.45,
     China: 0.5,
+    Brazil: 0.2,
   },
   "ISO-27001": {
     China: 0.4,
     "Saudi Arabia": 0.25,
     "European Union": 0.15,
+    "United States": 0.2,
+    Brazil: 0.2,
   },
 };
 
@@ -336,6 +347,33 @@ const CROSS_BORDER_CONFLICTS: Array<{
       "Highly complementary frameworks; NIST CSF provides risk-based guidance while ISO 27001 provides certifiable ISMS standard.",
     mitigation:
       "Map NIST CSF categories to ISO 27001 Annex A controls; use ISO 27001 certification as evidence for NIST CSF Tier 3+ maturity.",
+  },
+  {
+    fw1: "CCPA",
+    fw2: "LGPD",
+    conflictScore: 35,
+    description:
+      "CCPA opt-out model vs LGPD consent requirement; different definitions of sensitive data and processing grounds.",
+    mitigation:
+      "Align to GDPR as intermediary standard; implement opt-out mechanisms for US consumers while maintaining LGPD consent basis for Brazilian data subjects.",
+  },
+  {
+    fw1: "CCPA",
+    fw2: "PDPL-KSA",
+    conflictScore: 50,
+    description:
+      "CCPA sectoral approach vs PDPL-KSA comprehensive law; different data subject rights frameworks and transfer restriction models.",
+    mitigation:
+      "Implement comprehensive privacy program covering both US state-level and KSA requirements; maintain separate processing records per jurisdiction.",
+  },
+  {
+    fw1: "LGPD",
+    fw2: "PDPL-KSA",
+    conflictScore: 40,
+    description:
+      "Both require DPO appointment and data transfer impact assessments but with differing scope and enforcement regimes.",
+    mitigation:
+      "Unified DPO role covering both jurisdictions; implement TIA framework that satisfies both LGPD and PDPL-KSA requirements.",
   },
   {
     fw1: "GDPR",

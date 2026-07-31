@@ -292,6 +292,10 @@ export const vendorHostingEnvironmentOptions: ReadonlyArray<
 export const vendorCountryValues = [
   "saudi-arabia",
   "china",
+  "eu",
+  "us",
+  "brazil",
+  "global",
   "united-arab-emirates",
   "bahrain",
   "singapore",
@@ -307,6 +311,16 @@ export type VendorCountry = (typeof vendorCountryValues)[number];
 
 export const vendorCountryOptions: ReadonlyArray<VendorOption<VendorCountry>> =
   [
+    {
+      value: "eu",
+      labels: { en: "European Union", zh: "欧盟", ar: "الاتحاد الأوروبي" },
+    },
+    {
+      value: "us",
+      labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
+    },
+    { value: "brazil", labels: { en: "Brazil", zh: "巴西", ar: "البرازيل" } },
+    { value: "global", labels: { en: "Global", zh: "全球", ar: "عالمي" } },
     {
       value: "saudi-arabia",
       labels: {
@@ -349,6 +363,10 @@ export const vendorCountryOptions: ReadonlyArray<VendorOption<VendorCountry>> =
 export const vendorJurisdictionValues = [
   "saudi-arabia",
   "china",
+  "eu",
+  "us",
+  "brazil",
+  "global",
   "gcc",
   "eu-eea",
   "united-kingdom",
@@ -361,6 +379,16 @@ export type VendorJurisdiction = (typeof vendorJurisdictionValues)[number];
 export const vendorJurisdictionOptions: ReadonlyArray<
   VendorOption<VendorJurisdiction>
 > = [
+  {
+    value: "eu",
+    labels: { en: "European Union", zh: "欧盟", ar: "الاتحاد الأوروبي" },
+  },
+  {
+    value: "us",
+    labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
+  },
+  { value: "brazil", labels: { en: "Brazil", zh: "巴西", ar: "البرازيل" } },
+  { value: "global", labels: { en: "Global", zh: "全球", ar: "عالمي" } },
   {
     value: "saudi-arabia",
     labels: {

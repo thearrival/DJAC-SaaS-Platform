@@ -1,7 +1,7 @@
 -- Phase 38: Data Subject Request (DSR) Tracker
 -- Migration: 0017_dsr_requests
--- Tracks incoming data subject rights requests under PIPL (China, 15 working days)
--- and PDPL (Saudi Arabia, 30 days). Supports access, rectification, erasure,
+-- Tracks incoming data subject rights requests under PIPL/PDPL/GDPR/CCPA/LGPD
+-- and other global privacy regulations. Supports access, rectification, erasure,
 -- portability, restriction, objection, and explanation request types.
 
 CREATE TABLE IF NOT EXISTS `dsrRequests` (

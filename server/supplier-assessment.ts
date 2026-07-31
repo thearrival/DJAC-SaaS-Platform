@@ -4,7 +4,14 @@ export type AssessmentSeverity = "critical" | "high" | "medium" | "low";
 
 export type SupplierGap = {
   code: string;
-  jurisdiction: "china" | "saudi" | "cross_border";
+  jurisdiction:
+    | "china"
+    | "saudi"
+    | "eu"
+    | "us"
+    | "brazil"
+    | "cross_border"
+    | "global";
   frameworks: string[];
   severity: AssessmentSeverity;
   title: string;
@@ -20,6 +27,10 @@ export type SupplierAssessmentResult = {
   jurisdictionScores: {
     china: number;
     saudiArabia: number;
+    eu: number;
+    us: number;
+    brazil: number;
+    global: number;
   };
   status: "compliant" | "partial" | "non_compliant";
   riskLevel: "low" | "medium" | "high" | "critical";
@@ -33,6 +44,20 @@ const PENALTY_CONTEXT: Record<string, string> = {
   DSL: "DSL violations can trigger major fines and business sanctions.",
   PDPL: "PDPL penalties can reach up to SAR 5M.",
   NCA: "NCA non-compliance can impact licensing and critical contracts.",
+  GDPR: "GDPR fines can reach up to €20M or 4% of annual global turnover.",
+  CCPA: "CCPA violations can incur fines of up to $7,500 per intentional violation.",
+  HIPAA:
+    "HIPAA penalties can reach up to $1.5M per violation category per year.",
+  SOX: "SOX non-compliance can result in fines up to $5M and executives face criminal penalties.",
+  LGPD: "LGPD penalties can reach up to 2% of revenue in Brazil (capped at R$50M per violation).",
+  "ISO 27001":
+    "ISO 27001 certification demonstrates internationally recognized ISMS controls.",
+  "ISO 27701":
+    "ISO 27701 provides a privacy extension to ISO 27001 for PII management.",
+  "SOC 2":
+    "SOC 2 reports provide independent assurance of security, availability, and confidentiality controls.",
+  "NIST CSF":
+    "NIST CSF provides a comprehensive cybersecurity risk management framework.",
 };
 
 function parseList(value: string | null | undefined): string[] {
@@ -112,6 +137,10 @@ export function runDualJurisdictionAssessment(
 
   let chinaScore = 100;
   let saudiScore = 100;
+  let euScore = 100;
+  let usScore = 100;
+  let brazilScore = 100;
+  let globalScore = 100;
   const gaps: SupplierGap[] = [];
 
   const requiresChinaControls =
@@ -122,6 +151,24 @@ export function runDualJurisdictionAssessment(
     hasAny(jurisdictions, ["saudi", "ksa"]) ||
     hasAny(operatingCountries, ["saudi", "ksa"]) ||
     hasAny(locations, ["saudi", "ksa"]);
+  const requiresEUControls =
+    hasAny(jurisdictions, ["eu", "europe", "european union", "gdpr"]) ||
+    hasAny(operatingCountries, ["eu", "europe", "european union", "gdpr"]) ||
+    hasAny(locations, ["eu", "europe", "european union", "gdpr"]);
+  const requiresUSControls =
+    hasAny(jurisdictions, ["us", "usa", "united states", "america", "ccpa"]) ||
+    hasAny(operatingCountries, [
+      "us",
+      "usa",
+      "united states",
+      "america",
+      "ccpa",
+    ]) ||
+    hasAny(locations, ["us", "usa", "united states", "america", "ccpa"]);
+  const requiresBrazilControls =
+    hasAny(jurisdictions, ["brazil", "brasil", "lgpd"]) ||
+    hasAny(operatingCountries, ["brazil", "brasil", "lgpd"]) ||
+    hasAny(locations, ["brazil", "brasil", "lgpd"]);
   const hasChinaLocation = hasAny(locations, [
     "china",
     "cn",
@@ -136,6 +183,35 @@ export function runDualJurisdictionAssessment(
     "riyadh",
     "jeddah",
     "dammam",
+  ]);
+  const hasEULocation = hasAny(locations, [
+    "eu",
+    "europe",
+    "european union",
+    "gdpr",
+    "berlin",
+    "paris",
+    "london",
+    "frankfurt",
+    "dublin",
+  ]);
+  const hasUSLocation = hasAny(locations, [
+    "us",
+    "usa",
+    "united states",
+    "america",
+    "ccpa",
+    "new york",
+    "california",
+    "virginia",
+  ]);
+  const hasBrazilLocation = hasAny(locations, [
+    "brazil",
+    "brasil",
+    "lgpd",
+    "sao paulo",
+    "rio de janeiro",
+    "brasilia",
   ]);
   const hasCrossBorderTransfer = hasAny(processingActivities, [
     "cross border",
@@ -189,6 +265,54 @@ export function runDualJurisdictionAssessment(
     });
   }
 
+  if (requiresEUControls && !hasEULocation) {
+    euScore -= 30;
+    gaps.push({
+      code: "LOC-EU-001",
+      jurisdiction: "eu",
+      frameworks: ["GDPR"],
+      severity: "high",
+      title: "Missing EU data residency evidence",
+      description:
+        "No EU data location was declared for GDPR compliance requirements.",
+      mitigation:
+        "Provision EU-hosted data storage and processing paths for EU data subjects.",
+      penaltyContext: makePenaltyContext(["GDPR"]),
+    });
+  }
+
+  if (requiresUSControls && !hasUSLocation) {
+    usScore -= 25;
+    gaps.push({
+      code: "LOC-US-001",
+      jurisdiction: "us",
+      frameworks: ["CCPA"],
+      severity: "high",
+      title: "Missing US data presence evidence",
+      description:
+        "No US data location was declared for CCPA/state privacy law compliance.",
+      mitigation:
+        "Document US-based data processing infrastructure and data subject access mechanisms.",
+      penaltyContext: makePenaltyContext(["CCPA"]),
+    });
+  }
+
+  if (requiresBrazilControls && !hasBrazilLocation) {
+    brazilScore -= 25;
+    gaps.push({
+      code: "LOC-BRAZIL-001",
+      jurisdiction: "brazil",
+      frameworks: ["LGPD"],
+      severity: "high",
+      title: "Missing Brazil data presence evidence",
+      description:
+        "No Brazil data location was declared for LGPD compliance requirements.",
+      mitigation:
+        "Provision Brazil-based data handling infrastructure and ANPD compliance framework.",
+      penaltyContext: makePenaltyContext(["LGPD"]),
+    });
+  }
+
   if (
     requiresChinaControls &&
     requiresSaudiControls &&
@@ -215,6 +339,10 @@ export function runDualJurisdictionAssessment(
   if (processingActivities.length === 0) {
     chinaScore -= 8;
     saudiScore -= 8;
+    euScore -= 8;
+    usScore -= 8;
+    brazilScore -= 8;
+    globalScore -= 8;
     gaps.push({
       code: "DATA-MAP-001",
       jurisdiction: "cross_border",
@@ -234,6 +362,10 @@ export function runDualJurisdictionAssessment(
     const deduction = isHighCriticality ? 18 : 12;
     chinaScore -= deduction;
     saudiScore -= deduction;
+    euScore -= deduction;
+    usScore -= deduction;
+    brazilScore -= deduction;
+    globalScore -= deduction;
     gaps.push({
       code: "CERT-ISO27001-001",
       jurisdiction: "cross_border",
@@ -258,6 +390,10 @@ export function runDualJurisdictionAssessment(
     const deduction = hasHighDependencyChain ? 12 : 8;
     chinaScore -= deduction;
     saudiScore -= deduction;
+    euScore -= deduction;
+    usScore -= deduction;
+    brazilScore -= deduction;
+    globalScore -= deduction;
     gaps.push({
       code: "CERT-SOC2-001",
       jurisdiction: "cross_border",
@@ -280,6 +416,10 @@ export function runDualJurisdictionAssessment(
   if (handlesSensitiveData && !hasIso27701) {
     chinaScore -= 10;
     saudiScore -= 10;
+    euScore -= 10;
+    usScore -= 10;
+    brazilScore -= 10;
+    globalScore -= 10;
     gaps.push({
       code: "PRIVACY-PROGRAM-001",
       jurisdiction: "cross_border",
@@ -342,6 +482,10 @@ export function runDualJurisdictionAssessment(
   ) {
     chinaScore -= 5;
     saudiScore -= 5;
+    euScore -= 5;
+    usScore -= 5;
+    brazilScore -= 5;
+    globalScore -= 5;
     gaps.push({
       code: "CLOUD-INFO-001",
       jurisdiction: "cross_border",
@@ -362,6 +506,10 @@ export function runDualJurisdictionAssessment(
   ) {
     chinaScore -= 6;
     saudiScore -= 6;
+    euScore -= 6;
+    usScore -= 6;
+    brazilScore -= 6;
+    globalScore -= 6;
     gaps.push({
       code: "ARCH-MULTICLOUD-001",
       jurisdiction: "cross_border",
@@ -379,6 +527,10 @@ export function runDualJurisdictionAssessment(
   if (hasHighDependencyChain && !hasSoc2) {
     saudiScore -= 6;
     chinaScore -= 6;
+    euScore -= 6;
+    usScore -= 6;
+    brazilScore -= 6;
+    globalScore -= 6;
     gaps.push({
       code: "SUPPLY-CHAIN-001",
       jurisdiction: "cross_border",
@@ -407,8 +559,15 @@ export function runDualJurisdictionAssessment(
 
   chinaScore = clampScore(chinaScore);
   saudiScore = clampScore(saudiScore);
+  euScore = clampScore(euScore);
+  usScore = clampScore(usScore);
+  brazilScore = clampScore(brazilScore);
+  globalScore = clampScore(globalScore);
 
-  const overallScore = clampScore((chinaScore + saudiScore) / 2);
+  const overallScore = clampScore(
+    (chinaScore + saudiScore + euScore + usScore + brazilScore + globalScore) /
+      6
+  );
   const riskLevel = inferRiskLevel(overallScore, gaps);
   const status = scoreToStatus(overallScore);
 
@@ -417,7 +576,7 @@ export function runDualJurisdictionAssessment(
       .map(gap => gap.mitigation)
       .concat([
         "Run legal validation for all critical and high findings before onboarding.",
-        "Keep a jurisdiction-specific evidence pack for CAC, SDAIA, and NCA audits.",
+        "Keep a jurisdiction-specific evidence pack for applicable regulators (e.g., CAC, SDAIA, EDPB, ANPD).",
       ])
   );
 
@@ -428,6 +587,10 @@ export function runDualJurisdictionAssessment(
     jurisdictionScores: {
       china: chinaScore,
       saudiArabia: saudiScore,
+      eu: euScore,
+      us: usScore,
+      brazil: brazilScore,
+      global: globalScore,
     },
     status,
     riskLevel,
@@ -493,7 +656,11 @@ export function buildAssessmentCsv(
   lines.push(`Generated At,${csvEscape(result.generatedAt)}`);
   lines.push(`Overall Score,${result.overallScore}`);
   lines.push(`China Score,${result.jurisdictionScores.china}`);
-  lines.push(`Saudi Score,${result.jurisdictionScores.saudiArabia}`);
+  lines.push(`Saudi Arabia Score,${result.jurisdictionScores.saudiArabia}`);
+  lines.push(`EU Score,${result.jurisdictionScores.eu}`);
+  lines.push(`US Score,${result.jurisdictionScores.us}`);
+  lines.push(`Brazil Score,${result.jurisdictionScores.brazil}`);
+  lines.push(`Global Score,${result.jurisdictionScores.global}`);
   lines.push(`Risk Level,${result.riskLevel}`);
   lines.push(`Status,${result.status}`);
   lines.push("");

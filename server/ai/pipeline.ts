@@ -46,8 +46,14 @@ const DEFAULT_KNOWN_FRAMEWORKS = [
   "PDPL",
   "NCA",
 ];
-const CHINA_FRAMEWORKS = ["PIPL", "CSL", "DSL", "MLPS 2.0"];
-const SAUDI_FRAMEWORKS = ["PDPL", "NCA"];
+const JURISDICTION_FRAMEWORKS: Record<string, string[]> = {
+  china: ["PIPL", "CSL", "DSL", "MLPS 2.0"],
+  saudi: ["PDPL", "NCA"],
+  eu: ["GDPR"],
+  us: ["CCPA", "HIPAA", "SOX"],
+  brazil: ["LGPD"],
+  global: ["ISO 27001", "ISO 27701", "SOC 2", "NIST CSF"],
+};
 
 const INJECTION_PATTERNS: RegExp[] = [
   /ignore\s+all\s+previous\s+instructions/i,
@@ -70,6 +76,9 @@ const CONTROL_BUCKET_KEYWORDS: Record<string, string[]> = {
   "Data Localization": [
     "china",
     "saudi",
+    "eu",
+    "us",
+    "brazil",
     "riyadh",
     "beijing",
     "shanghai",
@@ -418,7 +427,7 @@ function ensureWeakEncryptionGap(
   const newGap: SupplierGap = {
     code: WEAK_ENCRYPTION_CODE,
     jurisdiction: "cross_border",
-    frameworks: ["PIPL", "PDPL", "NCA"],
+    frameworks: ["PIPL", "PDPL", "GDPR", "CCPA", "LGPD"],
     severity: "critical",
     title: "Weak encryption claim detected",
     description: `Extracted evidence indicates weak encryption posture (${weakFact.value}).`,
@@ -429,16 +438,15 @@ function ensureWeakEncryptionGap(
   };
 
   assessment.gaps = [newGap, ...assessment.gaps];
-  assessment.jurisdictionScores.china = clampScore(
-    assessment.jurisdictionScores.china - 10
-  );
-  assessment.jurisdictionScores.saudiArabia = clampScore(
-    assessment.jurisdictionScores.saudiArabia - 10
-  );
+  for (const key of Object.keys(assessment.jurisdictionScores)) {
+    const k = key as keyof typeof assessment.jurisdictionScores;
+    assessment.jurisdictionScores[k] = clampScore(
+      assessment.jurisdictionScores[k] - 10
+    );
+  }
+  const vals = Object.values(assessment.jurisdictionScores);
   assessment.overallScore = clampScore(
-    (assessment.jurisdictionScores.china +
-      assessment.jurisdictionScores.saudiArabia) /
-      2
+    vals.reduce((sum, v) => sum + v, 0) / vals.length
   );
   assessment.status = scoreToStatus(assessment.overallScore);
   assessment.riskLevel = inferRiskLevel(assessment);
@@ -483,7 +491,7 @@ function runSynthesizer(assessment: SupplierAssessmentResult): string[] {
     );
 
   plan.push(
-    "Build a jurisdiction-specific evidence register for CAC, SDAIA, and NCA review cycles.",
+    "Build a jurisdiction-specific evidence register for applicable regulators (e.g., CAC, SDAIA, EDPB, ANPD) review cycles.",
     "Introduce quarterly control re-validation against framework updates and supplier architecture changes.",
     "Require legal sign-off for all critical and high findings prior to vendor onboarding approval."
   );
@@ -562,28 +570,23 @@ function buildDbPayload(
   remediationPlan: string[],
   ragControls: RagControl[]
 ) {
-  const frameworkAssessmentRows = [
-    ...CHINA_FRAMEWORKS.map(code => ({
+  const frameworkAssessmentRows = Object.entries(
+    JURISDICTION_FRAMEWORKS
+  ).flatMap(([jurisdiction, codes]) =>
+    codes.map(code => ({
       frameworkCode: code,
-      complianceScore: assessment.jurisdictionScores.china,
+      complianceScore:
+        assessment.jurisdictionScores[
+          jurisdiction as keyof typeof assessment.jurisdictionScores
+        ],
       riskLevel: assessment.riskLevel,
       status: assessment.status,
       findings: assessment.gaps
         .filter(gap => gap.frameworks.includes(code))
         .map(gap => `${gap.code}: ${gap.title}`),
       recommendations: remediationPlan,
-    })),
-    ...SAUDI_FRAMEWORKS.map(code => ({
-      frameworkCode: code,
-      complianceScore: assessment.jurisdictionScores.saudiArabia,
-      riskLevel: assessment.riskLevel,
-      status: assessment.status,
-      findings: assessment.gaps
-        .filter(gap => gap.frameworks.includes(code))
-        .map(gap => `${gap.code}: ${gap.title}`),
-      recommendations: remediationPlan,
-    })),
-  ];
+    }))
+  );
 
   const firstControlByFramework = new Map<string, string>();
   for (const control of ragControls) {

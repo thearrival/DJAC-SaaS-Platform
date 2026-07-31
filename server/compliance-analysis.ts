@@ -174,7 +174,110 @@ export async function getControlCategoryHeatmap() {
     },
   ];
 
-  if (!db) return staticFallback;
+  if (!db) {
+    const extendedFallback = [
+      ...staticFallback,
+      {
+        frameworkId: 5,
+        frameworkCode: "GDPR",
+        frameworkName: "EU GDPR",
+        category: "Consent & Transparency",
+        count: 6,
+      },
+      {
+        frameworkId: 5,
+        frameworkCode: "GDPR",
+        frameworkName: "EU GDPR",
+        category: "Data Subject Rights",
+        count: 5,
+      },
+      {
+        frameworkId: 5,
+        frameworkCode: "GDPR",
+        frameworkName: "EU GDPR",
+        category: "Data Security",
+        count: 4,
+      },
+      {
+        frameworkId: 5,
+        frameworkCode: "GDPR",
+        frameworkName: "EU GDPR",
+        category: "Data Transfer",
+        count: 3,
+      },
+      {
+        frameworkId: 5,
+        frameworkCode: "GDPR",
+        frameworkName: "EU GDPR",
+        category: "Governance",
+        count: 4,
+      },
+      {
+        frameworkId: 6,
+        frameworkCode: "CCPA",
+        frameworkName: "California CCPA",
+        category: "Consumer Rights",
+        count: 5,
+      },
+      {
+        frameworkId: 6,
+        frameworkCode: "CCPA",
+        frameworkName: "California CCPA",
+        category: "Opt-Out",
+        count: 3,
+      },
+      {
+        frameworkId: 6,
+        frameworkCode: "CCPA",
+        frameworkName: "California CCPA",
+        category: "Data Security",
+        count: 2,
+      },
+      {
+        frameworkId: 6,
+        frameworkCode: "CCPA",
+        frameworkName: "California CCPA",
+        category: "Governance",
+        count: 2,
+      },
+      {
+        frameworkId: 7,
+        frameworkCode: "LGPD",
+        frameworkName: "Brazil LGPD",
+        category: "Consent & Transparency",
+        count: 4,
+      },
+      {
+        frameworkId: 7,
+        frameworkCode: "LGPD",
+        frameworkName: "Brazil LGPD",
+        category: "Data Subject Rights",
+        count: 4,
+      },
+      {
+        frameworkId: 7,
+        frameworkCode: "LGPD",
+        frameworkName: "Brazil LGPD",
+        category: "Data Security",
+        count: 3,
+      },
+      {
+        frameworkId: 7,
+        frameworkCode: "LGPD",
+        frameworkName: "Brazil LGPD",
+        category: "Data Transfer",
+        count: 2,
+      },
+      {
+        frameworkId: 7,
+        frameworkCode: "LGPD",
+        frameworkName: "Brazil LGPD",
+        category: "Governance",
+        count: 3,
+      },
+    ];
+    return extendedFallback;
+  }
 
   try {
     const allFrameworks = await db.select().from(frameworks);

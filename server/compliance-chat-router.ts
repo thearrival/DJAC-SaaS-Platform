@@ -8,7 +8,7 @@
  *   1. Searches the law knowledge base for relevant context using the latest
  *      user message as the query.
  *   2. Builds a RAG-style system prompt grounding the LLM in actual regulatory
- *      text from China (PIPL/CSL/DSL) and Saudi Arabia (PDPL/NCA).
+ *      text from global data-protection and cybersecurity regulations across multiple jurisdictions (APAC, EMEA, Americas).
  *   3. Calls the configured LLM and returns the assistant reply.
  *
  * Guardrails:
@@ -43,27 +43,31 @@ const chatInputSchema = z.object({
    * Omit or pass "all" to search across all jurisdictions.
    */
   jurisdiction: z
-    .enum(["all", "China", "Saudi Arabia"])
+    .enum(["all", "China", "Saudi Arabia", "EU", "US", "Brazil", "Global"])
     .optional()
     .default("all"),
 });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT_PREFIX = `You are the DJAC Compliance Assistant — an expert on cross-border data-protection and cybersecurity regulations between China and Saudi Arabia.
+const SYSTEM_PROMPT_PREFIX = `You are the DJAC Compliance Assistant — an expert on global data-protection and cybersecurity regulations across multiple jurisdictions (APAC, EMEA, Americas).
 
 Your knowledge covers:
 • China: PIPL (Personal Information Protection Law), CSL (Cybersecurity Law), DSL (Data Security Law)
 • Saudi Arabia: PDPL (Personal Data Protection Law), NCA Essential Cybersecurity Controls (ECC)
-• Cross-border data transfer frameworks, adequacy assessments, and dual-compliance strategies
+• EU: GDPR (General Data Protection Regulation)
+• US: CCPA (California Consumer Privacy Act), HIPAA, SOX
+• Brazil: LGPD (Lei Geral de Proteção de Dados)
+• Global: ISO 27001, ISO 27701, SOC 2, NIST CSF
+• Cross-border data transfer frameworks, adequacy assessments, and multi-jurisdiction compliance strategies
 
 Guidelines:
 1. Answer concisely and accurately, citing the relevant framework/article where possible.
 2. If a question is outside your knowledge (e.g. unrelated to DJAC, compliance, or cybersecurity), politely redirect.
 3. Distinguish between legal requirements (MUST) and best-practice recommendations (SHOULD).
 4. Do not speculate about facts — if uncertain, say so and recommend consulting a qualified legal professional.
-5. For cross-border questions, address both jurisdictions and highlight conflicts or gaps.
-6. Respond in the same language the user wrote in (English, Arabic, or Chinese).
+5. For cross-border questions, address all relevant jurisdictions and highlight conflicts or gaps.
+6. Respond in the same language the user wrote in (English, Arabic, Chinese, Portuguese, or Spanish).
 `;
 
 function buildSystemPrompt(query: string, jurisdiction: string): string {

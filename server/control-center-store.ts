@@ -1189,7 +1189,14 @@ function buildRegionCoverage(
   vendorRows: Awaited<ReturnType<typeof listAdminVendorSummaries>>,
   assessmentRows: Awaited<ReturnType<typeof listAssessmentSummaries>>
 ) {
-  const trackedRegions = ["China", "Saudi Arabia"];
+  const trackedRegions = [
+    "China",
+    "Saudi Arabia",
+    "EU",
+    "US",
+    "Brazil",
+    "Global",
+  ];
   const coverage = trackedRegions.map(region => ({
     region,
     vendors: 0,
@@ -1246,15 +1253,35 @@ function buildCorridorFlows(
       ...vendor.operatingCountries,
       ...vendor.dataLocations,
     ]);
-    return regions.has("China") && regions.has("Saudi Arabia");
+    return regions.size >= 2;
   }).length;
 
-  return flowWeight > 0
-    ? [
-        { source: "China", target: "Saudi Arabia", weight: flowWeight },
-        { source: "Saudi Arabia", target: "China", weight: flowWeight },
-      ]
-    : [];
+  if (flowWeight === 0) return [];
+
+  const allRegions = Array.from(
+    new Set(
+      vendorRows.flatMap(v => [...v.operatingCountries, ...v.dataLocations])
+    )
+  );
+  const corridors: Array<{ source: string; target: string; weight: number }> =
+    [];
+  for (const source of allRegions) {
+    for (const target of allRegions) {
+      if (source >= target) continue;
+      const pairWeight = vendorRows.filter(
+        v =>
+          (v.operatingCountries.includes(source) ||
+            v.dataLocations.includes(source)) &&
+          (v.operatingCountries.includes(target) ||
+            v.dataLocations.includes(target))
+      ).length;
+      if (pairWeight > 0) {
+        corridors.push({ source, target, weight: pairWeight });
+        corridors.push({ source: target, target: source, weight: pairWeight });
+      }
+    }
+  }
+  return corridors;
 }
 
 export async function getAdminOverview(): Promise<AdminOverview> {

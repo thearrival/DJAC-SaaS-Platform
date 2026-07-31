@@ -34,6 +34,33 @@ describe("Validation - Compliance Framework", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("should validate EU framework", () => {
+    const result = ComplianceFrameworkSchema.safeParse({
+      code: "GDPR",
+      name: "General Data Protection Regulation",
+      country: "EU",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should validate US framework", () => {
+    const result = ComplianceFrameworkSchema.safeParse({
+      code: "CCPA",
+      name: "California Consumer Privacy Act",
+      country: "US",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should validate Brazil framework", () => {
+    const result = ComplianceFrameworkSchema.safeParse({
+      code: "LGPD",
+      name: "Lei Geral de Proteção de Dados",
+      country: "Brazil",
+    });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe("Validation - User Registration", () => {

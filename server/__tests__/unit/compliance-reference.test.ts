@@ -16,18 +16,24 @@ describe("Compliance Reference Data", () => {
     expect(complianceFrameworks.length).toBeGreaterThanOrEqual(10);
   });
 
-  it("should include both China and Saudi Arabia frameworks", () => {
+  it("should include frameworks for all major jurisdictions", () => {
     const countries = new Set(complianceFrameworks.map(f => f.country));
     expect(countries.has("China")).toBe(true);
     expect(countries.has("Saudi Arabia")).toBe(true);
+    expect(countries.has("EU")).toBe(true);
+    expect(countries.has("US")).toBe(true);
+    expect(countries.has("Brazil")).toBe(true);
   });
 
-  it("should include PIPL, CSL, DSL, PDPL frameworks", () => {
+  it("should include PIPL, CSL, DSL, PDPL, GDPR, CCPA, LGPD frameworks", () => {
     const codes = complianceFrameworks.map(f => f.code);
     expect(codes).toContain("PIPL");
     expect(codes).toContain("CSL");
     expect(codes).toContain("DSL");
     expect(codes).toContain("PDPL");
+    expect(codes).toContain("GDPR");
+    expect(codes).toContain("CCPA");
+    expect(codes).toContain("LGPD");
   });
 
   it("each framework should have required fields", () => {

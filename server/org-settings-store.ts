@@ -8,7 +8,15 @@ import { ENV } from "./_core/env";
 import { organizations } from "../drizzle/schema";
 
 type OrgPlan = "free_trial" | "starter" | "professional" | "enterprise";
-type Jurisdiction = "China" | "Saudi Arabia" | "Both" | "Other";
+type Jurisdiction =
+  | "China"
+  | "Saudi Arabia"
+  | "EU"
+  | "US"
+  | "Brazil"
+  | "Global"
+  | "Both"
+  | "Other";
 
 export type OrgProfile = {
   id: number;

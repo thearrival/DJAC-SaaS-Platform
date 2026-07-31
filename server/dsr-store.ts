@@ -65,7 +65,15 @@ export function computeDueDate(
   from: Date = new Date()
 ): Date {
   const d = new Date(from);
-  d.setDate(d.getDate() + (jurisdiction === "China" ? 21 : 30));
+  const days =
+    jurisdiction === "China"
+      ? 21
+      : jurisdiction === "US"
+        ? 45
+        : jurisdiction === "Brazil"
+          ? 15
+          : 30;
+  d.setDate(d.getDate() + days);
   return d;
 }
 
@@ -144,6 +152,78 @@ const MEM_DSRS: DsrRow[] = [
     notes: "Waiting for ID document from requester.",
     createdAt: new Date(_now.getTime() - 10 * 86400000),
     updatedAt: new Date(_now.getTime() - 1 * 86400000),
+  },
+  {
+    id: 5,
+    organizationId: 1,
+    requestType: "access",
+    jurisdiction: "EU",
+    requesterName: "Marie Dubois",
+    requesterEmail: "marie.dubois@example.fr",
+    description:
+      "Access request for all personal data processed under GDPR Article 15.",
+    status: "in_review",
+    priority: "normal",
+    dueDate: computeDueDate("EU", new Date(_now.getTime() - 7 * 86400000)),
+    completedAt: null,
+    assignedToUserId: null,
+    notes: "Identity verified via government ID.",
+    createdAt: new Date(_now.getTime() - 7 * 86400000),
+    updatedAt: new Date(_now.getTime() - 2 * 86400000),
+  },
+  {
+    id: 6,
+    organizationId: 1,
+    requestType: "erasure",
+    jurisdiction: "US",
+    requesterName: "Sarah Johnson",
+    requesterEmail: "s.johnson@example.com",
+    description:
+      "Requesting deletion of personal data as permitted under CCPA Section 1798.105.",
+    status: "received",
+    priority: "high",
+    dueDate: new Date(_now.getTime() + 38 * 86400000),
+    completedAt: null,
+    assignedToUserId: null,
+    notes: null,
+    createdAt: new Date(_now.getTime() - 7 * 86400000),
+    updatedAt: new Date(_now.getTime() - 7 * 86400000),
+  },
+  {
+    id: 7,
+    organizationId: 1,
+    requestType: "rectification",
+    jurisdiction: "Brazil",
+    requesterName: "Carlos Silva",
+    requesterEmail: "carlos.silva@example.br",
+    description:
+      "Requesting correction of personal address data under LGPD Article 18.",
+    status: "pending_info",
+    priority: "normal",
+    dueDate: new Date(_now.getTime() + 10 * 86400000),
+    completedAt: null,
+    assignedToUserId: null,
+    notes: "Awaiting proof of address document.",
+    createdAt: new Date(_now.getTime() - 5 * 86400000),
+    updatedAt: new Date(_now.getTime() - 1 * 86400000),
+  },
+  {
+    id: 8,
+    organizationId: 1,
+    requestType: "portability",
+    jurisdiction: "EU",
+    requesterName: "Giulia Rossi",
+    requesterEmail: "giulia.rossi@example.it",
+    description:
+      "Requesting data portability to transfer records to a new service provider per GDPR Article 20.",
+    status: "completed",
+    priority: "normal",
+    dueDate: computeDueDate("EU", new Date(_now.getTime() - 35 * 86400000)),
+    completedAt: new Date(_now.getTime() - 5 * 86400000),
+    assignedToUserId: null,
+    notes: "Data exported in machine-readable format.",
+    createdAt: new Date(_now.getTime() - 35 * 86400000),
+    updatedAt: new Date(_now.getTime() - 5 * 86400000),
   },
 ];
 

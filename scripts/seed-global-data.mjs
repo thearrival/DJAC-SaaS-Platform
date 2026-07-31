@@ -153,6 +153,17 @@ const GLOBAL_FRAMEWORK_PACKS = [
     authority: "FTC",
   },
   {
+    code: "CCPA",
+    name: "California Consumer Privacy Act",
+    region: "North America",
+    jurisdiction: "United States",
+    category: "privacy",
+    description:
+      "California consumer privacy law for data collection transparency and opt-out rights.",
+    scope: "Organizations collecting personal data of California residents.",
+    authority: "California Privacy Protection Agency (CPPA)",
+  },
+  {
     code: "CMMC",
     name: "Cybersecurity Maturity Model Certification",
     region: "North America",
@@ -473,7 +484,8 @@ const GLOBAL_FRAMEWORK_PACKS = [
     category: "privacy",
     description:
       "Saudi national privacy law for personal data processing and rights.",
-    scope: "Controllers and processors handling personal data in Saudi Arabia.",
+    scope:
+      "Controllers and processors handling personal data in applicable jurisdiction.",
     authority: "SDAIA",
   },
   {
@@ -483,7 +495,7 @@ const GLOBAL_FRAMEWORK_PACKS = [
     jurisdiction: "Saudi Arabia",
     category: "cybersecurity",
     description:
-      "Mandatory baseline cybersecurity controls for Saudi entities.",
+      "Mandatory baseline cybersecurity controls for regulated entities.",
     scope: "Government, critical sectors, and regulated organizations.",
     authority: "NCA",
   },
@@ -495,7 +507,7 @@ const GLOBAL_FRAMEWORK_PACKS = [
     category: "cloud security",
     description:
       "Cloud-specific cybersecurity controls and assurance requirements.",
-    scope: "Cloud service providers and tenants in KSA.",
+    scope: "Cloud service providers and tenants in applicable jurisdiction.",
     authority: "NCA",
   },
   {
@@ -517,7 +529,7 @@ const GLOBAL_FRAMEWORK_PACKS = [
     category: "cybersecurity",
     description:
       "Alias for the Saudi cybersecurity control baseline used in organizational mapping.",
-    scope: "Regulated Saudi organizations.",
+    scope: "Regulated organizations.",
     authority: "NCA",
   },
   {
@@ -619,9 +631,8 @@ const GLOBAL_FRAMEWORK_PACKS = [
     region: "Asia-Pacific",
     jurisdiction: "China",
     category: "cybersecurity",
-    description:
-      "China's multi-level protection scheme for information systems.",
-    scope: "Networked information systems in China.",
+    description: "Multi-level protection scheme for information systems.",
+    scope: "Networked information systems in applicable jurisdiction.",
     authority: "MPS / CAC",
   },
   {
@@ -630,7 +641,7 @@ const GLOBAL_FRAMEWORK_PACKS = [
     region: "Asia-Pacific",
     jurisdiction: "China",
     category: "cryptography",
-    description: "Chinese cryptography governance and product requirements.",
+    description: "Cryptography governance and product requirements.",
     scope: "Cryptography products and regulated users.",
     authority: "CAC / State Cryptography Administration",
   },
@@ -641,8 +652,8 @@ const GLOBAL_FRAMEWORK_PACKS = [
     jurisdiction: "China",
     category: "ai governance",
     description:
-      "Chinese requirements for generative AI, algorithmic recommendation, and AI governance.",
-    scope: "AI providers and deployers in China.",
+      "Requirements for generative AI, algorithmic recommendation, and AI governance.",
+    scope: "AI providers and deployers in applicable jurisdiction.",
     authority: "CAC",
   },
   {
@@ -1409,7 +1420,7 @@ async function seed() {
         target: "PDPL-KSA",
         type: "coordination",
         description:
-          "Both regulate personal data rights but PDPL-KSA has stricter cross-border rules.",
+          "Both regulate personal data rights with differing cross-border requirements.",
         severity: "high",
         riskLevel: "high",
         mitigation:

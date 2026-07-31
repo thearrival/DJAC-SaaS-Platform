@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Scheduled Report Delivery
- * ─────────────────────────────────────────────────────────────────────────────
+ * â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
  * Automatically generates and emails compliance reports for each active
  * organization on two cadences:
  *
- *   • Weekly  — every Monday at or after 07:00 UTC
- *   • Monthly — on the 1st of each month at or after 07:00 UTC
+ *   â€¢ Weekly  â€” every Monday at or after 07:00 UTC
+ *   â€¢ Monthly â€” on the 1st of each month at or after 07:00 UTC
  *
  * Runs every 6 hours. Uses an in-process dedup Set (keyed by orgId + ISO week/month)
  * to prevent duplicate sends within the same server lifetime.
@@ -40,11 +40,31 @@ function monthKey(d: Date): string {
 
 function mapJurisdiction(
   raw: string | null | undefined
-): "Saudi Arabia" | "China" | "both" {
+): "Saudi Arabia" | "China" | "EU" | "US" | "Brazil" | "Global" | "both" {
   if (!raw) return "both";
   const lower = raw.toLowerCase();
-  if (lower.includes("saudi") || lower.includes("ksa")) return "Saudi Arabia";
-  if (lower.includes("china") || lower.includes("cn")) return "China";
+  if (
+    lower.includes("saudi") ||
+    lower.includes("ksa") ||
+    lower.includes("pdpl")
+  )
+    return "Saudi Arabia";
+  if (lower.includes("china") || lower.includes("cn") || lower.includes("pipl"))
+    return "China";
+  if (
+    lower.includes("eu") ||
+    lower.includes("europe") ||
+    lower.includes("gdpr")
+  )
+    return "EU";
+  if (
+    lower.includes("us") ||
+    lower.includes("ccpa") ||
+    lower.includes("america")
+  )
+    return "US";
+  if (lower.includes("brazil") || lower.includes("lgpd")) return "Brazil";
+  if (lower.includes("Global") || lower.includes("world")) return "Global";
   return "both";
 }
 
@@ -54,13 +74,13 @@ async function runScheduledReports(): Promise<void> {
   const dayOfMonth = now.getUTCDate();
   const hourUtc = now.getUTCHours();
 
-  const isWeeklyTrigger = dayOfWeek === 1 && hourUtc >= 7; // Monday ≥07:00 UTC
-  const isMonthlyTrigger = dayOfMonth === 1 && hourUtc >= 7; // 1st of month ≥07:00 UTC
+  const isWeeklyTrigger = dayOfWeek === 1 && hourUtc >= 7; // Monday â‰¥07:00 UTC
+  const isMonthlyTrigger = dayOfMonth === 1 && hourUtc >= 7; // 1st of month â‰¥07:00 UTC
 
   if (!isWeeklyTrigger && !isMonthlyTrigger) return;
 
   const db = await getDb();
-  if (!db) return; // no DB in this runtime — skip silently
+  if (!db) return; // no DB in this runtime â€” skip silently
 
   const activeOrgs = await db
     .select({
@@ -114,7 +134,14 @@ async function sendOrgReport(
   orgId: number,
   orgName: string,
   email: string,
-  jurisdiction: "Saudi Arabia" | "China" | "both",
+  jurisdiction:
+    | "Saudi Arabia"
+    | "China"
+    | "EU"
+    | "US"
+    | "Brazil"
+    | "Global"
+    | "both",
   locale: "en" | "ar" | "zh",
   cadence: "weekly" | "monthly"
 ): Promise<void> {

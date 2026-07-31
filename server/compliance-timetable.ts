@@ -2,6 +2,8 @@ export type ComplianceFrequency =
   | "immediate"
   | "within_2h"
   | "within_24h"
+  | "within_30d"
+  | "within_45d"
   | "within_48h"
   | "within_72h"
   | "monthly"
@@ -29,6 +31,9 @@ export type ComplianceComparisonRow = {
   topic: string;
   saudiArabia: string;
   china: string;
+  eu?: string;
+  us?: string;
+  brazil?: string;
   notes: string;
 };
 
@@ -302,6 +307,184 @@ const COMPLIANCE_OBLIGATIONS: ComplianceObligation[] = [
       "SDAIA Implementing Regulations (2023) Article 6",
     ],
   },
+
+  // ── EU / GDPR ─────────────────────────────────────────────────
+  {
+    id: "eu-gdpr-right-to-erasure",
+    country: "EU",
+    framework: "GDPR",
+    requirement: "Right to Erasure (Right to be Forgotten)",
+    frequency: "within_30d",
+    authority: "EDPB / National DPA",
+    riskLevel: "high",
+    description:
+      "Under GDPR Art. 17, data subjects have the right to obtain erasure of personal data without undue delay. Controllers must respond within 30 days (extendable to 60 for complex requests).",
+    references: ["GDPR Art. 17", "EDPB Guidelines on Right to Erasure"],
+  },
+  {
+    id: "eu-gdpr-dpo-appointment",
+    country: "EU",
+    framework: "GDPR",
+    requirement: "Data Protection Officer (DPO) Appointment",
+    frequency: "ongoing",
+    authority: "EDPB / National DPA",
+    riskLevel: "high",
+    description:
+      "Under GDPR Art. 37, public authorities, organizations engaged in large-scale systematic monitoring, or large-scale processing of special categories must appoint a DPO. The DPO must be independent and report to highest management.",
+    references: ["GDPR Art. 37-39", "EDPB DPO Guidelines"],
+  },
+  {
+    id: "eu-gdpr-breach-notification",
+    country: "EU",
+    framework: "GDPR",
+    requirement: "Personal Data Breach Notification",
+    frequency: "within_72h",
+    authority: "EDPB / National DPA",
+    riskLevel: "critical",
+    description:
+      "Under GDPR Art. 33, controllers must notify the supervisory authority of a personal data breach within 72 hours of becoming aware. Data subjects must be notified under Art. 34 if high risk to rights and freedoms.",
+    references: ["GDPR Art. 33-34", "EDPB Guidelines on Breach Notification"],
+  },
+  {
+    id: "eu-gdpr-dpa-requirement",
+    country: "EU",
+    framework: "GDPR",
+    requirement: "Data Processing Agreement (DPA) in Place",
+    frequency: "ongoing",
+    authority: "EDPB / National DPA",
+    riskLevel: "high",
+    description:
+      "Under GDPR Art. 28, controllers must enter into a written DPA with each processor. The DPA must specify subject-matter, duration, nature and purpose of processing, data types, and processor obligations.",
+    references: ["GDPR Art. 28", "EDPB Guidelines on Processor Relationships"],
+  },
+  {
+    id: "eu-gdpr-cross-border-transfer",
+    country: "EU",
+    framework: "GDPR",
+    requirement: "Cross-Border Transfer Compliance (SCCs / Adequacy)",
+    frequency: "ongoing",
+    authority: "EDPB / National DPA",
+    riskLevel: "critical",
+    description:
+      "Transfers to third countries require an adequacy decision (Art. 45), SCCs (Art. 46), BCRs, or derogations (Art. 49). Transfer Impact Assessments required for SCC-based transfers. Schrems II ruling requires case-by-case assessment.",
+    references: [
+      "GDPR Art. 44-49",
+      "Schrems II Decision",
+      "EDPB Recommendations on Supplementary Measures",
+    ],
+  },
+
+  // ── US / CCPA + HIPAA ──────────────────────────────────────────
+  {
+    id: "us-ccpa-right-to-know",
+    country: "US",
+    framework: "CCPA",
+    requirement: "Consumer Right to Know",
+    frequency: "within_45d",
+    authority: "California AG / FTC",
+    riskLevel: "high",
+    description:
+      "Under CCPA, consumers have the right to request disclosure of categories and specific pieces of personal information collected. Businesses must respond within 45 days (extendable to 90 with notice).",
+    references: ["CCPA Civil Code §1798.110", "CCPA Regulations"],
+  },
+  {
+    id: "us-ccpa-right-to-delete",
+    country: "US",
+    framework: "CCPA",
+    requirement: "Consumer Right to Delete Personal Information",
+    frequency: "within_45d",
+    authority: "California AG / FTC",
+    riskLevel: "high",
+    description:
+      "Under CCPA, consumers may request deletion of personal information collected. Businesses must delete and direct service providers to delete unless statutory exceptions apply.",
+    references: ["CCPA Civil Code §1798.105", "CPRA Amendments"],
+  },
+  {
+    id: "us-ccpa-opt-out",
+    country: "US",
+    framework: "CCPA",
+    requirement: "Right to Opt-Out of Sale or Sharing",
+    frequency: "ongoing",
+    authority: "California AG / FTC",
+    riskLevel: "medium",
+    description:
+      "Businesses must provide a clear 'Do Not Sell or Share My Personal Information' link. Opt-out requests must be honored for at least 12 months. Must not discriminate against consumers who exercise rights.",
+    references: ["CCPA Civil Code §1798.120", "CCPA Regulations §999.315"],
+  },
+  {
+    id: "us-ccpa-non-discrimination",
+    country: "US",
+    framework: "CCPA",
+    requirement: "Non-Discrimination for Exercising Rights",
+    frequency: "ongoing",
+    authority: "California AG / FTC",
+    riskLevel: "medium",
+    description:
+      "Businesses may not discriminate against consumers for exercising CCPA rights including denying goods, charging different prices, or providing different quality. Financial incentives permitted with notice and consent.",
+    references: ["CCPA Civil Code §1798.125"],
+  },
+
+  // ── Brazil / LGPD ──────────────────────────────────────────────
+  {
+    id: "br-lgpd-consent",
+    country: "Brazil",
+    framework: "LGPD",
+    requirement: "Consent Requirements for Processing",
+    frequency: "ongoing",
+    authority: "ANPD",
+    riskLevel: "high",
+    description:
+      "Under LGPD Art. 8, consent must be freely given, specific, informed, and unambiguous. Consent for sensitive data (Art. 11) requires specific and prominent consent. Processing must cease upon withdrawal.",
+    references: ["LGPD Art. 7-8", "LGPD Art. 11", "ANPD Guidelines"],
+  },
+  {
+    id: "br-lgpd-dpo",
+    country: "Brazil",
+    framework: "LGPD",
+    requirement: "Data Protection Officer (DPO) Appointment",
+    frequency: "ongoing",
+    authority: "ANPD",
+    riskLevel: "high",
+    description:
+      "Under LGPD Art. 41, the controller must appoint a DPO. The DPO handles complaints, receives communications from ANPD, trains staff, and executes compliance activities. Identity and contact must be publicly published.",
+    references: ["LGPD Art. 41", "ANPD DPO Guidelines"],
+  },
+  {
+    id: "br-lgpd-breach-notification",
+    country: "Brazil",
+    framework: "LGPD",
+    requirement: "Security Incident Notification to ANPD",
+    frequency: "within_72h",
+    authority: "ANPD",
+    riskLevel: "critical",
+    description:
+      "Under LGPD Art. 48, controllers must notify ANPD of any security incident that may create risk or relevant damage within a reasonable time. Affected data subjects must also be notified if significant risk.",
+    references: ["LGPD Art. 48", "ANPD Incident Reporting Regulations"],
+  },
+  {
+    id: "br-lgpd-international-transfer",
+    country: "Brazil",
+    framework: "LGPD",
+    requirement: "International Transfer Compliance",
+    frequency: "ongoing",
+    authority: "ANPD",
+    riskLevel: "high",
+    description:
+      "International transfers under LGPD Art. 33 require adequacy decision by ANPD, SCCs, BCRs, or consent. Organizations must assess and document recipient country data protection levels.",
+    references: ["LGPD Art. 33-36", "ANPD International Transfer Guidelines"],
+  },
+  {
+    id: "br-lgpd-data-subject-rights",
+    country: "Brazil",
+    framework: "LGPD",
+    requirement: "Data Subject Rights Implementation",
+    frequency: "ongoing",
+    authority: "ANPD",
+    riskLevel: "medium",
+    description:
+      "Under LGPD Art. 18, data subjects have rights to confirmation of processing, access, correction, anonymization, portability, deletion, and information about shared entities. Controllers must respond within 15 days.",
+    references: ["LGPD Art. 18-22", "ANPD Enforcement Guidelines"],
+  },
 ];
 
 const COMPARISON_TABLE: ComplianceComparisonRow[] = [
@@ -419,6 +602,57 @@ const COMPARISON_TABLE: ComplianceComparisonRow[] = [
     china: "CAC/TC260 cloud security standards; MLPS 2.0 cloud extension",
     notes:
       "Both countries mandate cloud-specific security frameworks for service providers.",
+  },
+  {
+    topic: "Breach Notification Timeline",
+    saudiArabia: "72 hours to SDAIA",
+    china: "2 hours initial + 24 hours detailed",
+    eu: "72 hours to DPA (Art. 33)",
+    us: "Varies by state (CA: no fixed timeline; HIPAA: 60 days)",
+    brazil: "Reasonable time per ANPD determination (Art. 48)",
+    notes:
+      "EU GDPR and Saudi PDPL both use 72-hour benchmark; China strictest at 2h.",
+  },
+  {
+    topic: "Data Protection Officer Requirement",
+    saudiArabia: "Required for large-scale/sensitive data processing",
+    china: "PIPO required above regulatory thresholds",
+    eu: "Required for public bodies, large-scale monitoring, special categories (Art. 37)",
+    us: "Not mandated by CCPA; required under HIPAA for covered entities",
+    brazil: "Required for controllers (Art. 41)",
+    notes:
+      "DPO/PIPO requirement is common across all regimes except US federal law.",
+  },
+  {
+    topic: "Cross-Border Transfer Mechanism",
+    saudiArabia: "SDAIA approval, SCCs, or adequacy",
+    china: "CAC security assessment, standard contract, or certification",
+    eu: "Adequacy decision, SCCs, BCRs, or derogations (Art. 44-49)",
+    us: "No federal restriction; state laws vary (CCPA does not restrict transfers)",
+    brazil: "ANPD adequacy, SCCs, BCRs, or specific consent (Art. 33)",
+    notes:
+      "EU and Brazil share similar transfer frameworks; China most restrictive.",
+  },
+  {
+    topic: "Right to Erasure / Deletion",
+    saudiArabia: "Right to deletion under PDPL",
+    china: "Right to deletion under PIPL Art. 47",
+    eu: "Right to erasure under GDPR Art. 17",
+    us: "Right to delete under CCPA (exceptions apply)",
+    brazil: "Right to deletion under LGPD Art. 18",
+    notes:
+      "All five jurisdictions provide right to erasure/deletion with varying exceptions.",
+  },
+  {
+    topic: "Sensitive Data Definition",
+    saudiArabia: "Health, biometric, financial (PDPL)",
+    china: "Biometric, health, financial, location, minors under 14 (PIPL)",
+    eu: "Health, biometric, genetic, political, religious, sexual orientation (Art. 9)",
+    us: "Health (HIPAA), biometric (state laws), financial (GLBA)",
+    brazil:
+      "Health, biometric, genetic, political, religious, sexual orientation (Art. 11)",
+    notes:
+      "EU and Brazil definitions nearly identical; China includes location and minors data.",
   },
 ];
 
