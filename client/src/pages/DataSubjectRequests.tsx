@@ -77,7 +77,29 @@ type RequestType =
   | "objection"
   | "explanation";
 
-type Jurisdiction = "China" | "Saudi Arabia" | "EU" | "US" | "Brazil" | "Other";
+type Jurisdiction =
+  | "China"
+  | "Saudi Arabia"
+  | "EU"
+  | "US"
+  | "Brazil"
+  | "Other"
+  | "United Kingdom"
+  | "Canada"
+  | "Australia"
+  | "Japan"
+  | "South Korea"
+  | "Singapore"
+  | "India"
+  | "South Africa"
+  | "Mexico"
+  | "United Arab Emirates"
+  | "Qatar"
+  | "Kuwait"
+  | "Bahrain"
+  | "Oman"
+  | "Jordan"
+  | "Egypt";
 
 type Status =
   | "received"
@@ -150,6 +172,22 @@ const JURISDICTION_COLOURS: Record<Jurisdiction, string> = {
   US: "bg-purple-500/10 text-purple-500 border-purple-500/30",
   Brazil: "bg-yellow-500/10 text-yellow-500 border-yellow-500/30",
   Other: "bg-slate-500/10 text-slate-400 border-slate-500/30",
+  "United Kingdom": "bg-blue-500/10 text-blue-500 border-blue-500/30",
+  Canada: "bg-red-500/10 text-red-400 border-red-500/30",
+  Australia: "bg-green-500/10 text-green-500 border-green-500/30",
+  Japan: "bg-rose-500/10 text-rose-500 border-rose-500/30",
+  "South Korea": "bg-blue-500/10 text-blue-500 border-blue-500/30",
+  Singapore: "bg-red-500/10 text-red-400 border-red-500/30",
+  India: "bg-orange-500/10 text-orange-500 border-orange-500/30",
+  "South Africa": "bg-green-500/10 text-green-500 border-green-500/30",
+  Mexico: "bg-lime-500/10 text-lime-500 border-lime-500/30",
+  "United Arab Emirates": "bg-green-500/10 text-green-500 border-green-500/30",
+  Qatar: "bg-teal-500/10 text-teal-500 border-teal-500/30",
+  Kuwait: "bg-teal-500/10 text-teal-500 border-teal-500/30",
+  Bahrain: "bg-teal-500/10 text-teal-500 border-teal-500/30",
+  Oman: "bg-teal-500/10 text-teal-500 border-teal-500/30",
+  Jordan: "bg-amber-500/10 text-amber-500 border-amber-500/30",
+  Egypt: "bg-amber-500/10 text-amber-500 border-amber-500/30",
 };
 
 const REQUEST_TYPES: RequestType[] = [
@@ -178,6 +216,22 @@ const JURISDICTIONS: Jurisdiction[] = [
   "US",
   "Brazil",
   "Other",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Japan",
+  "South Korea",
+  "Singapore",
+  "India",
+  "South Africa",
+  "Mexico",
+  "United Arab Emirates",
+  "Qatar",
+  "Kuwait",
+  "Bahrain",
+  "Oman",
+  "Jordan",
+  "Egypt",
 ];
 const PRIORITIES: Priority[] = ["normal", "high", "urgent"];
 
@@ -247,6 +301,15 @@ function jurisdictionDeadline(j: Jurisdiction): string {
   if (j === "EU") return "30 calendar days (GDPR)";
   if (j === "US") return "45 calendar days (CCPA)";
   if (j === "Brazil") return "15 working days (LGPD)";
+  if (j === "United Kingdom") return "1 calendar month (UK GDPR)";
+  if (j === "Canada") return "30 days (PIPEDA)";
+  if (j === "Australia") return "30 days (APP 12)";
+  if (j === "Japan") return "Reasonable time (APPI)";
+  if (j === "South Korea") return "10 days (PIPA)";
+  if (j === "Singapore") return "Reasonable time (PDPA)";
+  if (j === "India") return "Reasonable time (DPDP)";
+  if (j === "South Africa") return "Reasonable time (POPIA)";
+  if (j === "Mexico") return "15 working days (LFPDPPP)";
   return "30 days";
 }
 

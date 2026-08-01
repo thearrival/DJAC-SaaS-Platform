@@ -219,6 +219,264 @@ export const complianceFrameworks = [
     enforcementAuthority: "Autoridade Nacional de Proteção de Dados (ANPD)",
     maxPenalty: "Up to 2% of revenue in Brazil (capped at BRL 50M)",
   },
+  {
+    code: "ISO-27001",
+    name: "ISO/IEC 27001",
+    country: "Global",
+    description:
+      "International information security management system (ISMS) standard for establishing, implementing, and continuously improving security controls.",
+    scope: "Organizations of all sizes across sectors with an ISMS program.",
+    enforcementAuthority: "ISO/IEC / accredited certification bodies",
+    maxPenalty:
+      "Certification non-conformities require corrective action; no statutory fine",
+  },
+  {
+    code: "ISO-27701",
+    name: "ISO/IEC 27701",
+    country: "Global",
+    description:
+      "Privacy information management extension to ISO 27001/27002 covering PII controllers and processors.",
+    scope: "Organizations operating privacy governance programs.",
+    enforcementAuthority: "ISO/IEC / accredited certification bodies",
+    maxPenalty:
+      "Certification non-conformities require corrective action; no statutory fine",
+  },
+  {
+    code: "SOC2",
+    name: "SOC 2",
+    country: "US",
+    description:
+      "AICPA attestation framework for service organization controls over security, availability, processing integrity, confidentiality, and privacy.",
+    scope: "Service organizations and their technology infrastructure.",
+    enforcementAuthority: "AICPA / CPA firms",
+    maxPenalty: "No statutory fine; attestation report qualification for gaps",
+  },
+  {
+    code: "NIST-CSF-2",
+    name: "NIST Cybersecurity Framework 2.0",
+    country: "US",
+    description:
+      "Voluntary framework for improving cybersecurity posture through Govern, Identify, Protect, Detect, Respond, and Recover functions.",
+    scope: "Organizations of all sizes across sectors.",
+    enforcementAuthority: "NIST",
+    maxPenalty: "No statutory fine; referenced by US regulatory regimes",
+  },
+  {
+    code: "HIPAA",
+    name: "Health Insurance Portability and Accountability Act",
+    country: "US",
+    description:
+      "US federal law establishing privacy and security standards for protected health information.",
+    scope: "Covered entities and business associates handling PHI.",
+    enforcementAuthority: "HHS Office for Civil Rights (OCR)",
+    maxPenalty: "Up to USD 1.9M per calendar year per violation category",
+  },
+  {
+    code: "PCI-DSS",
+    name: "Payment Card Industry Data Security Standard",
+    country: "Global",
+    description:
+      "Contractual security standard for organizations that store, process, or transmit cardholder data.",
+    scope:
+      "Merchants, processors, acquirers, and issuers in the card payment ecosystem.",
+    enforcementAuthority: "PCI Security Standards Council",
+    maxPenalty:
+      "Fines, card brand penalties, and termination of processing rights",
+  },
+  {
+    code: "NIS2",
+    name: "NIS2 Directive",
+    country: "EU",
+    description:
+      "EU directive strengthening cybersecurity obligations for essential and important entities, including incident reporting and supply-chain security.",
+    scope: "Essential and important entities across the EU.",
+    enforcementAuthority: "ENISA / national competent authorities",
+    maxPenalty: "Up to EUR 10M or 2% of global turnover",
+  },
+  {
+    code: "DORA",
+    name: "Digital Operational Resilience Act",
+    country: "EU",
+    description:
+      "EU regulation for ICT risk management, incident reporting, digital operational resilience testing, and third-party risk in the financial sector.",
+    scope:
+      "EU financial entities and their critical ICT third-party providers.",
+    enforcementAuthority: "European Supervisory Authorities",
+    maxPenalty: "Up to 2% of annual global turnover",
+  },
+  {
+    code: "EU-AI-ACT",
+    name: "EU AI Act",
+    country: "EU",
+    description:
+      "Risk-based regulation of artificial intelligence systems, imposing transparency, governance, and conformity obligations by AI risk class.",
+    scope: "AI providers, deployers, importers, and distributors in the EU.",
+    enforcementAuthority: "European Commission / national authorities",
+    maxPenalty: "Up to EUR 35M or 7% of global turnover",
+  },
+  {
+    code: "UK-GDPR",
+    name: "UK GDPR",
+    country: "United Kingdom",
+    description:
+      "UK-retained data protection framework aligned with GDPR, enforced by the Information Commissioner's Office.",
+    scope: "UK data controllers and processors.",
+    enforcementAuthority: "ICO (Information Commissioner's Office)",
+    maxPenalty: "Up to GBP 17.5M or 4% of global turnover",
+  },
+  {
+    code: "PIPEDA",
+    name: "Personal Information Protection and Electronic Documents Act",
+    country: "Canada",
+    description:
+      "Canadian private-sector privacy law governing collection, use, and disclosure of personal information.",
+    scope: "Private-sector organizations in Canada.",
+    enforcementAuthority: "Office of the Privacy Commissioner of Canada",
+    maxPenalty: "Up to CAD 100K per violation plus court-ordered damages",
+  },
+  {
+    code: "PRIVACY-ACT-AU",
+    name: "Australian Privacy Act",
+    country: "Australia",
+    description:
+      "Australian privacy framework establishing Australian Privacy Principles (APPs) for handling personal information.",
+    scope: "Australian organizations and entities with APP obligations.",
+    enforcementAuthority:
+      "Office of the Australian Information Commissioner (OAIC)",
+    maxPenalty: "Up to AUD 50M or 30% of turnover",
+  },
+  {
+    code: "APPI",
+    name: "Act on the Protection of Personal Information",
+    country: "Japan",
+    description:
+      "Japanese personal data protection law covering acquisition, use, and cross-border transfer of personal information.",
+    scope: "Business operators handling personal information in Japan.",
+    enforcementAuthority: "Personal Information Protection Commission (PPC)",
+    maxPenalty:
+      "Up to JPY 100M for violations; orders and administrative measures",
+  },
+  {
+    code: "PIPA-KR",
+    name: "Personal Information Protection Act",
+    country: "South Korea",
+    description:
+      "South Korean comprehensive privacy law covering personal information processing, rights, and cross-border transfers.",
+    scope: "Personal information controllers and processors in Korea.",
+    enforcementAuthority: "PIPC (Personal Information Protection Commission)",
+    maxPenalty: "Up to 3% of revenue or KRW 1B per violation",
+  },
+  {
+    code: "PDPA-SG",
+    name: "Singapore Personal Data Protection Act",
+    country: "Singapore",
+    description:
+      "Singapore privacy law governing collection, use, and disclosure of personal data, including breach notification and cross-border transfer rules.",
+    scope: "Organizations processing personal data in Singapore.",
+    enforcementAuthority: "PDPC (Personal Data Protection Commission)",
+    maxPenalty: "Up to 10% of annual turnover or SGD 1M",
+  },
+  {
+    code: "DPDP-IN",
+    name: "Digital Personal Data Protection Act",
+    country: "India",
+    description:
+      "India's digital personal data protection framework establishing notice, consent, purpose limitation, and data subject rights obligations.",
+    scope: "Data fiduciaries and processors in India.",
+    enforcementAuthority: "Data Protection Board of India",
+    maxPenalty: "Up to INR 250 Cr per breach",
+  },
+  {
+    code: "POPIA",
+    name: "Protection of Personal Information Act",
+    country: "South Africa",
+    description:
+      "South African privacy law governing lawful processing, conditions, and rights relating to personal information.",
+    scope: "Responsible parties and operators in South Africa.",
+    enforcementAuthority: "Information Regulator (South Africa)",
+    maxPenalty: "Up to ZAR 10M or imprisonment for serious violations",
+  },
+  {
+    code: "MEXICO-DPA",
+    name: "Mexico Federal Data Protection Law",
+    country: "Mexico",
+    description:
+      "Mexican federal privacy law (LFPDPPP) governing processing of personal data by private parties.",
+    scope: "Private-sector entities in Mexico.",
+    enforcementAuthority: "INAI",
+    maxPenalty: "Up to MXN 16M per violation",
+  },
+  {
+    code: "TH-PDPA",
+    name: "Thailand Personal Data Protection Act",
+    country: "Thailand",
+    description:
+      "Thai data protection law covering lawful basis, rights, cross-border transfers, and breach notification.",
+    scope: "Organizations handling personal data in Thailand.",
+    enforcementAuthority: "PDPC Thailand",
+    maxPenalty: "Up to THB 5M plus administrative fines",
+  },
+  {
+    code: "ID-PDP",
+    name: "Indonesia Personal Data Protection Law",
+    country: "Indonesia",
+    description:
+      "Indonesian personal data protection framework (UU PDP) governing processing, rights, and transfers.",
+    scope: "Controllers and processors in Indonesia.",
+    enforcementAuthority: "Ministry of Communication and Digital Affairs",
+    maxPenalty: "Up to 2% of annual revenue or IDR 50B",
+  },
+  {
+    code: "MY-PDPA",
+    name: "Malaysia Personal Data Protection Act",
+    country: "Malaysia",
+    description:
+      "Malaysian personal data protection principles covering consent, purpose, security, and retention.",
+    scope: "Commercial organizations processing personal data in Malaysia.",
+    enforcementAuthority: "Department of Personal Data Protection (JPDP)",
+    maxPenalty: "Up to MYR 1M or imprisonment",
+  },
+  {
+    code: "PH-DPA",
+    name: "Philippines Data Privacy Act",
+    country: "Philippines",
+    description:
+      "Philippine privacy law (RA 10173) governing processing of personal information and breach notification.",
+    scope:
+      "Personal information controllers and processors in the Philippines.",
+    enforcementAuthority: "National Privacy Commission (NPC)",
+    maxPenalty: "Up to PHP 5M or imprisonment",
+  },
+  {
+    code: "VN-PDPD",
+    name: "Vietnam Personal Data Protection Decree",
+    country: "Vietnam",
+    description:
+      "Vietnamese decree governing personal data processing, rights, and cross-border data transfers.",
+    scope: "Organizations processing personal data in Vietnam.",
+    enforcementAuthority: "MPS / MIC",
+    maxPenalty: "Up to 5% of revenue for violations",
+  },
+  {
+    code: "NDPA-NG",
+    name: "Nigeria Data Protection Act",
+    country: "Nigeria",
+    description:
+      "Nigerian data protection law establishing obligations for data controllers and processors.",
+    scope: "Data controllers and processors in Nigeria.",
+    enforcementAuthority: "NDPC (Nigeria Data Protection Commission)",
+    maxPenalty: "Up to 2% of annual gross revenue or NGN 10M",
+  },
+  {
+    code: "KENYA-DPA",
+    name: "Kenya Data Protection Act",
+    country: "Kenya",
+    description:
+      "Kenyan data protection law governing processing, rights, and transfer of personal data.",
+    scope: "Data controllers and processors in Kenya.",
+    enforcementAuthority: "ODPC (Office of the Data Protection Commissioner)",
+    maxPenalty: "Up to KES 5M or 1% of turnover",
+  },
 ];
 
 export const complianceControls = [
@@ -758,6 +1016,588 @@ export const complianceControls = [
       "Complete adequacy, contractual, or regulator-approved transfer mechanisms.",
     applicability: "Entities transferring personal data cross-border.",
   },
+
+  // ISO 27001
+  {
+    frameworkCode: "ISO-27001",
+    controlCode: "ISO-27001-1",
+    controlName: "ISMS Governance and Scope",
+    category: "Governance",
+    description:
+      "Establish an information security management system with defined scope, policy, and leadership commitment.",
+    requirement:
+      "Define ISMS scope, security policy, roles, and continuous improvement processes.",
+    applicability:
+      "Organizations seeking or maintaining ISO 27001 certification.",
+  },
+  {
+    frameworkCode: "ISO-27001",
+    controlCode: "ISO-27001-2",
+    controlName: "Risk Assessment and Treatment",
+    category: "Risk Management",
+    description:
+      "Conduct systematic information security risk assessments and select treatment options.",
+    requirement:
+      "Document risk assessment methodology, results, and risk treatment plans (SoA).",
+    applicability: "All ISMS scoped organizations.",
+  },
+  {
+    frameworkCode: "ISO-27001",
+    controlCode: "ISO-27001-3",
+    controlName: "Annex A Control Implementation",
+    category: "Technical Controls",
+    description:
+      "Implement applicable Annex A controls across organizational, human, physical, and technical domains.",
+    requirement:
+      "Maintain a Statement of Applicability mapping Annex A controls to implementation evidence.",
+    applicability: "All ISMS scoped organizations.",
+  },
+  {
+    frameworkCode: "ISO-27001",
+    controlCode: "ISO-27001-4",
+    controlName: "Internal Audit and Management Review",
+    category: "Audit",
+    description:
+      "Perform planned internal audits and management reviews of the ISMS.",
+    requirement:
+      "Conduct audits at planned intervals and review ISMS performance with management.",
+    applicability: "All ISMS scoped organizations.",
+  },
+
+  // SOC 2
+  {
+    frameworkCode: "SOC2",
+    controlCode: "SOC2-1",
+    controlName: "Trust Services Criteria Coverage",
+    category: "Assurance",
+    description:
+      "Design controls covering security, availability, processing integrity, confidentiality, and privacy criteria.",
+    requirement:
+      "Map implemented controls to applicable Trust Services Criteria (TSC).",
+    applicability: "Service organizations undergoing SOC 2 attestation.",
+  },
+  {
+    frameworkCode: "SOC2",
+    controlCode: "SOC2-2",
+    controlName: "Control Environment and Monitoring",
+    category: "Governance",
+    description:
+      "Maintain an effective control environment with risk assessment, information, communication, and monitoring activities.",
+    requirement:
+      "Document control environment, communication processes, and ongoing monitoring evidence.",
+    applicability: "Service organizations undergoing SOC 2 attestation.",
+  },
+  {
+    frameworkCode: "SOC2",
+    controlCode: "SOC2-3",
+    controlName: "Evidence Collection for Attestation",
+    category: "Audit",
+    description:
+      "Collect and retain evidence supporting controls for the audit period.",
+    requirement:
+      "Retain audit-ready evidence for the full examination period and support exception responses.",
+    applicability: "Service organizations undergoing SOC 2 attestation.",
+  },
+
+  // NIST CSF 2.0
+  {
+    frameworkCode: "NIST-CSF-2",
+    controlCode: "NIST-CSF-2-1",
+    controlName: "Govern Function Controls",
+    category: "Governance",
+    description:
+      "Establish organizational cybersecurity governance, risk management strategy, and supply-chain risk management.",
+    requirement:
+      "Define governance structures, roles, and risk appetite aligned to the CSF Govern function.",
+    applicability: "Organizations adopting NIST CSF 2.0.",
+  },
+  {
+    frameworkCode: "NIST-CSF-2",
+    controlCode: "NIST-CSF-2-2",
+    controlName: "Identify and Protect Functions",
+    category: "Security Controls",
+    description:
+      "Develop organizational understanding of assets, vulnerabilities, and risk while deploying protective safeguards.",
+    requirement:
+      "Maintain asset inventory, risk register, identity management, and protective technology controls.",
+    applicability: "Organizations adopting NIST CSF 2.0.",
+  },
+  {
+    frameworkCode: "NIST-CSF-2",
+    controlCode: "NIST-CSF-2-3",
+    controlName: "Detect, Respond, and Recover",
+    category: "Incident Response",
+    description:
+      "Operate detection capabilities, incident response plans, and recovery processes.",
+    requirement:
+      "Deploy continuous monitoring, tested incident playbooks, and documented recovery procedures.",
+    applicability: "Organizations adopting NIST CSF 2.0.",
+  },
+
+  // HIPAA
+  {
+    frameworkCode: "HIPAA",
+    controlCode: "HIPAA-1",
+    controlName: "Privacy Rule Safeguards",
+    category: "Privacy",
+    description:
+      "Implement privacy policies and safeguards protecting individually identifiable health information (PHI).",
+    requirement:
+      "Maintain notice, authorization, minimum necessary, and patient rights procedures.",
+    applicability: "Covered entities and business associates.",
+  },
+  {
+    frameworkCode: "HIPAA",
+    controlCode: "HIPAA-2",
+    controlName: "Security Rule Administrative and Technical Safeguards",
+    category: "Security",
+    description:
+      "Implement administrative, physical, and technical safeguards for electronic PHI.",
+    requirement:
+      "Deploy access controls, audit controls, integrity controls, and workforce training.",
+    applicability: "Covered entities and business associates.",
+  },
+  {
+    frameworkCode: "HIPAA",
+    controlCode: "HIPAA-3",
+    controlName: "Breach Notification",
+    category: "Incident Response",
+    description:
+      "Notify HHS OCR and affected individuals of breaches of unsecured PHI.",
+    requirement:
+      "Report breaches without unreasonable delay, within 60 days for large breaches.",
+    applicability: "Covered entities and business associates.",
+  },
+
+  // PCI DSS
+  {
+    frameworkCode: "PCI-DSS",
+    controlCode: "PCI-DSS-1",
+    controlName: "Secure Network and Systems",
+    category: "Network Security",
+    description:
+      "Install and maintain network security controls and secure configuration of systems.",
+    requirement:
+      "Configure firewalls, hardening baselines, and change management for system components.",
+    applicability:
+      "Organizations storing, processing, or transmitting cardholder data.",
+  },
+  {
+    frameworkCode: "PCI-DSS",
+    controlCode: "PCI-DSS-2",
+    controlName: "Cardholder Data Protection",
+    category: "Data Security",
+    description:
+      "Protect stored cardholder data and encrypt cardholder data over open networks.",
+    requirement:
+      "Minimize stored data, protect with strong cryptography, and mask PAN where displayed.",
+    applicability: "Card data environment components.",
+  },
+  {
+    frameworkCode: "PCI-DSS",
+    controlCode: "PCI-DSS-3",
+    controlName: "Access Control and Monitoring",
+    category: "Access Control",
+    description:
+      "Restrict access to cardholder data and track and monitor all access to system components.",
+    requirement:
+      "Apply least privilege, unique IDs, MFA, and log monitoring for card data environments.",
+    applicability: "Organizations in the card payment ecosystem.",
+  },
+
+  // NIS2
+  {
+    frameworkCode: "NIS2",
+    controlCode: "NIS2-1",
+    controlName: "Cybersecurity Risk Management Measures",
+    category: "Governance",
+    description:
+      "Adopt technical, operational, and organizational measures for managing cybersecurity risk.",
+    requirement:
+      "Implement measures covering risk analysis, incident handling, business continuity, and supply-chain security.",
+    applicability: "Essential and important entities under NIS2.",
+  },
+  {
+    frameworkCode: "NIS2",
+    controlCode: "NIS2-2",
+    controlName: "Incident Reporting Obligations",
+    category: "Incident Response",
+    description:
+      "Report significant incidents to national CSIRT/competent authority.",
+    requirement:
+      "Submit early warning within 24 hours, notification within 72 hours, and final report within 1 month.",
+    applicability: "Essential and important entities under NIS2.",
+  },
+  {
+    frameworkCode: "NIS2",
+    controlCode: "NIS2-3",
+    controlName: "Management Accountability",
+    category: "Governance",
+    description:
+      "Hold management accountable for cybersecurity risk management and compliance.",
+    requirement:
+      "Board approval of risk measures and training obligations for management.",
+    applicability: "Essential and important entities under NIS2.",
+  },
+
+  // DORA
+  {
+    frameworkCode: "DORA",
+    controlCode: "DORA-1",
+    controlName: "ICT Risk Management Framework",
+    category: "Risk Management",
+    description:
+      "Establish a sound, comprehensive, and well-documented ICT risk management framework.",
+    requirement:
+      "Define ICT risk governance, protection, detection, response, and recovery processes.",
+    applicability: "EU financial entities.",
+  },
+  {
+    frameworkCode: "DORA",
+    controlCode: "DORA-2",
+    controlName: "ICT Third-Party Risk Management",
+    category: "Third-party",
+    description:
+      "Manage ICT third-party risk including the register of information, risk assessments, and contractual protections.",
+    requirement:
+      "Maintain an ICT third-party register and enforce contract clauses on subcontracting and exit.",
+    applicability: "EU financial entities and critical ICT providers.",
+  },
+  {
+    frameworkCode: "DORA",
+    controlCode: "DORA-3",
+    controlName: "Digital Operational Resilience Testing",
+    category: "Resilience",
+    description:
+      "Perform regular testing of ICT systems and resilience capabilities.",
+    requirement:
+      "Conduct vulnerability, penetration, and scenario-based testing at defined frequencies.",
+    applicability: "EU financial entities.",
+  },
+
+  // EU AI Act
+  {
+    frameworkCode: "EU-AI-ACT",
+    controlCode: "EU-AI-ACT-1",
+    controlName: "AI System Risk Classification",
+    category: "AI Governance",
+    description:
+      "Determine the risk class (prohibited, high-risk, limited, minimal) of AI systems.",
+    requirement:
+      "Document classification rationale and applicable obligations per risk class.",
+    applicability: "AI providers and deployers in the EU.",
+  },
+  {
+    frameworkCode: "EU-AI-ACT",
+    controlCode: "EU-AI-ACT-2",
+    controlName: "High-Risk AI Conformity Assessment",
+    category: "AI Governance",
+    description:
+      "Perform conformity assessment, technical documentation, and registration for high-risk AI systems.",
+    requirement:
+      "Maintain EU declaration of conformity, logging, and post-market monitoring.",
+    applicability: "High-risk AI system providers.",
+  },
+  {
+    frameworkCode: "EU-AI-ACT",
+    controlCode: "EU-AI-ACT-3",
+    controlName: "Transparency and Human Oversight",
+    category: "AI Governance",
+    description:
+      "Ensure transparency obligations and human oversight for AI systems.",
+    requirement:
+      "Disclose AI-generated content and design human oversight mechanisms.",
+    applicability: "AI providers and deployers in the EU.",
+  },
+
+  // UK GDPR
+  {
+    frameworkCode: "UK-GDPR",
+    controlCode: "UK-GDPR-1",
+    controlName: "UK Lawful Basis and Rights",
+    category: "Privacy Governance",
+    description:
+      "Establish lawful basis for processing and uphold data subject rights under UK GDPR.",
+    requirement:
+      "Maintain records of processing, consent mechanisms, and rights request workflows.",
+    applicability: "UK data controllers and processors.",
+  },
+  {
+    frameworkCode: "UK-GDPR",
+    controlCode: "UK-GDPR-2",
+    controlName: "UK Breach Notification to ICO",
+    category: "Incident Response",
+    description: "Notify the ICO of personal data breaches within 72 hours.",
+    requirement:
+      "Operate breach detection and notification procedures aligned to ICO requirements.",
+    applicability: "UK data controllers.",
+  },
+  {
+    frameworkCode: "UK-GDPR",
+    controlCode: "UK-GDPR-3",
+    controlName: "International Data Transfers",
+    category: "Cross-border Transfer",
+    description:
+      "Manage international data transfers under UK adequacy, IDTA, or other safeguards.",
+    requirement:
+      "Use UK International Data Transfer Agreement or adequacy decisions for transfers.",
+    applicability: "UK controllers transferring personal data overseas.",
+  },
+
+  // APPI (Japan)
+  {
+    frameworkCode: "APPI",
+    controlCode: "APPI-1",
+    controlName: "Utilization Purpose and Consent",
+    category: "Privacy Governance",
+    description:
+      "Specify the purpose of use and obtain consent where required for personal information.",
+    requirement:
+      "Notify or publish utilization purposes and obtain consent for changes.",
+    applicability: "Business operators handling personal information in Japan.",
+  },
+  {
+    frameworkCode: "APPI",
+    controlCode: "APPI-2",
+    controlName: "Secure Management and Breach Handling",
+    category: "Data Security",
+    description:
+      "Implement necessary and appropriate security measures and breach notification procedures.",
+    requirement:
+      "Report qualifying breaches to the PPC and affected data subjects.",
+    applicability: "Business operators handling personal information in Japan.",
+  },
+  {
+    frameworkCode: "APPI",
+    controlCode: "APPI-3",
+    controlName: "Cross-border Provision Rules",
+    category: "Cross-border Transfer",
+    description:
+      "Provide personal data to third parties in foreign countries in compliance with APPI rules.",
+    requirement:
+      "Disclose destination country and obtain consent or rely on adequate safeguards.",
+    applicability: "Business operators transferring personal data abroad.",
+  },
+
+  // PIPA-KR (South Korea)
+  {
+    frameworkCode: "PIPA-KR",
+    controlCode: "PIPA-KR-1",
+    controlName: "Consent and Purpose Limitation",
+    category: "Privacy Governance",
+    description:
+      "Obtain consent and limit processing to notified purposes for personal information.",
+    requirement:
+      "Operate granular consent collection and purpose-restricted processing.",
+    applicability: "Personal information controllers in Korea.",
+  },
+  {
+    frameworkCode: "PIPA-KR",
+    controlCode: "PIPA-KR-2",
+    controlName: "Data Subject Rights",
+    category: "Data Subject Rights",
+    description:
+      "Support access, correction, deletion, and suspension rights of data subjects.",
+    requirement:
+      "Operate rights request workflows with defined response timelines.",
+    applicability: "Personal information controllers in Korea.",
+  },
+  {
+    frameworkCode: "PIPA-KR",
+    controlCode: "PIPA-KR-3",
+    controlName: "Cross-border Transfer and Pseudonymization",
+    category: "Cross-border Transfer",
+    description:
+      "Apply cross-border transfer requirements and pseudonymization duties.",
+    requirement:
+      "Notify transfer details, obtain consent, and apply pseudonymization where required.",
+    applicability: "Controllers transferring data overseas.",
+  },
+
+  // PDPA-SG (Singapore)
+  {
+    frameworkCode: "PDPA-SG",
+    controlCode: "PDPA-SG-1",
+    controlName: "Consent and Purpose Limitation",
+    category: "Privacy Governance",
+    description:
+      "Obtain consent for collection, use, and disclosure of personal data.",
+    requirement:
+      "Operate consent mechanisms, purpose notification, and withdrawal processes.",
+    applicability: "Organizations processing personal data in Singapore.",
+  },
+  {
+    frameworkCode: "PDPA-SG",
+    controlCode: "PDPA-SG-2",
+    controlName: "Breach Notification",
+    category: "Incident Response",
+    description:
+      "Notify the PDPC of notifiable data breaches and affected individuals.",
+    requirement:
+      "Assess and notify qualifying breaches within prescribed timelines.",
+    applicability: "Organizations in Singapore.",
+  },
+  {
+    frameworkCode: "PDPA-SG",
+    controlCode: "PDPA-SG-3",
+    controlName: "Transfer Limitation",
+    category: "Cross-border Transfer",
+    description:
+      "Ensure comparable protection for transfers of personal data overseas.",
+    requirement:
+      "Apply transfer impact assessment and contractual safeguards for cross-border transfers.",
+    applicability: "Organizations transferring data outside Singapore.",
+  },
+
+  // DPDP-IN (India)
+  {
+    frameworkCode: "DPDP-IN",
+    controlCode: "DPDP-IN-1",
+    controlName: "Notice and Consent",
+    category: "Privacy Governance",
+    description:
+      "Provide notice of personal data processing and obtain verifiable consent.",
+    requirement:
+      "Deliver notice in specified languages and maintain consent records.",
+    applicability: "Data fiduciaries in India.",
+  },
+  {
+    frameworkCode: "DPDP-IN",
+    controlCode: "DPDP-IN-2",
+    controlName: "Data Subject Rights and Grievances",
+    category: "Data Subject Rights",
+    description:
+      "Support rights of access, correction, erasure, portability, and grievance redressal.",
+    requirement:
+      "Operate rights fulfillment and grievance redressal mechanisms with timelines.",
+    applicability: "Data fiduciaries in India.",
+  },
+  {
+    frameworkCode: "DPDP-IN",
+    controlCode: "DPDP-IN-3",
+    controlName: "Breach Notification",
+    category: "Incident Response",
+    description:
+      "Notify the Data Protection Board and affected data principals of data breaches.",
+    requirement: "Operate breach detection and notification procedures.",
+    applicability: "Data fiduciaries in India.",
+  },
+
+  // POPIA (South Africa)
+  {
+    frameworkCode: "POPIA",
+    controlCode: "POPIA-1",
+    controlName: "Processing Conditions and Accountability",
+    category: "Privacy Governance",
+    description:
+      "Comply with the eight POPIA processing conditions and accountability duties.",
+    requirement:
+      "Document lawful grounds, purpose specification, security safeguards, and information officer appointment.",
+    applicability: "Responsible parties in South Africa.",
+  },
+  {
+    frameworkCode: "POPIA",
+    controlCode: "POPIA-2",
+    controlName: "Cross-border Transfer Conditions",
+    category: "Cross-border Transfer",
+    description:
+      "Transfer personal information cross-border only where recipient ensures adequate protection.",
+    requirement:
+      "Apply contracts, adequacy assessments, or consent before transfers.",
+    applicability:
+      "Responsible parties transferring data outside South Africa.",
+  },
+  {
+    frameworkCode: "POPIA",
+    controlCode: "POPIA-3",
+    controlName: "Security Breach Notification",
+    category: "Incident Response",
+    description:
+      "Notify the Information Regulator and data subjects of security compromises.",
+    requirement:
+      "Operate breach detection and notification procedures with documented timelines.",
+    applicability: "Responsible parties in South Africa.",
+  },
+
+  // PIPEDA (Canada)
+  {
+    frameworkCode: "PIPEDA",
+    controlCode: "PIPEDA-1",
+    controlName: "Consent and Openness",
+    category: "Privacy Governance",
+    description:
+      "Obtain meaningful consent and provide transparent privacy policies.",
+    requirement:
+      "Operate consent mechanisms and published privacy policies under PIPEDA.",
+    applicability: "Private-sector organizations in Canada.",
+  },
+  {
+    frameworkCode: "PIPEDA",
+    controlCode: "PIPEDA-2",
+    controlName: "Safeguards and Breach Reporting",
+    category: "Data Security",
+    description:
+      "Protect personal information with safeguards and report material breaches.",
+    requirement:
+      "Operate security safeguards, breach records, and notification to OPC and affected individuals.",
+    applicability: "Private-sector organizations in Canada.",
+  },
+
+  // Privacy Act AU
+  {
+    frameworkCode: "PRIVACY-ACT-AU",
+    controlCode: "PRIVACY-ACT-AU-1",
+    controlName: "Australian Privacy Principles Compliance",
+    category: "Privacy Governance",
+    description: "Comply with the 13 Australian Privacy Principles (APPs).",
+    requirement:
+      "Operate APP-compliant collection, use, disclosure, access, and correction practices.",
+    applicability: "Australian organizations with APP obligations.",
+  },
+  {
+    frameworkCode: "PRIVACY-ACT-AU",
+    controlCode: "PRIVACY-ACT-AU-2",
+    controlName: "Notifiable Data Breaches",
+    category: "Incident Response",
+    description:
+      "Notify affected individuals and the OAIC of eligible data breaches.",
+    requirement:
+      "Operate breach assessment and notification procedures within statutory timelines.",
+    applicability: "Entities with APP obligations.",
+  },
+
+  // MEXICO-DPA
+  {
+    frameworkCode: "MEXICO-DPA",
+    controlCode: "MEXICO-DPA-1",
+    controlName: "Privacy Notice and Consent",
+    category: "Privacy Governance",
+    description:
+      "Provide privacy notices and obtain consent for personal data processing.",
+    requirement:
+      "Operate privacy notices with legal basis and consent management.",
+    applicability: "Private-sector entities in Mexico.",
+  },
+  {
+    frameworkCode: "MEXICO-DPA",
+    controlCode: "MEXICO-DPA-2",
+    controlName: "ARCO Rights",
+    category: "Data Subject Rights",
+    description:
+      "Support access, rectification, cancellation, and opposition (ARCO) rights.",
+    requirement:
+      "Operate ARCO rights request workflows with statutory response timelines.",
+    applicability: "Private-sector entities in Mexico.",
+  },
+  {
+    frameworkCode: "MEXICO-DPA",
+    controlCode: "MEXICO-DPA-3",
+    controlName: "Breach Notification",
+    category: "Incident Response",
+    description: "Notify INAI of breaches involving personal data.",
+    requirement: "Operate breach detection and INAI notification procedures.",
+    applicability: "Private-sector entities in Mexico.",
+  },
 ];
 
 export const complianceRelationships = [
@@ -1046,5 +1886,280 @@ export const complianceRelationships = [
     riskLevel: "medium",
     mitigation:
       "Unify vulnerability lifecycle tooling while preserving local reporting timelines and authority channels.",
+  },
+  {
+    sourceFrameworkCode: "ISO-27001",
+    targetFrameworkCode: "NIST-CSF-2",
+    relationshipType: "overlap",
+    description:
+      "ISO 27001 ISMS controls and NIST CSF 2.0 functions share a common technical and organizational control baseline.",
+    severity: "high",
+    riskLevel: "high",
+    mitigation:
+      "Maintain one unified control catalog mapped to both ISO 27001 Annex A and NIST CSF functions.",
+  },
+  {
+    sourceFrameworkCode: "ISO-27701",
+    targetFrameworkCode: "ISO-27001",
+    relationshipType: "dependency",
+    description:
+      "ISO 27701 privacy information management extends the ISO 27001 ISMS with PIMS requirements.",
+    severity: "high",
+    riskLevel: "high",
+    mitigation:
+      "Build the PIMS as an extension of an existing certified ISMS to minimize duplicate effort.",
+  },
+  {
+    sourceFrameworkCode: "ISO-27701",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "overlap",
+    description:
+      "ISO 27701 PIMS controls map closely to GDPR accountability and data subject rights obligations.",
+    severity: "high",
+    riskLevel: "high",
+    mitigation:
+      "Use ISO 27701 mappings as evidence of GDPR accountability for international operators.",
+  },
+  {
+    sourceFrameworkCode: "ISO-27701",
+    targetFrameworkCode: "PIPL",
+    relationshipType: "overlap",
+    description:
+      "PIMS privacy controls overlap with PIPL requirements for transparency, rights, and security.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Apply PIMS control evidence with PIPL-specific local overlays for notices and export approvals.",
+  },
+  {
+    sourceFrameworkCode: "ISO-27701",
+    targetFrameworkCode: "PDPL",
+    relationshipType: "overlap",
+    description:
+      "PIMS privacy controls align with PDPL accountability and data subject rights duties.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Reuse PIMS evidence with PDPL-specific local requirements for cross-border processing.",
+  },
+  {
+    sourceFrameworkCode: "SOC2",
+    targetFrameworkCode: "ISO-27001",
+    relationshipType: "overlap",
+    description:
+      "SOC 2 Trust Services Criteria and ISO 27001 Annex A share substantial security control coverage.",
+    severity: "high",
+    riskLevel: "high",
+    mitigation:
+      "Maintain a shared control matrix to satisfy both SOC 2 examination and ISO certification audits.",
+  },
+  {
+    sourceFrameworkCode: "SOC2",
+    targetFrameworkCode: "NIST-CSF-2",
+    relationshipType: "overlap",
+    description:
+      "SOC 2 controls can be mapped to NIST CSF 2.0 functions for consolidated security posture reporting.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Align TSC control narratives with NIST CSF function and category identifiers.",
+  },
+  {
+    sourceFrameworkCode: "HIPAA",
+    targetFrameworkCode: "NIST-CSF-2",
+    relationshipType: "coordination",
+    description:
+      "HIPAA safeguards are commonly operationalized through NIST CSF 2.0 technical controls.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Use NIST CSF controls as the technical baseline for HIPAA administrative, physical, and technical safeguards.",
+  },
+  {
+    sourceFrameworkCode: "PCI-DSS",
+    targetFrameworkCode: "ISO-27001",
+    relationshipType: "overlap",
+    description:
+      "PCI DSS requirements and ISO 27001 Annex A controls overlap for network and access security.",
+    severity: "high",
+    riskLevel: "high",
+    mitigation:
+      "Satisfy PCI DSS requirements using ISO 27001 control evidence where coverage is equivalent.",
+  },
+  {
+    sourceFrameworkCode: "NIS2",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "NIS2 security measures and GDPR security-of-processing duties require coordinated incident governance.",
+    severity: "high",
+    riskLevel: "high",
+    mitigation:
+      "Run a unified incident response function feeding both NIS2 CSIRT and GDPR supervisory notifications.",
+  },
+  {
+    sourceFrameworkCode: "DORA",
+    targetFrameworkCode: "NIS2",
+    relationshipType: "overlap",
+    description:
+      "DORA ICT risk requirements for financial entities overlap NIS2 security measures for essential entities.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "For financial entities, prefer DORA-specific controls and align NIS2 reporting where applicable.",
+  },
+  {
+    sourceFrameworkCode: "EU-AI-ACT",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "AI Act obligations interplay with GDPR for AI systems processing personal data.",
+    severity: "high",
+    riskLevel: "high",
+    mitigation:
+      "Maintain a coordinated AI governance layer addressing both data protection and AI risk obligations.",
+  },
+  {
+    sourceFrameworkCode: "UK-GDPR",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "overlap",
+    description:
+      "UK GDPR mirrors EU GDPR with distinct enforcement, adequacy, and transfer mechanics.",
+    severity: "high",
+    riskLevel: "high",
+    mitigation:
+      "Run one privacy program with UK- and EU-specific transfer tooling and regulator reporting.",
+  },
+  {
+    sourceFrameworkCode: "APPI",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Japan APPI and GDPR share accountability and rights principles with different consent and transfer mechanics.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Harmonize global privacy policies while keeping jurisdiction-specific consent and transfer flows.",
+  },
+  {
+    sourceFrameworkCode: "PIPA-KR",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Korea PIPA and GDPR both require strong consent and rights frameworks with distinct local enforcement.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Use a global privacy baseline with Korean-specific consent granularity and notification duties.",
+  },
+  {
+    sourceFrameworkCode: "PDPA-SG",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Singapore PDPA and GDPR align on consent and rights principles with different breach timelines.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Share the privacy program baseline while honoring PDPC-specific timelines and exemptions.",
+  },
+  {
+    sourceFrameworkCode: "DPDP-IN",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "India DPDP Act and GDPR share accountability principles with different consent and notice mechanics.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Maintain a global privacy baseline with DPDP-specific notice languages and verifiable consent flows.",
+  },
+  {
+    sourceFrameworkCode: "POPIA",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "overlap",
+    description:
+      "South Africa POPIA conditions closely track GDPR principles with local enforcement nuances.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Extend the GDPR baseline to POPIA conditions with local information officer and breach duties.",
+  },
+  {
+    sourceFrameworkCode: "PIPEDA",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Canada PIPEDA and GDPR align on consent, access, and safeguards with distinct exemption regimes.",
+    severity: "low",
+    riskLevel: "low",
+    mitigation:
+      "Use one privacy program with PIPEDA-specific consent and material breach notification handling.",
+  },
+  {
+    sourceFrameworkCode: "PRIVACY-ACT-AU",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Australian Privacy Principles and GDPR share rights and transparency duties with different scope.",
+    severity: "low",
+    riskLevel: "low",
+    mitigation:
+      "Operate APP-aligned practices as the local baseline while satisfying GDPR where it applies.",
+  },
+  {
+    sourceFrameworkCode: "MEXICO-DPA",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Mexican Federal Law and GDPR both require transparency, consent, and rights with local nuances.",
+    severity: "low",
+    riskLevel: "low",
+    mitigation:
+      "Layer Mexican privacy notice and ARCO workflows onto the global privacy baseline.",
+  },
+  {
+    sourceFrameworkCode: "ISO-27001",
+    targetFrameworkCode: "CSL",
+    relationshipType: "coordination",
+    description:
+      "ISO 27001 ISMS controls can underpin CSL network security baseline obligations for international operators.",
+    severity: "medium",
+    riskLevel: "medium",
+    mitigation:
+      "Use the certified ISMS as evidence for CSL baseline controls with local incident reporting overlays.",
+  },
+  {
+    sourceFrameworkCode: "TH-PDPA",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Thailand PDPA aligns with GDPR principles for lawful basis, rights, and breach notification.",
+    severity: "low",
+    riskLevel: "low",
+    mitigation:
+      "Reuse the global privacy baseline with PDPC Thai-specific consent and DPO requirements.",
+  },
+  {
+    sourceFrameworkCode: "NDPA-NG",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Nigeria NDPA and its Data Protection Act share GDPR-style accountability and rights duties.",
+    severity: "low",
+    riskLevel: "low",
+    mitigation:
+      "Extend the global privacy baseline with NDPA registration, officer, and breach duties.",
+  },
+  {
+    sourceFrameworkCode: "KENYA-DPA",
+    targetFrameworkCode: "GDPR",
+    relationshipType: "coordination",
+    description:
+      "Kenya Data Protection Act mirrors GDPR principles with local licensing and transfer rules.",
+    severity: "low",
+    riskLevel: "low",
+    mitigation:
+      "Layer Kenya DPO registration and local transfer safeguards onto the global baseline.",
   },
 ];

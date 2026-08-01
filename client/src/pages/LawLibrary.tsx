@@ -34,6 +34,41 @@ const FW_STYLE: Record<string, string> = {
   DSL: "bg-teal-100  text-teal-700  border-teal-200  dark:bg-teal-900/30  dark:text-teal-300",
   PDPL: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300",
   NCA: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300",
+  GDPR: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300",
+  "UK-GDPR":
+    "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300",
+  CCPA: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300",
+  LGPD: "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300",
+  "ISO-27001":
+    "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300",
+  "ISO-27701":
+    "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300",
+  SOC2: "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300",
+  "NIST-CSF-2":
+    "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300",
+  HIPAA:
+    "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300",
+  "PCI-DSS":
+    "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300",
+  NIS2: "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300",
+  DORA: "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300",
+  "EU-AI-ACT":
+    "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300",
+  PIPEDA:
+    "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300",
+  "PRIVACY-ACT-AU":
+    "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300",
+  APPI: "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300",
+  "PIPA-KR":
+    "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300",
+  "PDPA-SG":
+    "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300",
+  "DPDP-IN":
+    "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300",
+  POPIA:
+    "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300",
+  "MEXICO-DPA":
+    "bg-lime-100 text-lime-700 border-lime-200 dark:bg-lime-900/30 dark:text-lime-300",
 };
 
 const JX_STYLE: Record<string, string> = {
@@ -41,6 +76,30 @@ const JX_STYLE: Record<string, string> = {
     "bg-red-50    text-red-700    border-red-200    dark:bg-red-900/20    dark:text-red-300",
   "Saudi Arabia":
     "bg-green-50  text-green-700  border-green-200  dark:bg-green-900/20  dark:text-green-300",
+  EU: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300",
+  US: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300",
+  Brazil:
+    "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300",
+  Global:
+    "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/20 dark:text-teal-300",
+  "United Kingdom":
+    "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300",
+  Canada:
+    "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300",
+  Australia:
+    "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300",
+  Japan:
+    "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300",
+  "South Korea":
+    "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300",
+  Singapore:
+    "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300",
+  India:
+    "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-300",
+  "South Africa":
+    "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300",
+  "United Arab Emirates":
+    "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300",
   "Cross-border":
     "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-300",
 };
@@ -54,6 +113,24 @@ const ALL_FRAMEWORKS = [
   "GDPR",
   "CCPA",
   "LGPD",
+  "ISO-27001",
+  "ISO-27701",
+  "SOC2",
+  "NIST-CSF-2",
+  "HIPAA",
+  "PCI-DSS",
+  "NIS2",
+  "DORA",
+  "EU-AI-ACT",
+  "UK-GDPR",
+  "PIPEDA",
+  "PRIVACY-ACT-AU",
+  "APPI",
+  "PIPA-KR",
+  "PDPA-SG",
+  "DPDP-IN",
+  "POPIA",
+  "MEXICO-DPA",
 ] as const;
 
 // ── Bookmarks (localStorage) ──────────────────────────────────────────────────

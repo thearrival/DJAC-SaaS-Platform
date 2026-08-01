@@ -16,7 +16,7 @@ export type ComplianceRiskLevel = "critical" | "high" | "medium" | "low";
 
 export type ComplianceObligation = {
   id: string;
-  country: "Saudi Arabia" | "China" | "EU" | "US" | "Brazil";
+  country: string;
   framework: string;
   requirement: string;
   frequency: ComplianceFrequency;
@@ -485,6 +485,202 @@ const COMPLIANCE_OBLIGATIONS: ComplianceObligation[] = [
       "Under LGPD Art. 18, data subjects have rights to confirmation of processing, access, correction, anonymization, portability, deletion, and information about shared entities. Controllers must respond within 15 days.",
     references: ["LGPD Art. 18-22", "ANPD Enforcement Guidelines"],
   },
+  {
+    id: "uk-gdpr-ico-notification",
+    country: "United Kingdom",
+    framework: "UK-GDPR",
+    requirement: "ICO Breach Notification (72 hours)",
+    frequency: "within_72h",
+    authority: "ICO",
+    riskLevel: "critical",
+    description:
+      "Under UK GDPR Article 33, controllers must notify the ICO of personal data breaches within 72 hours unless the breach is unlikely to result in risk to individuals. Data subjects must be notified where high risk.",
+    references: ["UK GDPR Art. 33-34", "ICO Breach Reporting Guidance"],
+  },
+  {
+    id: "uk-gdpr-idta-transfers",
+    country: "United Kingdom",
+    framework: "UK-GDPR",
+    requirement: "UK IDTA for International Transfers",
+    frequency: "ongoing",
+    authority: "ICO",
+    riskLevel: "high",
+    description:
+      "Transfers to third countries require UK adequacy regulations, the UK International Data Transfer Agreement (IDTA), or recognised safeguards under Article 46.",
+    references: [
+      "UK GDPR Art. 44-49",
+      "UK IDTA",
+      "ICO Transfer Risk Assessment",
+    ],
+  },
+  {
+    id: "uk-gdpr-dpo-representative",
+    country: "United Kingdom",
+    framework: "UK-GDPR",
+    requirement: "UK Representative for Non-UK Controllers",
+    frequency: "ongoing",
+    authority: "ICO",
+    riskLevel: "medium",
+    description:
+      "Non-UK controllers offering goods or services in the UK must appoint a UK representative per UK GDPR Article 27.",
+    references: ["UK GDPR Art. 27", "ICO Representative Guidance"],
+  },
+  {
+    id: "ca-pipeda-breach",
+    country: "Canada",
+    framework: "PIPEDA",
+    requirement: "Material Breach Reporting to OPC",
+    frequency: "ongoing",
+    authority: "OPC",
+    riskLevel: "high",
+    description:
+      "Report material breaches to the OPC and notify affected individuals where real risk of significant harm exists; maintain breach records.",
+    references: ["PIPEDA Part 1.1", "OPC Breach Guidance"],
+  },
+  {
+    id: "au-app-ndb",
+    country: "Australia",
+    framework: "PRIVACY-ACT-AU",
+    requirement: "Notifiable Data Breach Reporting",
+    frequency: "ongoing",
+    authority: "OAIC",
+    riskLevel: "high",
+    description:
+      "Notify the OAIC and affected individuals when a data breach is likely to result in serious harm; assess eligibility without unreasonable delay.",
+    references: ["Privacy Act 1988 Part IIIC", "OAIC NDB Guidance"],
+  },
+  {
+    id: "au-app-cross-border",
+    country: "Australia",
+    framework: "PRIVACY-ACT-AU",
+    requirement: "APP 8 Cross-Border Disclosure",
+    frequency: "ongoing",
+    authority: "OAIC",
+    riskLevel: "high",
+    description:
+      "Before disclosing personal information overseas, ensure the recipient is covered by the APPs or an enforceable mechanism, or obtain consent.",
+    references: ["APP 8", "OAIC Cross-Border Disclosure Guidance"],
+  },
+  {
+    id: "jp-appi-breach",
+    country: "Japan",
+    framework: "APPI",
+    requirement: "PPC Breach Reporting",
+    frequency: "ongoing",
+    authority: "PPC",
+    riskLevel: "high",
+    description:
+      "Report qualifying breaches (risk to rights and interests) to the Personal Information Protection Commission and notify affected data subjects.",
+    references: ["APPI Art. 32-33", "PPC Guidelines"],
+  },
+  {
+    id: "jp-appi-cross-border",
+    country: "Japan",
+    framework: "APPI",
+    requirement: "APPI Cross-Border Provision Rules",
+    frequency: "ongoing",
+    authority: "PPC",
+    riskLevel: "high",
+    description:
+      "Disclose the destination country and obtain consent, or rely on safeguards, before providing personal data to third parties in foreign countries.",
+    references: ["APPI Art. 28", "PPC Transfer Guidelines"],
+  },
+  {
+    id: "kr-pipa-breach",
+    country: "South Korea",
+    framework: "PIPA-KR",
+    requirement: "PIPC Breach Notification",
+    frequency: "ongoing",
+    authority: "PIPC",
+    riskLevel: "high",
+    description:
+      "Notify the PIPC and affected data subjects of personal information breaches without delay, and submit follow-up reports where required.",
+    references: ["PIPA Art. 34", "PIPC Enforcement Guidelines"],
+  },
+  {
+    id: "sg-pdpa-breach",
+    country: "Singapore",
+    framework: "PDPA-SG",
+    requirement: "Notifiable Data Breach Reporting",
+    frequency: "ongoing",
+    authority: "PDPC",
+    riskLevel: "high",
+    description:
+      "Assess whether a breach is notifiable and inform the PDPC and affected individuals of breaches that result in significant harm.",
+    references: ["PDPA Part VIA", "PDPC Breach Guidelines"],
+  },
+  {
+    id: "sg-pdpa-dpo",
+    country: "Singapore",
+    framework: "PDPA-SG",
+    requirement: "Data Protection Officer Appointment",
+    frequency: "ongoing",
+    authority: "PDPC",
+    riskLevel: "medium",
+    description:
+      "Organisations must designate at least one Data Protection Officer and make their business contact publicly available.",
+    references: ["PDPA Schedule 1", "PDPC DPO Guidance"],
+  },
+  {
+    id: "in-dpdp-breach",
+    country: "India",
+    framework: "DPDP-IN",
+    requirement: "DPDP Act Breach Notification",
+    frequency: "ongoing",
+    authority: "Data Protection Board",
+    riskLevel: "high",
+    description:
+      "Notify the Data Protection Board of India and affected data principals of personal data breaches per the DPDP Act rules.",
+    references: ["DPDP Act 2023 S.8", "MeitY Rules"],
+  },
+  {
+    id: "za-popia-breach",
+    country: "South Africa",
+    framework: "POPIA",
+    requirement: "POPIA Security Compromise Notification",
+    frequency: "ongoing",
+    authority: "Information Regulator",
+    riskLevel: "high",
+    description:
+      "Notify the Information Regulator and affected data subjects of security compromises per POPIA Section 22, including the identity of all affected parties.",
+    references: ["POPIA S.22", "Information Regulator Guidance"],
+  },
+  {
+    id: "za-popia-info-officer",
+    country: "South Africa",
+    framework: "POPIA",
+    requirement: "Information Officer Registration",
+    frequency: "annual",
+    authority: "Information Regulator",
+    riskLevel: "medium",
+    description:
+      "Responsible parties must register an Information Officer and maintain a POPIA compliance framework.",
+    references: ["POPIA S.55", "Information Regulator Registration"],
+  },
+  {
+    id: "mx-lfpdp-breach",
+    country: "Mexico",
+    framework: "MEXICO-DPA",
+    requirement: "INAI Breach Notification",
+    frequency: "ongoing",
+    authority: "INAI",
+    riskLevel: "high",
+    description:
+      "Notify INAI and affected data owners of significant security breaches without delay, including scope and corrective actions.",
+    references: ["LFPDPPP Art. 20", "INAI Guidance"],
+  },
+  {
+    id: "ae-pdpl-breach",
+    country: "United Arab Emirates",
+    framework: "ISO-27701",
+    requirement: "UAE PDPL Breach Notification",
+    frequency: "ongoing",
+    authority: "UAE Federal Authority",
+    riskLevel: "high",
+    description:
+      "Under UAE Federal Decree-Law No. 45 of 2021, controllers must notify authorities and data subjects of personal data breaches and security incidents.",
+    references: ["UAE PDPL Law", "DIFC/ADGM local rules"],
+  },
 ];
 
 const COMPARISON_TABLE: ComplianceComparisonRow[] = [
@@ -654,6 +850,46 @@ const COMPARISON_TABLE: ComplianceComparisonRow[] = [
     notes:
       "EU and Brazil definitions nearly identical; China includes location and minors data.",
   },
+  {
+    topic: "International Standards Baseline",
+    saudiArabia: "ISO 27001 encouraged; NCA-ECC self-assessments",
+    china: "GB/T 22239 (MLPS 2.0) aligned with ISO 27001 for cloud",
+    eu: "ISO 27001 + NIS2 risk measures for essential entities",
+    us: "SOC 2 + NIST CSF 2.0 for SaaS and cloud providers",
+    brazil: "ISO 27001 widely adopted for ANPD compliance evidence",
+    notes:
+      "ISO 27001, SOC 2, and NIST CSF serve as the common control baseline across all major markets.",
+  },
+  {
+    topic: "Breach Notification — Global Benchmarks",
+    saudiArabia: "72 hours to SDAIA",
+    china: "2 hours initial + 24 hours detailed to CAC",
+    eu: "72 hours to DPA (GDPR Art. 33); NIS2 24h/72h for CSIRT",
+    us: "HIPAA 60 days; state laws vary",
+    brazil: "Reasonable time per ANPD (Art. 48)",
+    notes:
+      "UK (ICO 72h), Canada (OPC material breach), Australia (OAIC serious harm), Singapore (PDPC significant harm), India (DPDP Board), Japan (PPC), South Korea (PIPC), and South Africa (Regulator) all mandate breach notification with local timelines.",
+  },
+  {
+    topic: "International Transfer Safeguards",
+    saudiArabia: "SDAIA approval, SCCs, or adequacy",
+    china: "CAC security assessment, standard contract, or certification",
+    eu: "Adequacy decision, SCCs, BCRs, or derogations (Art. 44-49)",
+    us: "No federal restriction; state laws vary",
+    brazil: "ANPD adequacy, SCCs, BCRs, or specific consent (Art. 33)",
+    notes:
+      "UK uses the IDTA; Japan and South Korea rely on adequacy decisions; Australia, Canada, Mexico, and South Africa require consent or adequacy for cross-border flows.",
+  },
+  {
+    topic: "Executive Accountability",
+    saudiArabia: "Royal Decree M/117 individual liability",
+    china: "PIPL + CSL 2026: personal fines + up to 10-year industry ban",
+    eu: "GDPR: managers liable via Member State law; NIS2: management approval + training",
+    us: "SOX: personal liability for certification; HIPAA: individual criminal penalties",
+    brazil: "LGPD: personal liability for controllers and operators",
+    notes:
+      "NIS2 makes management directly accountable for cybersecurity measures; executive accountability is now global across all major regimes.",
+  },
 ];
 
 export function listComplianceObligations(): ComplianceObligation[] {
@@ -661,7 +897,7 @@ export function listComplianceObligations(): ComplianceObligation[] {
 }
 
 export function getObligationsByCountry(
-  country: "Saudi Arabia" | "China" | "EU" | "US" | "Brazil"
+  country: string
 ): ComplianceObligation[] {
   return COMPLIANCE_OBLIGATIONS.filter(o => o.country === country);
 }

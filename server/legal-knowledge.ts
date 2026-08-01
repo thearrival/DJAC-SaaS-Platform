@@ -1,11 +1,14 @@
-type LawJurisdiction =
+import { NEW_GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
+
+export type LawJurisdiction =
   | "China"
   | "Saudi Arabia"
   | "Cross-border"
   | "EU"
   | "US"
   | "Brazil"
-  | "Global";
+  | "Global"
+  | (typeof NEW_GLOBAL_JURISDICTIONS)[number];
 
 type LawSection = {
   title: string;
@@ -1849,6 +1852,455 @@ const LAW_KNOWLEDGE_BASE: LawKnowledgeEntry[] = [
       },
     ],
     sources: ["DJAC comparative framework analysis"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "uk-gdpr-regime",
+    title: "UK GDPR and Data Protection Act 2018",
+    jurisdiction: "United Kingdom",
+    frameworkCodes: ["UK-GDPR"],
+    summary:
+      "UK GDPR mirrors EU GDPR but is a separate regime enforced by the ICO, with its own adequacy assessments, the UK International Data Transfer Agreement (IDTA), and post-Brexit divergence.",
+    keyTopics: [
+      "UK GDPR lawful basis",
+      "ICO breach notification 72 hours",
+      "UK IDTA transfers",
+      "Data Protection Act 2018",
+      "UK adequacy",
+    ],
+    sections: [
+      {
+        title: "Lawful basis and rights",
+        excerpt:
+          "Controllers must document lawful bases and honour UK data subject rights; the ICO may fine up to GBP 17.5M or 4% of annual turnover.",
+        keywords: ["consent", "rights", "lawful basis", "ico"],
+      },
+      {
+        title: "International transfers",
+        excerpt:
+          "Transfers to third countries require UK adequacy regulations, the UK IDTA, or recognised safeguards.",
+        keywords: ["idta", "transfer", "adequacy", "international"],
+      },
+      {
+        title: "Breach notification",
+        excerpt:
+          "Notify the ICO within 72 hours of a personal data breach unless low risk to individuals.",
+        keywords: ["breach", "notification", "72 hours", "incident"],
+      },
+    ],
+    sources: ["UK GDPR", "Data Protection Act 2018", "ICO guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "canada-pipeda-regime",
+    title: "Canada PIPEDA and Provincial Privacy Laws",
+    jurisdiction: "Canada",
+    frameworkCodes: ["PIPEDA"],
+    summary:
+      "PIPEDA governs private-sector personal information handling in Canada, complemented by provincial laws (Alberta, BC, Quebec), with mandatory breach reporting to the OPC.",
+    keyTopics: [
+      "PIPEDA consent",
+      "OPC breach reporting",
+      "material breach",
+      "privacy program",
+      "provincial laws",
+    ],
+    sections: [
+      {
+        title: "Consent and accountability",
+        excerpt:
+          "Organizations must obtain meaningful consent, appoint accountability leads, and document handling practices.",
+        keywords: ["consent", "accountability", "privacy program"],
+      },
+      {
+        title: "Breach reporting",
+        excerpt:
+          "Report material data breaches to the OPC and notify affected individuals where real risk of significant harm exists.",
+        keywords: ["breach", "opc", "material", "notification"],
+      },
+      {
+        title: "Data stewardship",
+        excerpt:
+          "Limit collection to what is necessary, safeguard personal information, and support access and correction requests.",
+        keywords: ["collection", "safeguards", "access", "correction"],
+      },
+    ],
+    sources: ["PIPEDA", "OPC guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "australia-privacy-act",
+    title: "Australia Privacy Act and Australian Privacy Principles",
+    jurisdiction: "Australia",
+    frameworkCodes: ["PRIVACY-ACT-AU"],
+    summary:
+      "The Privacy Act 1988 and its 13 Australian Privacy Principles (APPs) regulate handling of personal information, with Notifiable Data Breach (NDB) duties to the OAIC.",
+    keyTopics: [
+      "Australian Privacy Principles",
+      "OAIC notifiable data breach",
+      "APP entity obligations",
+      "cross-border disclosure",
+      "privacy policy",
+    ],
+    sections: [
+      {
+        title: "APP compliance",
+        excerpt:
+          "Entities must comply with all 13 APPs covering collection, use, disclosure, quality, security, access, and correction.",
+        keywords: ["app", "principles", "collection", "disclosure"],
+      },
+      {
+        title: "Notifiable data breaches",
+        excerpt:
+          "Notify affected individuals and the OAIC when a data breach is likely to result in serious harm.",
+        keywords: ["notifiable data breach", "oaic", "serious harm"],
+      },
+      {
+        title: "Cross-border disclosure",
+        excerpt:
+          "Before disclosing personal information overseas, ensure the recipient is covered by the APPs or equivalent safeguards.",
+        keywords: ["cross-border", "transfer", "overseas", "disclosure"],
+      },
+    ],
+    sources: ["Privacy Act 1988", "OAIC guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "japan-appi-regime",
+    title: "Japan APPI — Act on the Protection of Personal Information",
+    jurisdiction: "Japan",
+    frameworkCodes: ["APPI"],
+    summary:
+      "APPI regulates business operators handling personal information in Japan, requiring utilization purpose disclosure, secure management, and PPC breach reporting.",
+    keyTopics: [
+      "APPI utilization purpose",
+      "PPC breach reporting",
+      "cross-border provision",
+      "anonymized information",
+      "sensitive data",
+    ],
+    sections: [
+      {
+        title: "Purpose of use and consent",
+        excerpt:
+          "Specify utilization purposes, obtain consent where required, and notify or publish purposes on the PPC website.",
+        keywords: ["purpose", "consent", "utilization"],
+      },
+      {
+        title: "Breach reporting",
+        excerpt:
+          "Report qualifying breaches to the Personal Information Protection Commission (PPC) and notify affected data subjects.",
+        keywords: ["breach", "ppc", "reporting"],
+      },
+      {
+        title: "Cross-border provision",
+        excerpt:
+          "Provide personal data to foreign third parties only after disclosing the destination country and obtaining consent or equivalent safeguards.",
+        keywords: ["cross-border", "foreign", "consent", "provision"],
+      },
+    ],
+    sources: ["APPI", "PPC guidelines"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "korea-pipa-regime",
+    title: "South Korea PIPA — Personal Information Protection Act",
+    jurisdiction: "South Korea",
+    frameworkCodes: ["PIPA-KR"],
+    summary:
+      "PIPA is Korea's comprehensive data protection law, requiring consent-based processing, strong data subject rights, pseudonymization duties, and PIPC breach reporting.",
+    keyTopics: [
+      "PIPA consent",
+      "PIPC breach notification",
+      "pseudonymization",
+      "data subject rights",
+      "cross-border transfer",
+    ],
+    sections: [
+      {
+        title: "Consent and rights",
+        excerpt:
+          "Collect explicit consent where required and honour access, correction, deletion, and suspension rights within defined timelines.",
+        keywords: ["consent", "rights", "deletion", "suspension"],
+      },
+      {
+        title: "Security and breach duties",
+        excerpt:
+          "Implement required technical safeguards, pseudonymization duties, and notify the PIPC and data subjects of breaches.",
+        keywords: ["security", "breach", "pipc", "pseudonymization"],
+      },
+      {
+        title: "Cross-border transfer",
+        excerpt:
+          "Notify transfer details and obtain consent for overseas transfers, or rely on adequacy and safeguards.",
+        keywords: ["cross-border", "overseas", "transfer", "consent"],
+      },
+    ],
+    sources: ["PIPA", "PIPC guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "singapore-pdpa-regime",
+    title: "Singapore PDPA — Personal Data Protection Act",
+    jurisdiction: "Singapore",
+    frameworkCodes: ["PDPA-SG"],
+    summary:
+      "The PDPA regulates personal data handling in Singapore with a consent framework, DNC registry, breach notification to the PDPC, and transfer limitation obligations.",
+    keyTopics: [
+      "PDPA consent",
+      "PDPC breach notification",
+      "transfer limitation",
+      "DNC registry",
+      "data protection officer",
+    ],
+    sections: [
+      {
+        title: "Consent framework",
+        excerpt:
+          "Obtain consent for collection, use, and disclosure, and provide withdrawal and access channels.",
+        keywords: ["consent", "withdrawal", "access", "disclosure"],
+      },
+      {
+        title: "Breach notification",
+        excerpt:
+          "Assess and notify the PDPC of notifiable data breaches and inform affected individuals.",
+        keywords: ["breach", "pdpc", "notifiable"],
+      },
+      {
+        title: "Transfer limitation",
+        excerpt:
+          "Ensure overseas recipients provide comparable protection before transferring personal data outside Singapore.",
+        keywords: ["transfer limitation", "overseas", "comparable protection"],
+      },
+    ],
+    sources: ["PDPA", "PDPC guidelines"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "india-dpdp-regime",
+    title: "India DPDP Act 2023 — Digital Personal Data Protection",
+    jurisdiction: "India",
+    frameworkCodes: ["DPDP-IN"],
+    summary:
+      "The DPDP Act regulates digital personal data processing in India, requiring notice and verifiable consent, rights fulfillment, and Data Protection Board breach reporting.",
+    keyTopics: [
+      "DPDP notice and consent",
+      "verifiable consent",
+      "Data Protection Board",
+      "data fiduciary duties",
+      "breach notification",
+    ],
+    sections: [
+      {
+        title: "Notice and consent",
+        excerpt:
+          "Provide notice in specified languages and obtain verifiable consent for processing personal data.",
+        keywords: ["notice", "consent", "verifiable"],
+      },
+      {
+        title: "Data principal rights",
+        excerpt:
+          "Support access, correction, erasure, portability, and grievance redressal with defined timelines.",
+        keywords: ["access", "correction", "erasure", "grievance"],
+      },
+      {
+        title: "Breach notification",
+        excerpt:
+          "Notify the Data Protection Board and affected data principals of personal data breaches.",
+        keywords: ["breach", "board", "notification"],
+      },
+    ],
+    sources: ["DPDP Act 2023", "MeitY guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "south-africa-popia-regime",
+    title: "South Africa POPIA — Protection of Personal Information Act",
+    jurisdiction: "South Africa",
+    frameworkCodes: ["POPIA"],
+    summary:
+      "POPIA imposes eight processing conditions on responsible parties, requires an Information Officer, and mandates Information Regulator breach notification.",
+    keyTopics: [
+      "POPIA processing conditions",
+      "Information Officer",
+      "Information Regulator",
+      "cross-border transfer",
+      "security breach notification",
+    ],
+    sections: [
+      {
+        title: "Processing conditions",
+        excerpt:
+          "Comply with the eight conditions: accountability, processing limitation, purpose specification, further processing, information quality, openness, security, and data subject participation.",
+        keywords: ["conditions", "accountability", "purpose specification"],
+      },
+      {
+        title: "Information officer",
+        excerpt:
+          "Register an Information Officer and maintain a POPIA compliance framework.",
+        keywords: ["information officer", "registration", "compliance"],
+      },
+      {
+        title: "Cross-border and breach duties",
+        excerpt:
+          "Transfer data only to countries with adequate protection and notify the Regulator of security compromises.",
+        keywords: ["cross-border", "breach", "regulator"],
+      },
+    ],
+    sources: ["POPIA", "Information Regulator guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "uae-data-protection-regime",
+    title: "UAE Federal Data Protection Law (PDPL)",
+    jurisdiction: "United Arab Emirates",
+    frameworkCodes: ["ISO-27701", "ISO-27001"],
+    summary:
+      "The UAE Federal Decree-Law No. 45 of 2021 on Personal Data Protection establishes consent-based processing, DSR rights, and cross-border transfer restrictions under federal supervision.",
+    keyTopics: [
+      "UAE PDPL consent",
+      "data subject rights",
+      "cross-border transfer",
+      "federal enforcement",
+      "DIFC and ADGM regimes",
+    ],
+    sections: [
+      {
+        title: "Consent and purpose",
+        excerpt:
+          "Process personal data on lawful grounds with explicit consent for sensitive data and specified purposes.",
+        keywords: ["consent", "purpose", "sensitive data"],
+      },
+      {
+        title: "Rights and transfers",
+        excerpt:
+          "Support access, correction, and deletion rights and restrict transfers to countries without adequate protection.",
+        keywords: ["rights", "access", "transfer", "adequate"],
+      },
+      {
+        title: "Financial free-zone overlays",
+        excerpt:
+          "Entities in DIFC (DPF Law) and ADGM (DPR) must satisfy additional financial centre data protection rules.",
+        keywords: ["difc", "adgm", "financial free zone"],
+      },
+    ],
+    sources: [
+      "UAE Federal Decree-Law No. 45 of 2021",
+      "DIFC DPF Law",
+      "ADGM DPR",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "mexico-dpa-regime",
+    title: "Mexico Federal Law on Protection of Personal Data (LFPDPPP)",
+    jurisdiction: "Mexico",
+    frameworkCodes: ["MEXICO-DPA"],
+    summary:
+      "Mexico's LFPDPPP requires privacy notices, consent for sensitive data, ARCO rights (access, rectification, cancellation, opposition), and INAI breach notification.",
+    keyTopics: [
+      "privacy notice",
+      "ARCO rights",
+      "INAI breach notification",
+      "consent",
+      "transfer of data",
+    ],
+    sections: [
+      {
+        title: "Privacy notice and consent",
+        excerpt:
+          "Provide full privacy notices and obtain consent where required, especially for sensitive personal data.",
+        keywords: ["privacy notice", "consent", "sensitive"],
+      },
+      {
+        title: "ARCO rights",
+        excerpt:
+          "Operate procedures for access, rectification, cancellation, and opposition requests with statutory response timelines.",
+        keywords: ["arco", "access", "rectification", "opposition"],
+      },
+      {
+        title: "Breach notification",
+        excerpt:
+          "Notify INAI and affected owners of significant data breaches without delay.",
+        keywords: ["breach", "inai", "notification"],
+      },
+    ],
+    sources: ["LFPDPPP", "INAI guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "eu-cyber-resilience-regime",
+    title: "EU NIS2, DORA and AI Act Digital Resilience",
+    jurisdiction: "EU",
+    frameworkCodes: ["NIS2", "DORA", "EU-AI-ACT"],
+    summary:
+      "The EU digital resilience stack — NIS2 for essential entities, DORA for financial sector ICT risk, and the AI Act for AI systems — imposes reporting, governance, and testing duties.",
+    keyTopics: [
+      "NIS2 incident reporting",
+      "DORA ICT risk",
+      "EU AI Act risk classes",
+      "supply chain security",
+      "digital operational resilience",
+    ],
+    sections: [
+      {
+        title: "NIS2 reporting",
+        excerpt:
+          "Report significant incidents to the CSIRT within 24 hours (early warning) and a full notification within 72 hours.",
+        keywords: ["nis2", "csirt", "24 hours", "72 hours"],
+      },
+      {
+        title: "DORA ICT risk",
+        excerpt:
+          "Financial entities must run an ICT risk framework, third-party register, and regular resilience testing.",
+        keywords: ["dora", "ict risk", "third-party", "testing"],
+      },
+      {
+        title: "AI Act obligations",
+        excerpt:
+          "Classify AI systems by risk, run conformity assessments for high-risk systems, and maintain transparency.",
+        keywords: ["ai act", "risk classification", "conformity"],
+      },
+    ],
+    sources: ["NIS2 Directive", "DORA Regulation", "EU AI Act"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "global-isms-privacy-regime",
+    title:
+      "Global ISMS and Privacy Standards (ISO 27001/27701, SOC 2, NIST CSF)",
+    jurisdiction: "Global",
+    frameworkCodes: ["ISO-27001", "ISO-27701", "SOC2", "NIST-CSF-2"],
+    summary:
+      "International frameworks — ISO 27001 ISMS, ISO 27701 PIMS, SOC 2 trust services criteria, and NIST CSF 2.0 — provide the common control baseline for multi-jurisdiction compliance.",
+    keyTopics: [
+      "ISO 27001 ISMS",
+      "ISO 27701 PIMS",
+      "SOC 2 attestation",
+      "NIST CSF 2.0",
+      "shared control baseline",
+    ],
+    sections: [
+      {
+        title: "ISO 27001 ISMS",
+        excerpt:
+          "Establish a certified ISMS with risk assessment, Statement of Applicability, and Annex A controls.",
+        keywords: ["isms", "statement of applicability", "annex a"],
+      },
+      {
+        title: "ISO 27701 PIMS",
+        excerpt:
+          "Extend the ISMS with privacy controls aligned to GDPR and other privacy regimes.",
+        keywords: ["pims", "privacy", "gdpr"],
+      },
+      {
+        title: "SOC 2 and NIST CSF",
+        excerpt:
+          "Map Trust Services Criteria and NIST CSF functions to evidence artifacts for customer assurance.",
+        keywords: ["soc 2", "nist csf", "trust services criteria"],
+      },
+    ],
+    sources: ["ISO 27001", "ISO 27701", "AICPA TSC", "NIST CSF 2.0"],
     updatedAt: "2026-03-16",
   },
 ];

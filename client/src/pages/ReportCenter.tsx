@@ -56,7 +56,23 @@ type Jurisdiction =
   | "US"
   | "Brazil"
   | "Global"
-  | "both";
+  | "both"
+  | "United Kingdom"
+  | "Canada"
+  | "Australia"
+  | "Japan"
+  | "South Korea"
+  | "Singapore"
+  | "India"
+  | "South Africa"
+  | "Mexico"
+  | "United Arab Emirates"
+  | "Qatar"
+  | "Kuwait"
+  | "Bahrain"
+  | "Oman"
+  | "Jordan"
+  | "Egypt";
 type ReportLocale = "en" | "ar" | "zh";
 type ReportType =
   | "full_compliance"
@@ -581,6 +597,22 @@ export default function ReportCenter() {
                     "Brazil",
                     "Global",
                     "both",
+                    "United Kingdom",
+                    "Canada",
+                    "Australia",
+                    "Japan",
+                    "South Korea",
+                    "Singapore",
+                    "India",
+                    "South Africa",
+                    "Mexico",
+                    "United Arab Emirates",
+                    "Qatar",
+                    "Kuwait",
+                    "Bahrain",
+                    "Oman",
+                    "Jordan",
+                    "Egypt",
                   ] as Jurisdiction[]
                 ).map(j => (
                   <SelectItem key={j} value={j}>
@@ -596,10 +628,90 @@ export default function ReportCenter() {
                               ? t("reportCenter.jurisdictionBrazil", "Brazil")
                               : j === "Global"
                                 ? t("reportCenter.jurisdictionGlobal", "Global")
-                                : t(
-                                    "reportCenter.jurisdictionBoth",
-                                    "Both Jurisdictions"
-                                  )}
+                                : j === "United Kingdom"
+                                  ? t(
+                                      "reportCenter.jurisdictionUK",
+                                      "United Kingdom"
+                                    )
+                                  : j === "Canada"
+                                    ? t(
+                                        "reportCenter.jurisdictionCanada",
+                                        "Canada"
+                                      )
+                                    : j === "Australia"
+                                      ? t(
+                                          "reportCenter.jurisdictionAustralia",
+                                          "Australia"
+                                        )
+                                      : j === "Japan"
+                                        ? t(
+                                            "reportCenter.jurisdictionJapan",
+                                            "Japan"
+                                          )
+                                        : j === "South Korea"
+                                          ? t(
+                                              "reportCenter.jurisdictionSouthKorea",
+                                              "South Korea"
+                                            )
+                                          : j === "Singapore"
+                                            ? t(
+                                                "reportCenter.jurisdictionSingapore",
+                                                "Singapore"
+                                              )
+                                            : j === "India"
+                                              ? t(
+                                                  "reportCenter.jurisdictionIndia",
+                                                  "India"
+                                                )
+                                              : j === "South Africa"
+                                                ? t(
+                                                    "reportCenter.jurisdictionSouthAfrica",
+                                                    "South Africa"
+                                                  )
+                                                : j === "Mexico"
+                                                  ? t(
+                                                      "reportCenter.jurisdictionMexico",
+                                                      "Mexico"
+                                                    )
+                                                  : j === "United Arab Emirates"
+                                                    ? t(
+                                                        "reportCenter.jurisdictionUAE",
+                                                        "United Arab Emirates"
+                                                      )
+                                                    : j === "Qatar"
+                                                      ? t(
+                                                          "reportCenter.jurisdictionQatar",
+                                                          "Qatar"
+                                                        )
+                                                      : j === "Kuwait"
+                                                        ? t(
+                                                            "reportCenter.jurisdictionKuwait",
+                                                            "Kuwait"
+                                                          )
+                                                        : j === "Bahrain"
+                                                          ? t(
+                                                              "reportCenter.jurisdictionBahrain",
+                                                              "Bahrain"
+                                                            )
+                                                          : j === "Oman"
+                                                            ? t(
+                                                                "reportCenter.jurisdictionOman",
+                                                                "Oman"
+                                                              )
+                                                            : j === "Jordan"
+                                                              ? t(
+                                                                  "reportCenter.jurisdictionJordan",
+                                                                  "Jordan"
+                                                                )
+                                                              : j === "Egypt"
+                                                                ? t(
+                                                                    "reportCenter.jurisdictionEgypt",
+                                                                    "Egypt"
+                                                                  )
+                                                                : t(
+                                                                    "reportCenter.jurisdictionBoth",
+                                                                    "Both Jurisdictions"
+                                                                  )}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -3,6 +3,10 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { requireModulePermissionIfOrgContext } from "./_core/permission-guard";
 import { recordUserInteraction } from "./interaction-logger";
 import {
+  REPORT_JURISDICTIONS,
+  TIMETABLE_JURISDICTIONS,
+} from "./_core/jurisdictions";
+import {
   getComparisonTable,
   getObligationsByCountry,
   listComplianceObligations,
@@ -231,7 +235,7 @@ export const complianceFrameworkRouter = router({
   }),
 
   timetableByCountry: publicProcedure
-    .input(z.enum(["Saudi Arabia", "China", "EU", "US", "Brazil"]))
+    .input(z.enum(TIMETABLE_JURISDICTIONS))
     .query(({ input }) => {
       return getObligationsByCountry(input);
     }),
@@ -244,15 +248,7 @@ export const complianceFrameworkRouter = router({
   report: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z.enum(REPORT_JURISDICTIONS),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -300,15 +296,7 @@ export const complianceFrameworkRouter = router({
   reportPdf: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z.enum(REPORT_JURISDICTIONS),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -357,15 +345,7 @@ export const complianceFrameworkRouter = router({
   reportDocx: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z.enum(REPORT_JURISDICTIONS),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -414,15 +394,7 @@ export const complianceFrameworkRouter = router({
   emailReport: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z.enum(REPORT_JURISDICTIONS),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([
@@ -474,15 +446,7 @@ export const complianceFrameworkRouter = router({
   createShareLink: protectedProcedure
     .input(
       z.object({
-        jurisdiction: z.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z.enum(REPORT_JURISDICTIONS),
         locale: z.enum(["en", "ar", "zh"]).default("en"),
         reportType: z
           .enum([

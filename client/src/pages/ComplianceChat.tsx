@@ -36,7 +36,24 @@ const SUGGESTED_PROMPTS = [
   "Does LGPD in Brazil have requirements similar to GDPR's DPO role?",
 ];
 
-type Jurisdiction = "all" | "China" | "Saudi Arabia" | "EU" | "Brazil" | "US";
+type Jurisdiction =
+  | "all"
+  | "China"
+  | "Saudi Arabia"
+  | "EU"
+  | "Brazil"
+  | "US"
+  | "Global"
+  | "United Kingdom"
+  | "Canada"
+  | "Australia"
+  | "Japan"
+  | "South Korea"
+  | "Singapore"
+  | "India"
+  | "South Africa"
+  | "Mexico"
+  | "United Arab Emirates";
 
 export default function ComplianceChat() {
   const { t } = useLocale();
@@ -73,13 +90,8 @@ export default function ComplianceChat() {
     const newMessages: Message[] = [...messages, { role: "user", content }];
     setMessages(newMessages);
 
-    // Only send user/assistant messages to the server (no system role)
-    const apiJurisdiction: "all" | "China" | "Saudi Arabia" =
-      jurisdiction === "EU" ||
-      jurisdiction === "Brazil" ||
-      jurisdiction === "US"
-        ? "all"
-        : jurisdiction;
+    // Send the selected jurisdiction to the server (all are supported now)
+    const apiJurisdiction: Jurisdiction = jurisdiction;
     chatMutation.mutate({
       messages: newMessages
         .filter(m => m.role === "user" || m.role === "assistant")
@@ -146,6 +158,39 @@ export default function ComplianceChat() {
                 </SelectItem>
                 <SelectItem value="US">
                   {t("chat.jurisdictionUSA", "United States")}
+                </SelectItem>
+                <SelectItem value="Global">
+                  {t("chat.jurisdictionGlobal", "Global")}
+                </SelectItem>
+                <SelectItem value="United Kingdom">
+                  {t("chat.jurisdictionUK", "United Kingdom")}
+                </SelectItem>
+                <SelectItem value="Canada">
+                  {t("chat.jurisdictionCanada", "Canada")}
+                </SelectItem>
+                <SelectItem value="Australia">
+                  {t("chat.jurisdictionAustralia", "Australia")}
+                </SelectItem>
+                <SelectItem value="Japan">
+                  {t("chat.jurisdictionJapan", "Japan")}
+                </SelectItem>
+                <SelectItem value="South Korea">
+                  {t("chat.jurisdictionSouthKorea", "South Korea")}
+                </SelectItem>
+                <SelectItem value="Singapore">
+                  {t("chat.jurisdictionSingapore", "Singapore")}
+                </SelectItem>
+                <SelectItem value="India">
+                  {t("chat.jurisdictionIndia", "India")}
+                </SelectItem>
+                <SelectItem value="South Africa">
+                  {t("chat.jurisdictionSouthAfrica", "South Africa")}
+                </SelectItem>
+                <SelectItem value="Mexico">
+                  {t("chat.jurisdictionMexico", "Mexico")}
+                </SelectItem>
+                <SelectItem value="United Arab Emirates">
+                  {t("chat.jurisdictionUAE", "United Arab Emirates")}
                 </SelectItem>
               </SelectContent>
             </Select>

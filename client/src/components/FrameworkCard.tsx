@@ -47,6 +47,20 @@ export function FrameworkCard({
   const countryColors: Record<string, string> = {
     China: "var(--djac-red)",
     "Saudi Arabia": "var(--djac-green)",
+    EU: "var(--djac-blue)",
+    US: "var(--djac-purple)",
+    Brazil: "var(--djac-yellow)",
+    Global: "var(--djac-teal)",
+    "United Kingdom": "var(--djac-blue)",
+    Canada: "var(--djac-red)",
+    Australia: "var(--djac-green)",
+    Japan: "var(--djac-red)",
+    "South Korea": "var(--djac-blue)",
+    Singapore: "var(--djac-red)",
+    India: "var(--djac-orange)",
+    "South Africa": "var(--djac-green)",
+    Mexico: "var(--djac-green)",
+    "United Arab Emirates": "var(--djac-green)",
   };
   const countryColor = countryColors[country] ?? "var(--djac-muted)";
 

@@ -26,6 +26,7 @@ import { parsedEnv } from "./services/config-schema";
 import { activeOrgProcedure, router } from "./_core/trpc";
 import { requireModulePermission } from "./_core/permission-guard";
 import { searchLawKnowledge } from "./legal-knowledge";
+import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
 import { recordUserInteraction } from "./interaction-logger";
 
 // ── Schemas ────────────────────────────────────────────────────────────────
@@ -43,7 +44,7 @@ const chatInputSchema = z.object({
    * Omit or pass "all" to search across all jurisdictions.
    */
   jurisdiction: z
-    .enum(["all", "China", "Saudi Arabia", "EU", "US", "Brazil", "Global"])
+    .enum(["all", ...GLOBAL_JURISDICTIONS])
     .optional()
     .default("all"),
 });
@@ -55,10 +56,20 @@ const SYSTEM_PROMPT_PREFIX = `You are the DJAC Compliance Assistant — an exper
 Your knowledge covers:
 • China: PIPL (Personal Information Protection Law), CSL (Cybersecurity Law), DSL (Data Security Law)
 • Saudi Arabia: PDPL (Personal Data Protection Law), NCA Essential Cybersecurity Controls (ECC)
-• EU: GDPR (General Data Protection Regulation)
-• US: CCPA (California Consumer Privacy Act), HIPAA, SOX
+• EU: GDPR, NIS2, DORA, EU AI Act
+• US: CCPA (California Consumer Privacy Act), HIPAA, SOX, PCI DSS, NIST CSF 2.0
 • Brazil: LGPD (Lei Geral de Proteção de Dados)
-• Global: ISO 27001, ISO 27701, SOC 2, NIST CSF
+• UK: UK GDPR (ICO) and its international data transfer agreement
+• Canada: PIPEDA (and provincial privacy laws)
+• Australia: Privacy Act 1988 and Australian Privacy Principles (APPs)
+• Japan: APPI (Act on the Protection of Personal Information)
+• South Korea: PIPA
+• Singapore: PDPA
+• India: DPDP Act 2023
+• South Africa: POPIA
+• Mexico: Federal Law on Protection of Personal Data (INAI)
+• Gulf: UAE, Qatar, Kuwait, Bahrain, Oman, Jordan, Egypt data protection regimes
+• Global: ISO 27001, ISO 27701, SOC 2, NIST CSF, PCI DSS
 • Cross-border data transfer frameworks, adequacy assessments, and multi-jurisdiction compliance strategies
 
 Guidelines:

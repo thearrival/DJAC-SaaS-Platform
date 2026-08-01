@@ -40,13 +40,29 @@ import {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const JURISDICTION_OPTIONS = [
+  { value: "Global", label: "Global" },
+  { value: "Both", label: "Both — China & Saudi Arabia" },
   { value: "China", label: "China (CN)" },
   { value: "Saudi Arabia", label: "Saudi Arabia (SA)" },
   { value: "EU", label: "European Union (EU)" },
   { value: "US", label: "United States (US)" },
   { value: "Brazil", label: "Brazil (BR)" },
-  { value: "Global", label: "Global" },
-  { value: "Both", label: "Both — China & Saudi Arabia" },
+  { value: "United Kingdom", label: "United Kingdom (UK)" },
+  { value: "Canada", label: "Canada (CA)" },
+  { value: "Australia", label: "Australia (AU)" },
+  { value: "Japan", label: "Japan (JP)" },
+  { value: "South Korea", label: "South Korea (KR)" },
+  { value: "Singapore", label: "Singapore (SG)" },
+  { value: "India", label: "India (IN)" },
+  { value: "South Africa", label: "South Africa (ZA)" },
+  { value: "Mexico", label: "Mexico (MX)" },
+  { value: "United Arab Emirates", label: "United Arab Emirates (AE)" },
+  { value: "Qatar", label: "Qatar (QA)" },
+  { value: "Kuwait", label: "Kuwait (KW)" },
+  { value: "Bahrain", label: "Bahrain (BH)" },
+  { value: "Oman", label: "Oman (OM)" },
+  { value: "Jordan", label: "Jordan (JO)" },
+  { value: "Egypt", label: "Egypt (EG)" },
   { value: "Other", label: "Other / Custom" },
 ] as const;
 
@@ -165,8 +181,28 @@ export default function OrgSettings() {
       primaryJurisdiction: jurisdiction as
         | "China"
         | "Saudi Arabia"
+        | "EU"
+        | "US"
+        | "Brazil"
+        | "Global"
         | "Both"
-        | "Other",
+        | "Other"
+        | "United Kingdom"
+        | "Canada"
+        | "Australia"
+        | "Japan"
+        | "South Korea"
+        | "Singapore"
+        | "India"
+        | "South Africa"
+        | "Mexico"
+        | "United Arab Emirates"
+        | "Qatar"
+        | "Kuwait"
+        | "Bahrain"
+        | "Oman"
+        | "Jordan"
+        | "Egypt",
     });
     setDirty(false);
   }

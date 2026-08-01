@@ -755,6 +755,12 @@ export default function VendorRiskDashboard() {
               "US",
               "Brazil",
               "Global",
+              "United Kingdom",
+              "Canada",
+              "Japan",
+              "Singapore",
+              "India",
+              "United Arab Emirates",
             ] as const
           ).map(j => {
             const active = jurisFilter === j;
