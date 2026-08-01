@@ -135,6 +135,19 @@ function stageIndex(stage: string): number {
 }
 
 // ── Mini gauge ────────────────────────────────────────────────────────────────
+const GLOBAL_SCORE_LABELS: Record<string, string> = {
+  uk: "UK",
+  canada: "CA",
+  australia: "AU",
+  japan: "JP",
+  southKorea: "KR",
+  singapore: "SG",
+  india: "IN",
+  southAfrica: "ZA",
+  mexico: "MX",
+  uae: "UAE",
+};
+
 function MiniGauge({
   value,
   color,
@@ -529,6 +542,30 @@ export function AIOrchestrationFeed() {
             color={isDark ? "#FFD600" : "#d97706"}
             label={`${t("assessmentHistory.scoreRegion2", "EMEA")} (PDPL)`}
           />
+          {/* Additional global jurisdiction gauges — up to 4 below-threshold scores */}
+          {Object.entries(assessment.jurisdictionScores ?? {})
+            .filter(
+              ([key, score]) =>
+                key in GLOBAL_SCORE_LABELS &&
+                typeof score === "number" &&
+                score < 100
+            )
+            .sort(([, a], [, b]) => (a as number) - (b as number))
+            .slice(0, 4)
+            .map(([key, score]) => (
+              <MiniGauge
+                key={key}
+                value={score as number}
+                color={
+                  (score as number) >= 85
+                    ? "#22c55e"
+                    : (score as number) >= 65
+                      ? "#eab308"
+                      : "#ef4444"
+                }
+                label={GLOBAL_SCORE_LABELS[key]}
+              />
+            ))}
           <div style={{ flex: 1 }}>
             <div
               style={{

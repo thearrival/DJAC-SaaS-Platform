@@ -469,6 +469,8 @@ export default function ClientWorkspace() {
     trpc.compliance.frameworksByCountry.useQuery("Saudi Arabia");
   const chinaFrameworksQuery =
     trpc.compliance.frameworksByCountry.useQuery("China");
+  const ukFrameworksQuery =
+    trpc.compliance.frameworksByCountry.useQuery("United Kingdom");
   const globalRegistrySummaryQuery =
     trpc.compliance.globalRegistrySummary.useQuery(undefined, {
       refetchOnWindowFocus: false,
@@ -1938,7 +1940,7 @@ export default function ClientWorkspace() {
             <CardDescription>
               {t(
                 "client.regulatoryWatchDesc",
-                "Quick references for current APAC, EMEA, and global framework entries available in your environment."
+                "Quick references for current APAC, EMEA, UK, and global framework entries available in your environment."
               )}
             </CardDescription>
           </CardHeader>
@@ -2033,6 +2035,50 @@ export default function ClientWorkspace() {
               ) : (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {(saudiFrameworksQuery.data ?? []).map(framework => (
+                    <Badge key={framework.id} variant="secondary">
+                      {framework.code} · {framework.name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="rounded-lg border border-border p-3">
+              <h3 className="text-sm font-semibold">
+                {t("client.uk", "United Kingdom")}
+              </h3>
+              {ukFrameworksQuery.isLoading ? (
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="mt-2 animate-pulse text-xs text-muted-foreground"
+                >
+                  {t("client.loadingFrameworks", "Loading frameworks...")}
+                </p>
+              ) : ukFrameworksQuery.isError ? (
+                <div className="mt-2 flex flex-col gap-2">
+                  <p className="text-xs text-destructive">
+                    {ukFrameworksQuery.error?.message ||
+                      t(
+                        "client.frameworksLoadError",
+                        "Failed to load frameworks."
+                      )}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={() => ukFrameworksQuery.refetch()}
+                  >
+                    {t("common.retry", "Retry")}
+                  </Button>
+                </div>
+              ) : (ukFrameworksQuery.data ?? []).length === 0 ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t("client.noFrameworksFound", "No frameworks available.")}
+                </p>
+              ) : (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(ukFrameworksQuery.data ?? []).map(framework => (
                     <Badge key={framework.id} variant="secondary">
                       {framework.code} · {framework.name}
                     </Badge>
