@@ -43,8 +43,6 @@ jobs:
       - name: Health Check
         run: |
           sleep 15
-          echo "== Redirect trace =="
-          curl -sIL --max-redirs 5 "${{ steps.deploy.outputs.deploy_url }}/api/status" | grep -iE "^(HTTP|Location)" || true
           STATUS=$(curl -sfL --max-redirs 5 "${{ steps.deploy.outputs.deploy_url }}/api/status") || exit 1
           echo "$STATUS" | jq -e '.ok == true and .dbConnected == true and .env == "production"' >/dev/null || {
             echo "API not fully healthy: $STATUS"
