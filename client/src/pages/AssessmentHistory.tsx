@@ -68,7 +68,11 @@ interface JobGap {
 
 interface JobAssessment {
   overallScore: number;
-  jurisdictionScores: { china: number; saudiArabia: number };
+  jurisdictionScores: {
+    china: number;
+    saudiArabia: number;
+    [key: string]: number | undefined;
+  };
   status: "compliant" | "partial" | "non_compliant";
   riskLevel: "low" | "medium" | "high" | "critical";
   gaps: JobGap[];
@@ -343,6 +347,32 @@ function EventTimeline({
 
 // ─── Score Mini ────────────────────────────────────────────────────────────────
 
+const ADDITIONAL_SCORE_LABELS: Record<string, string> = {
+  uk: "UK",
+  canada: "CA",
+  australia: "AU",
+  japan: "JP",
+  southKorea: "KR",
+  singapore: "SG",
+  india: "IN",
+  southAfrica: "ZA",
+  mexico: "MX",
+  uae: "UAE",
+  qatar: "QA",
+  kuwait: "KW",
+  bahrain: "BH",
+  oman: "OM",
+  jordan: "JO",
+  egypt: "EG",
+  indonesia: "ID",
+  thailand: "TH",
+  vietnam: "VN",
+  philippines: "PH",
+  malaysia: "MY",
+  nigeria: "NG",
+  kenya: "KE",
+};
+
 function ScoreMini({ label, score }: { label: string; score: number }) {
   const color = score >= 85 ? "#22c55e" : score >= 65 ? "#eab308" : "#ef4444";
   return (
@@ -547,6 +577,21 @@ function JobCard({
                 label={scoreLabels.region2}
                 score={assessment.jurisdictionScores.saudiArabia}
               />
+              {Object.entries(assessment.jurisdictionScores ?? {})
+                .filter(([key]) => ADDITIONAL_SCORE_LABELS[key])
+                .filter(
+                  ([, score]) =>
+                    typeof score === "number" &&
+                    score !== undefined &&
+                    score < 100
+                )
+                .map(([key, score]) => (
+                  <ScoreMini
+                    key={key}
+                    label={ADDITIONAL_SCORE_LABELS[key]}
+                    score={score as number}
+                  />
+                ))}
             </div>
           )}
         </div>

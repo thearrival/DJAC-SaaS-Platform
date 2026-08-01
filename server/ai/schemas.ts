@@ -1,4 +1,12 @@
 import { z } from "zod";
+import {
+  JURISDICTION_SCORE_KEYS,
+  type JurisdictionScoreKey,
+} from "../supplier-assessment";
+
+const jurisdictionScoreShape = Object.fromEntries(
+  JURISDICTION_SCORE_KEYS.map(key => [key, z.number().int().min(0).max(100)])
+) as Record<JurisdictionScoreKey, z.ZodNumber>;
 
 export const aiJobStatusSchema = z.enum([
   "queued",
@@ -39,6 +47,29 @@ export const supplierGapSchema = z.object({
     "brazil",
     "cross_border",
     "global",
+    "uk",
+    "canada",
+    "australia",
+    "japan",
+    "southKorea",
+    "singapore",
+    "india",
+    "southAfrica",
+    "mexico",
+    "uae",
+    "qatar",
+    "kuwait",
+    "bahrain",
+    "oman",
+    "jordan",
+    "egypt",
+    "indonesia",
+    "thailand",
+    "vietnam",
+    "philippines",
+    "malaysia",
+    "nigeria",
+    "kenya",
   ]),
   frameworks: z.array(z.string().trim().min(1).max(32)).min(1).max(8),
   severity: assessmentSeveritySchema,
@@ -59,6 +90,7 @@ export const supplierAssessmentSchema = z.object({
     us: z.number().int().min(0).max(100),
     brazil: z.number().int().min(0).max(100),
     global: z.number().int().min(0).max(100),
+    ...jurisdictionScoreShape,
   }),
   status: z.enum(["compliant", "partial", "non_compliant"]),
   riskLevel: z.enum(["low", "medium", "high", "critical"]),
