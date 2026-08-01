@@ -419,6 +419,28 @@ export default function DashboardEnhanced() {
               </p>
             </CardContent>
           </Card>
+          <Card className="border-teal-200 dark:border-teal-900/40 bg-gradient-to-br from-teal-50 to-white dark:from-teal-950/30 dark:to-transparent">
+            <CardContent className="pt-6">
+              <p className="text-sm font-medium text-teal-700 dark:text-teal-300">
+                {t("enhanced.statGlobal", "Global")}
+              </p>
+              <p className="mt-2 text-3xl font-bold text-teal-950 dark:text-teal-100">
+                {
+                  (frameworks ?? []).filter(
+                    framework =>
+                      framework.country !== "China" &&
+                      framework.country !== "Saudi Arabia"
+                  ).length
+                }
+              </p>
+              <p className="mt-1 text-sm text-teal-700 dark:text-teal-300">
+                {t(
+                  "enhanced.statGlobalDesc",
+                  "ISO 27001, SOC 2, NIST CSF, GDPR, CCPA, LGPD and 40+ frameworks."
+                )}
+              </p>
+            </CardContent>
+          </Card>
           <Card className="border-purple-200 dark:border-purple-900/40 bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/30 dark:to-transparent">
             <CardContent className="pt-6">
               <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
@@ -1505,7 +1527,7 @@ export default function DashboardEnhanced() {
                             <p className="font-semibold text-foreground">
                               {row.topic}
                             </p>
-                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                            <div className="mt-3 grid gap-3 md:grid-cols-3">
                               <div>
                                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                                   {t("home.emea", "EMEA")}
@@ -1520,6 +1542,14 @@ export default function DashboardEnhanced() {
                                 </p>
                                 <p className="mt-1 text-sm text-foreground">
                                   {row.china}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                  {t("enhanced.compareGlobal", "Global")}
+                                </p>
+                                <p className="mt-1 text-sm text-foreground">
+                                  {row.eu ?? row.us ?? row.brazil ?? "\u2014"}
                                 </p>
                               </div>
                             </div>
