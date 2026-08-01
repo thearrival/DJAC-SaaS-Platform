@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "./_core/trpc";
 import { requireModulePermissionIfOrgContext } from "./_core/permission-guard";
+import { DEADLINE_JURISDICTIONS } from "./_core/jurisdictions";
 import {
   listDeadlines,
   createDeadline,
@@ -14,17 +15,7 @@ export const deadlineRouter = router({
     .input(
       z
         .object({
-          jurisdiction: z
-            .enum([
-              "China",
-              "Saudi Arabia",
-              "EU",
-              "US",
-              "Brazil",
-              "Global",
-              "Both",
-            ])
-            .optional(),
+          jurisdiction: z.enum(DEADLINE_JURISDICTIONS).optional(),
           status: z
             .enum(["upcoming", "overdue", "completed", "waived"])
             .optional(),
@@ -62,15 +53,7 @@ export const deadlineRouter = router({
         title: z.string().trim().min(3).max(255),
         description: z.string().trim().max(2000).optional(),
         deadlineDate: z.string().datetime(),
-        jurisdiction: z.enum([
-          "China",
-          "Saudi Arabia",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "Both",
-        ]),
+        jurisdiction: z.enum(DEADLINE_JURISDICTIONS),
         priority: z.enum(["low", "medium", "high", "critical"]).optional(),
         assignedToUserId: z.number().int().positive().optional(),
       })

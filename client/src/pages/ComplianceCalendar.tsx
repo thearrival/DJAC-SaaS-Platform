@@ -48,7 +48,23 @@ type Jurisdiction =
   | "US"
   | "Brazil"
   | "Global"
-  | "Both";
+  | "Both"
+  | "United Kingdom"
+  | "Canada"
+  | "Australia"
+  | "Japan"
+  | "South Korea"
+  | "Singapore"
+  | "India"
+  | "South Africa"
+  | "Mexico"
+  | "United Arab Emirates"
+  | "Qatar"
+  | "Kuwait"
+  | "Bahrain"
+  | "Oman"
+  | "Jordan"
+  | "Egypt";
 
 type Translate = (key: string, fallback: string) => string;
 
@@ -100,6 +116,17 @@ const FRAMEWORK_COLORS: Record<string, string> = {
   DSL: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300",
   PDPL: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
   NCA: "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300",
+  GDPR: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
+  "UK-GDPR": "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
+  LGPD: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300",
+  "ISO-27001":
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+  "ISO-27701":
+    "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+  NIS2: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300",
+  DORA: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300",
+  "PCI-DSS":
+    "bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-300",
 };
 
 const JURISDICTION_FLAG: Record<Jurisdiction, string> = {
@@ -110,6 +137,22 @@ const JURISDICTION_FLAG: Record<Jurisdiction, string> = {
   Brazil: "🇧🇷",
   Global: "🌍",
   Both: "🌐",
+  "United Kingdom": "🇬🇧",
+  Canada: "🇨🇦",
+  Australia: "🇦🇺",
+  Japan: "🇯🇵",
+  "South Korea": "🇰🇷",
+  Singapore: "🇸🇬",
+  India: "🇮🇳",
+  "South Africa": "🇿🇦",
+  Mexico: "🇲🇽",
+  "United Arab Emirates": "🇦🇪",
+  Qatar: "🇶🇦",
+  Kuwait: "🇰🇼",
+  Bahrain: "🇧🇭",
+  Oman: "🇴🇲",
+  Jordan: "🇯🇴",
+  Egypt: "🇪🇬",
 };
 
 function daysUntil(date: string | Date): number {
@@ -477,6 +520,54 @@ export default function ComplianceCalendar() {
                       </SelectItem>
                       <SelectItem value="Both">
                         🌐 {t("calendar.countryBoth", "Both")}
+                      </SelectItem>
+                      <SelectItem value="United Kingdom">
+                        🇬🇧 {t("calendar.countryUK", "United Kingdom")}
+                      </SelectItem>
+                      <SelectItem value="Canada">
+                        🇨🇦 {t("calendar.countryCanada", "Canada")}
+                      </SelectItem>
+                      <SelectItem value="Australia">
+                        🇦🇺 {t("calendar.countryAustralia", "Australia")}
+                      </SelectItem>
+                      <SelectItem value="Japan">
+                        🇯🇵 {t("calendar.countryJapan", "Japan")}
+                      </SelectItem>
+                      <SelectItem value="South Korea">
+                        🇰🇷 {t("calendar.countrySouthKorea", "South Korea")}
+                      </SelectItem>
+                      <SelectItem value="Singapore">
+                        🇸🇬 {t("calendar.countrySingapore", "Singapore")}
+                      </SelectItem>
+                      <SelectItem value="India">
+                        🇮🇳 {t("calendar.countryIndia", "India")}
+                      </SelectItem>
+                      <SelectItem value="South Africa">
+                        🇿🇦 {t("calendar.countrySouthAfrica", "South Africa")}
+                      </SelectItem>
+                      <SelectItem value="Mexico">
+                        🇲🇽 {t("calendar.countryMexico", "Mexico")}
+                      </SelectItem>
+                      <SelectItem value="United Arab Emirates">
+                        🇦🇪 {t("calendar.countryUAE", "United Arab Emirates")}
+                      </SelectItem>
+                      <SelectItem value="Qatar">
+                        🇶🇦 {t("calendar.countryQatar", "Qatar")}
+                      </SelectItem>
+                      <SelectItem value="Kuwait">
+                        🇰🇼 {t("calendar.countryKuwait", "Kuwait")}
+                      </SelectItem>
+                      <SelectItem value="Bahrain">
+                        🇧🇭 {t("calendar.countryBahrain", "Bahrain")}
+                      </SelectItem>
+                      <SelectItem value="Oman">
+                        🇴🇲 {t("calendar.countryOman", "Oman")}
+                      </SelectItem>
+                      <SelectItem value="Jordan">
+                        🇯🇴 {t("calendar.countryJordan", "Jordan")}
+                      </SelectItem>
+                      <SelectItem value="Egypt">
+                        🇪🇬 {t("calendar.countryEgypt", "Egypt")}
                       </SelectItem>
                     </SelectContent>
                   </Select>

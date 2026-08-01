@@ -35,6 +35,24 @@ const FRAMEWORKS = [
   "GDPR",
   "CCPA",
   "LGPD",
+  "ISO-27001",
+  "ISO-27701",
+  "SOC2",
+  "NIST-CSF-2",
+  "HIPAA",
+  "PCI-DSS",
+  "NIS2",
+  "DORA",
+  "EU-AI-ACT",
+  "UK-GDPR",
+  "PIPEDA",
+  "PRIVACY-ACT-AU",
+  "APPI",
+  "PIPA-KR",
+  "PDPA-SG",
+  "DPDP-IN",
+  "POPIA",
+  "MEXICO-DPA",
 ] as const;
 type Framework = (typeof FRAMEWORKS)[number];
 
@@ -47,6 +65,45 @@ const FRAMEWORK_LABELS: Record<Framework, { name: string; country: string }> = {
   GDPR: { name: "General Data Protection Regulation", country: "EU" },
   CCPA: { name: "California Consumer Privacy Act", country: "US" },
   LGPD: { name: "Lei Geral de Proteção de Dados", country: "Brazil" },
+  "ISO-27001": { name: "ISO/IEC 27001 ISMS", country: "Global" },
+  "ISO-27701": { name: "ISO/IEC 27701 PIMS", country: "Global" },
+  SOC2: { name: "SOC 2 Trust Services", country: "US" },
+  "NIST-CSF-2": { name: "NIST Cybersecurity Framework 2.0", country: "US" },
+  HIPAA: {
+    name: "Health Insurance Portability & Accountability Act",
+    country: "US",
+  },
+  "PCI-DSS": {
+    name: "Payment Card Industry Data Security Standard",
+    country: "Global",
+  },
+  NIS2: { name: "Network and Information Security Directive 2", country: "EU" },
+  DORA: { name: "Digital Operational Resilience Act", country: "EU" },
+  "EU-AI-ACT": { name: "EU Artificial Intelligence Act", country: "EU" },
+  "UK-GDPR": {
+    name: "UK General Data Protection Regulation",
+    country: "United Kingdom",
+  },
+  PIPEDA: {
+    name: "Personal Information Protection & Electronic Documents Act",
+    country: "Canada",
+  },
+  "PRIVACY-ACT-AU": { name: "Privacy Act 1988 (APPs)", country: "Australia" },
+  APPI: { name: "Act on Protection of Personal Information", country: "Japan" },
+  "PIPA-KR": {
+    name: "Personal Information Protection Act",
+    country: "South Korea",
+  },
+  "PDPA-SG": { name: "Personal Data Protection Act", country: "Singapore" },
+  "DPDP-IN": { name: "Digital Personal Data Protection Act", country: "India" },
+  POPIA: {
+    name: "Protection of Personal Information Act",
+    country: "South Africa",
+  },
+  "MEXICO-DPA": {
+    name: "Ley Federal de Protección de Datos",
+    country: "Mexico",
+  },
 };
 
 const RELATIONSHIP_TYPES: RelationshipType[] = [

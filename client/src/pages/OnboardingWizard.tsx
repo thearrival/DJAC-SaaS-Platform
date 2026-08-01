@@ -50,6 +50,22 @@ export default function OnboardingWizard() {
     | "Both"
     | "Other"
     | "Global"
+    | "United Kingdom"
+    | "Canada"
+    | "Australia"
+    | "Japan"
+    | "South Korea"
+    | "Singapore"
+    | "India"
+    | "South Africa"
+    | "Mexico"
+    | "United Arab Emirates"
+    | "Qatar"
+    | "Kuwait"
+    | "Bahrain"
+    | "Oman"
+    | "Jordan"
+    | "Egypt"
   >("Both");
   const [selectedVendorId, setSelectedVendorId] = useState<number | null>(null);
   const [assessmentResult, setAssessmentResult] = useState<{
@@ -467,8 +483,28 @@ export default function OnboardingWizard() {
                   const valid = [
                     "China",
                     "Saudi Arabia",
+                    "EU",
+                    "US",
+                    "Brazil",
+                    "Global",
                     "Both",
                     "Other",
+                    "United Kingdom",
+                    "Canada",
+                    "Australia",
+                    "Japan",
+                    "South Korea",
+                    "Singapore",
+                    "India",
+                    "South Africa",
+                    "Mexico",
+                    "United Arab Emirates",
+                    "Qatar",
+                    "Kuwait",
+                    "Bahrain",
+                    "Oman",
+                    "Jordan",
+                    "Egypt",
                   ] as const;
                   if ((valid as readonly string[]).includes(v)) {
                     setSelectedJurisdiction(v as (typeof valid)[number]);
@@ -484,14 +520,56 @@ export default function OnboardingWizard() {
                   />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Global">
+                    {t("wizard.countryGlobal", "Global")}
+                  </SelectItem>
+                  <SelectItem value="Both">
+                    {t("wizard.countryBoth", "Both")}
+                  </SelectItem>
                   <SelectItem value="China">
                     {t("wizard.countryChina", "China")}
                   </SelectItem>
                   <SelectItem value="Saudi Arabia">
                     {t("wizard.countrySaudiArabia", "Saudi Arabia")}
                   </SelectItem>
-                  <SelectItem value="Both">
-                    {t("wizard.countryBoth", "Both")}
+                  <SelectItem value="EU">
+                    {t("wizard.countryEU", "EU")}
+                  </SelectItem>
+                  <SelectItem value="US">
+                    {t("wizard.countryUS", "US")}
+                  </SelectItem>
+                  <SelectItem value="Brazil">
+                    {t("wizard.countryBrazil", "Brazil")}
+                  </SelectItem>
+                  <SelectItem value="United Kingdom">
+                    {t("wizard.countryUK", "United Kingdom")}
+                  </SelectItem>
+                  <SelectItem value="Canada">
+                    {t("wizard.countryCanada", "Canada")}
+                  </SelectItem>
+                  <SelectItem value="Australia">
+                    {t("wizard.countryAustralia", "Australia")}
+                  </SelectItem>
+                  <SelectItem value="Japan">
+                    {t("wizard.countryJapan", "Japan")}
+                  </SelectItem>
+                  <SelectItem value="South Korea">
+                    {t("wizard.countrySouthKorea", "South Korea")}
+                  </SelectItem>
+                  <SelectItem value="Singapore">
+                    {t("wizard.countrySingapore", "Singapore")}
+                  </SelectItem>
+                  <SelectItem value="India">
+                    {t("wizard.countryIndia", "India")}
+                  </SelectItem>
+                  <SelectItem value="South Africa">
+                    {t("wizard.countrySouthAfrica", "South Africa")}
+                  </SelectItem>
+                  <SelectItem value="Mexico">
+                    {t("wizard.countryMexico", "Mexico")}
+                  </SelectItem>
+                  <SelectItem value="United Arab Emirates">
+                    {t("wizard.countryUAE", "United Arab Emirates")}
                   </SelectItem>
                   <SelectItem value="Other">
                     {t("wizard.countryOther", "Other")}

@@ -156,6 +156,51 @@ export async function ensureMigrated(): Promise<void> {
             ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")
         `);
 
+    // Migration 0003: expand enums for global jurisdiction coverage (idempotent)
+    const globalJurisdictions = [
+      "United Kingdom",
+      "Canada",
+      "Australia",
+      "Japan",
+      "South Korea",
+      "Singapore",
+      "India",
+      "South Africa",
+      "Mexico",
+      "Thailand",
+      "Indonesia",
+      "Malaysia",
+      "Philippines",
+      "Vietnam",
+      "Nigeria",
+      "Kenya",
+      "United Arab Emirates",
+      "Qatar",
+      "Kuwait",
+      "Bahrain",
+      "Oman",
+      "Jordan",
+      "Egypt",
+    ];
+    for (const j of globalJurisdictions) {
+      const escaped = j.replace(/'/g, "''");
+      await db.execute(
+        sql.raw(
+          `ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
+        )
+      );
+      await db.execute(
+        sql.raw(
+          `ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
+        )
+      );
+      await db.execute(
+        sql.raw(
+          `ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
+        )
+      );
+    }
+
     // Seed compliance reference data into DB (idempotent upserts)
     await seedComplianceFrameworks(db);
 

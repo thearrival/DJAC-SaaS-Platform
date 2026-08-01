@@ -5,6 +5,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { dsrRequests } from "../drizzle/schema";
 import { getDb } from "./db";
+import { NEW_GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,6 +25,7 @@ export const JURISDICTIONS = [
   "US",
   "Brazil",
   "Other",
+  ...NEW_GLOBAL_JURISDICTIONS,
 ] as const;
 export const STATUSES = [
   "received",

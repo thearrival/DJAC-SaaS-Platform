@@ -4,6 +4,7 @@
  */
 import { and, eq, isNull, desc, or } from "drizzle-orm";
 import { getDb } from "./db";
+import { DEADLINE_JURISDICTIONS } from "./_core/jurisdictions";
 import {
   complianceDeadlines,
   organizationMembers,
@@ -344,6 +345,244 @@ const GLOBAL_DEADLINES: ComplianceDeadline[] = [
     createdAt: NOW,
     updatedAt: NOW,
   },
+  {
+    id: 20,
+    organizationId: null,
+    frameworkCode: "UK-GDPR",
+    title: "UK GDPR ICO Breach Notification (72 hours)",
+    description:
+      "Notify the ICO within 72 hours of becoming aware of a personal data breach posing risk to individuals, per UK GDPR Article 33.",
+    deadlineDate: d(5),
+    jurisdiction: "United Kingdom",
+    priority: "critical",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 21,
+    organizationId: null,
+    frameworkCode: "UK-GDPR",
+    title: "UK IDTA Transfer Review",
+    description:
+      "Complete UK International Data Transfer Agreement documentation for transfers to third countries without UK adequacy.",
+    deadlineDate: d(40),
+    jurisdiction: "United Kingdom",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 22,
+    organizationId: null,
+    frameworkCode: "NIS2",
+    title: "NIS2 Incident Early Warning (24 hours)",
+    description:
+      "Essential and important entities must submit an early warning to the national CSIRT within 24 hours of a significant incident.",
+    deadlineDate: d(10),
+    jurisdiction: "EU",
+    priority: "critical",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 23,
+    organizationId: null,
+    frameworkCode: "DORA",
+    title: "DORA ICT Third-Party Register Update",
+    description:
+      "EU financial entities must maintain and update the register of ICT third-party arrangements for supervisory reporting.",
+    deadlineDate: d(30),
+    jurisdiction: "EU",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 24,
+    organizationId: null,
+    frameworkCode: "PIPEDA",
+    title: "PIPEDA Material Breach Reporting to OPC",
+    description:
+      "Report material data breaches to the Office of the Privacy Commissioner of Canada and notify affected individuals where risk of significant harm exists.",
+    deadlineDate: d(25),
+    jurisdiction: "Canada",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 25,
+    organizationId: null,
+    frameworkCode: "PRIVACY-ACT-AU",
+    title: "Australia Notifiable Data Breach Reporting",
+    description:
+      "Notify the OAIC and affected individuals when a data breach is likely to result in serious harm under the Notifiable Data Breaches scheme.",
+    deadlineDate: d(35),
+    jurisdiction: "Australia",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 26,
+    organizationId: null,
+    frameworkCode: "APPI",
+    title: "APPI PPC Breach Notification",
+    description:
+      "Report qualifying personal data breaches to Japan's Personal Information Protection Commission and notify affected data subjects.",
+    deadlineDate: d(15),
+    jurisdiction: "Japan",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 27,
+    organizationId: null,
+    frameworkCode: "PIPA-KR",
+    title: "PIPA PIPC Breach Notification",
+    description:
+      "Notify Korea's Personal Information Protection Commission and affected data subjects of personal information breaches without delay.",
+    deadlineDate: d(20),
+    jurisdiction: "South Korea",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 28,
+    organizationId: null,
+    frameworkCode: "PDPA-SG",
+    title: "Singapore PDPA Notifiable Breach Assessment",
+    description:
+      "Assess whether a data breach is notifiable and inform the PDPC and affected individuals within prescribed timelines.",
+    deadlineDate: d(12),
+    jurisdiction: "Singapore",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 29,
+    organizationId: null,
+    frameworkCode: "DPDP-IN",
+    title: "DPDP Act Breach Notification to Data Protection Board",
+    description:
+      "Notify the Data Protection Board of India and affected data principals of personal data breaches per DPDP Act obligations.",
+    deadlineDate: d(18),
+    jurisdiction: "India",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 30,
+    organizationId: null,
+    frameworkCode: "POPIA",
+    title: "POPIA Security Compromise Notification",
+    description:
+      "Notify the South African Information Regulator and affected data subjects of security compromises per POPIA Section 22.",
+    deadlineDate: d(22),
+    jurisdiction: "South Africa",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 31,
+    organizationId: null,
+    frameworkCode: "PCI-DSS",
+    title: "PCI DSS Annual SAQ and Attestation of Compliance",
+    description:
+      "Complete the annual Self-Assessment Questionnaire and Attestation of Compliance for cardholder data environments.",
+    deadlineDate: d(55),
+    jurisdiction: "Global",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 32,
+    organizationId: null,
+    frameworkCode: "ISO-27001",
+    title: "ISO 27001 Surveillance Audit Preparation",
+    description:
+      "Prepare evidence for the annual ISO 27001 surveillance audit, including management review and internal audit records.",
+    deadlineDate: d(50),
+    jurisdiction: "Global",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 33,
+    organizationId: null,
+    frameworkCode: "MEXICO-DPA",
+    title: "Mexico ARCO Rights Response Obligation",
+    description:
+      "Respond to ARCO rights requests within statutory timelines and maintain the privacy notice registry under LFPDPPP.",
+    deadlineDate: d(28),
+    jurisdiction: "Mexico",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
 ];
 
 const memoryDeadlines: ComplianceDeadline[] = [...GLOBAL_DEADLINES];
@@ -354,14 +593,7 @@ let nextId = GLOBAL_DEADLINES.length + 1;
 // ---------------------------------------------------------------------------
 export type DeadlineFilters = {
   organizationId?: number | null;
-  jurisdiction?:
-    | "China"
-    | "Saudi Arabia"
-    | "EU"
-    | "US"
-    | "Brazil"
-    | "Global"
-    | "Both";
+  jurisdiction?: (typeof DEADLINE_JURISDICTIONS)[number];
   status?: "upcoming" | "overdue" | "completed" | "waived";
   frameworkCode?: string;
   limit?: number;
@@ -433,14 +665,7 @@ export type CreateDeadlineInput = {
   title: string;
   description?: string;
   deadlineDate: Date;
-  jurisdiction:
-    | "China"
-    | "Saudi Arabia"
-    | "EU"
-    | "US"
-    | "Brazil"
-    | "Global"
-    | "Both";
+  jurisdiction: (typeof DEADLINE_JURISDICTIONS)[number];
   priority?: "low" | "medium" | "high" | "critical";
   assignedToUserId?: number | null;
 };

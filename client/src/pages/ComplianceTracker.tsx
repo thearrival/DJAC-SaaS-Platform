@@ -236,7 +236,22 @@ function CountryTab({ country }: { country: string }) {
     error: countryError,
     refetch: refetchCountry,
   } = trpc.compliance.timetableByCountry.useQuery(
-    country as "China" | "Saudi Arabia" | "EU" | "US" | "Brazil",
+    country as
+      | "China"
+      | "Saudi Arabia"
+      | "EU"
+      | "US"
+      | "Brazil"
+      | "United Kingdom"
+      | "Canada"
+      | "Australia"
+      | "Japan"
+      | "South Korea"
+      | "Singapore"
+      | "India"
+      | "South Africa"
+      | "Mexico"
+      | "United Arab Emirates",
     {
       refetchOnWindowFocus: false,
     }
@@ -791,7 +806,7 @@ export default function ComplianceTracker() {
       <SummaryCards />
 
       <Tabs defaultValue="saudi" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="saudi" className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4" />
             {t("tracker.tabSaudi", "🇸🇦 Saudi Arabia")}
@@ -811,6 +826,14 @@ export default function ComplianceTracker() {
           <TabsTrigger value="brazil" className="flex items-center gap-2">
             <Globe2 className="h-4 w-4" />
             {t("tracker.tabBrazil", "🇧🇷 Brazil")}
+          </TabsTrigger>
+          <TabsTrigger value="uk" className="flex items-center gap-2">
+            <Globe2 className="h-4 w-4" />
+            {t("tracker.tabUK", "🇬🇧 UK")}
+          </TabsTrigger>
+          <TabsTrigger value="global" className="flex items-center gap-2">
+            <Globe2 className="h-4 w-4" />
+            {t("tracker.tabGlobal", "🌍 Global")}
           </TabsTrigger>
           <TabsTrigger value="comparison" className="flex items-center gap-2">
             <ArrowLeftRight className="h-4 w-4" />
@@ -917,6 +940,49 @@ export default function ComplianceTracker() {
             </CardHeader>
             <CardContent>
               <CountryTab country="Brazil" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="uk">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe2 className="h-5 w-5 text-blue-600" />
+                {t(
+                  "tracker.ukTitle",
+                  "United Kingdom — Compliance Obligations"
+                )}
+              </CardTitle>
+              <CardDescription>
+                {t(
+                  "tracker.ukDesc",
+                  "UK GDPR (ICO), Data Protection Act 2018, and UK IDTA transfer obligations."
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CountryTab country="United Kingdom" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="global">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe2 className="h-5 w-5 text-teal-600" />
+                {t("tracker.globalTitle", "Global — Compliance Obligations")}
+              </CardTitle>
+              <CardDescription>
+                {t(
+                  "tracker.globalDesc",
+                  "ISO 27001, ISO 27701, SOC 2, NIST CSF, PCI DSS, and international transfer standards."
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CountryTab country="Global" />
             </CardContent>
           </Card>
         </TabsContent>

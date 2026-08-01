@@ -301,6 +301,9 @@ function OrgSetupForm({ onSuccess }: { onSuccess: () => void }) {
                 color: "var(--djac-text)",
               }}
             >
+              <SelectItem value="Global">
+                {t("billing.jurisdictionGlobal", "Global")}
+              </SelectItem>
               <SelectItem value="Both">
                 {t("billing.jurisdictionBoth", "Both (China + Saudi Arabia)")}
               </SelectItem>
@@ -318,6 +321,36 @@ function OrgSetupForm({ onSuccess }: { onSuccess: () => void }) {
               </SelectItem>
               <SelectItem value="Brazil">
                 {t("billing.jurisdictionBrazil", "Brazil Only")}
+              </SelectItem>
+              <SelectItem value="United Kingdom">
+                {t("billing.jurisdictionUK", "United Kingdom")}
+              </SelectItem>
+              <SelectItem value="Canada">
+                {t("billing.jurisdictionCanada", "Canada")}
+              </SelectItem>
+              <SelectItem value="Australia">
+                {t("billing.jurisdictionAustralia", "Australia")}
+              </SelectItem>
+              <SelectItem value="Japan">
+                {t("billing.jurisdictionJapan", "Japan")}
+              </SelectItem>
+              <SelectItem value="South Korea">
+                {t("billing.jurisdictionSouthKorea", "South Korea")}
+              </SelectItem>
+              <SelectItem value="Singapore">
+                {t("billing.jurisdictionSingapore", "Singapore")}
+              </SelectItem>
+              <SelectItem value="India">
+                {t("billing.jurisdictionIndia", "India")}
+              </SelectItem>
+              <SelectItem value="South Africa">
+                {t("billing.jurisdictionSouthAfrica", "South Africa")}
+              </SelectItem>
+              <SelectItem value="Mexico">
+                {t("billing.jurisdictionMexico", "Mexico")}
+              </SelectItem>
+              <SelectItem value="United Arab Emirates">
+                {t("billing.jurisdictionUAE", "United Arab Emirates")}
               </SelectItem>
               <SelectItem value="Other">
                 {t("billing.jurisdictionOther", "Other")}

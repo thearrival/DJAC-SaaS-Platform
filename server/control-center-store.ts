@@ -1196,6 +1196,14 @@ function buildRegionCoverage(
     "US",
     "Brazil",
     "Global",
+    "United Kingdom",
+    "Canada",
+    "Australia",
+    "Japan",
+    "Singapore",
+    "India",
+    "South Africa",
+    "United Arab Emirates",
   ];
   const coverage = trackedRegions.map(region => ({
     region,

@@ -5,18 +5,11 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { ENV } from "./_core/env";
+import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
 import { organizations } from "../drizzle/schema";
 
 type OrgPlan = "free_trial" | "starter" | "professional" | "enterprise";
-type Jurisdiction =
-  | "China"
-  | "Saudi Arabia"
-  | "EU"
-  | "US"
-  | "Brazil"
-  | "Global"
-  | "Both"
-  | "Other";
+type Jurisdiction = (typeof GLOBAL_JURISDICTIONS)[number];
 
 export type OrgProfile = {
   id: number;

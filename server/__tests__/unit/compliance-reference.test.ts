@@ -12,8 +12,8 @@ describe("Compliance Reference Data", () => {
     complianceRelationships = mod.complianceRelationships;
   });
 
-  it("should export at least 10 compliance frameworks", () => {
-    expect(complianceFrameworks.length).toBeGreaterThanOrEqual(10);
+  it("should export at least 40 compliance frameworks", () => {
+    expect(complianceFrameworks.length).toBeGreaterThanOrEqual(40);
   });
 
   it("should include frameworks for all major jurisdictions", () => {
@@ -23,6 +23,15 @@ describe("Compliance Reference Data", () => {
     expect(countries.has("EU")).toBe(true);
     expect(countries.has("US")).toBe(true);
     expect(countries.has("Brazil")).toBe(true);
+    expect(countries.has("Global")).toBe(true);
+    expect(countries.has("United Kingdom")).toBe(true);
+    expect(countries.has("Canada")).toBe(true);
+    expect(countries.has("Australia")).toBe(true);
+    expect(countries.has("Japan")).toBe(true);
+    expect(countries.has("South Korea")).toBe(true);
+    expect(countries.has("Singapore")).toBe(true);
+    expect(countries.has("India")).toBe(true);
+    expect(countries.has("South Africa")).toBe(true);
   });
 
   it("should include PIPL, CSL, DSL, PDPL, GDPR, CCPA, LGPD frameworks", () => {
@@ -36,13 +45,39 @@ describe("Compliance Reference Data", () => {
     expect(codes).toContain("LGPD");
   });
 
+  it("should include global and international frameworks", () => {
+    const codes = complianceFrameworks.map(f => f.code);
+    expect(codes).toContain("ISO-27001");
+    expect(codes).toContain("ISO-27701");
+    expect(codes).toContain("SOC2");
+    expect(codes).toContain("NIST-CSF-2");
+    expect(codes).toContain("HIPAA");
+    expect(codes).toContain("PCI-DSS");
+    expect(codes).toContain("NIS2");
+    expect(codes).toContain("DORA");
+    expect(codes).toContain("EU-AI-ACT");
+    expect(codes).toContain("UK-GDPR");
+    expect(codes).toContain("PIPEDA");
+    expect(codes).toContain("PRIVACY-ACT-AU");
+    expect(codes).toContain("APPI");
+    expect(codes).toContain("PIPA-KR");
+    expect(codes).toContain("PDPA-SG");
+    expect(codes).toContain("DPDP-IN");
+    expect(codes).toContain("POPIA");
+    expect(codes).toContain("MEXICO-DPA");
+  });
+
   it("each framework should have required fields", () => {
+    const codes = new Set<string>();
     for (const fw of complianceFrameworks) {
       expect(fw.code).toBeTruthy();
       expect(fw.name).toBeTruthy();
       expect(fw.country).toBeTruthy();
       expect(typeof fw.code).toBe("string");
       expect(typeof fw.name).toBe("string");
+      expect((fw.country as string).length).toBeLessThanOrEqual(50);
+      expect(codes.has(fw.code as string)).toBe(false);
+      codes.add(fw.code as string);
     }
   });
 

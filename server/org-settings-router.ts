@@ -11,17 +11,9 @@ import { TRPCError } from "@trpc/server";
 import { orgAdminProcedure, orgProcedure, router } from "./_core/trpc";
 import { requireModulePermission } from "./_core/permission-guard";
 import { getOrgSettings, updateOrgSettings } from "./org-settings-store";
+import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
 
-const JURISDICTION_VALUES = [
-  "China",
-  "Saudi Arabia",
-  "EU",
-  "US",
-  "Brazil",
-  "Global",
-  "Both",
-  "Other",
-] as const;
+const JURISDICTION_VALUES = GLOBAL_JURISDICTIONS;
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 

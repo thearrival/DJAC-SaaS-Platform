@@ -31,6 +31,7 @@ import {
   router,
 } from "./_core/trpc";
 import { ENV } from "./_core/env";
+import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
 import { parsedEnv } from "./services/config-schema";
 import { getDb } from "./db";
 import { recordUserInteraction } from "./interaction-logger";
@@ -192,15 +193,7 @@ export async function createOrganizationForUser(params: {
   name: string;
   billingEmail: string;
   industry?: string;
-  primaryJurisdiction?:
-    | "China"
-    | "Saudi Arabia"
-    | "EU"
-    | "US"
-    | "Brazil"
-    | "Global"
-    | "Both"
-    | "Other";
+  primaryJurisdiction?: (typeof GLOBAL_JURISDICTIONS)[number];
   ownerUserId?: number;
   ownerLocalUserId?: number;
 }): Promise<Organization> {
@@ -489,18 +482,7 @@ export const billingRouter = router({
           .max(255),
         billingEmail: z.string().email(),
         industry: z.string().max(120).optional(),
-        primaryJurisdiction: z
-          .enum([
-            "China",
-            "Saudi Arabia",
-            "EU",
-            "US",
-            "Brazil",
-            "Global",
-            "Both",
-            "Other",
-          ])
-          .optional(),
+        primaryJurisdiction: z.enum(GLOBAL_JURISDICTIONS).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

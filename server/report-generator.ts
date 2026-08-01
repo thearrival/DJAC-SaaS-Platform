@@ -17,16 +17,10 @@ import {
   listComplianceObligations,
 } from "./compliance-timetable";
 import { listLawKnowledge } from "./legal-knowledge";
+import { REPORT_JURISDICTIONS } from "./_core/jurisdictions";
 
 export type ReportLocale = "en" | "ar" | "zh";
-export type ReportJurisdiction =
-  | "Saudi Arabia"
-  | "China"
-  | "EU"
-  | "US"
-  | "Brazil"
-  | "Global"
-  | "both";
+export type ReportJurisdiction = (typeof REPORT_JURISDICTIONS)[number];
 export type ReportType =
   | "full_compliance"
   | "gap_analysis"
