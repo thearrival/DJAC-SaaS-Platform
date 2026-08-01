@@ -11,7 +11,30 @@ export type SupplierGap = {
     | "us"
     | "brazil"
     | "cross_border"
-    | "global";
+    | "global"
+    | "uk"
+    | "canada"
+    | "australia"
+    | "japan"
+    | "southKorea"
+    | "singapore"
+    | "india"
+    | "southAfrica"
+    | "mexico"
+    | "uae"
+    | "qatar"
+    | "kuwait"
+    | "bahrain"
+    | "oman"
+    | "jordan"
+    | "egypt"
+    | "indonesia"
+    | "thailand"
+    | "vietnam"
+    | "philippines"
+    | "malaysia"
+    | "nigeria"
+    | "kenya";
   frameworks: string[];
   severity: AssessmentSeverity;
   title: string;
@@ -19,6 +42,34 @@ export type SupplierGap = {
   mitigation: string;
   penaltyContext: string;
 };
+
+export const JURISDICTION_SCORE_KEYS = [
+  "uk",
+  "canada",
+  "australia",
+  "japan",
+  "southKorea",
+  "singapore",
+  "india",
+  "southAfrica",
+  "mexico",
+  "uae",
+  "qatar",
+  "kuwait",
+  "bahrain",
+  "oman",
+  "jordan",
+  "egypt",
+  "indonesia",
+  "thailand",
+  "vietnam",
+  "philippines",
+  "malaysia",
+  "nigeria",
+  "kenya",
+] as const;
+
+export type JurisdictionScoreKey = (typeof JURISDICTION_SCORE_KEYS)[number];
 
 export type SupplierAssessmentResult = {
   vendorId: number;
@@ -31,7 +82,7 @@ export type SupplierAssessmentResult = {
     us: number;
     brazil: number;
     global: number;
-  };
+  } & Record<JurisdictionScoreKey, number>;
   status: "compliant" | "partial" | "non_compliant";
   riskLevel: "low" | "medium" | "high" | "critical";
   gaps: SupplierGap[];
@@ -44,7 +95,7 @@ const PENALTY_CONTEXT: Record<string, string> = {
   DSL: "DSL violations can trigger major fines and business sanctions.",
   PDPL: "PDPL penalties can reach up to SAR 5M.",
   NCA: "NCA non-compliance can impact licensing and critical contracts.",
-  GDPR: "GDPR fines can reach up to €20M or 4% of annual global turnover.",
+  GDPR: "GDPR fines can reach up to Γé¼20M or 4% of annual global turnover.",
   CCPA: "CCPA violations can incur fines of up to $7,500 per intentional violation.",
   HIPAA:
     "HIPAA penalties can reach up to $1.5M per violation category per year.",
@@ -58,7 +109,256 @@ const PENALTY_CONTEXT: Record<string, string> = {
     "SOC 2 reports provide independent assurance of security, availability, and confidentiality controls.",
   "NIST CSF":
     "NIST CSF provides a comprehensive cybersecurity risk management framework.",
+  "UK GDPR": "UK ICO fines can reach ┬ú17.5M or 4% of annual global turnover.",
+  "DPA 2018":
+    "UK DPA 2018 aligns with UK GDPR enforcement and data subject rights.",
+  PIPEDA:
+    "PIPEDA penalties under C-27 updates can reach CAD 25M for non-compliance.",
+  "Privacy Act":
+    "OAIC penalties can reach AUD 50M for serious or repeated NDB breaches.",
+  APPI: "APPI enforcement includes corrective orders and criminal fines in Japan.",
+  PIPA: "PIPA fines can reach KRW 300M plus criminal penalties in South Korea.",
+  PDPA: "PDPA breaches can attract substantial fines and corrective orders from the regulator.",
+  "DPDP Act":
+    "DPDP Act penalties can reach INR 250 crore for significant violations.",
+  POPIA:
+    "POPIA fines can reach ZAR 10M with imprisonment for serious violations.",
+  LFPDPPP:
+    "Mexico LFPDPPP sanctions include corrective measures and fines by INAI.",
+  "UAE PDPL":
+    "UAE PDPL penalties can reach AED 3M for violations under federal law.",
+  "Qatar DPL": "Qatar DPL violations attract fines and corrective orders.",
+  "Kuwait PDPL":
+    "Kuwait PDPL violations attract administrative penalties and corrective orders.",
+  "Bahrain PDPL": "Bahrain PDPL penalties can reach BHD 50,000.",
+  "Oman PDPL": "Oman PDPL violations attract fines and corrective measures.",
+  "Jordan PDP": "Jordan PDP violations attract corrective orders and fines.",
+  "Egypt DPL": "Egypt DPL violations can lead to fines and imprisonment.",
+  "UU PDP":
+    "Indonesia's UU PDP penalties include fines up to 2% of annual revenue.",
+  PDPD: "Vietnam's PDPD fines can reach 5% of annual revenue.",
+  "DPA 2012": "Philippines DPA 2012 fines can reach PHP 5M with imprisonment.",
+  NDPA: "Nigeria's NDPA penalties can reach 2% of annual revenue.",
+  "Kenya DPA": "Kenya DPA fines can reach KES 5M.",
 };
+
+const JURISDICTION_DEFS: Array<{
+  key: JurisdictionScoreKey;
+  code: string;
+  name: string;
+  matches: string[];
+  locations: string[];
+  deduction: number;
+  frameworks: string[];
+}> = [
+  {
+    key: "uk",
+    code: "UK",
+    name: "United Kingdom",
+    matches: ["united kingdom", "britain", "england", "wales", "scotland"],
+    locations: ["united kingdom", "britain", "england", "scotland", "london"],
+    deduction: 30,
+    frameworks: ["UK GDPR", "DPA 2018"],
+  },
+  {
+    key: "canada",
+    code: "CANADA",
+    name: "Canada",
+    matches: ["canada", "canadian"],
+    locations: ["canada", "toronto", "montreal", "vancouver", "ottawa"],
+    deduction: 25,
+    frameworks: ["PIPEDA"],
+  },
+  {
+    key: "australia",
+    code: "AUSTRALIA",
+    name: "Australia",
+    matches: ["australia", "australian"],
+    locations: ["australia", "sydney", "melbourne", "canberra", "brisbane"],
+    deduction: 25,
+    frameworks: ["Privacy Act"],
+  },
+  {
+    key: "japan",
+    code: "JAPAN",
+    name: "Japan",
+    matches: ["japan", "japanese"],
+    locations: ["japan", "tokyo", "osaka"],
+    deduction: 25,
+    frameworks: ["APPI"],
+  },
+  {
+    key: "southKorea",
+    code: "KOREA",
+    name: "South Korea",
+    matches: ["south korea", "korea", "korean", "rok"],
+    locations: ["south korea", "korea", "seoul", "busan"],
+    deduction: 25,
+    frameworks: ["PIPA"],
+  },
+  {
+    key: "singapore",
+    code: "SINGAPORE",
+    name: "Singapore",
+    matches: ["singapore"],
+    locations: ["singapore"],
+    deduction: 25,
+    frameworks: ["PDPA"],
+  },
+  {
+    key: "india",
+    code: "INDIA",
+    name: "India",
+    matches: ["india", "indian"],
+    locations: ["india", "mumbai", "delhi", "bengaluru"],
+    deduction: 25,
+    frameworks: ["DPDP Act"],
+  },
+  {
+    key: "southAfrica",
+    code: "SAFRICA",
+    name: "South Africa",
+    matches: ["south africa", "south african"],
+    locations: ["south africa", "johannesburg", "cape town"],
+    deduction: 25,
+    frameworks: ["POPIA"],
+  },
+  {
+    key: "mexico",
+    code: "MEXICO",
+    name: "Mexico",
+    matches: ["mexico", "mexican"],
+    locations: ["mexico", "mexico city"],
+    deduction: 25,
+    frameworks: ["LFPDPPP"],
+  },
+  {
+    key: "uae",
+    code: "UAE",
+    name: "United Arab Emirates",
+    matches: ["united arab emirates", "uae", "emirates", "dubai", "abu dhabi"],
+    locations: ["united arab emirates", "uae", "dubai", "abu dhabi"],
+    deduction: 25,
+    frameworks: ["UAE PDPL"],
+  },
+  {
+    key: "qatar",
+    code: "QATAR",
+    name: "Qatar",
+    matches: ["qatar"],
+    locations: ["qatar", "doha"],
+    deduction: 25,
+    frameworks: ["Qatar DPL"],
+  },
+  {
+    key: "kuwait",
+    code: "KUWAIT",
+    name: "Kuwait",
+    matches: ["kuwait"],
+    locations: ["kuwait", "kuwait city"],
+    deduction: 25,
+    frameworks: ["Kuwait PDPL"],
+  },
+  {
+    key: "bahrain",
+    code: "BAHRAIN",
+    name: "Bahrain",
+    matches: ["bahrain"],
+    locations: ["bahrain", "manama"],
+    deduction: 25,
+    frameworks: ["Bahrain PDPL"],
+  },
+  {
+    key: "oman",
+    code: "OMAN",
+    name: "Oman",
+    matches: ["oman"],
+    locations: ["oman", "muscat"],
+    deduction: 25,
+    frameworks: ["Oman PDPL"],
+  },
+  {
+    key: "jordan",
+    code: "JORDAN",
+    name: "Jordan",
+    matches: ["jordan"],
+    locations: ["jordan", "amman"],
+    deduction: 25,
+    frameworks: ["Jordan PDP"],
+  },
+  {
+    key: "egypt",
+    code: "EGYPT",
+    name: "Egypt",
+    matches: ["egypt"],
+    locations: ["egypt", "cairo"],
+    deduction: 25,
+    frameworks: ["Egypt DPL"],
+  },
+  {
+    key: "indonesia",
+    code: "INDONESIA",
+    name: "Indonesia",
+    matches: ["indonesia"],
+    locations: ["indonesia", "jakarta"],
+    deduction: 25,
+    frameworks: ["UU PDP"],
+  },
+  {
+    key: "thailand",
+    code: "THAILAND",
+    name: "Thailand",
+    matches: ["thailand"],
+    locations: ["thailand", "bangkok"],
+    deduction: 25,
+    frameworks: ["PDPA"],
+  },
+  {
+    key: "vietnam",
+    code: "VIETNAM",
+    name: "Vietnam",
+    matches: ["vietnam"],
+    locations: ["vietnam", "hanoi", "ho chi minh"],
+    deduction: 25,
+    frameworks: ["PDPD"],
+  },
+  {
+    key: "philippines",
+    code: "PHILIPPINES",
+    name: "Philippines",
+    matches: ["philippines"],
+    locations: ["philippines", "manila"],
+    deduction: 25,
+    frameworks: ["DPA 2012"],
+  },
+  {
+    key: "malaysia",
+    code: "MALAYSIA",
+    name: "Malaysia",
+    matches: ["malaysia"],
+    locations: ["malaysia", "kuala lumpur"],
+    deduction: 25,
+    frameworks: ["PDPA"],
+  },
+  {
+    key: "nigeria",
+    code: "NIGERIA",
+    name: "Nigeria",
+    matches: ["nigeria"],
+    locations: ["nigeria", "lagos", "abuja"],
+    deduction: 25,
+    frameworks: ["NDPA"],
+  },
+  {
+    key: "kenya",
+    code: "KENYA",
+    name: "Kenya",
+    matches: ["kenya"],
+    locations: ["kenya", "nairobi"],
+    deduction: 25,
+    frameworks: ["Kenya DPA"],
+  },
+];
 
 function parseList(value: string | null | undefined): string[] {
   if (!value) return [];
@@ -557,6 +857,46 @@ export function runDualJurisdictionAssessment(
     saudiScore += 5;
   }
 
+  const genericDeductions = [
+    !hasIso27001 ? (isHighCriticality ? 18 : 12) : 0,
+    !hasSoc2 ? (hasHighDependencyChain ? 12 : 8) : 0,
+    handlesSensitiveData && !hasIso27701 ? 10 : 0,
+    processingActivities.length === 0 ? 8 : 0,
+    !cloudProvider &&
+    !hasAny([hostingEnvironment], ["on premises", "private cloud"])
+      ? 5
+      : 0,
+    hasAny([hostingEnvironment], ["multi cloud", "hybrid"]) &&
+    cloudProviders.length < 2
+      ? 6
+      : 0,
+    hasHighDependencyChain && !hasSoc2 ? 6 : 0,
+  ].reduce((total, amount) => total + amount, 0);
+
+  const newJurisdictionScores = {} as Record<JurisdictionScoreKey, number>;
+  for (const def of JURISDICTION_DEFS) {
+    const requiresControls =
+      hasAny(jurisdictions, def.matches) ||
+      hasAny(operatingCountries, def.matches) ||
+      hasAny(locations, def.matches);
+    const hasLocation = hasAny(locations, def.locations);
+    let score = 100 - genericDeductions;
+    if (requiresControls && !hasLocation) {
+      score -= def.deduction;
+      gaps.push({
+        code: `LOC-${def.code}-001`,
+        jurisdiction: def.key,
+        frameworks: def.frameworks,
+        severity: "high",
+        title: `Missing ${def.name} data residency evidence`,
+        description: `No ${def.name} data location was declared for ${def.name} data protection obligations.`,
+        mitigation: `Provision ${def.name}-hosted data storage and processing paths for ${def.name} data subjects.`,
+        penaltyContext: makePenaltyContext(def.frameworks),
+      });
+    }
+    newJurisdictionScores[def.key] = clampScore(score);
+  }
+
   chinaScore = clampScore(chinaScore);
   saudiScore = clampScore(saudiScore);
   euScore = clampScore(euScore);
@@ -591,6 +931,7 @@ export function runDualJurisdictionAssessment(
       us: usScore,
       brazil: brazilScore,
       global: globalScore,
+      ...newJurisdictionScores,
     },
     status,
     riskLevel,
@@ -661,6 +1002,9 @@ export function buildAssessmentCsv(
   lines.push(`US Score,${result.jurisdictionScores.us}`);
   lines.push(`Brazil Score,${result.jurisdictionScores.brazil}`);
   lines.push(`Global Score,${result.jurisdictionScores.global}`);
+  for (const key of JURISDICTION_SCORE_KEYS) {
+    lines.push(`${key} Score,${result.jurisdictionScores[key]}`);
+  }
   lines.push(`Risk Level,${result.riskLevel}`);
   lines.push(`Status,${result.status}`);
   lines.push("");

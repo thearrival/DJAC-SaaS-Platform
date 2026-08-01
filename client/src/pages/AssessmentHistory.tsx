@@ -1,5 +1,5 @@
 /**
- * AssessmentHistory.tsx — Phase 24
+ * AssessmentHistory.tsx ΓÇö Phase 24
  *
  * Shows the AI-powered vendor assessment job history for the current user.
  * Data comes from `ai.listAssessmentJobs` (in-process queue persisted to
@@ -56,7 +56,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Types ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 type JobStatus = "queued" | "running" | "completed" | "failed";
 
@@ -68,7 +68,11 @@ interface JobGap {
 
 interface JobAssessment {
   overallScore: number;
-  jurisdictionScores: { china: number; saudiArabia: number };
+  jurisdictionScores: {
+    china: number;
+    saudiArabia: number;
+    [key: string]: number | undefined;
+  };
   status: "compliant" | "partial" | "non_compliant";
   riskLevel: "low" | "medium" | "high" | "critical";
   gaps: JobGap[];
@@ -102,7 +106,7 @@ interface AiJob {
   persistence?: JobPersistence;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Constants ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 const STATUS_CONFIG: Record<
   JobStatus,
@@ -177,11 +181,11 @@ const SEV_ICON: Record<string, React.FC<{ size?: number }>> = {
   ),
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function formatDuration(startIso: string, endIso: string): string {
   const ms = new Date(endIso).getTime() - new Date(startIso).getTime();
-  if (ms < 0) return "–";
+  if (ms < 0) return "ΓÇô";
   if (ms < 1000) return `${ms}ms`;
   const secs = Math.floor(ms / 1000);
   if (secs < 60) return `${secs}s`;
@@ -237,7 +241,7 @@ function sourceBadge(source: string) {
   );
 }
 
-// ─── Event Timeline ───────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Event Timeline ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function EventTimeline({
   events,
@@ -341,7 +345,33 @@ function EventTimeline({
   );
 }
 
-// ─── Score Mini ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Score Mini ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+const ADDITIONAL_SCORE_LABELS: Record<string, string> = {
+  uk: "UK",
+  canada: "CA",
+  australia: "AU",
+  japan: "JP",
+  southKorea: "KR",
+  singapore: "SG",
+  india: "IN",
+  southAfrica: "ZA",
+  mexico: "MX",
+  uae: "UAE",
+  qatar: "QA",
+  kuwait: "KW",
+  bahrain: "BH",
+  oman: "OM",
+  jordan: "JO",
+  egypt: "EG",
+  indonesia: "ID",
+  thailand: "TH",
+  vietnam: "VN",
+  philippines: "PH",
+  malaysia: "MY",
+  nigeria: "NG",
+  kenya: "KE",
+};
 
 function ScoreMini({ label, score }: { label: string; score: number }) {
   const color = score >= 85 ? "#22c55e" : score >= 65 ? "#eab308" : "#ef4444";
@@ -364,7 +394,7 @@ function ScoreMini({ label, score }: { label: string; score: number }) {
   );
 }
 
-// ─── Job Card ─────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Job Card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function JobCard({
   job,
@@ -547,6 +577,21 @@ function JobCard({
                 label={scoreLabels.region2}
                 score={assessment.jurisdictionScores.saudiArabia}
               />
+              {Object.entries(assessment.jurisdictionScores ?? {})
+                .filter(([key]) => ADDITIONAL_SCORE_LABELS[key])
+                .filter(
+                  ([, score]) =>
+                    typeof score === "number" &&
+                    score !== undefined &&
+                    score < 100
+                )
+                .map(([key, score]) => (
+                  <ScoreMini
+                    key={key}
+                    label={ADDITIONAL_SCORE_LABELS[key]}
+                    score={score as number}
+                  />
+                ))}
             </div>
           )}
         </div>
@@ -599,7 +644,7 @@ function JobCard({
               <span
                 style={{ fontSize: 11, color: "#22c55e", marginLeft: "auto" }}
               >
-                âœ“ Persisted ({job.persistence.savedAssessments} assessments,{" "}
+                ├ó┼ôΓÇ£ Persisted ({job.persistence.savedAssessments} assessments,{" "}
                 {job.persistence.savedGaps} gaps)
               </span>
             )}
@@ -660,7 +705,7 @@ function JobCard({
   );
 }
 
-// ─── Stat Tile ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Stat Tile ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function StatTile({
   label,
@@ -704,7 +749,7 @@ function StatTile({
   );
 }
 
-// ─── Filter tabs ──────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Filter tabs ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 type FilterTab = "all" | JobStatus;
 
@@ -716,7 +761,7 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: "queued", label: "Queued" },
 ];
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Main Page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export default function AssessmentHistory() {
   const { t } = useLocale();
@@ -774,7 +819,7 @@ export default function AssessmentHistory() {
     }
   }, [error]);
 
-  // Vendor id → name lookup
+  // Vendor id ΓåÆ name lookup
   const vendorNameById = useMemo(() => {
     const m = new Map<number, string>();
     for (const v of vendorList ?? []) {
@@ -805,7 +850,7 @@ export default function AssessmentHistory() {
 
   return (
     <div className="djac-page">
-      {/* ── Header ─────────────────────────────────────────── */}
+      {/* ΓöÇΓöÇ Header ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
         <div
           style={{
@@ -879,7 +924,7 @@ export default function AssessmentHistory() {
         </div>
       </div>
 
-      {/* ── Stats ──────────────────────────────────────────── */}
+      {/* ΓöÇΓöÇ Stats ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       {!isLoading && !error && (
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <StatTile
@@ -915,7 +960,7 @@ export default function AssessmentHistory() {
         </div>
       )}
 
-      {/* ── Filter Bar ─────────────────────────────────────── */}
+      {/* ΓöÇΓöÇ Filter Bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
         {FILTER_TABS.map(tab => (
           <button
@@ -954,7 +999,7 @@ export default function AssessmentHistory() {
         ))}
       </div>
 
-      {/* ── Content ────────────────────────────────────────── */}
+      {/* ΓöÇΓöÇ Content ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       {isLoading && (
         <div
           style={{
@@ -968,7 +1013,7 @@ export default function AssessmentHistory() {
           }}
         >
           <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} />
-          {t("assessmentHistory.loading", "Loading assessment history…")}
+          {t("assessmentHistory.loading", "Loading assessment historyΓÇª")}
         </div>
       )}
 
@@ -1064,7 +1109,7 @@ export default function AssessmentHistory() {
         </div>
       )}
 
-      {/* ── Confirm Clear Dialog ────────────────────────────── */}
+      {/* ΓöÇΓöÇ Confirm Clear Dialog ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <Dialog open={confirmClear} onOpenChange={setConfirmClear}>
         <DialogContent style={{ maxWidth: 420 }}>
           <DialogHeader>

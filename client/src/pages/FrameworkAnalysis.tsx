@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
@@ -336,6 +336,11 @@ export default function FrameworkAnalysis() {
                   "GDPR",
                   "CCPA",
                   "LGPD",
+                  "ISO 27001",
+                  "NIST CSF",
+                  "SOC 2",
+                  "HIPAA",
+                  "PCI DSS",
                 ].map(fw => (
                   <span
                     key={fw}
@@ -397,7 +402,9 @@ export default function FrameworkAnalysis() {
                     className={
                       selectedFramework.country === "China"
                         ? "bg-destructive/10 text-destructive border border-destructive/20"
-                        : "bg-green-100 text-green-900 dark:bg-green-900/20 dark:text-green-200 border border-green-300 dark:border-green-700"
+                        : selectedFramework.country === "Saudi Arabia"
+                          ? "bg-teal-100 text-teal-900 dark:bg-teal-900/20 dark:text-teal-200 border border-teal-300 dark:border-teal-700"
+                          : "bg-green-100 text-green-900 dark:bg-green-900/20 dark:text-green-200 border border-green-300 dark:border-green-700"
                     }
                   >
                     {selectedFramework.country}

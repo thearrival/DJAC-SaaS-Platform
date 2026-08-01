@@ -1,4 +1,4 @@
-﻿/**
+/**
  * VendorDetail.tsx  —  /vendor/:id
  *
  * Drill-down view for a single vendor. Displays:
@@ -591,6 +591,47 @@ export default function VendorDetail() {
               score={assessment.jurisdictionScores.saudiArabia}
               label={t("vendorDetail.scoreEMEA", "EMEA")}
             />
+            {(
+              [
+                ["uk", "UK"],
+                ["canada", "CA"],
+                ["australia", "AU"],
+                ["japan", "JP"],
+                ["southKorea", "KR"],
+                ["singapore", "SG"],
+                ["india", "IN"],
+                ["southAfrica", "ZA"],
+                ["mexico", "MX"],
+                ["uae", "UAE"],
+                ["qatar", "QA"],
+                ["kuwait", "KW"],
+                ["bahrain", "BH"],
+                ["oman", "OM"],
+                ["jordan", "JO"],
+                ["egypt", "EG"],
+                ["indonesia", "ID"],
+                ["thailand", "TH"],
+                ["vietnam", "VN"],
+                ["philippines", "PH"],
+                ["malaysia", "MY"],
+                ["nigeria", "NG"],
+                ["kenya", "KE"],
+              ] as const
+            )
+              .map(
+                ([key, label]) =>
+                  [
+                    key,
+                    label,
+                    (assessment.jurisdictionScores as Record<string, number>)[
+                      key
+                    ],
+                  ] as const
+              )
+              .filter(([, , score]) => typeof score === "number" && score < 100)
+              .map(([key, label, score]) => (
+                <ScoreArc key={key} score={score} label={label} />
+              ))}
 
             <Separator
               orientation="vertical"

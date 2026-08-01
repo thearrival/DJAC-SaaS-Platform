@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DJAC Signup / Login page - standalone (no DashboardLayout).
  * Routes: /signup  /login
  * Supports: 3 languages (EN / AR / ZH) + dark & light themes.
@@ -1149,6 +1149,26 @@ function RoleRegisterForm({
     "Brazil",
     "India",
     "Singapore",
+    "United Kingdom",
+    "Canada",
+    "Australia",
+    "Japan",
+    "South Korea",
+    "South Africa",
+    "Mexico",
+    "Qatar",
+    "Kuwait",
+    "Bahrain",
+    "Oman",
+    "Jordan",
+    "Egypt",
+    "Indonesia",
+    "Thailand",
+    "Vietnam",
+    "Philippines",
+    "Malaysia",
+    "Nigeria",
+    "Kenya",
   ];
   const PRACTICE_AREAS = [
     "Privacy Law",

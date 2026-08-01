@@ -1,7 +1,7 @@
 /**
  * GapTracker.tsx
  *
- * Vendor Compliance Gap Tracker — Phase 23
+ * Vendor Compliance Gap Tracker ΓÇö Phase 23
  * Shows aggregated compliance gaps across all registered org vendors,
  * powered by the rule-based dual-jurisdiction assessment engine.
  *
@@ -44,10 +44,40 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ─── Types (mirrored from server/supplier-assessment.ts) ──────────────────────
+// ΓöÇΓöÇΓöÇ Types (mirrored from server/supplier-assessment.ts) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 type AssessmentSeverity = "critical" | "high" | "medium" | "low";
-type GapJurisdiction = "china" | "saudi" | "cross_border";
+type GapJurisdiction =
+  | "china"
+  | "saudi"
+  | "eu"
+  | "us"
+  | "brazil"
+  | "cross_border"
+  | "global"
+  | "uk"
+  | "canada"
+  | "australia"
+  | "japan"
+  | "southKorea"
+  | "singapore"
+  | "india"
+  | "southAfrica"
+  | "mexico"
+  | "uae"
+  | "qatar"
+  | "kuwait"
+  | "bahrain"
+  | "oman"
+  | "jordan"
+  | "egypt"
+  | "indonesia"
+  | "thailand"
+  | "vietnam"
+  | "philippines"
+  | "malaysia"
+  | "nigeria"
+  | "kenya";
 
 interface SupplierGap {
   code: string;
@@ -82,7 +112,7 @@ interface GapEntry {
   assessment: SupplierAssessmentResult;
 }
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Constants ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 const SEVERITY_ORDER: AssessmentSeverity[] = [
   "critical",
@@ -137,16 +167,78 @@ const SEVERITY_CONFIG: Record<
 const JURISDICTION_LABEL: Record<GapJurisdiction, string> = {
   china: "APAC",
   saudi: "EMEA",
+  eu: "EU",
+  us: "US",
+  brazil: "Brazil",
   cross_border: "Cross-Border",
+  global: "Global",
+  uk: "United Kingdom",
+  canada: "Canada",
+  australia: "Australia",
+  japan: "Japan",
+  southKorea: "South Korea",
+  singapore: "Singapore",
+  india: "India",
+  southAfrica: "South Africa",
+  mexico: "Mexico",
+  uae: "UAE",
+  qatar: "Qatar",
+  kuwait: "Kuwait",
+  bahrain: "Bahrain",
+  oman: "Oman",
+  jordan: "Jordan",
+  egypt: "Egypt",
+  indonesia: "Indonesia",
+  thailand: "Thailand",
+  vietnam: "Vietnam",
+  philippines: "Philippines",
+  malaysia: "Malaysia",
+  nigeria: "Nigeria",
+  kenya: "Kenya",
 };
 
 const JURISDICTION_COLOR: Record<GapJurisdiction, string> = {
   china: "#3b82f6",
   saudi: "#10b981",
+  eu: "#8b5cf6",
+  us: "#f59e0b",
+  brazil: "#eab308",
   cross_border: "#8b5cf6",
+  global: "#64748b",
+  uk: "#1d4ed8",
+  canada: "#db2777",
+  australia: "#65a30d",
+  japan: "#be185d",
+  southKorea: "#9333ea",
+  singapore: "#0284c7",
+  india: "#7c3aed",
+  southAfrica: "#059669",
+  mexico: "#ca8a04",
+  uae: "#c026d3",
+  qatar: "#0891b2",
+  kuwait: "#64748b",
+  bahrain: "#14b8a6",
+  oman: "#f59e0b",
+  jordan: "#dc2626",
+  egypt: "#d97706",
+  indonesia: "#16a34a",
+  thailand: "#6366f1",
+  vietnam: "#e11d48",
+  philippines: "#0ea5e9",
+  malaysia: "#84cc16",
+  nigeria: "#22c55e",
+  kenya: "#a16207",
 };
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+function jurisdictionTagLabel(jurisdiction: GapJurisdiction): string {
+  return JURISDICTION_LABEL[jurisdiction] ?? jurisdiction;
+}
+
+function jurisdictionTagColor(jurisdiction: GapJurisdiction): string {
+  return JURISDICTION_COLOR[jurisdiction] ?? "#64748b";
+}
+
+// ΓöÇΓöÇΓöÇ Sub-components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function SeverityBadge({ severity }: { severity: AssessmentSeverity }) {
   const cfg = SEVERITY_CONFIG[severity];
@@ -185,13 +277,13 @@ function JurisdictionTag({ jurisdiction }: { jurisdiction: GapJurisdiction }) {
         borderRadius: 6,
         fontSize: 11,
         fontWeight: 500,
-        background: `${JURISDICTION_COLOR[jurisdiction]}18`,
-        border: `1px solid ${JURISDICTION_COLOR[jurisdiction]}44`,
-        color: JURISDICTION_COLOR[jurisdiction],
+        background: `${jurisdictionTagColor(jurisdiction)}18`,
+        border: `1px solid ${jurisdictionTagColor(jurisdiction)}44`,
+        color: jurisdictionTagColor(jurisdiction),
       }}
     >
       <Globe2 size={10} />
-      {JURISDICTION_LABEL[jurisdiction]}
+      {jurisdictionTagLabel(jurisdiction)}
     </span>
   );
 }
@@ -390,7 +482,7 @@ function GapItem({
                     lineHeight: 1.5,
                   }}
                 >
-                  ⚠️ {gap.penaltyContext}
+                  ΓÜá∩╕Å {gap.penaltyContext}
                 </p>
               </div>
             </>
@@ -573,7 +665,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
             }}
           >
             <ShieldCheck size={16} />
-            No compliance gaps detected — vendor is within acceptable
+            No compliance gaps detected ΓÇö vendor is within acceptable
             thresholds.
           </div>
         ) : (
@@ -668,7 +760,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
   );
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Stat Card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function StatCard({
   label,
@@ -719,12 +811,12 @@ function StatCard({
   );
 }
 
-// ─── Filter controls ──────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Filter controls ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 type SeverityFilter = "all" | AssessmentSeverity;
 type JurisdictionFilter = "all" | GapJurisdiction;
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇ Main Page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 export default function GapTracker() {
   const { t } = useLocale();
@@ -795,7 +887,7 @@ export default function GapTracker() {
 
   return (
     <div className="djac-page">
-      {/* ── Page Header ──────────────────────────────────────── */}
+      {/* ΓöÇΓöÇ Page Header ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <ClipboardList size={22} style={{ color: "#818cf8" }} />
@@ -825,7 +917,7 @@ export default function GapTracker() {
         </p>
       </div>
 
-      {/* ── Stats Row ────────────────────────────────────────── */}
+      {/* ΓöÇΓöÇ Stats Row ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       {!isLoading && !error && (
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <StatCard
@@ -869,7 +961,7 @@ export default function GapTracker() {
         </div>
       )}
 
-      {/* ── Filter Bar ───────────────────────────────────────── */}
+      {/* ΓöÇΓöÇ Filter Bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       <div
         style={{
           display: "flex",
@@ -985,7 +1077,7 @@ export default function GapTracker() {
         )}
       </div>
 
-      {/* ── Content ──────────────────────────────────────────── */}
+      {/* ΓöÇΓöÇ Content ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
       {isLoading && (
         <div
           style={{
@@ -999,7 +1091,7 @@ export default function GapTracker() {
           }}
         >
           <ClipboardList size={20} style={{ opacity: 0.5 }} />
-          {t("gapTracker.loading", "Running gap analysis across all vendors…")}
+          {t("gapTracker.loading", "Running gap analysis across all vendorsΓÇª")}
         </div>
       )}
 
@@ -1015,7 +1107,7 @@ export default function GapTracker() {
           }}
         >
           <p style={{ margin: 0 }}>
-            {t("gapTracker.errorTitle", "Gap analysis unavailable")} —{" "}
+            {t("gapTracker.errorTitle", "Gap analysis unavailable")} ΓÇö{" "}
             {error.message}
           </p>
           <Button
@@ -1124,7 +1216,7 @@ export default function GapTracker() {
             <ShieldCheck size={18} style={{ color: "#22c55e" }} />
             {t(
               "gapTracker.noGapsForFilter",
-              "No gaps match the active filters — all vendors are within threshold for this selection."
+              "No gaps match the active filters ΓÇö all vendors are within threshold for this selection."
             )}
           </div>
         )}
