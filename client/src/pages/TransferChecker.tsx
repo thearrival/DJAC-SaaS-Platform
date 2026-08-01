@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TransferChecker.tsx
  * ──────────────────────────────────────────────────────────────────────────────
  * Data Transfer Compliance Checker — interactive 3-step wizard that calculates

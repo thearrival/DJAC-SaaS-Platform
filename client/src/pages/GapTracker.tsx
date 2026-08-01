@@ -1,7 +1,7 @@
 /**
  * GapTracker.tsx
  *
- * Vendor Compliance Gap Tracker ΓÇö Phase 23
+ * Vendor Compliance Gap Tracker — Phase 23
  * Shows aggregated compliance gaps across all registered org vendors,
  * powered by the rule-based dual-jurisdiction assessment engine.
  *
@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ΓöÇΓöÇΓöÇ Types (mirrored from server/supplier-assessment.ts) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Types (mirrored from server/supplier-assessment.ts) ──────────────────────
 
 type AssessmentSeverity = "critical" | "high" | "medium" | "low";
 type GapJurisdiction =
@@ -112,7 +112,7 @@ interface GapEntry {
   assessment: SupplierAssessmentResult;
 }
 
-// ΓöÇΓöÇΓöÇ Constants ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const SEVERITY_ORDER: AssessmentSeverity[] = [
   "critical",
@@ -238,7 +238,7 @@ function jurisdictionTagColor(jurisdiction: GapJurisdiction): string {
   return JURISDICTION_COLOR[jurisdiction] ?? "#64748b";
 }
 
-// ΓöÇΓöÇΓöÇ Sub-components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Sub-components ──────────────────────────────────────────────────────────
 
 function SeverityBadge({ severity }: { severity: AssessmentSeverity }) {
   const cfg = SEVERITY_CONFIG[severity];
@@ -482,7 +482,7 @@ function GapItem({
                     lineHeight: 1.5,
                   }}
                 >
-                  ΓÜá∩╕Å {gap.penaltyContext}
+                  ⚠️ {gap.penaltyContext}
                 </p>
               </div>
             </>
@@ -665,7 +665,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
             }}
           >
             <ShieldCheck size={16} />
-            No compliance gaps detected ΓÇö vendor is within acceptable
+            No compliance gaps detected — vendor is within acceptable
             thresholds.
           </div>
         ) : (
@@ -760,7 +760,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
   );
 }
 
-// ΓöÇΓöÇΓöÇ Stat Card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Stat Card ────────────────────────────────────────────────────────────────
 
 function StatCard({
   label,
@@ -811,12 +811,12 @@ function StatCard({
   );
 }
 
-// ΓöÇΓöÇΓöÇ Filter controls ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Filter controls ──────────────────────────────────────────────────────────
 
 type SeverityFilter = "all" | AssessmentSeverity;
 type JurisdictionFilter = "all" | GapJurisdiction;
 
-// ΓöÇΓöÇΓöÇ Main Page ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function GapTracker() {
   const { t } = useLocale();
@@ -887,7 +887,7 @@ export default function GapTracker() {
 
   return (
     <div className="djac-page">
-      {/* ΓöÇΓöÇ Page Header ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ── Page Header ──────────────────────────────────────── */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <ClipboardList size={22} style={{ color: "#818cf8" }} />
@@ -917,7 +917,7 @@ export default function GapTracker() {
         </p>
       </div>
 
-      {/* ΓöÇΓöÇ Stats Row ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ── Stats Row ────────────────────────────────────────── */}
       {!isLoading && !error && (
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <StatCard
@@ -961,7 +961,7 @@ export default function GapTracker() {
         </div>
       )}
 
-      {/* ΓöÇΓöÇ Filter Bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ── Filter Bar ───────────────────────────────────────── */}
       <div
         style={{
           display: "flex",
@@ -1077,7 +1077,7 @@ export default function GapTracker() {
         )}
       </div>
 
-      {/* ΓöÇΓöÇ Content ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ── Content ──────────────────────────────────────────── */}
       {isLoading && (
         <div
           style={{
@@ -1091,7 +1091,7 @@ export default function GapTracker() {
           }}
         >
           <ClipboardList size={20} style={{ opacity: 0.5 }} />
-          {t("gapTracker.loading", "Running gap analysis across all vendorsΓÇª")}
+          {t("gapTracker.loading", "Running gap analysis across all vendors…")}
         </div>
       )}
 
@@ -1107,7 +1107,7 @@ export default function GapTracker() {
           }}
         >
           <p style={{ margin: 0 }}>
-            {t("gapTracker.errorTitle", "Gap analysis unavailable")} ΓÇö{" "}
+            {t("gapTracker.errorTitle", "Gap analysis unavailable")} —{" "}
             {error.message}
           </p>
           <Button
@@ -1216,7 +1216,7 @@ export default function GapTracker() {
             <ShieldCheck size={18} style={{ color: "#22c55e" }} />
             {t(
               "gapTracker.noGapsForFilter",
-              "No gaps match the active filters ΓÇö all vendors are within threshold for this selection."
+              "No gaps match the active filters — all vendors are within threshold for this selection."
             )}
           </div>
         )}

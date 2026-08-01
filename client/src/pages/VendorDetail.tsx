@@ -1,4 +1,4 @@
-/**
+﻿/**
  * VendorDetail.tsx  —  /vendor/:id
  *
  * Drill-down view for a single vendor. Displays:

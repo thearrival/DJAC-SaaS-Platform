@@ -95,7 +95,7 @@ const PENALTY_CONTEXT: Record<string, string> = {
   DSL: "DSL violations can trigger major fines and business sanctions.",
   PDPL: "PDPL penalties can reach up to SAR 5M.",
   NCA: "NCA non-compliance can impact licensing and critical contracts.",
-  GDPR: "GDPR fines can reach up to Γé¼20M or 4% of annual global turnover.",
+  GDPR: "GDPR fines can reach up to €20M or 4% of annual global turnover.",
   CCPA: "CCPA violations can incur fines of up to $7,500 per intentional violation.",
   HIPAA:
     "HIPAA penalties can reach up to $1.5M per violation category per year.",
@@ -109,7 +109,7 @@ const PENALTY_CONTEXT: Record<string, string> = {
     "SOC 2 reports provide independent assurance of security, availability, and confidentiality controls.",
   "NIST CSF":
     "NIST CSF provides a comprehensive cybersecurity risk management framework.",
-  "UK GDPR": "UK ICO fines can reach ┬ú17.5M or 4% of annual global turnover.",
+  "UK GDPR": "UK ICO fines can reach £17.5M or 4% of annual global turnover.",
   "DPA 2018":
     "UK DPA 2018 aligns with UK GDPR enforcement and data subject rights.",
   PIPEDA:

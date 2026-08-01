@@ -35,83 +35,83 @@ export const vendorIndustryOptions: ReadonlyArray<
     value: "software-saas",
     labels: {
       en: "Software / SaaS",
-      zh: "Φ╜»Σ╗╢ / SaaS",
-      ar: "╪º┘ä╪¿╪▒┘à╪¼┘è╪º╪¬ / SaaS",
+      zh: "软件 / SaaS",
+      ar: "البرمجيات / SaaS",
     },
   },
   {
     value: "cloud-digital-infrastructure",
     labels: {
       en: "Cloud / Digital Infrastructure",
-      zh: "Σ║æΣ╕Äµò░σ¡ùσƒ║τíÇΦ«╛µû╜",
-      ar: "╪º┘ä╪│╪¡╪º╪¿╪⌐ ┘ê╪º┘ä╪¿┘å┘è╪⌐ ╪º┘ä╪▒┘é┘à┘è╪⌐",
+      zh: "云与数字基础设施",
+      ar: "السحابة والبنية الرقمية",
     },
   },
   {
     value: "financial-services",
-    labels: { en: "Financial Services", zh: "ΘçæΦ₧ìµ£ìσèí", ar: "╪º┘ä╪«╪»┘à╪º╪¬ ╪º┘ä┘à╪º┘ä┘è╪⌐" },
+    labels: { en: "Financial Services", zh: "金融服务", ar: "الخدمات المالية" },
   },
   {
     value: "healthcare-life-sciences",
     labels: {
       en: "Healthcare / Life Sciences",
-      zh: "σî╗τûùΣ╕Äτöƒσæ╜τºæσ¡ª",
-      ar: "╪º┘ä╪▒╪╣╪º┘è╪⌐ ╪º┘ä╪╡╪¡┘è╪⌐ ┘ê╪╣┘ä┘ê┘à ╪º┘ä╪¡┘è╪º╪⌐",
+      zh: "医疗与生命科学",
+      ar: "الرعاية الصحية وعلوم الحياة",
     },
   },
   {
     value: "government-public-sector",
     labels: {
       en: "Government / Public Sector",
-      zh: "µö┐σ║£ / σà¼σà▒Θâ¿Θù¿",
-      ar: "╪º┘ä╪¡┘â┘ê┘à╪⌐ ┘ê╪º┘ä┘é╪╖╪º╪╣ ╪º┘ä╪╣╪º┘à",
+      zh: "政府 / 公共部门",
+      ar: "الحكومة والقطاع العام",
     },
   },
   {
     value: "telecommunications",
-    labels: { en: "Telecommunications", zh: "τö╡Σ┐í", ar: "╪º┘ä╪º╪¬╪╡╪º┘ä╪º╪¬" },
+    labels: { en: "Telecommunications", zh: "电信", ar: "الاتصالات" },
   },
   {
     value: "energy-utilities",
     labels: {
       en: "Energy / Utilities",
-      zh: "Φâ╜µ║É / σà¼τö¿Σ║ïΣ╕Ü",
-      ar: "╪º┘ä╪╖╪º┘é╪⌐ ┘ê╪º┘ä┘à╪▒╪º┘ü┘é",
+      zh: "能源 / 公用事业",
+      ar: "الطاقة والمرافق",
     },
   },
   {
     value: "manufacturing-operational-technology",
     labels: {
       en: "Manufacturing / OT",
-      zh: "σê╢ΘÇá / OT",
-      ar: "╪º┘ä╪¬╪╡┘å┘è╪╣ / ╪º┘ä╪¬┘é┘å┘è╪⌐ ╪º┘ä╪¬╪┤╪║┘è┘ä┘è╪⌐",
+      zh: "制造 / OT",
+      ar: "التصنيع / التقنية التشغيلية",
     },
   },
   {
     value: "retail-ecommerce",
     labels: {
       en: "Retail / E-commerce",
-      zh: "Θ¢╢σö« / τö╡σòå",
-      ar: "╪º┘ä╪¬╪¼╪▓╪ª╪⌐ / ╪º┘ä╪¬╪¼╪º╪▒╪⌐ ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è╪⌐",
+      zh: "零售 / 电商",
+      ar: "التجزئة / التجارة الإلكترونية",
     },
   },
   {
     value: "logistics-supply-chain",
     labels: {
       en: "Logistics / Supply Chain",
-      zh: "τë⌐µ╡ü / Σ╛¢σ║öΘô╛",
-      ar: "╪º┘ä┘ä┘ê╪¼╪│╪¬┘è╪º╪¬ / ╪│┘ä╪º╪│┘ä ╪º┘ä╪Ñ┘à╪»╪º╪»",
+      zh: "物流 / 供应链",
+      ar: "اللوجستيات / سلاسل الإمداد",
     },
   },
   {
     value: "professional-services",
     labels: {
       en: "Professional Services",
-      zh: "Σ╕ôΣ╕Üµ£ìσèí",
-      ar: "╪º┘ä╪«╪»┘à╪º╪¬ ╪º┘ä┘à┘ç┘å┘è╪⌐",
+      zh: "专业服务",
+      ar: "الخدمات المهنية",
     },
   },
-  { value: "other", labels: { en: "Other", zh: "σà╢Σ╗û", ar: "╪ú╪«╪▒┘ë" } },
+  { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
 ];
 
 export const vendorServiceTypeValues = [
@@ -133,65 +133,65 @@ export type VendorServiceType = (typeof vendorServiceTypeValues)[number];
 export const vendorServiceTypeOptions: ReadonlyArray<
   VendorOption<VendorServiceType>
 > = [
-  { value: "saas", labels: { en: "SaaS", zh: "SaaS", ar: "╪º┘ä╪¿╪▒┘à╪¼┘è╪º╪¬ ┘â╪«╪»┘à╪⌐" } },
-  { value: "paas", labels: { en: "PaaS", zh: "PaaS", ar: "╪º┘ä┘à┘å╪╡╪⌐ ┘â╪«╪»┘à╪⌐" } },
+  { value: "saas", labels: { en: "SaaS", zh: "SaaS", ar: "البرمجيات كخدمة" } },
+  { value: "paas", labels: { en: "PaaS", zh: "PaaS", ar: "المنصة كخدمة" } },
   {
     value: "iaas",
-    labels: { en: "IaaS", zh: "IaaS", ar: "╪º┘ä╪¿┘å┘è╪⌐ ╪º┘ä╪¬╪¡╪¬┘è╪⌐ ┘â╪«╪»┘à╪⌐" },
+    labels: { en: "IaaS", zh: "IaaS", ar: "البنية التحتية كخدمة" },
   },
   {
     value: "managed-service-provider",
     labels: {
       en: "Managed Service Provider",
-      zh: "µëÿτ«íµ£ìσèíµÅÉΣ╛¢σòå",
-      ar: "┘à╪▓┘ê╪» ╪«╪»┘à╪º╪¬ ┘à┘Å╪»╪º╪▒╪⌐",
+      zh: "托管服务提供商",
+      ar: "مزود خدمات مُدارة",
     },
   },
   {
     value: "managed-security-service-provider",
     labels: {
       en: "Managed Security Service Provider",
-      zh: "µëÿτ«íσ«ëσà¿µ£ìσèíµÅÉΣ╛¢σòå",
-      ar: "┘à╪▓┘ê╪» ╪«╪»┘à╪º╪¬ ╪ú┘à┘å┘è╪⌐ ┘à┘Å╪»╪º╪▒╪⌐",
+      zh: "托管安全服务提供商",
+      ar: "مزود خدمات أمنية مُدارة",
     },
   },
   {
     value: "payment-processor",
-    labels: { en: "Payment Processor", zh: "µö»Σ╗ÿσñäτÉåσòå", ar: "┘à╪╣╪º┘ä╪¼ ┘à╪»┘ü┘ê╪╣╪º╪¬" },
+    labels: { en: "Payment Processor", zh: "支付处理商", ar: "معالج مدفوعات" },
   },
   {
     value: "telecom-network",
     labels: {
       en: "Telecom / Network Provider",
-      zh: "τö╡Σ┐í / τ╜æτ╗£µÅÉΣ╛¢σòå",
-      ar: "┘à╪▓┘ê╪» ╪º╪¬╪╡╪º┘ä╪º╪¬ / ╪┤╪¿┘â╪⌐",
+      zh: "电信 / 网络提供商",
+      ar: "مزود اتصالات / شبكة",
     },
   },
   {
     value: "colocation-data-center",
     labels: {
       en: "Colocation / Data Center",
-      zh: "µ£║µê┐µëÿτ«í / µò░µì«Σ╕¡σ┐â",
-      ar: "╪º╪│╪¬╪╢╪º┘ü╪⌐ / ┘à╪▒┘â╪▓ ╪¿┘è╪º┘å╪º╪¬",
+      zh: "机房托管 / 数据中心",
+      ar: "استضافة / مركز بيانات",
     },
   },
   {
     value: "business-process-outsourcing",
     labels: {
       en: "Business Process Outsourcing",
-      zh: "Σ╕Üσèíµ╡üτ¿ïσñûσîà",
-      ar: "╪º┘ä╪º╪│╪¬╪╣╪º┘å╪⌐ ╪¿┘à╪╡╪º╪»╪▒ ╪«╪º╪▒╪¼┘è╪⌐ ┘ä┘ä╪╣┘à┘ä┘è╪º╪¬",
+      zh: "业务流程外包",
+      ar: "الاستعانة بمصادر خارجية للعمليات",
     },
   },
   {
     value: "professional-services",
     labels: {
       en: "Professional Services",
-      zh: "Σ╕ôΣ╕Üµ£ìσèí",
-      ar: "╪º┘ä╪«╪»┘à╪º╪¬ ╪º┘ä┘à┘ç┘å┘è╪⌐",
+      zh: "专业服务",
+      ar: "الخدمات المهنية",
     },
   },
-  { value: "other", labels: { en: "Other", zh: "σà╢Σ╗û", ar: "╪ú╪«╪▒┘ë" } },
+  { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
 ];
 
 export const vendorCloudProviderValues = [
@@ -215,41 +215,41 @@ export const vendorCloudProviderOptions: ReadonlyArray<
   { value: "aws", labels: { en: "AWS", zh: "AWS", ar: "AWS" } },
   {
     value: "azure",
-    labels: { en: "Microsoft Azure", zh: "σ╛«Φ╜» Azure", ar: "┘à╪º┘è┘â╪▒┘ê╪│┘ê┘ü╪¬ Azure" },
+    labels: { en: "Microsoft Azure", zh: "微软 Azure", ar: "مايكروسوفت Azure" },
   },
   {
     value: "gcp",
-    labels: { en: "Google Cloud", zh: "Φ░╖µ¡îΣ║æ", ar: "Google Cloud" },
+    labels: { en: "Google Cloud", zh: "谷歌云", ar: "Google Cloud" },
   },
   {
     value: "oracle-cloud",
-    labels: { en: "Oracle Cloud", zh: "τö▓Θ¬¿µûçΣ║æ", ar: "Oracle Cloud" },
+    labels: { en: "Oracle Cloud", zh: "甲骨文云", ar: "Oracle Cloud" },
   },
   {
     value: "alibaba-cloud",
-    labels: { en: "Alibaba Cloud", zh: "Θÿ┐ΘçîΣ║æ", ar: "Alibaba Cloud" },
+    labels: { en: "Alibaba Cloud", zh: "阿里云", ar: "Alibaba Cloud" },
   },
   {
     value: "huawei-cloud",
-    labels: { en: "Huawei Cloud", zh: "σìÄΣ╕║Σ║æ", ar: "Huawei Cloud" },
+    labels: { en: "Huawei Cloud", zh: "华为云", ar: "Huawei Cloud" },
   },
   {
     value: "tencent-cloud",
-    labels: { en: "Tencent Cloud", zh: "Φà╛Φ«»Σ║æ", ar: "Tencent Cloud" },
+    labels: { en: "Tencent Cloud", zh: "腾讯云", ar: "Tencent Cloud" },
   },
   {
     value: "stc-cloud",
-    labels: { en: "stc Cloud", zh: "stc Σ║æ", ar: "stc Cloud" },
+    labels: { en: "stc Cloud", zh: "stc 云", ar: "stc Cloud" },
   },
   {
     value: "private-cloud",
     labels: {
       en: "Private Cloud / VMware",
-      zh: "τºüµ£ëΣ║æ / VMware",
-      ar: "╪│╪¡╪º╪¿╪⌐ ╪«╪º╪╡╪⌐ / VMware",
+      zh: "私有云 / VMware",
+      ar: "سحابة خاصة / VMware",
     },
   },
-  { value: "other", labels: { en: "Other", zh: "σà╢Σ╗û", ar: "╪ú╪«╪▒┘ë" } },
+  { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
 ];
 
 export const vendorHostingEnvironmentValues = [
@@ -268,25 +268,25 @@ export const vendorHostingEnvironmentOptions: ReadonlyArray<
 > = [
   {
     value: "on-premises",
-    labels: { en: "On-premises", zh: "µ£¼σ£░Θâ¿τ╜▓", ar: "╪»╪º╪«┘ä ╪º┘ä┘à╪ñ╪│╪│╪⌐" },
+    labels: { en: "On-premises", zh: "本地部署", ar: "داخل المؤسسة" },
   },
   {
     value: "private-cloud",
-    labels: { en: "Private Cloud", zh: "τºüµ£ëΣ║æ", ar: "╪│╪¡╪º╪¿╪⌐ ╪«╪º╪╡╪⌐" },
+    labels: { en: "Private Cloud", zh: "私有云", ar: "سحابة خاصة" },
   },
   {
     value: "single-public-cloud",
     labels: {
       en: "Single Public Cloud",
-      zh: "σìòΣ╕Çσà¼µ£ëΣ║æ",
-      ar: "╪│╪¡╪º╪¿╪⌐ ╪╣╪º┘à╪⌐ ┘ê╪º╪¡╪»╪⌐",
+      zh: "单一公有云",
+      ar: "سحابة عامة واحدة",
     },
   },
   {
     value: "multi-cloud",
-    labels: { en: "Multi-cloud", zh: "σñÜΣ║æ", ar: "┘à╪¬╪╣╪»╪» ╪º┘ä╪│╪¡╪º╪¿╪º╪¬" },
+    labels: { en: "Multi-cloud", zh: "多云", ar: "متعدد السحابات" },
   },
-  { value: "hybrid", labels: { en: "Hybrid", zh: "µ╖╖σÉê", ar: "┘ç╪¼┘è┘å╪⌐" } },
+  { value: "hybrid", labels: { en: "Hybrid", zh: "混合", ar: "هجينة" } },
 ];
 
 export const vendorCountryValues = [
@@ -331,96 +331,96 @@ export const vendorCountryOptions: ReadonlyArray<VendorOption<VendorCountry>> =
   [
     {
       value: "eu",
-      labels: { en: "European Union", zh: "µ¼ºτ¢ƒ", ar: "╪º┘ä╪º╪¬╪¡╪º╪» ╪º┘ä╪ú┘ê╪▒┘ê╪¿┘è" },
+      labels: { en: "European Union", zh: "欧盟", ar: "الاتحاد الأوروبي" },
     },
     {
       value: "us",
-      labels: { en: "United States", zh: "τ╛Äσ¢╜", ar: "╪º┘ä┘ê┘ä╪º┘è╪º╪¬ ╪º┘ä┘à╪¬╪¡╪»╪⌐" },
+      labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
     },
-    { value: "brazil", labels: { en: "Brazil", zh: "σ╖┤ΦÑ┐", ar: "╪º┘ä╪¿╪▒╪º╪▓┘è┘ä" } },
-    { value: "global", labels: { en: "Global", zh: "σà¿τÉâ", ar: "╪╣╪º┘ä┘à┘è" } },
+    { value: "brazil", labels: { en: "Brazil", zh: "巴西", ar: "البرازيل" } },
+    { value: "global", labels: { en: "Global", zh: "全球", ar: "عالمي" } },
     {
       value: "saudi-arabia",
       labels: {
         en: "Saudi Arabia",
-        zh: "µ▓Öτë╣Θÿ┐µïëΣ╝»",
-        ar: "╪º┘ä┘à┘à┘ä┘â╪⌐ ╪º┘ä╪╣╪▒╪¿┘è╪⌐ ╪º┘ä╪│╪╣┘ê╪»┘è╪⌐",
+        zh: "沙特阿拉伯",
+        ar: "المملكة العربية السعودية",
       },
     },
-    { value: "china", labels: { en: "China", zh: "Σ╕¡σ¢╜", ar: "╪º┘ä╪╡┘è┘å" } },
+    { value: "china", labels: { en: "China", zh: "中国", ar: "الصين" } },
     {
       value: "united-arab-emirates",
       labels: {
         en: "United Arab Emirates",
-        zh: "Θÿ┐ΦüöΘàï",
-        ar: "╪º┘ä╪Ñ┘à╪º╪▒╪º╪¬ ╪º┘ä╪╣╪▒╪¿┘è╪⌐ ╪º┘ä┘à╪¬╪¡╪»╪⌐",
+        zh: "阿联酋",
+        ar: "الإمارات العربية المتحدة",
       },
     },
-    { value: "bahrain", labels: { en: "Bahrain", zh: "σ╖┤µ₧ù", ar: "╪º┘ä╪¿╪¡╪▒┘è┘å" } },
+    { value: "bahrain", labels: { en: "Bahrain", zh: "巴林", ar: "البحرين" } },
     {
       value: "singapore",
-      labels: { en: "Singapore", zh: "µû░σèáσ¥í", ar: "╪│┘å╪║╪º┘ü┘ê╪▒╪⌐" },
+      labels: { en: "Singapore", zh: "新加坡", ar: "سنغافورة" },
     },
-    { value: "india", labels: { en: "India", zh: "σì░σ║ª", ar: "╪º┘ä┘ç┘å╪»" } },
-    { value: "germany", labels: { en: "Germany", zh: "σ╛╖σ¢╜", ar: "╪ú┘ä┘à╪º┘å┘è╪º" } },
+    { value: "india", labels: { en: "India", zh: "印度", ar: "الهند" } },
+    { value: "germany", labels: { en: "Germany", zh: "德国", ar: "ألمانيا" } },
     {
       value: "netherlands",
-      labels: { en: "Netherlands", zh: "Φì╖σà░", ar: "┘ç┘ê┘ä┘å╪»╪º" },
+      labels: { en: "Netherlands", zh: "荷兰", ar: "هولندا" },
     },
     {
       value: "united-kingdom",
-      labels: { en: "United Kingdom", zh: "Φï▒σ¢╜", ar: "╪º┘ä┘à┘à┘ä┘â╪⌐ ╪º┘ä┘à╪¬╪¡╪»╪⌐" },
+      labels: { en: "United Kingdom", zh: "英国", ar: "المملكة المتحدة" },
     },
     {
       value: "united-states",
-      labels: { en: "United States", zh: "τ╛Äσ¢╜", ar: "╪º┘ä┘ê┘ä╪º┘è╪º╪¬ ╪º┘ä┘à╪¬╪¡╪»╪⌐" },
+      labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
     },
     {
       value: "canada",
-      labels: { en: "Canada", zh: "σèáµï┐σñº", ar: "┘â┘å╪»╪º" },
+      labels: { en: "Canada", zh: "加拿大", ar: "كندا" },
     },
     {
       value: "australia",
-      labels: { en: "Australia", zh: "µ╛│σñºσê⌐Σ║Ü", ar: "╪ú╪│╪¬╪▒╪º┘ä┘è╪º" },
+      labels: { en: "Australia", zh: "澳大利亚", ar: "أستراليا" },
     },
-    { value: "japan", labels: { en: "Japan", zh: "µùÑµ£¼", ar: "╪º┘ä┘è╪º╪¿╪º┘å" } },
+    { value: "japan", labels: { en: "Japan", zh: "日本", ar: "اليابان" } },
     {
       value: "south-korea",
-      labels: { en: "South Korea", zh: "Θƒ⌐σ¢╜", ar: "┘â┘ê╪▒┘è╪º ╪º┘ä╪¼┘å┘ê╪¿┘è╪⌐" },
+      labels: { en: "South Korea", zh: "韩国", ar: "كوريا الجنوبية" },
     },
     {
       value: "south-africa",
-      labels: { en: "South Africa", zh: "σìùΘ¥₧", ar: "╪¼┘å┘ê╪¿ ╪ú┘ü╪▒┘è┘é┘è╪º" },
+      labels: { en: "South Africa", zh: "南非", ar: "جنوب أفريقيا" },
     },
-    { value: "mexico", labels: { en: "Mexico", zh: "σó¿ΦÑ┐σôÑ", ar: "╪º┘ä┘à┘â╪│┘è┘â" } },
-    { value: "qatar", labels: { en: "Qatar", zh: "σìíσíöσ░ö", ar: "┘é╪╖╪▒" } },
-    { value: "kuwait", labels: { en: "Kuwait", zh: "τºæσ¿üτë╣", ar: "╪º┘ä┘â┘ê┘è╪¬" } },
-    { value: "oman", labels: { en: "Oman", zh: "Θÿ┐µ¢╝", ar: "╪╣┘Å┘à╪º┘å" } },
-    { value: "jordan", labels: { en: "Jordan", zh: "τ║ªµùª", ar: "╪º┘ä╪ú╪▒╪»┘å" } },
-    { value: "egypt", labels: { en: "Egypt", zh: "σƒâσÅè", ar: "┘à╪╡╪▒" } },
+    { value: "mexico", labels: { en: "Mexico", zh: "墨西哥", ar: "المكسيك" } },
+    { value: "qatar", labels: { en: "Qatar", zh: "卡塔尔", ar: "قطر" } },
+    { value: "kuwait", labels: { en: "Kuwait", zh: "科威特", ar: "الكويت" } },
+    { value: "oman", labels: { en: "Oman", zh: "阿曼", ar: "عُمان" } },
+    { value: "jordan", labels: { en: "Jordan", zh: "约旦", ar: "الأردن" } },
+    { value: "egypt", labels: { en: "Egypt", zh: "埃及", ar: "مصر" } },
     {
       value: "indonesia",
-      labels: { en: "Indonesia", zh: "σì░σ║ªσ░╝ΦÑ┐Σ║Ü", ar: "╪Ñ┘å╪»┘ê┘å┘è╪│┘è╪º" },
+      labels: { en: "Indonesia", zh: "印度尼西亚", ar: "إندونيسيا" },
     },
     {
       value: "thailand",
-      labels: { en: "Thailand", zh: "µ│░σ¢╜", ar: "╪¬╪º┘è┘ä╪º┘å╪»" },
+      labels: { en: "Thailand", zh: "泰国", ar: "تايلاند" },
     },
-    { value: "vietnam", labels: { en: "Vietnam", zh: "Φ╢èσìù", ar: "┘ü┘è╪¬┘å╪º┘à" } },
+    { value: "vietnam", labels: { en: "Vietnam", zh: "越南", ar: "فيتنام" } },
     {
       value: "philippines",
-      labels: { en: "Philippines", zh: "ΦÅ▓σ╛ïσ«╛", ar: "╪º┘ä┘ü┘ä╪¿┘è┘å" },
+      labels: { en: "Philippines", zh: "菲律宾", ar: "الفلبين" },
     },
     {
       value: "malaysia",
-      labels: { en: "Malaysia", zh: "Θ⌐¼µ¥ÑΦÑ┐Σ║Ü", ar: "┘à╪º┘ä┘è╪▓┘è╪º" },
+      labels: { en: "Malaysia", zh: "马来西亚", ar: "ماليزيا" },
     },
     {
       value: "nigeria",
-      labels: { en: "Nigeria", zh: "σ░╝µùÑσê⌐Σ║Ü", ar: "┘å┘è╪¼┘è╪▒┘è╪º" },
+      labels: { en: "Nigeria", zh: "尼日利亚", ar: "نيجيريا" },
     },
-    { value: "kenya", labels: { en: "Kenya", zh: "Φé»σ░╝Σ║Ü", ar: "┘â┘è┘å┘è╪º" } },
-    { value: "other", labels: { en: "Other", zh: "σà╢Σ╗û", ar: "╪ú╪«╪▒┘ë" } },
+    { value: "kenya", labels: { en: "Kenya", zh: "肯尼亚", ar: "كينيا" } },
+    { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
   ];
 
 export const vendorJurisdictionValues = [
@@ -463,93 +463,93 @@ export const vendorJurisdictionOptions: ReadonlyArray<
 > = [
   {
     value: "eu",
-    labels: { en: "European Union", zh: "µ¼ºτ¢ƒ", ar: "╪º┘ä╪º╪¬╪¡╪º╪» ╪º┘ä╪ú┘ê╪▒┘ê╪¿┘è" },
+    labels: { en: "European Union", zh: "欧盟", ar: "الاتحاد الأوروبي" },
   },
   {
     value: "us",
-    labels: { en: "United States", zh: "τ╛Äσ¢╜", ar: "╪º┘ä┘ê┘ä╪º┘è╪º╪¬ ╪º┘ä┘à╪¬╪¡╪»╪⌐" },
+    labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
   },
-  { value: "brazil", labels: { en: "Brazil", zh: "σ╖┤ΦÑ┐", ar: "╪º┘ä╪¿╪▒╪º╪▓┘è┘ä" } },
-  { value: "global", labels: { en: "Global", zh: "σà¿τÉâ", ar: "╪╣╪º┘ä┘à┘è" } },
+  { value: "brazil", labels: { en: "Brazil", zh: "巴西", ar: "البرازيل" } },
+  { value: "global", labels: { en: "Global", zh: "全球", ar: "عالمي" } },
   {
     value: "saudi-arabia",
     labels: {
       en: "Saudi Arabia",
-      zh: "µ▓Öτë╣Θÿ┐µïëΣ╝»",
-      ar: "╪º┘ä┘à┘à┘ä┘â╪⌐ ╪º┘ä╪╣╪▒╪¿┘è╪⌐ ╪º┘ä╪│╪╣┘ê╪»┘è╪⌐",
+      zh: "沙特阿拉伯",
+      ar: "المملكة العربية السعودية",
     },
   },
-  { value: "china", labels: { en: "China", zh: "Σ╕¡σ¢╜", ar: "╪º┘ä╪╡┘è┘å" } },
+  { value: "china", labels: { en: "China", zh: "中国", ar: "الصين" } },
   {
     value: "gcc",
-    labels: { en: "GCC", zh: "µ╡╖σÉêΣ╝Ü", ar: "┘à╪¼┘ä╪│ ╪º┘ä╪¬╪╣╪º┘ê┘å ╪º┘ä╪«┘ä┘è╪¼┘è" },
+    labels: { en: "GCC", zh: "海合会", ar: "مجلس التعاون الخليجي" },
   },
   {
     value: "eu-eea",
     labels: {
       en: "EU / EEA",
-      zh: "µ¼ºτ¢ƒ / µ¼ºµ┤▓τ╗Åµ╡Äσî║",
-      ar: "╪º┘ä╪º╪¬╪¡╪º╪» ╪º┘ä╪ú┘ê╪▒┘ê╪¿┘è / ╪º┘ä┘à┘å╪╖┘é╪⌐ ╪º┘ä╪º┘é╪¬╪╡╪º╪»┘è╪⌐ ╪º┘ä╪ú┘ê╪▒┘ê╪¿┘è╪⌐",
+      zh: "欧盟 / 欧洲经济区",
+      ar: "الاتحاد الأوروبي / المنطقة الاقتصادية الأوروبية",
     },
   },
   {
     value: "united-kingdom",
-    labels: { en: "United Kingdom", zh: "Φï▒σ¢╜", ar: "╪º┘ä┘à┘à┘ä┘â╪⌐ ╪º┘ä┘à╪¬╪¡╪»╪⌐" },
+    labels: { en: "United Kingdom", zh: "英国", ar: "المملكة المتحدة" },
   },
   {
     value: "united-states",
-    labels: { en: "United States", zh: "τ╛Äσ¢╜", ar: "╪º┘ä┘ê┘ä╪º┘è╪º╪¬ ╪º┘ä┘à╪¬╪¡╪»╪⌐" },
+    labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
   },
   {
     value: "apac",
-    labels: { en: "APAC", zh: "Σ║Üσñ¬", ar: "╪ó╪│┘è╪º ┘ê╪º┘ä┘à╪¡┘è╪╖ ╪º┘ä┘ç╪º╪»╪ª" },
+    labels: { en: "APAC", zh: "亚太", ar: "آسيا والمحيط الهادئ" },
   },
   {
     value: "canada",
-    labels: { en: "Canada", zh: "σèáµï┐σñº", ar: "┘â┘å╪»╪º" },
+    labels: { en: "Canada", zh: "加拿大", ar: "كندا" },
   },
   {
     value: "australia",
-    labels: { en: "Australia", zh: "µ╛│σñºσê⌐Σ║Ü", ar: "╪ú╪│╪¬╪▒╪º┘ä┘è╪º" },
+    labels: { en: "Australia", zh: "澳大利亚", ar: "أستراليا" },
   },
-  { value: "japan", labels: { en: "Japan", zh: "µùÑµ£¼", ar: "╪º┘ä┘è╪º╪¿╪º┘å" } },
+  { value: "japan", labels: { en: "Japan", zh: "日本", ar: "اليابان" } },
   {
     value: "south-korea",
-    labels: { en: "South Korea", zh: "Θƒ⌐σ¢╜", ar: "┘â┘ê╪▒┘è╪º ╪º┘ä╪¼┘å┘ê╪¿┘è╪⌐" },
+    labels: { en: "South Korea", zh: "韩国", ar: "كوريا الجنوبية" },
   },
   {
     value: "south-africa",
-    labels: { en: "South Africa", zh: "σìùΘ¥₧", ar: "╪¼┘å┘ê╪¿ ╪ú┘ü╪▒┘è┘é┘è╪º" },
+    labels: { en: "South Africa", zh: "南非", ar: "جنوب أفريقيا" },
   },
-  { value: "mexico", labels: { en: "Mexico", zh: "σó¿ΦÑ┐σôÑ", ar: "╪º┘ä┘à┘â╪│┘è┘â" } },
-  { value: "qatar", labels: { en: "Qatar", zh: "σìíσíöσ░ö", ar: "┘é╪╖╪▒" } },
-  { value: "kuwait", labels: { en: "Kuwait", zh: "τºæσ¿üτë╣", ar: "╪º┘ä┘â┘ê┘è╪¬" } },
-  { value: "bahrain", labels: { en: "Bahrain", zh: "σ╖┤µ₧ù", ar: "╪º┘ä╪¿╪¡╪▒┘è┘å" } },
-  { value: "oman", labels: { en: "Oman", zh: "Θÿ┐µ¢╝", ar: "╪╣┘Å┘à╪º┘å" } },
-  { value: "jordan", labels: { en: "Jordan", zh: "τ║ªµùª", ar: "╪º┘ä╪ú╪▒╪»┘å" } },
-  { value: "egypt", labels: { en: "Egypt", zh: "σƒâσÅè", ar: "┘à╪╡╪▒" } },
+  { value: "mexico", labels: { en: "Mexico", zh: "墨西哥", ar: "المكسيك" } },
+  { value: "qatar", labels: { en: "Qatar", zh: "卡塔尔", ar: "قطر" } },
+  { value: "kuwait", labels: { en: "Kuwait", zh: "科威特", ar: "الكويت" } },
+  { value: "bahrain", labels: { en: "Bahrain", zh: "巴林", ar: "البحرين" } },
+  { value: "oman", labels: { en: "Oman", zh: "阿曼", ar: "عُمان" } },
+  { value: "jordan", labels: { en: "Jordan", zh: "约旦", ar: "الأردن" } },
+  { value: "egypt", labels: { en: "Egypt", zh: "埃及", ar: "مصر" } },
   {
     value: "indonesia",
-    labels: { en: "Indonesia", zh: "σì░σ║ªσ░╝ΦÑ┐Σ║Ü", ar: "╪Ñ┘å╪»┘ê┘å┘è╪│┘è╪º" },
+    labels: { en: "Indonesia", zh: "印度尼西亚", ar: "إندونيسيا" },
   },
   {
     value: "thailand",
-    labels: { en: "Thailand", zh: "µ│░σ¢╜", ar: "╪¬╪º┘è┘ä╪º┘å╪»" },
+    labels: { en: "Thailand", zh: "泰国", ar: "تايلاند" },
   },
-  { value: "vietnam", labels: { en: "Vietnam", zh: "Φ╢èσìù", ar: "┘ü┘è╪¬┘å╪º┘à" } },
+  { value: "vietnam", labels: { en: "Vietnam", zh: "越南", ar: "فيتنام" } },
   {
     value: "philippines",
-    labels: { en: "Philippines", zh: "ΦÅ▓σ╛ïσ«╛", ar: "╪º┘ä┘ü┘ä╪¿┘è┘å" },
+    labels: { en: "Philippines", zh: "菲律宾", ar: "الفلبين" },
   },
   {
     value: "malaysia",
-    labels: { en: "Malaysia", zh: "Θ⌐¼µ¥ÑΦÑ┐Σ║Ü", ar: "┘à╪º┘ä┘è╪▓┘è╪º" },
+    labels: { en: "Malaysia", zh: "马来西亚", ar: "ماليزيا" },
   },
   {
     value: "nigeria",
-    labels: { en: "Nigeria", zh: "σ░╝µùÑσê⌐Σ║Ü", ar: "┘å┘è╪¼┘è╪▒┘è╪º" },
+    labels: { en: "Nigeria", zh: "尼日利亚", ar: "نيجيريا" },
   },
-  { value: "kenya", labels: { en: "Kenya", zh: "Φé»σ░╝Σ║Ü", ar: "┘â┘è┘å┘è╪º" } },
+  { value: "kenya", labels: { en: "Kenya", zh: "肯尼亚", ar: "كينيا" } },
 ];
 
 export const vendorComplianceStandardValues = [
@@ -592,8 +592,8 @@ export const vendorComplianceStandardOptions: ReadonlyArray<
     value: "nist-csf-aligned",
     labels: {
       en: "NIST CSF aligned",
-      zh: "τ¼ªσÉê NIST CSF",
-      ar: "┘à╪¬┘ê╪º┘ü┘é ┘à╪╣ NIST CSF",
+      zh: "符合 NIST CSF",
+      ar: "متوافق مع NIST CSF",
     },
   },
   { value: "nca-ecc", labels: { en: "NCA ECC", zh: "NCA ECC", ar: "NCA ECC" } },
@@ -606,8 +606,8 @@ export const vendorComplianceStandardOptions: ReadonlyArray<
     value: "privacy-impact-assessment-program",
     labels: {
       en: "Privacy impact assessment program",
-      zh: "ΘÜÉτºüσ╜▒σôìΦ»äΣ╝░Φ«íσêÆ",
-      ar: "╪¿╪▒┘å╪º┘à╪¼ ╪¬┘é┘è┘è┘à ╪ú╪½╪▒ ╪º┘ä╪«╪╡┘ê╪╡┘è╪⌐",
+      zh: "隐私影响评估计划",
+      ar: "برنامج تقييم أثر الخصوصية",
     },
   },
 ];
@@ -635,76 +635,76 @@ export const vendorDataProcessingActivityOptions: ReadonlyArray<
     value: "customer-personal-data",
     labels: {
       en: "Customer personal data",
-      zh: "σ«óµê╖Σ╕¬Σ║║µò░µì«",
-      ar: "╪º┘ä╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪┤╪«╪╡┘è╪⌐ ┘ä┘ä╪╣┘à┘ä╪º╪í",
+      zh: "客户个人数据",
+      ar: "البيانات الشخصية للعملاء",
     },
   },
   {
     value: "employee-data",
-    labels: { en: "Employee data", zh: "σæÿσ╖Ñµò░µì«", ar: "╪¿┘è╪º┘å╪º╪¬ ╪º┘ä┘à┘ê╪╕┘ü┘è┘å" },
+    labels: { en: "Employee data", zh: "员工数据", ar: "بيانات الموظفين" },
   },
   {
     value: "financial-payment-data",
     labels: {
       en: "Financial / payment data",
-      zh: "ΘçæΦ₧ì / µö»Σ╗ÿµò░µì«",
-      ar: "╪º┘ä╪¿┘è╪º┘å╪º╪¬ ╪º┘ä┘à╪º┘ä┘è╪⌐ / ╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪»┘ü╪╣",
+      zh: "金融 / 支付数据",
+      ar: "البيانات المالية / بيانات الدفع",
     },
   },
   {
     value: "health-biometric-data",
     labels: {
       en: "Health / biometric data",
-      zh: "σüÑσ║╖ / τöƒτë⌐Φ»åσê½µò░µì«",
-      ar: "╪º┘ä╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪╡╪¡┘è╪⌐ / ╪º┘ä╪¿┘è┘ê┘à╪¬╪▒┘è╪⌐",
+      zh: "健康 / 生物识别数据",
+      ar: "البيانات الصحية / البيومترية",
     },
   },
   {
     value: "security-telemetry-logs",
     labels: {
       en: "Security telemetry / logs",
-      zh: "σ«ëσà¿ΘüÑµ╡ï / µùÑσ┐ù",
-      ar: "┘é┘è╪º╪│╪º╪¬ ╪º┘ä╪ú┘à┘å / ╪º┘ä╪│╪¼┘ä╪º╪¬",
+      zh: "安全遥测 / 日志",
+      ar: "قياسات الأمن / السجلات",
     },
   },
   {
     value: "source-code-intellectual-property",
     labels: {
       en: "Source code / intellectual property",
-      zh: "µ║ÉΣ╗úτáü / τƒÑΦ»åΣ║ºµ¥â",
-      ar: "╪º┘ä╪┤┘ü╪▒╪⌐ ╪º┘ä┘à╪╡╪»╪▒┘è╪⌐ / ╪º┘ä┘à┘ä┘â┘è╪⌐ ╪º┘ä┘ü┘â╪▒┘è╪⌐",
+      zh: "源代码 / 知识产权",
+      ar: "الشفرة المصدرية / الملكية الفكرية",
     },
   },
   {
     value: "operational-technology-data",
     labels: {
       en: "Operational technology data",
-      zh: "Φ┐ÉΦÉÑµèÇµ£»µò░µì«",
-      ar: "╪¿┘è╪º┘å╪º╪¬ ╪º┘ä╪¬┘é┘å┘è╪⌐ ╪º┘ä╪¬╪┤╪║┘è┘ä┘è╪⌐",
+      zh: "运营技术数据",
+      ar: "بيانات التقنية التشغيلية",
     },
   },
   {
     value: "identity-access-data",
     labels: {
       en: "Identity / access data",
-      zh: "Φ║½Σ╗╜ / Φ«┐Θù«µò░µì«",
-      ar: "╪¿┘è╪º┘å╪º╪¬ ╪º┘ä┘ç┘ê┘è╪⌐ / ╪º┘ä┘ê╪╡┘ê┘ä",
+      zh: "身份 / 访问数据",
+      ar: "بيانات الهوية / الوصول",
     },
   },
   {
     value: "backup-disaster-recovery-data",
     labels: {
       en: "Backup / disaster recovery data",
-      zh: "σñçΣ╗╜ / τü╛σñçµò░µì«",
-      ar: "╪¿┘è╪º┘å╪º╪¬ ╪º┘ä┘å╪│╪« ╪º┘ä╪º╪¡╪¬┘è╪º╪╖┘è / ╪º┘ä╪¬╪╣╪º┘ü┘è ┘à┘å ╪º┘ä┘â┘ê╪º╪▒╪½",
+      zh: "备份 / 灾备数据",
+      ar: "بيانات النسخ الاحتياطي / التعافي من الكوارث",
     },
   },
   {
     value: "cross-border-data-transfer",
     labels: {
       en: "Cross-border data transfer",
-      zh: "Φ╖¿σóâµò░µì«Σ╝áΦ╛ô",
-      ar: "┘å┘é┘ä ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ╪╣╪¿╪▒ ╪º┘ä╪¡╪»┘ê╪»",
+      zh: "跨境数据传输",
+      ar: "نقل البيانات عبر الحدود",
     },
   },
 ];
@@ -722,12 +722,12 @@ export type VendorCriticalityLevel =
 export const vendorCriticalityLevelOptions: ReadonlyArray<
   VendorOption<VendorCriticalityLevel>
 > = [
-  { value: "low", labels: { en: "Low", zh: "Σ╜Ä", ar: "┘à┘å╪«┘ü╪╢" } },
-  { value: "moderate", labels: { en: "Moderate", zh: "Σ╕¡", ar: "┘à╪¬┘ê╪│╪╖" } },
-  { value: "high", labels: { en: "High", zh: "Θ½ÿ", ar: "┘à╪▒╪¬┘ü╪╣" } },
+  { value: "low", labels: { en: "Low", zh: "低", ar: "منخفض" } },
+  { value: "moderate", labels: { en: "Moderate", zh: "中", ar: "متوسط" } },
+  { value: "high", labels: { en: "High", zh: "高", ar: "مرتفع" } },
   {
     value: "mission-critical",
-    labels: { en: "Mission critical", zh: "σà│Θö«µá╕σ┐â", ar: "╪¡╪▒╪¼ ┘ä┘ä╪║╪º┘è╪⌐" },
+    labels: { en: "Mission critical", zh: "关键核心", ar: "حرج للغاية" },
   },
 ];
 
@@ -747,25 +747,25 @@ export const vendorRiskTierOptions: ReadonlyArray<
     value: "tier-1-critical",
     labels: {
       en: "Tier 1 - Critical",
-      zh: "Σ╕Çτ║º - σà│Θö«",
-      ar: "╪º┘ä┘à╪│╪¬┘ê┘ë 1 - ╪¡╪▒╪¼",
+      zh: "一级 - 关键",
+      ar: "المستوى 1 - حرج",
     },
   },
   {
     value: "tier-2-high",
-    labels: { en: "Tier 2 - High", zh: "Σ║îτ║º - Θ½ÿ", ar: "╪º┘ä┘à╪│╪¬┘ê┘ë 2 - ┘à╪▒╪¬┘ü╪╣" },
+    labels: { en: "Tier 2 - High", zh: "二级 - 高", ar: "المستوى 2 - مرتفع" },
   },
   {
     value: "tier-3-moderate",
     labels: {
       en: "Tier 3 - Moderate",
-      zh: "Σ╕ëτ║º - Σ╕¡",
-      ar: "╪º┘ä┘à╪│╪¬┘ê┘ë 3 - ┘à╪¬┘ê╪│╪╖",
+      zh: "三级 - 中",
+      ar: "المستوى 3 - متوسط",
     },
   },
   {
     value: "tier-4-low",
-    labels: { en: "Tier 4 - Low", zh: "σ¢¢τ║º - Σ╜Ä", ar: "╪º┘ä┘à╪│╪¬┘ê┘ë 4 - ┘à┘å╪«┘ü╪╢" },
+    labels: { en: "Tier 4 - Low", zh: "四级 - 低", ar: "المستوى 4 - منخفض" },
   },
 ];
 
@@ -782,10 +782,10 @@ export type VendorDependencyLevel =
 export const vendorDependencyLevelOptions: ReadonlyArray<
   VendorOption<VendorDependencyLevel>
 > = [
-  { value: "none", labels: { en: "None", zh: "µùá", ar: "┘ä╪º ┘è┘ê╪¼╪»" } },
-  { value: "limited", labels: { en: "Limited", zh: "µ£ëΘÖÉ", ar: "┘à╪¡╪»┘ê╪»" } },
-  { value: "material", labels: { en: "Material", zh: "ΘçìΦªü", ar: "╪¼┘ê┘ç╪▒┘è" } },
-  { value: "extensive", labels: { en: "Extensive", zh: "σ╣┐µ│¢", ar: "┘ê╪º╪│╪╣" } },
+  { value: "none", labels: { en: "None", zh: "无", ar: "لا يوجد" } },
+  { value: "limited", labels: { en: "Limited", zh: "有限", ar: "محدود" } },
+  { value: "material", labels: { en: "Material", zh: "重要", ar: "جوهري" } },
+  { value: "extensive", labels: { en: "Extensive", zh: "广泛", ar: "واسع" } },
 ];
 
 export type EnterpriseTechStackComponentInput = {
@@ -825,203 +825,203 @@ export type EnterpriseVendorProfileInput = {
 export const vendorProfileCopy = {
   sectionCompany: {
     en: "Company Information",
-    zh: "σà¼σÅ╕Σ┐íµü»",
-    ar: "┘à╪╣┘ä┘ê┘à╪º╪¬ ╪º┘ä╪┤╪▒┘â╪⌐",
+    zh: "公司信息",
+    ar: "معلومات الشركة",
   },
   sectionCompanyHint: {
     en: "Capture the supplier's legal identity and organizational context.",
-    zh: "Φ«░σ╜òΣ╛¢σ║öσòåτÜäµ│òσ╛ïΦ║½Σ╗╜Σ╕Äτ╗äτ╗çΦâîµÖ»πÇé",
-    ar: "╪│╪¼┘æ┘ä ╪º┘ä┘ç┘ê┘è╪⌐ ╪º┘ä┘é╪º┘å┘ê┘å┘è╪⌐ ┘ê╪º┘ä╪│┘è╪º┘é ╪º┘ä┘à╪ñ╪│╪│┘è ┘ä┘ä┘à┘ê╪▒┘æ╪».",
+    zh: "记录供应商的法律身份与组织背景。",
+    ar: "سجّل الهوية القانونية والسياق المؤسسي للمورّد.",
   },
   sectionService: {
     en: "Service & Infrastructure",
-    zh: "µ£ìσèíΣ╕Äσƒ║τíÇΦ«╛µû╜",
-    ar: "╪º┘ä╪«╪»┘à╪⌐ ┘ê╪º┘ä╪¿┘å┘è╪⌐ ╪º┘ä╪¬╪¡╪¬┘è╪⌐",
+    zh: "服务与基础设施",
+    ar: "الخدمة والبنية التحتية",
   },
   sectionServiceHint: {
     en: "Define what the vendor delivers, where it runs, and which jurisdictions it affects.",
-    zh: "σ«ÜΣ╣ëΣ╛¢σ║öσòåµÅÉΣ╛¢τÜäµ£ìσèíπÇüΦ┐ÉΦíîτÄ»σóâΣ╗ÑσÅèσ╜▒σôìσê░τÜäµ│òσƒƒπÇé",
-    ar: "╪¡╪»┘æ╪» ┘à╪º ┘è┘é╪»┘à┘ç ╪º┘ä┘à┘ê╪▒┘æ╪» ┘ê╪ú┘è┘å ┘è╪╣┘à┘ä ┘ê┘à╪º ┘ç┘è ╪º┘ä┘ê┘ä╪º┘è╪º╪¬ ╪º┘ä┘é╪╢╪º╪ª┘è╪⌐ ╪º┘ä┘à╪¬╪ú╪½╪▒╪⌐.",
+    zh: "定义供应商提供的服务、运行环境以及影响到的法域。",
+    ar: "حدّد ما يقدمه المورّد وأين يعمل وما هي الولايات القضائية المتأثرة.",
   },
   sectionCompliance: {
     en: "Security & Compliance",
-    zh: "σ«ëσà¿Σ╕ÄσÉêΦºä",
-    ar: "╪º┘ä╪ú┘à┘å ┘ê╪º┘ä╪º┘à╪¬╪½╪º┘ä",
+    zh: "安全与合规",
+    ar: "الأمن والامتثال",
   },
   sectionComplianceHint: {
     en: "Record control attestations, data handling patterns, and regulatory exposure.",
-    zh: "Φ«░σ╜òµÄºσê╢Φ«ñΦ»üπÇüµò░µì«σñäτÉåµ¿íσ╝ÅσÆîτ¢æτ«íµÜ┤Θ£▓Θ¥óπÇé",
-    ar: "╪│╪¼┘æ┘ä ╪º┘ä╪º╪╣╪¬┘à╪º╪»╪º╪¬ ╪º┘ä╪▒┘é╪º╪¿┘è╪⌐ ┘ê╪ú┘å┘à╪º╪╖ ┘à╪╣╪º┘ä╪¼╪⌐ ╪º┘ä╪¿┘è╪º┘å╪º╪¬ ┘ê╪º┘ä╪¬╪╣╪▒╪╢ ╪º┘ä╪¬┘å╪╕┘è┘à┘è.",
+    zh: "记录控制认证、数据处理模式和监管暴露面。",
+    ar: "سجّل الاعتمادات الرقابية وأنماط معالجة البيانات والتعرض التنظيمي.",
   },
   sectionRisk: {
     en: "Risk Classification",
-    zh: "ΘúÄΘÖ⌐σêåτ▒╗",
-    ar: "╪¬╪╡┘å┘è┘ü ╪º┘ä┘à╪«╪º╪╖╪▒",
+    zh: "风险分类",
+    ar: "تصنيف المخاطر",
   },
   sectionRiskHint: {
     en: "Classify inherent risk, business criticality, and supply-chain dependency depth.",
-    zh: "σêåτ▒╗σ¢║µ£ëΘúÄΘÖ⌐πÇüΣ╕Üσèíσà│Θö«µÇºΣ╕ÄΣ╛¢σ║öΘô╛Σ╛¥Φ╡ûµ╖▒σ║ªπÇé",
-    ar: "╪╡┘å┘æ┘ü ╪º┘ä┘à╪«╪º╪╖╪▒ ╪º┘ä┘â╪º┘à┘å╪⌐ ┘ê╪º┘ä╪ú┘ç┘à┘è╪⌐ ╪º┘ä╪¬╪┤╪║┘è┘ä┘è╪⌐ ┘ê╪╣┘à┘é ╪º┘ä╪¬╪¿╪╣┘è╪⌐ ┘ü┘è ╪│┘ä╪│┘ä╪⌐ ╪º┘ä╪¬┘ê╪▒┘è╪».",
+    zh: "分类固有风险、业务关键性与供应链依赖深度。",
+    ar: "صنّف المخاطر الكامنة والأهمية التشغيلية وعمق التبعية في سلسلة التوريد.",
   },
   sectionContact: {
     en: "Primary Contact",
-    zh: "Σ╕╗ΦªüΦüöτ│╗Σ║║",
-    ar: "╪¼┘ç╪⌐ ╪º┘ä╪º╪¬╪╡╪º┘ä ╪º┘ä╪▒╪ª┘è╪│┘è╪⌐",
+    zh: "主要联系人",
+    ar: "جهة الاتصال الرئيسية",
   },
   sectionContactHint: {
     en: "Store the accountable contact for due diligence, remediation, and evidence requests.",
-    zh: "Σ┐¥σ¡ÿσ░╜Φ░âπÇüµò┤µö╣σÆîΦ»üµì«Φ»╖µ▒éτÜäΦ┤úΣ╗╗Φüöτ│╗Σ║║πÇé",
-    ar: "╪º╪¡┘ü╪╕ ╪¼┘ç╪⌐ ╪º┘ä╪º╪¬╪╡╪º┘ä ╪º┘ä┘à╪│╪ñ┘ê┘ä╪⌐ ╪╣┘å ╪º┘ä╪╣┘å╪º┘è╪⌐ ╪º┘ä┘ê╪º╪¼╪¿╪⌐ ┘ê╪º┘ä┘à╪╣╪º┘ä╪¼╪⌐ ┘ê╪╖┘ä╪¿╪º╪¬ ╪º┘ä╪ú╪»┘ä╪⌐.",
+    zh: "保存尽调、整改和证据请求的责任联系人。",
+    ar: "احفظ جهة الاتصال المسؤولة عن العناية الواجبة والمعالجة وطلبات الأدلة.",
   },
   fieldBusinessRegistrationNumber: {
     en: "Business Registration Number",
-    zh: "σòåΣ╕Üµ│¿σåîσÅ╖",
-    ar: "╪▒┘é┘à ╪º┘ä╪│╪¼┘ä ╪º┘ä╪¬╪¼╪º╪▒┘è",
+    zh: "商业注册号",
+    ar: "رقم السجل التجاري",
   },
   fieldHeadquartersLocation: {
     en: "Headquarters Location",
-    zh: "µÇ╗Θâ¿µëÇσ£¿σ£░",
-    ar: "┘à┘ê┘é╪╣ ╪º┘ä┘à┘é╪▒ ╪º┘ä╪▒╪ª┘è╪│┘è",
+    zh: "总部所在地",
+    ar: "موقع المقر الرئيسي",
   },
   fieldPrimaryContactName: {
     en: "Primary Contact Name",
-    zh: "Σ╕╗ΦªüΦüöτ│╗Σ║║σºôσÉì",
-    ar: "╪º╪│┘à ╪¼┘ç╪⌐ ╪º┘ä╪º╪¬╪╡╪º┘ä ╪º┘ä╪▒╪ª┘è╪│┘è╪⌐",
+    zh: "主要联系人姓名",
+    ar: "اسم جهة الاتصال الرئيسية",
   },
   fieldPrimaryContactEmail: {
     en: "Primary Contact Email",
-    zh: "Σ╕╗ΦªüΦüöτ│╗Σ║║Θé«τ«▒",
-    ar: "╪º┘ä╪¿╪▒┘è╪» ╪º┘ä╪Ñ┘ä┘â╪¬╪▒┘ê┘å┘è ┘ä╪¼┘ç╪⌐ ╪º┘ä╪º╪¬╪╡╪º┘ä ╪º┘ä╪▒╪ª┘è╪│┘è╪⌐",
+    zh: "主要联系人邮箱",
+    ar: "البريد الإلكتروني لجهة الاتصال الرئيسية",
   },
   fieldPrimaryContactRole: {
     en: "Primary Contact Role",
-    zh: "Σ╕╗ΦªüΦüöτ│╗Σ║║ΦºÆΦë▓",
-    ar: "╪»┘ê╪▒ ╪¼┘ç╪⌐ ╪º┘ä╪º╪¬╪╡╪º┘ä ╪º┘ä╪▒╪ª┘è╪│┘è╪⌐",
+    zh: "主要联系人角色",
+    ar: "دور جهة الاتصال الرئيسية",
   },
   fieldPrimaryContactPhone: {
     en: "Primary Contact Phone",
-    zh: "Σ╕╗ΦªüΦüöτ│╗Σ║║τö╡Φ»¥",
-    ar: "┘ç╪º╪¬┘ü ╪¼┘ç╪⌐ ╪º┘ä╪º╪¬╪╡╪º┘ä ╪º┘ä╪▒╪ª┘è╪│┘è╪⌐",
+    zh: "主要联系人电话",
+    ar: "هاتف جهة الاتصال الرئيسية",
   },
   fieldServiceType: {
     en: "Service Type",
-    zh: "µ£ìσèíτ▒╗σ₧ï",
-    ar: "┘å┘ê╪╣ ╪º┘ä╪«╪»┘à╪⌐",
+    zh: "服务类型",
+    ar: "نوع الخدمة",
   },
   fieldServiceScope: {
     en: "Service Scope",
-    zh: "µ£ìσèíΦîâσ¢┤",
-    ar: "┘å╪╖╪º┘é ╪º┘ä╪«╪»┘à╪⌐",
+    zh: "服务范围",
+    ar: "نطاق الخدمة",
   },
   fieldHostingEnvironment: {
     en: "Hosting Environment",
-    zh: "µëÿτ«íτÄ»σóâ",
-    ar: "╪¿┘è╪ª╪⌐ ╪º┘ä╪º╪│╪¬╪╢╪º┘ü╪⌐",
+    zh: "托管环境",
+    ar: "بيئة الاستضافة",
   },
   fieldCloudProviders: {
     en: "Cloud Providers",
-    zh: "Σ║æµ£ìσèíσòå",
-    ar: "┘à╪▓┘ê╪»┘ê ╪º┘ä╪│╪¡╪º╪¿╪⌐",
+    zh: "云服务商",
+    ar: "مزودو السحابة",
   },
   fieldRegulatoryJurisdictions: {
     en: "Regulatory Jurisdictions",
-    zh: "τ¢æτ«íµ│òσƒƒ",
-    ar: "╪º┘ä┘ê┘ä╪º┘è╪º╪¬ ╪º┘ä┘é╪╢╪º╪ª┘è╪⌐ ╪º┘ä╪¬┘å╪╕┘è┘à┘è╪⌐",
+    zh: "监管法域",
+    ar: "الولايات القضائية التنظيمية",
   },
   fieldDataProcessingActivities: {
     en: "Data Processing Activities",
-    zh: "µò░µì«σñäτÉåµ┤╗σè¿",
-    ar: "╪ú┘å╪┤╪╖╪⌐ ┘à╪╣╪º┘ä╪¼╪⌐ ╪º┘ä╪¿┘è╪º┘å╪º╪¬",
+    zh: "数据处理活动",
+    ar: "أنشطة معالجة البيانات",
   },
   fieldCriticalityLevel: {
     en: "Criticality Level",
-    zh: "σà│Θö«µÇºτ║ºσê½",
-    ar: "┘à╪│╪¬┘ê┘ë ╪º┘ä╪ú┘ç┘à┘è╪⌐",
+    zh: "关键性级别",
+    ar: "مستوى الأهمية",
   },
   fieldRiskTier: {
     en: "Inherent Risk Tier",
-    zh: "σ¢║µ£ëΘúÄΘÖ⌐τ¡ëτ║º",
-    ar: "╪»╪▒╪¼╪⌐ ╪º┘ä┘à╪«╪º╪╖╪▒ ╪º┘ä┘â╪º┘à┘å╪⌐",
+    zh: "固有风险等级",
+    ar: "درجة المخاطر الكامنة",
   },
   fieldThirdPartyDependencies: {
     en: "Third-Party Dependencies",
-    zh: "τ¼¼Σ╕ëµû╣Σ╛¥Φ╡û",
-    ar: "╪º╪╣╪¬┘à╪º╪»┘è╪º╪¬ ╪º┘ä╪╖╪▒┘ü ╪º┘ä╪½╪º┘ä╪½",
+    zh: "第三方依赖",
+    ar: "اعتماديات الطرف الثالث",
   },
   fieldFourthPartyDependencies: {
     en: "Fourth-Party Dependencies",
-    zh: "τ¼¼σ¢¢µû╣Σ╛¥Φ╡û",
-    ar: "╪º╪╣╪¬┘à╪º╪»┘è╪º╪¬ ╪º┘ä╪╖╪▒┘ü ╪º┘ä╪▒╪º╪¿╪╣",
+    zh: "第四方依赖",
+    ar: "اعتماديات الطرف الرابع",
   },
   fieldComplianceStandards: {
     en: "Security Certifications & Standards",
-    zh: "σ«ëσà¿Φ«ñΦ»üΣ╕Äµáçσçå",
-    ar: "╪º┘ä╪┤┘ç╪º╪»╪º╪¬ ┘ê╪º┘ä┘à╪╣╪º┘è┘è╪▒ ╪º┘ä╪ú┘à┘å┘è╪⌐",
+    zh: "安全认证与标准",
+    ar: "الشهادات والمعايير الأمنية",
   },
   fieldCompanyProfile: {
     en: "Company Profile / Description",
-    zh: "σà¼σÅ╕τ«ÇΣ╗ï / µÅÅΦ┐░",
-    ar: "┘à┘ä┘ü ╪º┘ä╪┤╪▒┘â╪⌐ / ╪º┘ä┘ê╪╡┘ü",
+    zh: "公司简介 / 描述",
+    ar: "ملف الشركة / الوصف",
   },
   requiredFieldsNotice: {
     en: "Complete the required enterprise profile fields before creating or previewing the supplier.",
-    zh: "Φ»╖σàêσ«îµêÉσ┐àσí½τÜäΣ╝üΣ╕Üτ║ºµíúµíêσ¡ùµ«╡∩╝îσåìσê¢σ╗║µêûΘóäΦºêΣ╛¢σ║öσòåπÇé",
-    ar: "╪ú┘â┘à┘ä ╪º┘ä╪¡┘é┘ê┘ä ╪º┘ä╪Ñ┘ä╪▓╪º┘à┘è╪⌐ ┘ü┘è ┘à┘ä┘ü ╪º┘ä┘à╪ñ╪│╪│╪⌐ ┘é╪¿┘ä ╪Ñ┘å╪┤╪º╪í ╪º┘ä┘à┘ê╪▒╪» ╪ú┘ê ┘à╪╣╪º┘è┘å╪¬┘ç.",
+    zh: "请先完成必填的企业级档案字段，再创建或预览供应商。",
+    ar: "أكمل الحقول الإلزامية في ملف المؤسسة قبل إنشاء المورد أو معاينته.",
   },
   requiredBadge: {
     en: "Required",
-    zh: "σ┐àσí½",
-    ar: "╪Ñ┘ä╪▓╪º┘à┘è",
+    zh: "必填",
+    ar: "إلزامي",
   },
   profileCompleteness: {
     en: "Profile completeness",
-    zh: "µíúµíêσ«îµò┤σ║ª",
-    ar: "╪º┘â╪¬┘à╪º┘ä ╪º┘ä┘à┘ä┘ü",
+    zh: "档案完整度",
+    ar: "اكتمال الملف",
   },
   summaryCompany: {
     en: "Company",
-    zh: "σà¼σÅ╕",
-    ar: "╪º┘ä╪┤╪▒┘â╪⌐",
+    zh: "公司",
+    ar: "الشركة",
   },
   summaryService: {
     en: "Service",
-    zh: "µ£ìσèí",
-    ar: "╪º┘ä╪«╪»┘à╪⌐",
+    zh: "服务",
+    ar: "الخدمة",
   },
   summaryCompliance: {
     en: "Compliance",
-    zh: "σÉêΦºä",
-    ar: "╪º┘ä╪º┘à╪¬╪½╪º┘ä",
+    zh: "合规",
+    ar: "الامتثال",
   },
   summaryRisk: {
     en: "Risk & Dependencies",
-    zh: "ΘúÄΘÖ⌐Σ╕ÄΣ╛¥Φ╡û",
-    ar: "╪º┘ä┘à╪«╪º╪╖╪▒ ┘ê╪º┘ä╪º╪╣╪¬┘à╪º╪»┘è╪º╪¬",
+    zh: "风险与依赖",
+    ar: "المخاطر والاعتماديات",
   },
   summaryContact: {
     en: "Contact",
-    zh: "Φüöτ│╗Σ║║",
-    ar: "╪¼┘ç╪⌐ ╪º┘ä╪º╪¬╪╡╪º┘ä",
+    zh: "联系人",
+    ar: "جهة الاتصال",
   },
   optionSelectPlaceholder: {
     en: "Select an option",
-    zh: "Φ»╖ΘÇëµï⌐",
-    ar: "╪º╪«╪¬╪▒ ╪«┘è╪º╪▒╪º",
+    zh: "请选择",
+    ar: "اختر خيارا",
   },
   optionMultiSelectHint: {
     en: "Select all that apply",
-    zh: "σÅ»σñÜΘÇë",
-    ar: "╪º╪«╪¬╪▒ ┘â┘ä ┘à╪º ┘è┘å╪╖╪¿┘é",
+    zh: "可多选",
+    ar: "اختر كل ما ينطبق",
   },
   formIntro: {
     en: "Capture enterprise-grade supplier attributes used by the assessment, reporting, and governance workflows.",
-    zh: "Φ«░σ╜òΦ»äΣ╝░πÇüµèÑσæèΣ╕Äµ▓╗τÉåµ╡üτ¿ïµëÇΘ£ÇτÜäΣ╝üΣ╕Üτ║ºΣ╛¢σ║öσòåσ▒₧µÇºπÇé",
-    ar: "╪│╪¼┘æ┘ä ╪«╪╡╪º╪ª╪╡ ╪º┘ä┘à┘ê╪▒╪» ╪º┘ä┘à╪ñ╪│╪│┘è╪⌐ ╪º┘ä┘à╪│╪¬╪«╪»┘à╪⌐ ┘ü┘è ╪º┘ä╪¬┘é┘è┘è┘à ┘ê╪º┘ä╪¬┘é╪º╪▒┘è╪▒ ┘ê┘à╪│╪º╪▒╪º╪¬ ╪º┘ä╪¡┘ê┘â┘à╪⌐.",
+    zh: "记录评估、报告与治理流程所需的企业级供应商属性。",
+    ar: "سجّل خصائص المورد المؤسسية المستخدمة في التقييم والتقارير ومسارات الحوكمة.",
   },
   methodologyPoint: {
     en: "Scores now combine localization evidence with business criticality, hosting model, dependency depth, and declared regulatory exposure.",
-    zh: "Φ»äσêåτÄ░σ£¿τ╗ôσÉêµò░µì«µ£¼σ£░σîûΦ»üµì«πÇüΣ╕Üσèíσà│Θö«µÇºπÇüµëÿτ«íµ¿íσ₧ïπÇüΣ╛¥Φ╡ûµ╖▒σ║ªσÆîτö│µèÑτ¢æτ«íµÜ┤Θ£▓Θ¥óπÇé",
-    ar: "╪¬╪¼┘à╪╣ ╪º┘ä╪»╪▒╪¼╪º╪¬ ╪º┘ä╪ó┘å ╪¿┘è┘å ╪ú╪»┘ä╪⌐ ╪º┘ä╪¬┘ê╪╖┘è┘å ┘ê╪º┘ä╪ú┘ç┘à┘è╪⌐ ╪º┘ä╪¬╪┤╪║┘è┘ä┘è╪⌐ ┘ê┘å┘à┘ê╪░╪¼ ╪º┘ä╪º╪│╪¬╪╢╪º┘ü╪⌐ ┘ê╪╣┘à┘é ╪º┘ä╪º╪╣╪¬┘à╪º╪»┘è╪º╪¬ ┘ê╪º┘ä╪¬╪╣╪▒╪╢ ╪º┘ä╪¬┘å╪╕┘è┘à┘è ╪º┘ä┘à╪╣┘ä┘å.",
+    zh: "评分现在结合数据本地化证据、业务关键性、托管模型、依赖深度和申报监管暴露面。",
+    ar: "تجمع الدرجات الآن بين أدلة التوطين والأهمية التشغيلية ونموذج الاستضافة وعمق الاعتماديات والتعرض التنظيمي المعلن.",
   },
 } as const;
 

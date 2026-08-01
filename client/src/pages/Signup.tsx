@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DJAC Signup / Login page - standalone (no DashboardLayout).
  * Routes: /signup  /login
  * Supports: 3 languages (EN / AR / ZH) + dark & light themes.
