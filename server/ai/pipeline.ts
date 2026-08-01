@@ -2,6 +2,7 @@ import type { Vendor } from "../../drizzle/schema";
 import { complianceControls, frameworks } from "../../drizzle/schema";
 import { getDb } from "../db";
 import {
+  JURISDICTION_SCORE_KEYS,
   runDualJurisdictionAssessment,
   type SupplierAssessmentResult,
   type SupplierGap,
@@ -697,6 +698,12 @@ export async function executeAssessmentPipeline(
   );
   const assessment =
     externalAssessment || runJudge(input.vendor, extractedFacts);
+  for (const key of JURISDICTION_SCORE_KEYS) {
+    const score = assessment.jurisdictionScores[key];
+    if (typeof score !== "number" || !Number.isFinite(score)) {
+      assessment.jurisdictionScores[key] = assessment.overallScore;
+    }
+  }
 
   reportStage(
     "synthesizer",

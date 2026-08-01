@@ -47,7 +47,37 @@ import { toast } from "sonner";
 // ─── Types (mirrored from server/supplier-assessment.ts) ──────────────────────
 
 type AssessmentSeverity = "critical" | "high" | "medium" | "low";
-type GapJurisdiction = "china" | "saudi" | "cross_border";
+type GapJurisdiction =
+  | "china"
+  | "saudi"
+  | "eu"
+  | "us"
+  | "brazil"
+  | "cross_border"
+  | "global"
+  | "uk"
+  | "canada"
+  | "australia"
+  | "japan"
+  | "southKorea"
+  | "singapore"
+  | "india"
+  | "southAfrica"
+  | "mexico"
+  | "uae"
+  | "qatar"
+  | "kuwait"
+  | "bahrain"
+  | "oman"
+  | "jordan"
+  | "egypt"
+  | "indonesia"
+  | "thailand"
+  | "vietnam"
+  | "philippines"
+  | "malaysia"
+  | "nigeria"
+  | "kenya";
 
 interface SupplierGap {
   code: string;
@@ -137,14 +167,76 @@ const SEVERITY_CONFIG: Record<
 const JURISDICTION_LABEL: Record<GapJurisdiction, string> = {
   china: "APAC",
   saudi: "EMEA",
+  eu: "EU",
+  us: "US",
+  brazil: "Brazil",
   cross_border: "Cross-Border",
+  global: "Global",
+  uk: "United Kingdom",
+  canada: "Canada",
+  australia: "Australia",
+  japan: "Japan",
+  southKorea: "South Korea",
+  singapore: "Singapore",
+  india: "India",
+  southAfrica: "South Africa",
+  mexico: "Mexico",
+  uae: "UAE",
+  qatar: "Qatar",
+  kuwait: "Kuwait",
+  bahrain: "Bahrain",
+  oman: "Oman",
+  jordan: "Jordan",
+  egypt: "Egypt",
+  indonesia: "Indonesia",
+  thailand: "Thailand",
+  vietnam: "Vietnam",
+  philippines: "Philippines",
+  malaysia: "Malaysia",
+  nigeria: "Nigeria",
+  kenya: "Kenya",
 };
 
 const JURISDICTION_COLOR: Record<GapJurisdiction, string> = {
   china: "#3b82f6",
   saudi: "#10b981",
+  eu: "#8b5cf6",
+  us: "#f59e0b",
+  brazil: "#eab308",
   cross_border: "#8b5cf6",
+  global: "#64748b",
+  uk: "#1d4ed8",
+  canada: "#db2777",
+  australia: "#65a30d",
+  japan: "#be185d",
+  southKorea: "#9333ea",
+  singapore: "#0284c7",
+  india: "#7c3aed",
+  southAfrica: "#059669",
+  mexico: "#ca8a04",
+  uae: "#c026d3",
+  qatar: "#0891b2",
+  kuwait: "#64748b",
+  bahrain: "#14b8a6",
+  oman: "#f59e0b",
+  jordan: "#dc2626",
+  egypt: "#d97706",
+  indonesia: "#16a34a",
+  thailand: "#6366f1",
+  vietnam: "#e11d48",
+  philippines: "#0ea5e9",
+  malaysia: "#84cc16",
+  nigeria: "#22c55e",
+  kenya: "#a16207",
 };
+
+function jurisdictionTagLabel(jurisdiction: GapJurisdiction): string {
+  return JURISDICTION_LABEL[jurisdiction] ?? jurisdiction;
+}
+
+function jurisdictionTagColor(jurisdiction: GapJurisdiction): string {
+  return JURISDICTION_COLOR[jurisdiction] ?? "#64748b";
+}
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -185,13 +277,13 @@ function JurisdictionTag({ jurisdiction }: { jurisdiction: GapJurisdiction }) {
         borderRadius: 6,
         fontSize: 11,
         fontWeight: 500,
-        background: `${JURISDICTION_COLOR[jurisdiction]}18`,
-        border: `1px solid ${JURISDICTION_COLOR[jurisdiction]}44`,
-        color: JURISDICTION_COLOR[jurisdiction],
+        background: `${jurisdictionTagColor(jurisdiction)}18`,
+        border: `1px solid ${jurisdictionTagColor(jurisdiction)}44`,
+        color: jurisdictionTagColor(jurisdiction),
       }}
     >
       <Globe2 size={10} />
-      {JURISDICTION_LABEL[jurisdiction]}
+      {jurisdictionTagLabel(jurisdiction)}
     </span>
   );
 }

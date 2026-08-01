@@ -304,6 +304,24 @@ export const vendorCountryValues = [
   "netherlands",
   "united-kingdom",
   "united-states",
+  "canada",
+  "australia",
+  "japan",
+  "south-korea",
+  "south-africa",
+  "mexico",
+  "qatar",
+  "kuwait",
+  "oman",
+  "jordan",
+  "egypt",
+  "indonesia",
+  "thailand",
+  "vietnam",
+  "philippines",
+  "malaysia",
+  "nigeria",
+  "kenya",
   "other",
 ] as const;
 
@@ -357,6 +375,51 @@ export const vendorCountryOptions: ReadonlyArray<VendorOption<VendorCountry>> =
       value: "united-states",
       labels: { en: "United States", zh: "美国", ar: "الولايات المتحدة" },
     },
+    {
+      value: "canada",
+      labels: { en: "Canada", zh: "加拿大", ar: "كندا" },
+    },
+    {
+      value: "australia",
+      labels: { en: "Australia", zh: "澳大利亚", ar: "أستراليا" },
+    },
+    { value: "japan", labels: { en: "Japan", zh: "日本", ar: "اليابان" } },
+    {
+      value: "south-korea",
+      labels: { en: "South Korea", zh: "韩国", ar: "كوريا الجنوبية" },
+    },
+    {
+      value: "south-africa",
+      labels: { en: "South Africa", zh: "南非", ar: "جنوب أفريقيا" },
+    },
+    { value: "mexico", labels: { en: "Mexico", zh: "墨西哥", ar: "المكسيك" } },
+    { value: "qatar", labels: { en: "Qatar", zh: "卡塔尔", ar: "قطر" } },
+    { value: "kuwait", labels: { en: "Kuwait", zh: "科威特", ar: "الكويت" } },
+    { value: "oman", labels: { en: "Oman", zh: "阿曼", ar: "عُمان" } },
+    { value: "jordan", labels: { en: "Jordan", zh: "约旦", ar: "الأردن" } },
+    { value: "egypt", labels: { en: "Egypt", zh: "埃及", ar: "مصر" } },
+    {
+      value: "indonesia",
+      labels: { en: "Indonesia", zh: "印度尼西亚", ar: "إندونيسيا" },
+    },
+    {
+      value: "thailand",
+      labels: { en: "Thailand", zh: "泰国", ar: "تايلاند" },
+    },
+    { value: "vietnam", labels: { en: "Vietnam", zh: "越南", ar: "فيتنام" } },
+    {
+      value: "philippines",
+      labels: { en: "Philippines", zh: "菲律宾", ar: "الفلبين" },
+    },
+    {
+      value: "malaysia",
+      labels: { en: "Malaysia", zh: "马来西亚", ar: "ماليزيا" },
+    },
+    {
+      value: "nigeria",
+      labels: { en: "Nigeria", zh: "尼日利亚", ar: "نيجيريا" },
+    },
+    { value: "kenya", labels: { en: "Kenya", zh: "肯尼亚", ar: "كينيا" } },
     { value: "other", labels: { en: "Other", zh: "其他", ar: "أخرى" } },
   ];
 
@@ -372,6 +435,25 @@ export const vendorJurisdictionValues = [
   "united-kingdom",
   "united-states",
   "apac",
+  "canada",
+  "australia",
+  "japan",
+  "south-korea",
+  "south-africa",
+  "mexico",
+  "qatar",
+  "kuwait",
+  "bahrain",
+  "oman",
+  "jordan",
+  "egypt",
+  "indonesia",
+  "thailand",
+  "vietnam",
+  "philippines",
+  "malaysia",
+  "nigeria",
+  "kenya",
 ] as const;
 
 export type VendorJurisdiction = (typeof vendorJurisdictionValues)[number];
@@ -422,6 +504,52 @@ export const vendorJurisdictionOptions: ReadonlyArray<
     value: "apac",
     labels: { en: "APAC", zh: "亚太", ar: "آسيا والمحيط الهادئ" },
   },
+  {
+    value: "canada",
+    labels: { en: "Canada", zh: "加拿大", ar: "كندا" },
+  },
+  {
+    value: "australia",
+    labels: { en: "Australia", zh: "澳大利亚", ar: "أستراليا" },
+  },
+  { value: "japan", labels: { en: "Japan", zh: "日本", ar: "اليابان" } },
+  {
+    value: "south-korea",
+    labels: { en: "South Korea", zh: "韩国", ar: "كوريا الجنوبية" },
+  },
+  {
+    value: "south-africa",
+    labels: { en: "South Africa", zh: "南非", ar: "جنوب أفريقيا" },
+  },
+  { value: "mexico", labels: { en: "Mexico", zh: "墨西哥", ar: "المكسيك" } },
+  { value: "qatar", labels: { en: "Qatar", zh: "卡塔尔", ar: "قطر" } },
+  { value: "kuwait", labels: { en: "Kuwait", zh: "科威特", ar: "الكويت" } },
+  { value: "bahrain", labels: { en: "Bahrain", zh: "巴林", ar: "البحرين" } },
+  { value: "oman", labels: { en: "Oman", zh: "阿曼", ar: "عُمان" } },
+  { value: "jordan", labels: { en: "Jordan", zh: "约旦", ar: "الأردن" } },
+  { value: "egypt", labels: { en: "Egypt", zh: "埃及", ar: "مصر" } },
+  {
+    value: "indonesia",
+    labels: { en: "Indonesia", zh: "印度尼西亚", ar: "إندونيسيا" },
+  },
+  {
+    value: "thailand",
+    labels: { en: "Thailand", zh: "泰国", ar: "تايلاند" },
+  },
+  { value: "vietnam", labels: { en: "Vietnam", zh: "越南", ar: "فيتنام" } },
+  {
+    value: "philippines",
+    labels: { en: "Philippines", zh: "菲律宾", ar: "الفلبين" },
+  },
+  {
+    value: "malaysia",
+    labels: { en: "Malaysia", zh: "马来西亚", ar: "ماليزيا" },
+  },
+  {
+    value: "nigeria",
+    labels: { en: "Nigeria", zh: "尼日利亚", ar: "نيجيريا" },
+  },
+  { value: "kenya", labels: { en: "Kenya", zh: "肯尼亚", ar: "كينيا" } },
 ];
 
 export const vendorComplianceStandardValues = [

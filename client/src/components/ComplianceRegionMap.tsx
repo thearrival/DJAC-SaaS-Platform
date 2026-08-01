@@ -51,15 +51,39 @@ const regionPositions: Record<string, RegionPosition> = {
     color: "#7c3aed",
     glow: "rgba(124, 58, 237, 0.35)",
   },
-  "North America": {
-    x: 280,
+  "United Kingdom": {
+    x: 395,
+    y: 95,
+    color: "#b45309",
+    glow: "rgba(180, 83, 9, 0.35)",
+  },
+  Canada: {
+    x: 235,
+    y: 90,
+    color: "#db2777",
+    glow: "rgba(219, 39, 119, 0.35)",
+  },
+  US: {
+    x: 285,
     y: 140,
     color: "#ea580c",
     glow: "rgba(234, 88, 12, 0.35)",
   },
+  "North America": {
+    x: 285,
+    y: 140,
+    color: "#ea580c",
+    glow: "rgba(234, 88, 12, 0.35)",
+  },
+  Brazil: {
+    x: 345,
+    y: 285,
+    color: "#ca8a04",
+    glow: "rgba(202, 138, 4, 0.35)",
+  },
   "Latin America": {
-    x: 340,
-    y: 280,
+    x: 345,
+    y: 285,
     color: "#ca8a04",
     glow: "rgba(202, 138, 4, 0.35)",
   },
@@ -69,11 +93,53 @@ const regionPositions: Record<string, RegionPosition> = {
     color: "#16a34a",
     glow: "rgba(22, 163, 74, 0.35)",
   },
+  "South Africa": {
+    x: 545,
+    y: 345,
+    color: "#059669",
+    glow: "rgba(5, 150, 105, 0.35)",
+  },
   APAC: {
     x: 650,
     y: 140,
     color: "#dc2626",
     glow: "rgba(220, 38, 38, 0.35)",
+  },
+  Japan: {
+    x: 705,
+    y: 125,
+    color: "#be185d",
+    glow: "rgba(190, 24, 93, 0.35)",
+  },
+  Singapore: {
+    x: 655,
+    y: 235,
+    color: "#0284c7",
+    glow: "rgba(2, 132, 199, 0.35)",
+  },
+  India: {
+    x: 560,
+    y: 225,
+    color: "#9333ea",
+    glow: "rgba(147, 51, 234, 0.35)",
+  },
+  Australia: {
+    x: 700,
+    y: 340,
+    color: "#65a30d",
+    glow: "rgba(101, 163, 13, 0.35)",
+  },
+  "United Arab Emirates": {
+    x: 525,
+    y: 195,
+    color: "#c026d3",
+    glow: "rgba(192, 38, 211, 0.35)",
+  },
+  Global: {
+    x: 460,
+    y: 180,
+    color: "#475569",
+    glow: "rgba(71, 85, 105, 0.35)",
   },
 };
 
