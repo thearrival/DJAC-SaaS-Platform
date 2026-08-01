@@ -43,5 +43,9 @@ jobs:
       - name: Health Check
         run: |
           sleep 15
-          curl -f "${{ steps.deploy.outputs.deploy_url }}/api/health" || exit 1
-          echo "Health check passed."
+          STATUS=$(curl -sf "${{ steps.deploy.outputs.deploy_url }}/api/status") || exit 1
+          echo "$STATUS" | jq -e '.ok == true and .dbConnected == true and .env == "production"' >/dev/null || {
+            echo "API not fully healthy: $STATUS"
+            exit 1
+          }
+          echo "API healthy, DB connected: $STATUS"
