@@ -1349,11 +1349,15 @@ const messages: Record<string, Record<string, string>> = {
     "layout.menuTracker": "Compliance Tracker",
 
     "enhanced.statFrameworksDesc":
-      "Saudi Arabia and China reference packs are loaded and ready.",
+      "40+ global compliance packs loaded from 23 jurisdictions for multi-market analysis.",
     "enhanced.statSaudiDesc":
-      "EMEA: GDPR, PDPL, POPIA controls and requirements are available for analysis.",
+      "EMEA & Middle East: PDPL, GDPR, NCA controls and Gulf-region frameworks.",
     "enhanced.statChinaDesc":
-      "APAC: PIPL, CSL, DSL, PDPA, and transfer obligations are ready for comparison.",
+      "APAC: PIPL, CSL, DSL, PDPA, APPI, PIPA and cross-border obligations.",
+    "enhanced.statGlobalDesc":
+      "ISO 27001, SOC 2, NIST CSF, GDPR, CCPA, LGPD and 40+ international frameworks.",
+    "enhanced.statGlobal": "Global",
+    "enhanced.compareGlobal": "Global",
     "enhanced.statMatrixDesc":
       "Cross-framework relationships are loaded and ready for pair selection.",
     "enhanced.awaitingPair": "Awaiting pair selection",
@@ -4452,11 +4456,15 @@ const messages: Record<string, Record<string, string>> = {
     "layout.menuTracker": "متتبع الامتثال",
 
     "enhanced.statFrameworksDesc":
-      "حزم مراجع عالمية محمّلة وجاهزة عبر 40+ إطارًا.",
+      "حزم امتثال عالمية من 23 ولاية قضائية جاهزة للتحليل متعدد الأسواق.",
     "enhanced.statSaudiDesc":
-      "ضوابط EMEA: GDPR وPDPL وPOPIA وغيرها متاحة للتحليل.",
+      "EMEA والشرق الأوسط: ضوابط PDPL وGDPR وNCA وأطر منطقة الخليج.",
     "enhanced.statChinaDesc":
-      "ضوابط APAC: PIPL وCSL وDSL وPDPA وغيرها جاهزة للمقارنة.",
+      "APAC: ضوابط PIPL وCSL وDSL وPDPA وAPPI وPIPA وغيرها.",
+    "enhanced.statGlobalDesc":
+      "ISO 27001 وSOC 2 وNIST CSF وGDPR وCCPA وLGPD وأكثر من 40 إطارًا دوليًا.",
+    "enhanced.statGlobal": "عالمي",
+    "enhanced.compareGlobal": "عالمي",
     "enhanced.statMatrixDesc":
       "علاقات الهياكل التنظيمية محمّلة وجاهزة لاختيار الأزواج.",
     "enhanced.awaitingPair": "في انتظار اختيار الزوج",
@@ -7404,9 +7412,16 @@ const messages: Record<string, Record<string, string>> = {
 
     "layout.menuTracker": "合规跟踪",
 
-    "enhanced.statFrameworksDesc": "全球监管参考数据包已加载，覆盖40+框架。",
-    "enhanced.statSaudiDesc": "EMEA: GDPR、PDPL、POPIA 控制项和要求已就绪。",
-    "enhanced.statChinaDesc": "APAC: PIPL、CSL、DSL、PDPA 及传输义务已就绪。",
+    "enhanced.statFrameworksDesc":
+      "来自23个司法辖区的40+全球合规包，已就绪多市场分析。",
+    "enhanced.statSaudiDesc":
+      "EMEA 与中东：PDPL、GDPR、NCA 控制项及海湾地区框架。",
+    "enhanced.statChinaDesc":
+      "APAC：PIPL、CSL、DSL、PDPA、APPI、PIPA 及跨境义务已就绪。",
+    "enhanced.statGlobalDesc":
+      "ISO 27001、SOC 2、NIST CSF、GDPR、CCPA、LGPD 及40+国际合规框架。",
+    "enhanced.statGlobal": "全局",
+    "enhanced.compareGlobal": "全局",
     "enhanced.statMatrixDesc": "跨框架关系已加载，可直接选择对比组合。",
     "enhanced.awaitingPair": "等待选择对比组合",
     "enhanced.swapButton": "切换组合",
