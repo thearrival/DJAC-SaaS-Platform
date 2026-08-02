@@ -1,5 +1,5 @@
 /**
- * SinoGulfHeatmap v3 — Global Regulatory Heatmap
+ * SinoGulfHeatmap v3 — APAC-EMEA Cross-Border Regulatory Corridor Map
  * Real-world simplified country outlines via Natural Earth coordinates.
  * All text is clean ASCII — no mojibake, no broken emoji.
  */
@@ -1427,7 +1427,7 @@ export function SinoGulfHeatmap() {
                 marginBottom: 2,
               }}
             >
-              {t("heatmap.sinoGulf.sectionLabel", "Global Regulatory Heatmap")}
+              {t("heatmap.sinoGulf.sectionLabel", "APAC-EMEA Regulatory Corridor")}
             </p>
             <h2
               style={{
@@ -1620,7 +1620,7 @@ export function SinoGulfHeatmap() {
             setSelectedPipe(null);
             setTooltip(null);
           }}
-          aria-label="Global regulatory corridor map"
+          aria-label="APAC-EMEA regulatory corridor map"
         >
           {/* ── Defs ────────────────────────────────────────────── */}
           <defs>
