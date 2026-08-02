@@ -1427,7 +1427,10 @@ export function SinoGulfHeatmap() {
                 marginBottom: 2,
               }}
             >
-              {t("heatmap.sinoGulf.sectionLabel", "APAC-EMEA Regulatory Corridor")}
+              {t(
+                "heatmap.sinoGulf.sectionLabel",
+                "APAC-EMEA Regulatory Corridor"
+              )}
             </p>
             <h2
               style={{
