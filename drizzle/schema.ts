@@ -6,6 +6,8 @@ import {
   varchar,
   text,
   timestamp,
+  boolean,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2007,4 +2009,153 @@ export const aiAgentRuns = pgTable("aiAgentRuns", {
 });
 
 export type AiAgentRun = typeof aiAgentRuns.$inferSelect;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ONBOARDING & CUSTOMER JOURNEY
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const onboardingProgress = pgTable("onboarding_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  currentStep: integer("current_step").default(0),
+  completedSteps: jsonb("completed_steps").$type<string[]>().default([]),
+  skipped: boolean("skipped").default(false),
+  completedAt: timestamp("completed_at"),
+  responses: jsonb("responses").$type<Record<string, unknown>>().default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const organizationProfilesCustom = pgTable(
+  "organization_profiles_custom",
+  {
+    id: serial("id").primaryKey(),
+    organizationId: integer("organization_id")
+      .notNull()
+      .unique()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    industry: varchar("industry", { length: 120 }),
+    employeeRange: varchar("employee_range", { length: 30 }),
+    complianceMaturity: varchar("compliance_maturity", { length: 30 }),
+    selectedFrameworks: jsonb("selected_frameworks")
+      .$type<string[]>()
+      .default([]),
+    businessObjectives: jsonb("business_objectives")
+      .$type<string[]>()
+      .default([]),
+    onboardingCompletedAt: timestamp("onboarding_completed_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  }
+);
+
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  dashboardLayout: jsonb("dashboard_layout")
+    .$type<Record<string, unknown>>()
+    .default({}),
+  defaultJurisdictions: jsonb("default_jurisdictions")
+    .$type<string[]>()
+    .default([]),
+  notificationPrefs: jsonb("notification_prefs")
+    .$type<Record<string, unknown>>()
+    .default({}),
+  theme: varchar("theme", { length: 20 }).default("system"),
+  locale: localeEnum("locale").default("en"),
+  tourCompleted: boolean("tour_completed").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PRODUCT ANALYTICS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const analyticsEvents = pgTable("analytics_events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  organizationId: integer("organization_id")
+    .notNull()
+    .references(() => organizations.id, {
+      onDelete: "cascade",
+    }),
+  event: varchar("event", { length: 100 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull(),
+  properties: jsonb("properties").$type<Record<string, unknown>>().default({}),
+  sessionId: varchar("session_id", { length: 64 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userActivitySummary = pgTable("user_activity_summary", {
+  userId: integer("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  totalSessions: integer("total_sessions").default(0),
+  totalEvents: integer("total_events").default(0),
+  lastActiveAt: timestamp("last_active_at"),
+  featureAdoption: jsonb("feature_adoption")
+    .$type<Record<string, number>>()
+    .default({}),
+  activationScore: integer("activation_score").default(0),
+  healthScore: integer("health_score").default(0),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMMUNICATION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const emailLog = pgTable("email_log", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  organizationId: integer("organization_id").references(
+    () => organizations.id,
+    {
+      onDelete: "set null",
+    }
+  ),
+  template: varchar("template", { length: 100 }).notNull(),
+  recipient: varchar("recipient", { length: 320 }).notNull(),
+  subject: varchar("subject", { length: 500 }),
+  status: varchar("status", { length: 20 }).default("queued").notNull(),
+  sentAt: timestamp("sent_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 50 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  body: text("body"),
+  actionUrl: varchar("action_url", { length: 500 }),
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type OnboardingProgress = typeof onboardingProgress.$inferSelect;
+export type OrganizationProfile =
+  typeof organizationProfilesCustom.$inferSelect;
+export type UserPreferences = typeof userPreferences.$inferSelect;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type UserActivitySummary = typeof userActivitySummary.$inferSelect;
+export type EmailLogEntry = typeof emailLog.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
 export type InsertAiAgentRun = typeof aiAgentRuns.$inferInsert;
