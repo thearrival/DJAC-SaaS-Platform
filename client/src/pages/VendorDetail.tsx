@@ -3,7 +3,7 @@
  *
  * Drill-down view for a single vendor. Displays:
  *   • Profile tab   — all stored vendor fields (contact, services, certifications)
- *   • Assessment tab — dual-jurisdiction compliance scores + gap list
+ *   • Assessment tab — multi-jurisdiction compliance scores + gap list
  *   • Tech Stack tab — technology components registered for this vendor
  *
  * Uses:  trpc.vendor.getDetail (profile + techStack + assessment in one call)
@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { QueryErrorPanel } from "@/components/ui/query-error-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { GlobalScoreOverview } from "@/components/GlobalScoreOverview";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -692,6 +693,20 @@ export default function VendorDetail() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Global jurisdiction score heatmap */}
+      {assessment && (
+        <Card>
+          <CardContent className="py-3">
+            <GlobalScoreOverview
+              jurisdictionScores={
+                assessment.jurisdictionScores as Record<string, number>
+              }
+              t={t}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Tabs */}
       <Tabs defaultValue="profile">
