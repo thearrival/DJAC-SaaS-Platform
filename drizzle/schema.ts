@@ -2078,6 +2078,17 @@ export const userPreferences = pgTable("user_preferences", {
 // PRODUCT ANALYTICS
 // ═══════════════════════════════════════════════════════════════════════════════
 
+export const featureFlags = pgTable("feature_flags", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  enabled: boolean("enabled").default(false),
+  rolloutPercentage: integer("rollout_percentage").default(0),
+  targetOrgIds: jsonb("target_org_ids").$type<number[]>().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const analyticsEvents = pgTable("analytics_events", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
@@ -2158,4 +2169,5 @@ export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
 export type UserActivitySummary = typeof userActivitySummary.$inferSelect;
 export type EmailLogEntry = typeof emailLog.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type FeatureFlag = typeof featureFlags.$inferSelect;
 export type InsertAiAgentRun = typeof aiAgentRuns.$inferInsert;
