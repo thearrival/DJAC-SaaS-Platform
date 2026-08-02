@@ -824,7 +824,7 @@ const GLOBAL_DEADLINES: ComplianceDeadline[] = [
 ];
 
 const memoryDeadlines: ComplianceDeadline[] = [...GLOBAL_DEADLINES];
-let nextId = GLOBAL_DEADLINES.length + 1;
+let nextId = Math.max(0, ...GLOBAL_DEADLINES.map(d => d.id)) + 1;
 
 // ---------------------------------------------------------------------------
 // Read
