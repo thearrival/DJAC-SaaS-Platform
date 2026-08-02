@@ -58,9 +58,10 @@ describe("runDualJurisdictionAssessment — integration edge cases", () => {
     );
     expect(result.jurisdictionScores.uk).toBe(100);
     expect(result.jurisdictionScores.singapore).toBe(100);
-    expect(result.gaps.filter(g =>
-      ["uk", "singapore"].includes(g.jurisdiction)
-    ).length).toBe(0);
+    expect(
+      result.gaps.filter(g => ["uk", "singapore"].includes(g.jurisdiction))
+        .length
+    ).toBe(0);
   });
 
   it("should flag gaps for declared countries without data locations", () => {
@@ -99,7 +100,9 @@ describe("runDualJurisdictionAssessment — integration edge cases", () => {
     const zaGap = result.gaps.find(g => g.code === "LOC-SAFRICA-001");
     expect(jpGap?.jurisdiction).toBe("japan");
     expect(zaGap?.jurisdiction).toBe("southAfrica");
-    expect(result.gaps.filter(g => g.severity === "high").length).toBeGreaterThanOrEqual(2);
+    expect(
+      result.gaps.filter(g => g.severity === "high").length
+    ).toBeGreaterThanOrEqual(2);
   });
 
   it("should not produce empty penalty context for any gap", () => {
