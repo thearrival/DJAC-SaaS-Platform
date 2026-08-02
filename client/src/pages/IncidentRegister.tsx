@@ -666,10 +666,10 @@ export default function IncidentRegister() {
             <p className="font-semibold">
               {t("incident.emptyTitle", "No incidents recorded")}
             </p>
-            <p className="text-sm">
+            <p className="text-sm max-w-sm text-center">
               {t(
                 "incident.emptyDesc",
-                "Use the 'Report Incident' button to log a new compliance incident."
+                "Log your first security or compliance incident. We'll auto-map regulations and generate notification timelines based on your jurisdictions."
               )}
             </p>
             <Button variant="outline" size="sm" onClick={openNew}>
