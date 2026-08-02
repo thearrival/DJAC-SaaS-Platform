@@ -30,7 +30,9 @@ async function main() {
   console.log("=== Vercel Token Health Check ===\n");
 
   if (!existsSync(AUTH_PATH)) {
-    console.log("[SKIP] No local Vercel auth file — run `vercel login` first.\n");
+    console.log(
+      "[SKIP] No local Vercel auth file — run `vercel login` first.\n"
+    );
     return;
   }
 
@@ -44,11 +46,17 @@ async function main() {
   }
 
   const nowSec = Math.floor(Date.now() / 1000);
-  const remaining = expiresAt ? fmtMinutes((expiresAt - nowSec) * 1000) : "unknown";
+  const remaining = expiresAt
+    ? fmtMinutes((expiresAt - nowSec) * 1000)
+    : "unknown";
 
   console.log(`Token:    ${token.substring(0, 12)}...`);
-  console.log(`Expires:  ${expiresAt ? new Date(expiresAt * 1000).toISOString() : "unknown"}`);
-  console.log(`Remaining:${typeof remaining === "number" ? ` ${remaining} min` : ` ${remaining}`}`);
+  console.log(
+    `Expires:  ${expiresAt ? new Date(expiresAt * 1000).toISOString() : "unknown"}`
+  );
+  console.log(
+    `Remaining:${typeof remaining === "number" ? ` ${remaining} min` : ` ${remaining}`}`
+  );
   console.log(`Refresh:  ${refreshToken ? "present" : "missing"}\n`);
 
   let valid = false;
@@ -72,8 +80,12 @@ async function main() {
   }
 
   if (!valid) {
-    console.log("[ACTION] Create a permanent token at https://vercel.com/account/tokens");
-    console.log("         Then run: gh secret set VERCEL_TOKEN --repo thearrival/DJAC-SaaS-Platform --body \"<token>\"\n");
+    console.log(
+      "[ACTION] Create a permanent token at https://vercel.com/account/tokens"
+    );
+    console.log(
+      '         Then run: gh secret set VERCEL_TOKEN --repo thearrival/DJAC-SaaS-Platform --body "<token>"\n'
+    );
     process.exitCode = 1;
     return;
   }
@@ -81,7 +93,9 @@ async function main() {
   const refreshed = JSON.parse(readFileSync(AUTH_PATH, "utf-8"));
   const diff = refreshed.token !== token;
   if (diff) {
-    console.log("[INFO] Token changed after refresh — updating GitHub secret...\n");
+    console.log(
+      "[INFO] Token changed after refresh — updating GitHub secret...\n"
+    );
     try {
       execSync(
         `gh secret set ${SECRET_NAME} --repo thearrival/DJAC-SaaS-Platform --body "${refreshed.token}"`,
