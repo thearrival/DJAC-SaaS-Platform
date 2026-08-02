@@ -149,7 +149,7 @@ async function send(
   if (!email) return;
   const t = getTransporter();
   if (!t) {
-    console.log(`[Email] ${template} to ${email}: ${subject}`);
+    console.info(`[Email] ${template} to ${email}: ${subject}`);
     return;
   }
   try {
@@ -173,7 +173,7 @@ async function sendTo(
 ) {
   const t = getTransporter();
   if (!t) {
-    console.log(`[Email] ${template} to ${email}: ${subject}`);
+    console.info(`[Email] ${template} to ${email}: ${subject}`);
     return;
   }
   try {

@@ -38,6 +38,7 @@ import { crossBorderDataFlowRouter } from "./cross-border-data-flow-router";
 import { onboardingRouter } from "./onboarding-router";
 import { analyticsRouter } from "./analytics-router";
 import { notificationsRouter } from "./notification-router";
+import { personalizationRouter } from "./personalization-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -79,6 +80,7 @@ export const appRouter = router({
   onboarding: onboardingRouter,
   analytics: analyticsRouter,
   notifications: notificationsRouter,
+  personalization: personalizationRouter,
 });
 
 export type AppRouter = typeof appRouter;
