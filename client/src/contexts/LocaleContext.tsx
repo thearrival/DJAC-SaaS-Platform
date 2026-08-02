@@ -7412,10 +7412,14 @@ const messages: Record<string, Record<string, string>> = {
 
     "layout.menuTracker": "合规跟踪",
 
-    "enhanced.statFrameworksDesc": "来自23个司法辖区的40+全球合规包，已就绪多市场分析。",
-    "enhanced.statSaudiDesc": "EMEA 与中东：PDPL、GDPR、NCA 控制项及海湾地区框架。",
-    "enhanced.statChinaDesc": "APAC：PIPL、CSL、DSL、PDPA、APPI、PIPA 及跨境义务已就绪。",
-    "enhanced.statGlobalDesc": "ISO 27001、SOC 2、NIST CSF、GDPR、CCPA、LGPD 及40+国际合规框架。",
+    "enhanced.statFrameworksDesc":
+      "来自23个司法辖区的40+全球合规包，已就绪多市场分析。",
+    "enhanced.statSaudiDesc":
+      "EMEA 与中东：PDPL、GDPR、NCA 控制项及海湾地区框架。",
+    "enhanced.statChinaDesc":
+      "APAC：PIPL、CSL、DSL、PDPA、APPI、PIPA 及跨境义务已就绪。",
+    "enhanced.statGlobalDesc":
+      "ISO 27001、SOC 2、NIST CSF、GDPR、CCPA、LGPD 及40+国际合规框架。",
     "enhanced.statGlobal": "全局",
     "enhanced.compareGlobal": "全局",
     "enhanced.statMatrixDesc": "跨框架关系已加载，可直接选择对比组合。",
