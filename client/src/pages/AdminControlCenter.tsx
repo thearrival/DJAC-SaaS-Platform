@@ -67,7 +67,7 @@ type FrameworkNode = {
   label: string;
   x: number;
   y: number;
-  cluster: "china" | "saudi" | "eu" | "us" | "cross-border";
+  cluster: "china" | "saudi" | "eu" | "us" | "global" | "cross-border";
 };
 
 type FrameworkEdge = {
@@ -87,6 +87,41 @@ const frameworkNodes: FrameworkNode[] = [
   { code: "GDPR", label: "GDPR", x: 280, y: 30, cluster: "eu" },
   { code: "CCPA", label: "CCPA", x: 550, y: 30, cluster: "us" },
   { code: "LGPD", label: "LGPD", x: 280, y: 340, cluster: "cross-border" },
+  {
+    code: "ISO-27001",
+    label: "ISO 27001",
+    x: 420,
+    y: 270,
+    cluster: "global",
+  },
+  {
+    code: "NIST-CSF",
+    label: "NIST CSF",
+    x: 520,
+    y: 270,
+    cluster: "global",
+  },
+  {
+    code: "SOC-2",
+    label: "SOC 2",
+    x: 420,
+    y: 310,
+    cluster: "global",
+  },
+  {
+    code: "HIPAA",
+    label: "HIPAA",
+    x: 520,
+    y: 310,
+    cluster: "global",
+  },
+  {
+    code: "PCI-DSS",
+    label: "PCI DSS",
+    x: 470,
+    y: 335,
+    cluster: "global",
+  },
 ];
 
 function frameworkClusterColor(cluster: FrameworkNode["cluster"]) {
@@ -104,6 +139,10 @@ function frameworkClusterColor(cluster: FrameworkNode["cluster"]) {
 
   if (cluster === "us") {
     return "#ea580c";
+  }
+
+  if (cluster === "global") {
+    return "#4338ca";
   }
 
   return "#7c3aed";
@@ -1500,7 +1539,13 @@ export default function AdminControlCenter() {
                 {t("admin.frameworkLegendChina", "Blue: China frameworks")}
               </Badge>
               <Badge variant="outline">
-                {t("admin.frameworkLegendSaudi", "Teal: Saudi frameworks")}
+                {t("admin.frameworkLegendSaudi", "Teal: Saudi Arabia")}
+              </Badge>
+              <Badge variant="outline">
+                {t(
+                  "admin.frameworkLegendGlobal",
+                  "Indigo: Global standards (ISO, NIST, SOC 2, HIPAA, PCI DSS)"
+                )}
               </Badge>
               <Badge variant="outline">
                 {t("admin.frameworkLegendNode", "Node radius: assessment load")}
