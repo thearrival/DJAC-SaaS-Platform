@@ -35,6 +35,9 @@ import { knowledgeGraphRouter } from "./knowledge-graph-router";
 import { regulatoryChangeRouter } from "./regulatory-change-router";
 import { complianceSimulationRouter } from "./compliance-simulation-router";
 import { crossBorderDataFlowRouter } from "./cross-border-data-flow-router";
+import { onboardingRouter } from "./onboarding-router";
+import { analyticsRouter } from "./analytics-router";
+import { notificationsRouter } from "./notification-router";
 
 export const appRouter = router({
   system: systemRouter,
@@ -73,6 +76,9 @@ export const appRouter = router({
   auth: authRouter,
   compliance: complianceFrameworkRouter,
   vendor: vendorRouter,
+  onboarding: onboardingRouter,
+  analytics: analyticsRouter,
+  notifications: notificationsRouter,
 });
 
 export type AppRouter = typeof appRouter;
