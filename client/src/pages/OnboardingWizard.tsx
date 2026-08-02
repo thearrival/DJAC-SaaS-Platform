@@ -67,6 +67,8 @@ export default function OnboardingWizard() {
     | "Jordan"
     | "Egypt"
   >("Both");
+  const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>([]);
+  const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
   const [selectedVendorId, setSelectedVendorId] = useState<number | null>(null);
   const [assessmentResult, setAssessmentResult] = useState<{
     riskLevel?: string;
@@ -124,7 +126,7 @@ export default function OnboardingWizard() {
   const assessMutation = trpc.vendor.assess.useMutation({
     onSuccess: result => {
       setAssessmentResult(result);
-      setActiveStep(4);
+      setActiveStep(6);
     },
     onError: err => {
       toast.error(
@@ -173,6 +175,8 @@ export default function OnboardingWizard() {
       [
         t("wizard.step1", "🏢 Organization Setup"),
         t("wizard.step2", "🌍 Jurisdiction Focus"),
+        t("wizard.stepFrameworks", "📋 Framework Selection"),
+        t("wizard.stepObjectives", "🎯 Business Objectives"),
         t("wizard.step3", "🔍 Vendor Selection"),
         t("wizard.step4", "🤖 Run Assessment"),
         t("wizard.step5", "📄 Generate Report"),
@@ -183,14 +187,16 @@ export default function OnboardingWizard() {
   const stepDone = {
     0: hasOrganization,
     1: Boolean(selectedJurisdiction),
-    2: Boolean(selectedVendorId),
-    3: Boolean(assessmentResult),
-    4: Boolean(reportResult),
+    2: selectedFrameworks.length > 0,
+    3: selectedObjectives.length > 0,
+    4: Boolean(selectedVendorId),
+    5: Boolean(assessmentResult),
+    6: Boolean(reportResult),
   } as const;
 
   useEffect(() => {
-    const firstIncomplete = [0, 1, 2, 3, 4].find(
-      i => !stepDone[i as 0 | 1 | 2 | 3 | 4]
+    const firstIncomplete = [0, 1, 2, 3, 4, 5, 6].find(
+      i => !stepDone[i as 0 | 1 | 2 | 3 | 4 | 5 | 6]
     );
     if (typeof firstIncomplete === "number") {
       setActiveStep(firstIncomplete);
@@ -287,7 +293,7 @@ export default function OnboardingWizard() {
           </div>
 
           <div
-            className="grid grid-cols-1 gap-2 md:grid-cols-5"
+            className="grid grid-cols-1 gap-2 md:grid-cols-7"
             aria-label={t("wizard.stepListLabel", "Onboarding steps")}
           >
             {stepTitles.map((title, index) => {
@@ -621,12 +627,179 @@ export default function OnboardingWizard() {
         </Card>
       )}
 
+      {/* ── Step 2: Framework Selection ── */}
       {activeStep === 2 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              {t("wizard.stepFrameworks", "Select Your Compliance Frameworks")}
+            </CardTitle>
+            <CardDescription>
+              {t(
+                "wizard.frameworksDesc",
+                "Choose the frameworks relevant to your organization. We'll personalize your dashboard and recommendations."
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  "PDPL",
+                  "NCA ECC",
+                  "NCA CCC",
+                  "PIPL",
+                  "CSL",
+                  "DSL",
+                  "GDPR",
+                  "CCPA",
+                  "LGPD",
+                  "ISO 27001",
+                  "NIST CSF",
+                  "SOC 2",
+                  "HIPAA",
+                  "PCI DSS",
+                  "PIPEDA",
+                  "APPI",
+                  "PIPA (KR)",
+                  "PDPA (SG)",
+                  "POPIA",
+                  "UK GDPR",
+                  "Other",
+                ] as const
+              ).map(fw => {
+                const selected = selectedFrameworks.includes(fw);
+                return (
+                  <button
+                    key={fw}
+                    type="button"
+                    onClick={() =>
+                      setSelectedFrameworks(prev =>
+                        prev.includes(fw)
+                          ? prev.filter(f => f !== fw)
+                          : [...prev, fw]
+                      )
+                    }
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                      selected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card hover:bg-muted/50"
+                    }`}
+                  >
+                    {fw}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => setActiveStep(1)} variant="outline">
+                {t("wizard.back", "Back")}
+              </Button>
+              <Button
+                onClick={() => setActiveStep(3)}
+                disabled={selectedFrameworks.length === 0}
+              >
+                {t("wizard.continue", "Continue")}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveStep(3)}
+              >
+                {t("wizard.skip", "Skip for now")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Step 3: Business Objectives ── */}
+      {activeStep === 3 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              {t("wizard.stepObjectives", "What Are Your Goals?")}
+            </CardTitle>
+            <CardDescription>
+              {t(
+                "wizard.objectivesDesc",
+                "Select your primary objectives so we can tailor your experience."
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  "Regulatory Compliance",
+                  "Vendor Risk Management",
+                  "Risk Assessment",
+                  "Security Governance",
+                  "Audit Readiness",
+                  "Executive Reporting",
+                  "AI-Powered Reports",
+                  "Continuous Monitoring",
+                  "Incident Management",
+                  "Data Privacy",
+                  "Cross-Border Compliance",
+                  "Team Collaboration",
+                ] as const
+              ).map(obj => {
+                const selected = selectedObjectives.includes(obj);
+                return (
+                  <button
+                    key={obj}
+                    type="button"
+                    onClick={() =>
+                      setSelectedObjectives(prev =>
+                        prev.includes(obj)
+                          ? prev.filter(o => o !== obj)
+                          : [...prev, obj]
+                      )
+                    }
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                      selected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card hover:bg-muted/50"
+                    }`}
+                  >
+                    {selected ? "✓ " : ""}
+                    {obj}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => setActiveStep(2)} variant="outline">
+                {t("wizard.back", "Back")}
+              </Button>
+              <Button onClick={() => setActiveStep(4)}>
+                {t("wizard.continue", "Continue")}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveStep(6)}
+              >
+                {t("wizard.skip", "Skip for now")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Step 4: Vendor Selection ── */}
+
+      {activeStep === 4 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4" />
-              3. {t("wizard.step3", "Vendor Selection")}
+              5. {t("wizard.step3", "Vendor Selection")}
             </CardTitle>
             <CardDescription>
               {t(
@@ -705,7 +878,7 @@ export default function OnboardingWizard() {
                 ) : null}
 
                 <Button
-                  onClick={() => setActiveStep(3)}
+                  onClick={() => setActiveStep(5)}
                   disabled={!selectedVendorId}
                 >
                   {t("wizard.continueToAssessment", "Continue to Assessment")}
@@ -716,12 +889,12 @@ export default function OnboardingWizard() {
         </Card>
       )}
 
-      {activeStep === 3 && (
+      {activeStep === 5 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4" />
-              4. {t("wizard.step4", "Run Assessment")}
+              6. {t("wizard.step4", "Run Assessment")}
             </CardTitle>
             <CardDescription>
               {t(
@@ -779,12 +952,12 @@ export default function OnboardingWizard() {
         </Card>
       )}
 
-      {activeStep === 4 && (
+      {activeStep === 6 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              5. {t("wizard.step5", "Generate Report")}
+              7. {t("wizard.step5", "Generate Report")}
             </CardTitle>
             <CardDescription>
               {t(
