@@ -1,5 +1,18 @@
 import type { Vendor } from "../drizzle/schema";
 
+/**
+ * Rule-based multi-jurisdiction vendor compliance assessment engine.
+ *
+ * Produces per-vendor scores for 29 jurisdictions (6 core + 23 global)
+ * with location-residency gaps, certification deductions, and remediation
+ * guidance. The overallScore is computed from the 6 core jurisdictions
+ * (China, Saudi Arabia, EU, US, Brazil, Global) to preserve backward
+ * compatibility. The 23 additional jurisdiction scores provide drill-down
+ * granularity for global vendor profiles.
+ *
+ * @see JURISDICTION_DEFS for the data-driven jurisdiction expansion table.
+ */
+
 export type AssessmentSeverity = "critical" | "high" | "medium" | "low";
 
 export type SupplierGap = {
@@ -413,6 +426,13 @@ function dedupe(values: string[]): string[] {
   return Array.from(new Set(values));
 }
 
+/**
+ * Evaluate a vendor for compliance gaps across 29 jurisdictions.
+ * Returns per-jurisdiction scores with gap analysis and remediation.
+ * The overallScore averages only the 6 core jurisdictions for backward
+ * compatibility. Use the 23 additional jurisdiction scores for global
+ * drill-down analysis.
+ */
 export function runDualJurisdictionAssessment(
   vendor: Vendor
 ): SupplierAssessmentResult {
