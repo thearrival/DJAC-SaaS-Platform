@@ -4,6 +4,7 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 import { TourGuide } from "@/components/TourGuide";
 import { CommandPalette } from "@/components/CommandPalette";
 import RouteErrorBoundary from "@/components/RouteErrorBoundary";
+import { ProductTour } from "@/components/ProductTour";
 import { sounds } from "@/lib/sounds";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -1100,6 +1101,7 @@ function DashboardLayoutContent({
           </div>
         </main>
       </SidebarInset>
+      <ProductTour />
     </>
   );
 }
