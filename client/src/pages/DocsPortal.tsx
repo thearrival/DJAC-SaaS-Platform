@@ -528,7 +528,7 @@ function getDocSections(locale: string): DocSection[] {
 
 export default function DocsPortal() {
   usePageTitle("Documentation");
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const [location, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -726,7 +726,9 @@ export default function DocsPortal() {
           onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
         >
           <BookOpen className="h-4 w-4 mr-2" />
-          {mobileSidebarOpen ? "Close Menu" : "Documentation Menu"}
+          {mobileSidebarOpen
+            ? t("docs.close_menu", "Close Menu")
+            : t("docs.mobile_menu", "Documentation Menu")}
         </Button>
       </div>
 
@@ -738,7 +740,9 @@ export default function DocsPortal() {
           <div className="djac-docs-sidebar-header">
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              <span className="font-semibold text-sm">Documentation</span>
+              <span className="font-semibold text-sm">
+                {t("docs.sidebar_title", "Documentation")}
+              </span>
             </div>
           </div>
 
@@ -746,7 +750,7 @@ export default function DocsPortal() {
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search docs..."
+                placeholder={t("docs.search_placeholder", "Search docs...")}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="pl-8 h-8 text-xs"
@@ -828,7 +832,10 @@ export default function DocsPortal() {
 
           {/* Main content */}
           <div className="djac-docs-article">
-            {renderContent(currentPage.content)}
+            {useMemo(
+              () => renderContent(currentPage.content),
+              [currentPage.content]
+            )}
           </div>
 
           {/* Diagram */}
@@ -837,7 +844,7 @@ export default function DocsPortal() {
               <div className="flex items-center gap-2 mb-3">
                 <Network className="h-4 w-4 text-primary" />
                 <span className="text-sm font-semibold">
-                  Architecture Diagram
+                  {t("docs.architecture_diagram", "Architecture Diagram")}
                 </span>
               </div>
               <div className="djac-glass-card p-4 text-center text-sm font-mono text-foreground">
@@ -851,7 +858,9 @@ export default function DocsPortal() {
             <div className="djac-docs-casestudy">
               <div className="flex items-center gap-2 mb-4">
                 <Star className="h-5 w-5 text-amber-500" />
-                <h2 className="djac-h2 text-xl font-bold">Case Study</h2>
+                <h2 className="djac-h2 text-xl font-bold">
+                  {t("docs.case_study", "Case Study")}
+                </h2>
                 <Badge variant="outline" className="ml-2">
                   {currentPage.caseStudy.company}
                 </Badge>
@@ -860,7 +869,7 @@ export default function DocsPortal() {
                 <div className="djac-glass-card p-4">
                   <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
-                    Challenge
+                    {t("docs.challenge", "Challenge")}
                   </h4>
                   <p className="text-sm djac-body">
                     {currentPage.caseStudy.challenge}
@@ -869,7 +878,7 @@ export default function DocsPortal() {
                 <div className="djac-glass-card p-4">
                   <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
                     <Lightbulb className="h-4 w-4 text-primary" />
-                    Solution
+                    {t("docs.solution", "Solution")}
                   </h4>
                   <p className="text-sm djac-body">
                     {currentPage.caseStudy.solution}
@@ -878,7 +887,7 @@ export default function DocsPortal() {
                 <div className="djac-glass-card p-4 md:col-span-2">
                   <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    Results
+                    {t("docs.results", "Results")}
                   </h4>
                   <p className="text-sm djac-body">
                     {currentPage.caseStudy.results}
@@ -894,7 +903,7 @@ export default function DocsPortal() {
               <div className="flex items-center gap-2 mb-4">
                 <Play className="h-5 w-5 text-primary" />
                 <h2 className="djac-h2 text-xl font-bold">
-                  Interactive Demo Guide
+                  {t("docs.demo_guide", "Interactive Demo Guide")}
                 </h2>
               </div>
               <div className="space-y-3">
@@ -919,7 +928,9 @@ export default function DocsPortal() {
               <div className="djac-docs-best-practices">
                 <div className="flex items-center gap-2 mb-4">
                   <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                  <h2 className="djac-h2 text-xl font-bold">Best Practices</h2>
+                  <h2 className="djac-h2 text-xl font-bold">
+                    {t("docs.best_practices", "Best Practices")}
+                  </h2>
                 </div>
                 <div className="space-y-2">
                   {currentPage.bestPractices.map((bp, i) => (
@@ -941,18 +952,22 @@ export default function DocsPortal() {
               <div className="djac-docs-troubleshoot">
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  <h2 className="djac-h2 text-xl font-bold">Troubleshooting</h2>
+                  <h2 className="djac-h2 text-xl font-bold">
+                    {t("docs.troubleshooting", "Troubleshooting")}
+                  </h2>
                 </div>
                 <div className="space-y-3">
                   {currentPage.troubleshooting.map((item, i) => (
                     <div key={i} className="djac-glass-card p-4 space-y-2">
                       <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <span className="text-amber-500">Q:</span>{" "}
+                        <span className="text-amber-500">
+                          {t("docs.q", "Q")}:
+                        </span>{" "}
                         {item.problem}
                       </h4>
                       <p className="text-sm djac-body flex items-start gap-2">
                         <span className="text-emerald-500 font-semibold">
-                          A:
+                          {t("docs.a", "A")}:
                         </span>{" "}
                         {item.solution}
                       </p>
@@ -982,21 +997,23 @@ export default function DocsPortal() {
 
           {/* Next steps */}
           <div className="djac-docs-next">
-            <h3 className="text-lg font-bold mb-3">Ready to get started?</h3>
+            <h3 className="text-lg font-bold mb-3">
+              {t("docs.cta_ready", "Ready to get started?")}
+            </h3>
             <div className="flex flex-wrap gap-3">
               <Button onClick={() => navigate("/signup")}>
-                Start Free Trial
+                {t("docs.cta_trial", "Start Free Trial")}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
               <Button variant="outline" onClick={() => navigate("/pricing")}>
-                View Pricing
+                {t("docs.cta_pricing", "View Pricing")}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate(`/docs/getting-started/welcome`)}
               >
                 <BookOpen className="h-4 w-4 mr-2" />
-                Quick Start Guide
+                {t("docs.cta_guide", "Quick Start Guide")}
               </Button>
             </div>
           </div>

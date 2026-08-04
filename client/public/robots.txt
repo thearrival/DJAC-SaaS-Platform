@@ -19,3 +19,5 @@ Allow: /login
 Allow: /forgot-password
 Allow: /privacy
 Allow: /terms
+Allow: /docs
+Allow: /docs/
