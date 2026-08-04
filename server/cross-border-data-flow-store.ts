@@ -21,7 +21,7 @@ const JURISDICTION_REQUIREMENTS: Record<
     transferImpactAssessment: boolean;
   }
 > = {
-  "European Union": {
+  EU: {
     adequacyDecisions: ["UK", "Argentina", "Japan", "South Korea", "Canada"],
     sccAllowed: true,
     bcrAllowed: true,
@@ -48,7 +48,7 @@ const JURISDICTION_REQUIREMENTS: Record<
     dataLocalization: true,
     transferImpactAssessment: true,
   },
-  "United States": {
+  US: {
     adequacyDecisions: [],
     sccAllowed: false,
     bcrAllowed: false,
@@ -176,6 +176,15 @@ const JURISDICTION_REQUIREMENTS: Record<
   },
   Kuwait: {
     adequacyDecisions: [],
+    sccAllowed: false,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: true,
+    transferImpactAssessment: false,
+  },
+  Bahrain: {
+    adequacyDecisions: [],
     sccAllowed: true,
     bcrAllowed: false,
     consentRequired: true,
@@ -183,7 +192,88 @@ const JURISDICTION_REQUIREMENTS: Record<
     dataLocalization: false,
     transferImpactAssessment: true,
   },
-  Bahrain: {
+  Thailand: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Indonesia: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Malaysia: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Philippines: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Vietnam: {
+    adequacyDecisions: [],
+    sccAllowed: false,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: true,
+    transferImpactAssessment: true,
+  },
+  Nigeria: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Kenya: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: false,
+  },
+  Oman: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Jordan: {
+    adequacyDecisions: [],
+    sccAllowed: false,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: false,
+  },
+  Egypt: {
     adequacyDecisions: [],
     sccAllowed: true,
     bcrAllowed: false,

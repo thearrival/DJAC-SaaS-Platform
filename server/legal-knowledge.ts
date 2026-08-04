@@ -2154,7 +2154,7 @@ const LAW_KNOWLEDGE_BASE: LawKnowledgeEntry[] = [
     slug: "uae-data-protection-regime",
     title: "UAE Federal Data Protection Law (PDPL)",
     jurisdiction: "United Arab Emirates",
-    frameworkCodes: ["ISO-27701", "ISO-27001"],
+    frameworkCodes: ["UAE PDPL"],
     summary:
       "The UAE Federal Decree-Law No. 45 of 2021 on Personal Data Protection establishes consent-based processing, DSR rights, and cross-border transfer restrictions under federal supervision.",
     keyTopics: [
@@ -2301,6 +2301,391 @@ const LAW_KNOWLEDGE_BASE: LawKnowledgeEntry[] = [
       },
     ],
     sources: ["ISO 27001", "ISO 27701", "AICPA TSC", "NIST CSF 2.0"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "thailand-pdpa",
+    title: "Thailand Personal Data Protection Act (PDPA)",
+    jurisdiction: "Thailand",
+    frameworkCodes: ["PDPA"],
+    summary:
+      "Thailand's PDPA B.E. 2562 governs personal data collection, use, and disclosure with consent-based processing and PDPC oversight.",
+    keyTopics: [
+      "Consent",
+      "Data subject rights",
+      "Cross-border transfer",
+      "PDPC enforcement",
+    ],
+    sections: [
+      {
+        title: "Core obligations and PDPC enforcement",
+        excerpt:
+          "The PDPA requires consent for data processing unless exempt, mandates data protection officers for certain controllers, and empowers the PDPC to issue administrative fines up to THB 5 million per violation.",
+        keywords: ["pdpa", "pdpc", "consent", "dpo", "fines"],
+      },
+    ],
+    sources: [
+      "Thailand Personal Data Protection Act B.E. 2562",
+      "PDPC notifications",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "indonesia-pdp-law",
+    title: "Indonesia Personal Data Protection Law (UU PDP)",
+    jurisdiction: "Indonesia",
+    frameworkCodes: ["UU PDP"],
+    summary:
+      "Indonesia's UU No. 27/2022 on Personal Data Protection establishes consent requirements, data subject rights, and Kominfo agency enforcement with fines up to 2% of annual revenue.",
+    keyTopics: [
+      "Consent and lawful basis",
+      "Data localization",
+      "Cross-border transfer",
+      "Denda administratif",
+    ],
+    sections: [
+      {
+        title: "Consent, localization, and penalties",
+        excerpt:
+          "UU PDP mandates explicit consent for sensitive data, requires data controllers to notify breaches within 3×24 hours, and authorizes administrative fines up to 2% of annual revenue with criminal sanctions for intentional misuse.",
+        keywords: [
+          "uu pdp",
+          "kominfo",
+          "consent",
+          "localization",
+          "2 percent fine",
+        ],
+      },
+    ],
+    sources: [
+      "UU No. 27/2022 tentang Pelindungan Data Pribadi",
+      "Kominfo implementing regulations",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "malaysia-pdpa",
+    title: "Malaysia Personal Data Protection Act (PDPA)",
+    jurisdiction: "Malaysia",
+    frameworkCodes: ["PDPA"],
+    summary:
+      "Malaysia's PDPA 2010 regulates personal data processing in commercial transactions with registration and consent requirements enforced by the PDP Commissioner.",
+    keyTopics: [
+      "Data user registration",
+      "Consent principles",
+      "Cross-border restrictions",
+      "Enforcement",
+    ],
+    sections: [
+      {
+        title: "Registration, consent, and cross-border restrictions",
+        excerpt:
+          "Data users in specified classes must register with the Commissioner. Cross-border transfers are restricted to approved jurisdictions or with consent and contractual safeguards. Penalties can reach MYR 500,000 and/or imprisonment.",
+        keywords: [
+          "pdpa malaysia",
+          "commissioner",
+          "registration",
+          "cross-border",
+        ],
+      },
+    ],
+    sources: [
+      "Malaysia Personal Data Protection Act 2010 (Act 709)",
+      "PDP Commissioner guidelines",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "philippines-dpa",
+    title: "Philippines Data Privacy Act (DPA 2012)",
+    jurisdiction: "Philippines",
+    frameworkCodes: ["DPA 2012"],
+    summary:
+      "The Philippines DPA of 2012 establishes the National Privacy Commission (NPC) with comprehensive data privacy obligations, breach notification, and criminal penalties.",
+    keyTopics: [
+      "NPC authority",
+      "Data subject rights",
+      "Breach notification",
+      "Penalties",
+    ],
+    sections: [
+      {
+        title: "NPC governance and enforcement",
+        excerpt:
+          "The NPC enforces compliance with breach notification within 72 hours, registration of data processing systems, and appointment of Data Protection Officers for large-scale processing. Penalties include imprisonment for unauthorized disclosure and PHP 5 million fines.",
+        keywords: ["dpa 2012", "npc", "dpo", "breach notification", "72 hours"],
+      },
+    ],
+    sources: ["Republic Act No. 10173", "NPC Circulars and Advisories"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "vietnam-pdpd",
+    title: "Vietnam Decree on Personal Data Protection (PDPD)",
+    jurisdiction: "Vietnam",
+    frameworkCodes: ["PDPD"],
+    summary:
+      "Vietnam's PDPD (Decree 13/2023/ND-CP) mandates consent-based processing, data localization requirements for Vietnamese users, and enforcement by the Ministry of Public Security.",
+    keyTopics: [
+      "Consent",
+      "Data localization",
+      "Cross-border transfer",
+      "MPS enforcement",
+    ],
+    sections: [
+      {
+        title: "Data localization and cross-border transfer rules",
+        excerpt:
+          "The PDPD requires personal data of Vietnamese data subjects to be stored in Vietnam and restricts cross-border transfers without consent and regulatory assessment. Violations can result in fines up to 5% of annual revenue and suspension of processing activities.",
+        keywords: ["pdpa", "decree 13", "data localization", "vietnam storage"],
+      },
+    ],
+    sources: ["Decree 13/2023/ND-CP", "Ministry of Public Security guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "nigeria-ndpa",
+    title: "Nigeria Data Protection Act (NDPA)",
+    jurisdiction: "Nigeria",
+    frameworkCodes: ["NDPA"],
+    summary:
+      "Nigeria's NDPA 2023 establishes the Nigeria Data Protection Commission (NDPC) with comprehensive data processing principles, DPO requirements, and penalties up to 2% of annual gross revenue.",
+    keyTopics: [
+      "NDPC governance",
+      "Data controller obligations",
+      "Data subject rights",
+      "Cross-border transfer",
+    ],
+    sections: [
+      {
+        title: "NDPC enforcement and compliance obligations",
+        excerpt:
+          "The NDPA requires data controllers to register with the NDPC, appoint Data Protection Officers for major processing, conduct Data Protection Impact Assessments for high-risk processing, and report breaches within 72 hours. Non-compliance attracts fines up to 2% of annual gross revenue.",
+        keywords: ["ndpa", "ndpc", "nigeria data protection", "dpo", "dpia"],
+      },
+    ],
+    sources: [
+      "Nigeria Data Protection Act 2023",
+      "NDPC Implementation Framework",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "kenya-dpa",
+    title: "Kenya Data Protection Act (DPA)",
+    jurisdiction: "Kenya",
+    frameworkCodes: ["Kenya DPA"],
+    summary:
+      "Kenya's Data Protection Act 2019 establishes the Office of the Data Protection Commissioner (ODPC) with EU-aligned data processing principles, registration requirements, and enforcement powers.",
+    keyTopics: [
+      "ODPC registration",
+      "Data processing principles",
+      "Cross-border safeguards",
+      "Enforcement",
+    ],
+    sections: [
+      {
+        title: "ODPC oversight and compliance requirements",
+        excerpt:
+          "Data controllers and processors must register with the ODPC, implement data protection by design, conduct DPIAs for high-risk processing, and ensure adequate safeguards for cross-border transfers. Penalties can reach KES 5 million or 1% of annual turnover for severe violations.",
+        keywords: [
+          "kenya dpa",
+          "odpc",
+          "registration",
+          "dpia",
+          "kes 5 million",
+        ],
+      },
+    ],
+    sources: [
+      "Kenya Data Protection Act No. 24 of 2019",
+      "ODPC guidance notes",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "qatar-dpl",
+    title: "Qatar Personal Data Privacy Protection Law (DPL)",
+    jurisdiction: "Qatar",
+    frameworkCodes: ["Qatar DPL"],
+    summary:
+      "Qatar's Law No. 13 of 2016 on Personal Data Privacy Protection governs the collection and processing of personal data with consent requirements and compliance oversight by the Ministry of Transport and Communications.",
+    keyTopics: [
+      "Consent requirements",
+      "Data processing limits",
+      "Rights of individuals",
+      "MOTC oversight",
+    ],
+    sections: [
+      {
+        title: "Consent, obligations, and enforcement",
+        excerpt:
+          "Personal data processing requires explicit consent unless an exception applies. Controllers must implement appropriate security measures, limit processing to specified purposes, and provide individuals with rights to access and correct their data. Non-compliance can result in fines and corrective orders.",
+        keywords: ["qatar dpl", "law 13", "consent", "motc", "data privacy"],
+      },
+    ],
+    sources: [
+      "Law No. 13 of 2016 — Qatar Personal Data Privacy Protection Law",
+      "MOTC regulatory communications",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "kuwait-pdpl",
+    title: "Kuwait Data Privacy Protection Regulation (PDPL)",
+    jurisdiction: "Kuwait",
+    frameworkCodes: ["Kuwait PDPL"],
+    summary:
+      "Kuwait's Communication and Information Technology Regulatory Authority (CITRA) Resolution No. 42/2021 establishes data privacy principles for telecommunications and IT service providers in Kuwait.",
+    keyTopics: [
+      "CITRA authority",
+      "Consent and notice",
+      "Data localization",
+      "Breach obligations",
+    ],
+    sections: [
+      {
+        title: "CITRA data privacy framework",
+        excerpt:
+          "CITRA's resolution requires service providers to obtain clear consent for data collection, notify users of processing purposes, implement adequate security safeguards, and store certain categories of data within Kuwait. Violations may lead to administrative penalties and license suspension.",
+        keywords: [
+          "kuwait pdpl",
+          "citra",
+          "resolution 42",
+          "data localization",
+        ],
+      },
+    ],
+    sources: ["CITRA Resolution No. 42/2021", "Kuwait Telecommunications Law"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "bahrain-pdpl",
+    title: "Bahrain Personal Data Protection Law (PDPL)",
+    jurisdiction: "Bahrain",
+    frameworkCodes: ["Bahrain PDPL"],
+    summary:
+      "Bahrain's Law No. 30 of 2018 on Personal Data Protection (PDPL) establishes the Personal Data Protection Authority with GDPR-aligned principles for consent, data subject rights, and cross-border transfer restrictions.",
+    keyTopics: [
+      "PDP Authority",
+      "Data subject rights",
+      "Cross-border adequacy",
+      "Penalties",
+    ],
+    sections: [
+      {
+        title: "PDP Authority governance and compliance",
+        excerpt:
+          "The Personal Data Protection Authority supervises compliance, issues adequacy decisions for cross-border transfers, and requires controllers to implement appropriate technical and organizational measures, report breaches, and register data processing. Penalties can reach BHD 50,000 with criminal sanctions for intentional violations.",
+        keywords: [
+          "bahrain pdpl",
+          "law 30",
+          "authority",
+          "cross-border adequacy",
+          "bhd 50000",
+        ],
+      },
+    ],
+    sources: [
+      "Law No. 30 of 2018 — Bahrain PDPL",
+      "Personal Data Protection Authority directives",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "oman-pdpl",
+    title: "Oman Personal Data Protection Law (PDPL)",
+    jurisdiction: "Oman",
+    frameworkCodes: ["Oman PDPL"],
+    summary:
+      "Oman's Royal Decree 6/2022 on Personal Data Protection establishes the Ministry of Transport, Communications and Information Technology as the supervisory authority for data protection compliance.",
+    keyTopics: [
+      "Consent and processing",
+      "Cross-border transfers",
+      "Data subject rights",
+      "MTCIT supervision",
+    ],
+    sections: [
+      {
+        title: "Processing requirements and MTCIT oversight",
+        excerpt:
+          "Personal data may only be processed for specified, legitimate purposes with the data subject's consent or other lawful basis. Cross-border transfers require adequate protection or consent. Failure to comply may result in fines and corrective measures ordered by MTCIT.",
+        keywords: [
+          "oman pdpl",
+          "royal decree 6",
+          "mtcit",
+          "consent",
+          "transfer",
+        ],
+      },
+    ],
+    sources: ["Royal Decree 6/2022 — Oman PDPL", "MTCIT regulations"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "jordan-pdp",
+    title: "Jordan Personal Data Protection Law (PDP)",
+    jurisdiction: "Jordan",
+    frameworkCodes: ["Jordan PDP"],
+    summary:
+      "Jordan's draft Personal Data Protection Law provides a framework for personal data rights and controller obligations, to be enforced by the Ministry of Digital Economy and Entrepreneurship.",
+    keyTopics: [
+      "Data subject consent",
+      "Controller obligations",
+      "Cross-border flow",
+      "Regulatory oversight",
+    ],
+    sections: [
+      {
+        title: "Proposed legal framework and compliance requirements",
+        excerpt:
+          "The Jordan PDP requires data processing to be based on consent or legitimate legal grounds, mandates security measures proportionate to sensitivity, and restricts cross-border data transfers to jurisdictions with adequate protection. Regulators may issue fines and corrective orders for non-compliance.",
+        keywords: [
+          "jordan pdp",
+          "modee",
+          "consent",
+          "cross-border",
+          "digital economy",
+        ],
+      },
+    ],
+    sources: [
+      "Jordan Personal Data Protection Law (draft)",
+      "Ministry of Digital Economy and Entrepreneurship",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "egypt-dpl",
+    title: "Egypt Data Protection Law (DPL)",
+    jurisdiction: "Egypt",
+    frameworkCodes: ["Egypt DPL"],
+    summary:
+      "Egypt's Law No. 151 of 2020 on Personal Data Protection establishes the Personal Data Protection Centre and imposes consent-based processing, DPO requirements, and cross-border transfer restrictions.",
+    keyTopics: [
+      "Protection Centre",
+      "Consent and licensing",
+      "Cross-border controls",
+      "Criminal sanctions",
+    ],
+    sections: [
+      {
+        title: "Centre oversight, licenses, and cross-border transfers",
+        excerpt:
+          "Controllers must obtain a license from the Protection Centre for processing sensitive data or cross-border transfers. DPO appointments are mandatory for large-scale processors. Violations can lead to fines and imprisonment under Egypt's criminal code. Cross-border transfers are restricted to countries with adequate protection levels.",
+        keywords: [
+          "egypt dpl",
+          "law 151",
+          "protection centre",
+          "license",
+          "cross-border",
+        ],
+      },
+    ],
+    sources: [
+      "Law No. 151 of 2020 — Egypt Data Protection Law",
+      "Personal Data Protection Centre regulations",
+    ],
     updatedAt: "2026-03-16",
   },
 ];

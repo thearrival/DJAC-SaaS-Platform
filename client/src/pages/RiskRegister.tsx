@@ -1136,19 +1136,25 @@ export default function RiskRegister() {
           {t("risk.loading", "Loading risks…")}
         </div>
       ) : filteredRisks.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <ShieldOff size={40} className="mx-auto mb-3 opacity-25" />
-          <p className="font-medium">
-            {t("risk.emptyTitle", "No risks found")}
+        <div className="text-center py-20 text-muted-foreground">
+          <ShieldOff size={48} className="mx-auto mb-4 opacity-20" />
+          <p className="text-lg font-semibold text-foreground">
+            {t("risk.emptyTitle", "No risks tracked yet")}
           </p>
-          <p className="text-sm mt-1">
+          <p className="text-sm mt-2 max-w-sm mx-auto">
             {risks.length === 0
               ? t(
                   "risk.emptyDesc",
-                  "Add your first risk entry to start building the risk register."
+                  "Start by creating your first risk entry. We'll auto-map it to your compliance frameworks and calculate severity scores."
                 )
               : t("risk.emptyFilter", "No risks match the current filters.")}
           </p>
+          {risks.length === 0 && (
+            <Button className="mt-6 gap-2" onClick={openNew}>
+              <Plus size={14} />
+              {t("risk.createFirst", "Create First Risk")}
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
