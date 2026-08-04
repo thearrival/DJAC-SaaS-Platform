@@ -8,7 +8,7 @@
  *   1. Logged to Vercel console (retrievable via `vercel logs`)
  *   2. Returned in API response in development mode
  */
-import { createHash } from "node:crypto";
+import { createHash, randomInt } from "node:crypto";
 import { eq, and, lt } from "drizzle-orm";
 import { otpCodes } from "../../drizzle/schema";
 import { getDb } from "../db";
@@ -19,10 +19,9 @@ const OTP_MAX_ATTEMPTS = 5;
 const OTP_LENGTH = 6;
 
 function generateCode(): string {
-  const digits = "0123456789";
   let code = "";
   for (let i = 0; i < OTP_LENGTH; i++) {
-    code += digits[Math.floor(Math.random() * digits.length)];
+    code += randomInt(0, 10).toString();
   }
   return code;
 }

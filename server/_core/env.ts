@@ -117,6 +117,7 @@ export const ENV = {
   devAuthEmail: parsedEnv.DEV_AUTH_EMAIL,
   devAuthRole: parseDevRole(parsedEnv.DEV_AUTH_ROLE),
   aiOrchestratorEnabled: parsedEnv.AI_ORCHESTRATOR_ENABLED,
+  openAiApiKey: parsedEnv.OPENAI_API_KEY,
   aiQueueMode: resolveAiQueueMode(parsedEnv.AI_QUEUE_MODE, {
     isProduction: parsedEnv.NODE_ENV === "production",
     redisUrl: parsedEnv.REDIS_URL,
@@ -139,6 +140,7 @@ export const ENV = {
   smtpPass: parsedEnv.SMTP_PASS,
   smtpFrom: parsedEnv.SMTP_FROM,
   reportTemplateName: parsedEnv.REPORT_TEMPLATE_NAME,
+  reportNativePdfConversion: parsedEnv.REPORT_NATIVE_PDF_CONVERSION,
   interactionRetentionAutoRun: parsedEnv.INTERACTION_RETENTION_AUTORUN,
   interactionRetentionDays: parsedEnv.INTERACTION_RETENTION_DAYS,
   interactionRetentionIntervalHours:

@@ -599,7 +599,7 @@ const messages: Record<string, Record<string, string>> = {
     "calendar.daysLeft": "{days}d left",
     "calendar.markComplete": "Mark Complete",
 
-    "wizard.title": "5-Step Enterprise Onboarding Wizard",
+    "wizard.title": "Enterprise Onboarding Wizard",
     "wizard.subtitle":
       "Complete setup from organization to first compliance report in one guided flow.",
     "wizard.step1": "Organization Setup",
@@ -639,6 +639,13 @@ const messages: Record<string, Record<string, string>> = {
     "wizard.reportReady": "Report ready",
     "wizard.download": "Download",
     "wizard.openReportCenter": "Open Report Center",
+    "wizard.congratsTitle": "You're All Set!",
+    "wizard.congratsDesc":
+      "Your organization is configured, your first compliance report has been generated, and you're ready to explore the full platform. DJAC is now watching your compliance posture.",
+    "wizard.congratsFrameworks": "Frameworks",
+    "wizard.congratsVendors": "Vendors",
+    "wizard.congratsReports": "Reports",
+    "wizard.goToDashboard": "Launch Dashboard",
     "wizard.orgNamePlaceholder": "Acme Compliance",
     "wizard.billingEmailPlaceholder": "finance@company.com",
     "wizard.industryPlaceholder": "Technology",
@@ -3720,7 +3727,7 @@ const messages: Record<string, Record<string, string>> = {
     "calendar.daysLeft": "متبقي {days} يوم",
     "calendar.markComplete": "وضع كمكتمل",
 
-    "wizard.title": "دليل التهيئة المؤسسية من 5 خطوات",
+    "wizard.title": "دليل التهيئة المؤسسية",
     "wizard.subtitle":
       "أكمل الإعداد من إنشاء المؤسسة حتى أول تقرير امتثال في مسار إرشادي واحد.",
     "wizard.step1": "إعداد المؤسسة",
@@ -3760,6 +3767,13 @@ const messages: Record<string, Record<string, string>> = {
     "wizard.reportReady": "التقرير جاهز",
     "wizard.download": "تنزيل",
     "wizard.openReportCenter": "فتح مركز التقارير",
+    "wizard.congratsTitle": "جاهز بالكامل!",
+    "wizard.congratsDesc":
+      "تم إعداد مؤسستك، وتم توليد أول تقرير امتثال لك، وأنت مستعد لاستكشاف المنصة بالكامل. DJAC الآن يراقب وضع امتثالك.",
+    "wizard.congratsFrameworks": "أطر العمل",
+    "wizard.congratsVendors": "المورّدين",
+    "wizard.congratsReports": "التقارير",
+    "wizard.goToDashboard": "الانتقال إلى لوحة التحكم",
     "wizard.orgNamePlaceholder": "Acme Compliance",
     "wizard.billingEmailPlaceholder": "finance@company.com",
     "wizard.industryPlaceholder": "تقنية",

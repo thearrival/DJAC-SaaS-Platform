@@ -52,13 +52,16 @@ function getRedis(): Redis | null {
 type MemEntry = { count: number; resetAt: number };
 const _memStore = new Map<string, MemEntry>();
 
+let _pruneInterval: ReturnType<typeof setInterval> | null = null;
+
 // Prune expired entries every 5 minutes to prevent unbounded growth.
-setInterval(() => {
+_pruneInterval = setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of _memStore) {
     if (now > entry.resetAt) _memStore.delete(key);
   }
-}, 5 * 60_000).unref();
+}, 5 * 60_000);
+_pruneInterval.unref();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public API
@@ -149,6 +152,10 @@ export function getRateLimiterStats(): RateLimiterStats {
 
 /** Gracefully close the Redis connection used by the rate limiter. */
 export async function closeRateLimiter(): Promise<void> {
+  if (_pruneInterval) {
+    clearInterval(_pruneInterval);
+    _pruneInterval = null;
+  }
   if (_redis) {
     await _redis.quit();
     _redis = null;

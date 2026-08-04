@@ -32,6 +32,8 @@ import {
   ClipboardList,
   ShieldCheck,
   FileText,
+  PartyPopper,
+  Rocket,
 } from "lucide-react";
 
 export default function OnboardingWizard() {
@@ -39,6 +41,9 @@ export default function OnboardingWizard() {
   const { t } = useLocale();
   const [, navigate] = useLocation();
   const _utils = trpc.useUtils();
+
+  const updateProgressMutation = trpc.onboarding.updateProgress.useMutation();
+  const completeOnboardingMutation = trpc.onboarding.complete.useMutation();
 
   const [activeStep, setActiveStep] = useState(0);
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<
@@ -209,6 +214,50 @@ export default function OnboardingWizard() {
     reportResult,
   ]);
 
+  // Persist progress to server when a step becomes "done"
+  useEffect(() => {
+    const steps = [0, 1, 2, 3, 4, 5, 6];
+    let currentStep: number | undefined;
+    for (let i = steps.length - 1; i >= 0; i--) {
+      if (stepDone[steps[i] as 0 | 1 | 2 | 3 | 4 | 5 | 6]) {
+        currentStep = steps[i];
+        break;
+      }
+    }
+    if (currentStep === undefined || currentStep < 1) return;
+    const responses: Record<string, unknown> = {};
+    if (selectedJurisdiction) responses.jurisdiction = selectedJurisdiction;
+    if (selectedFrameworks.length > 0)
+      responses.frameworks = selectedFrameworks;
+    if (selectedObjectives.length > 0)
+      responses.objectives = selectedObjectives;
+    if (!updateProgressMutation.isPending && !updateProgressMutation.data) {
+      updateProgressMutation.mutate({
+        step: currentStep,
+        responses:
+          Object.keys(responses).length > 0
+            ? (responses as Record<string, unknown>)
+            : undefined,
+      });
+    }
+  }, [
+    hasOrganization,
+    selectedJurisdiction,
+    selectedFrameworks,
+    selectedObjectives,
+  ]);
+
+  // Mark onboarding complete when report is generated
+  useEffect(() => {
+    if (
+      reportResult &&
+      !completeOnboardingMutation.isPending &&
+      !completeOnboardingMutation.data
+    ) {
+      completeOnboardingMutation.mutate();
+    }
+  }, [reportResult]);
+
   const handleCreateOrganization = () => {
     const next: { name?: string; billingEmail?: string } = {};
     if (!orgForm.name.trim()) next.name = "Organization name is required";
@@ -256,7 +305,7 @@ export default function OnboardingWizard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            {t("wizard.title", "5-Step Enterprise Onboarding Wizard")}
+            {t("wizard.title", "Enterprise Onboarding Wizard")}
           </CardTitle>
           <CardDescription>
             {t(
@@ -997,6 +1046,71 @@ export default function OnboardingWizard() {
                 </div>
               </div>
             ) : null}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Completion Celebration ────────────────────────────────────────── */}
+      {reportResult && (
+        <Card className="border-emerald-500/50 bg-gradient-to-br from-emerald-50/60 via-background to-blue-50/60 dark:from-emerald-950/30 dark:to-blue-950/30">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
+              <PartyPopper className="h-8 w-8 text-emerald-600" />
+            </div>
+            <CardTitle className="text-2xl">
+              {t("wizard.congratsTitle", "You're All Set!")}
+            </CardTitle>
+            <CardDescription className="text-base">
+              {t(
+                "wizard.congratsDesc",
+                "Your organization is configured, your first compliance report has been generated, and you're ready to explore the full platform. DJAC is now watching your compliance posture."
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <div className="grid w-full max-w-md grid-cols-3 gap-4 text-center">
+              <div className="rounded-lg bg-background p-3 border">
+                <div className="text-lg font-bold text-primary">
+                  {selectedFrameworks.length}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {t("wizard.congratsFrameworks", "Frameworks")}
+                </div>
+              </div>
+              <div className="rounded-lg bg-background p-3 border">
+                <div className="text-lg font-bold text-primary">
+                  {selectedVendorId ? 1 : 0}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {t("wizard.congratsVendors", "Vendors")}
+                </div>
+              </div>
+              <div className="rounded-lg bg-background p-3 border">
+                <div className="text-lg font-bold text-primary">
+                  {reportResult ? 1 : 0}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {t("wizard.congratsReports", "Reports")}
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Button
+                size="lg"
+                onClick={() => navigate("/dashboard")}
+                className="gap-2"
+              >
+                <Rocket className="h-4 w-4" />
+                {t("wizard.goToDashboard", "Launch Dashboard")}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate("/report-center")}
+              >
+                {t("wizard.openReportCenter", "Open Report Center")}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

@@ -95,35 +95,27 @@ export async function getDb() {
   }
 
   try {
-    if (ENV.isProduction) {
-      const connectionLimit = ENV.databasePoolSize;
-      const sslUrl = fixSslMode(databaseUrl);
+    const connectionLimit = ENV.databasePoolSize;
+    const sslUrl = fixSslMode(databaseUrl);
 
-      _pool = new pg.Pool({
-        connectionString: sslUrl,
-        max: connectionLimit,
-        idleTimeoutMillis: 30_000,
-        connectionTimeoutMillis: 5_000,
-      });
+    _pool = new pg.Pool({
+      connectionString: sslUrl,
+      max: connectionLimit,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+    });
 
-      _pool.on("error", (err: Error) => {
-        console.error("[Database] Pool error:", err.message);
-      });
+    _pool.on("error", (err: Error) => {
+      console.error("[Database] Pool error:", err.message);
+    });
 
-      const client = await _pool.connect();
-      await client.query("SELECT 1");
-      client.release();
+    const client = await _pool.connect();
+    await client.query("SELECT 1");
+    client.release();
 
-      _db = drizzle(_pool);
-      _consecutiveFailures = 0;
-      console.info(`[Database] Pool created — max=${connectionLimit}`);
-    } else {
-      const client = new pg.Client(fixSslMode(databaseUrl));
-      await client.connect();
-      await client.end();
-      _db = drizzle(fixSslMode(databaseUrl));
-      _consecutiveFailures = 0;
-    }
+    _db = drizzle(_pool);
+    _consecutiveFailures = 0;
+    console.info(`[Database] Pool created — max=${connectionLimit}`);
     _lastDbCheckFailedAt = 0;
     return _db;
   } catch (error) {

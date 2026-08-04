@@ -65,6 +65,7 @@ const TransferChecker = lazy(() => import("./pages/TransferChecker"));
 const TeamMembers = lazy(() => import("./pages/TeamMembers"));
 const OrgSettings = lazy(() => import("./pages/OrgSettings"));
 const InviteAccept = lazy(() => import("./pages/InviteAccept"));
+const DocsPortal = lazy(() => import("./pages/DocsPortal"));
 const AuditLog = lazy(() => import("./pages/AuditLog"));
 const ComplianceScorecard = lazy(() => import("./pages/ComplianceScorecard"));
 const ApiKeys = lazy(() => import("./pages/ApiKeys"));
@@ -179,6 +180,12 @@ function Router() {
       </Route>
       <Route path={"/invite-accept"}>
         <InviteAccept />
+      </Route>
+      <Route path={"/docs/:section?/:page?"}>
+        <DocsPortal />
+      </Route>
+      <Route path={"/docs"}>
+        <DocsPortal />
       </Route>
       {/* Yalla-Admin — isolated owner portal, outside DashboardLayout, no nav */}
       <Route path={"/yalla-hack-owners-console/enter"}>

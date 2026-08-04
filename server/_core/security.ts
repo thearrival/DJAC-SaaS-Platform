@@ -59,20 +59,6 @@ function normalizePath(pathname: string): string {
   return normalized || "/";
 }
 
-export function shouldBypassApiRateLimit(pathname: string): boolean {
-  const normalized = normalizePath(pathname);
-  return (
-    normalized === "/api/health" ||
-    normalized === "/api/healthz" ||
-    normalized === "/api/readiness" ||
-    normalized === "/api/readyz" ||
-    normalized === "/health" ||
-    normalized === "/healthz" ||
-    normalized === "/readiness" ||
-    normalized === "/readyz"
-  );
-}
-
 function shouldNoIndex(pathname: string): boolean {
   const normalized = normalizePath(pathname);
   return NO_INDEX_PATH_PREFIXES.some(

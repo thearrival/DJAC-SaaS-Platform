@@ -1,4 +1,5 @@
 import { defineConfig } from "drizzle-kit";
+import { fixSslMode } from "./server/_core/ssl-helper";
 
 const connectionString =
   process.env.DATABASE_URL ||
@@ -11,12 +12,14 @@ if (!connectionString) {
   );
 }
 
+const dbUrl = fixSslMode(connectionString);
+
 export default defineConfig({
   schema: "./drizzle/schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: connectionString,
+    url: dbUrl,
     ssl:
       process.env.NODE_ENV === "production"
         ? { rejectUnauthorized: false }

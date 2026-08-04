@@ -88,7 +88,7 @@ const DEMO_ORGS = [
     risks: [
       {
         title: "Cross-border PIPL data flows without CAC assessment",
-        category: "regulatory",
+        category: "legal",
         likelihood: 4,
         impact: 5,
         treatment: "mitigate",
@@ -98,11 +98,11 @@ const DEMO_ORGS = [
         category: "operational",
         likelihood: 3,
         impact: 4,
-        treatment: "remediate",
+        treatment: "mitigate",
       },
       {
         title: "GDPR DPO not appointed for EU operations",
-        category: "regulatory",
+        category: "legal",
         likelihood: 3,
         impact: 5,
         treatment: "mitigate",
@@ -187,17 +187,17 @@ const DEMO_ORGS = [
     risks: [
       {
         title: "NIS2 incident reporting not tested for essential entity status",
-        category: "regulatory",
+        category: "legal",
         likelihood: 3,
         impact: 4,
         treatment: "mitigate",
       },
       {
         title: "EU AI Act classification of manufacturing QA model incomplete",
-        category: "compliance",
+        category: "legal",
         likelihood: 4,
         impact: 4,
-        treatment: "assess",
+        treatment: "mitigate",
       },
       {
         title: "DORA ICT third-party register missing sub-contractors",
@@ -288,7 +288,7 @@ const DEMO_ORGS = [
     risks: [
       {
         title: "PIPL cross-border data transfer non-compliance",
-        category: "regulatory",
+        category: "legal",
         likelihood: 5,
         impact: 5,
         treatment: "mitigate",
@@ -298,18 +298,18 @@ const DEMO_ORGS = [
         category: "operational",
         likelihood: 3,
         impact: 4,
-        treatment: "remediate",
+        treatment: "mitigate",
       },
       {
         title: "PDPL-KSA data localization not implemented",
-        category: "regulatory",
+        category: "legal",
         likelihood: 4,
         impact: 5,
         treatment: "mitigate",
       },
       {
         title: "PCI-DSS quarterly scan schedule gap",
-        category: "compliance",
+        category: "legal",
         likelihood: 2,
         impact: 3,
         treatment: "accept",
