@@ -154,14 +154,6 @@ export interface PermissionFlags {
   canInvite: boolean;
 }
 
-const _DENY: PermissionFlags = {
-  canView: false,
-  canCreate: false,
-  canEdit: false,
-  canDelete: false,
-  canExport: false,
-  canInvite: false,
-};
 const VIEW_ONLY: PermissionFlags = {
   canView: true,
   canCreate: false,
@@ -307,17 +299,4 @@ export const DEFAULT_ORG_ROLE_PERMISSIONS: Record<
     regulatory_changes: FULL,
     billing: FULL,
   },
-};
-
-// ─── Onboarding Gate Rules ────────────────────────────────────────────────────
-
-/** Maps each onboarding stage to the routes that are accessible without completing it.
- *  An empty array means the stage must be completed before any gated route is accessible. */
-export const ONBOARDING_GATE_RULES: Record<OnboardingStage, string[]> = {
-  not_started: [],
-  account_type_selected: [],
-  org_created: [],
-  org_joined: [],
-  jurisdiction_set: [],
-  completed: ["*"], // wildcard — all routes accessible
 };

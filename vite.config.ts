@@ -65,6 +65,17 @@ export default defineConfig(({ mode }) => {
               return "charts";
             }
 
+            if (
+              id.includes("react-markdown") ||
+              id.includes("remark") ||
+              id.includes("rehype") ||
+              id.includes("mdast") ||
+              id.includes("unified") ||
+              id.includes("micromark")
+            ) {
+              return "markdown-render";
+            }
+
             // React core + ALL React-dependent libraries MUST load in order.
             // Any library calling React.createContext/useState/etc at module-init
             // time will crash if React isn't loaded first. Merge them all here.
@@ -72,25 +83,34 @@ export default defineConfig(({ mode }) => {
               id.includes("react") ||
               id.includes("react-dom") ||
               id.includes("scheduler") ||
+              id.includes("wouter") ||
+              id.includes("next-themes")
+            ) {
+              return "react-vendor";
+            }
+
+            if (
               id.includes("@radix-ui") ||
               id.includes("framer-motion") ||
               id.includes("sonner") ||
-              id.includes("wouter") ||
               id.includes("cmdk") ||
               id.includes("vaul") ||
-              id.includes("next-themes") ||
               id.includes("input-otp") ||
               id.includes("react-resizable-panels") ||
               id.includes("embla-carousel") ||
               id.includes("react-day-picker") ||
-              id.includes("react-markdown") ||
               id.includes("react-hook-form") ||
-              id.includes("@hookform") ||
+              id.includes("@hookform")
+            ) {
+              return "ui-primitives";
+            }
+
+            if (
               id.includes("@tanstack/react-query") ||
               id.includes("@trpc") ||
               id.includes("superjson")
             ) {
-              return "react-vendor";
+              return "data-layer";
             }
 
             if (id.includes("lucide-react")) {
@@ -126,10 +146,8 @@ export default defineConfig(({ mode }) => {
               return "crypto-libs";
             }
 
-            // Catch-all: merge into react-vendor to avoid circular chunk warnings
-            // (vendor -> react-vendor -> vendor) that Vite reports when two
-            // manual chunks reference each other across the default boundary.
-            return "react-vendor";
+            // Catch-all: generic vendor chunk, separate from React-critical
+            return "vendor";
           },
         },
       },
