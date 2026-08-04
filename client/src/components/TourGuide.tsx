@@ -125,7 +125,7 @@ const TOUR_STEPS: TourStep[] = [
     placement: "right",
   },
   {
-    targetId: "tour-menu-calendar",
+    targetId: "tour-menu-compliance-calendar",
     titleKey: "tour.step5Title",
     titleFallback: "📅 Calendar — Never Miss a Deadline",
     descKey: "tour.step5Desc",

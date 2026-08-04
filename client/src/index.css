@@ -2085,6 +2085,242 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   }
 }
 
+/* ── Documentation Portal ─────────────────────────────────────────────── */
+.djac-docs-portal {
+  max-width: 100%;
+  padding: 0;
+}
+
+.djac-docs-mobile-toggle {
+  display: none;
+}
+
+.djac-docs-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: calc(100vh - 4rem);
+  gap: 0;
+}
+
+.djac-docs-sidebar {
+  border-right: 1px solid var(--border);
+  background: var(--card);
+  overflow-y: auto;
+  height: calc(100vh - 4rem);
+  position: sticky;
+  top: 4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.djac-docs-sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.djac-docs-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.djac-docs-section-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--foreground);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 0.15s;
+}
+
+.djac-docs-section-btn:hover {
+  background: var(--accent);
+}
+
+.djac-docs-section-active {
+  color: var(--primary);
+  background: hsl(var(--primary) / 0.08);
+}
+
+.djac-docs-page-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.35rem 0.75rem 0.35rem 1.75rem;
+  text-align: left;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.15s;
+}
+
+.djac-docs-page-btn:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+
+.djac-docs-page-active {
+  color: var(--primary);
+  font-weight: 600;
+  background: hsl(var(--primary) / 0.06);
+  border-left: 2px solid var(--primary);
+}
+
+.djac-docs-sidebar-footer {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Docs Content ────────────────────────────────────────────────────── */
+.djac-docs-content {
+  padding: 1.5rem 2rem 3rem 2rem;
+  max-width: 860px;
+  width: 100%;
+}
+
+.djac-docs-section-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.djac-docs-article {
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
+
+.djac-docs-article h3,
+.djac-docs-article h4 {
+  scroll-margin-top: 5rem;
+}
+
+.djac-docs-diagram {
+  margin: 2rem 0;
+}
+
+.djac-docs-casestudy {
+  margin: 2.5rem 0;
+}
+
+.djac-docs-casestudy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.djac-docs-demo {
+  margin: 2.5rem 0;
+}
+
+.djac-docs-best-practices {
+  margin: 2.5rem 0;
+}
+
+.djac-docs-troubleshoot {
+  margin: 2.5rem 0;
+}
+
+/* ── Docs page navigation tabs ───────────────────────────────────────── */
+.djac-docs-page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 2.5rem 0 2rem 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.djac-docs-page-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.djac-docs-page-nav-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.djac-docs-page-nav-active {
+  border-color: var(--primary);
+  background: hsl(var(--primary) / 0.08);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ── Docs next steps ─────────────────────────────────────────────────── */
+.djac-docs-next {
+  margin-top: 2.5rem;
+  padding: 2rem;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary) / 0.05),
+    hsl(var(--primary) / 0.02)
+  );
+  border: 1px solid hsl(var(--primary) / 0.15);
+  border-radius: 12px;
+}
+
+/* ── Mobile responsiveness ────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .djac-docs-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .djac-docs-mobile-toggle {
+    display: block;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  .djac-docs-sidebar {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    top: 3.5rem;
+    height: calc(100vh - 3.5rem);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .djac-docs-sidebar-open {
+    display: flex;
+  }
+
+  .djac-docs-content {
+    padding: 1rem 1.25rem 2rem 1.25rem;
+  }
+
+  .djac-docs-casestudy-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Reduced-motion: disable animation system extras ───────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .glass-card:hover {

@@ -29,7 +29,10 @@ const cmd = [
 
 try {
   execSync(cmd, { stdio: "inherit", cwd: root });
-} catch {
+} catch (esmErr) {
+  console.warn(
+    `[prebuild] ESM build failed (${esmErr.message}) — falling back to CJS`
+  );
   const fb = `npx esbuild --bundle --platform=node --target=node20 --format=cjs --packages=external --external:pg-native "${entry.replace(/\\/g, "/")}" --outfile="${outfile.replace(/\\/g, "/")}"`;
   execSync(fb, { stdio: "inherit", cwd: root, shell: true });
 }

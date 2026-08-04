@@ -303,7 +303,7 @@ export function getDataFlowRoutes(
       riskLevel: "high",
       restrictions: ["Jurisdiction requirements not found in knowledge base"],
       requirements: ["Consult local legal counsel"],
-      estimatedComplianceCost: "TBD",
+      estimatedComplianceCost: "Unknown",
     };
   }
 

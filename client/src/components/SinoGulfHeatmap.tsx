@@ -3,7 +3,7 @@
  * Real-world simplified country outlines via Natural Earth coordinates.
  * All text is clean ASCII — no mojibake, no broken emoji.
  */
-import { useMemo, useState, useRef, useCallback } from "react";
+import { useMemo, useState, useRef, useCallback, memo } from "react";
 import { useTheme } from "@/contexts/useTheme";
 import { useLocale } from "@/contexts/useLocale";
 import { Badge } from "@/components/ui/badge";
@@ -1281,7 +1281,7 @@ function RiskKPIBar({
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
-export function SinoGulfHeatmap() {
+export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
   const { theme } = useTheme();
   const { t } = useLocale();
   const isDark = theme === "dark";
@@ -2079,10 +2079,19 @@ export function SinoGulfHeatmap() {
                   stroke="transparent"
                   strokeWidth={22}
                   style={{ cursor: "pointer" }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Corridor: ${pipe.from} → ${pipe.to}. Status: ${pipe.status}. Click for details.`}
                   onMouseEnter={e => handlePipeMouse(e, pipe)}
                   onMouseMove={e => handlePipeMouse(e, pipe)}
                   onMouseLeave={e => handlePipeMouse(e, null)}
                   onClick={e => handlePipeClick(e, pipe)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handlePipeClick(e as unknown as React.MouseEvent, pipe);
+                    }
+                  }}
                 />
               </g>
             );
@@ -2618,4 +2627,4 @@ export function SinoGulfHeatmap() {
       </div>
     </div>
   );
-}
+});

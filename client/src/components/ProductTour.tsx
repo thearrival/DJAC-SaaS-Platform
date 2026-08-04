@@ -35,14 +35,14 @@ interface TourStep {
 
 const TOUR_STEPS: TourStep[] = [
   {
-    target: ".nav-dashboard",
+    target: '[data-tour-id="tour-menu-dashboard"]',
     title: "Your Command Center",
     description:
       "See compliance health, critical gaps, and upcoming deadlines at a glance. This dashboard updates in real time as you add vendors and run assessments.",
     icon: LayoutDashboard,
   },
   {
-    target: ".nav-frameworks",
+    target: '[data-tour-id="tour-menu-analysis"]',
     title: "Compliance Framework Library",
     description:
       "Browse 46 frameworks across 29 jurisdictions. Select your frameworks to unlock AI-powered gap analysis and cross-jurisdiction comparisons.",
@@ -51,35 +51,35 @@ const TOUR_STEPS: TourStep[] = [
     offsetY: 8,
   },
   {
-    target: ".nav-vendors",
+    target: '[data-tour-id="tour-menu-vendor-assessment"]',
     title: "Vendor Risk Management",
     description:
       "Register and assess third-party vendors. DJAC runs automated compliance checks across all your selected frameworks and flags critical gaps.",
     icon: Building2,
   },
   {
-    target: ".nav-risk-register",
+    target: '[data-tour-id="tour-menu-risk-register"]',
     title: "Risk Register",
     description:
       "Track organizational risks with automated severity scoring. Link risks to vendors, frameworks, and remediation tasks for complete traceability.",
     icon: AlertTriangle,
   },
   {
-    target: ".nav-incidents",
+    target: '[data-tour-id="tour-menu-incidents"]',
     title: "Incident Management",
     description:
       "Log security and compliance incidents. DJAC auto-maps relevant regulations and generates notification timelines based on your jurisdictions.",
     icon: ShieldCheck,
   },
   {
-    target: ".nav-ai-report",
+    target: '[data-tour-id="tour-menu-reports"]',
     title: "AI Report Generator",
     description:
       "Generate professional compliance reports with one click. Select jurisdictions and frameworks — DJAC's AI produces gap analysis, recommendations, and export-ready PDFs.",
     icon: FileText,
   },
   {
-    target: ".nav-settings",
+    target: '[data-tour-id="tour-menu-account-settings"]',
     title: "Team & Settings",
     description:
       "Invite team members, configure role-based access, set notification preferences, and manage your organization profile and billing.",
@@ -88,6 +88,7 @@ const TOUR_STEPS: TourStep[] = [
 ];
 
 const STORAGE_KEY = "djac_tour_completed";
+const TOUR_GUIDE_KEY = "djac_tour_done";
 
 export function ProductTour() {
   const { t } = useLocale();
@@ -103,6 +104,8 @@ export function ProductTour() {
   const startTour = useCallback(() => {
     const done = localStorage.getItem(STORAGE_KEY);
     if (done === "true") return;
+    const tourGuideDone = localStorage.getItem(TOUR_GUIDE_KEY);
+    if (tourGuideDone === "true") return;
 
     const timer = setTimeout(() => {
       setVisible(true);

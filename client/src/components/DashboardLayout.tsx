@@ -463,6 +463,19 @@ const menuGroups: MenuGroup[] = [
       },
     ],
   },
+  // ── Resources ──────────────────────────────────────────────────────────────
+  {
+    groupKey: "layout.groupResources",
+    groupFallback: "Resources",
+    items: [
+      {
+        icon: BookOpen,
+        labelKey: "layout.menuDocumentation",
+        labelFallback: "Documentation",
+        path: "/docs",
+      },
+    ],
+  },
 ];
 
 const adminMenuItems: MenuItem[] = [

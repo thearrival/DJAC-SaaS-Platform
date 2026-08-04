@@ -36,7 +36,6 @@ import {
 } from "./rateLimiter";
 import {
   getSecurityHeadersForRequest,
-  shouldBypassApiRateLimit,
   getClientIp,
   parseCspReport,
 } from "./security";
@@ -67,9 +66,28 @@ function getClientKey(req: Request): string {
   return getClientIp(req);
 }
 
+// Paths that bypass the global API rate limiter (health, webhooks).
+const RATE_LIMIT_BYPASS_PATHS = new Set([
+  "/api/health",
+  "/api/healthz",
+  "/api/readiness",
+  "/api/readyz",
+  "/health",
+  "/healthz",
+  "/readiness",
+  "/readyz",
+  "/api/webhooks/stripe",
+]);
+
+function shouldBypassRateLimit(req: Request): boolean {
+  if (!req.path.startsWith("/api/")) return true;
+  const normalized = req.path.toLowerCase().split("?")[0];
+  return RATE_LIMIT_BYPASS_PATHS.has(normalized);
+}
+
 // Redis-backed rate limiter (falls back to in-memory when Redis is unavailable).
 function apiRateLimit(req: Request, res: Response, next: NextFunction) {
-  if (!req.path.startsWith("/api/") || shouldBypassApiRateLimit(req.path)) {
+  if (shouldBypassRateLimit(req)) {
     next();
     return;
   }
@@ -93,7 +111,10 @@ function apiRateLimit(req: Request, res: Response, next: NextFunction) {
       }
       next();
     })
-    .catch(next);
+    .catch(() => {
+      // Allow request through if rate limiter itself fails
+      next();
+    });
 }
 
 // Strict rate limiter for authentication endpoints (brute-force protection).
@@ -224,6 +245,23 @@ export async function createApp() {
     next();
   });
 
+  // ─── Docs subdomain routing ────────────────────────────────────────────────
+  // When requests arrive on docs.app.yalla-hack.ae, rewrite paths so the SPA
+  // serves the documentation portal without requiring the /docs prefix.
+  //   docs.app.yalla-hack.ae                 → /docs (landing)
+  //   docs.app.yalla-hack.ae/getting-started → /docs/getting-started
+  //   app.yalla-hack.ae/docs                 → works natively
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    const host = req.hostname || req.headers.host || "";
+    if (host.startsWith("docs.")) {
+      const raw = req.path || "/";
+      const rewritten = raw.startsWith("/docs") ? raw : `/docs${raw}`;
+      // biome-ignore lint/suspicious/noExplicitAny: Express req.url property mutation
+      (req as any).url = rewritten;
+    }
+    next();
+  });
+
   app.use(corsMiddleware);
   app.use(securityHeaders);
   app.use(authRateLimit);
@@ -232,8 +270,50 @@ export async function createApp() {
   // ─── Stripe webhook ─────────────────────────────────────────────────────────
   app.post(
     "/api/webhooks/stripe",
-    express.raw({ type: "application/json" }),
+    express.raw({ type: "application/json", limit: "5mb" }),
     (req, res) => void stripeWebhookHandler(req, res)
+  );
+
+  // ─── CSP report collector (browsers send application/csp-report, not JSON) ──
+  app.post(
+    "/api/csp-report",
+    express.raw({ type: "application/csp-report", limit: "64kb" }),
+    (req: Request, res: Response) => {
+      if (!req.body || req.body.length === 0) {
+        res.status(204).end();
+        return;
+      }
+      try {
+        const payload = JSON.parse(req.body.toString("utf-8"));
+        const report = parseCspReport(payload);
+        const isReportOnly = req.query.ro === "1";
+        if (report && Object.keys(report).length > 0) {
+          const blockedUri = report["blocked-uri"]
+            ? String(report["blocked-uri"])
+            : "unknown";
+          const violatedDirective = report["violated-directive"]
+            ? String(report["violated-directive"])
+            : "unknown";
+          const sourceFile = report["source-file"]
+            ? String(report["source-file"])
+            : "";
+          logger.warn(
+            {
+              category: "security",
+              cspReport: report,
+              reportOnly: isReportOnly,
+            },
+            `CSP violation: ${violatedDirective} blocked ${blockedUri}${sourceFile ? ` in ${sourceFile}` : ""}`
+          );
+        }
+      } catch {
+        logger.debug(
+          { category: "security" },
+          "CSP report payload was not valid JSON"
+        );
+      }
+      res.status(204).end();
+    }
   );
 
   app.use(express.json({ limit: "2mb" }));
@@ -254,7 +334,8 @@ export async function createApp() {
       scaleProfile: {
         databasePoolSize: ENV.databasePoolSize,
         databasePoolStats: getDbPoolStats(),
-        redisConfigured: ENV.redisUrl.trim().length > 0,
+        redisConfigured:
+          typeof ENV.redisUrl === "string" && ENV.redisUrl.trim().length > 0,
         aiQueueMode: ENV.aiQueueMode,
       },
       rateLimiter: getRateLimiterStats(),
@@ -279,23 +360,6 @@ export async function createApp() {
   app.get("/api/readyz", sendReadiness);
 
   registerOAuthRoutes(app);
-
-  app.post("/api/csp-report", (req: Request, res: Response) => {
-    const report = parseCspReport(req.body);
-    const isReportOnly = req.query.ro === "1";
-    if (report && Object.keys(report).length > 0) {
-      const blockedUri = String(report["blocked-uri"] ?? "unknown");
-      const violatedDirective = String(
-        report["violated-directive"] ?? "unknown"
-      );
-      const sourceFile = String(report["source-file"] ?? "");
-      logger.warn(
-        { category: "security", cspReport: report, reportOnly: isReportOnly },
-        `CSP violation: ${violatedDirective} blocked ${blockedUri}${sourceFile ? ` in ${sourceFile}` : ""}`
-      );
-    }
-    res.status(204).end();
-  });
 
   // ─── tRPC ───────────────────────────────────────────────────────────────────
   app.use(
@@ -323,15 +387,44 @@ export async function createApp() {
 
   app.use(sentryErrorHandler());
 
+  // Fallback error handler (4-arg) when Sentry is not configured or for errors
+  // that escape the Sentry handler. Never leak stack traces to the client.
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    logger.error({ err }, "Unhandled Express error");
+    res.status(500).json({
+      error: ENV.isProduction
+        ? "Internal server error"
+        : err instanceof Error
+          ? err.message
+          : "Unknown error",
+    });
+  });
+
   return app;
 }
+
+// Scheduler stop functions are captured here so shutdown() can access them.
+let _stopInteractionRetention: (() => void) | null = null;
+let _stopTrialReminder: (() => void) | null = null;
+let _stopDeadlineAlerts: (() => void) | null = null;
+let _stopReportScheduler: (() => void) | null = null;
+let _cleanupAssessmentWs: (() => void) | null = null;
+let _httpServer: ReturnType<typeof createServer> | null = null;
 
 async function startServer() {
   const app = await createApp();
   const server = createServer(app);
+  _httpServer = server;
 
-  // Auto-migrate DB schema before accepting traffic
-  void ensureMigrated();
+  // Await DB migration before accepting traffic to avoid schema-inconsistent queries
+  try {
+    await ensureMigrated();
+  } catch (err) {
+    console.warn(
+      "[Migrate] Migration failed, continuing with startup:",
+      (err as Error).message
+    );
+  }
 
   server.keepAliveTimeout = ENV.httpKeepAliveTimeoutMs;
   server.headersTimeout = Math.max(
@@ -341,18 +434,18 @@ async function startServer() {
   server.requestTimeout = ENV.httpRequestTimeoutMs;
   server.maxRequestsPerSocket = 1_000;
 
-  const cleanupAssessmentWs = registerAssessmentWebSocketServer(server);
-  const stopInteractionRetention = startInteractionRetentionScheduler();
-  const stopTrialReminder = startTrialReminderScheduler();
-  const stopDeadlineAlerts = startDeadlineAlertScheduler();
-  const stopReportScheduler = startReportScheduler();
+  _cleanupAssessmentWs = registerAssessmentWebSocketServer(server);
+  _stopInteractionRetention = startInteractionRetentionScheduler();
+  _stopTrialReminder = startTrialReminderScheduler();
+  _stopDeadlineAlerts = startDeadlineAlertScheduler();
+  _stopReportScheduler = startReportScheduler();
 
   server.on("close", () => {
-    cleanupAssessmentWs();
-    stopInteractionRetention();
-    stopTrialReminder();
-    stopDeadlineAlerts();
-    stopReportScheduler();
+    _cleanupAssessmentWs?.();
+    _stopInteractionRetention?.();
+    _stopTrialReminder?.();
+    _stopDeadlineAlerts?.();
+    _stopReportScheduler?.();
   });
 
   if (ENV.isDevelopment) {
@@ -371,7 +464,8 @@ async function startServer() {
       process.exit(1);
       return;
     }
-    throw error;
+    console.error("[Server] Fatal server error:", error);
+    shutdown("SERVER_ERROR");
   });
 
   server.listen(port, () => {
@@ -404,16 +498,47 @@ if (isMainModule) {
   startServer().catch(console.error);
 }
 
+let _shuttingDown = false;
+
 function shutdown(signal: string) {
+  if (_shuttingDown) {
+    console.warn(
+      "[Server] Shutdown already in progress — ignoring duplicate signal"
+    );
+    return;
+  }
+  _shuttingDown = true;
+
   console.info(`[Server] ${signal} received — shutting down gracefully`);
-  const forcedExit = setTimeout(() => {
+
+  let forcedExit: ReturnType<typeof setTimeout> | null = setTimeout(() => {
     console.warn("[Server] Forced shutdown after 10s timeout");
     process.exit(1);
   }, 10_000);
   forcedExit.unref();
+
+  // Close the HTTP server so it stops accepting new connections
+  if (_httpServer) {
+    _httpServer.close(() => {
+      console.info("[Server] HTTP server closed.");
+    });
+  }
+
+  // Stop background schedulers and WebSocket connections
+  _stopInteractionRetention?.();
+  _stopTrialReminder?.();
+  _stopDeadlineAlerts?.();
+  _stopReportScheduler?.();
+  _cleanupAssessmentWs?.();
+
+  // Release resources (DB pool, Redis, AI queue)
   Promise.all([closeDbPool(), closeRateLimiter(), closeAssessmentQueue()])
     .then(() => {
       console.info("[Server] Resources released — exiting.");
+      if (forcedExit) {
+        clearTimeout(forcedExit);
+        forcedExit = null;
+      }
       process.exit(0);
     })
     .catch(err => {
@@ -426,6 +551,7 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("unhandledRejection", reason => {
   console.error("[Server] Unhandled rejection:", reason);
+  shutdown("UNHANDLED_REJECTION");
 });
 process.on("uncaughtException", err => {
   console.error("[Server] Uncaught exception:", err);

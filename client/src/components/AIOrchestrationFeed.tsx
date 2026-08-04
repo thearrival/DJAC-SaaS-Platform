@@ -7,7 +7,7 @@
  * Uses: trpc.ai.listAssessmentJobs (polling) — no WS subscription required for
  * the "latest job" view, keeping the UI simple and reconnection-safe.
  */
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef, memo } from "react";
 import { useTheme } from "@/contexts/useTheme";
 import { useLocale } from "@/contexts/useLocale";
 import { trpc } from "@/lib/trpc";
@@ -258,7 +258,7 @@ function RiskBadge({ level, isDark }: { level: string; isDark: boolean }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export function AIOrchestrationFeed() {
+export const AIOrchestrationFeed = memo(function AIOrchestrationFeed() {
   const { theme } = useTheme();
   const { t, locale } = useLocale();
   const isDark = theme === "dark";
@@ -847,4 +847,4 @@ export function AIOrchestrationFeed() {
       `}</style>
     </div>
   );
-}
+});

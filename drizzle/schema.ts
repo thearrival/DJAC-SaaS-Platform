@@ -730,7 +730,53 @@ export type AllTables = {
   vendorAssessments: typeof vendorAssessments;
   assessmentGaps: typeof assessmentGaps;
   auditLogs: typeof auditLogs;
+  organizations: typeof organizations;
+  organizationMembers: typeof organizationMembers;
+  subscriptions: typeof subscriptions;
+  billingEvents: typeof billingEvents;
+  complianceReports: typeof complianceReports;
+  apiKeys: typeof apiKeys;
+  userInteractionLogs: typeof userInteractionLogs;
+  yallaAdminAccessLinkNonces: typeof yallaAdminAccessLinkNonces;
+  complianceDeadlines: typeof complianceDeadlines;
+  reportShares: typeof reportShares;
+  remediationTasks: typeof remediationTasks;
+  riskRegister: typeof riskRegister;
+  compliancePolicies: typeof compliancePolicies;
+  complianceIncidents: typeof complianceIncidents;
+  auditSchedules: typeof auditSchedules;
+  ctemAssets: typeof ctemAssets;
+  ctemVulnerabilities: typeof ctemVulnerabilities;
+  ctemAttackSimulations: typeof ctemAttackSimulations;
+  ctemRiskScores: typeof ctemRiskScores;
+  continuousComplianceRuns: typeof continuousComplianceRuns;
+  complianceExposureMappings: typeof complianceExposureMappings;
+  userOnboarding: typeof userOnboarding;
+  rolePermissions: typeof rolePermissions;
+  vendorShares: typeof vendorShares;
+  regulatorOversightTargets: typeof regulatorOversightTargets;
+  complianceEvidence: typeof complianceEvidence;
+  dsrRequests: typeof dsrRequests;
+  serviceRequests: typeof serviceRequests;
+  assetInventory: typeof assetInventory;
+  securityMaturityAssessments: typeof securityMaturityAssessments;
+  threatIntelItems: typeof threatIntelItems;
+  yallaAdminSessions: typeof yallaAdminSessions;
+  yallaAdminAuditLogs: typeof yallaAdminAuditLogs;
+  otpCodes: typeof otpCodes;
+  knowledgeGraphNodes: typeof knowledgeGraphNodes;
+  knowledgeGraphEdges: typeof knowledgeGraphEdges;
   regulatoryChanges: typeof regulatoryChanges;
+  complianceSimulations: typeof complianceSimulations;
+  aiAgentRuns: typeof aiAgentRuns;
+  onboardingProgress: typeof onboardingProgress;
+  organizationProfilesCustom: typeof organizationProfilesCustom;
+  userPreferences: typeof userPreferences;
+  featureFlags: typeof featureFlags;
+  analyticsEvents: typeof analyticsEvents;
+  userActivitySummary: typeof userActivitySummary;
+  emailLog: typeof emailLog;
+  notifications: typeof notifications;
 };
 
 export const accessRequests = pgTable("accessRequests", {
@@ -1148,8 +1194,8 @@ export const yallaAdminAccessLinkNonces = pgTable(
     nonceHash: varchar("nonceHash", { length: 64 }).notNull().unique(),
     redirectTarget: varchar("redirectTarget", { length: 255 }).notNull(),
     expiresAt: timestamp("expiresAt").notNull(),
-    consumedAt: timestamp("consumedAt").defaultNow().notNull(),
-    consumedByIp: varchar("consumedByIp", { length: 64 }).notNull(),
+    consumedAt: timestamp("consumedAt"),
+    consumedByIp: varchar("consumedByIp", { length: 64 }),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   }
 );
@@ -2162,12 +2208,21 @@ export const notifications = pgTable("notifications", {
 });
 
 export type OnboardingProgress = typeof onboardingProgress.$inferSelect;
+export type InsertOnboardingProgress = typeof onboardingProgress.$inferInsert;
 export type OrganizationProfile =
   typeof organizationProfilesCustom.$inferSelect;
+export type InsertOrganizationProfile =
+  typeof organizationProfilesCustom.$inferInsert;
 export type UserPreferences = typeof userPreferences.$inferSelect;
+export type InsertUserPreferences = typeof userPreferences.$inferInsert;
 export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type InsertAnalyticsEvent = typeof analyticsEvents.$inferInsert;
 export type UserActivitySummary = typeof userActivitySummary.$inferSelect;
+export type InsertUserActivitySummary = typeof userActivitySummary.$inferInsert;
 export type EmailLogEntry = typeof emailLog.$inferSelect;
+export type InsertEmailLog = typeof emailLog.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
 export type FeatureFlag = typeof featureFlags.$inferSelect;
+export type InsertFeatureFlag = typeof featureFlags.$inferInsert;
 export type InsertAiAgentRun = typeof aiAgentRuns.$inferInsert;

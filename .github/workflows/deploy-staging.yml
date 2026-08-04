@@ -43,7 +43,7 @@ jobs:
       - name: Health Check
         run: |
           sleep 15
-          STATUS=$(curl -sf "${{ steps.deploy.outputs.deploy_url }}/api/status") || exit 1
+          STATUS=$(curl -sfL --max-redirs 5 "${{ steps.deploy.outputs.deploy_url }}/api/status") || exit 1
           echo "$STATUS" | jq -e '.ok == true and .dbConnected == true and .env == "production"' >/dev/null || {
             echo "API not fully healthy: $STATUS"
             exit 1

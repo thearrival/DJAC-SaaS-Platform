@@ -12,6 +12,7 @@
  *
  * Route: /pro-intelligence
  */
+import { memo } from "react";
 import type React from "react";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/useTheme";
@@ -954,7 +955,7 @@ function AIJobsActivity({
 }
 
 // ── Main page ─────────────────────────────────────────────────────────────────
-export default function ProIntelligenceDashboard() {
+const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   usePageTitle("Pro Intelligence");
   const { t } = useLocale();
   const { theme } = useTheme();
@@ -1645,4 +1646,6 @@ export default function ProIntelligenceDashboard() {
             `}</style>
     </div>
   );
-}
+});
+
+export default ProIntelligenceDashboard;

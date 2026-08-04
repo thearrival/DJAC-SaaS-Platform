@@ -137,7 +137,7 @@ async function checkRedisReadiness(): Promise<ServiceReadiness> {
       details: `Redis connection failed: ${String(error)}`,
     };
   } finally {
-    client.disconnect();
+    client.quit().catch(() => undefined);
   }
 }
 

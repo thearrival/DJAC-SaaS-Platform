@@ -201,6 +201,263 @@ export async function ensureMigrated(): Promise<void> {
       );
     }
 
+    // Migration 0004: fix region enum values (initial migration had China/Saudi Arabia/Cross-border/Other,
+    // but schema now uses geographic regions). Add new values idempotently.
+    const newRegions = [
+      "North America",
+      "Europe",
+      "APAC",
+      "EMEA",
+      "Latin America",
+      "Africa",
+      "Global",
+    ];
+    for (const r of newRegions) {
+      const escapedR = r.replace(/'/g, "''");
+      await db.execute(
+        sql.raw(`ALTER TYPE "region" ADD VALUE IF NOT EXISTS '${escapedR}'`)
+      );
+    }
+
+    await db.execute(sql`
+            ALTER TABLE "yallaAdminAccessLinkNonces"
+            ALTER COLUMN "consumedAt" DROP DEFAULT
+        `);
+    await db.execute(sql`
+            ALTER TABLE "yallaAdminAccessLinkNonces"
+            ALTER COLUMN "consumedAt" DROP NOT NULL
+        `);
+    await db.execute(sql`
+            ALTER TABLE "yallaAdminAccessLinkNonces"
+            ALTER COLUMN "consumedByIp" DROP NOT NULL
+        `);
+
+    // Migration 0005: onboarding + customer journey tables
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "onboarding_progress" (
+                "id"              serial        PRIMARY KEY,
+                "user_id"         integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
+                "current_step"    integer       DEFAULT 0,
+                "completed_steps" jsonb         DEFAULT '[]'::jsonb,
+                "skipped"         boolean       DEFAULT false,
+                "completed_at"    timestamp,
+                "responses"       jsonb         DEFAULT '{}'::jsonb,
+                "created_at"      timestamp     NOT NULL DEFAULT now(),
+                "updated_at"      timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "organization_profiles_custom" (
+                "id"                       serial        PRIMARY KEY,
+                "organization_id"          integer       NOT NULL UNIQUE REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "industry"                 varchar(120),
+                "employee_range"           varchar(30),
+                "compliance_maturity"      varchar(30),
+                "selected_frameworks"      jsonb         DEFAULT '[]'::jsonb,
+                "business_objectives"      jsonb         DEFAULT '[]'::jsonb,
+                "onboarding_completed_at"  timestamp,
+                "created_at"               timestamp     NOT NULL DEFAULT now(),
+                "updated_at"               timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "user_preferences" (
+                "id"                    serial        PRIMARY KEY,
+                "user_id"               integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
+                "dashboard_layout"      jsonb         DEFAULT '{}'::jsonb,
+                "default_jurisdictions" jsonb         DEFAULT '[]'::jsonb,
+                "notification_prefs"    jsonb         DEFAULT '{}'::jsonb,
+                "theme"                 varchar(20)   DEFAULT 'system',
+                "locale"                varchar(10)   DEFAULT 'en',
+                "tour_completed"        boolean       DEFAULT false,
+                "created_at"            timestamp     NOT NULL DEFAULT now(),
+                "updated_at"            timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+
+    // Migration 0006: analytics + feature flags tables
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "feature_flags" (
+                "id"                   serial        PRIMARY KEY,
+                "name"                 varchar(100)  NOT NULL UNIQUE,
+                "description"          text,
+                "enabled"              boolean       DEFAULT false,
+                "rollout_percentage"   integer       DEFAULT 0,
+                "target_org_ids"       jsonb         DEFAULT '[]'::jsonb,
+                "created_at"           timestamp     NOT NULL DEFAULT now(),
+                "updated_at"           timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "analytics_events" (
+                "id"               serial        PRIMARY KEY,
+                "user_id"          integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+                "organization_id"  integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "event"            varchar(100)  NOT NULL,
+                "category"         varchar(50)   NOT NULL,
+                "properties"       jsonb         DEFAULT '{}'::jsonb,
+                "session_id"       varchar(64),
+                "created_at"       timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "user_activity_summary" (
+                "user_id"           integer       PRIMARY KEY REFERENCES "users" ("id") ON DELETE CASCADE,
+                "total_sessions"    integer       DEFAULT 0,
+                "total_events"      integer       DEFAULT 0,
+                "last_active_at"    timestamp,
+                "feature_adoption"  jsonb         DEFAULT '{}'::jsonb,
+                "activation_score"  integer       DEFAULT 0,
+                "health_score"      integer       DEFAULT 0,
+                "updated_at"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+
+    // Migration 0007: communication tables
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "email_log" (
+                "id"               serial        PRIMARY KEY,
+                "user_id"          integer       REFERENCES "users" ("id") ON DELETE SET NULL,
+                "organization_id"  integer       REFERENCES "organizations" ("id") ON DELETE SET NULL,
+                "template"         varchar(100)  NOT NULL,
+                "recipient"        varchar(320)  NOT NULL,
+                "subject"          varchar(500),
+                "status"           varchar(20)   DEFAULT 'queued' NOT NULL,
+                "sent_at"          timestamp,
+                "opened_at"        timestamp,
+                "clicked_at"       timestamp,
+                "error_message"    text,
+                "created_at"       timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "notifications" (
+                "id"          serial        PRIMARY KEY,
+                "user_id"     integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+                "type"        varchar(50)   NOT NULL,
+                "title"       varchar(255)  NOT NULL,
+                "body"        text,
+                "action_url"  varchar(500),
+                "is_read"     boolean       DEFAULT false,
+                "read_at"     timestamp,
+                "created_at"  timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+
+    // Migration 0008: knowledge graph tables
+    // Create enum types first so the column references work
+    await db.execute(sql`
+            DO $$ BEGIN
+                CREATE TYPE "knowledgeGraphNodeKind" AS ENUM (
+                    'region','framework','standard','edition','agent','regulator',
+                    'country','control','threat','vendor','certification','policy',
+                    'technology','data_type','industry','risk_scenario'
+                );
+            EXCEPTION WHEN duplicate_object THEN NULL;
+            END $$;
+        `);
+    await db.execute(sql`
+            DO $$ BEGIN
+                CREATE TYPE "knowledgeGraphEdgeRelation" AS ENUM (
+                    'contains','activates','supports','maps_to','requires','conflicts',
+                    'depends_on','governs','references','impacts','mitigates',
+                    'translates_to','equivalent_to','cross_border_to'
+                );
+            EXCEPTION WHEN duplicate_object THEN NULL;
+            END $$;
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "knowledgeGraphNodes" (
+                "id"               serial        PRIMARY KEY,
+                "nodeId"           varchar(120)  NOT NULL UNIQUE,
+                "label"            varchar(255)  NOT NULL,
+                "kind"             varchar(50)   NOT NULL,
+                "description"      text,
+                "region"           varchar(120),
+                "jurisdiction"     varchar(120),
+                "metadata"         text,
+                "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "isCustom"         integer       DEFAULT 0 NOT NULL,
+                "createdAt"        timestamp     NOT NULL DEFAULT now(),
+                "updatedAt"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "knowledgeGraphEdges" (
+                "id"               serial        PRIMARY KEY,
+                "sourceNodeId"     varchar(120)  NOT NULL,
+                "targetNodeId"     varchar(120)  NOT NULL,
+                "relation"         varchar(60)   NOT NULL,
+                "weight"           integer       DEFAULT 1 NOT NULL,
+                "metadata"         text,
+                "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "createdAt"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+
+    // Migration 0009: regulatory changes + compliance simulations + AI agent runs
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "regulatoryChanges" (
+                "id"               serial        PRIMARY KEY,
+                "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE SET NULL,
+                "frameworkCode"    varchar(50)   NOT NULL,
+                "title"            text          NOT NULL,
+                "description"      text          NOT NULL,
+                "changeType"       varchar(50)   NOT NULL,
+                "jurisdiction"     text          NOT NULL,
+                "source"           text          NOT NULL,
+                "effectiveDate"    timestamp     NOT NULL,
+                "publicationDate"  timestamp     NOT NULL,
+                "status"           varchar(50)   NOT NULL DEFAULT 'pending',
+                "impact"           text          NOT NULL,
+                "url"              varchar(1024),
+                "createdAt"        timestamp     NOT NULL DEFAULT now(),
+                "updatedAt"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "complianceSimulations" (
+                "id"                   serial        PRIMARY KEY,
+                "organizationId"       integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "name"                 text          NOT NULL,
+                "description"          text,
+                "simulationType"       varchar(50)   NOT NULL,
+                "jurisdiction"         text          NOT NULL,
+                "frameworks"           text          NOT NULL,
+                "maturityScores"       text          NOT NULL,
+                "gapCounts"            text          NOT NULL,
+                "totalGaps"            integer       DEFAULT 0 NOT NULL,
+                "costEstimateLow"      integer,
+                "costEstimateHigh"     integer,
+                "costEstimateCurrency" text          DEFAULT 'USD' NOT NULL,
+                "riskLevel"            varchar(20)   DEFAULT 'medium' NOT NULL,
+                "status"               varchar(20)   DEFAULT 'completed' NOT NULL,
+                "summary"              text,
+                "createdByUserId"      integer       REFERENCES "localUsers" ("id") ON DELETE SET NULL,
+                "createdAt"            timestamp     NOT NULL DEFAULT now(),
+                "updatedAt"            timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "aiAgentRuns" (
+                "id"               serial        PRIMARY KEY,
+                "organizationId"   integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "agentCode"        varchar(120)  NOT NULL,
+                "agentName"        varchar(255)  NOT NULL,
+                "triggerType"      varchar(64)   DEFAULT 'manual' NOT NULL,
+                "inputPayload"     text,
+                "outputPayload"    text,
+                "status"           varchar(20)   DEFAULT 'queued' NOT NULL,
+                "startedAt"        timestamp,
+                "completedAt"      timestamp,
+                "errorMessage"     text,
+                "durationMs"       integer,
+                "createdByUserId"  integer       REFERENCES "localUsers" ("id") ON DELETE SET NULL,
+                "createdAt"        timestamp     NOT NULL DEFAULT now(),
+                "updatedAt"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+
     // Seed compliance reference data into DB (idempotent upserts)
     await seedComplianceFrameworks(db);
 

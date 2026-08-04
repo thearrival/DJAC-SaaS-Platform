@@ -60,7 +60,7 @@ async function main() {
     print("3. Run pnpm db:migrate after connectivity is fixed");
     process.exitCode = 1;
   } finally {
-    await client?.end().catch(() => undefined);
+    if (client) await client.end().catch(() => undefined);
   }
 }
 
