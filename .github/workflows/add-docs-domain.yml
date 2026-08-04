@@ -1,0 +1,40 @@
+name: Add Docs Domain
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+    paths:
+      - ".github/workflows/add-docs-domain.yml"
+
+jobs:
+  add-domain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add docs.app.yalla-hack.ae to Vercel
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://api.vercel.com/v10/projects/prj_nzZ267pel57FCf9DBz4V9gUy7IWe/domains?teamId=team_xS2mdeBXinbhSUdgWu1eKUEF" \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"docs.app.yalla-hack.ae"}')
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "409" ]; then
+            echo "SUCCESS: Domain added or already exists"
+          else
+            echo "FAILED: Could not add domain (HTTP $HTTP_CODE)"
+            echo "The VERCEL_TOKEN secret appears to be invalid or expired."
+            echo ""
+            echo "MANUAL FIX REQUIRED:"
+            echo "1. Go to https://vercel.com/account/tokens"
+            echo "2. Create a new token (full account scope)"
+            echo "3. Go to https://github.com/thearrival/DJAC-SaaS-Platform/settings/secrets/actions"
+            echo "4. Update the VERCEL_TOKEN secret with the new token value"
+            echo "5. Re-run this workflow"
+          fi
