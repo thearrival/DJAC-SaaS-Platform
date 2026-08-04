@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import RouteErrorBoundary from "./components/RouteErrorBoundary";
 import { FeatureGate } from "./components/FeatureGate";
 import { LocaleProvider } from "./contexts/LocaleContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -141,7 +142,9 @@ function Router() {
   return (
     <Switch>
       <Route path={"/404"}>
-        <NotFound />
+        <RouteErrorBoundary>
+          <NotFound />
+        </RouteErrorBoundary>
       </Route>
       {import.meta.env.DEV && DevComponentShowcase && (
         <Route path={"/component-showcase"}>
@@ -149,62 +152,100 @@ function Router() {
         </Route>
       )}
       <Route path={"/privacy"}>
-        <PrivacyPolicy />
+        <RouteErrorBoundary>
+          <PrivacyPolicy />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/admin/health"}>
-        <AdminHealth />
+        <RouteErrorBoundary>
+          <AdminHealth />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/terms"}>
-        <TermsOfService />
+        <RouteErrorBoundary>
+          <TermsOfService />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/signup"}>
-        <Signup />
+        <RouteErrorBoundary>
+          <Signup />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/login"}>
-        <Signup />
+        <RouteErrorBoundary>
+          <Signup />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/forgot-password"}>
-        <ForgotPassword />
+        <RouteErrorBoundary>
+          <ForgotPassword />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/reset-password"}>
-        <ResetPassword />
+        <RouteErrorBoundary>
+          <ResetPassword />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/"}>
-        <RootRoute />
+        <RouteErrorBoundary>
+          <RootRoute />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/pricing"}>
-        <Pricing />
+        <RouteErrorBoundary>
+          <Pricing />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/hero"}>
-        <DJACHero />
+        <RouteErrorBoundary>
+          <DJACHero />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/invite-accept"}>
-        <InviteAccept />
+        <RouteErrorBoundary>
+          <InviteAccept />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/docs/:section?/:page?"}>
-        <DocsPortal />
+        <RouteErrorBoundary>
+          <DocsPortal />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/docs"}>
-        <DocsPortal />
+        <RouteErrorBoundary>
+          <DocsPortal />
+        </RouteErrorBoundary>
       </Route>
       {/* Yalla-Admin — isolated owner portal, outside DashboardLayout, no nav */}
       <Route path={"/yalla-hack-owners-console/enter"}>
-        <YallaAdminAccessBootstrap />
+        <RouteErrorBoundary>
+          <YallaAdminAccessBootstrap />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/login"}>
-        <YallaAdminLogin />
+        <RouteErrorBoundary>
+          <YallaAdminLogin />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/dashboard"}>
-        <AdminDashboard />
+        <RouteErrorBoundary>
+          <AdminDashboard />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console"}>
-        <YallaAdminPortal />
+        <RouteErrorBoundary>
+          <YallaAdminPortal />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-admin/login"}>
-        <NotFound />
+        <RouteErrorBoundary>
+          <NotFound />
+        </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-admin"}>
-        <NotFound />
+        <RouteErrorBoundary>
+          <NotFound />
+        </RouteErrorBoundary>
       </Route>
       {/* All app routes share the DashboardLayout sidebar */}
       <Route>
@@ -408,22 +449,15 @@ function ThemedAppShell() {
                 aria-label="Loading"
                 role="status"
               />
-              <span className="text-xs text-muted-foreground tracking-wide select-none">
-                Loading…
-              </span>
             </div>
           }
         >
-          {/* CookieConsentBanner is lazy — must live inside Suspense so React
-              concurrent mode has a fallback while the chunk loads. Rendering it
-              outside Suspense without a higher-level boundary causes the entire
-              tree to silently defer (blank page) in React 18+ concurrent mode. */}
+          {/* Background is lazy — Suspense prevents blank page while chunk loads */}
           <CookieConsentBanner />
-          {/* Global background animation layer — renders behind every page */}
           <ParticleField />
           <CyberGrid />
-          <Router />
         </Suspense>
+        <Router />
       </TooltipProvider>
     </ThemeProvider>
   );
