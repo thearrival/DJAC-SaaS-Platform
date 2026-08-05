@@ -67,6 +67,7 @@ const TeamMembers = lazy(() => import("./pages/TeamMembers"));
 const OrgSettings = lazy(() => import("./pages/OrgSettings"));
 const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 const DocsPortal = lazy(() => import("./pages/DocsPortal"));
+const InteractiveDemo = lazy(() => import("./pages/InteractiveDemo"));
 const AuditLog = lazy(() => import("./pages/AuditLog"));
 const ComplianceScorecard = lazy(() => import("./pages/ComplianceScorecard"));
 const ApiKeys = lazy(() => import("./pages/ApiKeys"));
@@ -214,6 +215,11 @@ function Router() {
       <Route path={"/docs"}>
         <RouteErrorBoundary>
           <DocsPortal />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/demo"}>
+        <RouteErrorBoundary>
+          <InteractiveDemo />
         </RouteErrorBoundary>
       </Route>
       {/* Yalla-Admin — isolated owner portal, outside DashboardLayout, no nav */}

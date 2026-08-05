@@ -474,6 +474,12 @@ const menuGroups: MenuGroup[] = [
         labelFallback: "Documentation",
         path: "/docs",
       },
+      {
+        icon: Sparkles,
+        labelKey: "layout.menuDemo",
+        labelFallback: "Interactive Demo",
+        path: "/demo",
+      },
     ],
   },
 ];
