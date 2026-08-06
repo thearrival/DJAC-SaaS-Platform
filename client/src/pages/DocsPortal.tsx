@@ -1,10 +1,11 @@
 /**
  * DJAC Documentation Portal — comprehensive product documentation
- * with multilingual support, interactive demos, and case studies.
+ * with multilingual support (EN/AR/ZH), enhanced UI, admonitions,
+ * table of contents, breadcrumbs, keyboard shortcuts, and hero landing.
  *
- * Route: /docs and /docs/:section
+ * Route: /docs and /docs/:section/:page
  */
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -16,6 +17,7 @@ import {
   Search,
   ChevronRight,
   ChevronDown,
+  ChevronLeft,
   Globe,
   Zap,
   Shield,
@@ -37,9 +39,25 @@ import {
   Lock,
   Rocket,
   Key,
-  Bug,
   Layers,
+  Home,
+  Copy,
+  Check,
+  Info,
+  X,
+  List,
+  Hash,
+  ArrowUp,
+  Sparkles,
+  Users,
+  Clock,
+  DollarSign,
+  Brain,
 } from "lucide-react";
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Types
+   ────────────────────────────────────────────────────────────────────────── */
 
 interface DocSection {
   id: string;
@@ -65,6 +83,16 @@ interface DocPage {
   troubleshooting?: { problem: string; solution: string }[];
 }
 
+interface TocEntry {
+  level: number;
+  text: string;
+  id: string;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Icon Map
+   ────────────────────────────────────────────────────────────────────────── */
+
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   book: BookOpen,
   zap: Zap,
@@ -82,9 +110,73 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   lock: Lock,
   rocket: Rocket,
   key: Key,
-  bug: Bug,
   layers: Layers,
+  home: Home,
+  brain: Brain,
+  users: Users,
+  clock: Clock,
+  sparkles: Sparkles,
+  dollar: DollarSign,
 };
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Home Page Feature Cards Data
+   ────────────────────────────────────────────────────────────────────────── */
+
+const homeFeatures = [
+  {
+    icon: "zap",
+    title: "AI Compliance Engine",
+    desc: "8-stage GPT-4o assessment pipeline with RAG context retrieval",
+    link: "/docs/ai-engine/ai-overview",
+  },
+  {
+    icon: "shield",
+    title: "29+ Jurisdictions",
+    desc: "PIPL, PDPL, GDPR, NCA-ECC, CSL, DSL and global standards",
+    link: "/docs/frameworks/jurisdictions",
+  },
+  {
+    icon: "building",
+    title: "Vendor Risk",
+    desc: "Automated third-party assessments across all frameworks",
+    link: "/docs/vendor-risk/vendor-assessment",
+  },
+  {
+    icon: "terminal",
+    title: "API & Integration",
+    desc: "200+ tRPC procedures with WebSocket streaming",
+    link: "/docs/api-integration/api-reference",
+  },
+  {
+    icon: "lock",
+    title: "Security & RBAC",
+    desc: "7 platform roles, 32 modules, 6 permission flags",
+    link: "/docs/security-compliance/security-overview",
+  },
+  {
+    icon: "code",
+    title: "Developer Guide",
+    desc: "Setup, architecture, testing, contributing",
+    link: "/docs/developer-guide/dev-setup",
+  },
+];
+
+const quickLinks = [
+  { label: "Welcome & Overview", path: "/docs/getting-started/welcome" },
+  { label: "Quick Start Guide", path: "/docs/getting-started/architecture" },
+  { label: "API Reference", path: "/docs/api-integration/api-reference" },
+  { label: "Pricing & Plans", path: "/docs/billing-plans/pricing-overview" },
+  {
+    label: "Security Overview",
+    path: "/docs/security-compliance/security-overview",
+  },
+  { label: "Deployment Guide", path: "/docs/deployment-operations/deployment" },
+];
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Multi-language Doc Data
+   ────────────────────────────────────────────────────────────────────────── */
 
 const docsData: Record<string, DocSection[]> = {
   en: [
@@ -97,13 +189,13 @@ const docsData: Record<string, DocSection[]> = {
           id: "welcome",
           title: "Welcome to DJAC",
           summary:
-            "DJAC is the world's first AI-powered cross-jurisdiction compliance intelligence platform. Deploy in minutes, not months, and achieve regulatory compliance across 29+ jurisdictions with continuous automated monitoring.",
+            "DJAC is the world's first AI-powered cross-jurisdiction compliance intelligence platform. Deploy in minutes and achieve regulatory compliance across 29+ jurisdictions.",
           content: `### What is DJAC?
+DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automates regulatory compliance across jurisdictions — China, Saudi Arabia, the GCC, the EU, North America, and APAC.
 
-DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automates regulatory compliance across jurisdictions — China, Saudi Arabia, the GCC, the EU, North America, and APAC. Built for compliance officers, legal teams, enterprise administrators, consultants, and government regulators.
+> **info** Built for compliance officers, legal teams, enterprise administrators, consultants, and government regulators.
 
 ### Why DJAC?
-
 - **29+ Jurisdictions** — PIPL, PDPL, CSL, DSL, GDPR, ISO 27001, SOC 2, NIST CSF, HIPAA, and more
 - **AI-Powered Analysis** — GPT-4o driven 8-stage compliance assessment pipeline
 - **Real-Time Monitoring** — Continuous compliance tracking with automated gap detection
@@ -112,28 +204,27 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 - **Enterprise-Grade Security** — AES-256 encryption, RBAC, audit trails, SOC 2 ready
 
 ### Quick Start (5 minutes)
-
 1. **Create your organization** — Set up your company profile and billing
 2. **Select jurisdictions** — Choose China, Saudi Arabia, EU, or any combination
 3. **Pick frameworks** — AI auto-recommends relevant regulations
 4. **Register a vendor** — Add your first third-party supplier
 5. **Run assessment** — AI generates a complete compliance report in under 60 seconds
 
-### Platform Tiers
+> **tip** The onboarding wizard guides you through this entire flow — look for it in your dashboard after signing up.
 
+### Platform Tiers
 | Tier | Monthly | Best For |
 |------|---------|----------|
 | Starter | From $99/mo | Small teams, single jurisdiction |
 | Professional | From $249/mo | Multi-jurisdiction compliance |
-| Enterprise | Custom | Global enterprises, API access, dedicated support |`,
+| Enterprise | Custom | Global enterprises, API, dedicated support |`,
         },
         {
           id: "architecture",
           title: "Platform Architecture",
           summary:
-            "DJAC runs on a cloud-native architecture with React 19, Express + tRPC, PostgreSQL on Supabase, Redis, and OpenAI GPT-4o. All data is encrypted at rest and in transit.",
+            "DJAC runs on a cloud-native architecture with React 19, Express + tRPC, PostgreSQL on Supabase, Redis, and OpenAI GPT-4o.",
           content: `### System Architecture
-
 DJAC employs a modern monorepo architecture:
 
 **Frontend**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4 + shadcn/ui  
@@ -143,10 +234,9 @@ DJAC employs a modern monorepo architecture:
 **Queue**: In-memory / Redis (BullMQ-ready)  
 **Auth**: Triple-path (Clerk OAuth + Supabase Auth + Local JWT)  
 **Billing**: Stripe (5 plans × 4 intervals)  
-**Hosting**: Vercel (serverless) + Docker  
+**Hosting**: Vercel (serverless) + Docker
 
 ### Data Flow
-
 1. User submits vendor assessment request
 2. Gatekeeper validates inputs (injection detection)
 3. Intake parses documents and normalizes text
@@ -156,15 +246,15 @@ DJAC employs a modern monorepo architecture:
 7. Synthesizer merges findings into cross-framework report
 8. Validator ensures schema consistency and data integrity
 9. Reporter generates final formatted output (PDF/DOCX/JSON)`,
-          diagram: `[User] → [Gatekeeper] → [Intake] → [Extractor] → [RAG Context] → [Judge (GPT-4o)] → [Synthesizer] → [Validator] → [Reporter] → [PDF / DOCX / JSON]`,
+          diagram:
+            "[User] → [Gatekeeper] → [Intake] → [Extractor] → [RAG] → [Judge (GPT-4o)] → [Synthesizer] → [Validator] → [Reporter] → [PDF / DOCX / JSON]",
         },
         {
           id: "roles",
           title: "Roles & Permissions",
           summary:
-            "DJAC provides granular role-based access control with 6 platform roles and 4 organization roles. Each role has specific permission sets across 30+ modules.",
+            "DJAC provides granular role-based access control with 6 platform roles and 4 organization roles across 30+ modules.",
           content: `### Platform Roles
-
 | Role | Level | Access |
 |------|-------|--------|
 | Basic User | 10 | Read-only access to assigned modules |
@@ -175,7 +265,6 @@ DJAC employs a modern monorepo architecture:
 | Super Admin | 100 | Unrestricted full platform access |
 
 ### Organization Roles
-
 | Role | Level | Capabilities |
 |------|-------|-------------|
 | Analyst | 10 | View-only on most modules |
@@ -183,8 +272,9 @@ DJAC employs a modern monorepo architecture:
 | Admin | 30 | Team management + API keys |
 | Owner | 40 | Billing + org settings + full access |
 
-### Permission Model
+> **tip** You can customize permissions per module per role — the defaults are just starting points.
 
+### Permission Model
 Each of the 30+ modules has 6 permission flags:
 - \`canView\` — Read access
 - \`canCreate\` — Create new records
@@ -204,9 +294,8 @@ Each of the 30+ modules has 6 permission flags:
           id: "ai-overview",
           title: "AI Engine Overview",
           summary:
-            "DJAC's 8-stage AI pipeline uses GPT-4o to assess vendor compliance across multiple frameworks simultaneously. Each stage adds intelligence, validation, and quality assurance.",
+            "DJAC's 8-stage AI pipeline uses GPT-4o to assess vendor compliance across multiple frameworks simultaneously.",
           content: `### The 8-Stage Pipeline
-
 1. **Gatekeeper** — Input validation, injection detection, data sanitization
 2. **Intake** — Document parsing, text normalization, language detection
 3. **Extractor** — Structured fact extraction into key-value-evidence triples
@@ -216,8 +305,9 @@ Each of the 30+ modules has 6 permission flags:
 7. **Validator** — Schema validation, cross-field consistency, retry on failure
 8. **Reporter** — Final formatted output in PDF, DOCX, or JSON
 
-### AI Features
+> **info** Each stage logs its progress to the WebSocket channel so you can watch assessments happen in real-time.
 
+### AI Features
 - **Automated Gap Analysis** — Identifies missing controls and non-compliance areas
 - **Risk Scoring (0-100)** — Per-framework and aggregate compliance scores
 - **Remediation Recommendations** — AI-suggested actions ranked by priority
@@ -229,9 +319,8 @@ Each of the 30+ modules has 6 permission flags:
           id: "rag-system",
           title: "RAG Context System",
           summary:
-            "The Retrieval-Augmented Generation system retrieves the most relevant compliance controls from the database before AI analysis, ensuring grounded, accurate assessments.",
+            "The Retrieval-Augmented Generation system retrieves the most relevant compliance controls from the database before AI analysis.",
           content: `### How RAG Works
-
 1. **Document Parsing** — Extracted facts from vendor documents
 2. **Semantic Search** — Matches facts against 1,000+ compliance controls
 3. **Relevance Scoring** — Ranks controls by jurisdictional and topical relevance
@@ -239,14 +328,14 @@ Each of the 30+ modules has 6 permission flags:
 5. **Grounded Response** — AI evaluates based ONLY on retrieved controls (no hallucination)
 
 ### Benefits
-
 - Eliminates AI hallucinations in compliance advice
 - Ensures framework-specific recommendations
 - Maintains audit trail of control-to-finding mappings
 - Supports 29+ jurisdictions with jurisdiction-specific controls
 
-### Knowledge Base
+> **tip** The RAG system is what makes DJAC legally reliable — it never guesses about regulatory requirements.
 
+### Knowledge Base
 - 46 regulatory frameworks
 - 1,000+ compliance controls
 - 14+ cross-framework relationship types
@@ -263,23 +352,17 @@ Each of the 30+ modules has 6 permission flags:
           id: "jurisdictions",
           title: "Supported Jurisdictions",
           summary:
-            "DJAC covers 29+ jurisdictions across APAC, EMEA, North America, and Africa with comprehensive regulatory frameworks and continuous updates.",
+            "DJAC covers 29+ jurisdictions across APAC, EMEA, North America, and Africa with comprehensive regulatory frameworks.",
           content: `### APAC Region
-
-- **China** — PIPL (Personal Information Protection Law)
-- **China** — CSL (Cybersecurity Law)
-- **China** — DSL (Data Security Law)
-- **China** — MLPS 2.0 (Multi-Level Protection Scheme)
-- **Japan** — APPI (Act on Protection of Personal Information)
-- **South Korea** — PIPA (Personal Information Protection Act)
-- **Singapore** — PDPA (Personal Data Protection Act)
-- **India** — DPDP Act (Digital Personal Data Protection)
+- **China** — PIPL, CSL, DSL, MLPS 2.0
+- **Japan** — APPI
+- **South Korea** — PIPA
+- **Singapore** — PDPA
+- **India** — DPDP Act
 - **Australia** — Privacy Act 1988
 
 ### Middle East / GCC
-
-- **Saudi Arabia** — PDPL (Personal Data Protection Law)
-- **Saudi Arabia** — NCA ECC / CSCC / OCC
+- **Saudi Arabia** — PDPL, NCA ECC / CSCC / OCC
 - **UAE** — UAE PDPL
 - **Qatar** — Qatar PDPPL
 - **Bahrain** — Bahrain PDPL
@@ -287,19 +370,14 @@ Each of the 30+ modules has 6 permission flags:
 - **Oman** — Oman PDPL
 
 ### Europe
-
-- **EU/EEA** — GDPR (General Data Protection Regulation)
-- **EU** — NIS2 Directive
-- **EU** — DORA (Digital Operational Resilience Act)
+- **EU/EEA** — GDPR, NIS2 Directive, DORA
 - **United Kingdom** — UK GDPR / DPA 2018
 
 ### North America
-
 - **United States** — HIPAA, CCPA/CPRA, SOX, PCI DSS
 - **Canada** — PIPEDA
 
 ### Global Standards
-
 - ISO 27001 / 27002
 - NIST Cybersecurity Framework (CSF)
 - SOC 2 Type II
@@ -309,30 +387,23 @@ Each of the 30+ modules has 6 permission flags:
           id: "pipl-guide",
           title: "PIPL Compliance Guide",
           summary:
-            "Comprehensive guide to China's Personal Information Protection Law (PIPL), including data localization requirements, cross-border transfer rules, and CAC assessment procedures.",
+            "Comprehensive guide to China's Personal Information Protection Law (PIPL), including data localization and cross-border transfer rules.",
           content: `### PIPL Overview
+China's Personal Information Protection Law (PIPL) took effect November 1, 2021. It regulates how organizations collect, use, store, and transfer personal information of individuals in China.
 
-China's Personal Information Protection Law (PIPL) came into effect November 1, 2021. It regulates how organizations collect, use, store, and transfer personal information of individuals in China.
+> **warning** PIPL violations can result in fines up to ¥50 million RMB (~$7M USD) or 5% of annual revenue.
 
 ### Key Requirements
-
-1. **Consent** — Explicit, informed consent for data collection and processing
-2. **Data Minimization** — Collect only what is necessary for stated purposes
-3. **Purpose Limitation** — Use data only for specified, reasonable purposes
-4. **Data Localization** — Critical information infrastructure operators must store data in China
-5. **Cross-Border Transfer** — CAC security assessment required for large-scale transfers
-6. **DPIAs** — Data Protection Impact Assessments before high-risk processing
+1. **Consent** — Explicit, informed consent for data collection
+2. **Data Minimization** — Collect only what is necessary
+3. **Purpose Limitation** — Use data only for specified purposes
+4. **Data Localization** — CIIOs must store data in China
+5. **Cross-Border Transfer** — CAC security assessment required
+6. **DPIAs** — Impact assessments before high-risk processing
 7. **Data Subject Rights** — Access, correction, deletion, portability
-8. **Breach Notification** — Report to authorities within 72 hours
-
-### Penalties
-
-- Up to ¥50 million RMB (~$7M USD) or 5% of annual revenue
-- Personal liability for responsible persons
-- Business license revocation
+8. **Breach Notification** — Report within 72 hours
 
 ### How DJAC Helps
-
 - Automated PIPL control mapping (all 72 articles)
 - Cross-border transfer assessment with CAC guidance
 - Vendor risk scoring against PIPL requirements
@@ -359,18 +430,16 @@ China's Personal Information Protection Law (PIPL) came into effect November 1, 
           id: "vendor-assessment",
           title: "Vendor Compliance Assessment",
           summary:
-            "Automate third-party vendor compliance assessments across all selected frameworks. DJAC runs AI-powered analysis and generates gap reports with remediation guidance.",
+            "Automate third-party vendor compliance assessments across all selected frameworks with AI-powered analysis and gap reports.",
           content: `### Automated Vendor Assessment
-
 1. **Register Vendor** — Add vendor name, industry, jurisdiction, and tech stack
-2. **Select Frameworks** — Choose applicable regulatory frameworks (PIPL, GDPR, PDPL, etc.)
+2. **Select Frameworks** — Choose applicable regulatory frameworks
 3. **Upload Evidence** — Attach vendor policies, certifications, audit reports
 4. **Run Assessment** — AI analyzes vendor against all selected frameworks
 5. **Review Results** — Detailed gap analysis with risk scoring (0-100)
 6. **Export Report** — Professional PDF/DOCX report for stakeholders
 
 ### Assessment Output
-
 - **Overall Score** — Weighted average across all frameworks (0-100)
 - **Per-Framework Scores** — Individual compliance scores
 - **Risk Level** — Critical / High / Medium / Low
@@ -379,8 +448,7 @@ China's Personal Information Protection Law (PIPL) came into effect November 1, 
 - **Penalty Context** — Applicable fines per jurisdiction per gap
 
 ### Continuous Monitoring
-
-DJAC automatically re-assesses vendors at configurable intervals (weekly, monthly, quarterly) and alerts you to:
+DJAC automatically re-assesses vendors at configurable intervals and alerts you to:
 - New regulatory requirements affecting existing vendors
 - Changes in vendor risk profile
 - Expiring certifications or audit reports
@@ -399,7 +467,6 @@ DJAC automatically re-assesses vendors at configurable intervals (weekly, monthl
           summary:
             "Build comprehensive vendor profiles with jurisdiction-specific data, tech stack analysis, and contact management.",
           content: `### Profile Components
-
 - **Basic Info** — Name, industry, website, jurisdiction
 - **Tech Stack** — Technology components with version tracking
 - **Contacts** — Key personnel with role and jurisdiction assignment
@@ -408,7 +475,6 @@ DJAC automatically re-assesses vendors at configurable intervals (weekly, monthl
 - **Document Repository** — Evidence, certifications, policies
 
 ### Risk Tiering
-
 DJAC automatically calculates vendor risk tiers:
 - **Critical** — Handles personal/sensitive data, operates in high-regulation jurisdictions
 - **High** — Processes regulated data, cross-border data flows
@@ -426,9 +492,8 @@ DJAC automatically calculates vendor risk tiers:
           id: "api-reference",
           title: "API Reference",
           summary:
-            "DJAC exposes a type-safe tRPC API with 200+ procedures across 42 routers, plus REST endpoints for webhooks and health checks. All mutations use Zod validation.",
+            "DJAC exposes a type-safe tRPC API with 200+ procedures across 42 routers, plus REST endpoints for webhooks and health checks.",
           content: `### API Overview
-
 DJAC uses **tRPC** for end-to-end type-safe API operations. All procedures go through \`POST /api/trpc\` with batch support.
 
 **Base URLs:**
@@ -436,115 +501,34 @@ DJAC uses **tRPC** for end-to-end type-safe API operations. All procedures go th
 - Local: \`http://localhost:3000\`
 
 ### Authentication Methods
-
 | Method | Header | Use Case |
 |--------|--------|----------|
 | Session Cookie | \`app_session_id\` cookie | Web app (default) |
 | API Key | \`x-djac-api-key: djac_<hex>\` | Programmatic access |
-| Clerk OAuth | Auto-managed by Clerk SDK | External OAuth |
+| Clerk OAuth | Auto-managed | External OAuth |
 
-### Router Categories (42 routers, 200+ procedures)
-
+### Router Categories
 | Domain | Routers | Key Procedures |
 |--------|---------|----------------|
-| **Auth** | \`localAuth\`, \`auth\`, \`googleAuth\` | register, login, mfa, logout |
-| **Organization** | \`orgSettings\`, \`orgMembers\`, \`portal\` | create, invite, updateRole |
-| **RBAC** | \`role\`, \`rbac\` | getPermissions, setModulePermissions |
-| **Compliance** | \`compliance\`, \`regulatoryChanges\` | frameworks.list, controls.get |
-| **Vendors** | \`vendor\`, \`vendorCompliance\` | list, create, assess |
-| **Risk** | \`riskRegister\`, \`remediation\` | list, create, update |
-| **Policy** | \`policyManager\`, \`incidentRegister\` | create, publish, update |
-| **Audit** | \`auditSchedule\`, \`evidence\` | schedule, addFinding, upload |
-| **CTEM** | \`ctem\`, \`assetInventory\` | list, create, getVulnerabilities |
-| **DSR** | \`dsr\`, \`serviceRequests\` | list, create, fulfill |
-| **AI** | \`ai\` | startAssessment, getJob |
-| **Reports** | \`complianceReport\` | generate, download, schedule |
-| **Graph** | \`knowledgeGraph\`, \`crossBorderFlow\` | search, analyze |
-| **Billing** | \`billing\` | getPlans, createCheckoutSession |
-| **Admin** | \`admin\`, \`system\` | getStats, getAuditLogs |
-| **UX** | \`onboarding\`, \`notifications\`, \`analytics\`, \`personalization\`, \`customer360\` | Various |
-
-### Error Response Format
-
-All errors follow:
-\`\`\`
-{
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "Authentication required (10001)",
-    "details": {}
-  }
-}
-\`\`\`
+| Auth | \`localAuth\`, \`auth\`, \`googleAuth\` | register, login, mfa |
+| Organization | \`orgSettings\`, \`orgMembers\` | create, invite, updateRole |
+| RBAC | \`role\`, \`rbac\` | getPermissions, setPermissions |
+| Compliance | \`compliance\`, \`regulatoryChanges\` | frameworks.list, controls.get |
+| Vendors | \`vendor\`, \`vendorCompliance\` | list, create, assess |
+| Risk | \`riskRegister\`, \`remediation\` | list, create, update |
+| AI | \`ai\` | startAssessment, getJob |
+| Reports | \`complianceReport\` | generate, download, schedule |
+| Billing | \`billing\` | getPlans, checkout |
+| Admin | \`admin\`, \`system\` | getStats, getAuditLogs |
 
 ### Error Codes
-
 | Code | Description |
 |------|-------------|
 | \`UNAUTHORIZED\` | Authentication required |
 | \`FORBIDDEN\` | Insufficient permissions |
 | \`NOT_FOUND\` | Resource not found |
 | \`VALIDATION_ERROR\` | Input validation failed |
-| \`RATE_LIMITED\` | Too many requests |
-| \`INTERNAL_ERROR\` | Unexpected server error |`,
-        },
-        {
-          id: "rate-limiting",
-          title: "Rate Limiting & Security",
-          summary:
-            "DJAC implements tiered rate limiting with configurable windows to protect the API from abuse while ensuring fair usage for all tenants.",
-          content: `### Rate Limiting Tiers
-
-| Scope | Limit | Window | Headers |
-|-------|-------|--------|---------|
-| General API | 120 requests | 1 minute | \`X-RateLimit-Limit\`, \`X-RateLimit-Remaining\` |
-| Auth endpoints | 10 requests | 1 minute | Same as above |
-| Admin panel | 300 requests | 5 minutes | Custom headers |
-| Health checks | Unlimited | N/A | None (bypassed) |
-
-### Response Headers
-
-Every rate-limited response includes:
-- \`X-RateLimit-Limit\` — Maximum requests per window
-- \`X-RateLimit-Remaining\` — Requests remaining in current window
-- \`X-RateLimit-Reset\` — Unix timestamp when the window resets
-
-### API Key Best Practices
-
-- API keys use the \`djac_\` prefix format
-- Keys inherit permissions of the creating user
-- Keys are scoped to a single organization
-- Revoke unused or compromised keys immediately
-- Rotate keys every 90 days`,
-        },
-        {
-          id: "webhooks",
-          title: "Webhooks & Edge Functions",
-          summary:
-            "DJAC receives Stripe webhooks and uses Supabase Edge Functions for notifications, compliance events, and report exports.",
-          content: `### Stripe Webhooks
-
-**Endpoint:** \`POST /api/webhooks/stripe\`
-**Auth:** Stripe signature verification (\`STRIPE_WEBHOOK_SECRET\`)
-
-**Events handled:**
-- \`checkout.session.completed\` — Provision subscription
-- \`customer.subscription.updated\` — Update plan/status
-- \`customer.subscription.deleted\` — Cancel subscription
-- \`invoice.payment_succeeded\` — Record billing event
-- \`invoice.payment_failed\` — Flag payment issue
-
-### Supabase Edge Functions (Deno)
-
-| Function | Endpoint | Purpose |
-|----------|----------|---------|
-| \`send-notification\` | \`/functions/v1/send-notification\` | Create user notifications |
-| \`compliance-webhook\` | \`/functions/v1/compliance-webhook\` | Process compliance events |
-| \`report-export\` | \`/functions/v1/report-export\` | Export JSON/CSV/PDF |
-| \`auth-hooks\` | \`/functions/v1/auth-hooks\` | Sync auth users to DB |
-
-**Development:** \`supabase functions serve\`
-**Deploy:** \`supabase functions deploy\``,
+| \`RATE_LIMITED\` | Too many requests |`,
         },
         {
           id: "websocket",
@@ -552,21 +536,17 @@ Every rate-limited response includes:
           summary:
             "Real-time AI assessment progress is streamed via WebSocket at /ws/ai-jobs with job lifecycle events.",
           content: `### WebSocket Endpoint
-
 **URL:** \`wss://app.yalla-hack.ae/ws/ai-jobs\`
 
 ### Event Types
-
 | Event | Direction | Payload |
 |-------|-----------|---------|
 | \`job:progress\` | Server → Client | \`{ jobId, stage, message, progress }\` |
-| \`job:complete\` | Server → Client | \`{ jobId, result: AiAssessmentReport }\` |
+| \`job:complete\` | Server → Client | \`{ jobId, result }\` |
 | \`job:error\` | Server → Client | \`{ jobId, error: string }\` |
 | \`subscribe\` | Client → Server | \`{ jobId: string }\` |
-| \`unsubscribe\` | Client → Server | \`{ jobId: string }\` |
 
-### Usage Example
-
+### Example
 \`\`\`typescript
 const ws = new WebSocket("wss://app.yalla-hack.ae/ws/ai-jobs");
 ws.onopen = () => ws.send(JSON.stringify({ type: "subscribe", jobId }));
@@ -575,18 +555,7 @@ ws.onmessage = (e) => {
   if (type === "job:progress") updateUI(stage, message);
   if (type === "job:complete") showResults(data.result);
 };
-\`\`\`
-
-### AI Job Stages (8-stage pipeline)
-
-1. **Gatekeeper** — Input validation, injection detection
-2. **Intake** — Document parsing, text normalization
-3. **Extractor** — Structured fact extraction
-4. **RAG** — Retrieve relevant compliance controls
-5. **Judge** — GPT-4o evaluates facts against controls
-6. **Synthesizer** — Merge findings into cross-framework report
-7. **Validator** — Schema validation, retry on failure
-8. **Reporter** — Final formatted output (PDF/DOCX/JSON)`,
+\`\`\``,
         },
       ],
     },
@@ -599,42 +568,36 @@ ws.onmessage = (e) => {
           id: "security-overview",
           title: "Security Architecture",
           summary:
-            "DJAC implements defense-in-depth across authentication, authorization, data protection, and infrastructure layers following OWASP Top 10 and SOC 2 principles.",
-          content: `### Defense-in-Depth Layers
-
+            "DJAC implements defense-in-depth across authentication, authorization, data protection, and infrastructure following OWASP Top 10.",
+          content: `### Defense-in-Depth
 **Authentication:**
 - Passwords hashed with bcrypt (12 rounds)
 - JWT tokens signed with HS256 (min 64-char secret)
 - HTTP-only, Secure, SameSite cookies
 - TOTP-based MFA with backup codes
 - OTP-based password reset (SHA-256, 5-min expiry)
-- Brute force protection with exponential backoff
 
 **Authorization:**
 - 7 platform roles + 4 organization roles
 - 32 permission-gated modules
-- 6 granular permission flags per module
 - Row-Level Security on all PostgreSQL tables
 - Organization-scoped data isolation
 
 **Data Protection:**
 - TLS 1.3 for all data in transit
 - PostgreSQL encrypted at rest (Supabase)
-- Secrets in Vercel env vars + GitHub Actions secrets
-- Never in code or version control
+- Secrets in Vercel env vars + GitHub Actions
 
 ### Security Headers
-
 | Header | Value | Purpose |
 |--------|-------|---------|
 | Strict-Transport-Security | max-age=63072000 | Enforce HTTPS |
 | X-Content-Type-Options | nosniff | MIME sniffing prevention |
 | X-Frame-Options | DENY | Clickjacking prevention |
 | Content-Security-Policy | Restricted per route | XSS mitigation |
-| Referrer-Policy | strict-origin-when-cross-origin | Referrer leakage |
+| Referrer-Policy | strict-origin | Referrer leakage |
 
 ### CVE Patching
-
 - Dependabot automated vulnerability alerts
 - pnpm overrides for transitive dependency patches
 - CodeQL security analysis in CI pipeline`,
@@ -643,39 +606,17 @@ ws.onmessage = (e) => {
           id: "rbac-system",
           title: "RBAC & Permission System",
           summary:
-            "DJAC's role-based access control system provides granular permissions across 32 platform modules with custom role overrides per organization.",
-          content: `### Platform Roles (7 levels)
-
-| Role | Level | Typical User |
-|------|-------|-------------|
-| Basic User | 10 | Read-only access |
-| Professional User | 20 | Full compliance features |
-| Company Admin | 30 | Organization + team management |
-| Platform Admin | 40 | Cross-org oversight |
-| Yalla Hack Employee | 45 | Internal support |
-| Super Admin | 100 | Unrestricted access |
-
-### Organization Roles (4 levels)
-
-| Role | Level | Capabilities |
-|------|-------|-------------|
-| Analyst | 10 | View-only on most modules |
-| Compliance Officer | 20 | Create/Edit compliance data |
-| Admin | 30 | Team + API key management |
-| Owner | 40 | Billing + full org settings |
-
-### Permission Resolution Flow
-
+            "Granular permissions across 32 platform modules with custom role overrides per organization.",
+          content: `### Permission Resolution Flow
 1. Request arrives at tRPC procedure
 2. Auth middleware extracts \`ctx.user\` and \`ctx.orgRole\`
-3. System checks custom \`rolePermissions\` row for (orgId, role, module)
-4. If no custom row, falls back to \`DEFAULT_ORG_ROLE_PERMISSIONS\`
-5. Compares requested action (e.g., canEdit) against PermissionFlags
+3. System checks custom \`rolePermissions\` row
+4. Falls back to \`DEFAULT_ORG_ROLE_PERMISSIONS\`
+5. Compares action against PermissionFlags
 6. Returns Allow or 403 FORBIDDEN
 
 ### Permission Flags
-
-Each module has 6 boolean flags:
+Each module has 6 flags:
 - \`canView\` — Read access
 - \`canCreate\` — Create new records
 - \`canEdit\` — Modify existing records
@@ -683,88 +624,13 @@ Each module has 6 boolean flags:
 - \`canExport\` — Download/export data
 - \`canInvite\` — Invite team members
 
-### Default Permission Templates
-
+### Default Templates
 | Role | Default Pattern |
 |------|----------------|
 | Analyst | VIEW_ONLY on most modules |
-| Compliance Officer | STANDARD on compliance, VIEW_ONLY on legal |
+| Compliance Officer | STANDARD on compliance |
 | Admin | FULL on compliance, STANDARD on settings |
-| Owner | FULL on everything, including billing |`,
-        },
-        {
-          id: "audit-trail",
-          title: "Audit Logging & Monitoring",
-          summary:
-            "Comprehensive audit logging tracks all data mutations with category, action, outcome, and actor attribution. Sentry provides real-time error monitoring.",
-          content: `### Audit Log System
-
-**Table:** \`auditLogs\`
-**Categories:** auth, data_write, data_read, role_change, system, billing
-**Outcomes:** success, failure, blocked
-
-Every audit log entry records:
-- \`actorId\` — Who performed the action
-- \`category\` — Type of event
-- \`action\` — What was done
-- \`outcome\` — Result (success/failure/blocked)
-- \`details\` — JSON payload with relevant data
-- \`ipAddress\` — Request origin
-- \`createdAt\` — Timestamp
-
-### Audit Log Access
-
-- **Org Admins** — View audit logs for their organization
-- **Yalla Admin** — View all platform audit logs with filtering
-- **API Access** — \`admin.getAuditLogs\` tRPC procedure
-
-### Sentry Monitoring
-
-- **Server:** \`@sentry/node\` v10 with Express integration
-- **Client:** \`@sentry/react\` with React error boundary
-- **Sampling:** 10% trace sample production, 100% development
-- **Environments:** production, staging, development
-
-### Pino Structured Logging
-
-- **Format:** JSON (production) / pretty-print (development)
-- **Levels:** trace, debug, info, warn, error, fatal
-- **Context:** request ID, user ID, org ID per log entry`,
-        },
-        {
-          id: "data-protection",
-          title: "Data Protection & Privacy",
-          summary:
-            "DJAC implements multi-tenant data isolation, end-to-end encryption, and supports data subject request management for GDPR, PIPL, and PDPL compliance.",
-          content: `### Multi-Tenant Data Isolation
-
-Every organization-scoped query includes \`orgId\` filtering enforced at:
-1. **tRPC middleware** — Extracts \`orgId\` from session
-2. **Drizzle queries** — All queries filter by \`ctx.orgId\`
-3. **Row-Level Security** — PostgreSQL RLS as defense-in-depth
-4. **API keys** — Scoped to a single organization
-
-### Encryption Standards
-
-- **In Transit:** TLS 1.3 via Vercel edge network
-- **At Rest:** AES-256 (Supabase managed PostgreSQL)
-- **Passwords:** bcrypt with 12 salt rounds
-- **Secrets:** Vercel encrypted environment variables
-- **OTP Codes:** SHA-256 hashed in database
-
-### Data Subject Requests (DSR)
-
-Full DSR lifecycle management:
-- **Request Types:** Access, Rectification, Erasure, Portability, Restriction
-- **Workflow:** Submission → Validation → Fulfillment → Verification
-- **Deadline Tracking:** Jurisdiction-specific response times
-- **Automated Evidence:** Audit trail of all DSR actions
-
-### Data Retention
-
-- **Interaction Logs:** Configurable TTL (default 90 days)
-- **Audit Logs:** Retained indefinitely for compliance
-- **Deleted Users:** Anonymized per GDPR/PIPL requirements`,
+| Owner | FULL on everything |`,
         },
       ],
     },
@@ -775,141 +641,62 @@ Full DSR lifecycle management:
       pages: [
         {
           id: "dev-setup",
-          title: "Development Environment Setup",
+          title: "Development Setup",
           summary:
-            "Set up your local development environment with Node.js 20+, pnpm 10+, Docker for Supabase, and all required services.",
+            "Set up your local environment with Node.js 20+, pnpm 10+, Docker for Supabase, and all required services.",
           content: `### Prerequisites
-
 - Node.js 20+
 - pnpm 10+ (\`npm install -g pnpm@10\`)
-- Docker Desktop (for local Supabase)
+- Docker Desktop (for Supabase)
 - Supabase CLI (\`npm install -g supabase\`)
-- Git
 
 ### First-Time Setup
-
 \`\`\`bash
-git clone <repo-url> djac
-cd djac
+git clone <repo-url> djac && cd djac
 pnpm install
 cp .env.example .env
-# Edit .env with your local values (minimum: DATABASE_URL)
 supabase start
 pnpm db:push
 pnpm seed:data
 pnpm dev
-# App available at http://localhost:3000
+# → http://localhost:3000
 \`\`\`
 
-### Required Environment Variables
-
-| Variable | Source | Purpose |
-|----------|--------|---------|
-| \`DATABASE_URL\` | \`supabase status\` | PostgreSQL connection |
-| \`SUPABASE_URL\` | \`supabase status\` | Supabase API URL |
-| \`SUPABASE_ANON_KEY\` | \`supabase status\` | Anonymous client key |
-| \`SUPABASE_SERVICE_ROLE_KEY\` | \`supabase status\` | Service role (bypass RLS) |
-| \`JWT_SECRET\` | Any random string | JWT signing |
-| \`OPENAI_API_KEY\` | OpenAI dashboard | AI features (optional) |
-| \`STRIPE_SECRET_KEY\` | Stripe dashboard | Billing (optional) |
-
 ### Dev Auth Bypass
-
-For local development without OAuth:
 \`\`\`env
 DEV_AUTH_BYPASS=true
-DEV_AUTH_OPEN_ID=local-dev-user
 DEV_AUTH_EMAIL=dev@example.com
 DEV_AUTH_ROLE=super_admin
 \`\`\`
 
 ### Available Scripts
-
 | Command | Purpose |
 |---------|---------|
-| \`pnpm dev\` | Start dev server with hot reload |
+| \`pnpm dev\` | Start dev server |
 | \`pnpm check\` | TypeScript type checking |
-| \`pnpm lint\` | ESLint code quality |
-| \`pnpm test\` | Run all tests (vitest) |
+| \`pnpm lint\` | ESLint |
+| \`pnpm test\` | Run tests (vitest) |
 | \`pnpm build\` | Production build |
-| \`pnpm verify:all\` | Run all checks + build |`,
+| \`pnpm verify:all\` | All checks + build |`,
           demoSteps: [
             "Clone the repository and install dependencies with 'pnpm install'",
             "Copy .env.example to .env and fill in required values",
             "Start Supabase locally with 'supabase start'",
             "Push database schema with 'pnpm db:push'",
             "Seed reference data with 'pnpm seed:data'",
-            "Start dev server with 'pnpm dev' and open http://localhost:3000",
+            "Start dev server with 'pnpm dev' → http://localhost:3000",
           ],
-        },
-        {
-          id: "project-structure",
-          title: "Project Structure & Architecture",
-          summary:
-            "DJAC is a pnpm monorepo with client (React SPA), server (Express + tRPC), and shared code organized by domain.",
-          content: `### Directory Structure
-
-\`\`\`
-djac/
-├── client/              # React 19 SPA (Vite 7 + Tailwind CSS 4)
-│   └── src/
-│       ├── pages/       # 70+ route pages
-│       ├── components/  # 39 shared UI components
-│       ├── hooks/       # Custom React hooks
-│       ├── contexts/    # Theme, Locale contexts
-│       └── lib/         # tRPC client, utilities
-├── server/              # Express 4 + tRPC 11 backend
-│   ├── _core/           # Auth, env, security, trpc, rate limit
-│   ├── ai/              # 8-stage AI pipeline + queue
-│   ├── services/        # Business logic (billing, email, OTP)
-│   └── __tests__/       # 40+ test files
-├── shared/              # Shared types and constants
-│   └── const.ts         # Roles, permissions, RBAC defaults
-├── drizzle/             # Drizzle ORM schema + migrations
-│   └── schema.ts        # 60+ tables, 30+ enums
-├── supabase/            # Supabase config + Edge Functions
-│   └── functions/       # 4 Deno Edge Functions
-└── scripts/             # 43 operational scripts
-\`\`\`
-
-### Tech Stack Details
-
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Frontend | React, TypeScript | 19.2, 5.9 |
-| Bundler | Vite | 7.3 |
-| Styling | Tailwind CSS, Radix UI | 4.1, latest |
-| Backend | Express, tRPC | 4.21, 11.8 |
-| ORM | Drizzle ORM | 0.45 |
-| Database | PostgreSQL (Supabase) | 17 |
-| Queue | BullMQ + Redis | 5.7 |
-| AI | OpenAI GPT-4o | 4.67 |
-| Billing | Stripe | 20.4 |
-| Monitoring | Sentry, Pino | 10.47, 9.5 |
-
-### Naming Conventions
-
-| Element | Convention | Example |
-|---------|-----------|---------|
-| Files | kebab-case | \`compliance-framework-router.ts\` |
-| tRPC Routers | camelCase | \`complianceFrameworkRouter\` |
-| Procedures | dot-separated | \`compliance.frameworks.list\` |
-| DB Tables | snake_case | \`organization_members\` |
-| DB Columns | snake_case | \`created_at\` |
-| React Components | PascalCase | \`VendorAssessmentPage\` |
-| Hooks | \`use\` prefix | \`useAuth\` |`,
         },
         {
           id: "adding-features",
           title: "Adding New Features",
           summary:
             "Follow DJAC's patterns for adding new tRPC routers, React pages, database tables, and tests.",
-          content: `### Adding a New tRPC Router
-
-**1. Create router file** — \`server/my-feature-router.ts\`:
+          content: `### Add a tRPC Router
 \`\`\`typescript
-import { z } from "zod";
+// server/my-feature-router.ts
 import { orgProcedure, router } from "./_core/trpc";
+import { z } from "zod";
 
 export const myFeatureRouter = router({
   list: orgProcedure
@@ -921,287 +708,123 @@ export const myFeatureRouter = router({
   create: orgProcedure
     .input(z.object({ orgId: z.string(), name: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const db = getDb();
-      const [record] = await db.insert(myTable).values(input).returning();
-      return record;
+      const [rec] = await db.insert(myTable).values(input).returning();
+      return rec;
     }),
 });
 \`\`\`
 
-**2. Register in \`server/routers.ts\`:**
+Register in \`server/routers.ts\`:
 \`\`\`typescript
 import { myFeatureRouter } from "./my-feature-router";
-export const appRouter = router({
-  // ... existing routers
-  myFeature: myFeatureRouter,
-});
+export const appRouter = router({ myFeature: myFeatureRouter });
 \`\`\`
-
-### Adding a New Page
-
-1. Create \`client/src/pages/MyNewPage.tsx\`
-2. Add route in \`client/src/App.tsx\`:
-   \`\`\`tsx
-   const MyNewPage = lazy(() => import("./pages/MyNewPage"));
-   <Route path="/my-page" component={MyNewPage} />
-   \`\`\`
-3. Add navigation link in \`DashboardLayout.tsx\`
-4. Add i18n keys in \`LocaleContext.tsx\`
-
-### Adding Database Tables
-
-1. Edit \`drizzle/schema.ts\`
-2. Generate migration: \`pnpm drizzle-kit generate\`
-3. Apply: \`pnpm db:migrate\`
-4. Update seed scripts if needed
 
 ### API Design Rules
-
 1. All mutations use tRPC with Zod validation
-2. Use \`protectedProcedure\` for authenticated endpoints
-3. Use \`orgProcedure\` for org-scoped endpoints
-4. Check \`ctx.user.role\` for authorization
-5. Never trust client input — always validate with Zod
-6. Return typed responses (never \`any\`)`,
-        },
-        {
-          id: "testing",
-          title: "Testing Guide",
-          summary:
-            "DJAC uses Vitest for unit and integration tests. 40+ test files cover auth, RBAC, validation, and API flows.",
-          content: `### Running Tests
-
-\`\`\`bash
-pnpm test                   # Run all tests
-npx vitest run path/to/file # Run specific file
-npx vitest --ui             # Interactive UI
-npx vitest --coverage       # Coverage report
-\`\`\`
-
-### Test Structure
-
-\`\`\`
-server/__tests__/
-├── unit/               # Unit tests (auth, RBAC, validation)
-└── integration/        # API flow tests
-client/src/__tests__/
-├── components/         # Component rendering tests
-└── hooks/              # Custom hook tests
-\`\`\`
-
-### Test Patterns
-
-**tRPC Procedure Test:**
-\`\`\`typescript
-import { describe, it, expect } from "vitest";
-
-describe("vendor.list", () => {
-  it("should return vendors for the org", async () => {
-    const vendors = await caller.vendor.list({ orgId: "org_123" });
-    expect(Array.isArray(vendors)).toBe(true);
-  });
-});
-\`\`\`
-
-### Best Practices
-
-- Isolate tests with setup/teardown
-- Mock external APIs (Stripe, OpenAI, SendGrid)
-- Test edge cases and authorization
-- Test with different role levels`,
+2. Use \`protectedProcedure\` for authenticated, \`orgProcedure\` for org-scoped
+3. Check \`ctx.user.role\` for authorization
+4. Never trust client input — always validate with Zod`,
         },
       ],
     },
     {
       id: "deployment-operations",
-      title: "Deployment & Operations",
+      title: "Deployment & Ops",
       icon: "server",
       pages: [
         {
           id: "deployment",
           title: "Deployment Options",
           summary:
-            "DJAC supports deployment on Vercel (serverless), Docker, and manual VPS. CI/CD pipelines automate staging and production deployments.",
-          content: `### Deployment Options
-
-| Option | Best For | Setup Time |
-|--------|----------|------------|
-| Vercel (Recommended) | Production SaaS | 5 minutes |
-| Docker | Self-hosted, on-prem | 15 minutes |
-| Manual VPS | Custom infrastructure | 30 minutes |
-
-### Vercel Deployment (Production)
-
+            "DJAC supports Vercel (serverless), Docker, and manual VPS deployment. CI/CD pipelines automate staging and production.",
+          content: `### Vercel (Recommended)
 \`\`\`bash
-# 1. Build
 pnpm build
-
-# 2. Deploy
 vercel --prod
-
-# 3. Apply DB migrations
 supabase db push --linked
-
-# 4. Deploy Edge Functions
 supabase functions deploy
-
-# 5. Verify
 curl https://your-app.com/api/health
 \`\`\`
 
-### Docker Deployment
-
+### Docker
 \`\`\`bash
 docker build -t djac:latest .
 docker run -d -p 3000:3000 --env-file .env.production --name djac-app djac:latest
 \`\`\`
 
 ### CI/CD Pipeline
-
 | Workflow | Trigger | Actions |
 |----------|---------|---------|
-| CI | Push/PR to main/develop | Lint, Typecheck, Test, Build |
+| CI | Push/PR | Lint, Typecheck, Test, Build |
 | Staging | Push to develop | Auto-deploy to Vercel preview |
 | Production | Push to main | Deploy + DB migration + health check |
-| Supabase Deploy | Push to main | Deploy migrations + functions |
 
 ### Production Checklist
-
-- [ ] JWT_SECRET ≥ 64 random characters
-- [ ] ALLOW_IN_MEMORY_PERSISTENCE=false
+- [ ] JWT_SECRET ≥ 64 chars
 - [ ] DEV_AUTH_BYPASS=false
-- [ ] Database pool size: 25 connections
-- [ ] Redis configured for AI queue
+- [ ] DB pool size: 25 connections
+- [ ] Redis configured
 - [ ] RLS policies enabled
-- [ ] CORS restricted to production domain
-- [ ] Sentry error tracking enabled
-- [ ] Stripe webhook registered`,
+- [ ] Sentry error tracking enabled`,
         },
         {
           id: "monitoring",
           title: "Monitoring & Observability",
           summary:
-            "DJAC uses Sentry for error tracking, Pino for structured logging, and health/readiness endpoints for operational monitoring.",
+            "Sentry for error tracking, Pino for structured logging, health/readiness endpoints for operational monitoring.",
           content: `### Health Endpoints
-
-| Endpoint | Purpose | Response |
-|----------|---------|----------|
-| \`/api/health\` | Health check | Status, uptime, version |
-| \`/api/healthz\` | Liveness probe | Always 200 |
-| \`/api/readiness\` | Readiness check | DB, Redis, Stripe, AI status |
-| \`/api/readyz\` | Alias for readiness | Same |
-
-### Readiness Response Example
-
-\`\`\`json
-{
-  "status": "ok",
-  "checks": {
-    "database": "ok",
-    "redis": "ok",
-    "stripe": "ok",
-    "ai": "ok"
-  }
-}
-\`\`\`
-
-A degraded response (\`503\`) indicates one or more services are unavailable.
-
-### Pino Logging
-
-\`\`\`bash
-# Development (pretty-print)
-pnpm dev
-
-# Debug level logging
-LOG_LEVEL=debug pnpm dev
-\`\`\`
-
-### Sentry Setup
-
-Set in \`.env.production\`:
-\`\`\`
-SENTRY_DSN=https://...
-VITE_SENTRY_DSN=https://...
-SENTRY_ENVIRONMENT=production
-\`\`\`
+| Endpoint | Purpose |
+|----------|---------|
+| \`/api/health\` | Health check (status, uptime) |
+| \`/api/readyz\` | Readiness (DB, Redis, Stripe, AI) |
 
 ### Background Schedulers
-
 | Scheduler | Interval | Purpose |
 |-----------|----------|---------|
-| Interaction Retention | 24h | Purge old interaction logs |
-| Trial Reminder | 6h | Email expiring trials |
+| Interaction Retention | 24h | Purge old logs |
+| Trial Reminder | 6h | Expiring trial emails |
 | Deadline Alert | 1h | Regulatory deadline notifications |
-| Report Delivery | Config | Scheduled report generation |
-| SSE Broadcast | Real-time | Admin dashboard events |`,
+| Report Delivery | Config | Scheduled report generation |`,
         },
         {
           id: "troubleshooting",
           title: "Troubleshooting Common Issues",
           summary:
-            "Solutions for common development, deployment, and operational issues encountered with DJAC.",
+            "Solutions for common development, deployment, and operational issues.",
           content: `### Common Issues
+**DB connection errors:** Verify \`DATABASE_URL\` in \`.env\`. Ensure Supabase is running.
 
-**Database connection errors on startup:**
+**AI stuck in "queued":** Check Redis connectivity. In dev mode, confirm \`AI_QUEUE_MODE=in_memory\`.
 
-- Verify \`DATABASE_URL\` in \`.env\`
-- Ensure Supabase is running: \`supabase status\`
-- Check for stale connection pool: restart server
+**OpenAI 401:** Invalid \`OPENAI_API_KEY\`.
 
-**AI assessment stuck in "queued":**
-
-- Check Redis connectivity: \`redis-cli ping\`
-- In dev mode, confirm \`AI_QUEUE_MODE=in_memory\`
-- Check server logs for queue worker errors
-
-**OpenAI API errors:**
-
-- \`401\`: Invalid \`OPENAI_API_KEY\`
-- \`429\`: Rate limit reached — add retry logic
-- \`context_length_exceeded\`: Input too large — truncate
-
-**Build fails on Vercel:**
-
-- Check Vercel project env vars are set
-- Ensure Node 20+ in Vercel settings
-- Test locally: \`pnpm build\`
+**Vercel build fails:** Check env vars. Ensure Node 20+. Test with \`pnpm build\`.
 
 ### Debugging
-
-- Enable debug logs: \`LOG_LEVEL=debug pnpm dev\`
-- Track requests: \`X-Request-ID\` in response headers
-- Check Sentry dashboard for error grouping
-
-### Recovery Procedures
-
-**Database rollback:**
-1. Download latest backup from Supabase
-2. Restore to new database
-3. Update \`DATABASE_URL\`
-
-**Service degradation:**
-The readiness endpoint shows which services are down. The app continues serving requests that don't depend on unavailable services.`,
+- Debug logs: \`LOG_LEVEL=debug pnpm dev\`
+- Track requests: \`X-Request-ID\` header
+- Check Sentry dashboard for errors`,
           troubleshooting: [
             {
               problem: "Login returns 'Authentication required (10001)'",
               solution:
-                "Check JWT_SECRET is set in .env. Clear browser cookies. Verify COOKIE_DOMAIN matches deployment domain.",
+                "Check JWT_SECRET in .env. Clear browser cookies. Verify COOKIE_DOMAIN.",
             },
             {
               problem: "pnpm db:push fails with migration errors",
               solution:
-                "Check migration status with 'supabase db status'. Use 'supabase db reset' for development reset.",
+                "Check with 'supabase db status'. Use 'supabase db reset' for dev reset.",
             },
             {
               problem: "Vercel build fails with memory limit",
               solution:
-                "Consider externalizing large dependencies. Increase Node memory in Vercel settings.",
+                "Externalize large dependencies. Increase Node memory in Vercel settings.",
             },
             {
               problem: "Stripe webhook not receiving events",
               solution:
-                "Verify STRIPE_WEBHOOK_SECRET. Check webhook endpoint in Stripe dashboard. Use 'stripe listen' for local testing.",
+                "Verify STRIPE_WEBHOOK_SECRET. Use 'stripe listen' for local testing.",
             },
           ],
         },
@@ -1216,91 +839,65 @@ The readiness endpoint shows which services are down. The app continues serving 
           id: "pricing-overview",
           title: "Pricing & Plans Overview",
           summary:
-            "DJAC offers flexible subscription plans for teams of all sizes — from startups needing single jurisdiction compliance to global enterprises.",
+            "Flexible subscription plans for teams of all sizes — from startups to global enterprises.",
           content: `### Plan Comparison
-
 | Feature | Free Trial | Starter | Professional | Enterprise |
 |---------|-----------|---------|-------------|------------|
 | Jurisdictions | 1 | 3 | 10 | Unlimited |
 | Vendors | 5 | 25 | 100 | Unlimited |
 | AI Assessments/mo | 3 | 20 | 100 | Custom |
 | Team Members | 2 | 10 | 50 | Unlimited |
-| Reports | Basic | Standard | Advanced | Custom |
 | API Access | — | — | ✓ | ✓ |
 | Priority Support | — | — | ✓ | ✓ |
-| Custom Integrations | — | — | — | ✓ |
 | SLA | — | 99.5% | 99.9% | 99.95% |
 
 ### Billing Intervals
-
-All paid plans support:
 - **Monthly** — Standard rate
 - **Quarterly** — 10% discount
 - **Biannual** — 15% discount
 - **Annual** — 20% discount
 
 ### Free Trial
-
 - 14-day free trial on Starter plan
-- No credit card required to start
-- Full access to all Starter features
-- Automatic upgrade reminder before trial ends`,
+- No credit card required
+- Full access to all Starter features`,
         },
         {
           id: "subscription-management",
           title: "Managing Your Subscription",
           summary:
-            "Upgrade, downgrade, or cancel your subscription through the Stripe Customer Portal. View billing history and download invoices.",
+            "Upgrade, downgrade, or cancel through the Stripe Customer Portal. View billing history and invoices.",
           content: `### Subscription Lifecycle
-
 1. **Trial** → Automatic 14-day trial on signup
-2. **Active** → Paid subscription after trial or direct purchase
-3. **Past Due** → Payment failed; grace period before cancellation
-4. **Canceled** → Subscription ended; data retained for 30 days
-5. **Paused** → Temporarily suspended (Enterprise only)
+2. **Active** → Paid subscription
+3. **Past Due** → Payment failed; grace period
+4. **Canceled** → Data retained for 30 days
 
 ### Upgrade / Downgrade
-
-- **Upgrade:** Immediate access to new features. Prorated charges for current billing period.
-- **Downgrade:** Takes effect at end of current billing period.
+- **Upgrade:** Immediate access. Prorated charges.
+- **Downgrade:** Takes effect at end of billing period.
 
 ### Billing Portal
-
 Access via: **Dashboard → Billing & Plan → Manage Subscription**
-
-The Stripe Customer Portal allows:
 - Update payment method
 - View billing history
 - Download invoices
-- Change plan
-- Cancel subscription
-
-### Payment Methods
-
-- Credit/Debit cards (Visa, Mastercard, Amex)
-- Bank transfers (Enterprise only)
-- Invoice billing (Enterprise only)
-
-### Refund Policy
-
-- Monthly plans: Prorated refund within 7 days
-- Annual plans: Full refund within 30 days, prorated thereafter
-- Credit applied to account for service outages exceeding SLA`,
+- Change/cancel plan`,
           troubleshooting: [
             {
               problem: "Payment failed but card is valid",
               solution:
-                "Check with your bank for international transaction blocks. Try an alternative card. Contact support for manual invoice payment.",
+                "Check for international transaction blocks. Try alternative card or contact support.",
             },
             {
               problem: "Upgrade not reflected in dashboard",
               solution:
-                "Allow up to 5 minutes for provisioning. If still not visible, try refreshing the page or logging out and back in.",
+                "Allow up to 5 minutes for provisioning. Try refreshing or logging out/in.",
             },
             {
               problem: "Trial ended but need more time",
               solution:
-                "Contact support for a one-time 7-day trial extension. Extension is available once per organization.",
+                "Contact support for a one-time 7-day extension (once per org).",
             },
           ],
         },
@@ -1317,15 +914,13 @@ The Stripe Customer Portal allows:
           summary:
             "Centralized risk management with automated severity scoring, treatment planning, and framework linkage.",
           content: `### Risk Management Workflow
-
-1. **Identify** — Log organizational risks with category and likelihood/impact
+1. **Identify** — Log risks with category and likelihood/impact
 2. **Assess** — Automated risk scoring (likelihood × impact)
-3. **Treat** — Select treatment strategy: Accept, Mitigate, Transfer, Avoid
-4. **Link** — Connect risks to vendors, frameworks, and remediation tasks
-5. **Monitor** — Track risk status and treatment progress
+3. **Treat** — Accept, Mitigate, Transfer, or Avoid
+4. **Link** — Connect risks to vendors, frameworks, and tasks
+5. **Monitor** — Track status and treatment progress
 
 ### Risk Categories
-
 - **Operational** — Process failures, system outages
 - **Legal** — Regulatory non-compliance, contractual violations
 - **Technical** — Security vulnerabilities, architecture weaknesses
@@ -1336,22 +931,19 @@ The Stripe Customer Portal allows:
           id: "incident-management",
           title: "Incident Management",
           summary:
-            "Log, track, and resolve security and compliance incidents with automated regulatory mapping and notification timelines.",
+            "Log, track, and resolve security and compliance incidents with automated regulatory mapping.",
           content: `### Incident Lifecycle
-
-1. **Detection** — Log incident with type, severity, and affected systems
-2. **Triage** — Automated severity classification and assignee routing
-3. **Investigation** — Timeline tracking with evidence collection
-4. **Containment** — Action tracking and stakeholder notification
-5. **Resolution** — Root cause analysis and remediation documentation
-6. **Closure** — Post-incident review and lessons learned
+1. **Detection** — Log incident with type, severity, affected systems
+2. **Triage** — Automated severity classification
+3. **Investigation** — Timeline tracking with evidence
+4. **Containment** — Action tracking, notification
+5. **Resolution** — Root cause analysis, remediation docs
+6. **Closure** — Post-incident review
 
 ### Automated Regulatory Mapping
-
-DJAC automatically maps incidents to affected regulations:
-- Data breach in China → PIPL Art. 57 notification (72h to CAC)
-- Data breach in EU → GDPR Art. 33 notification (72h to DPA)
-- Security incident → Multiple framework implications identified`,
+- Data breach in China → PIPL Art. 57 (72h to CAC)
+- Data breach in EU → GDPR Art. 33 (72h to DPA)
+- Security incident → Multi-framework implications identified`,
         },
       ],
     },
@@ -1362,76 +954,646 @@ DJAC automatically maps incidents to affected regulations:
       pages: [
         {
           id: "enterprise-expansion",
-          title: "Case Study: Enterprise Cross-Border Expansion",
+          title: "Enterprise Cross-Border Expansion",
           summary:
-            "How a Fortune 500 manufacturer used DJAC to achieve simultaneous compliance in China, Saudi Arabia, and the EU for 50+ vendors.",
+            "How a Fortune 500 manufacturer used DJAC to achieve compliance in China, Saudi Arabia, and EU for 50+ vendors.",
           content: `### Background
-
-A global manufacturing company with $2B+ annual revenue needed to expand operations into China, Saudi Arabia, and the EU simultaneously. Their compliance team faced managing PIPL, PDPL, and GDPR requirements across 53 third-party vendors.
+A global manufacturer with $2B+ revenue needed expansion into China, Saudi Arabia, and the EU with 53 vendors across 12 countries.
 
 ### Challenge
-
-- 53 vendors in 12 countries with varying regulatory requirements
-- 3 new jurisdictions with overlapping and conflicting obligations
-- Tight 90-day deadline to achieve compliance before market entry
-- Manual assessment would require 6+ months and $500K+ in consulting fees
+- 53 vendors, 3 new jurisdictions, 90-day deadline
+- Manual assessment: 6+ months, $500K+ consulting fees
 
 ### DJAC Solution
-
-1. **Week 1-2**: Registered all 53 vendors in DJAC with jurisdiction tagging
-2. **Week 2-3**: Ran automated AI assessments for PIPL, PDPL, and GDPR simultaneously
-3. **Week 3-4**: Generated cross-framework gap analysis identifying 312 compliance gaps
-4. **Week 4-8**: Used remediation planner to prioritize and track gap closure
-5. **Week 8-12**: Continuous monitoring confirmed full compliance across all jurisdictions
+1. **Week 1-2**: Registered all 53 vendors
+2. **Week 2-3**: Ran AI assessments for PIPL, PDPL, GDPR
+3. **Week 3-4**: Cross-framework gap analysis — 312 gaps found
+4. **Week 4-8**: Remediation planner tracked gap closure
+5. **Week 8-12**: Continuous monitoring confirmed full compliance
 
 ### Results
-
-- ✅ Achieved full compliance in 82 days (vs. 180-day estimate)
-- ✅ Identified 312 gaps and closed 298 within 60 days
-- ✅ Saved $380K in external consulting fees
-- ✅ Reduced ongoing compliance monitoring cost by 70%
-- ✅ Passed first regulatory audit in each jurisdiction with zero findings`,
+- ✅ Full compliance in 82 days (vs. 180-day estimate)
+- ✅ 312 gaps identified, 298 closed in 60 days
+- ✅ Saved $380K in consulting fees
+- ✅ 70% reduction in ongoing monitoring costs
+- ✅ Zero findings in first regulatory audits`,
         },
         {
           id: "saas-startup",
-          title: "Case Study: SaaS Startup Rapid Compliance",
+          title: "SaaS Startup Rapid Compliance",
           summary:
-            "How a 15-person SaaS startup achieved SOC 2 and GDPR readiness in 30 days using DJAC's automated compliance platform.",
+            "How a 15-person startup achieved SOC 2 and GDPR readiness in 30 days using DJAC.",
           content: `### Background
-
-A Series A SaaS startup with 15 employees needed to demonstrate SOC 2 Type II and GDPR compliance to close enterprise deals. With no dedicated compliance team and a limited budget, they needed an automated solution.
+A Series A startup with 15 employees needed SOC 2 Type II and GDPR compliance to close enterprise deals.
 
 ### Challenge
-
-- No existing compliance program or documentation
-- 7 cloud vendors and sub-processors to assess
-- Enterprise prospects demanding SOC 2 attestation
-- Budget limitation of $5K/month for compliance tools
+- No existing compliance program
+- 7 cloud vendors to assess
+- $5K/month budget for compliance
 
 ### DJAC Solution
-
-1. Onboarded the entire team and set up organization profile
-2. Selected SOC 2 and GDPR frameworks with AI-recommended controls
-3. Registered all 7 vendors and ran automated assessments
-4. Generated policy templates from DJAC's policy manager
-5. Ran continuous compliance checks during auditor review period
+1. Onboarded team, set up org profile
+2. Selected SOC 2 + GDPR with AI-recommended controls
+3. Registered all 7 vendors, ran assessments
+4. Generated policy templates from policy manager
+5. Continuous checks during auditor review
 
 ### Results
-
-- ✅ SOC 2 Type II report delivered in 28 days
-- ✅ GDPR compliance program established in 30 days
-- ✅ Landed 3 enterprise contracts (total $480K ARR)
-- ✅ Ongoing compliance cost under $250/month
-- ✅ Team of 15 manages compliance with 2 hours/week total effort`,
+- ✅ SOC 2 Type II delivered in 28 days
+- ✅ GDPR program established in 30 days
+- ✅ Landed 3 enterprise deals ($480K ARR)
+- ✅ Ongoing compliance cost under $250/month`,
         },
       ],
     },
   ],
+  ar: [],
+  zh: [],
 };
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Arabic (ar) Data — Key sections translated
+   ────────────────────────────────────────────────────────────────────────── */
+
+docsData.ar = [
+  {
+    id: "getting-started",
+    title: "البدء",
+    icon: "book",
+    pages: [
+      {
+        id: "welcome",
+        title: "مرحباً بك في DJAC",
+        summary:
+          "DJAC هي أول منصة ذكاء امتثال تنظيمي مدعومة بالذكاء الاصطناعي عبر 29+ ولاية قضائية.",
+        content: `### ما هو DJAC؟
+DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسسية تعمل على أتمتة الامتثال التنظيمي عبر الصين والسعودية ودول الخليج والاتحاد الأوروبي وأمريكا الشمالية وآسيا والمحيط الهادئ.
+
+### لماذا DJAC؟
+- **29+ ولاية قضائية** — PIPL، PDPL، CSL، DSL، GDPR، ISO 27001، SOC 2 وغيرها
+- **تحليل بالذكاء الاصطناعي** — تقييم امتثال من 8 مراحل مدعوم بـ GPT-4o
+- **مراقبة مستمرة** — تتبع الامتثال مع اكتشاف الفجوات تلقائياً
+- **ذكاء عابر للحدود** — فحص نقل البيانات ومراقبة التغييرات التنظيمية
+- **إدارة مخاطر الموردين** — تقييمات تلقائية عبر جميع الأطر
+- **أمان مؤسسي** — تشفير AES-256، RBAC، سجلات التدقيق
+
+### البدء السريع (5 دقائق)
+1. **إنشاء مؤسستك** — إعداد ملف الشركة والفوترة
+2. **اختيار الولايات القضائية** — الصين، السعودية، الاتحاد الأوروبي أو أي مزيج
+3. **اختيار الأطر** — الذكاء الاصطناعي يوصي باللوائح المناسبة
+4. **تسجيل مورد** — أضف أول مورد خارجي
+5. **تشغيل التقييم** — تقرير امتثال كامل في أقل من 60 ثانية`,
+      },
+      {
+        id: "architecture",
+        title: "معمارية المنصة",
+        summary:
+          "تعمل DJAC على معمارية سحابية أصلية مع React 19 و Express + tRPC و PostgreSQL على Supabase.",
+        content: `### معمارية النظام
+**الواجهة**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4
+**الخادم**: Express 4 + tRPC 11 (200+ إجراء API)
+**قاعدة البيانات**: PostgreSQL 17 على Supabase
+**محرك AI**: OpenAI GPT-4o مع 8 مراحل تقييم
+**المصادقة**: ثلاثي المسار (Clerk OAuth + Supabase Auth + JWT محلي)
+**الفوترة**: Stripe (5 خطط × 4 فترات)
+**الاستضافة**: Vercel (بدون خادم) + Docker`,
+      },
+    ],
+  },
+  {
+    id: "ai-engine",
+    title: "محرك الامتثال الذكي",
+    icon: "zap",
+    pages: [
+      {
+        id: "ai-overview",
+        title: "نظرة عامة على محرك AI",
+        summary:
+          "يستخدم خط أنابيب AI المكون من 8 مراحل GPT-4o لتقييم امتثال الموردين عبر أطر متعددة في وقت واحد.",
+        content: `### خط الأنابيب ذو 8 مراحل
+1. **البواب** — التحقق من المدخلات، كشف الحقن
+2. **الاستيعاب** — تحليل المستندات، تطبيع النص
+3. **المستخرج** — استخراج الحقائق المنظمة
+4. **سياق RAG** — استرجاع ضوابط الامتثال ذات الصلة
+5. **الحكم (GPT-4o)** — تقييم الحقائق مقابل الضوابط
+6. **المركب** — دمج النتائج عبر الأطر
+7. **المدقق** — التحقق من اتساق المخطط
+8. **المراسل** — إخراج نهائي (PDF/DOCX/JSON)`,
+      },
+    ],
+  },
+  {
+    id: "frameworks",
+    title: "أطر الامتثال",
+    icon: "shield",
+    pages: [
+      {
+        id: "jurisdictions",
+        title: "الولايات القضائية المدعومة",
+        summary:
+          "تغطي DJAC أكثر من 29 ولاية قضائية عبر آسيا والمحيط الهادئ وأوروبا والشرق الأوسط وأمريكا الشمالية وأفريقيا.",
+        content: `### منطقة آسيا والمحيط الهادئ
+- **الصين** — PIPL، CSL، DSL، MLPS 2.0
+- **اليابان** — APPI
+- **كوريا الجنوبية** — PIPA
+- **سنغافورة** — PDPA
+- **الهند** — DPDP Act
+- **أستراليا** — Privacy Act 1988
+
+### الشرق الأوسط / الخليج
+- **السعودية** — PDPL، NCA ECC / CSCC / OCC
+- **الإمارات** — UAE PDPL
+- **قطر** — Qatar PDPPL
+- **البحرين** — Bahrain PDPL
+- **الكويت** — Kuwait DPA
+
+### أوروبا
+- **الاتحاد الأوروبي** — GDPR، NIS2، DORA
+- **المملكة المتحدة** — UK GDPR / DPA 2018
+
+### أمريكا الشمالية
+- **الولايات المتحدة** — HIPAA، CCPA/CPRA، SOX، PCI DSS
+- **كندا** — PIPEDA`,
+      },
+    ],
+  },
+  {
+    id: "security-compliance",
+    title: "الأمان والامتثال",
+    icon: "lock",
+    pages: [
+      {
+        id: "security-overview",
+        title: "معمارية الأمان",
+        summary:
+          "تطبق DJAC دفاعاً متعدد الطبقات عبر المصادقة والترخيص وحماية البيانات والبنية التحتية.",
+        content: `### دفاع متعدد الطبقات
+**المصادقة:**
+- كلمات مرور مشفرة بـ bcrypt (12 جولة)
+- رموز JWT موقعة بـ HS256
+- ملفات تعريف HTTP-only، Secure، SameSite
+- TOTP MFA مع رموز احتياطية
+- إعادة تعيين كلمة المرور بـ OTP (SHA-256، صلاحية 5 دقائق)
+
+**الترخيص:**
+- 7 أدوار منصة + 4 أدوار مؤسسة
+- 32 وحدة بصلاحيات محددة
+- أمان مستوى الصف على جميع جداول PostgreSQL
+
+**حماية البيانات:**
+- TLS 1.3 للنقل
+- تشفير AES-256 في السكون
+- الأسرار في Vercel + GitHub Actions`,
+      },
+    ],
+  },
+  {
+    id: "developer-guide",
+    title: "دليل المطور",
+    icon: "code",
+    pages: [
+      {
+        id: "dev-setup",
+        title: "إعداد بيئة التطوير",
+        summary:
+          "إعداد بيئتك المحلية مع Node.js 20+ و pnpm 10+ و Docker لـ Supabase.",
+        content: `### المتطلبات الأساسية
+- Node.js 20+
+- pnpm 10+ (\`npm install -g pnpm@10\`)
+- Docker Desktop
+- Supabase CLI
+
+### الإعداد الأولي
+\`\`\`bash
+git clone <repo-url> djac && cd djac
+pnpm install
+cp .env.example .env
+supabase start
+pnpm db:push
+pnpm seed:data
+pnpm dev
+\`\`\`
+
+### تجاوز المصادقة للتطوير
+\`\`\`env
+DEV_AUTH_BYPASS=true
+DEV_AUTH_EMAIL=dev@example.com
+DEV_AUTH_ROLE=super_admin
+\`\`\``,
+      },
+    ],
+  },
+  {
+    id: "billing-plans",
+    title: "الفوترة والخطط",
+    icon: "card",
+    pages: [
+      {
+        id: "pricing-overview",
+        title: "نظرة عامة على الأسعار",
+        summary:
+          "خطط اشتراك مرنة للفرق من جميع الأحجام — من الشركات الناشئة إلى المؤسسات العالمية.",
+        content: `### مقارنة الخطط
+| الميزة | تجربة مجانية | Starter | Professional | Enterprise |
+|---------|-----------|---------|-------------|------------|
+| الولايات القضائية | 1 | 3 | 10 | غير محدود |
+| الموردين | 5 | 25 | 100 | غير محدود |
+| تقييمات AI/شهر | 3 | 20 | 100 | مخصص |
+| أعضاء الفريق | 2 | 10 | 50 | غير محدود |
+| وصول API | — | — | ✓ | ✓ |
+| دعم متميز | — | — | ✓ | ✓ |
+| SLA | — | 99.5% | 99.9% | 99.95% |
+
+### تجربة مجانية
+- 14 يوماً على خطة Starter
+- لا حاجة لبطاقة ائتمان
+- وصول كامل لجميع ميزات Starter`,
+      },
+    ],
+  },
+];
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Chinese (zh) Data — Key sections translated
+   ────────────────────────────────────────────────────────────────────────── */
+
+docsData.zh = [
+  {
+    id: "getting-started",
+    title: "入门指南",
+    icon: "book",
+    pages: [
+      {
+        id: "welcome",
+        title: "欢迎使用 DJAC",
+        summary:
+          "DJAC 是全球首个AI驱动的跨司法管辖区合规智能平台，覆盖29+个司法管辖区。",
+        content: `### 什么是 DJAC？
+DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理中国、沙特、海湾合作委员会、欧盟、北美和亚太地区的监管合规。
+
+### 为什么选择 DJAC？
+- **29+ 司法管辖区** — PIPL、PDPL、CSL、DSL、GDPR、ISO 27001、SOC 2等
+- **AI驱动分析** — GPT-4o驱动的8阶段合规评估流程
+- **实时监控** — 持续合规跟踪，自动检测差距
+- **跨境智能** — 数据传输合规检查器和监管变化监控
+- **供应商风险管理** — 跨所有选定框架的自动第三方评估
+- **企业级安全** — AES-256加密、RBAC、审计跟踪、SOC 2就绪
+
+### 快速开始（5分钟）
+1. **创建您的组织** — 设置公司资料和账单
+2. **选择司法管辖区** — 中国、沙特、欧盟或任意组合
+3. **选择框架** — AI自动推荐相关法规
+4. **注册供应商** — 添加您的第一个第三方供应商
+5. **运行评估** — AI在60秒内生成完整的合规报告`,
+      },
+      {
+        id: "architecture",
+        title: "平台架构",
+        summary:
+          "DJAC在云原生架构上运行，使用React 19、Express + tRPC、PostgreSQL（Supabase）、Redis和OpenAI GPT-4o。",
+        content: `### 系统架构
+**前端**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4
+**后端**: Express 4 + tRPC 11（200+ API程序）
+**数据库**: PostgreSQL 17 on Supabase
+**AI引擎**: OpenAI GPT-4o，8阶段评估流程
+**身份验证**: 三路径（Clerk OAuth + Supabase Auth + 本地JWT）
+**计费**: Stripe（5个计划 × 4个周期）
+**托管**: Vercel（无服务器）+ Docker`,
+      },
+    ],
+  },
+  {
+    id: "ai-engine",
+    title: "AI合规引擎",
+    icon: "zap",
+    pages: [
+      {
+        id: "ai-overview",
+        title: "AI引擎概述",
+        summary: "DJAC的8阶段AI流程使用GPT-4o同时评估多个框架的供应商合规性。",
+        content: `### 8阶段流程
+1. **守门人** — 输入验证、注入检测
+2. **摄入** — 文档解析、文本规范化
+3. **提取器** — 结构化事实提取
+4. **RAG上下文** — 检索增强生成：从PostgreSQL提取相关合规控制
+5. **法官（GPT-4o）** — 评估事实与适用控制要求
+6. **合成器** — 合并发现结果，生成跨框架比较
+7. **验证器** — 模式验证、跨字段一致性
+8. **报告器** — 最终格式化输出（PDF/DOCX/JSON）`,
+      },
+    ],
+  },
+  {
+    id: "frameworks",
+    title: "合规框架",
+    icon: "shield",
+    pages: [
+      {
+        id: "jurisdictions",
+        title: "支持的司法管辖区",
+        summary:
+          "DJAC覆盖亚太、欧洲、中东、北美和非洲29+个司法管辖区的综合监管框架。",
+        content: `### 亚太地区
+- **中国** — PIPL、CSL、DSL、MLPS 2.0
+- **日本** — APPI
+- **韩国** — PIPA
+- **新加坡** — PDPA
+- **印度** — DPDP Act
+- **澳大利亚** — Privacy Act 1988
+
+### 中东/海湾地区
+- **沙特阿拉伯** — PDPL、NCA ECC / CSCC / OCC
+- **阿联酋** — UAE PDPL
+- **卡塔尔** — Qatar PDPPL
+- **巴林** — Bahrain PDPL
+- **科威特** — Kuwait DPA
+
+### 欧洲
+- **欧盟/欧洲经济区** — GDPR、NIS2、DORA
+- **英国** — UK GDPR / DPA 2018
+
+### 北美
+- **美国** — HIPAA、CCPA/CPRA、SOX、PCI DSS
+- **加拿大** — PIPEDA`,
+      },
+    ],
+  },
+  {
+    id: "security-compliance",
+    title: "安全与合规",
+    icon: "lock",
+    pages: [
+      {
+        id: "security-overview",
+        title: "安全架构",
+        summary:
+          "DJAC实施深度防御，覆盖身份验证、授权、数据保护和基础设施层面。",
+        content: `### 深度防御
+**身份验证：**
+- bcrypt密码哈希（12轮）
+- HS256签名的JWT令牌
+- HTTP-only、Secure、SameSite Cookies
+- 基于TOTP的MFA及备份码
+- 基于OTP的密码重置（SHA-256，5分钟有效期）
+
+**授权：**
+- 7个平台角色 + 4个组织角色
+- 32个权限控制模块
+- 所有PostgreSQL表的行级安全
+
+**数据保护：**
+- 传输中TLS 1.3
+- 静态AES-256加密
+- 密钥存储于Vercel + GitHub Actions`,
+      },
+    ],
+  },
+  {
+    id: "developer-guide",
+    title: "开发者指南",
+    icon: "code",
+    pages: [
+      {
+        id: "dev-setup",
+        title: "开发环境设置",
+        summary:
+          "使用Node.js 20+、pnpm 10+、Docker for Supabase设置本地开发环境。",
+        content: `### 前提条件
+- Node.js 20+
+- pnpm 10+ (\`npm install -g pnpm@10\`)
+- Docker Desktop
+- Supabase CLI
+
+### 首次设置
+\`\`\`bash
+git clone <repo-url> djac && cd djac
+pnpm install
+cp .env.example .env
+supabase start
+pnpm db:push
+pnpm seed:data
+pnpm dev
+\`\`\`
+
+### 开发认证绕过
+\`\`\`env
+DEV_AUTH_BYPASS=true
+DEV_AUTH_EMAIL=dev@example.com
+DEV_AUTH_ROLE=super_admin
+\`\`\``,
+      },
+    ],
+  },
+  {
+    id: "billing-plans",
+    title: "计费与计划",
+    icon: "card",
+    pages: [
+      {
+        id: "pricing-overview",
+        title: "定价概览",
+        summary: "为各规模团队提供灵活的订阅计划——从初创公司到全球企业。",
+        content: `### 计划对比
+| 功能 | 免费试用 | Starter | Professional | Enterprise |
+|---------|-----------|---------|-------------|------------|
+| 司法管辖区 | 1 | 3 | 10 | 无限制 |
+| 供应商 | 5 | 25 | 100 | 无限制 |
+| AI评估/月 | 3 | 20 | 100 | 定制 |
+| 团队成员 | 2 | 10 | 50 | 无限制 |
+| API访问 | — | — | ✓ | ✓ |
+| 优先支持 | — | — | ✓ | ✓ |
+| SLA | — | 99.5% | 99.9% | 99.95% |
+
+### 免费试用
+- Starter计划14天免费试用
+- 无需信用卡
+- 完整访问所有Starter功能`,
+      },
+    ],
+  },
+];
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Helper: Extract TOC from content
+   ────────────────────────────────────────────────────────────────────────── */
+
+function extractToc(content: string): TocEntry[] {
+  const entries: TocEntry[] = [];
+  const lines = content.split("\n");
+  for (const line of lines) {
+    const h3 = line.match(/^### (.+)/);
+    const h4 = line.match(/^#### (.+)/);
+    if (h3)
+      entries.push({
+        level: 3,
+        text: h3[1],
+        id: h3[1]
+          .toLowerCase()
+          .replace(/[^a-z0-9\u0600-\u06FF\u4e00-\u9fff]+/g, "-")
+          .replace(/^-|-$/g, ""),
+      });
+    else if (h4)
+      entries.push({
+        level: 4,
+        text: h4[1],
+        id: h4[1]
+          .toLowerCase()
+          .replace(/[^a-z0-9\u0600-\u06FF\u4e00-\u9fff]+/g, "-")
+          .replace(/^-|-$/g, ""),
+      });
+  }
+  return entries;
+}
 
 function getDocSections(locale: string): DocSection[] {
   return docsData[locale] || docsData.en;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Sub-component: CodeBlock
+   ────────────────────────────────────────────────────────────────────────── */
+
+function CodeBlock({ code, lang }: { code: string; lang?: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [code]);
+  return (
+    <div className="relative my-4 rounded-lg border bg-zinc-950 dark:bg-zinc-900 overflow-hidden group">
+      {lang && (
+        <div className="flex items-center justify-between px-4 py-1.5 border-b border-zinc-800">
+          <span className="text-xs font-mono text-zinc-400">{lang}</span>
+          <button
+            onClick={copy}
+            className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            {copied ? (
+              <Check className="h-3.5 w-3.5" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
+          </button>
+        </div>
+      )}
+      <pre className="p-4 overflow-x-auto text-sm leading-relaxed">
+        <code className="font-mono text-zinc-200">{code}</code>
+      </pre>
+      {!lang && (
+        <button
+          onClick={copy}
+          className="absolute top-2 right-2 p-1.5 rounded-md bg-zinc-800/80 text-zinc-500 hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Sub-component: Admonition
+   ────────────────────────────────────────────────────────────────────────── */
+
+const ADMONITION_STYLES: Record<
+  string,
+  {
+    icon: React.ComponentType<{ className?: string }>;
+    bg: string;
+    border: string;
+    text: string;
+  }
+> = {
+  tip: {
+    icon: Lightbulb,
+    bg: "bg-emerald-50/50 dark:bg-emerald-950/20",
+    border: "border-emerald-200/50 dark:border-emerald-800/30",
+    text: "text-emerald-700 dark:text-emerald-300",
+  },
+  info: {
+    icon: Info,
+    bg: "bg-blue-50/50 dark:bg-blue-950/20",
+    border: "border-blue-200/50 dark:border-blue-800/30",
+    text: "text-blue-700 dark:text-blue-300",
+  },
+  warning: {
+    icon: AlertTriangle,
+    bg: "bg-amber-50/50 dark:bg-amber-950/20",
+    border: "border-amber-200/50 dark:border-amber-800/30",
+    text: "text-amber-700 dark:text-amber-300",
+  },
+  danger: {
+    icon: X,
+    bg: "bg-red-50/50 dark:bg-red-950/20",
+    border: "border-red-200/50 dark:border-red-800/30",
+    text: "text-red-700 dark:text-red-300",
+  },
+};
+
+function Admonition({ type, children }: { type: string; children: string }) {
+  const style = ADMONITION_STYLES[type] || ADMONITION_STYLES.info;
+  const Icon = style.icon;
+  return (
+    <div className={`my-4 p-4 rounded-lg border ${style.bg} ${style.border}`}>
+      <div className="flex items-start gap-3">
+        <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${style.text}`} />
+        <p className={`text-sm ${style.text}`}>{children}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Sub-component: BreadcrumbNav
+   ────────────────────────────────────────────────────────────────────────── */
+
+function BreadcrumbNav({
+  section,
+  page,
+}: {
+  section: DocSection | null;
+  page: DocPage | null;
+}) {
+  const [, navigate] = useLocation();
+  return (
+    <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 flex-wrap">
+      <button
+        onClick={() => navigate("/docs")}
+        className="hover:text-foreground transition-colors flex items-center gap-1"
+      >
+        <Home className="h-3.5 w-3.5" />
+        <span>Docs</span>
+      </button>
+      {section && (
+        <>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <button
+            onClick={() => navigate(`/docs/${section.id}`)}
+            className="hover:text-foreground transition-colors"
+          >
+            {section.title}
+          </button>
+        </>
+      )}
+      {page && (
+        <>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <span className="text-foreground">{page.title}</span>
+        </>
+      )}
+    </nav>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Main Component
+   ────────────────────────────────────────────────────────────────────────── */
 
 export default function DocsPortal() {
   usePageTitle("Documentation");
@@ -1442,6 +1604,9 @@ export default function DocsPortal() {
     new Set(["getting-started"])
   );
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [activeTocId, setActiveTocId] = useState<string>("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const sections = useMemo(() => getDocSections(locale), [locale]);
 
@@ -1449,24 +1614,80 @@ export default function DocsPortal() {
   const [currentSectionId, currentPageId] = currentPath
     ? currentPath.split("/")
     : [null, null];
+  const isHome = !currentSectionId && !currentPageId;
 
   const currentSection = useMemo(() => {
-    if (!currentSectionId) return sections[0];
-    return sections.find(s => s.id === currentSectionId) || sections[0];
+    if (!currentSectionId) return null;
+    return sections.find(s => s.id === currentSectionId) || null;
   }, [sections, currentSectionId]);
 
   const currentPage = useMemo(() => {
-    if (!currentPageId) return currentSection.pages[0];
+    if (!currentSection || !currentPageId)
+      return currentSection?.pages[0] || null;
     return (
       currentSection.pages.find(p => p.id === currentPageId) ||
       currentSection.pages[0]
     );
   }, [currentSection, currentPageId]);
 
+  const toc = useMemo(
+    () => (currentPage ? extractToc(currentPage.content) : []),
+    [currentPage]
+  );
+
+  // Prev / Next navigation
+  const { prevPage, nextPage, prevSection, nextSection } = useMemo(() => {
+    if (!currentSection || !currentPage)
+      return {
+        prevPage: null,
+        nextPage: null,
+        prevSection: null,
+        nextSection: null,
+      };
+    const secIdx = sections.indexOf(currentSection);
+    const pageIdx = currentSection.pages.indexOf(currentPage);
+    let prevPage: { sectionId: string; pageId: string; title: string } | null =
+      null;
+    let nextPage: { sectionId: string; pageId: string; title: string } | null =
+      null;
+    let prevSection: { id: string; title: string } | null = null;
+    let nextSection: { id: string; title: string } | null = null;
+
+    if (pageIdx > 0) {
+      const p = currentSection.pages[pageIdx - 1];
+      prevPage = { sectionId: currentSection.id, pageId: p.id, title: p.title };
+    } else if (secIdx > 0) {
+      const prevSec = sections[secIdx - 1];
+      const lastPage = prevSec.pages[prevSec.pages.length - 1];
+      prevPage = {
+        sectionId: prevSec.id,
+        pageId: lastPage.id,
+        title: lastPage.title,
+      };
+      prevSection = { id: prevSec.id, title: prevSec.title };
+    }
+
+    if (pageIdx < currentSection.pages.length - 1) {
+      const p = currentSection.pages[pageIdx + 1];
+      nextPage = { sectionId: currentSection.id, pageId: p.id, title: p.title };
+    } else if (secIdx < sections.length - 1) {
+      const nextSec = sections[secIdx + 1];
+      nextPage = {
+        sectionId: nextSec.id,
+        pageId: nextSec.pages[0].id,
+        title: nextSec.pages[0].title,
+      };
+      nextSection = { id: nextSec.id, title: nextSec.title };
+    }
+
+    return { prevPage, nextPage, prevSection, nextSection };
+  }, [currentSection, currentPage, sections]);
+
   const navigateToPage = useCallback(
     (sectionId: string, pageId: string) => {
       navigate(`/docs/${sectionId}/${pageId}`);
       setMobileSidebarOpen(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     [navigate]
   );
@@ -1507,125 +1728,464 @@ export default function DocsPortal() {
     }
   }, [currentSectionId]);
 
-  const renderContent = (text: string) => {
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        setMobileSidebarOpen(false);
+        searchRef.current?.blur();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Scroll-based active TOC tracking
+  useEffect(() => {
+    if (toc.length === 0) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        const visible = entries.filter(e => e.isIntersecting);
+        if (visible.length > 0) setActiveTocId(visible[0].target.id);
+      },
+      { rootMargin: "-80px 0px -70% 0px" }
+    );
+    toc.forEach(entry => {
+      const el = document.getElementById(entry.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [toc, currentPage]);
+
+  /* ── Content Renderer ────────────────────────────────────────────────── */
+
+  const renderContent = useCallback((text: string) => {
     const lines = text.split("\n");
+    const elements: React.ReactNode[] = [];
+    let i = 0;
+    let inCodeBlock = false;
+    let codeBlockLines: string[] = [];
+    let codeBlockLang = "";
 
-    return lines
-      .map((line, i) => {
-        if (!line.trim()) return <div key={i} className="h-3" />;
+    const flushCodeBlock = () => {
+      if (codeBlockLines.length > 0) {
+        elements.push(
+          <CodeBlock
+            key={`code-${i}`}
+            code={codeBlockLines.join("\n")}
+            lang={codeBlockLang || undefined}
+          />
+        );
+        codeBlockLines = [];
+        codeBlockLang = "";
+      }
+      inCodeBlock = false;
+    };
 
-        const boldify = (t: string) => {
-          const parts = t.split(/(\*\*[^*]+\*\*)/g);
-          return parts.map((part, pi) => {
-            if (part.startsWith("**") && part.endsWith("**")) {
-              return (
-                <strong key={pi} className="font-semibold text-foreground">
-                  {part.slice(2, -2)}
-                </strong>
-              );
-            }
-            return part;
-          });
-        };
+    const boldify = (t: string): React.ReactNode => {
+      const parts = t.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+      return parts.map((part, pi) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return (
+            <strong key={pi} className="font-semibold text-foreground">
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        if (part.startsWith("`") && part.endsWith("`")) {
+          return (
+            <code
+              key={pi}
+              className="px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[0.85em] font-mono text-foreground"
+            >
+              {part.slice(1, -1)}
+            </code>
+          );
+        }
+        return part;
+      });
+    };
 
-        if (line.startsWith("### ")) {
-          return (
-            <h3
-              key={i}
-              className="djac-h3 text-foreground mt-8 mb-3 font-semibold"
-            >
-              {boldify(line.replace("### ", ""))}
-            </h3>
-          );
+    for (; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Code blocks
+      if (line.startsWith("```")) {
+        if (inCodeBlock) {
+          flushCodeBlock();
+        } else {
+          inCodeBlock = true;
+          codeBlockLang = line.slice(3).trim();
         }
-        if (line.startsWith("#### ")) {
-          return (
-            <h4
-              key={i}
-              className="text-base font-semibold text-foreground mt-6 mb-2"
-            >
-              {boldify(line.replace("#### ", ""))}
-            </h4>
-          );
-        }
-        if (line.startsWith("- **")) {
-          const match = line.match(/- \*\*(.+?)\*\*(.+)/);
-          if (match) {
-            return (
-              <div
-                key={i}
-                className="flex items-start gap-2 ml-2 my-1 text-sm djac-body"
-              >
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
-                <span>
-                  <strong>{match[1]}</strong>
-                  {match[2]}
-                </span>
-              </div>
-            );
-          }
-        }
-        if (line.startsWith("- ")) {
-          return (
-            <div
-              key={i}
-              className="flex items-start gap-2 ml-2 my-0.5 text-sm djac-body"
-            >
-              <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
-              <span>{boldify(line.replace("- ", ""))}</span>
-            </div>
-          );
-        }
-        if (line.startsWith("| ")) {
-          const cells = line
-            .split("|")
-            .filter(Boolean)
-            .map(c => c.trim());
-          const isSeparator = cells.every(c => /^-{3,}$/.test(c));
-          if (isSeparator) return null;
-          return (
-            <div
-              key={i}
-              className="grid text-sm djac-body gap-2 py-1.5 px-3 border-t border-border/50"
-              style={{
-                gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))`,
-              }}
-            >
-              {cells.map((cell, ci) => (
-                <span key={ci}>{boldify(cell)}</span>
-              ))}
-            </div>
-          );
-        }
-        if (line.startsWith("1. ") || /^\d+\.\s/.test(line)) {
-          const num = line.match(/^(\d+)\./)?.[1] || "";
-          const rest = line.replace(/^\d+\.\s*/, "");
-          return (
+        continue;
+      }
+      if (inCodeBlock) {
+        codeBlockLines.push(line);
+        continue;
+      }
+
+      if (!line.trim()) {
+        elements.push(<div key={i} className="h-3" />);
+        continue;
+      }
+
+      // Admonitions
+      const admonMatch = line.match(
+        /^> \*\*(tip|info|warning|danger)\*\* (.+)/
+      );
+      if (admonMatch) {
+        elements.push(
+          <Admonition key={i} type={admonMatch[1]}>
+            {admonMatch[2]}
+          </Admonition>
+        );
+        continue;
+      }
+
+      // Headings with anchor IDs
+      const h3Match = line.match(/^### (.+)/);
+      const h4Match = line.match(/^#### (.+)/);
+      if (h3Match) {
+        const text = h3Match[1];
+        const id = text
+          .toLowerCase()
+          .replace(/[^a-z0-9\u0600-\u06FF\u4e00-\u9fff]+/g, "-")
+          .replace(/^-|-$/g, "");
+        elements.push(
+          <h3
+            key={i}
+            id={id}
+            className="djac-docs-h3 text-foreground mt-10 mb-3 font-semibold text-lg"
+          >
+            {boldify(text)}
+          </h3>
+        );
+        continue;
+      }
+      if (h4Match) {
+        const text = h4Match[1];
+        const id = text
+          .toLowerCase()
+          .replace(/[^a-z0-9\u0600-\u06FF\u4e00-\u9fff]+/g, "-")
+          .replace(/^-|-$/g, "");
+        elements.push(
+          <h4
+            key={i}
+            id={id}
+            className="text-base font-semibold text-foreground mt-8 mb-2"
+          >
+            {boldify(text)}
+          </h4>
+        );
+        continue;
+      }
+
+      // Bold list items with checkmark
+      if (line.startsWith("- **")) {
+        const match = line.match(/- \*\*(.+?)\*\*(.+)/);
+        if (match) {
+          elements.push(
             <div
               key={i}
               className="flex items-start gap-2 ml-2 my-1 text-sm djac-body"
             >
-              <span className="font-semibold text-primary w-5 shrink-0">
-                {num}.
+              <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+              <span>
+                <strong>{match[1]}</strong>
+                {match[2]}
               </span>
-              <span>{boldify(rest)}</span>
             </div>
           );
+          continue;
         }
-        return (
-          <p key={i} className="text-sm djac-body my-1">
-            {boldify(line)}
-          </p>
-        );
-      })
-      .filter(el => el !== null);
-  };
+      }
 
-  const StatSectionIcon = ICONS[currentSection.icon] || BookOpen;
+      // Regular list items
+      if (line.startsWith("- ")) {
+        elements.push(
+          <div
+            key={i}
+            className="flex items-start gap-2 ml-2 my-0.5 text-sm djac-body"
+          >
+            <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
+            <span>{boldify(line.replace("- ", ""))}</span>
+          </div>
+        );
+        continue;
+      }
+
+      // Tables
+      if (line.startsWith("| ")) {
+        const cells = line
+          .split("|")
+          .filter(Boolean)
+          .map(c => c.trim());
+        const isSep = cells.every(c => /^-{3,}$/.test(c));
+        if (isSep) continue;
+        elements.push(
+          <div
+            key={i}
+            className="grid text-sm djac-body gap-2 py-1.5 px-3 border-t border-border/50"
+            style={{
+              gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))`,
+            }}
+          >
+            {cells.map((cell, ci) => (
+              <span key={ci}>{boldify(cell)}</span>
+            ))}
+          </div>
+        );
+        continue;
+      }
+
+      // Numbered lists
+      if (/^\d+\.\s/.test(line)) {
+        const num = line.match(/^(\d+)\./)?.[1] || "";
+        const rest = line.replace(/^\d+\.\s*/, "");
+        elements.push(
+          <div
+            key={i}
+            className="flex items-start gap-2 ml-2 my-1 text-sm djac-body"
+          >
+            <span className="font-semibold text-primary w-5 shrink-0">
+              {num}.
+            </span>
+            <span>{boldify(rest)}</span>
+          </div>
+        );
+        continue;
+      }
+
+      elements.push(
+        <p key={i} className="text-sm djac-body my-1">
+          {boldify(line)}
+        </p>
+      );
+    }
+
+    flushCodeBlock();
+    return elements;
+  }, []);
+
+  /* ────────────────────────────────────────────────────────────────────────
+     Home Landing Page
+     ──────────────────────────────────────────────────────────────────────── */
+
+  if (isHome) {
+    return (
+      <div className="djac-page djac-docs-portal">
+        <div className="djac-docs-mobile-toggle">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+          >
+            <BookOpen className="h-4 w-4 mr-2" />
+            {mobileSidebarOpen
+              ? t("docs.close_menu", "Close Menu")
+              : t("docs.mobile_menu", "Documentation Menu")}
+          </Button>
+        </div>
+
+        <div className="djac-docs-layout">
+          {/* Home Sidebar */}
+          <aside
+            className={`djac-docs-sidebar ${mobileSidebarOpen ? "djac-docs-sidebar-open" : ""}`}
+          >
+            <div className="djac-docs-sidebar-header">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <span className="font-semibold text-sm">
+                  {t("docs.sidebar_title", "Documentation")}
+                </span>
+              </div>
+            </div>
+            <div className="px-3 py-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  ref={searchRef}
+                  placeholder={t("docs.search_placeholder", "Search docs...")}
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-8 h-8 text-xs"
+                />
+                <kbd className="absolute right-2 top-1.5 px-1.5 py-0.5 rounded text-[10px] font-mono text-muted-foreground bg-muted border hidden sm:block">
+                  ⌘K
+                </kbd>
+              </div>
+            </div>
+            <nav className="djac-docs-nav">
+              {filteredSections.map(section => {
+                const isExpanded = expandedSections.has(section.id);
+                const SecIcon = ICONS[section.icon] || BookOpen;
+                return (
+                  <div key={section.id} className="mb-0.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(section.id)}
+                      className="djac-docs-section-btn"
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+                      ) : (
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                      )}
+                      <SecIcon className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{section.title}</span>
+                    </button>
+                    {isExpanded && (
+                      <div className="ml-2">
+                        {section.pages.map(page => (
+                          <button
+                            key={page.id}
+                            type="button"
+                            onClick={() => navigateToPage(section.id, page.id)}
+                            className="djac-docs-page-btn"
+                          >
+                            <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
+                            <span className="truncate text-xs">
+                              {page.title}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
+            <div className="djac-docs-sidebar-footer">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Globe className="h-3 w-3" />
+                <span>{locale.toUpperCase()}</span>
+              </div>
+            </div>
+          </aside>
+
+          {/* Home Content */}
+          <main className="djac-docs-content">
+            <div className="max-w-4xl">
+              {/* Hero */}
+              <div className="mb-12">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {locale.toUpperCase()}
+                  </Badge>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">
+                  DJAC Documentation
+                </h1>
+                <p className="text-base text-muted-foreground max-w-2xl">
+                  Everything you need to deploy, configure, and master the DJAC
+                  compliance intelligence platform. From quick-start guides to
+                  deep API references and security architecture.
+                </p>
+                <div className="flex flex-wrap gap-3 mt-6">
+                  <Button
+                    onClick={() => navigate("/docs/getting-started/welcome")}
+                  >
+                    Get Started
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      navigate("/docs/api-integration/api-reference")
+                    }
+                  >
+                    <Terminal className="h-4 w-4 mr-2" />
+                    API Reference
+                  </Button>
+                </div>
+              </div>
+
+              {/* Feature Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+                {homeFeatures.map(f => {
+                  const FIcon = ICONS[f.icon] || BookOpen;
+                  return (
+                    <button
+                      key={f.title}
+                      onClick={() => navigate(f.link)}
+                      className="djac-glass-card p-5 text-left hover:border-primary/40 transition-all hover:shadow-lg group cursor-pointer"
+                    >
+                      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 mb-3 group-hover:bg-primary/20 transition-colors">
+                        <FIcon className="h-4.5 w-4.5 text-primary" />
+                      </div>
+                      <h3 className="font-semibold text-sm mb-1.5">
+                        {f.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {f.desc}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quick Links */}
+              <div className="mb-12">
+                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <List className="h-5 w-5 text-primary" />
+                  Quick Links
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {quickLinks.map(link => (
+                    <button
+                      key={link.path}
+                      onClick={() => navigate(link.path)}
+                      className="flex items-center gap-2 p-3 rounded-lg border hover:border-primary/40 hover:bg-accent transition-all text-sm"
+                    >
+                      <ChevronRight className="h-4 w-4 text-primary shrink-0" />
+                      <span>{link.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="djac-docs-next">
+                <h3 className="text-lg font-bold mb-3">
+                  {t("docs.cta_ready", "Ready to get started?")}
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  <Button onClick={() => navigate("/signup")}>
+                    {t("docs.cta_trial", "Start Free Trial")}
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate("/pricing")}
+                  >
+                    {t("docs.cta_pricing", "View Pricing")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     Content Page
+     ──────────────────────────────────────────────────────────────────────── */
+
+  if (!currentSection || !currentPage) {
+    return null;
+  }
 
   return (
     <div className="djac-page djac-docs-portal">
-      {/* ── Mobile sidebar toggle ──────────────────────────────────────── */}
       <div className="djac-docs-mobile-toggle">
         <Button
           variant="outline"
@@ -1640,37 +2200,41 @@ export default function DocsPortal() {
       </div>
 
       <div className="djac-docs-layout">
-        {/* ── Sidebar ───────────────────────────────────────────────────── */}
+        {/* ── Sidebar ─────────────────────────────────────────────────── */}
         <aside
           className={`djac-docs-sidebar ${mobileSidebarOpen ? "djac-docs-sidebar-open" : ""}`}
         >
           <div className="djac-docs-sidebar-header">
-            <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("/docs")}
+              className="flex items-center gap-2 hover:text-primary transition-colors"
+            >
               <BookOpen className="h-5 w-5 text-primary" />
               <span className="font-semibold text-sm">
                 {t("docs.sidebar_title", "Documentation")}
               </span>
-            </div>
+            </button>
           </div>
-
           <div className="px-3 py-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <Input
+                ref={searchRef}
                 placeholder={t("docs.search_placeholder", "Search docs...")}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="pl-8 h-8 text-xs"
               />
+              <kbd className="absolute right-2 top-1.5 px-1.5 py-0.5 rounded text-[10px] font-mono text-muted-foreground bg-muted border hidden sm:block">
+                ⌘K
+              </kbd>
             </div>
           </div>
-
           <nav className="djac-docs-nav">
             {filteredSections.map(section => {
               const isExpanded = expandedSections.has(section.id);
               const isActive = currentSectionId === section.id;
               const SecIcon = ICONS[section.icon] || BookOpen;
-
               return (
                 <div key={section.id} className="mb-0.5">
                   <button
@@ -1712,7 +2276,6 @@ export default function DocsPortal() {
               );
             })}
           </nav>
-
           <div className="djac-docs-sidebar-footer">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Globe className="h-3 w-3" />
@@ -1721,209 +2284,304 @@ export default function DocsPortal() {
           </div>
         </aside>
 
-        {/* ── Content ───────────────────────────────────────────────────── */}
-        <main className="djac-docs-content">
-          {/* Section header */}
-          <div className="djac-docs-section-header">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-              <StatSectionIcon className="h-4 w-4" />
-              <span>{currentSection.title}</span>
+        {/* ── Content ─────────────────────────────────────────────────── */}
+        <main className="djac-docs-content" ref={contentRef}>
+          <article className="djac-docs-page-wrapper">
+            {/* Breadcrumbs */}
+            <BreadcrumbNav section={currentSection} page={currentPage} />
+
+            {/* Header */}
+            <div className="djac-docs-section-header">
+              <h1 className="djac-display text-2xl sm:text-3xl font-bold">
+                {currentPage.title}
+              </h1>
+              <p className="text-sm djac-body text-muted-foreground mt-2 max-w-3xl">
+                {currentPage.summary}
+              </p>
             </div>
-            <h1 className="djac-display text-2xl sm:text-3xl font-bold">
-              {currentPage.title}
-            </h1>
-            <p className="text-sm djac-body text-muted-foreground mt-2 max-w-3xl">
-              {currentPage.summary}
-            </p>
-          </div>
 
-          {/* Main content */}
-          <div className="djac-docs-article">
-            {useMemo(
-              () => renderContent(currentPage.content),
-              [currentPage.content]
-            )}
-          </div>
+            {/* Body + TOC Grid */}
+            <div className="djac-docs-body-grid">
+              {/* Article */}
+              <div className="djac-docs-article">
+                {useMemo(
+                  () => renderContent(currentPage.content),
+                  [currentPage.content, renderContent]
+                )}
+              </div>
 
-          {/* Diagram */}
-          {currentPage.diagram && (
-            <div className="djac-docs-diagram">
-              <div className="flex items-center gap-2 mb-3">
-                <Network className="h-4 w-4 text-primary" />
-                <span className="text-sm font-semibold">
-                  {t("docs.architecture_diagram", "Architecture Diagram")}
-                </span>
-              </div>
-              <div className="djac-glass-card p-4 text-center text-sm font-mono text-foreground">
-                {currentPage.diagram}
-              </div>
-            </div>
-          )}
-
-          {/* Case Study */}
-          {currentPage.caseStudy && (
-            <div className="djac-docs-casestudy">
-              <div className="flex items-center gap-2 mb-4">
-                <Star className="h-5 w-5 text-amber-500" />
-                <h2 className="djac-h2 text-xl font-bold">
-                  {t("docs.case_study", "Case Study")}
-                </h2>
-                <Badge variant="outline" className="ml-2">
-                  {currentPage.caseStudy.company}
-                </Badge>
-              </div>
-              <div className="djac-docs-casestudy-grid">
-                <div className="djac-glass-card p-4">
-                  <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-500" />
-                    {t("docs.challenge", "Challenge")}
-                  </h4>
-                  <p className="text-sm djac-body">
-                    {currentPage.caseStudy.challenge}
-                  </p>
-                </div>
-                <div className="djac-glass-card p-4">
-                  <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
-                    <Lightbulb className="h-4 w-4 text-primary" />
-                    {t("docs.solution", "Solution")}
-                  </h4>
-                  <p className="text-sm djac-body">
-                    {currentPage.caseStudy.solution}
-                  </p>
-                </div>
-                <div className="djac-glass-card p-4 md:col-span-2">
-                  <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    {t("docs.results", "Results")}
-                  </h4>
-                  <p className="text-sm djac-body">
-                    {currentPage.caseStudy.results}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Demo Steps */}
-          {currentPage.demoSteps && currentPage.demoSteps.length > 0 && (
-            <div className="djac-docs-demo">
-              <div className="flex items-center gap-2 mb-4">
-                <Play className="h-5 w-5 text-primary" />
-                <h2 className="djac-h2 text-xl font-bold">
-                  {t("docs.demo_guide", "Interactive Demo Guide")}
-                </h2>
-              </div>
-              <div className="space-y-3">
-                {currentPage.demoSteps.map((step, i) => (
-                  <div
-                    key={i}
-                    className="djac-glass-card p-4 flex items-start gap-3"
-                  >
-                    <div className="flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0">
-                      {i + 1}
-                    </div>
-                    <p className="text-sm djac-body pt-0.5">{step}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Best Practices */}
-          {currentPage.bestPractices &&
-            currentPage.bestPractices.length > 0 && (
-              <div className="djac-docs-best-practices">
-                <div className="flex items-center gap-2 mb-4">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                  <h2 className="djac-h2 text-xl font-bold">
-                    {t("docs.best_practices", "Best Practices")}
-                  </h2>
-                </div>
-                <div className="space-y-2">
-                  {currentPage.bestPractices.map((bp, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-3 p-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-800/30"
+              {/* Right TOC (desktop) */}
+              {toc.length >= 3 && (
+                <nav className="djac-docs-toc hidden xl:block">
+                  <div className="sticky top-24">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Hash className="h-3 w-3" />
+                      On this page
+                    </h4>
+                    <ul className="space-y-0.5">
+                      {toc.map(entry => (
+                        <li key={entry.id}>
+                          <a
+                            href={`#${entry.id}`}
+                            onClick={e => {
+                              e.preventDefault();
+                              document
+                                .getElementById(entry.id)
+                                ?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                            className={`block text-xs py-1 transition-colors border-l-2 ${
+                              entry.level === 3 ? "pl-3" : "pl-6"
+                            } ${
+                              activeTocId === entry.id
+                                ? "text-primary border-primary font-medium"
+                                : "text-muted-foreground border-transparent hover:text-foreground hover:border-border"
+                            }`}
+                          >
+                            {entry.text}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      onClick={() =>
+                        window.scrollTo({ top: 0, behavior: "smooth" })
+                      }
+                      className="flex items-center gap-1 mt-4 text-xs text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
-                      <span className="text-sm djac-body">{bp}</span>
-                    </div>
-                  ))}
+                      <ArrowUp className="h-3 w-3" />
+                      Back to top
+                    </button>
+                  </div>
+                </nav>
+              )}
+            </div>
+
+            {/* Diagram */}
+            {currentPage.diagram && (
+              <div className="djac-docs-diagram">
+                <div className="flex items-center gap-2 mb-3">
+                  <Network className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">
+                    {t("docs.architecture_diagram", "Architecture Diagram")}
+                  </span>
+                </div>
+                <div className="djac-glass-card p-4 text-center text-sm font-mono text-foreground">
+                  {currentPage.diagram}
                 </div>
               </div>
             )}
 
-          {/* Troubleshooting */}
-          {currentPage.troubleshooting &&
-            currentPage.troubleshooting.length > 0 && (
-              <div className="djac-docs-troubleshoot">
+            {/* Case Study */}
+            {currentPage.caseStudy && (
+              <div className="djac-docs-casestudy">
                 <div className="flex items-center gap-2 mb-4">
-                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  <Star className="h-5 w-5 text-amber-500" />
                   <h2 className="djac-h2 text-xl font-bold">
-                    {t("docs.troubleshooting", "Troubleshooting")}
+                    {t("docs.case_study", "Case Study")}
+                  </h2>
+                  <Badge variant="outline" className="ml-2">
+                    {currentPage.caseStudy.company}
+                  </Badge>
+                </div>
+                <div className="djac-docs-casestudy-grid">
+                  <div className="djac-glass-card p-4">
+                    <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-amber-500" />
+                      {t("docs.challenge", "Challenge")}
+                    </h4>
+                    <p className="text-sm djac-body">
+                      {currentPage.caseStudy.challenge}
+                    </p>
+                  </div>
+                  <div className="djac-glass-card p-4">
+                    <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
+                      <Lightbulb className="h-4 w-4 text-primary" />
+                      {t("docs.solution", "Solution")}
+                    </h4>
+                    <p className="text-sm djac-body">
+                      {currentPage.caseStudy.solution}
+                    </p>
+                  </div>
+                  <div className="djac-glass-card p-4 md:col-span-2">
+                    <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      {t("docs.results", "Results")}
+                    </h4>
+                    <p className="text-sm djac-body">
+                      {currentPage.caseStudy.results}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Demo Steps */}
+            {currentPage.demoSteps && currentPage.demoSteps.length > 0 && (
+              <div className="djac-docs-demo">
+                <div className="flex items-center gap-2 mb-4">
+                  <Play className="h-5 w-5 text-primary" />
+                  <h2 className="djac-h2 text-xl font-bold">
+                    {t("docs.demo_guide", "Interactive Demo Guide")}
                   </h2>
                 </div>
                 <div className="space-y-3">
-                  {currentPage.troubleshooting.map((item, i) => (
-                    <div key={i} className="djac-glass-card p-4 space-y-2">
-                      <h4 className="text-sm font-semibold flex items-center gap-2">
-                        <span className="text-amber-500">
-                          {t("docs.q", "Q")}:
-                        </span>{" "}
-                        {item.problem}
-                      </h4>
-                      <p className="text-sm djac-body flex items-start gap-2">
-                        <span className="text-emerald-500 font-semibold">
-                          {t("docs.a", "A")}:
-                        </span>{" "}
-                        {item.solution}
-                      </p>
+                  {currentPage.demoSteps.map((step, i) => (
+                    <div
+                      key={i}
+                      className="djac-glass-card p-4 flex items-start gap-3"
+                    >
+                      <div className="flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0">
+                        {i + 1}
+                      </div>
+                      <p className="text-sm djac-body pt-0.5">{step}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-          {/* Page navigation */}
-          <div className="djac-docs-page-nav">
-            {currentSection.pages.map((page, i) => {
-              const isActive = currentPageId === page.id;
-              return (
-                <button
-                  key={page.id}
-                  type="button"
-                  onClick={() => navigateToPage(currentSection.id, page.id)}
-                  className={`djac-docs-page-nav-btn ${isActive ? "djac-docs-page-nav-active" : ""}`}
-                >
-                  <span className="text-xs text-muted-foreground">{i + 1}</span>
-                  <span className="text-sm truncate">{page.title}</span>
-                </button>
-              );
-            })}
-          </div>
+            {/* Best Practices */}
+            {currentPage.bestPractices &&
+              currentPage.bestPractices.length > 0 && (
+                <div className="djac-docs-best-practices">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                    <h2 className="djac-h2 text-xl font-bold">
+                      {t("docs.best_practices", "Best Practices")}
+                    </h2>
+                  </div>
+                  <div className="space-y-2">
+                    {currentPage.bestPractices.map((bp, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 p-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-800/30"
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                        <span className="text-sm djac-body">{bp}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* Next steps */}
-          <div className="djac-docs-next">
-            <h3 className="text-lg font-bold mb-3">
-              {t("docs.cta_ready", "Ready to get started?")}
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={() => navigate("/signup")}>
-                {t("docs.cta_trial", "Start Free Trial")}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-              <Button variant="outline" onClick={() => navigate("/pricing")}>
-                {t("docs.cta_pricing", "View Pricing")}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/docs/getting-started/welcome`)}
-              >
-                <BookOpen className="h-4 w-4 mr-2" />
-                {t("docs.cta_guide", "Quick Start Guide")}
-              </Button>
+            {/* Troubleshooting */}
+            {currentPage.troubleshooting &&
+              currentPage.troubleshooting.length > 0 && (
+                <div className="djac-docs-troubleshoot">
+                  <div className="flex items-center gap-2 mb-4">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    <h2 className="djac-h2 text-xl font-bold">
+                      {t("docs.troubleshooting", "Troubleshooting")}
+                    </h2>
+                  </div>
+                  <div className="space-y-3">
+                    {currentPage.troubleshooting.map((item, i) => (
+                      <div key={i} className="djac-glass-card p-4 space-y-2">
+                        <h4 className="text-sm font-semibold flex items-center gap-2">
+                          <span className="text-amber-500">
+                            {t("docs.q", "Q")}:
+                          </span>{" "}
+                          {item.problem}
+                        </h4>
+                        <p className="text-sm djac-body flex items-start gap-2">
+                          <span className="text-emerald-500 font-semibold">
+                            {t("docs.a", "A")}:
+                          </span>{" "}
+                          {item.solution}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            {/* ── Prev / Next Navigation ───────────────────────────────── */}
+            <div className="djac-docs-prevnext">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                {prevPage ? (
+                  <button
+                    onClick={() =>
+                      navigateToPage(prevPage!.sectionId, prevPage!.pageId)
+                    }
+                    className="flex items-start gap-2 p-3 rounded-lg border hover:border-primary/40 hover:bg-accent transition-all text-left group flex-1 min-w-0"
+                  >
+                    <ChevronLeft className="h-5 w-5 text-muted-foreground group-hover:text-primary mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs text-muted-foreground mb-0.5">
+                        Previous{prevSection ? ` (${prevSection?.title})` : ""}
+                      </div>
+                      <div className="text-sm font-medium truncate">
+                        {prevPage.title}
+                      </div>
+                    </div>
+                  </button>
+                ) : (
+                  <div />
+                )}
+                {nextPage && (
+                  <button
+                    onClick={() =>
+                      navigateToPage(nextPage!.sectionId, nextPage!.pageId)
+                    }
+                    className="flex items-start gap-2 p-3 rounded-lg border hover:border-primary/40 hover:bg-accent transition-all text-right group flex-1 min-w-0 justify-end"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-xs text-muted-foreground mb-0.5">
+                        Next{nextSection ? ` (${nextSection?.title})` : ""}
+                      </div>
+                      <div className="text-sm font-medium truncate">
+                        {nextPage.title}
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary mt-0.5 shrink-0" />
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+
+            {/* Page Nav Tabs */}
+            <div className="djac-docs-page-nav">
+              {currentSection.pages.map((page, i) => {
+                const isActive = currentPageId === page.id;
+                return (
+                  <button
+                    key={page.id}
+                    type="button"
+                    onClick={() => navigateToPage(currentSection.id, page.id)}
+                    className={`djac-docs-page-nav-btn ${isActive ? "djac-docs-page-nav-active" : ""}`}
+                  >
+                    <span className="text-xs text-muted-foreground">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm truncate">{page.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* CTA */}
+            <div className="djac-docs-next">
+              <h3 className="text-lg font-bold mb-3">
+                {t("docs.cta_ready", "Ready to get started?")}
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => navigate("/signup")}>
+                  {t("docs.cta_trial", "Start Free Trial")}
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/pricing")}>
+                  {t("docs.cta_pricing", "View Pricing")}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/docs/getting-started/welcome")}
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  {t("docs.cta_guide", "Quick Start Guide")}
+                </Button>
+              </div>
+            </div>
+          </article>
         </main>
       </div>
     </div>

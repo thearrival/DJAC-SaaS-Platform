@@ -2193,6 +2193,97 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   width: 100%;
 }
 
+/* ── Docs Content Page Wrapper ──────────────────────────────────────── */
+.djac-docs-page-wrapper {
+  animation: docs-fade-in 0.3s ease-out;
+}
+
+@keyframes docs-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Docs Body + TOC Grid ───────────────────────────────────────────── */
+.djac-docs-body-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+@media (min-width: 1280px) {
+  .djac-docs-body-grid {
+    grid-template-columns: 1fr 200px;
+    gap: 3rem;
+  }
+}
+
+/* ── Docs TOC (Right sidebar) ────────────────────────────────────────── */
+.djac-docs-toc {
+  padding-top: 0.5rem;
+}
+
+.djac-docs-toc a {
+  text-decoration: none;
+  font-size: 0.75rem;
+}
+
+.djac-docs-toc a:hover {
+  text-decoration: none;
+}
+
+/* ── Docs Prev/Next Navigation ──────────────────────────────────────── */
+.djac-docs-prevnext {
+  margin: 3rem 0 2rem 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Docs Heading Scroll Offset ─────────────────────────────────────── */
+.djac-docs-h3,
+.djac-docs-article h3,
+.djac-docs-article h4 {
+  scroll-margin-top: 5rem;
+}
+
+/* ── Code Block Styling ─────────────────────────────────────────────── */
+.djac-docs-article pre {
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.djac-docs-article code {
+  font-size: 0.85em;
+}
+
+/* ── Print Styles ───────────────────────────────────────────────────── */
+@media print {
+  .djac-docs-sidebar,
+  .djac-docs-toc,
+  .djac-docs-mobile-toggle,
+  .djac-docs-next,
+  .djac-docs-prevnext,
+  .djac-docs-page-nav,
+  .djac-docs-sidebar-footer {
+    display: none !important;
+  }
+
+  .djac-docs-layout {
+    display: block !important;
+  }
+
+  .djac-docs-content {
+    max-width: 100%;
+    padding: 0;
+  }
+}
+
 .djac-docs-section-header {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
