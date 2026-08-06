@@ -30,6 +30,15 @@ import {
   Lightbulb,
   Network,
   Play,
+  Terminal,
+  Server,
+  CreditCard,
+  Code,
+  Lock,
+  Rocket,
+  Key,
+  Bug,
+  Layers,
 } from "lucide-react";
 
 interface DocSection {
@@ -66,6 +75,15 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   gauge: Gauge,
   globe: Globe,
   star: Star,
+  terminal: Terminal,
+  server: Server,
+  card: CreditCard,
+  code: Code,
+  lock: Lock,
+  rocket: Rocket,
+  key: Key,
+  bug: Bug,
+  layers: Layers,
 };
 
 const docsData: Record<string, DocSection[]> = {
@@ -396,6 +414,895 @@ DJAC automatically calculates vendor risk tiers:
 - **High** — Processes regulated data, cross-border data flows
 - **Medium** — Limited data exposure, standard regulatory requirements
 - **Low** — Minimal risk profile, no sensitive data processing`,
+        },
+      ],
+    },
+    {
+      id: "api-integration",
+      title: "API & Integration",
+      icon: "terminal",
+      pages: [
+        {
+          id: "api-reference",
+          title: "API Reference",
+          summary:
+            "DJAC exposes a type-safe tRPC API with 200+ procedures across 42 routers, plus REST endpoints for webhooks and health checks. All mutations use Zod validation.",
+          content: `### API Overview
+
+DJAC uses **tRPC** for end-to-end type-safe API operations. All procedures go through \`POST /api/trpc\` with batch support.
+
+**Base URLs:**
+- Production: \`https://app.yalla-hack.ae\`
+- Local: \`http://localhost:3000\`
+
+### Authentication Methods
+
+| Method | Header | Use Case |
+|--------|--------|----------|
+| Session Cookie | \`app_session_id\` cookie | Web app (default) |
+| API Key | \`x-djac-api-key: djac_<hex>\` | Programmatic access |
+| Clerk OAuth | Auto-managed by Clerk SDK | External OAuth |
+
+### Router Categories (42 routers, 200+ procedures)
+
+| Domain | Routers | Key Procedures |
+|--------|---------|----------------|
+| **Auth** | \`localAuth\`, \`auth\`, \`googleAuth\` | register, login, mfa, logout |
+| **Organization** | \`orgSettings\`, \`orgMembers\`, \`portal\` | create, invite, updateRole |
+| **RBAC** | \`role\`, \`rbac\` | getPermissions, setModulePermissions |
+| **Compliance** | \`compliance\`, \`regulatoryChanges\` | frameworks.list, controls.get |
+| **Vendors** | \`vendor\`, \`vendorCompliance\` | list, create, assess |
+| **Risk** | \`riskRegister\`, \`remediation\` | list, create, update |
+| **Policy** | \`policyManager\`, \`incidentRegister\` | create, publish, update |
+| **Audit** | \`auditSchedule\`, \`evidence\` | schedule, addFinding, upload |
+| **CTEM** | \`ctem\`, \`assetInventory\` | list, create, getVulnerabilities |
+| **DSR** | \`dsr\`, \`serviceRequests\` | list, create, fulfill |
+| **AI** | \`ai\` | startAssessment, getJob |
+| **Reports** | \`complianceReport\` | generate, download, schedule |
+| **Graph** | \`knowledgeGraph\`, \`crossBorderFlow\` | search, analyze |
+| **Billing** | \`billing\` | getPlans, createCheckoutSession |
+| **Admin** | \`admin\`, \`system\` | getStats, getAuditLogs |
+| **UX** | \`onboarding\`, \`notifications\`, \`analytics\`, \`personalization\`, \`customer360\` | Various |
+
+### Error Response Format
+
+All errors follow:
+\`\`\`
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication required (10001)",
+    "details": {}
+  }
+}
+\`\`\`
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| \`UNAUTHORIZED\` | Authentication required |
+| \`FORBIDDEN\` | Insufficient permissions |
+| \`NOT_FOUND\` | Resource not found |
+| \`VALIDATION_ERROR\` | Input validation failed |
+| \`RATE_LIMITED\` | Too many requests |
+| \`INTERNAL_ERROR\` | Unexpected server error |`,
+        },
+        {
+          id: "rate-limiting",
+          title: "Rate Limiting & Security",
+          summary:
+            "DJAC implements tiered rate limiting with configurable windows to protect the API from abuse while ensuring fair usage for all tenants.",
+          content: `### Rate Limiting Tiers
+
+| Scope | Limit | Window | Headers |
+|-------|-------|--------|---------|
+| General API | 120 requests | 1 minute | \`X-RateLimit-Limit\`, \`X-RateLimit-Remaining\` |
+| Auth endpoints | 10 requests | 1 minute | Same as above |
+| Admin panel | 300 requests | 5 minutes | Custom headers |
+| Health checks | Unlimited | N/A | None (bypassed) |
+
+### Response Headers
+
+Every rate-limited response includes:
+- \`X-RateLimit-Limit\` — Maximum requests per window
+- \`X-RateLimit-Remaining\` — Requests remaining in current window
+- \`X-RateLimit-Reset\` — Unix timestamp when the window resets
+
+### API Key Best Practices
+
+- API keys use the \`djac_\` prefix format
+- Keys inherit permissions of the creating user
+- Keys are scoped to a single organization
+- Revoke unused or compromised keys immediately
+- Rotate keys every 90 days`,
+        },
+        {
+          id: "webhooks",
+          title: "Webhooks & Edge Functions",
+          summary:
+            "DJAC receives Stripe webhooks and uses Supabase Edge Functions for notifications, compliance events, and report exports.",
+          content: `### Stripe Webhooks
+
+**Endpoint:** \`POST /api/webhooks/stripe\`
+**Auth:** Stripe signature verification (\`STRIPE_WEBHOOK_SECRET\`)
+
+**Events handled:**
+- \`checkout.session.completed\` — Provision subscription
+- \`customer.subscription.updated\` — Update plan/status
+- \`customer.subscription.deleted\` — Cancel subscription
+- \`invoice.payment_succeeded\` — Record billing event
+- \`invoice.payment_failed\` — Flag payment issue
+
+### Supabase Edge Functions (Deno)
+
+| Function | Endpoint | Purpose |
+|----------|----------|---------|
+| \`send-notification\` | \`/functions/v1/send-notification\` | Create user notifications |
+| \`compliance-webhook\` | \`/functions/v1/compliance-webhook\` | Process compliance events |
+| \`report-export\` | \`/functions/v1/report-export\` | Export JSON/CSV/PDF |
+| \`auth-hooks\` | \`/functions/v1/auth-hooks\` | Sync auth users to DB |
+
+**Development:** \`supabase functions serve\`
+**Deploy:** \`supabase functions deploy\``,
+        },
+        {
+          id: "websocket",
+          title: "WebSocket Streaming",
+          summary:
+            "Real-time AI assessment progress is streamed via WebSocket at /ws/ai-jobs with job lifecycle events.",
+          content: `### WebSocket Endpoint
+
+**URL:** \`wss://app.yalla-hack.ae/ws/ai-jobs\`
+
+### Event Types
+
+| Event | Direction | Payload |
+|-------|-----------|---------|
+| \`job:progress\` | Server → Client | \`{ jobId, stage, message, progress }\` |
+| \`job:complete\` | Server → Client | \`{ jobId, result: AiAssessmentReport }\` |
+| \`job:error\` | Server → Client | \`{ jobId, error: string }\` |
+| \`subscribe\` | Client → Server | \`{ jobId: string }\` |
+| \`unsubscribe\` | Client → Server | \`{ jobId: string }\` |
+
+### Usage Example
+
+\`\`\`typescript
+const ws = new WebSocket("wss://app.yalla-hack.ae/ws/ai-jobs");
+ws.onopen = () => ws.send(JSON.stringify({ type: "subscribe", jobId }));
+ws.onmessage = (e) => {
+  const { type, stage, message } = JSON.parse(e.data);
+  if (type === "job:progress") updateUI(stage, message);
+  if (type === "job:complete") showResults(data.result);
+};
+\`\`\`
+
+### AI Job Stages (8-stage pipeline)
+
+1. **Gatekeeper** — Input validation, injection detection
+2. **Intake** — Document parsing, text normalization
+3. **Extractor** — Structured fact extraction
+4. **RAG** — Retrieve relevant compliance controls
+5. **Judge** — GPT-4o evaluates facts against controls
+6. **Synthesizer** — Merge findings into cross-framework report
+7. **Validator** — Schema validation, retry on failure
+8. **Reporter** — Final formatted output (PDF/DOCX/JSON)`,
+        },
+      ],
+    },
+    {
+      id: "security-compliance",
+      title: "Security & Compliance",
+      icon: "lock",
+      pages: [
+        {
+          id: "security-overview",
+          title: "Security Architecture",
+          summary:
+            "DJAC implements defense-in-depth across authentication, authorization, data protection, and infrastructure layers following OWASP Top 10 and SOC 2 principles.",
+          content: `### Defense-in-Depth Layers
+
+**Authentication:**
+- Passwords hashed with bcrypt (12 rounds)
+- JWT tokens signed with HS256 (min 64-char secret)
+- HTTP-only, Secure, SameSite cookies
+- TOTP-based MFA with backup codes
+- OTP-based password reset (SHA-256, 5-min expiry)
+- Brute force protection with exponential backoff
+
+**Authorization:**
+- 7 platform roles + 4 organization roles
+- 32 permission-gated modules
+- 6 granular permission flags per module
+- Row-Level Security on all PostgreSQL tables
+- Organization-scoped data isolation
+
+**Data Protection:**
+- TLS 1.3 for all data in transit
+- PostgreSQL encrypted at rest (Supabase)
+- Secrets in Vercel env vars + GitHub Actions secrets
+- Never in code or version control
+
+### Security Headers
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| Strict-Transport-Security | max-age=63072000 | Enforce HTTPS |
+| X-Content-Type-Options | nosniff | MIME sniffing prevention |
+| X-Frame-Options | DENY | Clickjacking prevention |
+| Content-Security-Policy | Restricted per route | XSS mitigation |
+| Referrer-Policy | strict-origin-when-cross-origin | Referrer leakage |
+
+### CVE Patching
+
+- Dependabot automated vulnerability alerts
+- pnpm overrides for transitive dependency patches
+- CodeQL security analysis in CI pipeline`,
+        },
+        {
+          id: "rbac-system",
+          title: "RBAC & Permission System",
+          summary:
+            "DJAC's role-based access control system provides granular permissions across 32 platform modules with custom role overrides per organization.",
+          content: `### Platform Roles (7 levels)
+
+| Role | Level | Typical User |
+|------|-------|-------------|
+| Basic User | 10 | Read-only access |
+| Professional User | 20 | Full compliance features |
+| Company Admin | 30 | Organization + team management |
+| Platform Admin | 40 | Cross-org oversight |
+| Yalla Hack Employee | 45 | Internal support |
+| Super Admin | 100 | Unrestricted access |
+
+### Organization Roles (4 levels)
+
+| Role | Level | Capabilities |
+|------|-------|-------------|
+| Analyst | 10 | View-only on most modules |
+| Compliance Officer | 20 | Create/Edit compliance data |
+| Admin | 30 | Team + API key management |
+| Owner | 40 | Billing + full org settings |
+
+### Permission Resolution Flow
+
+1. Request arrives at tRPC procedure
+2. Auth middleware extracts \`ctx.user\` and \`ctx.orgRole\`
+3. System checks custom \`rolePermissions\` row for (orgId, role, module)
+4. If no custom row, falls back to \`DEFAULT_ORG_ROLE_PERMISSIONS\`
+5. Compares requested action (e.g., canEdit) against PermissionFlags
+6. Returns Allow or 403 FORBIDDEN
+
+### Permission Flags
+
+Each module has 6 boolean flags:
+- \`canView\` — Read access
+- \`canCreate\` — Create new records
+- \`canEdit\` — Modify existing records
+- \`canDelete\` — Remove records
+- \`canExport\` — Download/export data
+- \`canInvite\` — Invite team members
+
+### Default Permission Templates
+
+| Role | Default Pattern |
+|------|----------------|
+| Analyst | VIEW_ONLY on most modules |
+| Compliance Officer | STANDARD on compliance, VIEW_ONLY on legal |
+| Admin | FULL on compliance, STANDARD on settings |
+| Owner | FULL on everything, including billing |`,
+        },
+        {
+          id: "audit-trail",
+          title: "Audit Logging & Monitoring",
+          summary:
+            "Comprehensive audit logging tracks all data mutations with category, action, outcome, and actor attribution. Sentry provides real-time error monitoring.",
+          content: `### Audit Log System
+
+**Table:** \`auditLogs\`
+**Categories:** auth, data_write, data_read, role_change, system, billing
+**Outcomes:** success, failure, blocked
+
+Every audit log entry records:
+- \`actorId\` — Who performed the action
+- \`category\` — Type of event
+- \`action\` — What was done
+- \`outcome\` — Result (success/failure/blocked)
+- \`details\` — JSON payload with relevant data
+- \`ipAddress\` — Request origin
+- \`createdAt\` — Timestamp
+
+### Audit Log Access
+
+- **Org Admins** — View audit logs for their organization
+- **Yalla Admin** — View all platform audit logs with filtering
+- **API Access** — \`admin.getAuditLogs\` tRPC procedure
+
+### Sentry Monitoring
+
+- **Server:** \`@sentry/node\` v10 with Express integration
+- **Client:** \`@sentry/react\` with React error boundary
+- **Sampling:** 10% trace sample production, 100% development
+- **Environments:** production, staging, development
+
+### Pino Structured Logging
+
+- **Format:** JSON (production) / pretty-print (development)
+- **Levels:** trace, debug, info, warn, error, fatal
+- **Context:** request ID, user ID, org ID per log entry`,
+        },
+        {
+          id: "data-protection",
+          title: "Data Protection & Privacy",
+          summary:
+            "DJAC implements multi-tenant data isolation, end-to-end encryption, and supports data subject request management for GDPR, PIPL, and PDPL compliance.",
+          content: `### Multi-Tenant Data Isolation
+
+Every organization-scoped query includes \`orgId\` filtering enforced at:
+1. **tRPC middleware** — Extracts \`orgId\` from session
+2. **Drizzle queries** — All queries filter by \`ctx.orgId\`
+3. **Row-Level Security** — PostgreSQL RLS as defense-in-depth
+4. **API keys** — Scoped to a single organization
+
+### Encryption Standards
+
+- **In Transit:** TLS 1.3 via Vercel edge network
+- **At Rest:** AES-256 (Supabase managed PostgreSQL)
+- **Passwords:** bcrypt with 12 salt rounds
+- **Secrets:** Vercel encrypted environment variables
+- **OTP Codes:** SHA-256 hashed in database
+
+### Data Subject Requests (DSR)
+
+Full DSR lifecycle management:
+- **Request Types:** Access, Rectification, Erasure, Portability, Restriction
+- **Workflow:** Submission → Validation → Fulfillment → Verification
+- **Deadline Tracking:** Jurisdiction-specific response times
+- **Automated Evidence:** Audit trail of all DSR actions
+
+### Data Retention
+
+- **Interaction Logs:** Configurable TTL (default 90 days)
+- **Audit Logs:** Retained indefinitely for compliance
+- **Deleted Users:** Anonymized per GDPR/PIPL requirements`,
+        },
+      ],
+    },
+    {
+      id: "developer-guide",
+      title: "Developer Guide",
+      icon: "code",
+      pages: [
+        {
+          id: "dev-setup",
+          title: "Development Environment Setup",
+          summary:
+            "Set up your local development environment with Node.js 20+, pnpm 10+, Docker for Supabase, and all required services.",
+          content: `### Prerequisites
+
+- Node.js 20+
+- pnpm 10+ (\`npm install -g pnpm@10\`)
+- Docker Desktop (for local Supabase)
+- Supabase CLI (\`npm install -g supabase\`)
+- Git
+
+### First-Time Setup
+
+\`\`\`bash
+git clone <repo-url> djac
+cd djac
+pnpm install
+cp .env.example .env
+# Edit .env with your local values (minimum: DATABASE_URL)
+supabase start
+pnpm db:push
+pnpm seed:data
+pnpm dev
+# App available at http://localhost:3000
+\`\`\`
+
+### Required Environment Variables
+
+| Variable | Source | Purpose |
+|----------|--------|---------|
+| \`DATABASE_URL\` | \`supabase status\` | PostgreSQL connection |
+| \`SUPABASE_URL\` | \`supabase status\` | Supabase API URL |
+| \`SUPABASE_ANON_KEY\` | \`supabase status\` | Anonymous client key |
+| \`SUPABASE_SERVICE_ROLE_KEY\` | \`supabase status\` | Service role (bypass RLS) |
+| \`JWT_SECRET\` | Any random string | JWT signing |
+| \`OPENAI_API_KEY\` | OpenAI dashboard | AI features (optional) |
+| \`STRIPE_SECRET_KEY\` | Stripe dashboard | Billing (optional) |
+
+### Dev Auth Bypass
+
+For local development without OAuth:
+\`\`\`env
+DEV_AUTH_BYPASS=true
+DEV_AUTH_OPEN_ID=local-dev-user
+DEV_AUTH_EMAIL=dev@example.com
+DEV_AUTH_ROLE=super_admin
+\`\`\`
+
+### Available Scripts
+
+| Command | Purpose |
+|---------|---------|
+| \`pnpm dev\` | Start dev server with hot reload |
+| \`pnpm check\` | TypeScript type checking |
+| \`pnpm lint\` | ESLint code quality |
+| \`pnpm test\` | Run all tests (vitest) |
+| \`pnpm build\` | Production build |
+| \`pnpm verify:all\` | Run all checks + build |`,
+          demoSteps: [
+            "Clone the repository and install dependencies with 'pnpm install'",
+            "Copy .env.example to .env and fill in required values",
+            "Start Supabase locally with 'supabase start'",
+            "Push database schema with 'pnpm db:push'",
+            "Seed reference data with 'pnpm seed:data'",
+            "Start dev server with 'pnpm dev' and open http://localhost:3000",
+          ],
+        },
+        {
+          id: "project-structure",
+          title: "Project Structure & Architecture",
+          summary:
+            "DJAC is a pnpm monorepo with client (React SPA), server (Express + tRPC), and shared code organized by domain.",
+          content: `### Directory Structure
+
+\`\`\`
+djac/
+├── client/              # React 19 SPA (Vite 7 + Tailwind CSS 4)
+│   └── src/
+│       ├── pages/       # 70+ route pages
+│       ├── components/  # 39 shared UI components
+│       ├── hooks/       # Custom React hooks
+│       ├── contexts/    # Theme, Locale contexts
+│       └── lib/         # tRPC client, utilities
+├── server/              # Express 4 + tRPC 11 backend
+│   ├── _core/           # Auth, env, security, trpc, rate limit
+│   ├── ai/              # 8-stage AI pipeline + queue
+│   ├── services/        # Business logic (billing, email, OTP)
+│   └── __tests__/       # 40+ test files
+├── shared/              # Shared types and constants
+│   └── const.ts         # Roles, permissions, RBAC defaults
+├── drizzle/             # Drizzle ORM schema + migrations
+│   └── schema.ts        # 60+ tables, 30+ enums
+├── supabase/            # Supabase config + Edge Functions
+│   └── functions/       # 4 Deno Edge Functions
+└── scripts/             # 43 operational scripts
+\`\`\`
+
+### Tech Stack Details
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Frontend | React, TypeScript | 19.2, 5.9 |
+| Bundler | Vite | 7.3 |
+| Styling | Tailwind CSS, Radix UI | 4.1, latest |
+| Backend | Express, tRPC | 4.21, 11.8 |
+| ORM | Drizzle ORM | 0.45 |
+| Database | PostgreSQL (Supabase) | 17 |
+| Queue | BullMQ + Redis | 5.7 |
+| AI | OpenAI GPT-4o | 4.67 |
+| Billing | Stripe | 20.4 |
+| Monitoring | Sentry, Pino | 10.47, 9.5 |
+
+### Naming Conventions
+
+| Element | Convention | Example |
+|---------|-----------|---------|
+| Files | kebab-case | \`compliance-framework-router.ts\` |
+| tRPC Routers | camelCase | \`complianceFrameworkRouter\` |
+| Procedures | dot-separated | \`compliance.frameworks.list\` |
+| DB Tables | snake_case | \`organization_members\` |
+| DB Columns | snake_case | \`created_at\` |
+| React Components | PascalCase | \`VendorAssessmentPage\` |
+| Hooks | \`use\` prefix | \`useAuth\` |`,
+        },
+        {
+          id: "adding-features",
+          title: "Adding New Features",
+          summary:
+            "Follow DJAC's patterns for adding new tRPC routers, React pages, database tables, and tests.",
+          content: `### Adding a New tRPC Router
+
+**1. Create router file** — \`server/my-feature-router.ts\`:
+\`\`\`typescript
+import { z } from "zod";
+import { orgProcedure, router } from "./_core/trpc";
+
+export const myFeatureRouter = router({
+  list: orgProcedure
+    .input(z.object({ orgId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const db = getDb();
+      return db.select().from(myTable).where(eq(myTable.orgId, input.orgId));
+    }),
+  create: orgProcedure
+    .input(z.object({ orgId: z.string(), name: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+      const [record] = await db.insert(myTable).values(input).returning();
+      return record;
+    }),
+});
+\`\`\`
+
+**2. Register in \`server/routers.ts\`:**
+\`\`\`typescript
+import { myFeatureRouter } from "./my-feature-router";
+export const appRouter = router({
+  // ... existing routers
+  myFeature: myFeatureRouter,
+});
+\`\`\`
+
+### Adding a New Page
+
+1. Create \`client/src/pages/MyNewPage.tsx\`
+2. Add route in \`client/src/App.tsx\`:
+   \`\`\`tsx
+   const MyNewPage = lazy(() => import("./pages/MyNewPage"));
+   <Route path="/my-page" component={MyNewPage} />
+   \`\`\`
+3. Add navigation link in \`DashboardLayout.tsx\`
+4. Add i18n keys in \`LocaleContext.tsx\`
+
+### Adding Database Tables
+
+1. Edit \`drizzle/schema.ts\`
+2. Generate migration: \`pnpm drizzle-kit generate\`
+3. Apply: \`pnpm db:migrate\`
+4. Update seed scripts if needed
+
+### API Design Rules
+
+1. All mutations use tRPC with Zod validation
+2. Use \`protectedProcedure\` for authenticated endpoints
+3. Use \`orgProcedure\` for org-scoped endpoints
+4. Check \`ctx.user.role\` for authorization
+5. Never trust client input — always validate with Zod
+6. Return typed responses (never \`any\`)`,
+        },
+        {
+          id: "testing",
+          title: "Testing Guide",
+          summary:
+            "DJAC uses Vitest for unit and integration tests. 40+ test files cover auth, RBAC, validation, and API flows.",
+          content: `### Running Tests
+
+\`\`\`bash
+pnpm test                   # Run all tests
+npx vitest run path/to/file # Run specific file
+npx vitest --ui             # Interactive UI
+npx vitest --coverage       # Coverage report
+\`\`\`
+
+### Test Structure
+
+\`\`\`
+server/__tests__/
+├── unit/               # Unit tests (auth, RBAC, validation)
+└── integration/        # API flow tests
+client/src/__tests__/
+├── components/         # Component rendering tests
+└── hooks/              # Custom hook tests
+\`\`\`
+
+### Test Patterns
+
+**tRPC Procedure Test:**
+\`\`\`typescript
+import { describe, it, expect } from "vitest";
+
+describe("vendor.list", () => {
+  it("should return vendors for the org", async () => {
+    const vendors = await caller.vendor.list({ orgId: "org_123" });
+    expect(Array.isArray(vendors)).toBe(true);
+  });
+});
+\`\`\`
+
+### Best Practices
+
+- Isolate tests with setup/teardown
+- Mock external APIs (Stripe, OpenAI, SendGrid)
+- Test edge cases and authorization
+- Test with different role levels`,
+        },
+      ],
+    },
+    {
+      id: "deployment-operations",
+      title: "Deployment & Operations",
+      icon: "server",
+      pages: [
+        {
+          id: "deployment",
+          title: "Deployment Options",
+          summary:
+            "DJAC supports deployment on Vercel (serverless), Docker, and manual VPS. CI/CD pipelines automate staging and production deployments.",
+          content: `### Deployment Options
+
+| Option | Best For | Setup Time |
+|--------|----------|------------|
+| Vercel (Recommended) | Production SaaS | 5 minutes |
+| Docker | Self-hosted, on-prem | 15 minutes |
+| Manual VPS | Custom infrastructure | 30 minutes |
+
+### Vercel Deployment (Production)
+
+\`\`\`bash
+# 1. Build
+pnpm build
+
+# 2. Deploy
+vercel --prod
+
+# 3. Apply DB migrations
+supabase db push --linked
+
+# 4. Deploy Edge Functions
+supabase functions deploy
+
+# 5. Verify
+curl https://your-app.com/api/health
+\`\`\`
+
+### Docker Deployment
+
+\`\`\`bash
+docker build -t djac:latest .
+docker run -d -p 3000:3000 --env-file .env.production --name djac-app djac:latest
+\`\`\`
+
+### CI/CD Pipeline
+
+| Workflow | Trigger | Actions |
+|----------|---------|---------|
+| CI | Push/PR to main/develop | Lint, Typecheck, Test, Build |
+| Staging | Push to develop | Auto-deploy to Vercel preview |
+| Production | Push to main | Deploy + DB migration + health check |
+| Supabase Deploy | Push to main | Deploy migrations + functions |
+
+### Production Checklist
+
+- [ ] JWT_SECRET ≥ 64 random characters
+- [ ] ALLOW_IN_MEMORY_PERSISTENCE=false
+- [ ] DEV_AUTH_BYPASS=false
+- [ ] Database pool size: 25 connections
+- [ ] Redis configured for AI queue
+- [ ] RLS policies enabled
+- [ ] CORS restricted to production domain
+- [ ] Sentry error tracking enabled
+- [ ] Stripe webhook registered`,
+        },
+        {
+          id: "monitoring",
+          title: "Monitoring & Observability",
+          summary:
+            "DJAC uses Sentry for error tracking, Pino for structured logging, and health/readiness endpoints for operational monitoring.",
+          content: `### Health Endpoints
+
+| Endpoint | Purpose | Response |
+|----------|---------|----------|
+| \`/api/health\` | Health check | Status, uptime, version |
+| \`/api/healthz\` | Liveness probe | Always 200 |
+| \`/api/readiness\` | Readiness check | DB, Redis, Stripe, AI status |
+| \`/api/readyz\` | Alias for readiness | Same |
+
+### Readiness Response Example
+
+\`\`\`json
+{
+  "status": "ok",
+  "checks": {
+    "database": "ok",
+    "redis": "ok",
+    "stripe": "ok",
+    "ai": "ok"
+  }
+}
+\`\`\`
+
+A degraded response (\`503\`) indicates one or more services are unavailable.
+
+### Pino Logging
+
+\`\`\`bash
+# Development (pretty-print)
+pnpm dev
+
+# Debug level logging
+LOG_LEVEL=debug pnpm dev
+\`\`\`
+
+### Sentry Setup
+
+Set in \`.env.production\`:
+\`\`\`
+SENTRY_DSN=https://...
+VITE_SENTRY_DSN=https://...
+SENTRY_ENVIRONMENT=production
+\`\`\`
+
+### Background Schedulers
+
+| Scheduler | Interval | Purpose |
+|-----------|----------|---------|
+| Interaction Retention | 24h | Purge old interaction logs |
+| Trial Reminder | 6h | Email expiring trials |
+| Deadline Alert | 1h | Regulatory deadline notifications |
+| Report Delivery | Config | Scheduled report generation |
+| SSE Broadcast | Real-time | Admin dashboard events |`,
+        },
+        {
+          id: "troubleshooting",
+          title: "Troubleshooting Common Issues",
+          summary:
+            "Solutions for common development, deployment, and operational issues encountered with DJAC.",
+          content: `### Common Issues
+
+**Database connection errors on startup:**
+
+- Verify \`DATABASE_URL\` in \`.env\`
+- Ensure Supabase is running: \`supabase status\`
+- Check for stale connection pool: restart server
+
+**AI assessment stuck in "queued":**
+
+- Check Redis connectivity: \`redis-cli ping\`
+- In dev mode, confirm \`AI_QUEUE_MODE=in_memory\`
+- Check server logs for queue worker errors
+
+**OpenAI API errors:**
+
+- \`401\`: Invalid \`OPENAI_API_KEY\`
+- \`429\`: Rate limit reached — add retry logic
+- \`context_length_exceeded\`: Input too large — truncate
+
+**Build fails on Vercel:**
+
+- Check Vercel project env vars are set
+- Ensure Node 20+ in Vercel settings
+- Test locally: \`pnpm build\`
+
+### Debugging
+
+- Enable debug logs: \`LOG_LEVEL=debug pnpm dev\`
+- Track requests: \`X-Request-ID\` in response headers
+- Check Sentry dashboard for error grouping
+
+### Recovery Procedures
+
+**Database rollback:**
+1. Download latest backup from Supabase
+2. Restore to new database
+3. Update \`DATABASE_URL\`
+
+**Service degradation:**
+The readiness endpoint shows which services are down. The app continues serving requests that don't depend on unavailable services.`,
+          troubleshooting: [
+            {
+              problem: "Login returns 'Authentication required (10001)'",
+              solution:
+                "Check JWT_SECRET is set in .env. Clear browser cookies. Verify COOKIE_DOMAIN matches deployment domain.",
+            },
+            {
+              problem: "pnpm db:push fails with migration errors",
+              solution:
+                "Check migration status with 'supabase db status'. Use 'supabase db reset' for development reset.",
+            },
+            {
+              problem: "Vercel build fails with memory limit",
+              solution:
+                "Consider externalizing large dependencies. Increase Node memory in Vercel settings.",
+            },
+            {
+              problem: "Stripe webhook not receiving events",
+              solution:
+                "Verify STRIPE_WEBHOOK_SECRET. Check webhook endpoint in Stripe dashboard. Use 'stripe listen' for local testing.",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "billing-plans",
+      title: "Billing & Plans",
+      icon: "card",
+      pages: [
+        {
+          id: "pricing-overview",
+          title: "Pricing & Plans Overview",
+          summary:
+            "DJAC offers flexible subscription plans for teams of all sizes — from startups needing single jurisdiction compliance to global enterprises.",
+          content: `### Plan Comparison
+
+| Feature | Free Trial | Starter | Professional | Enterprise |
+|---------|-----------|---------|-------------|------------|
+| Jurisdictions | 1 | 3 | 10 | Unlimited |
+| Vendors | 5 | 25 | 100 | Unlimited |
+| AI Assessments/mo | 3 | 20 | 100 | Custom |
+| Team Members | 2 | 10 | 50 | Unlimited |
+| Reports | Basic | Standard | Advanced | Custom |
+| API Access | — | — | ✓ | ✓ |
+| Priority Support | — | — | ✓ | ✓ |
+| Custom Integrations | — | — | — | ✓ |
+| SLA | — | 99.5% | 99.9% | 99.95% |
+
+### Billing Intervals
+
+All paid plans support:
+- **Monthly** — Standard rate
+- **Quarterly** — 10% discount
+- **Biannual** — 15% discount
+- **Annual** — 20% discount
+
+### Free Trial
+
+- 14-day free trial on Starter plan
+- No credit card required to start
+- Full access to all Starter features
+- Automatic upgrade reminder before trial ends`,
+        },
+        {
+          id: "subscription-management",
+          title: "Managing Your Subscription",
+          summary:
+            "Upgrade, downgrade, or cancel your subscription through the Stripe Customer Portal. View billing history and download invoices.",
+          content: `### Subscription Lifecycle
+
+1. **Trial** → Automatic 14-day trial on signup
+2. **Active** → Paid subscription after trial or direct purchase
+3. **Past Due** → Payment failed; grace period before cancellation
+4. **Canceled** → Subscription ended; data retained for 30 days
+5. **Paused** → Temporarily suspended (Enterprise only)
+
+### Upgrade / Downgrade
+
+- **Upgrade:** Immediate access to new features. Prorated charges for current billing period.
+- **Downgrade:** Takes effect at end of current billing period.
+
+### Billing Portal
+
+Access via: **Dashboard → Billing & Plan → Manage Subscription**
+
+The Stripe Customer Portal allows:
+- Update payment method
+- View billing history
+- Download invoices
+- Change plan
+- Cancel subscription
+
+### Payment Methods
+
+- Credit/Debit cards (Visa, Mastercard, Amex)
+- Bank transfers (Enterprise only)
+- Invoice billing (Enterprise only)
+
+### Refund Policy
+
+- Monthly plans: Prorated refund within 7 days
+- Annual plans: Full refund within 30 days, prorated thereafter
+- Credit applied to account for service outages exceeding SLA`,
+          troubleshooting: [
+            {
+              problem: "Payment failed but card is valid",
+              solution:
+                "Check with your bank for international transaction blocks. Try an alternative card. Contact support for manual invoice payment.",
+            },
+            {
+              problem: "Upgrade not reflected in dashboard",
+              solution:
+                "Allow up to 5 minutes for provisioning. If still not visible, try refreshing the page or logging out and back in.",
+            },
+            {
+              problem: "Trial ended but need more time",
+              solution:
+                "Contact support for a one-time 7-day trial extension. Extension is available once per organization.",
+            },
+          ],
         },
       ],
     },

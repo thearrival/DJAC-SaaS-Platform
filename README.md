@@ -1,10 +1,10 @@
 # DJAC - Compliance Management SaaS Platform
 
-A production-ready, multi-tenant compliance management SaaS platform tailored for organizations operating in **Saudi Arabia (PDPA/NCA-ECC)** and **China (PIPL/CSL/DSL)** regulatory environments.
+A production-ready, multi-tenant compliance management SaaS platform tailored for organizations operating across **25+ jurisdictions** including Saudi Arabia (PDPA/NCA-ECC), China (PIPL/CSL/DSL), EU (GDPR/NIS2), and more.
 
 ## Overview
 
-DJAC provides comprehensive compliance management including framework mapping, risk assessment, vendor management, continuous threat monitoring, and AI-powered reporting.
+DJAC provides comprehensive compliance management including framework mapping, AI-powered risk assessment, vendor management, continuous threat monitoring, and automated reporting in 3 languages.
 
 For the expanded global product vision and architecture spec, see [docs/global-platform/README.md](docs/global-platform/README.md).
 
@@ -103,10 +103,20 @@ pnpm dev
 
 ## Documentation
 
-- [Architecture](./docs/architecture.md)
-- [API Reference](./docs/api.md)
-- [Deployment Guide](./docs/deployment.md)
-- [Security Review](./docs/security.md)
+| Document                                                   | Description                                     |
+| ---------------------------------------------------------- | ----------------------------------------------- |
+| [Architecture](./docs/architecture.md)                     | System design, RBAC, AI pipeline, scaling       |
+| [API Reference](./docs/api.md)                             | Complete tRPC procedure reference (200+)        |
+| [Database Schema](./docs/database.md)                      | Table reference, enums, entity relationships    |
+| [Deployment Guide](./docs/deployment.md)                   | Environment setup, CI/CD, production checklist  |
+| [Security](./docs/security.md)                             | OWASP coverage, auth hardening, headers         |
+| [Testing Guide](./docs/testing.md)                         | Test structure, patterns, CI integration        |
+| [Troubleshooting](./docs/troubleshooting.md)               | Common issues, debugging, recovery procedures   |
+| [Contributing](./CONTRIBUTING.md)                          | Dev setup, conventions, making PRs              |
+| [Security Policy](./SECURITY.md)                           | Vulnerability reporting, supported versions     |
+| [Changelog](./CHANGELOG.md)                                | Release history and feature tracking            |
+| [Codebase Report](./DJAC-CODEBASE-REPORT.md)               | Full inventory of codebase, endpoints, env vars |
+| [Global Platform Vision](./docs/global-platform/README.md) | Expansion roadmap and architecture spec         |
 
 ## Deployment
 

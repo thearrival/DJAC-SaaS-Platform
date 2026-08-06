@@ -112,6 +112,13 @@ temp/
 # IDE junk
 *.md
 !README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!SECURITY.md
+!LICENSE
+!docs/*.md
+!docs/global-platform/*.md
+!DJAC-CODEBASE-REPORT.md
 
 # Database
 *.db

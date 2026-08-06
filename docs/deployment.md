@@ -125,6 +125,27 @@ supabase functions deploy
 curl https://your-app.com/api/health
 ```
 
+## Docker Deployment
+
+```bash
+# Build image
+docker build -t djac:latest .
+
+# Run container
+docker run -d \
+  -p 3000:3000 \
+  --env-file .env.production \
+  --name djac-app \
+  djac:latest
+
+# View logs
+docker logs -f djac-app
+```
+
+## VPS Deployment (scripts/vps-\*.sh)
+
+Shell scripts are available for VPS provisioning. See `scripts/vps-*.sh` for automated server setup, database configuration, and application deployment.
+
 ## Infrastructure Checklist
 
 - [ ] Database connection pool configured (25 connections)
@@ -138,3 +159,26 @@ curl https://your-app.com/api/health
 - [ ] Email SMTP/Resend configured
 - [ ] Stripe webhook endpoint registered
 - [ ] Backup strategy in place (Supabase daily backups)
+
+## Rollback Procedure
+
+1. Identify the last stable deployment in Vercel dashboard
+2. Promote the previous deployment to production: `vercel promote <deployment-id>`
+3. If database migrations were applied, revert them: `supabase db push` with a rollback migration
+4. Verify health: `curl https://app.yalla-hack.ae/api/health`
+5. Monitor Sentry for any regression errors
+
+## Disaster Recovery
+
+- **Database**: Supabase provides daily automated backups with point-in-time recovery (PITR) on paid plans
+- **Files**: S3 bucket has versioning enabled for report files and evidence
+- **Configuration**: Environment variables are managed in Vercel and can be restored from the dashboard
+- **Code**: All code is in git; the repository itself serves as the source of truth
+- **Secrets**: Rotate all secrets after any suspected compromise
+
+## Zero-Downtime Deployment
+
+1. Database migrations MUST be backwards-compatible (additive only)
+2. Deploy new code first (handles both old and new schema)
+3. Apply database migrations
+4. If rollback needed: revert code first, then revert DB
