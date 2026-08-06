@@ -2325,6 +2325,62 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   font-size: 0.85em;
 }
 
+/* ── Heading Anchor Links ──────────────────────────────────────────── */
+.djac-docs-heading-anchor {
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.djac-docs-heading-anchor:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.djac-docs-heading-hash {
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: var(--muted-foreground);
+}
+
+.djac-docs-h3:hover .djac-docs-heading-hash,
+.djac-docs-heading-anchor:hover .djac-docs-heading-hash {
+  opacity: 1;
+}
+
+.djac-docs-heading-hash:hover {
+  color: var(--primary);
+}
+
+/* ── Focus Visible Styles ──────────────────────────────────────────── */
+.djac-docs-portal :focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.djac-docs-sidebar button:focus-visible {
+  outline-offset: -1px;
+  border-radius: 0;
+}
+
+/* ── Table Responsive Wrapper ──────────────────────────────────────── */
+.djac-docs-article .grid {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  .djac-docs-article .grid {
+    font-size: 0.7rem;
+    gap: 0.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+}
+
 /* ── Print Styles ───────────────────────────────────────────────────── */
 @media print {
   .djac-docs-sidebar,

@@ -1893,6 +1893,21 @@ export default function DocsPortal() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Arrow key navigation between pages
+  useEffect(() => {
+    if (isHome) return;
+    function handleArrows(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      if (target.closest("input,textarea,[contenteditable]")) return;
+      if (e.key === "ArrowRight" && nextPage)
+        navigateToPage(nextPage.sectionId, nextPage.pageId);
+      if (e.key === "ArrowLeft" && prevPage)
+        navigateToPage(prevPage.sectionId, prevPage.pageId);
+    }
+    window.addEventListener("keydown", handleArrows);
+    return () => window.removeEventListener("keydown", handleArrows);
+  }, [isHome, nextPage, prevPage, navigateToPage]);
+
   // Scroll progress + back-to-top
   useEffect(() => {
     function handleScroll() {
@@ -2026,9 +2041,16 @@ export default function DocsPortal() {
           <h3
             key={i}
             id={id}
-            className="djac-docs-h3 text-foreground mt-10 mb-3 font-semibold text-lg"
+            className="djac-docs-h3 text-foreground mt-10 mb-3 font-semibold text-lg group"
           >
-            {boldify(text)}
+            <a
+              href={`#${id}`}
+              className="djac-docs-heading-anchor"
+              aria-label={`Link to ${text}`}
+            >
+              {boldify(text)}
+              <Hash className="djac-docs-heading-hash" />
+            </a>
           </h3>
         );
         continue;
@@ -2043,9 +2065,16 @@ export default function DocsPortal() {
           <h4
             key={i}
             id={id}
-            className="text-base font-semibold text-foreground mt-8 mb-2"
+            className="text-base font-semibold text-foreground mt-8 mb-2 group"
           >
-            {boldify(text)}
+            <a
+              href={`#${id}`}
+              className="djac-docs-heading-anchor"
+              aria-label={`Link to ${text}`}
+            >
+              {boldify(text)}
+              <Hash className="djac-docs-heading-hash" />
+            </a>
           </h4>
         );
         continue;
@@ -2484,6 +2513,16 @@ export default function DocsPortal() {
               <p className="text-sm djac-body text-muted-foreground mt-2 max-w-3xl">
                 {currentPage.summary}
               </p>
+              <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {Math.max(
+                    1,
+                    Math.ceil(currentPage.content.split(/\s+/).length / 200)
+                  )}{" "}
+                  min read
+                </span>
+              </div>
             </div>
 
             {/* Body + TOC Grid */}
