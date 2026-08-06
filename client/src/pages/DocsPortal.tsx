@@ -53,6 +53,9 @@ import {
   Clock,
   DollarSign,
   Brain,
+  ThumbsUp,
+  ThumbsDown,
+  ChevronsUpDown,
 } from "lucide-react";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1753,6 +1756,8 @@ export default function DocsPortal() {
   const [activeTocId, setActiveTocId] = useState<string>("");
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackTop, setShowBackTop] = useState(false);
+  const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+  const [expandAll, setExpandAll] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isRTL = locale === "ar";
@@ -2216,44 +2221,67 @@ export default function DocsPortal() {
               </div>
             </div>
             <nav className="djac-docs-nav">
-              {filteredSections.map(section => {
-                const isExpanded = expandedSections.has(section.id);
-                const SecIcon = ICONS[section.icon] || BookOpen;
-                return (
-                  <div key={section.id} className="mb-0.5">
-                    <button
-                      type="button"
-                      onClick={() => toggleSection(section.id)}
-                      className="djac-docs-section-btn"
-                    >
-                      {isExpanded ? (
-                        <ChevronDown className="h-3.5 w-3.5 shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+              {filteredSections.length === 0 ? (
+                <div className="px-4 py-8 text-center">
+                  <Search className="h-6 w-6 text-muted-foreground mx-auto mb-3 opacity-50" />
+                  <p className="text-sm text-muted-foreground mb-1">
+                    No results found
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setExpandAll(false);
+                      setExpandedSections(new Set(["getting-started"]));
+                    }}
+                  >
+                    Clear search
+                  </Button>
+                </div>
+              ) : (
+                filteredSections.map(section => {
+                  const isExpanded =
+                    expandAll || expandedSections.has(section.id);
+                  const SecIcon = ICONS[section.icon] || BookOpen;
+                  return (
+                    <div key={section.id} className="mb-0.5">
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(section.id)}
+                        className="djac-docs-section-btn"
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+                        ) : (
+                          <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                        )}
+                        <SecIcon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{section.title}</span>
+                      </button>
+                      {isExpanded && (
+                        <div className="ml-2">
+                          {section.pages.map(page => (
+                            <button
+                              key={page.id}
+                              type="button"
+                              onClick={() =>
+                                navigateToPage(section.id, page.id)
+                              }
+                              className="djac-docs-page-btn"
+                            >
+                              <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
+                              <span className="truncate text-xs">
+                                {page.title}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                       )}
-                      <SecIcon className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{section.title}</span>
-                    </button>
-                    {isExpanded && (
-                      <div className="ml-2">
-                        {section.pages.map(page => (
-                          <button
-                            key={page.id}
-                            type="button"
-                            onClick={() => navigateToPage(section.id, page.id)}
-                            className="djac-docs-page-btn"
-                          >
-                            <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
-                            <span className="truncate text-xs">
-                              {page.title}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                    </div>
+                  );
+                })
+              )}
             </nav>
             <div className="djac-docs-sidebar-footer">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -2284,6 +2312,46 @@ export default function DocsPortal() {
                   compliance intelligence platform. From quick-start guides to
                   deep API references and security architecture.
                 </p>
+                <div className="flex flex-wrap gap-6 mt-6 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                      <Layers className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-foreground">11</span>{" "}
+                      <span className="text-muted-foreground">Sections</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                      <FileText className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-foreground">28+</span>{" "}
+                      <span className="text-muted-foreground">Pages</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                      <Globe className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-foreground">3</span>{" "}
+                      <span className="text-muted-foreground">Languages</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                      <Code className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-foreground">200+</span>{" "}
+                      <span className="text-muted-foreground">
+                        API Procedures
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-3 mt-6">
                   <Button
                     onClick={() => navigate("/docs/getting-started/welcome")}
@@ -2445,51 +2513,94 @@ export default function DocsPortal() {
               </kbd>
             </div>
           </div>
+          {filteredSections.length > 1 && (
+            <button
+              onClick={() => {
+                setExpandAll(!expandAll);
+                if (!expandAll)
+                  setExpandedSections(new Set(sections.map(s => s.id)));
+                else setExpandedSections(new Set());
+              }}
+              className="w-full px-3 py-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 justify-center"
+              aria-label={
+                expandAll ? "Collapse all sections" : "Expand all sections"
+              }
+            >
+              <ChevronsUpDown className="h-3 w-3" />
+              {expandAll ? "Collapse all" : "Expand all"}
+            </button>
+          )}
           <nav className="djac-docs-nav">
-            {filteredSections.map(section => {
-              const isExpanded = expandedSections.has(section.id);
-              const isActive = currentSectionId === section.id;
-              const SecIcon = ICONS[section.icon] || BookOpen;
-              return (
-                <div key={section.id} className="mb-0.5">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection(section.id)}
-                    className={`djac-docs-section-btn ${isActive ? "djac-docs-section-active" : ""}`}
-                  >
-                    {isExpanded ? (
-                      <ChevronDown className="h-3.5 w-3.5 shrink-0" />
-                    ) : (
-                      <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+            {filteredSections.length === 0 ? (
+              <div className="px-4 py-8 text-center">
+                <Search className="h-6 w-6 text-muted-foreground mx-auto mb-3 opacity-50" />
+                <p className="text-sm text-muted-foreground mb-1">
+                  No results found
+                </p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Try different keywords or browse the sections
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setExpandAll(false);
+                    setExpandedSections(new Set(["getting-started"]));
+                  }}
+                >
+                  Clear search
+                </Button>
+              </div>
+            ) : (
+              filteredSections.map(section => {
+                const isExpanded =
+                  expandAll || expandedSections.has(section.id);
+                const isActive = currentSectionId === section.id;
+                const SecIcon = ICONS[section.icon] || BookOpen;
+                return (
+                  <div key={section.id} className="mb-0.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(section.id)}
+                      className={`djac-docs-section-btn ${isActive ? "djac-docs-section-active" : ""}`}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+                      ) : (
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                      )}
+                      <SecIcon className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{section.title}</span>
+                    </button>
+                    {isExpanded && (
+                      <div className="ml-2">
+                        {section.pages.map(page => {
+                          const isPageActive =
+                            currentPageId === page.id &&
+                            currentSectionId === section.id;
+                          return (
+                            <button
+                              key={page.id}
+                              type="button"
+                              onClick={() =>
+                                navigateToPage(section.id, page.id)
+                              }
+                              className={`djac-docs-page-btn ${isPageActive ? "djac-docs-page-active" : ""}`}
+                            >
+                              <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
+                              <span className="truncate text-xs">
+                                {page.title}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     )}
-                    <SecIcon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{section.title}</span>
-                  </button>
-                  {isExpanded && (
-                    <div className="ml-2">
-                      {section.pages.map(page => {
-                        const isPageActive =
-                          currentPageId === page.id &&
-                          currentSectionId === section.id;
-                        return (
-                          <button
-                            key={page.id}
-                            type="button"
-                            onClick={() => navigateToPage(section.id, page.id)}
-                            className={`djac-docs-page-btn ${isPageActive ? "djac-docs-page-active" : ""}`}
-                          >
-                            <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
-                            <span className="truncate text-xs">
-                              {page.title}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                  </div>
+                );
+              })
+            )}
           </nav>
           <div className="djac-docs-sidebar-footer">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -2786,7 +2897,33 @@ export default function DocsPortal() {
 
             {/* CTA */}
             <div className="djac-docs-next">
-              <h3 className="text-lg font-bold mb-3">
+              <div className="djac-docs-feedback">
+                <span className="text-sm text-muted-foreground mr-3">
+                  Was this page helpful?
+                </span>
+                <button
+                  onClick={() => setFeedback("up")}
+                  className={`djac-docs-feedback-btn ${feedback === "up" ? "djac-docs-feedback-active bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700" : ""}`}
+                  aria-label="Yes, this page was helpful"
+                >
+                  <ThumbsUp className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setFeedback("down")}
+                  className={`djac-docs-feedback-btn ${feedback === "down" ? "djac-docs-feedback-active bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-700" : ""}`}
+                  aria-label="No, this page needs improvement"
+                >
+                  <ThumbsDown className="h-4 w-4" />
+                </button>
+                {feedback && (
+                  <span className="text-xs text-muted-foreground ml-3">
+                    {feedback === "up"
+                      ? "Thanks for your feedback!"
+                      : "Thanks! We'll improve this page."}
+                  </span>
+                )}
+              </div>
+              <h3 className="text-lg font-bold mb-3 mt-4">
                 {t("docs.cta_ready", "Ready to get started?")}
               </h3>
               <div className="flex flex-wrap gap-3">

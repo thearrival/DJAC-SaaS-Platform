@@ -2381,6 +2381,28 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   }
 }
 
+/* ── Custom Scrollbar ───────────────────────────────────────────────── */
+.djac-docs-sidebar::-webkit-scrollbar,
+.djac-docs-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.djac-docs-sidebar::-webkit-scrollbar-track,
+.djac-docs-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.djac-docs-sidebar::-webkit-scrollbar-thumb,
+.djac-docs-nav::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.djac-docs-sidebar::-webkit-scrollbar-thumb:hover,
+.djac-docs-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
 /* ── Print Styles ───────────────────────────────────────────────────── */
 @media print {
   .djac-docs-sidebar,
@@ -2492,6 +2514,41 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   );
   border: 1px solid hsl(var(--primary) / 0.15);
   border-radius: 12px;
+}
+
+/* ── Docs Feedback Widget ───────────────────────────────────────────── */
+.djac-docs-feedback {
+  display: flex;
+  align-items: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.djac-docs-feedback-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  transition: all 0.15s;
+  margin-left: 0.5rem;
+}
+
+.djac-docs-feedback-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.djac-docs-feedback-active {
+  border-color: var(--primary);
+  color: var(--primary);
+  pointer-events: none;
 }
 
 /* ── Mobile responsiveness ────────────────────────────────────────────── */
