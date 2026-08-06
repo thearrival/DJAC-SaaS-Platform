@@ -206,6 +206,8 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 - **Vendor Risk Management** — Automated third-party assessments across all selected frameworks
 - **Enterprise-Grade Security** — AES-256 encryption, RBAC, audit trails, SOC 2 ready
 
+> **tip** DJAC supports 3 languages — English, Arabic, and Chinese — switch anytime from the header locale menu.
+
 ### Quick Start (5 minutes)
 1. **Create your organization** — Set up your company profile and billing
 2. **Select jurisdictions** — Choose China, Saudi Arabia, EU, or any combination
@@ -1650,50 +1652,27 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
    Sub-component: Admonition
    ────────────────────────────────────────────────────────────────────────── */
 
-const ADMONITION_STYLES: Record<
-  string,
-  {
-    icon: React.ComponentType<{ className?: string }>;
-    bg: string;
-    border: string;
-    text: string;
-  }
-> = {
-  tip: {
-    icon: Lightbulb,
-    bg: "bg-emerald-50/50 dark:bg-emerald-950/20",
-    border: "border-emerald-200/50 dark:border-emerald-800/30",
-    text: "text-emerald-700 dark:text-emerald-300",
-  },
-  info: {
-    icon: Info,
-    bg: "bg-blue-50/50 dark:bg-blue-950/20",
-    border: "border-blue-200/50 dark:border-blue-800/30",
-    text: "text-blue-700 dark:text-blue-300",
-  },
-  warning: {
-    icon: AlertTriangle,
-    bg: "bg-amber-50/50 dark:bg-amber-950/20",
-    border: "border-amber-200/50 dark:border-amber-800/30",
-    text: "text-amber-700 dark:text-amber-300",
-  },
-  danger: {
-    icon: X,
-    bg: "bg-red-50/50 dark:bg-red-950/20",
-    border: "border-red-200/50 dark:border-red-800/30",
-    text: "text-red-700 dark:text-red-300",
-  },
-};
-
 function Admonition({ type, children }: { type: string; children: string }) {
-  const style = ADMONITION_STYLES[type] || ADMONITION_STYLES.info;
-  const Icon = style.icon;
+  const labels: Record<string, string> = {
+    tip: "Tip",
+    info: "Info",
+    warning: "Warning",
+    danger: "Danger",
+  };
+  const icons: Record<string, React.ComponentType<{ className?: string }>> = {
+    tip: Lightbulb,
+    info: Info,
+    warning: AlertTriangle,
+    danger: X,
+  };
+  const Icon = icons[type] || Info;
   return (
-    <div className={`my-4 p-4 rounded-lg border ${style.bg} ${style.border}`}>
-      <div className="flex items-start gap-3">
-        <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${style.text}`} />
-        <p className={`text-sm ${style.text}`}>{children}</p>
+    <div className={`djac-docs-admon admon-${type}`}>
+      <div className="djac-docs-admon-header">
+        <Icon className="h-4 w-4" />
+        <span>{labels[type] || "Note"}</span>
       </div>
+      <p>{children}</p>
     </div>
   );
 }

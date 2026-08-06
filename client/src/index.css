@@ -2381,6 +2381,64 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   }
 }
 
+/* ── Table Styling Enhancements ─────────────────────────────────────── */
+.djac-docs-article .grid:first-of-type {
+  background: var(--muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-bottom: 2px solid var(--border);
+}
+
+.djac-docs-article .grid:nth-of-type(even):not(:first-of-type) {
+  background: var(--muted) / 0.3;
+}
+
+.dark .djac-docs-article .grid:nth-of-type(even):not(:first-of-type) {
+  background: hsl(var(--foreground) / 0.03);
+}
+
+/* ── Admonition Block Enhancements ──────────────────────────────────── */
+.djac-docs-article .djac-docs-admon {
+  margin: 1.25rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  border: 1px solid;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.djac-docs-admon-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── Selection Color ────────────────────────────────────────────────── */
+.djac-docs-content ::selection {
+  background: hsl(var(--primary) / 0.2);
+  color: var(--foreground);
+}
+
+/* ── External Link Styling ──────────────────────────────────────────── */
+.djac-docs-article a[href^="http"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.djac-docs-article a[href^="http"]::after {
+  content: "↗";
+  font-size: 0.7em;
+  opacity: 0.6;
+}
+
 /* ── Custom Scrollbar ───────────────────────────────────────────────── */
 .djac-docs-sidebar::-webkit-scrollbar,
 .djac-docs-nav::-webkit-scrollbar {
