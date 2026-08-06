@@ -1211,6 +1211,82 @@ DEV_AUTH_ROLE=super_admin
       },
     ],
   },
+  {
+    id: "vendor-risk",
+    title: "إدارة مخاطر الموردين",
+    icon: "building",
+    pages: [
+      {
+        id: "vendor-assessment",
+        title: "تقييم امتثال الموردين",
+        summary:
+          "تقييم تلقائي لامتثال الموردين الخارجيين عبر جميع الأطر المختارة.",
+        content: `### تقييم تلقائي للموردين
+1. **تسجيل المورد** — إضافة الاسم والصناعة والولاية القضائية
+2. **اختيار الأطر** — اختيار الأطر التنظيمية المطبقة
+3. **تحميل الأدلة** — إرفاق السياسات والشهادات
+4. **تشغيل التقييم** — تحليل AI عبر جميع الأطر
+5. **مراجعة النتائج** — تحليل مفصل للفجوات مع تقييم المخاطر (0-100)
+6. **تصدير التقرير** — تقرير PDF/DOCX احترافي`,
+      },
+    ],
+  },
+  {
+    id: "api-integration",
+    title: "الواجهة البرمجية والتكامل",
+    icon: "terminal",
+    pages: [
+      {
+        id: "api-reference",
+        title: "مرجع API",
+        summary: "توفر DJAC واجهة برمجية آمنة مع 200+ إجراء عبر 42 موجه.",
+        content: `### نظرة عامة على API\nتستخدم DJAC **tRPC** لعمليات API الآمنة.\n\n**طرق المصادقة:**\n| الطريقة | الاستخدام |\n|---------|----------|\n| ملف تعريف الجلسة | تطبيق الويب |\n| مفتاح API | الوصول البرمجي |\n| Clerk OAuth | OAuth خارجي |`,
+      },
+    ],
+  },
+  {
+    id: "deployment-operations",
+    title: "النشر والعمليات",
+    icon: "server",
+    pages: [
+      {
+        id: "deployment",
+        title: "خيارات النشر",
+        summary: "تدعم DJAC النشر على Vercel و Docker و VPS مع خطوط CI/CD.",
+        content:
+          "### نشر Vercel\n```bash\npnpm build && vercel --prod\nsupabase db push --linked\nsupabase functions deploy\n```\n\n### نشر Docker\n```bash\ndocker build -t djac:latest .\ndocker run -d -p 3000:3000 --env-file .env.production djac:latest\n```",
+      },
+    ],
+  },
+  {
+    id: "operations",
+    title: "العمليات السيبرانية",
+    icon: "gauge",
+    pages: [
+      {
+        id: "risk-register",
+        title: "سجل المخاطر",
+        summary: "إدارة مركزية للمخاطر مع تقييم تلقائي للشدة وتخطيط المعالجة.",
+        content:
+          "### سير إدارة المخاطر\n1. **تحديد** — تسجيل المخاطر مع الفئة والاحتمالية/التأثير\n2. **تقييم** — تقييم تلقائي (الاحتمالية × التأثير)\n3. **معالجة** — قبول، تخفيف، نقل، أو تجنب\n4. **ربط** — ربط المخاطر بالموردين والأطر",
+      },
+    ],
+  },
+  {
+    id: "case-studies",
+    title: "دراسات الحالة",
+    icon: "star",
+    pages: [
+      {
+        id: "enterprise-expansion",
+        title: "توسع مؤسسي عبر الحدود",
+        summary:
+          "كيف استخدمت شركة عالمية DJAC للامتثال في الصين والسعودية والاتحاد الأوروبي.",
+        content:
+          "### النتائج\n- امتثال كامل في 82 يوماً\n- توفير 380 ألف دولار\n- تقليل تكاليف المراقبة 70%",
+      },
+    ],
+  },
 ];
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1411,6 +1487,76 @@ DEV_AUTH_ROLE=super_admin
       },
     ],
   },
+  {
+    id: "vendor-risk",
+    title: "供应商风险管理",
+    icon: "building",
+    pages: [
+      {
+        id: "vendor-assessment",
+        title: "供应商合规评估",
+        summary: "跨所有选定框架自动进行第三方供应商合规评估。",
+        content:
+          "### 自动供应商评估\n1. **注册供应商** — 添加名称、行业、司法管辖区\n2. **选择框架** — 选择适用的监管框架\n3. **上传证据** — 附加供应商政策、认证\n4. **运行评估** — AI跨所有框架分析\n5. **查看结果** — 详细差距分析及风险评分（0-100）\n6. **导出报告** — 专业PDF/DOCX报告",
+      },
+    ],
+  },
+  {
+    id: "api-integration",
+    title: "API与集成",
+    icon: "terminal",
+    pages: [
+      {
+        id: "api-reference",
+        title: "API参考",
+        summary: "DJAC通过42个路由器提供200+个类型安全的tRPC API程序。",
+        content:
+          "### API概述\nDJAC使用**tRPC**实现端到端类型安全的API操作。\n\n**认证方法：**\n| 方法 | 用例 |\n|--------|----------|\n| 会话Cookie | Web应用 |\n| API密钥 | 编程访问 |\n| Clerk OAuth | 外部OAuth |",
+      },
+    ],
+  },
+  {
+    id: "deployment-operations",
+    title: "部署与运维",
+    icon: "server",
+    pages: [
+      {
+        id: "deployment",
+        title: "部署选项",
+        summary: "DJAC支持Vercel、Docker和VPS部署。",
+        content:
+          "### Vercel\n```bash\npnpm build && vercel --prod\nsupabase db push --linked\n```\n\n### Docker\n```bash\ndocker build -t djac:latest .\ndocker run -d -p 3000:3000 --env-file .env.production djac:latest\n```",
+      },
+    ],
+  },
+  {
+    id: "operations",
+    title: "网络运营",
+    icon: "gauge",
+    pages: [
+      {
+        id: "risk-register",
+        title: "风险登记册",
+        summary: "集中风险管理，自动严重性评分和处理计划。",
+        content:
+          "### 风险管理流程\n1. **识别** — 记录风险\n2. **评估** — 自动评分\n3. **处理** — 接受、缓解、转移或避免\n4. **关联** — 关联供应商和框架",
+      },
+    ],
+  },
+  {
+    id: "case-studies",
+    title: "案例研究",
+    icon: "star",
+    pages: [
+      {
+        id: "enterprise-expansion",
+        title: "企业跨境扩展案例",
+        summary: "全球制造商使用DJAC在中国、沙特和欧盟实现合规。",
+        content:
+          "### 成果\n- 82天实现完全合规\n- 节省38万美元\n- 监控成本降低70%",
+      },
+    ],
+  },
 ];
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1605,8 +1751,11 @@ export default function DocsPortal() {
   );
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeTocId, setActiveTocId] = useState<string>("");
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showBackTop, setShowBackTop] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const isRTL = locale === "ar";
 
   const sections = useMemo(() => getDocSections(locale), [locale]);
 
@@ -1742,6 +1891,24 @@ export default function DocsPortal() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Scroll progress + back-to-top
+  useEffect(() => {
+    function handleScroll() {
+      const h = document.documentElement;
+      const scrollTop = h.scrollTop || document.body.scrollTop;
+      const scrollHeight = h.scrollHeight || document.body.scrollHeight;
+      const clientHeight = h.clientHeight;
+      const pct =
+        scrollHeight > clientHeight
+          ? Math.min(100, (scrollTop / (scrollHeight - clientHeight)) * 100)
+          : 0;
+      setScrollProgress(pct);
+      setShowBackTop(scrollTop > 400);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Scroll-based active TOC tracking
@@ -2185,7 +2352,13 @@ export default function DocsPortal() {
   }
 
   return (
-    <div className="djac-page djac-docs-portal">
+    <div className="djac-page djac-docs-portal" dir={isRTL ? "rtl" : "ltr"}>
+      {/* Scroll Progress Bar */}
+      <div
+        className="djac-docs-progress-bar"
+        style={{ width: `${scrollProgress}%` }}
+      />
+
       <div className="djac-docs-mobile-toggle">
         <Button
           variant="outline"
@@ -2198,6 +2371,14 @@ export default function DocsPortal() {
             : t("docs.mobile_menu", "Documentation Menu")}
         </Button>
       </div>
+
+      {/* Mobile Sidebar Backdrop */}
+      {mobileSidebarOpen && (
+        <div
+          className="djac-docs-mobile-backdrop"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
 
       <div className="djac-docs-layout">
         {/* ── Sidebar ─────────────────────────────────────────────────── */}
@@ -2214,6 +2395,11 @@ export default function DocsPortal() {
                 {t("docs.sidebar_title", "Documentation")}
               </span>
             </button>
+            {searchQuery && (
+              <Badge variant="secondary" className="text-[10px] h-5">
+                {filteredSections.reduce((s, sec) => s + sec.pages.length, 0)}
+              </Badge>
+            )}
           </div>
           <div className="px-3 py-2">
             <div className="relative">
@@ -2584,6 +2770,15 @@ export default function DocsPortal() {
           </article>
         </main>
       </div>
+
+      {/* Back to top FAB */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className={`djac-docs-backtop ${showBackTop ? "djac-docs-backtop-visible" : ""}`}
+        aria-label="Back to top"
+      >
+        <ArrowUp className="h-4 w-4" />
+      </button>
     </div>
   );
 }

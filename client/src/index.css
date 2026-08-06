@@ -2091,6 +2091,69 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   padding: 0;
 }
 
+/* ── Scroll Progress Bar ────────────────────────────────────────────── */
+.djac-docs-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), hsl(280, 80%, 55%));
+  z-index: 100;
+  transition: width 0.1s linear;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ── Back to Top FAB ─────────────────────────────────────────────────── */
+.djac-docs-backtop {
+  position: fixed;
+  bottom: 2rem;
+  right: 1.5rem;
+  z-index: 50;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.djac-docs-backtop-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.djac-docs-backtop:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Mobile Sidebar Backdrop ──────────────────────────────────────────── */
+.djac-docs-mobile-backdrop {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .djac-docs-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+  }
+}
+
 .djac-docs-mobile-toggle {
   display: none;
 }
