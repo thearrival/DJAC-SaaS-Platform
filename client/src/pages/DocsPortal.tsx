@@ -178,6 +178,63 @@ const quickLinks = [
 ];
 
 /* ──────────────────────────────────────────────────────────────────────────
+   Related Pages Map — for cross-discovery at bottom of each page
+   ────────────────────────────────────────────────────────────────────────── */
+
+const relatedPages: Record<string, { title: string; path: string }[]> = {
+  welcome: [
+    {
+      title: "Platform Architecture",
+      path: "/docs/getting-started/architecture",
+    },
+    { title: "AI Engine Overview", path: "/docs/ai-engine/ai-overview" },
+    { title: "Pricing & Plans", path: "/docs/billing-plans/pricing-overview" },
+  ],
+  architecture: [
+    { title: "Welcome to DJAC", path: "/docs/getting-started/welcome" },
+    { title: "Developer Setup", path: "/docs/developer-guide/dev-setup" },
+    {
+      title: "Deployment Options",
+      path: "/docs/deployment-operations/deployment",
+    },
+  ],
+  "ai-overview": [
+    { title: "RAG Context System", path: "/docs/ai-engine/rag-system" },
+    { title: "Vendor Assessment", path: "/docs/vendor-risk/vendor-assessment" },
+    { title: "WebSocket Streaming", path: "/docs/api-integration/websocket" },
+  ],
+  "vendor-assessment": [
+    { title: "AI Engine Overview", path: "/docs/ai-engine/ai-overview" },
+    { title: "Supplier Profiles", path: "/docs/vendor-risk/supplier-profiles" },
+    { title: "Risk Register", path: "/docs/operations/risk-register" },
+  ],
+  "security-overview": [
+    { title: "RBAC System", path: "/docs/security-compliance/rbac-system" },
+    {
+      title: "Data Protection",
+      path: "/docs/security-compliance/data-protection",
+    },
+    { title: "Audit Logging", path: "/docs/security-compliance/audit-trail" },
+  ],
+  "dev-setup": [
+    {
+      title: "Platform Architecture",
+      path: "/docs/getting-started/architecture",
+    },
+    { title: "Adding Features", path: "/docs/developer-guide/adding-features" },
+    { title: "Testing Guide", path: "/docs/developer-guide/testing" },
+  ],
+  deployment: [
+    { title: "Monitoring", path: "/docs/deployment-operations/monitoring" },
+    {
+      title: "Troubleshooting",
+      path: "/docs/deployment-operations/troubleshooting",
+    },
+    { title: "Pricing Overview", path: "/docs/billing-plans/pricing-overview" },
+  ],
+};
+
+/* ──────────────────────────────────────────────────────────────────────────
    Multi-language Doc Data
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -2394,6 +2451,72 @@ export default function DocsPortal() {
                 </div>
               </div>
 
+              {/* Guided Path */}
+              <div className="mb-12">
+                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Rocket className="h-5 w-5 text-primary" />
+                  New to DJAC? Start here
+                </h2>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => navigate("/docs/getting-started/welcome")}
+                    className="w-full text-left flex items-start gap-4 p-4 rounded-xl border hover:border-primary/30 hover:bg-accent/50 transition-all group"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0 mt-0.5">
+                      1
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        Read the Welcome Guide
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        What DJAC does and who it's for — 2 min read
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary shrink-0 self-center" />
+                  </button>
+                  <button
+                    onClick={() => navigate("/docs/ai-engine/ai-overview")}
+                    className="w-full text-left flex items-start gap-4 p-4 rounded-xl border hover:border-primary/30 hover:bg-accent/50 transition-all group"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0 mt-0.5">
+                      2
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-primary" />
+                        Explore the AI Engine
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        How the 8-stage compliance pipeline works — 3 min read
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary shrink-0 self-center" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      navigate("/docs/vendor-risk/vendor-assessment")
+                    }
+                    className="w-full text-left flex items-start gap-4 p-4 rounded-xl border hover:border-primary/30 hover:bg-accent/50 transition-all group"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0 mt-0.5">
+                      3
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-primary" />
+                        Try a Vendor Assessment
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        Step-by-step guide to run your first compliance check
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary shrink-0 self-center" />
+                  </button>
+                </div>
+              </div>
+
               {/* CTA */}
               <div className="djac-docs-next">
                 <h3 className="text-lg font-bold mb-3">
@@ -2902,7 +3025,28 @@ export default function DocsPortal() {
                   </span>
                 )}
               </div>
-              <h3 className="text-lg font-bold mb-3 mt-4">
+              {currentPageId && relatedPages[currentPageId] ? (
+                <div className="mt-6 pt-5 border-t">
+                  <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-primary" />
+                    Related pages
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {relatedPages[currentPageId].map(
+                      (r: { title: string; path: string }) => (
+                        <button
+                          key={r.path}
+                          onClick={() => navigate(r.path)}
+                          className="text-xs px-3 py-1.5 rounded-full border hover:border-primary/40 hover:bg-accent transition-all text-muted-foreground hover:text-foreground"
+                        >
+                          {r.title}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              ) : null}
+              <h3 className="text-lg font-bold mb-3 mt-5">
                 {t("docs.cta_ready", "Ready to get started?")}
               </h3>
               <div className="flex flex-wrap gap-3">
