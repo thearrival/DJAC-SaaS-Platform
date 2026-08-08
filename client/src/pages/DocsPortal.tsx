@@ -56,6 +56,9 @@ import {
   ThumbsUp,
   ThumbsDown,
   ChevronsUpDown,
+  Link2,
+  Printer,
+  HelpCircle,
 } from "lucide-react";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1658,6 +1661,76 @@ function getDocSections(locale: string): DocSection[] {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
+   Search helpers: highlight matched text + content snippet
+   ────────────────────────────────────────────────────────────────────────── */
+
+function highlightMatch(text: string, query: string): React.ReactNode {
+  if (!query) return text;
+  const q = query.toLowerCase();
+  const idx = text.toLowerCase().indexOf(q);
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="djac-docs-mark">{text.slice(idx, idx + q.length)}</mark>
+      {text.slice(idx + q.length)}
+    </>
+  );
+}
+
+function contentSnippet(content: string, query: string): string | null {
+  if (!query) return null;
+  const q = query.toLowerCase();
+  const idx = content.toLowerCase().indexOf(q);
+  if (idx === -1) return null;
+  const start = Math.max(0, idx - 35);
+  const end = Math.min(content.length, idx + q.length + 55);
+  return `${start > 0 ? "…" : ""}${content
+    .slice(start, end)
+    .replace(/\s+/g, " ")}${end < content.length ? "…" : ""}`;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Sub-component: SidebarPageRow — shared page link with search highlights
+   ────────────────────────────────────────────────────────────────────────── */
+
+function SidebarPageRow({
+  page,
+  query,
+  active,
+  onClick,
+}: {
+  page: DocPage;
+  query: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  const titleMatches = query && page.title.toLowerCase().includes(query);
+  const summaryMatches =
+    query && !titleMatches && page.summary.toLowerCase().includes(query);
+  const snippet = contentSnippet(page.content, query);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`djac-docs-page-btn ${active ? "djac-docs-page-active" : ""}`}
+    >
+      <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
+      <div className="min-w-0 flex-1">
+        <span className="truncate text-xs block">
+          {highlightMatch(page.title, query)}
+        </span>
+        {query && (titleMatches || summaryMatches || snippet) && (
+          <span className="block truncate text-[10px] text-muted-foreground/80">
+            {snippet || page.summary}
+          </span>
+        )}
+      </div>
+    </button>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
    Sub-component: CodeBlock
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -1669,6 +1742,7 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
       setTimeout(() => setCopied(false), 2000);
     });
   }, [code]);
+  const lines = code.split("\n");
   return (
     <div className="relative my-4 rounded-lg border bg-zinc-950 dark:bg-zinc-900 overflow-hidden group">
       {lang && (
@@ -1686,8 +1760,18 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
           </button>
         </div>
       )}
-      <pre className="p-4 overflow-x-auto text-sm leading-relaxed">
-        <code className="font-mono text-zinc-200">{code}</code>
+      <pre
+        dir="ltr"
+        className="p-4 overflow-x-auto overflow-y-auto text-sm leading-relaxed max-h-96"
+      >
+        <code className="font-mono text-zinc-200">
+          {lines.map((line, i) => (
+            <span key={i} className="djac-docs-code-line">
+              <span className="djac-docs-code-lineno">{i + 1}</span>
+              {line || " "}
+            </span>
+          ))}
+        </code>
       </pre>
       {!lang && (
         <button
@@ -1794,6 +1878,9 @@ export default function DocsPortal() {
   const [showBackTop, setShowBackTop] = useState(false);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
   const [expandAll, setExpandAll] = useState(false);
+  const [mobileTocOpen, setMobileTocOpen] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isRTL = locale === "ar";
@@ -1918,6 +2005,43 @@ export default function DocsPortal() {
     }
   }, [currentSectionId]);
 
+  // Persist per-page feedback votes + reset transient UI on navigation
+  useEffect(() => {
+    setShowShortcuts(false);
+    setMobileTocOpen(false);
+    setCopiedLink(false);
+    try {
+      const saved = localStorage.getItem(
+        `djac-doc-feedback:${currentPath || "home"}`
+      );
+      setFeedback(saved === "up" || saved === "down" ? saved : null);
+    } catch {
+      setFeedback(null);
+    }
+  }, [currentPath]);
+
+  const voteFeedback = useCallback(
+    (v: "up" | "down") => {
+      setFeedback(v);
+      try {
+        localStorage.setItem(`djac-doc-feedback:${currentPath || "home"}`, v);
+      } catch {
+        /* storage unavailable */
+      }
+    },
+    [currentPath]
+  );
+
+  const copyPageLink = useCallback(() => {
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+      })
+      .catch(() => {});
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -1927,6 +2051,8 @@ export default function DocsPortal() {
       }
       if (e.key === "Escape") {
         setMobileSidebarOpen(false);
+        setShowShortcuts(false);
+        setMobileTocOpen(false);
         searchRef.current?.blur();
       }
     }
@@ -2240,6 +2366,11 @@ export default function DocsPortal() {
                   {t("docs.sidebar_title", "Documentation")}
                 </span>
               </div>
+              {searchQuery && (
+                <Badge variant="secondary" className="text-[10px] h-5">
+                  {filteredSections.reduce((s, sec) => s + sec.pages.length, 0)}
+                </Badge>
+              )}
             </div>
             <div className="px-3 py-2">
               <div className="relative">
@@ -2298,19 +2429,15 @@ export default function DocsPortal() {
                       {isExpanded && (
                         <div className="ml-2">
                           {section.pages.map(page => (
-                            <button
+                            <SidebarPageRow
                               key={page.id}
-                              type="button"
+                              page={page}
+                              query={searchQuery}
+                              active={false}
                               onClick={() =>
                                 navigateToPage(section.id, page.id)
                               }
-                              className="djac-docs-page-btn"
-                            >
-                              <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
-                              <span className="truncate text-xs">
-                                {page.title}
-                              </span>
-                            </button>
+                            />
                           ))}
                         </div>
                       )}
@@ -2677,26 +2804,18 @@ export default function DocsPortal() {
                     </button>
                     {isExpanded && (
                       <div className="ml-2">
-                        {section.pages.map(page => {
-                          const isPageActive =
-                            currentPageId === page.id &&
-                            currentSectionId === section.id;
-                          return (
-                            <button
-                              key={page.id}
-                              type="button"
-                              onClick={() =>
-                                navigateToPage(section.id, page.id)
-                              }
-                              className={`djac-docs-page-btn ${isPageActive ? "djac-docs-page-active" : ""}`}
-                            >
-                              <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/40" />
-                              <span className="truncate text-xs">
-                                {page.title}
-                              </span>
-                            </button>
-                          );
-                        })}
+                        {section.pages.map(page => (
+                          <SidebarPageRow
+                            key={page.id}
+                            page={page}
+                            query={searchQuery}
+                            active={
+                              currentPageId === page.id &&
+                              currentSectionId === section.id
+                            }
+                            onClick={() => navigateToPage(section.id, page.id)}
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
@@ -2736,7 +2855,116 @@ export default function DocsPortal() {
                   min read
                 </span>
               </div>
+              <div className="relative flex flex-wrap items-center gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={copyPageLink}
+                  className="djac-docs-action-btn"
+                >
+                  {copiedLink ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Link2 className="h-3.5 w-3.5" />
+                  )}
+                  {copiedLink ? "Link copied" : "Copy link"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="djac-docs-action-btn"
+                >
+                  <Printer className="h-3.5 w-3.5" />
+                  Print page
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowShortcuts(s => !s)}
+                  className="djac-docs-action-btn"
+                  aria-expanded={showShortcuts}
+                >
+                  <HelpCircle className="h-3.5 w-3.5" />
+                  Shortcuts
+                </button>
+                {showShortcuts && (
+                  <div className="djac-docs-shortcuts">
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <kbd>⌘/Ctrl</kbd> + <kbd>K</kbd>
+                          </td>
+                          <td>Focus search</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <kbd>→</kbd> / <kbd>←</kbd>
+                          </td>
+                          <td>Next / previous page</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <kbd>Esc</kbd>
+                          </td>
+                          <td>Close menus &amp; search</td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <kbd>#</kbd> anchor links
+                          </td>
+                          <td>Jump to section</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Mobile TOC (below xl) */}
+            {toc.length >= 3 && (
+              <div className="djac-docs-toc-mobile xl:hidden">
+                <button
+                  type="button"
+                  onClick={() => setMobileTocOpen(o => !o)}
+                  className="djac-docs-toc-mobile-toggle"
+                  aria-expanded={mobileTocOpen}
+                >
+                  <span className="flex items-center gap-2">
+                    <List className="h-3.5 w-3.5" />
+                    On this page
+                  </span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${mobileTocOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {mobileTocOpen && (
+                  <ul>
+                    {toc.map(entry => (
+                      <li key={entry.id}>
+                        <a
+                          href={`#${entry.id}`}
+                          className={
+                            activeTocId === entry.id ? "toc-active" : ""
+                          }
+                          style={{
+                            paddingLeft: entry.level === 3 ? 8 : 20,
+                          }}
+                          onClick={e => {
+                            e.preventDefault();
+                            setMobileTocOpen(false);
+                            document
+                              .getElementById(entry.id)
+                              ?.scrollIntoView({ behavior: "smooth" });
+                          }}
+                        >
+                          {entry.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
 
             {/* Body + TOC Grid */}
             <div className="djac-docs-body-grid">
@@ -3004,14 +3232,14 @@ export default function DocsPortal() {
                   Was this page helpful?
                 </span>
                 <button
-                  onClick={() => setFeedback("up")}
+                  onClick={() => voteFeedback("up")}
                   className={`djac-docs-feedback-btn ${feedback === "up" ? "djac-docs-feedback-active bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700" : ""}`}
                   aria-label="Yes, this page was helpful"
                 >
                   <ThumbsUp className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setFeedback("down")}
+                  onClick={() => voteFeedback("down")}
                   className={`djac-docs-feedback-btn ${feedback === "down" ? "djac-docs-feedback-active bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-700" : ""}`}
                   aria-label="No, this page needs improvement"
                 >

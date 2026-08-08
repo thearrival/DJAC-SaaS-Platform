@@ -2469,7 +2469,12 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   .djac-docs-next,
   .djac-docs-prevnext,
   .djac-docs-page-nav,
-  .djac-docs-sidebar-footer {
+  .djac-docs-sidebar-footer,
+  .djac-docs-action-btn,
+  .djac-docs-shortcuts,
+  .djac-docs-toc-mobile,
+  .djac-docs-feedback,
+  .djac-docs-backtop {
     display: none !important;
   }
 
@@ -2607,6 +2612,150 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   border-color: var(--primary);
   color: var(--primary);
   pointer-events: none;
+}
+
+/* ── Docs UX polish round 2 ─────────────────────────────────────────────── */
+.djac-docs-mark {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.djac-docs-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
+}
+
+.djac-docs-action-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+
+.djac-docs-shortcuts {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 12px 14px;
+  min-width: 270px;
+}
+
+.djac-docs-shortcuts table {
+  width: 100%;
+  font-size: 12px;
+  margin: 0;
+}
+
+.djac-docs-shortcuts td {
+  padding: 4px 4px;
+  border: none;
+  color: var(--muted-foreground);
+}
+
+.djac-docs-shortcuts td:last-child {
+  color: var(--foreground);
+}
+
+.djac-docs-shortcuts kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--foreground);
+}
+
+.djac-docs-toc-mobile {
+  margin: 10px 0 4px;
+}
+
+.djac-docs-toc-mobile-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+.djac-docs-toc-mobile-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.djac-docs-toc-mobile ul {
+  margin-top: 6px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.djac-docs-toc-mobile a {
+  display: block;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: var(--muted-foreground);
+}
+
+.djac-docs-toc-mobile a:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.djac-docs-toc-mobile a.toc-active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.djac-docs-article h3,
+.djac-docs-article h4 {
+  scroll-margin-top: 96px;
+}
+
+.djac-docs-code-line {
+  display: block;
+  min-height: 1.4em;
+}
+
+.djac-docs-code-lineno {
+  display: inline-block;
+  width: 2.2em;
+  text-align: right;
+  margin-right: 1.1em;
+  color: #52525b;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* ── Mobile responsiveness ────────────────────────────────────────────── */
