@@ -63,12 +63,14 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
+import { docsAr } from "./docsAr";
+import { docsZh } from "./docsZh";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Types
    ────────────────────────────────────────────────────────────────────────── */
 
-interface DocSection {
+export interface DocSection {
   id: string;
   title: string;
   icon: string;
@@ -129,115 +131,447 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Home Page Feature Cards Data
+   Home Page Feature Cards Data (trilingual)
    ────────────────────────────────────────────────────────────────────────── */
 
-const homeFeatures = [
-  {
-    icon: "zap",
-    title: "AI Compliance Engine",
-    desc: "8-stage GPT-4o assessment pipeline with RAG context retrieval",
-    link: "/docs/ai-engine/ai-overview",
-  },
-  {
-    icon: "shield",
-    title: "29+ Jurisdictions",
-    desc: "PIPL, PDPL, GDPR, NCA-ECC, CSL, DSL and global standards",
-    link: "/docs/frameworks/jurisdictions",
-  },
-  {
-    icon: "building",
-    title: "Vendor Risk",
-    desc: "Automated third-party assessments across all frameworks",
-    link: "/docs/vendor-risk/vendor-assessment",
-  },
-  {
-    icon: "terminal",
-    title: "API & Integration",
-    desc: "200+ tRPC procedures with WebSocket streaming",
-    link: "/docs/api-integration/api-reference",
-  },
-  {
-    icon: "lock",
-    title: "Security & RBAC",
-    desc: "7 platform roles, 32 modules, 6 permission flags",
-    link: "/docs/security-compliance/security-overview",
-  },
-  {
-    icon: "code",
-    title: "Developer Guide",
-    desc: "Setup, architecture, testing, contributing",
-    link: "/docs/developer-guide/dev-setup",
-  },
-];
-
-const quickLinks = [
-  { label: "Welcome & Overview", path: "/docs/getting-started/welcome" },
-  { label: "Quick Start Guide", path: "/docs/getting-started/architecture" },
-  { label: "API Reference", path: "/docs/api-integration/api-reference" },
-  { label: "Pricing & Plans", path: "/docs/billing-plans/pricing-overview" },
-  {
-    label: "Security Overview",
-    path: "/docs/security-compliance/security-overview",
-  },
-  { label: "Deployment Guide", path: "/docs/deployment-operations/deployment" },
-];
-
-/* ──────────────────────────────────────────────────────────────────────────
-   Related Pages Map — for cross-discovery at bottom of each page
-   ────────────────────────────────────────────────────────────────────────── */
-
-const relatedPages: Record<string, { title: string; path: string }[]> = {
-  welcome: [
+const HOME_FEATURES: Record<
+  string,
+  { icon: string; title: string; desc: string; link: string }[]
+> = {
+  en: [
     {
-      title: "Platform Architecture",
-      path: "/docs/getting-started/architecture",
+      icon: "zap",
+      title: "AI Compliance Engine",
+      desc: "8-stage GPT-4o assessment pipeline with RAG context retrieval",
+      link: "/docs/ai-engine/ai-overview",
     },
-    { title: "AI Engine Overview", path: "/docs/ai-engine/ai-overview" },
-    { title: "Pricing & Plans", path: "/docs/billing-plans/pricing-overview" },
-  ],
-  architecture: [
-    { title: "Welcome to DJAC", path: "/docs/getting-started/welcome" },
-    { title: "Developer Setup", path: "/docs/developer-guide/dev-setup" },
     {
-      title: "Deployment Options",
+      icon: "shield",
+      title: "29+ Jurisdictions",
+      desc: "PIPL, PDPL, GDPR, NCA-ECC, CSL, DSL and global standards",
+      link: "/docs/frameworks/jurisdictions",
+    },
+    {
+      icon: "building",
+      title: "Vendor Risk",
+      desc: "Automated third-party assessments across all frameworks",
+      link: "/docs/vendor-risk/vendor-assessment",
+    },
+    {
+      icon: "terminal",
+      title: "API & Integration",
+      desc: "200+ tRPC procedures with WebSocket streaming",
+      link: "/docs/api-integration/api-reference",
+    },
+    {
+      icon: "lock",
+      title: "Security & RBAC",
+      desc: "7 platform roles, 32 modules, 6 permission flags",
+      link: "/docs/security-compliance/security-overview",
+    },
+    {
+      icon: "code",
+      title: "Developer Guide",
+      desc: "Setup, architecture, testing, contributing",
+      link: "/docs/developer-guide/dev-setup",
+    },
+  ],
+  ar: [
+    {
+      icon: "zap",
+      title: "محرك الامتثال الذكي",
+      desc: "خط أنابيب تقييم GPT-4o من 8 مراحل مع استرجاع سياق RAG",
+      link: "/docs/ai-engine/ai-overview",
+    },
+    {
+      icon: "shield",
+      title: "29+ ولاية قضائية",
+      desc: "PIPL وPDPL وGDPR وNCA-ECC وCSL وDSL والمعايير العالمية",
+      link: "/docs/frameworks/jurisdictions",
+    },
+    {
+      icon: "building",
+      title: "مخاطر الموردين",
+      desc: "تقييمات تلقائية للجهات الخارجية عبر جميع الأطر",
+      link: "/docs/vendor-risk/vendor-assessment",
+    },
+    {
+      icon: "terminal",
+      title: "API والتكامل",
+      desc: "أكثر من 200 إجراء tRPC مع بث WebSocket",
+      link: "/docs/api-integration/api-reference",
+    },
+    {
+      icon: "lock",
+      title: "الأمان وRBAC",
+      desc: "7 أدوار منصة و32 وحدة و6 أعلام صلاحيات",
+      link: "/docs/security-compliance/security-overview",
+    },
+    {
+      icon: "code",
+      title: "دليل المطور",
+      desc: "الإعداد والبنية والاختبار والمساهمة",
+      link: "/docs/developer-guide/dev-setup",
+    },
+  ],
+  zh: [
+    {
+      icon: "zap",
+      title: "AI合规引擎",
+      desc: "基于GPT-4o的8阶段评估流水线，带RAG上下文检索",
+      link: "/docs/ai-engine/ai-overview",
+    },
+    {
+      icon: "shield",
+      title: "29+ 司法管辖区",
+      desc: "PIPL、PDPL、GDPR、NCA-ECC、CSL、DSL及全球标准",
+      link: "/docs/frameworks/jurisdictions",
+    },
+    {
+      icon: "building",
+      title: "供应商风险",
+      desc: "跨所有框架的自动第三方评估",
+      link: "/docs/vendor-risk/vendor-assessment",
+    },
+    {
+      icon: "terminal",
+      title: "API与集成",
+      desc: "200+个tRPC程序，支持WebSocket流式传输",
+      link: "/docs/api-integration/api-reference",
+    },
+    {
+      icon: "lock",
+      title: "安全与RBAC",
+      desc: "7个平台角色、32个模块、6个权限标志",
+      link: "/docs/security-compliance/security-overview",
+    },
+    {
+      icon: "code",
+      title: "开发者指南",
+      desc: "设置、架构、测试、贡献",
+      link: "/docs/developer-guide/dev-setup",
+    },
+  ],
+};
+
+const QUICK_LINKS: Record<string, { label: string; path: string }[]> = {
+  en: [
+    { label: "Welcome & Overview", path: "/docs/getting-started/welcome" },
+    { label: "Quick Start Guide", path: "/docs/getting-started/architecture" },
+    { label: "API Reference", path: "/docs/api-integration/api-reference" },
+    { label: "Pricing & Plans", path: "/docs/billing-plans/pricing-overview" },
+    {
+      label: "Security Overview",
+      path: "/docs/security-compliance/security-overview",
+    },
+    {
+      label: "Deployment Guide",
       path: "/docs/deployment-operations/deployment",
     },
   ],
-  "ai-overview": [
-    { title: "RAG Context System", path: "/docs/ai-engine/rag-system" },
-    { title: "Vendor Assessment", path: "/docs/vendor-risk/vendor-assessment" },
-    { title: "WebSocket Streaming", path: "/docs/api-integration/websocket" },
-  ],
-  "vendor-assessment": [
-    { title: "AI Engine Overview", path: "/docs/ai-engine/ai-overview" },
-    { title: "Supplier Profiles", path: "/docs/vendor-risk/supplier-profiles" },
-    { title: "Risk Register", path: "/docs/operations/risk-register" },
-  ],
-  "security-overview": [
-    { title: "RBAC System", path: "/docs/security-compliance/rbac-system" },
+  ar: [
     {
-      title: "Data Protection",
-      path: "/docs/security-compliance/data-protection",
+      label: "الترحيب والنظرة العامة",
+      path: "/docs/getting-started/welcome",
     },
-    { title: "Audit Logging", path: "/docs/security-compliance/audit-trail" },
-  ],
-  "dev-setup": [
     {
-      title: "Platform Architecture",
+      label: "دليل البدء السريع",
       path: "/docs/getting-started/architecture",
     },
-    { title: "Adding Features", path: "/docs/developer-guide/adding-features" },
-    { title: "Testing Guide", path: "/docs/developer-guide/testing" },
-  ],
-  deployment: [
-    { title: "Monitoring", path: "/docs/deployment-operations/monitoring" },
+    { label: "مرجع API", path: "/docs/api-integration/api-reference" },
     {
-      title: "Troubleshooting",
-      path: "/docs/deployment-operations/troubleshooting",
+      label: "الأسعار والخطط",
+      path: "/docs/billing-plans/pricing-overview",
     },
-    { title: "Pricing Overview", path: "/docs/billing-plans/pricing-overview" },
+    {
+      label: "نظرة عامة على الأمان",
+      path: "/docs/security-compliance/security-overview",
+    },
+    {
+      label: "دليل النشر",
+      path: "/docs/deployment-operations/deployment",
+    },
   ],
+  zh: [
+    { label: "欢迎与概述", path: "/docs/getting-started/welcome" },
+    { label: "快速入门指南", path: "/docs/getting-started/architecture" },
+    { label: "API参考", path: "/docs/api-integration/api-reference" },
+    {
+      label: "定价与计划",
+      path: "/docs/billing-plans/pricing-overview",
+    },
+    {
+      label: "安全概述",
+      path: "/docs/security-compliance/security-overview",
+    },
+    { label: "部署指南", path: "/docs/deployment-operations/deployment" },
+  ],
+};
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Related Pages Map — cross-discovery at bottom of each page.
+   Titles resolve from the CURRENT locale's data (auto-localized).
+   ────────────────────────────────────────────────────────────────────────── */
+
+const RELATED_PAGE_IDS: Record<string, string[]> = {
+  welcome: ["architecture", "ai-overview", "pricing-overview"],
+  architecture: ["welcome", "dev-setup", "deployment"],
+  "ai-overview": ["rag-system", "vendor-assessment", "websocket"],
+  "vendor-assessment": ["ai-overview", "supplier-profiles", "risk-register"],
+  "security-overview": ["rbac-system", "pipl-guide"],
+  "dev-setup": ["architecture", "adding-features", "monitoring"],
+  deployment: ["monitoring", "troubleshooting", "pricing-overview"],
+  "pricing-overview": ["subscription-management", "welcome", "deployment"],
+};
+
+/* ──────────────────────────────────────────────────────────────────────────
+   UI Chrome Strings (trilingual) — hero, sidebar, action bar, palette, etc.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const DOCS_UI: Record<string, Record<string, string>> = {
+  en: {
+    docs_title: "Documentation",
+    hero_title: "DJAC Documentation",
+    hero_sub:
+      "Everything you need to deploy, configure, and master the DJAC compliance intelligence platform. From quick-start guides to deep API references and security architecture.",
+    stat_sections: "Sections",
+    stat_pages: "Pages",
+    stat_languages: "Languages",
+    stat_api: "API Procedures",
+    get_started: "Get Started",
+    api_reference: "API Reference",
+    quick_links: "Quick Links",
+    guided_title: "New to DJAC? Start here",
+    guided_1_title: "Read the Welcome Guide",
+    guided_1_desc: "What DJAC does and who it's for — 2 min read",
+    guided_2_title: "Explore the AI Engine",
+    guided_2_desc: "How the 8-stage compliance pipeline works — 3 min read",
+    guided_3_title: "Try a Vendor Assessment",
+    guided_3_desc: "Step-by-step guide to run your first compliance check",
+    no_results: "No results found",
+    try_different: "Try different keywords or browse the sections",
+    clear_search: "Clear search",
+    expand_all: "Expand all",
+    collapse_all: "Collapse all",
+    min_read: "min read",
+    copy_link: "Copy link",
+    link_copied: "Link copied",
+    print_page: "Print page",
+    shortcuts: "Shortcuts",
+    sh_focus: "Focus search",
+    sh_prev: "Next / previous page",
+    sh_close: "Close menus & search",
+    sh_jump: "Jump to section",
+    on_this_page: "On this page",
+    back_to_top: "Back to top",
+    previous: "Previous",
+    next: "Next",
+    helpful: "Was this page helpful?",
+    thanks_up: "Thanks for your feedback!",
+    thanks_down: "Thanks! We'll improve this page.",
+    related: "Related pages",
+    docs: "Docs",
+    palette_placeholder: "Jump to a page…",
+    palette_empty: "No pages match “{q}”",
+    palette_navigate: "navigate",
+    palette_open: "open",
+    palette_close: "close",
+    admon_tip: "Tip",
+    admon_info: "Info",
+    admon_warning: "Warning",
+    admon_danger: "Danger",
+    admon_note: "Note",
+    theme_light: "Light",
+    theme_dark: "Dark",
+    theme_switch_dark: "Switch to dark theme",
+    theme_switch_light: "Switch to light theme",
+    lang_aria: "Documentation language",
+    aria_copy: "Copy link to this page",
+    aria_backtop: "Back to top",
+    aria_helpful: "Yes, this page was helpful",
+    aria_unhelpful: "No, this page needs improvement",
+    aria_search: "Search documentation",
+    sidebar_title: "Documentation",
+    search_placeholder: "Search docs...",
+    mobile_menu: "Documentation Menu",
+    close_menu: "Close Menu",
+    cta_ready: "Ready to get started?",
+    cta_trial: "Start Free Trial",
+    cta_pricing: "View Pricing",
+    cta_guide: "Quick Start Guide",
+    architecture_diagram: "Architecture Diagram",
+    case_study: "Case Study",
+    challenge: "Challenge",
+    solution: "Solution",
+    results: "Results",
+    demo_guide: "Interactive Demo Guide",
+    best_practices: "Best Practices",
+    troubleshooting: "Troubleshooting",
+    q: "Q",
+    a: "A",
+  },
+  ar: {
+    docs_title: "التوثيق",
+    hero_title: "وثائق DJAC",
+    hero_sub:
+      "كل ما تحتاجه لنشر وتهيئة وإتقان منصة DJAC لذكاء الامتثال — من أدلة البدء السريع إلى مراجع API المتعمقة ومعمارية الأمان.",
+    stat_sections: "أقسام",
+    stat_pages: "صفحات",
+    stat_languages: "لغات",
+    stat_api: "إجراءات API",
+    get_started: "ابدأ الآن",
+    api_reference: "مرجع API",
+    quick_links: "روابط سريعة",
+    guided_title: "جديد على DJAC؟ ابدأ من هنا",
+    guided_1_title: "اقرأ دليل الترحيب",
+    guided_1_desc: "ما هي DJAC ولمن هي — قراءة دقيقتين",
+    guided_2_title: "استكشف محرك الذكاء الاصطناعي",
+    guided_2_desc: "كيف يعمل خط أنابيب الامتثال ذو 8 مراحل — قراءة 3 دقائق",
+    guided_3_title: "جرّب تقييم مورد",
+    guided_3_desc: "دليل خطوة بخطوة لتشغيل أول فحص امتثال",
+    no_results: "لا توجد نتائج",
+    try_different: "جرّب كلمات مفتاحية أخرى أو تصفح الأقسام",
+    clear_search: "مسح البحث",
+    expand_all: "توسيع الكل",
+    collapse_all: "طي الكل",
+    min_read: "دقائق قراءة",
+    copy_link: "نسخ الرابط",
+    link_copied: "تم نسخ الرابط",
+    print_page: "طباعة الصفحة",
+    shortcuts: "اختصارات",
+    sh_focus: "تركيز البحث",
+    sh_prev: "التالي / السابق",
+    sh_close: "إغلاق القوائم والبحث",
+    sh_jump: "الانتقال إلى قسم",
+    on_this_page: "في هذه الصفحة",
+    back_to_top: "العودة للأعلى",
+    previous: "السابق",
+    next: "التالي",
+    helpful: "هل كانت هذه الصفحة مفيدة؟",
+    thanks_up: "شكراً لملاحظاتك!",
+    thanks_down: "شكراً! سنحسّن هذه الصفحة.",
+    related: "صفحات ذات صلة",
+    docs: "الوثائق",
+    palette_placeholder: "انتقل إلى صفحة…",
+    palette_empty: "لا توجد صفحات تطابق «{q}»",
+    palette_navigate: "تنقل",
+    palette_open: "فتح",
+    palette_close: "إغلاق",
+    admon_tip: "نصيحة",
+    admon_info: "معلومة",
+    admon_warning: "تحذير",
+    admon_danger: "خطر",
+    admon_note: "ملاحظة",
+    theme_light: "فاتح",
+    theme_dark: "داكن",
+    theme_switch_dark: "التبديل إلى الوضع الداكن",
+    theme_switch_light: "التبديل إلى الوضع الفاتح",
+    lang_aria: "لغة التوثيق",
+    aria_copy: "نسخ رابط هذه الصفحة",
+    aria_backtop: "العودة للأعلى",
+    aria_helpful: "نعم، كانت هذه الصفحة مفيدة",
+    aria_unhelpful: "لا، تحتاج هذه الصفحة إلى تحسين",
+    aria_search: "البحث في التوثيق",
+    sidebar_title: "التوثيق",
+    search_placeholder: "ابحث في الوثائق...",
+    mobile_menu: "قائمة التوثيق",
+    close_menu: "إغلاق القائمة",
+    cta_ready: "جاهز للبدء؟",
+    cta_trial: "ابدأ تجربة مجانية",
+    cta_pricing: "عرض الأسعار",
+    cta_guide: "دليل البدء السريع",
+    architecture_diagram: "مخطط المعمارية",
+    case_study: "دراسة حالة",
+    challenge: "التحدي",
+    solution: "الحل",
+    results: "النتائج",
+    demo_guide: "دليل العرض التفاعلي",
+    best_practices: "أفضل الممارسات",
+    troubleshooting: "استكشاف الأخطاء",
+    q: "س",
+    a: "ج",
+  },
+  zh: {
+    docs_title: "文档",
+    hero_title: "DJAC 文档",
+    hero_sub:
+      "部署、配置并掌握 DJAC 合规智能平台所需的一切 —— 从快速入门指南到深度 API 参考和安全架构。",
+    stat_sections: "章节",
+    stat_pages: "页面",
+    stat_languages: "语言",
+    stat_api: "API 程序",
+    get_started: "开始使用",
+    api_reference: "API 参考",
+    quick_links: "快速链接",
+    guided_title: "DJAC 新手？从这里开始",
+    guided_1_title: "阅读欢迎指南",
+    guided_1_desc: "DJAC 是什么、适合谁 —— 2 分钟阅读",
+    guided_2_title: "探索 AI 引擎",
+    guided_2_desc: "8 阶段合规流水线的工作原理 —— 3 分钟阅读",
+    guided_3_title: "尝试供应商评估",
+    guided_3_desc: "运行首次合规检查的分步指南",
+    no_results: "未找到结果",
+    try_different: "尝试其他关键词或浏览章节",
+    clear_search: "清除搜索",
+    expand_all: "全部展开",
+    collapse_all: "全部折叠",
+    min_read: "分钟阅读",
+    copy_link: "复制链接",
+    link_copied: "链接已复制",
+    print_page: "打印页面",
+    shortcuts: "快捷键",
+    sh_focus: "聚焦搜索",
+    sh_prev: "下一页 / 上一页",
+    sh_close: "关闭菜单和搜索",
+    sh_jump: "跳转到章节",
+    on_this_page: "本页目录",
+    back_to_top: "返回顶部",
+    previous: "上一页",
+    next: "下一页",
+    helpful: "此页面有帮助吗？",
+    thanks_up: "感谢您的反馈！",
+    thanks_down: "谢谢！我们将改进此页面。",
+    related: "相关页面",
+    docs: "文档",
+    palette_placeholder: "跳转到页面…",
+    palette_empty: "没有匹配「{q}」的页面",
+    palette_navigate: "导航",
+    palette_open: "打开",
+    palette_close: "关闭",
+    admon_tip: "提示",
+    admon_info: "信息",
+    admon_warning: "警告",
+    admon_danger: "危险",
+    admon_note: "注意",
+    theme_light: "浅色",
+    theme_dark: "深色",
+    theme_switch_dark: "切换到深色主题",
+    theme_switch_light: "切换到浅色主题",
+    lang_aria: "文档语言",
+    aria_copy: "复制此页面的链接",
+    aria_backtop: "返回顶部",
+    aria_helpful: "是，此页面有帮助",
+    aria_unhelpful: "否，此页面需要改进",
+    aria_search: "搜索文档",
+    sidebar_title: "文档",
+    search_placeholder: "搜索文档...",
+    mobile_menu: "文档菜单",
+    close_menu: "关闭菜单",
+    cta_ready: "准备好开始了吗？",
+    cta_trial: "开始免费试用",
+    cta_pricing: "查看定价",
+    cta_guide: "快速入门指南",
+    architecture_diagram: "架构图",
+    case_study: "案例研究",
+    challenge: "挑战",
+    solution: "解决方案",
+    results: "成果",
+    demo_guide: "交互式演示指南",
+    best_practices: "最佳实践",
+    troubleshooting: "问题排查",
+    q: "问",
+    a: "答",
+  },
 };
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1649,6 +1983,14 @@ DEV_AUTH_ROLE=super_admin
 ];
 
 /* ──────────────────────────────────────────────────────────────────────────
+   Complete AR/ZH data (11 sections, 24 pages each) — docsAr.ts / docsZh.ts.
+   Overrides the legacy partial inline blocks above.
+   ────────────────────────────────────────────────────────────────────────── */
+
+docsData.ar = docsAr;
+docsData.zh = docsZh;
+
+/* ──────────────────────────────────────────────────────────────────────────
    Helper: Extract TOC from content
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -1681,7 +2023,8 @@ function extractToc(content: string): TocEntry[] {
 }
 
 function getDocSections(locale: string): DocSection[] {
-  return docsData[locale] || docsData.en;
+  const data = docsData[locale];
+  return data && data.length > 0 ? data : docsData.en;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1941,12 +2284,13 @@ const DOC_LANGUAGES = [
 function SidebarFooter() {
   const { locale, setLocale } = useLocale();
   const { theme, toggleTheme, switchable } = useTheme();
+  const ui = DOCS_UI[locale] ?? DOCS_UI.en;
   return (
     <div className="djac-docs-sidebar-footer">
       <div
         className="djac-docs-lang-switch"
         role="group"
-        aria-label="Documentation language"
+        aria-label={ui.lang_aria}
       >
         {DOC_LANGUAGES.map(l => (
           <button
@@ -1971,9 +2315,7 @@ function SidebarFooter() {
             onClick={toggleTheme}
             className="djac-docs-action-btn djac-docs-action-btn-sm"
             title={
-              theme === "dark"
-                ? "Switch to light theme"
-                : "Switch to dark theme"
+              theme === "dark" ? ui.theme_switch_light : ui.theme_switch_dark
             }
           >
             {theme === "dark" ? (
@@ -1981,7 +2323,7 @@ function SidebarFooter() {
             ) : (
               <Moon className="h-3.5 w-3.5" />
             )}
-            {theme === "dark" ? "Light" : "Dark"}
+            {theme === "dark" ? ui.theme_light : ui.theme_dark}
           </button>
         )}
       </div>
@@ -2053,11 +2395,13 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
    ────────────────────────────────────────────────────────────────────────── */
 
 function Admonition({ type, children }: { type: string; children: string }) {
+  const { locale } = useLocale();
+  const ui = DOCS_UI[locale] ?? DOCS_UI.en;
   const labels: Record<string, string> = {
-    tip: "Tip",
-    info: "Info",
-    warning: "Warning",
-    danger: "Danger",
+    tip: ui.admon_tip,
+    info: ui.admon_info,
+    warning: ui.admon_warning,
+    danger: ui.admon_danger,
   };
   const icons: Record<string, React.ComponentType<{ className?: string }>> = {
     tip: Lightbulb,
@@ -2070,7 +2414,7 @@ function Admonition({ type, children }: { type: string; children: string }) {
     <div className={`djac-docs-admon admon-${type}`}>
       <div className="djac-docs-admon-header">
         <Icon className="h-4 w-4" />
-        <span>{labels[type] || "Note"}</span>
+        <span>{labels[type] || ui.admon_note}</span>
       </div>
       <p>{children}</p>
     </div>
@@ -2089,6 +2433,8 @@ function BreadcrumbNav({
   page: DocPage | null;
 }) {
   const [, navigate] = useLocation();
+  const { locale } = useLocale();
+  const ui = DOCS_UI[locale] ?? DOCS_UI.en;
   return (
     <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 flex-wrap">
       <button
@@ -2096,7 +2442,7 @@ function BreadcrumbNav({
         className="hover:text-foreground transition-colors flex items-center gap-1"
       >
         <Home className="h-3.5 w-3.5" />
-        <span>Docs</span>
+        <span>{ui.docs}</span>
       </button>
       {section && (
         <>
@@ -2124,8 +2470,9 @@ function BreadcrumbNav({
    ────────────────────────────────────────────────────────────────────────── */
 
 export default function DocsPortal() {
-  usePageTitle("Documentation");
-  const { locale, t } = useLocale();
+  const { locale } = useLocale();
+  const ui = DOCS_UI[locale] ?? DOCS_UI.en;
+  usePageTitle(ui.docs_title);
   const [location, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -2173,6 +2520,23 @@ export default function DocsPortal() {
     () => (currentPage ? extractToc(currentPage.content) : []),
     [currentPage]
   );
+
+  // Related pages — titles resolved from the current locale's data
+  const relatedPageLinks = useMemo(() => {
+    const ids = currentPageId ? RELATED_PAGE_IDS[currentPageId] : undefined;
+    if (!ids) return null;
+    const links: { title: string; path: string }[] = [];
+    for (const id of ids) {
+      for (const s of sections) {
+        const p = s.pages.find(x => x.id === id);
+        if (p) {
+          links.push({ title: p.title, path: `/docs/${s.id}/${p.id}` });
+          break;
+        }
+      }
+    }
+    return links.length > 0 ? links : null;
+  }, [currentPageId, sections]);
 
   // Prev / Next navigation
   const { prevPage, nextPage, prevSection, nextSection } = useMemo(() => {
@@ -2420,7 +2784,7 @@ export default function DocsPortal() {
         className="djac-docs-palette"
         role="dialog"
         aria-modal="true"
-        aria-label="Search documentation"
+        aria-label={ui.aria_search}
         onClick={e => e.stopPropagation()}
       >
         <div className="djac-docs-palette-input-wrap">
@@ -2432,7 +2796,7 @@ export default function DocsPortal() {
               setPaletteQuery(e.target.value);
               setPaletteIndex(0);
             }}
-            placeholder={t("docs.palette_placeholder", "Jump to a page…")}
+            placeholder={ui.palette_placeholder}
             className="djac-docs-palette-input"
           />
           <kbd>Esc</kbd>
@@ -2440,7 +2804,7 @@ export default function DocsPortal() {
         <div className="djac-docs-palette-results">
           {paletteResults.length === 0 ? (
             <div className="djac-docs-palette-empty">
-              No pages match “{paletteQuery}”
+              {ui.palette_empty.replace("{q}", paletteQuery)}
             </div>
           ) : (
             paletteResults.slice(0, 50).map((r, i) => {
@@ -2471,13 +2835,13 @@ export default function DocsPortal() {
         <div className="djac-docs-palette-footer">
           <span>
             <kbd>↑</kbd>
-            <kbd>↓</kbd> navigate
+            <kbd>↓</kbd> {ui.palette_navigate}
           </span>
           <span>
-            <kbd>Enter</kbd> open
+            <kbd>Enter</kbd> {ui.palette_open}
           </span>
           <span>
-            <kbd>Esc</kbd> close
+            <kbd>Esc</kbd> {ui.palette_close}
           </span>
         </div>
       </div>
@@ -2878,9 +3242,7 @@ export default function DocsPortal() {
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
           >
             <BookOpen className="h-4 w-4 mr-2" />
-            {mobileSidebarOpen
-              ? t("docs.close_menu", "Close Menu")
-              : t("docs.mobile_menu", "Documentation Menu")}
+            {mobileSidebarOpen ? ui.close_menu : ui.mobile_menu}
           </Button>
         </div>
 
@@ -2893,7 +3255,7 @@ export default function DocsPortal() {
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary" />
                 <span className="font-semibold text-sm">
-                  {t("docs.sidebar_title", "Documentation")}
+                  {ui.sidebar_title}
                 </span>
               </div>
               {searchQuery && (
@@ -2907,7 +3269,7 @@ export default function DocsPortal() {
                 <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
                   ref={searchRef}
-                  placeholder={t("docs.search_placeholder", "Search docs...")}
+                  placeholder={ui.search_placeholder}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="pl-8 h-8 text-xs"
@@ -2922,7 +3284,7 @@ export default function DocsPortal() {
                 <div className="px-4 py-8 text-center">
                   <Search className="h-6 w-6 text-muted-foreground mx-auto mb-3 opacity-50" />
                   <p className="text-sm text-muted-foreground mb-1">
-                    No results found
+                    {ui.no_results}
                   </p>
                   <Button
                     variant="outline"
@@ -2933,7 +3295,7 @@ export default function DocsPortal() {
                       setExpandedSections(new Set(["getting-started"]));
                     }}
                   >
-                    Clear search
+                    {ui.clear_search}
                   </Button>
                 </div>
               ) : (
@@ -2993,12 +3355,10 @@ export default function DocsPortal() {
                   </Badge>
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">
-                  DJAC Documentation
+                  {ui.hero_title}
                 </h1>
                 <p className="text-base text-muted-foreground max-w-2xl">
-                  Everything you need to deploy, configure, and master the DJAC
-                  compliance intelligence platform. From quick-start guides to
-                  deep API references and security architecture.
+                  {ui.hero_sub}
                 </p>
                 <div className="flex flex-wrap gap-6 mt-6 text-sm">
                   <div className="flex items-center gap-2">
@@ -3006,8 +3366,12 @@ export default function DocsPortal() {
                       <Layers className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <span className="font-bold text-foreground">11</span>{" "}
-                      <span className="text-muted-foreground">Sections</span>
+                      <span className="font-bold text-foreground">
+                        {sections.length}
+                      </span>{" "}
+                      <span className="text-muted-foreground">
+                        {ui.stat_sections}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -3015,8 +3379,12 @@ export default function DocsPortal() {
                       <FileText className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <span className="font-bold text-foreground">28+</span>{" "}
-                      <span className="text-muted-foreground">Pages</span>
+                      <span className="font-bold text-foreground">
+                        {sections.reduce((s, sec) => s + sec.pages.length, 0)} +
+                      </span>{" "}
+                      <span className="text-muted-foreground">
+                        {ui.stat_pages}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -3025,7 +3393,9 @@ export default function DocsPortal() {
                     </div>
                     <div>
                       <span className="font-bold text-foreground">3</span>{" "}
-                      <span className="text-muted-foreground">Languages</span>
+                      <span className="text-muted-foreground">
+                        {ui.stat_languages}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -3035,7 +3405,7 @@ export default function DocsPortal() {
                     <div>
                       <span className="font-bold text-foreground">200+</span>{" "}
                       <span className="text-muted-foreground">
-                        API Procedures
+                        {ui.stat_api}
                       </span>
                     </div>
                   </div>
@@ -3044,7 +3414,7 @@ export default function DocsPortal() {
                   <Button
                     onClick={() => navigate("/docs/getting-started/welcome")}
                   >
-                    Get Started
+                    {ui.get_started}
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                   <Button
@@ -3054,14 +3424,14 @@ export default function DocsPortal() {
                     }
                   >
                     <Terminal className="h-4 w-4 mr-2" />
-                    API Reference
+                    {ui.api_reference}
                   </Button>
                 </div>
               </div>
 
               {/* Feature Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-                {homeFeatures.map(f => {
+                {(HOME_FEATURES[locale] ?? HOME_FEATURES.en).map(f => {
                   const FIcon = ICONS[f.icon] || BookOpen;
                   return (
                     <button
@@ -3087,10 +3457,10 @@ export default function DocsPortal() {
               <div className="mb-12">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <List className="h-5 w-5 text-primary" />
-                  Quick Links
+                  {ui.quick_links}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {quickLinks.map(link => (
+                  {(QUICK_LINKS[locale] ?? QUICK_LINKS.en).map(link => (
                     <button
                       key={link.path}
                       onClick={() => navigate(link.path)}
@@ -3107,7 +3477,7 @@ export default function DocsPortal() {
               <div className="mb-12">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Rocket className="h-5 w-5 text-primary" />
-                  New to DJAC? Start here
+                  {ui.guided_title}
                 </h2>
                 <div className="space-y-3">
                   <button
@@ -3120,10 +3490,10 @@ export default function DocsPortal() {
                     <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-primary" />
-                        Read the Welcome Guide
+                        {ui.guided_1_title}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        What DJAC does and who it's for — 2 min read
+                        {ui.guided_1_desc}
                       </p>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary shrink-0 self-center" />
@@ -3138,10 +3508,10 @@ export default function DocsPortal() {
                     <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-2">
                         <Zap className="h-4 w-4 text-primary" />
-                        Explore the AI Engine
+                        {ui.guided_2_title}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        How the 8-stage compliance pipeline works — 3 min read
+                        {ui.guided_2_desc}
                       </p>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary shrink-0 self-center" />
@@ -3158,10 +3528,10 @@ export default function DocsPortal() {
                     <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-primary" />
-                        Try a Vendor Assessment
+                        {ui.guided_3_title}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        Step-by-step guide to run your first compliance check
+                        {ui.guided_3_desc}
                       </p>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary shrink-0 self-center" />
@@ -3171,19 +3541,17 @@ export default function DocsPortal() {
 
               {/* CTA */}
               <div className="djac-docs-next">
-                <h3 className="text-lg font-bold mb-3">
-                  {t("docs.cta_ready", "Ready to get started?")}
-                </h3>
+                <h3 className="text-lg font-bold mb-3">{ui.cta_ready}</h3>
                 <div className="flex flex-wrap gap-3">
                   <Button onClick={() => navigate("/signup")}>
-                    {t("docs.cta_trial", "Start Free Trial")}
+                    {ui.cta_trial}
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => navigate("/pricing")}
                   >
-                    {t("docs.cta_pricing", "View Pricing")}
+                    {ui.cta_pricing}
                   </Button>
                 </div>
               </div>
@@ -3218,9 +3586,7 @@ export default function DocsPortal() {
           onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
         >
           <BookOpen className="h-4 w-4 mr-2" />
-          {mobileSidebarOpen
-            ? t("docs.close_menu", "Close Menu")
-            : t("docs.mobile_menu", "Documentation Menu")}
+          {mobileSidebarOpen ? ui.close_menu : ui.mobile_menu}
         </Button>
       </div>
 
@@ -3243,9 +3609,7 @@ export default function DocsPortal() {
               className="flex items-center gap-2 hover:text-primary transition-colors"
             >
               <BookOpen className="h-5 w-5 text-primary" />
-              <span className="font-semibold text-sm">
-                {t("docs.sidebar_title", "Documentation")}
-              </span>
+              <span className="font-semibold text-sm">{ui.sidebar_title}</span>
             </button>
             {searchQuery && (
               <Badge variant="secondary" className="text-[10px] h-5">
@@ -3258,7 +3622,7 @@ export default function DocsPortal() {
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 ref={searchRef}
-                placeholder={t("docs.search_placeholder", "Search docs...")}
+                placeholder={ui.search_placeholder}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="pl-8 h-8 text-xs"
@@ -3277,12 +3641,10 @@ export default function DocsPortal() {
                 else setExpandedSections(new Set());
               }}
               className="w-full px-3 py-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 justify-center"
-              aria-label={
-                expandAll ? "Collapse all sections" : "Expand all sections"
-              }
+              aria-label={expandAll ? ui.collapse_all : ui.expand_all}
             >
               <ChevronsUpDown className="h-3 w-3" />
-              {expandAll ? "Collapse all" : "Expand all"}
+              {expandAll ? ui.collapse_all : ui.expand_all}
             </button>
           )}
           <nav className="djac-docs-nav">
@@ -3290,10 +3652,10 @@ export default function DocsPortal() {
               <div className="px-4 py-8 text-center">
                 <Search className="h-6 w-6 text-muted-foreground mx-auto mb-3 opacity-50" />
                 <p className="text-sm text-muted-foreground mb-1">
-                  No results found
+                  {ui.no_results}
                 </p>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Try different keywords or browse the sections
+                  {ui.try_different}
                 </p>
                 <Button
                   variant="outline"
@@ -3304,7 +3666,7 @@ export default function DocsPortal() {
                     setExpandedSections(new Set(["getting-started"]));
                   }}
                 >
-                  Clear search
+                  {ui.clear_search}
                 </Button>
               </div>
             ) : (
@@ -3373,7 +3735,7 @@ export default function DocsPortal() {
                     1,
                     Math.ceil(currentPage.content.split(/\s+/).length / 200)
                   )}{" "}
-                  min read
+                  {ui.min_read}
                 </span>
               </div>
               <div className="relative flex flex-wrap items-center gap-2 mt-4">
@@ -3381,13 +3743,14 @@ export default function DocsPortal() {
                   type="button"
                   onClick={copyPageLink}
                   className="djac-docs-action-btn"
+                  aria-label={ui.aria_copy}
                 >
                   {copiedLink ? (
                     <Check className="h-3.5 w-3.5" />
                   ) : (
                     <Link2 className="h-3.5 w-3.5" />
                   )}
-                  {copiedLink ? "Link copied" : "Copy link"}
+                  {copiedLink ? ui.link_copied : ui.copy_link}
                 </button>
                 <button
                   type="button"
@@ -3395,7 +3758,7 @@ export default function DocsPortal() {
                   className="djac-docs-action-btn"
                 >
                   <Printer className="h-3.5 w-3.5" />
-                  Print page
+                  {ui.print_page}
                 </button>
                 <button
                   type="button"
@@ -3404,7 +3767,7 @@ export default function DocsPortal() {
                   aria-expanded={showShortcuts}
                 >
                   <HelpCircle className="h-3.5 w-3.5" />
-                  Shortcuts
+                  {ui.shortcuts}
                 </button>
                 {showShortcuts && (
                   <div className="djac-docs-shortcuts">
@@ -3414,25 +3777,25 @@ export default function DocsPortal() {
                           <td>
                             <kbd>⌘/Ctrl</kbd> + <kbd>K</kbd>
                           </td>
-                          <td>Focus search</td>
+                          <td>{ui.sh_focus}</td>
                         </tr>
                         <tr>
                           <td>
                             <kbd>→</kbd> / <kbd>←</kbd>
                           </td>
-                          <td>Next / previous page</td>
+                          <td>{ui.sh_prev}</td>
                         </tr>
                         <tr>
                           <td>
                             <kbd>Esc</kbd>
                           </td>
-                          <td>Close menus &amp; search</td>
+                          <td>{ui.sh_close}</td>
                         </tr>
                         <tr>
                           <td>
                             <kbd>#</kbd> anchor links
                           </td>
-                          <td>Jump to section</td>
+                          <td>{ui.sh_jump}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -3452,7 +3815,7 @@ export default function DocsPortal() {
                 >
                   <span className="flex items-center gap-2">
                     <List className="h-3.5 w-3.5" />
-                    On this page
+                    {ui.on_this_page}
                   </span>
                   <ChevronDown
                     className={`h-3.5 w-3.5 transition-transform ${mobileTocOpen ? "rotate-180" : ""}`}
@@ -3503,7 +3866,7 @@ export default function DocsPortal() {
                   <div className="sticky top-24">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
                       <Hash className="h-3 w-3" />
-                      On this page
+                      {ui.on_this_page}
                     </h4>
                     <ul className="space-y-0.5">
                       {toc.map(entry => (
@@ -3536,7 +3899,7 @@ export default function DocsPortal() {
                       className="flex items-center gap-1 mt-4 text-xs text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <ArrowUp className="h-3 w-3" />
-                      Back to top
+                      {ui.back_to_top}
                     </button>
                   </div>
                 </nav>
@@ -3549,7 +3912,7 @@ export default function DocsPortal() {
                 <div className="flex items-center gap-2 mb-3">
                   <Network className="h-4 w-4 text-primary" />
                   <span className="text-sm font-semibold">
-                    {t("docs.architecture_diagram", "Architecture Diagram")}
+                    {ui.architecture_diagram}
                   </span>
                 </div>
                 <div className="djac-glass-card p-4 text-center text-sm font-mono text-foreground">
@@ -3563,9 +3926,7 @@ export default function DocsPortal() {
               <div className="djac-docs-casestudy">
                 <div className="flex items-center gap-2 mb-4">
                   <Star className="h-5 w-5 text-amber-500" />
-                  <h2 className="djac-h2 text-xl font-bold">
-                    {t("docs.case_study", "Case Study")}
-                  </h2>
+                  <h2 className="djac-h2 text-xl font-bold">{ui.case_study}</h2>
                   <Badge variant="outline" className="ml-2">
                     {currentPage.caseStudy.company}
                   </Badge>
@@ -3574,7 +3935,7 @@ export default function DocsPortal() {
                   <div className="djac-glass-card p-4">
                     <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
                       <AlertTriangle className="h-4 w-4 text-amber-500" />
-                      {t("docs.challenge", "Challenge")}
+                      {ui.challenge}
                     </h4>
                     <p className="text-sm djac-body">
                       {currentPage.caseStudy.challenge}
@@ -3583,7 +3944,7 @@ export default function DocsPortal() {
                   <div className="djac-glass-card p-4">
                     <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
                       <Lightbulb className="h-4 w-4 text-primary" />
-                      {t("docs.solution", "Solution")}
+                      {ui.solution}
                     </h4>
                     <p className="text-sm djac-body">
                       {currentPage.caseStudy.solution}
@@ -3592,7 +3953,7 @@ export default function DocsPortal() {
                   <div className="djac-glass-card p-4 md:col-span-2">
                     <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                      {t("docs.results", "Results")}
+                      {ui.results}
                     </h4>
                     <p className="text-sm djac-body">
                       {currentPage.caseStudy.results}
@@ -3607,9 +3968,7 @@ export default function DocsPortal() {
               <div className="djac-docs-demo">
                 <div className="flex items-center gap-2 mb-4">
                   <Play className="h-5 w-5 text-primary" />
-                  <h2 className="djac-h2 text-xl font-bold">
-                    {t("docs.demo_guide", "Interactive Demo Guide")}
-                  </h2>
+                  <h2 className="djac-h2 text-xl font-bold">{ui.demo_guide}</h2>
                 </div>
                 <div className="space-y-3">
                   {currentPage.demoSteps.map((step, i) => (
@@ -3634,7 +3993,7 @@ export default function DocsPortal() {
                   <div className="flex items-center gap-2 mb-4">
                     <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                     <h2 className="djac-h2 text-xl font-bold">
-                      {t("docs.best_practices", "Best Practices")}
+                      {ui.best_practices}
                     </h2>
                   </div>
                   <div className="space-y-2">
@@ -3658,21 +4017,19 @@ export default function DocsPortal() {
                   <div className="flex items-center gap-2 mb-4">
                     <AlertTriangle className="h-5 w-5 text-amber-500" />
                     <h2 className="djac-h2 text-xl font-bold">
-                      {t("docs.troubleshooting", "Troubleshooting")}
+                      {ui.troubleshooting}
                     </h2>
                   </div>
                   <div className="space-y-3">
                     {currentPage.troubleshooting.map((item, i) => (
                       <div key={i} className="djac-glass-card p-4 space-y-2">
                         <h4 className="text-sm font-semibold flex items-center gap-2">
-                          <span className="text-amber-500">
-                            {t("docs.q", "Q")}:
-                          </span>{" "}
+                          <span className="text-amber-500">{ui.q}:</span>{" "}
                           {item.problem}
                         </h4>
                         <p className="text-sm djac-body flex items-start gap-2">
                           <span className="text-emerald-500 font-semibold">
-                            {t("docs.a", "A")}:
+                            {ui.a}:
                           </span>{" "}
                           {item.solution}
                         </p>
@@ -3695,7 +4052,8 @@ export default function DocsPortal() {
                     <ChevronLeft className="h-5 w-5 text-muted-foreground group-hover:text-primary mt-0.5 shrink-0" />
                     <div className="min-w-0">
                       <div className="text-xs text-muted-foreground mb-0.5">
-                        Previous{prevSection ? ` (${prevSection?.title})` : ""}
+                        {ui.previous}
+                        {prevSection ? ` (${prevSection?.title})` : ""}
                       </div>
                       <div className="text-sm font-medium truncate">
                         {prevPage.title}
@@ -3714,7 +4072,8 @@ export default function DocsPortal() {
                   >
                     <div className="min-w-0">
                       <div className="text-xs text-muted-foreground mb-0.5">
-                        Next{nextSection ? ` (${nextSection?.title})` : ""}
+                        {ui.next}
+                        {nextSection ? ` (${nextSection?.title})` : ""}
                       </div>
                       <div className="text-sm font-medium truncate">
                         {nextPage.title}
@@ -3750,68 +4109,62 @@ export default function DocsPortal() {
             <div className="djac-docs-next">
               <div className="djac-docs-feedback">
                 <span className="text-sm text-muted-foreground mr-3">
-                  Was this page helpful?
+                  {ui.helpful}
                 </span>
                 <button
                   onClick={() => voteFeedback("up")}
                   className={`djac-docs-feedback-btn ${feedback === "up" ? "djac-docs-feedback-active bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700" : ""}`}
-                  aria-label="Yes, this page was helpful"
+                  aria-label={ui.aria_helpful}
                 >
                   <ThumbsUp className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => voteFeedback("down")}
                   className={`djac-docs-feedback-btn ${feedback === "down" ? "djac-docs-feedback-active bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-700" : ""}`}
-                  aria-label="No, this page needs improvement"
+                  aria-label={ui.aria_unhelpful}
                 >
                   <ThumbsDown className="h-4 w-4" />
                 </button>
                 {feedback && (
                   <span className="text-xs text-muted-foreground ml-3">
-                    {feedback === "up"
-                      ? "Thanks for your feedback!"
-                      : "Thanks! We'll improve this page."}
+                    {feedback === "up" ? ui.thanks_up : ui.thanks_down}
                   </span>
                 )}
               </div>
-              {currentPageId && relatedPages[currentPageId] ? (
+              {relatedPageLinks ? (
                 <div className="mt-6 pt-5 border-t">
                   <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                     <Layers className="h-4 w-4 text-primary" />
-                    Related pages
+                    {ui.related}
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {relatedPages[currentPageId].map(
-                      (r: { title: string; path: string }) => (
-                        <button
-                          key={r.path}
-                          onClick={() => navigate(r.path)}
-                          className="text-xs px-3 py-1.5 rounded-full border hover:border-primary/40 hover:bg-accent transition-all text-muted-foreground hover:text-foreground"
-                        >
-                          {r.title}
-                        </button>
-                      )
-                    )}
+                    {relatedPageLinks.map(r => (
+                      <button
+                        key={r.path}
+                        onClick={() => navigate(r.path)}
+                        className="text-xs px-3 py-1.5 rounded-full border hover:border-primary/40 hover:bg-accent transition-all text-muted-foreground hover:text-foreground"
+                      >
+                        {r.title}
+                      </button>
+                    ))}
                   </div>
                 </div>
               ) : null}
-              <h3 className="text-lg font-bold mb-3 mt-5">
-                {t("docs.cta_ready", "Ready to get started?")}
-              </h3>
+              <h3 className="text-lg font-bold mb-3 mt-5">{ui.cta_ready}</h3>
               <div className="flex flex-wrap gap-3">
                 <Button onClick={() => navigate("/signup")}>
-                  {t("docs.cta_trial", "Start Free Trial")}
+                  {ui.cta_trial}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
                 <Button variant="outline" onClick={() => navigate("/pricing")}>
-                  {t("docs.cta_pricing", "View Pricing")}
+                  {ui.cta_pricing}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => navigate("/docs/getting-started/welcome")}
                 >
                   <BookOpen className="h-4 w-4 mr-2" />
-                  {t("docs.cta_guide", "Quick Start Guide")}
+                  {ui.cta_guide}
                 </Button>
               </div>
             </div>
@@ -3823,7 +4176,7 @@ export default function DocsPortal() {
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className={`djac-docs-backtop ${showBackTop ? "djac-docs-backtop-visible" : ""}`}
-        aria-label="Back to top"
+        aria-label={ui.aria_backtop}
       >
         <ArrowUp className="h-4 w-4" />
       </button>
