@@ -28,6 +28,7 @@ import {
   orgAdminProcedure,
   orgProcedure,
   protectedProcedure,
+  requireMfa,
   publicProcedure,
   router,
 } from "./_core/trpc";
@@ -321,6 +322,7 @@ export const billingRouter = router({
 
   /** Create a Stripe Checkout Session — redirects browser to hosted checkout */
   createCheckoutSession: orgAdminProcedure
+    .use(requireMfa)
     .input(
       z.object({
         plan: planSchema,
@@ -419,6 +421,7 @@ export const billingRouter = router({
 
   /** Open Stripe Customer Portal (manage / cancel subscription) */
   createPortalSession: orgAdminProcedure
+    .use(requireMfa)
     .input(z.object({ organizationId: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       if (input.organizationId !== ctx.organizationId) {

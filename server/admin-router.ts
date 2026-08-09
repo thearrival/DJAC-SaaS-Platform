@@ -18,7 +18,7 @@ import {
   recordActivity,
 } from "./control-center-store";
 import { listUsersForAdmin } from "./db";
-import { adminProcedure, router } from "./_core/trpc";
+import { adminProcedure, requireMfa, router } from "./_core/trpc";
 import { getConversionStats } from "./admin-store";
 import fs from "fs";
 import path from "path";
@@ -76,6 +76,7 @@ export const adminRouter = router({
     }),
 
   deleteInteractionData: adminProcedure
+    .use(requireMfa)
     .input(
       z
         .object({
@@ -171,6 +172,7 @@ export const adminRouter = router({
     }),
 
   updateUserAccess: adminProcedure
+    .use(requireMfa)
     .input(
       z.object({
         userId: z.number().int().positive(),

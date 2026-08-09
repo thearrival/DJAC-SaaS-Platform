@@ -686,6 +686,8 @@ export const localUsers = pgTable("localUsers", {
   mfaEnabled: integer("mfaEnabled").default(0).notNull(),
   mfaBackupCodes: text("mfaBackupCodes"),
   verifiedAt: timestamp("verifiedAt"),
+  lastMfaVerifiedAt: timestamp("lastMfaVerifiedAt"),
+  firstLoginEmailSent: integer("firstLoginEmailSent").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });

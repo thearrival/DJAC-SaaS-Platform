@@ -13,6 +13,7 @@ import { organizations, userOnboarding } from "../../drizzle/schema";
 import { eq, or } from "drizzle-orm";
 import { getDb } from "../db";
 import { isTrialExpired } from "../services/billing-entitlements";
+import { localUsers as localUsersTable } from "../../drizzle/schema";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
@@ -306,6 +307,75 @@ const requireOnboardingComplete = t.middleware(async opts => {
   }
 
   return next({ ctx: { ...ctx, user: ctx.user } });
+});
+
+// ─── MFA Enforcement ─────────────────────────────────────────────────────────
+
+const MFA_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
+
+/**
+ * Requires the caller to have completed MFA verification within the last 30
+ * minutes. Applies only to local-auth users with mfaEnabled=true. OAuth users
+ * authenticate through an external IdP with its own MFA, so they pass through.
+ */
+export const requireMfa = t.middleware(async opts => {
+  const { ctx, next } = opts;
+
+  if (!ctx.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+  }
+
+  const pass = () =>
+    next({
+      ctx: {
+        ...ctx,
+        user: ctx.user!,
+        organizationId: ctx.organizationId!,
+        organizationRole: ctx.organizationRole!,
+      },
+    });
+
+  // OAuth / API-key users rely on external IdP MFA — no local MFA check needed
+  const openId = (ctx.user as { openId?: string }).openId ?? "";
+  if (!openId.startsWith("local:")) {
+    return pass();
+  }
+
+  // Local user — verify MFA window
+  const localUserIdMatch = /^local:(\d+)$/.exec(openId);
+  if (!localUserIdMatch) {
+    return pass();
+  }
+
+  const db = await getDb();
+  if (!db) {
+    return pass(); // DB down — allow through
+  }
+
+  const [lu] = await db
+    .select({
+      mfaEnabled: localUsersTable.mfaEnabled,
+      lastMfaVerifiedAt: localUsersTable.lastMfaVerifiedAt,
+    })
+    .from(localUsersTable)
+    .where(eq(localUsersTable.id, Number(localUserIdMatch[1])))
+    .limit(1);
+
+  if (!lu || !lu.mfaEnabled) {
+    return pass();
+  }
+
+  if (
+    !lu.lastMfaVerifiedAt ||
+    Date.now() - lu.lastMfaVerifiedAt.getTime() > MFA_WINDOW_MS
+  ) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "mfa_required",
+    });
+  }
+
+  return pass();
 });
 
 /** protectedProcedure that additionally requires completed onboarding */

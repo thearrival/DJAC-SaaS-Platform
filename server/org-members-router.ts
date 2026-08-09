@@ -18,6 +18,7 @@ import {
   orgProcedure,
   protectedProcedure,
   publicProcedure,
+  requireMfa,
   router,
 } from "./_core/trpc";
 import { requireModulePermission } from "./_core/permission-guard";
@@ -54,6 +55,7 @@ export const orgMembersRouter = router({
   }),
 
   updateRole: orgAdminProcedure
+    .use(requireMfa)
     .input(
       z.object({
         memberId: z.number().int().positive(),
@@ -87,6 +89,7 @@ export const orgMembersRouter = router({
     }),
 
   remove: orgAdminProcedure
+    .use(requireMfa)
     .input(z.number().int().positive())
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "team_members", "canDelete");
@@ -116,6 +119,7 @@ export const orgMembersRouter = router({
     }),
 
   invite: orgAdminProcedure
+    .use(requireMfa)
     .input(
       z.object({
         email: z.string().email().max(320),

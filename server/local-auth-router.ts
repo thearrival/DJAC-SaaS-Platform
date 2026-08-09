@@ -61,6 +61,7 @@ import {
   enableLocalUserMfa,
   disableLocalUserMfa,
   consumeLocalUserBackupCode,
+  markLocalUserMfaVerified,
   verifyLocalUserEmail,
   type LocalUser,
 } from "./local-auth-store";
@@ -288,6 +289,7 @@ export const localAuthRouter = router({
       );
 
       await updateLocalUserLastSignedIn(user.id);
+      await markLocalUserMfaVerified(user.id);
 
       // 2FA gate â€” issue short-lived pending token instead of session
       if (user.mfaEnabled) {
@@ -849,6 +851,8 @@ export const localAuthRouter = router({
           { id: user.id, name: user.name, email: user.email },
           "localUsers"
         );
+        await updateLocalUserLastSignedIn(userId);
+        await markLocalUserMfaVerified(userId);
       } else {
         notifyLogin(
           ctx.req,
@@ -856,6 +860,7 @@ export const localAuthRouter = router({
           "localUsers"
         );
         await updateLocalUserLastSignedIn(userId);
+        await markLocalUserMfaVerified(userId);
       }
 
       const sessionToken = await signJwt({

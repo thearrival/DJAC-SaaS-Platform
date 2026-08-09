@@ -122,6 +122,8 @@ export function createLocalMemoryUser(input: {
     mfaBackupCodes: null,
     phoneNumber: null,
     verifiedAt: null,
+    lastMfaVerifiedAt: null,
+    firstLoginEmailSent: 0,
     createdAt: now,
     updatedAt: now,
   };

@@ -11,6 +11,7 @@ import {
   platformAdminProcedure,
   superAdminProcedure,
   protectedProcedure,
+  requireMfa,
 } from "./_core/trpc";
 import { recordAuditEvent } from "./audit-logger";
 import {
@@ -70,6 +71,7 @@ export const roleRouter = router({
    * Cannot self-demote from super_admin.
    */
   assignUserRole: platformAdminProcedure
+    .use(requireMfa)
     .input(
       z.object({
         targetUserId: z.number().int().positive(),
@@ -134,6 +136,7 @@ export const roleRouter = router({
    * Restricted to Platform Admin and above.
    */
   assignLocalUserRole: platformAdminProcedure
+    .use(requireMfa)
     .input(
       z.object({
         targetLocalUserId: z.number().int().positive(),

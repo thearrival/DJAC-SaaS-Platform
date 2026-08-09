@@ -168,6 +168,15 @@ export async function updateLocalUserLastSignedIn(id: number): Promise<void> {
     .where(eq(localUsers.id, id));
 }
 
+export async function markLocalUserMfaVerified(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(localUsers)
+    .set({ lastMfaVerifiedAt: new Date() })
+    .where(eq(localUsers.id, id));
+}
+
 export async function updateLocalUserStatus(
   id: number,
   status: "active" | "pending" | "suspended"

@@ -56,7 +56,7 @@ async function markFirstLoginSent(
     if (table === "localUsers") {
       await db
         .update(localUsers)
-        .set({ updatedAt: new Date() })
+        .set({ firstLoginEmailSent: 1, updatedAt: new Date() })
         .where(eq(localUsers.id, pk));
     } else {
       await db
@@ -78,12 +78,11 @@ async function hasFirstLoginBeenSent(
   try {
     if (table === "localUsers") {
       const [row] = await db
-        .select({ lastSignedIn: localUsers.lastSignedIn })
+        .select({ firstLoginEmailSent: localUsers.firstLoginEmailSent })
         .from(localUsers)
         .where(eq(localUsers.id, pk))
         .limit(1);
-      if (!row) return false;
-      return row.lastSignedIn != null;
+      return row?.firstLoginEmailSent === 1;
     } else {
       const [row] = await db
         .select({ lastActivityAt: users.lastActivityAt })

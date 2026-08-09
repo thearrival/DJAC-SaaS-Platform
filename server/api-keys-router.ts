@@ -12,7 +12,12 @@
 
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { activeOrgProcedure, orgAdminProcedure, router } from "./_core/trpc";
+import {
+  activeOrgProcedure,
+  orgAdminProcedure,
+  requireMfa,
+  router,
+} from "./_core/trpc";
 import { recordAuditEvent } from "./audit-logger";
 import { requireModulePermission } from "./_core/permission-guard";
 import { listApiKeys, createApiKey, revokeApiKey } from "./api-keys-store";
@@ -32,6 +37,7 @@ export const apiKeysRouter = router({
    * Only org admins can create keys.
    */
   create: orgAdminProcedure
+    .use(requireMfa)
     .input(
       z.object({
         name: z
@@ -85,6 +91,7 @@ export const apiKeysRouter = router({
    * Revoke an API key by id. Only org admins can revoke.
    */
   revoke: orgAdminProcedure
+    .use(requireMfa)
     .input(z.number().int().positive())
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "api_keys", "canDelete");

@@ -55,6 +55,12 @@ export async function ensureMigrated(): Promise<void> {
     await db.execute(sql`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "verifiedAt" timestamp
         `);
+    await db.execute(sql`
+            ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "lastMfaVerifiedAt" timestamp
+        `);
+    await db.execute(sql`
+            ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "firstLoginEmailSent" integer DEFAULT 0 NOT NULL
+        `);
 
     await db.execute(sql`
             CREATE TABLE IF NOT EXISTS "yallaAdminSessions" (

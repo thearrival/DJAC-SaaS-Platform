@@ -8,7 +8,12 @@
 
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { orgAdminProcedure, orgProcedure, router } from "./_core/trpc";
+import {
+  orgAdminProcedure,
+  orgProcedure,
+  requireMfa,
+  router,
+} from "./_core/trpc";
 import { requireModulePermission } from "./_core/permission-guard";
 import { getOrgSettings, updateOrgSettings } from "./org-settings-store";
 import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
@@ -55,6 +60,7 @@ export const orgSettingsRouter = router({
    * Slug and plan are intentionally excluded — those are system-managed.
    */
   update: orgAdminProcedure
+    .use(requireMfa)
     .input(updateOrgSchema)
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "org_settings", "canEdit");
