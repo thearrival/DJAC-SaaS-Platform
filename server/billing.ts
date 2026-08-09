@@ -18,7 +18,8 @@
  *   STRIPE_PRICE_STARTER_BIANNUAL     STRIPE_PRICE_STARTER_ANNUAL
  *   STRIPE_PRICE_PRO_MONTHLY          STRIPE_PRICE_PRO_QUARTERLY
  *   STRIPE_PRICE_PRO_BIANNUAL         STRIPE_PRICE_PRO_ANNUAL
- *   STRIPE_PRICE_ENTERPRISE_MONTHLY   STRIPE_PRICE_ENTERPRISE_ANNUAL
+ *   STRIPE_PRICE_ENTERPRISE_MONTHLY   STRIPE_PRICE_ENTERPRISE_QUARTERLY
+ *   STRIPE_PRICE_ENTERPRISE_BIANNUAL  STRIPE_PRICE_ENTERPRISE_ANNUAL
  */
 
 import { z } from "zod";
@@ -138,6 +139,22 @@ export const PRICE_CATALOG: PriceTier[] = [
     amountCents: 19900,
     label: "From $199 / mo",
     stripePriceId: parsedEnv.STRIPE_PRICE_ENTERPRISE_MONTHLY,
+  },
+  {
+    plan: "enterprise",
+    interval: "quarterly",
+    amountCents: 54900,
+    label: "From $549 / qtr",
+    savingsLabel: "Save 8%",
+    stripePriceId: parsedEnv.STRIPE_PRICE_ENTERPRISE_QUARTERLY,
+  },
+  {
+    plan: "enterprise",
+    interval: "biannual",
+    amountCents: 99900,
+    label: "From $999 / 6mo",
+    savingsLabel: "Save 16%",
+    stripePriceId: parsedEnv.STRIPE_PRICE_ENTERPRISE_BIANNUAL,
   },
   {
     plan: "enterprise",

@@ -131,8 +131,8 @@ const PLANS: PlanConfig[] = [
     bgColor: "from-amber-500/10 to-transparent",
     prices: {
       monthly: { label: "From $199" },
-      quarterly: { label: "Custom" },
-      biannual: { label: "Custom" },
+      quarterly: { label: "From $549", savings: "Save 8%" },
+      biannual: { label: "From $999", savings: "Save 16%" },
       annual: { label: "From $2,000", savings: "Save 16%" },
     },
     features: [
@@ -220,12 +220,6 @@ export default function Pricing() {
   });
 
   const handleSelectPlan = (plan: PlanKey) => {
-    if (plan === "enterprise") {
-      window.location.href =
-        "mailto:sales@yalla-hack.com?subject=DJAC Enterprise Inquiry";
-      return;
-    }
-
     if (!isLoggedIn) {
       navigate("/signup?next=/pricing");
       return;
@@ -743,11 +737,6 @@ export default function Pricing() {
                   >
                     {isPending ? (
                       t("pricing.redirecting", "Redirecting to checkout...")
-                    ) : plan.key === "enterprise" ? (
-                      <>
-                        {t("pricing.contactSales", "Contact Sales")}{" "}
-                        <ArrowRight size={14} />
-                      </>
                     ) : (
                       <>
                         {t("pricing.startFreeTrial", "Start Free Trial")}{" "}
