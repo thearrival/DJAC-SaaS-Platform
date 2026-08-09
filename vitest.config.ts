@@ -12,5 +12,11 @@ export default defineConfig({
       "client/src/**/*.spec.ts",
     ],
     pool: "forks",
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "text-summary", "lcov"],
+      include: ["server/**/*.ts", "client/src/**/*.{ts,tsx}"],
+      exclude: ["**/*.test.*", "**/*.spec.*", "**/node_modules/**"],
+    },
   },
 });

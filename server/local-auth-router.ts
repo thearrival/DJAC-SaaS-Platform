@@ -33,6 +33,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import { sendEmail } from "./email";
 import { recordAuditEvent } from "./audit-logger";
 import { broadcastSSE } from "./services/sse-bus";
+import { notifyLogin } from "./services/login-notification";
 import { hasMinRole } from "../shared/const";
 import {
   LOCAL_AUTH_COOKIE,
@@ -277,6 +278,14 @@ export const localAuthRouter = router({
           message: "This account has been suspended. Contact support.",
         });
       }
+
+      // Send login notification (first → welcome, subsequent → security alert).
+      // Called BEFORE updateLocalUserLastSignedIn so first-login detection works.
+      notifyLogin(
+        ctx.req,
+        { id: user.id, name: user.name, email: user.email },
+        "localUsers"
+      );
 
       await updateLocalUserLastSignedIn(user.id);
 
@@ -835,7 +844,17 @@ export const localAuthRouter = router({
           });
         backupCodes.splice(backupIdx, 1);
         await consumeLocalUserBackupCode(userId, backupCodes);
+        notifyLogin(
+          ctx.req,
+          { id: user.id, name: user.name, email: user.email },
+          "localUsers"
+        );
       } else {
+        notifyLogin(
+          ctx.req,
+          { id: user.id, name: user.name, email: user.email },
+          "localUsers"
+        );
         await updateLocalUserLastSignedIn(userId);
       }
 

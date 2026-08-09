@@ -137,6 +137,37 @@ export const emailService = {
       "team-invite"
     );
   },
+
+  async sendSecurityAlert(
+    user: User,
+    ip: string,
+    location: string,
+    timestamp: string,
+    device: string
+  ) {
+    const html = baseTemplate(`
+      <h2>Security Alert — New Sign-in</h2>
+      <p>Your DJAC account <strong>${user.email || "unknown"}</strong> was just accessed from a new session.</p>
+      <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin: 16px 0;">
+        <p style="margin: 0 0 8px; font-weight: 600; color: #991b1b;">Sign-in Details</p>
+        <table style="width: 100%%; font-size: 13px; color: #334155; border-collapse: collapse;">
+          <tr><td style="padding: 4px 8px 4px 0; color: #64748b;">Time</td><td style="padding: 4px 0;">${timestamp}</td></tr>
+          <tr><td style="padding: 4px 8px 4px 0; color: #64748b;">IP Address</td><td style="padding: 4px 0;">${ip}</td></tr>
+          <tr><td style="padding: 4px 8px 4px 0; color: #64748b;">Location</td><td style="padding: 4px 0;">${location}</td></tr>
+          <tr><td style="padding: 4px 8px 4px 0; color: #64748b;">Device</td><td style="padding: 4px 0; font-size: 12px;">${device}</td></tr>
+        </table>
+      </div>
+      <p>If this was you, no action is needed. If you don't recognise this activity, please reset your password immediately and review your account security settings.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/settings" class="btn" style="background: #dc2626;">Review Account →</a>
+      <p style="margin-top: 12px; font-size: 11px; color: #94a3b8;">This is an automated security notification. Replies are not monitored. Contact hello@yalla-hack.com for support.</p>
+    `);
+    return send(
+      user,
+      "Security Alert — New Sign-in to DJAC",
+      html,
+      "security-alert"
+    );
+  },
 };
 
 async function send(
