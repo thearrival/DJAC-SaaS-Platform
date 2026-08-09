@@ -8,6 +8,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { useLocale } from "@/contexts/useLocale";
+import { useTheme } from "@/contexts/useTheme";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,8 @@ import {
   Link2,
   Printer,
   HelpCircle,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -1926,6 +1929,67 @@ function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
+   Sub-component: SidebarFooter — language switcher + theme toggle
+   ────────────────────────────────────────────────────────────────────────── */
+
+const DOC_LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "ar", label: "العربية" },
+  { code: "zh", label: "中文" },
+] as const;
+
+function SidebarFooter() {
+  const { locale, setLocale } = useLocale();
+  const { theme, toggleTheme, switchable } = useTheme();
+  return (
+    <div className="djac-docs-sidebar-footer">
+      <div
+        className="djac-docs-lang-switch"
+        role="group"
+        aria-label="Documentation language"
+      >
+        {DOC_LANGUAGES.map(l => (
+          <button
+            key={l.code}
+            type="button"
+            onClick={() => setLocale(l.code)}
+            className={`djac-docs-lang-btn ${locale === l.code ? "active" : ""}`}
+            aria-pressed={locale === l.code}
+          >
+            {l.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <Globe className="h-3 w-3" />
+          <span>{locale.toUpperCase()}</span>
+        </span>
+        {switchable && toggleTheme && (
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="djac-docs-action-btn djac-docs-action-btn-sm"
+            title={
+              theme === "dark"
+                ? "Switch to light theme"
+                : "Switch to dark theme"
+            }
+          >
+            {theme === "dark" ? (
+              <Sun className="h-3.5 w-3.5" />
+            ) : (
+              <Moon className="h-3.5 w-3.5" />
+            )}
+            {theme === "dark" ? "Light" : "Dark"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
    Sub-component: CodeBlock
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -2076,6 +2140,9 @@ export default function DocsPortal() {
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [paletteQuery, setPaletteQuery] = useState("");
+  const [paletteIndex, setPaletteIndex] = useState(0);
   const searchRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isRTL = locale === "ar";
@@ -2249,6 +2316,7 @@ export default function DocsPortal() {
     setShowShortcuts(false);
     setMobileTocOpen(false);
     setCopiedLink(false);
+    setPaletteOpen(false);
     try {
       const saved = localStorage.getItem(
         `djac-doc-feedback:${currentPath || "home"}`
@@ -2298,23 +2366,162 @@ export default function DocsPortal() {
       .catch(() => {});
   }, []);
 
+  const paletteInputRef = useRef<HTMLInputElement>(null);
+
+  const paletteResults = useMemo(() => {
+    const q = paletteQuery.trim().toLowerCase();
+    const flat = sections.flatMap(s =>
+      s.pages.map(p => ({ section: s, page: p }))
+    );
+    if (!q) return flat;
+    const tokens = q.split(/\s+/).filter(Boolean);
+    return flat.filter(({ page }) => {
+      const tl = page.title.toLowerCase();
+      const sl = page.summary.toLowerCase();
+      const cl = page.content.toLowerCase();
+      const titleWords = new Set(tl.match(/[a-z0-9]{3,}/g) || []);
+      return tokens.every(
+        tk =>
+          tl.includes(tk) ||
+          sl.includes(tk) ||
+          cl.includes(tk) ||
+          (tk.length >= 4 &&
+            [...titleWords].some(
+              w =>
+                Math.abs(w.length - tk.length) <= 1 && levenshtein(tk, w) <= 1
+            ))
+      );
+    });
+  }, [sections, paletteQuery]);
+
+  const openPage = useCallback(
+    (sectionId: string, pageId: string) => {
+      setPaletteOpen(false);
+      setPaletteQuery("");
+      navigateToPage(sectionId, pageId);
+    },
+    [navigateToPage]
+  );
+
+  useEffect(() => {
+    if (paletteOpen) {
+      setPaletteQuery("");
+      setPaletteIndex(0);
+      requestAnimationFrame(() => paletteInputRef.current?.focus());
+    }
+  }, [paletteOpen]);
+
+  const paletteOverlay = paletteOpen ? (
+    <div
+      className="djac-docs-palette-backdrop"
+      onClick={() => setPaletteOpen(false)}
+    >
+      <div
+        className="djac-docs-palette"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search documentation"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="djac-docs-palette-input-wrap">
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+          <input
+            ref={paletteInputRef}
+            value={paletteQuery}
+            onChange={e => {
+              setPaletteQuery(e.target.value);
+              setPaletteIndex(0);
+            }}
+            placeholder={t("docs.palette_placeholder", "Jump to a page…")}
+            className="djac-docs-palette-input"
+          />
+          <kbd>Esc</kbd>
+        </div>
+        <div className="djac-docs-palette-results">
+          {paletteResults.length === 0 ? (
+            <div className="djac-docs-palette-empty">
+              No pages match “{paletteQuery}”
+            </div>
+          ) : (
+            paletteResults.slice(0, 50).map((r, i) => {
+              const SecIcon = ICONS[r.section.icon] || BookOpen;
+              const active = i === paletteIndex;
+              return (
+                <button
+                  key={`${r.section.id}-${r.page.id}`}
+                  type="button"
+                  onMouseEnter={() => setPaletteIndex(i)}
+                  onClick={() => openPage(r.section.id, r.page.id)}
+                  className={`djac-docs-palette-item ${active ? "djac-docs-palette-item-active" : ""}`}
+                >
+                  <SecIcon className="h-4 w-4 text-primary shrink-0" />
+                  <div className="min-w-0 flex-1 text-left">
+                    <div className="text-sm truncate">
+                      {highlightMatch(r.page.title, paletteQuery)}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground truncate">
+                      {r.section.title} · {r.page.summary}
+                    </div>
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+        <div className="djac-docs-palette-footer">
+          <span>
+            <kbd>↑</kbd>
+            <kbd>↓</kbd> navigate
+          </span>
+          <span>
+            <kbd>Enter</kbd> open
+          </span>
+          <span>
+            <kbd>Esc</kbd> close
+          </span>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        searchRef.current?.focus();
+        setPaletteOpen(true);
       }
       if (e.key === "Escape") {
         setMobileSidebarOpen(false);
         setShowShortcuts(false);
         setMobileTocOpen(false);
+        setPaletteOpen(false);
         searchRef.current?.blur();
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Command palette navigation
+  useEffect(() => {
+    if (!paletteOpen) return;
+    function handlePaletteKeys(e: KeyboardEvent) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setPaletteIndex(i => Math.min(i + 1, paletteResults.length - 1));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setPaletteIndex(i => Math.max(i - 1, 0));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const r = paletteResults[paletteIndex];
+        if (r) openPage(r.section.id, r.page.id);
+      }
+    }
+    window.addEventListener("keydown", handlePaletteKeys);
+    return () => window.removeEventListener("keydown", handlePaletteKeys);
+  }, [paletteOpen, paletteResults, paletteIndex, openPage]);
 
   // Arrow key navigation between pages
   useEffect(() => {
@@ -2663,7 +2870,7 @@ export default function DocsPortal() {
 
   if (isHome) {
     return (
-      <div className="djac-page djac-docs-portal">
+      <div className="djac-page djac-docs-portal" dir={isRTL ? "rtl" : "ltr"}>
         <div className="djac-docs-mobile-toggle">
           <Button
             variant="outline"
@@ -2769,12 +2976,7 @@ export default function DocsPortal() {
                 })
               )}
             </nav>
-            <div className="djac-docs-sidebar-footer">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Globe className="h-3 w-3" />
-                <span>{locale.toUpperCase()}</span>
-              </div>
-            </div>
+            <SidebarFooter />
           </aside>
 
           {/* Home Content */}
@@ -2988,6 +3190,7 @@ export default function DocsPortal() {
             </div>
           </main>
         </div>
+        {paletteOverlay}
       </div>
     );
   }
@@ -3146,12 +3349,7 @@ export default function DocsPortal() {
               })
             )}
           </nav>
-          <div className="djac-docs-sidebar-footer">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Globe className="h-3 w-3" />
-              <span>{locale.toUpperCase()}</span>
-            </div>
-          </div>
+          <SidebarFooter />
         </aside>
 
         {/* ── Content ─────────────────────────────────────────────────── */}
@@ -3629,6 +3827,7 @@ export default function DocsPortal() {
       >
         <ArrowUp className="h-4 w-4" />
       </button>
+      {paletteOverlay}
     </div>
   );
 }
