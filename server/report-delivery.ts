@@ -1469,9 +1469,9 @@ export async function generateComplianceReportDocx(
 export async function emailComplianceReport(
   input: ReportOptions & { recipientEmail: string }
 ) {
-  if (!ENV.smtpHost || !ENV.smtpFrom) {
+  if (!ENV.smtpHost) {
     throw new Error(
-      "SMTP is not configured. Set SMTP_HOST and SMTP_FROM to enable report email delivery."
+      "SMTP is not configured. Set SMTP_HOST to enable report email delivery."
     );
   }
 
@@ -1494,7 +1494,7 @@ export async function emailComplianceReport(
   });
 
   const info = await transporter.sendMail({
-    from: ENV.smtpFrom,
+    from: ENV.smtpFrom || "DJAC by Yalla Hack <hello@yalla-hack.com>",
     to: input.recipientEmail,
     subject: `${report.title} (${report.reportId})`,
     text:

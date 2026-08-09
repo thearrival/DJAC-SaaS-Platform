@@ -16,7 +16,7 @@ export interface EmailPayload {
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   const { smtpHost, smtpPort, smtpUser, smtpPass, smtpFrom, isDevelopment } =
     ENV;
-  const from = smtpFrom || "DJAC Platform <noreply@yalla-hack.net>";
+  const from = smtpFrom || "DJAC by Yalla Hack <hello@yalla-hack.com>";
 
   if (!smtpHost || !smtpUser || !smtpPass) {
     if (isDevelopment) {
