@@ -282,7 +282,14 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 |------|---------|----------|
 | Starter | From $99/mo | Small teams, single jurisdiction |
 | Professional | From $249/mo | Multi-jurisdiction compliance |
-| Enterprise | Custom | Global enterprises, API, dedicated support |`,
+| Enterprise | Custom | Global enterprises, API, dedicated support |
+
+> **faq** How long does an AI vendor assessment take?
+> **answer** Most assessments complete in under 60 seconds, streaming live progress over the WebSocket as each of the 8 pipeline stages finishes.
+> **faq** Which regulations are supported out of the box?
+> **answer** 60+ frameworks across 29 jurisdictions — including GDPR, NIS2, DORA, PIPL, PDPL, ISO 27001, SOC 2, and more. The AI engine auto-recommends the relevant ones for your profile.
+> **faq** Can DJAC run on our own infrastructure?
+> **answer** Yes — besides Vercel cloud hosting, self-hosted Docker deployment is supported, and the platform can be extended with custom frameworks.`,
         },
         {
           id: "architecture",
@@ -1107,7 +1114,14 @@ DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسس�
 2. **اختيار الولايات القضائية** — الصين، السعودية، الاتحاد الأوروبي أو أي مزيج
 3. **اختيار الأطر** — الذكاء الاصطناعي يوصي باللوائح المناسبة
 4. **تسجيل مورد** — أضف أول مورد خارجي
-5. **تشغيل التقييم** — تقرير امتثال كامل في أقل من 60 ثانية`,
+5. **تشغيل التقييم** — تقرير امتثال كامل في أقل من 60 ثانية
+
+> **faq** كم يستغرق تقييم المورد بالذكاء الاصطناعي؟
+> **answer** تكتمل معظم التقييمات في أقل من 60 ثانية، مع بث التقدم مباشرة عبر WebSocket أثناء إنهاء كل مرحلة من مراحل خط الأنابيب الثماني.
+> **faq** ما هي اللوائح المدعومة افتراضياً؟
+> **answer** أكثر من 60 إطاراً عبر 29 ولاية قضائية — بما في ذلك GDPR وNIS2 وDORA وPIPL وPDPL وISO 27001 وSOC 2 وغيرها. يوصي محرك الذكاء الاصطناعي تلقائياً بالأطر ذات الصلة بملفك.
+> **faq** هل يمكن تشغيل DJAC على بنيتنا التحتية الخاصة؟
+> **answer** نعم — بالإضافة إلى الاستضافة السحابية على Vercel، يتم دعم النشر الذاتي عبر Docker مع إمكانية توسيع المنصة بأطر مخصصة.`,
       },
       {
         id: "architecture",
@@ -1385,7 +1399,14 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
 2. **选择司法管辖区** — 中国、沙特、欧盟或任意组合
 3. **选择框架** — AI自动推荐相关法规
 4. **注册供应商** — 添加您的第一个第三方供应商
-5. **运行评估** — AI在60秒内生成完整的合规报告`,
+5. **运行评估** — AI在60秒内生成完整的合规报告
+
+> **faq** AI供应商评估需要多长时间？
+> **answer** 大多数评估在60秒内完成，并会通过WebSocket实时流式展示8个流水线阶段中每个阶段的进度。
+> **faq** 开箱即用支持哪些法规？
+> **answer** 覆盖29个司法管辖区的60多个框架——包括GDPR、NIS2、DORA、PIPL、PDPL、ISO 27001、SOC 2等。AI引擎会根据您的资料自动推荐相关法规。
+> **faq** DJAC可以在我们自己的基础设施上运行吗？
+> **answer** 可以——除了Vercel云托管，还支持基于Docker的自托管部署，并且平台可扩展自定义框架。`,
       },
       {
         id: "architecture",
@@ -1731,6 +1752,180 @@ function SidebarPageRow({
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
+   Glossary — hover tooltips on technical terms (trilingual)
+   ────────────────────────────────────────────────────────────────────────── */
+
+const GLOSSARY: Record<string, { en: string; ar: string; zh: string }> = {
+  tRPC: {
+    en: "Type-safe RPC framework — API calls are fully typed end-to-end (used for DJAC's 200+ API procedures).",
+    ar: "إطار RPC آمن الأنواع — استدعاءات API مكتوبة بالكامل من طرف إلى طرف (200+ إجراء في DJAC).",
+    zh: "类型安全RPC框架 — API调用端到端完全类型化（DJAC 200+个API程序）。",
+  },
+  RAG: {
+    en: "Retrieval-Augmented Generation — retrieves relevant compliance controls before evaluating or answering.",
+    ar: "التوليد المعزز بالاسترجاع — استرجاع ضوابط الامتثال ذات الصلة قبل التقييم أو الإجابة.",
+    zh: "检索增强生成 — 在评估或回答前先检索相关合规控制项。",
+  },
+  RBAC: {
+    en: "Role-Based Access Control — permissions are granted by role instead of per user.",
+    ar: "التحكم في الوصول القائم على الأدوار — صلاحيات حسب الدور بدلاً من المستخدم.",
+    zh: "基于角色的访问控制 — 按角色而非按用户授权。",
+  },
+  JWT: {
+    en: "JSON Web Token — a signed token used for stateless authentication sessions.",
+    ar: "رمز ويب JSON — رمز موقّع لجلسات مصادقة بدون حالة.",
+    zh: "JSON Web令牌 — 用于无状态认证会话的签名令牌。",
+  },
+  MFA: {
+    en: "Multi-Factor Authentication — requires two or more proof factors when signing in.",
+    ar: "المصادقة متعددة العوامل — تتطلب عاملين أو أكثر عند تسجيل الدخول.",
+    zh: "多因素认证 — 登录需要两个或更多验证因素。",
+  },
+  TOTP: {
+    en: "Time-based One-Time Password — 6-digit codes that rotate every 30 seconds.",
+    ar: "كلمة مرور لمرة واحدة زمنية — رموز من 6 أرقام تتغير كل 30 ثانية.",
+    zh: "基于时间的动态口令 — 每30秒轮换的6位验证码。",
+  },
+  RLS: {
+    en: "Row-Level Security — the database enforces that queries only see authorized rows (tenant isolation).",
+    ar: "أمان مستوى الصفوف — قاعدة البيانات تمنع الوصول لصفوف غير مصرح بها (عزل المستأجرين).",
+    zh: "行级安全 — 数据库只允许查询授权的行（多租户隔离）。",
+  },
+  OAuth: {
+    en: "Open Authorization — a delegated login protocol (e.g., sign in with Google).",
+    ar: "التفويض المفتوح — بروتوكول تسجيل دخول مفوض (مثل الدخول بحساب Google).",
+    zh: "开放授权 — 委托登录协议（例如使用Google登录）。",
+  },
+  webhook: {
+    en: "HTTP callback — the platform calls your URL when events happen (e.g., assessment complete).",
+    ar: "رد اتصال HTTP — المنصة تستدعي عنوانك عند حدوث أحداث (مثل اكتمال التقييم).",
+    zh: "HTTP回调 — 平台在事件发生时调用您的URL（如评估完成）。",
+  },
+  Zod: {
+    en: "Schema validation library — guarantees pipeline outputs match the expected shape.",
+    ar: "مكتبة التحقق من المخططات — تضمن تطابق مخرجات خط الأنابيب مع الشكل المتوقع.",
+    zh: "模式验证库 — 确保流水线输出符合预期结构。",
+  },
+  Redis: {
+    en: "In-memory data store — used for job queues, rate limiting, and caching.",
+    ar: "مخزن بيانات في الذاكرة — يستخدم للطوابير وتحديد المعدل والتخزين المؤقت.",
+    zh: "内存数据存储 — 用于队列、限流和缓存。",
+  },
+  BullMQ: {
+    en: "Redis-backed job queue — processes AI assessment jobs reliably.",
+    ar: "طابور مهام يعتمد على Redis — يعالج مهام تقييم AI بشكل موثوق.",
+    zh: "基于Redis的任务队列 — 可靠地处理AI评估任务。",
+  },
+  Supabase: {
+    en: "Managed Postgres + Auth platform — hosts DJAC's database with RLS and backups.",
+    ar: "منصة Postgres مُدارة — تستضيف قاعدة بيانات DJAC مع RLS والنسخ الاحتياطي.",
+    zh: "托管的Postgres+认证平台 — 托管DJAC数据库，支持RLS和备份。",
+  },
+  PostgreSQL: {
+    en: "Open-source relational database — DJAC's primary data store.",
+    ar: "قاعدة بيانات علائقية مفتوحة المصدر — مخزن البيانات الرئيسي لـ DJAC.",
+    zh: "开源关系型数据库 — DJAC的主要数据存储。",
+  },
+  Stripe: {
+    en: "Payment platform — handles subscriptions, checkout, and billing events.",
+    ar: "منصة دفع — تدير الاشتراكات والدفع وأحداث الفوترة.",
+    zh: "支付平台 — 处理订阅、结账和账单事件。",
+  },
+  Vercel: {
+    en: "Serverless hosting platform — deploys DJAC's frontend and API.",
+    ar: "منصة استضافة بدون خادم — تنشر واجهة DJAC وواجهة API.",
+    zh: "无服务器托管平台 — 部署DJAC前端和API。",
+  },
+};
+
+const GLOSSARY_TERMS = Object.keys(GLOSSARY).sort(
+  (a, b) => b.length - a.length
+);
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function glossifyText(text: string, locale: string): React.ReactNode[] {
+  if (!GLOSSARY_TERMS.length || !text) return [text];
+  const pattern = new RegExp(
+    `(^|[^\\p{L}\\p{N}])(${GLOSSARY_TERMS.map(escapeRegExp).join("|")})(?=[^\\p{L}\\p{N}]|$)`,
+    "giu"
+  );
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = pattern.exec(text))) {
+    if (m.index > lastIndex) nodes.push(text.slice(lastIndex, m.index));
+    if (m[1]) nodes.push(m[1]);
+    const term = m[2];
+    const def =
+      GLOSSARY[term]?.[locale as "en" | "ar" | "zh"] ||
+      GLOSSARY[term]?.en ||
+      "";
+    nodes.push(
+      <span
+        key={`t-${m.index}`}
+        className="djac-docs-term"
+        tabIndex={0}
+        data-term={def}
+      >
+        {term}
+      </span>
+    );
+    lastIndex = m.index + m[0].length;
+  }
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Fuzzy search: typo-tolerant token matching with Levenshtein distance
+   ────────────────────────────────────────────────────────────────────────── */
+
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (Math.abs(m - n) > 1) return 2;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) {
+      cur[j] = Math.min(
+        prev[j] + 1,
+        cur[j - 1] + 1,
+        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Sub-component: FaqAccordion — collapsible Q&A blocks
+   ────────────────────────────────────────────────────────────────────────── */
+
+function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
+  return (
+    <div className="djac-docs-faq">
+      {items.map((item, i) => (
+        <details key={i} className="djac-docs-faq-item">
+          <summary className="djac-docs-faq-q">
+            <HelpCircle className="h-4 w-4 text-primary shrink-0" />
+            <span className="min-w-0 flex-1">{item.q}</span>
+            <ChevronDown className="djac-docs-faq-chevron h-4 w-4 text-muted-foreground shrink-0" />
+          </summary>
+          <p className="djac-docs-faq-a">{item.a}</p>
+        </details>
+      ))}
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
    Sub-component: CodeBlock
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -1979,19 +2174,63 @@ export default function DocsPortal() {
   }, []);
 
   const filteredSections = useMemo(() => {
-    if (!searchQuery.trim()) return sections;
-    const q = searchQuery.toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return sections;
+    const tokens = query.split(/\s+/).filter(Boolean);
+
+    const wordCache = new Map<string, Set<string>>();
+    const wordsOf = (content: string): Set<string> => {
+      let set = wordCache.get(content);
+      if (!set) {
+        set = new Set(content.toLowerCase().match(/[a-z0-9]{3,}/g) || []);
+        wordCache.set(content, set);
+      }
+      return set;
+    };
+
+    const pageScore = (
+      title: string,
+      summary: string,
+      content: string
+    ): number => {
+      const tl = title.toLowerCase();
+      const sl = summary.toLowerCase();
+      const cl = content.toLowerCase();
+      let score = 0;
+      for (const tk of tokens) {
+        if (tl.includes(tk)) score += 3;
+        else if (sl.includes(tk)) score += 2;
+        else if (cl.includes(tk)) score += 1;
+        else {
+          let fuzzyFound = false;
+          if (tk.length >= 4) {
+            for (const w of wordsOf(content)) {
+              if (
+                Math.abs(w.length - tk.length) <= 1 &&
+                levenshtein(tk, w) <= 1
+              ) {
+                fuzzyFound = true;
+                break;
+              }
+            }
+          }
+          if (!fuzzyFound) return 0;
+          score += 1;
+        }
+      }
+      return score;
+    };
+
     return sections
-      .map(s => ({
-        ...s,
-        pages: s.pages.filter(
-          p =>
-            p.title.toLowerCase().includes(q) ||
-            p.summary.toLowerCase().includes(q) ||
-            p.content.toLowerCase().includes(q)
-        ),
-      }))
-      .filter(s => s.pages.length > 0);
+      .map(s => {
+        const scored = s.pages
+          .map(p => ({ p, score: pageScore(p.title, p.summary, p.content) }))
+          .filter(x => x.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .map(x => x.p);
+        return scored.length ? { ...s, pages: scored } : null;
+      })
+      .filter((s): s is DocSection => s !== null);
   }, [sections, searchQuery]);
 
   useEffect(() => {
@@ -2017,6 +2256,23 @@ export default function DocsPortal() {
       setFeedback(saved === "up" || saved === "down" ? saved : null);
     } catch {
       setFeedback(null);
+    }
+    if (currentPath) {
+      try {
+        const savedPos = Number(
+          localStorage.getItem(`djac-doc-scroll:${currentPath}`) || "0"
+        );
+        if (savedPos > 300) {
+          requestAnimationFrame(() => {
+            window.scrollTo({
+              top: savedPos,
+              behavior: "instant" as ScrollBehavior,
+            });
+          });
+        }
+      } catch {
+        /* storage unavailable */
+      }
     }
   }, [currentPath]);
 
@@ -2075,7 +2331,11 @@ export default function DocsPortal() {
     return () => window.removeEventListener("keydown", handleArrows);
   }, [isHome, nextPage, prevPage, navigateToPage]);
 
-  // Scroll progress + back-to-top
+  // Scroll progress + back-to-top + last-read position save
+  const saveScrollTimer = useRef<number | undefined>(undefined);
+  const currentPathRef = useRef(currentPath);
+  currentPathRef.current = currentPath;
+
   useEffect(() => {
     function handleScroll() {
       const h = document.documentElement;
@@ -2088,9 +2348,25 @@ export default function DocsPortal() {
           : 0;
       setScrollProgress(pct);
       setShowBackTop(scrollTop > 400);
+      if (currentPathRef.current) {
+        window.clearTimeout(saveScrollTimer.current);
+        saveScrollTimer.current = window.setTimeout(() => {
+          try {
+            localStorage.setItem(
+              `djac-doc-scroll:${currentPathRef.current}`,
+              String(window.scrollY)
+            );
+          } catch {
+            /* storage unavailable */
+          }
+        }, 400);
+      }
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.clearTimeout(saveScrollTimer.current);
+    };
   }, []);
 
   // Scroll-based active TOC tracking
@@ -2112,227 +2388,274 @@ export default function DocsPortal() {
 
   /* ── Content Renderer ────────────────────────────────────────────────── */
 
-  const renderContent = useCallback((text: string) => {
-    const lines = text.split("\n");
-    const elements: React.ReactNode[] = [];
-    let i = 0;
-    let inCodeBlock = false;
-    let codeBlockLines: string[] = [];
-    let codeBlockLang = "";
-
-    const flushCodeBlock = () => {
-      if (codeBlockLines.length > 0) {
-        elements.push(
-          <CodeBlock
-            key={`code-${i}`}
-            code={codeBlockLines.join("\n")}
-            lang={codeBlockLang || undefined}
-          />
-        );
-        codeBlockLines = [];
-        codeBlockLang = "";
+  const renderContent = useCallback(
+    (text: string) => {
+      const lines = text.split("\n");
+      const faqPattern = /^> \*\*(faq|answer)\*\* (.+)/;
+      const blocks: (string | { faq: { q: string; a: string }[] })[] = [];
+      let faqGroup: { q: string; a: string }[] = [];
+      let inCode = false;
+      for (const line of lines) {
+        if (line.startsWith("```")) {
+          inCode = !inCode;
+          if (faqGroup.length) {
+            blocks.push({ faq: faqGroup });
+            faqGroup = [];
+          }
+          blocks.push(line);
+          continue;
+        }
+        if (inCode) {
+          blocks.push(line);
+          continue;
+        }
+        const fm = line.match(faqPattern);
+        if (fm) {
+          if (fm[1] === "faq") {
+            if (faqGroup.length) blocks.push({ faq: faqGroup });
+            faqGroup = [{ q: fm[2], a: "" }];
+          } else if (faqGroup.length) {
+            const last = faqGroup[faqGroup.length - 1];
+            last.a += (last.a ? " " : "") + fm[2];
+          } else {
+            faqGroup = [{ q: "", a: fm[2] }];
+          }
+          continue;
+        }
+        if (faqGroup.length) {
+          blocks.push({ faq: faqGroup });
+          faqGroup = [];
+        }
+        blocks.push(line);
       }
-      inCodeBlock = false;
-    };
+      if (faqGroup.length) blocks.push({ faq: faqGroup });
 
-    const boldify = (t: string): React.ReactNode => {
-      const parts = t.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
-      return parts.map((part, pi) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
-          return (
-            <strong key={pi} className="font-semibold text-foreground">
-              {part.slice(2, -2)}
-            </strong>
+      const elements: React.ReactNode[] = [];
+      let i = 0;
+      let inCodeBlock = false;
+      let codeBlockLines: string[] = [];
+      let codeBlockLang = "";
+
+      const flushCodeBlock = () => {
+        if (codeBlockLines.length > 0) {
+          elements.push(
+            <CodeBlock
+              key={`code-${i}`}
+              code={codeBlockLines.join("\n")}
+              lang={codeBlockLang || undefined}
+            />
           );
+          codeBlockLines = [];
+          codeBlockLang = "";
         }
-        if (part.startsWith("`") && part.endsWith("`")) {
-          return (
-            <code
-              key={pi}
-              className="px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[0.85em] font-mono text-foreground"
-            >
-              {part.slice(1, -1)}
-            </code>
-          );
+        inCodeBlock = false;
+      };
+
+      const boldify = (t: string): React.ReactNode => {
+        const parts = t.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+        return parts.map((part, pi) => {
+          if (part.startsWith("**") && part.endsWith("**")) {
+            return (
+              <strong key={pi} className="font-semibold text-foreground">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          if (part.startsWith("`") && part.endsWith("`")) {
+            return (
+              <code
+                key={pi}
+                className="px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[0.85em] font-mono text-foreground"
+              >
+                {part.slice(1, -1)}
+              </code>
+            );
+          }
+          return <span key={pi}>{glossifyText(part, locale)}</span>;
+        });
+      };
+
+      for (; i < blocks.length; i++) {
+        const block = blocks[i];
+        if (typeof block !== "string") {
+          elements.push(<FaqAccordion key={`faq-${i}`} items={block.faq} />);
+          continue;
         }
-        return part;
-      });
-    };
+        const line = block;
 
-    for (; i < lines.length; i++) {
-      const line = lines[i];
-
-      // Code blocks
-      if (line.startsWith("```")) {
+        // Code blocks
+        if (line.startsWith("```")) {
+          if (inCodeBlock) {
+            flushCodeBlock();
+          } else {
+            inCodeBlock = true;
+            codeBlockLang = line.slice(3).trim();
+          }
+          continue;
+        }
         if (inCodeBlock) {
-          flushCodeBlock();
-        } else {
-          inCodeBlock = true;
-          codeBlockLang = line.slice(3).trim();
+          codeBlockLines.push(line);
+          continue;
         }
-        continue;
-      }
-      if (inCodeBlock) {
-        codeBlockLines.push(line);
-        continue;
-      }
 
-      if (!line.trim()) {
-        elements.push(<div key={i} className="h-3" />);
-        continue;
-      }
+        if (!line.trim()) {
+          elements.push(<div key={i} className="h-3" />);
+          continue;
+        }
 
-      // Admonitions
-      const admonMatch = line.match(
-        /^> \*\*(tip|info|warning|danger)\*\* (.+)/
-      );
-      if (admonMatch) {
-        elements.push(
-          <Admonition key={i} type={admonMatch[1]}>
-            {admonMatch[2]}
-          </Admonition>
+        // Admonitions
+        const admonMatch = line.match(
+          /^> \*\*(tip|info|warning|danger)\*\* (.+)/
         );
-        continue;
-      }
+        if (admonMatch) {
+          elements.push(
+            <Admonition key={i} type={admonMatch[1]}>
+              {admonMatch[2]}
+            </Admonition>
+          );
+          continue;
+        }
 
-      // Headings with anchor IDs
-      const h3Match = line.match(/^### (.+)/);
-      const h4Match = line.match(/^#### (.+)/);
-      if (h3Match) {
-        const text = h3Match[1];
-        const id = text
-          .toLowerCase()
-          .replace(/[^a-z0-9\u0600-\u06FF\u4e00-\u9fff]+/g, "-")
-          .replace(/^-|-$/g, "");
-        elements.push(
-          <h3
-            key={i}
-            id={id}
-            className="djac-docs-h3 text-foreground mt-10 mb-3 font-semibold text-lg group"
-          >
-            <a
-              href={`#${id}`}
-              className="djac-docs-heading-anchor"
-              aria-label={`Link to ${text}`}
+        // Headings with anchor IDs
+        const h3Match = line.match(/^### (.+)/);
+        const h4Match = line.match(/^#### (.+)/);
+        if (h3Match) {
+          const text = h3Match[1];
+          const id = text
+            .toLowerCase()
+            .replace(/[^a-z0-9\u0600-\u06FF\u4e00-\u9fff]+/g, "-")
+            .replace(/^-|-$/g, "");
+          elements.push(
+            <h3
+              key={i}
+              id={id}
+              className="djac-docs-h3 text-foreground mt-10 mb-3 font-semibold text-lg group"
             >
-              {boldify(text)}
-              <Hash className="djac-docs-heading-hash" />
-            </a>
-          </h3>
-        );
-        continue;
-      }
-      if (h4Match) {
-        const text = h4Match[1];
-        const id = text
-          .toLowerCase()
-          .replace(/[^a-z0-9\u0600-\u06FF\u4e00-\u9fff]+/g, "-")
-          .replace(/^-|-$/g, "");
-        elements.push(
-          <h4
-            key={i}
-            id={id}
-            className="text-base font-semibold text-foreground mt-8 mb-2 group"
-          >
-            <a
-              href={`#${id}`}
-              className="djac-docs-heading-anchor"
-              aria-label={`Link to ${text}`}
+              <a
+                href={`#${id}`}
+                className="djac-docs-heading-anchor"
+                aria-label={`Link to ${text}`}
+              >
+                {boldify(text)}
+                <Hash className="djac-docs-heading-hash" />
+              </a>
+            </h3>
+          );
+          continue;
+        }
+        if (h4Match) {
+          const text = h4Match[1];
+          const id = text
+            .toLowerCase()
+            .replace(/[^a-z0-9\u0600-\u06FF\u4e00-\u9fff]+/g, "-")
+            .replace(/^-|-$/g, "");
+          elements.push(
+            <h4
+              key={i}
+              id={id}
+              className="text-base font-semibold text-foreground mt-8 mb-2 group"
             >
-              {boldify(text)}
-              <Hash className="djac-docs-heading-hash" />
-            </a>
-          </h4>
-        );
-        continue;
-      }
+              <a
+                href={`#${id}`}
+                className="djac-docs-heading-anchor"
+                aria-label={`Link to ${text}`}
+              >
+                {boldify(text)}
+                <Hash className="djac-docs-heading-hash" />
+              </a>
+            </h4>
+          );
+          continue;
+        }
 
-      // Bold list items with checkmark
-      if (line.startsWith("- **")) {
-        const match = line.match(/- \*\*(.+?)\*\*(.+)/);
-        if (match) {
+        // Bold list items with checkmark
+        if (line.startsWith("- **")) {
+          const match = line.match(/- \*\*(.+?)\*\*(.+)/);
+          if (match) {
+            elements.push(
+              <div
+                key={i}
+                className="flex items-start gap-2 ml-2 my-1 text-sm djac-body"
+              >
+                <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <span>
+                  <strong>{match[1]}</strong>
+                  {match[2]}
+                </span>
+              </div>
+            );
+            continue;
+          }
+        }
+
+        // Regular list items
+        if (line.startsWith("- ")) {
+          elements.push(
+            <div
+              key={i}
+              className="flex items-start gap-2 ml-2 my-0.5 text-sm djac-body"
+            >
+              <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
+              <span>{boldify(line.replace("- ", ""))}</span>
+            </div>
+          );
+          continue;
+        }
+
+        // Tables
+        if (line.startsWith("| ")) {
+          const cells = line
+            .split("|")
+            .filter(Boolean)
+            .map(c => c.trim());
+          const isSep = cells.every(c => /^-{3,}$/.test(c));
+          if (isSep) continue;
+          elements.push(
+            <div
+              key={i}
+              className="grid text-sm djac-body gap-2 py-1.5 px-3 border-t border-border/50"
+              style={{
+                gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))`,
+              }}
+            >
+              {cells.map((cell, ci) => (
+                <span key={ci}>{boldify(cell)}</span>
+              ))}
+            </div>
+          );
+          continue;
+        }
+
+        // Numbered lists
+        if (/^\d+\.\s/.test(line)) {
+          const num = line.match(/^(\d+)\./)?.[1] || "";
+          const rest = line.replace(/^\d+\.\s*/, "");
           elements.push(
             <div
               key={i}
               className="flex items-start gap-2 ml-2 my-1 text-sm djac-body"
             >
-              <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
-              <span>
-                <strong>{match[1]}</strong>
-                {match[2]}
+              <span className="font-semibold text-primary w-5 shrink-0">
+                {num}.
               </span>
+              <span>{boldify(rest)}</span>
             </div>
           );
           continue;
         }
-      }
 
-      // Regular list items
-      if (line.startsWith("- ")) {
         elements.push(
-          <div
-            key={i}
-            className="flex items-start gap-2 ml-2 my-0.5 text-sm djac-body"
-          >
-            <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
-            <span>{boldify(line.replace("- ", ""))}</span>
-          </div>
+          <p key={i} className="text-sm djac-body my-1">
+            {boldify(line)}
+          </p>
         );
-        continue;
       }
 
-      // Tables
-      if (line.startsWith("| ")) {
-        const cells = line
-          .split("|")
-          .filter(Boolean)
-          .map(c => c.trim());
-        const isSep = cells.every(c => /^-{3,}$/.test(c));
-        if (isSep) continue;
-        elements.push(
-          <div
-            key={i}
-            className="grid text-sm djac-body gap-2 py-1.5 px-3 border-t border-border/50"
-            style={{
-              gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))`,
-            }}
-          >
-            {cells.map((cell, ci) => (
-              <span key={ci}>{boldify(cell)}</span>
-            ))}
-          </div>
-        );
-        continue;
-      }
-
-      // Numbered lists
-      if (/^\d+\.\s/.test(line)) {
-        const num = line.match(/^(\d+)\./)?.[1] || "";
-        const rest = line.replace(/^\d+\.\s*/, "");
-        elements.push(
-          <div
-            key={i}
-            className="flex items-start gap-2 ml-2 my-1 text-sm djac-body"
-          >
-            <span className="font-semibold text-primary w-5 shrink-0">
-              {num}.
-            </span>
-            <span>{boldify(rest)}</span>
-          </div>
-        );
-        continue;
-      }
-
-      elements.push(
-        <p key={i} className="text-sm djac-body my-1">
-          {boldify(line)}
-        </p>
-      );
-    }
-
-    flushCodeBlock();
-    return elements;
-  }, []);
+      flushCodeBlock();
+      return elements;
+    },
+    [locale]
+  );
 
   /* ────────────────────────────────────────────────────────────────────────
      Home Landing Page

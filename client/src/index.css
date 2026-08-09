@@ -2758,6 +2758,103 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   -webkit-user-select: none;
 }
 
+/* ── Docs UX polish round 3 ─────────────────────────────────────────────── */
+.djac-docs-term {
+  position: relative;
+  border-bottom: 1px dotted var(--primary);
+  cursor: help;
+  white-space: nowrap;
+}
+
+.djac-docs-term::after {
+  content: attr(data-term);
+  position: absolute;
+  left: 50%;
+  bottom: 150%;
+  transform: translateX(-50%) scale(0.96);
+  width: max-content;
+  max-width: 280px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.55;
+  font-weight: 400;
+  white-space: normal;
+  z-index: 60;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s,
+    visibility 0.15s,
+    transform 0.15s;
+  pointer-events: none;
+}
+
+.djac-docs-term:hover::after,
+.djac-docs-term:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) scale(1);
+}
+
+.djac-docs-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 1rem 0;
+}
+
+.djac-docs-faq-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.djac-docs-faq-q {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  transition: background 0.15s;
+}
+
+.djac-docs-faq-q::-webkit-details-marker {
+  display: none;
+}
+
+.djac-docs-faq-q:hover {
+  background: color-mix(in oklab, var(--primary) 6%, transparent);
+}
+
+.djac-docs-faq-chevron {
+  transition: transform 0.2s;
+}
+
+.djac-docs-faq-item[open] .djac-docs-faq-chevron {
+  transform: rotate(180deg);
+}
+
+.djac-docs-faq-item[open] .djac-docs-faq-q {
+  border-bottom: 1px solid var(--border);
+}
+
+.djac-docs-faq-a {
+  padding: 10px 14px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
 /* ── Mobile responsiveness ────────────────────────────────────────────── */
 @media (max-width: 860px) {
   .djac-docs-layout {
