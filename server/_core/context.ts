@@ -9,6 +9,7 @@ import {
   resolveLocalAuthUser,
 } from "../services/auth-session";
 import { resolveOrganizationForUser } from "../services/org-context";
+import { resolveOrganizationForLocalUser } from "../services/org-context";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -58,11 +59,11 @@ export async function createContext(
     if (!user) {
       user = await resolveLocalAuthUser(opts.req);
       if (user) {
-        // Virtual org — id -1 is the same convention as DEV_AUTH_BYPASS.
-        // orgProcedure checks (organizationId !== null) pass; real DB queries
-        // with id=-1 simply return empty result sets (not errors).
-        organizationId = -1;
-        organizationRole = "owner";
+        // Local-auth users get a REAL org membership (matched on localUserId),
+        // auto-created on first request — same convention as OAuth users.
+        const org = await resolveOrganizationForLocalUser(user);
+        organizationId = org.organizationId;
+        organizationRole = org.organizationRole;
       }
     }
   }

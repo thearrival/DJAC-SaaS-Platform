@@ -19,12 +19,15 @@ export type OrgResolution = {
   organizationRole: OrganizationMember["role"] | null;
 };
 
-async function createDefaultOrganizationForUser(user: User): Promise<{
+async function createDefaultOrganizationForUser(
+  user: User,
+  localUserId?: number
+): Promise<{
   organizationId: number;
   organizationRole: OrganizationMember["role"];
 } | null> {
   // Dev-bypass / API-key pseudo users are not persisted in DB — skip auto-seed.
-  if (user.id <= 0) return null;
+  if (user.id <= 0 && !localUserId) return null;
 
   const db = await getDb();
   if (!db) return null;
@@ -37,7 +40,8 @@ async function createDefaultOrganizationForUser(user: User): Promise<{
       ? user.organizationName.trim()
       : `${(user.name || "New User").trim()} Organization`;
 
-  const safeSlug = `org-${user.id}-${
+  const ownerKey = localUserId ?? user.id;
+  const safeSlug = `org-${ownerKey}-${
     orgName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -50,7 +54,7 @@ async function createDefaultOrganizationForUser(user: User): Promise<{
     .values({
       slug: safeSlug,
       name: orgName,
-      billingEmail: user.email || `user-${user.id}@example.local`,
+      billingEmail: user.email || `user-${ownerKey}@example.local`,
       primaryJurisdiction: "Both",
       plan: "free_trial",
       trialStartedAt: now,
@@ -64,12 +68,19 @@ async function createDefaultOrganizationForUser(user: User): Promise<{
 
   await db.insert(organizationMembers).values({
     organizationId,
-    userId: user.id,
+    ...(localUserId != null ? { localUserId } : { userId: user.id }),
     role: "owner",
     status: "active",
   });
 
   return { organizationId, organizationRole: "owner" };
+}
+
+/** Parse the real localUsers.id from a virtual local-auth user's openId ("local:<id>") */
+export function getLocalUserIdFromOpenId(openId: string | null): number | null {
+  if (!openId) return null;
+  const m = /^local:(\d+)$/.exec(openId);
+  return m ? Number(m[1]) : null;
 }
 
 export async function resolveOrganizationForUser(
@@ -94,6 +105,50 @@ export async function resolveOrganizationForUser(
 
   if (!membership) {
     const seeded = await createDefaultOrganizationForUser(user);
+    if (seeded) {
+      return {
+        organizationId: seeded.organizationId,
+        organizationRole: seeded.organizationRole,
+      };
+    }
+  }
+
+  return {
+    organizationId: membership?.organizationId ?? null,
+    organizationRole: membership?.role ?? null,
+  };
+}
+
+/**
+ * Org resolution for local-auth users (email+password). Local users live in
+ * the localUsers table, so memberships are matched on localUserId and any
+ * auto-created org records the owner with the localUserId FK.
+ */
+export async function resolveOrganizationForLocalUser(
+  user: User
+): Promise<OrgResolution> {
+  const localUserId = getLocalUserIdFromOpenId(user.openId);
+  if (!localUserId) return { organizationId: null, organizationRole: null };
+
+  const db = await getDb();
+  if (!db) return { organizationId: null, organizationRole: null };
+
+  const [membership] = await db
+    .select({
+      organizationId: organizationMembers.organizationId,
+      role: organizationMembers.role,
+    })
+    .from(organizationMembers)
+    .where(
+      and(
+        eq(organizationMembers.localUserId, localUserId),
+        eq(organizationMembers.status, "active")
+      )
+    )
+    .limit(1);
+
+  if (!membership) {
+    const seeded = await createDefaultOrganizationForUser(user, localUserId);
     if (seeded) {
       return {
         organizationId: seeded.organizationId,

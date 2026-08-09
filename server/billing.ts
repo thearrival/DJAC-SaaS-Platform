@@ -512,6 +512,8 @@ export const billingRouter = router({
       }
 
       const userId = (ctx.user as { id: number }).id;
+      const openId = (ctx.user as { openId?: string }).openId ?? "";
+      const localUserId = /^local:(\d+)$/.exec(openId)?.[1];
       const slug = input.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
@@ -519,12 +521,13 @@ export const billingRouter = router({
         .slice(0, 80);
 
       const org = await createOrganizationForUser({
-        slug: `${slug}-${userId}`,
+        slug: `${slug}-${localUserId ?? userId}`,
         name: input.name,
         billingEmail: input.billingEmail,
         industry: input.industry,
         primaryJurisdiction: input.primaryJurisdiction,
-        ownerUserId: userId,
+        ownerUserId: localUserId ? undefined : userId,
+        ownerLocalUserId: localUserId ? Number(localUserId) : undefined,
       });
 
       void recordUserInteraction(ctx, {

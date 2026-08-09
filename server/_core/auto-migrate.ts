@@ -458,6 +458,223 @@ export async function ensureMigrated(): Promise<void> {
             )
         `);
 
+    // Migration 0010: schema drift repair ───────────────────────────────────────
+    // Databases created from older SQL snapshots are missing columns that later
+    // versions of the schema rely on. CREATE TABLE IF NOT EXISTS never heals an
+    // existing table, so repair idempotently with ALTER ... ADD COLUMN.
+    const driftExec = async (label: string, stmt: string) => {
+      try {
+        await db.execute(sql.raw(stmt));
+        if (!ENV.isProduction) console.info(`[Migrate] Drift ok: ${label}`);
+      } catch (err) {
+        console.warn(
+          `[Migrate] Drift repair skipped (${label}):`,
+          (err as Error).message
+        );
+      }
+    };
+
+    const driftEnums: Record<string, string[]> = {
+      plan: ["free_trial", "starter", "professional", "enterprise"],
+      paidPlan: ["starter", "professional", "enterprise"],
+      billingInterval: ["monthly", "quarterly", "biannual", "annual"],
+      subscriptionStatus: [
+        "trialing",
+        "active",
+        "past_due",
+        "canceled",
+        "incomplete",
+        "paused",
+      ],
+      billingEventStatus: ["success", "failed", "pending", "refunded"],
+      orgMemberRole: ["owner", "admin", "compliance_officer", "analyst"],
+      orgMemberStatus: ["active", "invited", "suspended"],
+    };
+    for (const [typeName, values] of Object.entries(driftEnums)) {
+      await driftExec(
+        `create enum ${typeName}`,
+        `DO $$ BEGIN
+           CREATE TYPE "${typeName}" AS ENUM (${values
+             .map(v => `'${v}'`)
+             .join(",")});
+         EXCEPTION WHEN duplicate_object THEN NULL;
+         END $$;`
+      );
+      for (const v of values) {
+        await driftExec(
+          `enum ${typeName}.${v}`,
+          `ALTER TYPE "${typeName}" ADD VALUE IF NOT EXISTS '${v}'`
+        );
+      }
+    }
+
+    const driftColumns: Array<[string, string]> = [
+      // organizations — billing/trial/stripe columns
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`,
+      ],
+      ["organizations", `ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`,
+      ],
+      ["organizations", `ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`],
+      ["organizations", `ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`,
+      ],
+      ["organizations", `ADD COLUMN IF NOT EXISTS "metadata" text`],
+      // auditLogs — local-user actor columns
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "localUserId" integer`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "organizationId" integer`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
+      [
+        "auditLogs",
+        `ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`,
+      ],
+      [
+        "auditLogs",
+        `ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`,
+      ],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "entityId" integer`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
+      [
+        "auditLogs",
+        `ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`,
+      ],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "payload" text`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
+      // subscriptions — Stripe sync columns
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`,
+      ],
+      ["subscriptions", `ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`,
+      ],
+      ["subscriptions", `ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
+      ["subscriptions", `ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`],
+      ["subscriptions", `ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
+      // billingEvents — Stripe event log columns
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`],
+      [
+        "billingEvents",
+        `ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`,
+      ],
+      [
+        "billingEvents",
+        `ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`,
+      ],
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "amountCents" integer`],
+      [
+        "billingEvents",
+        `ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`,
+      ],
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "description" text`],
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "rawPayload" text`],
+      // organizationMembers — local-user membership columns
+      ["organizationMembers", `ADD COLUMN IF NOT EXISTS "localUserId" integer`],
+      ["organizationMembers", `ADD COLUMN IF NOT EXISTS "userId" integer`],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`,
+      ],
+    ];
+    for (const [table, clause] of driftColumns) {
+      await driftExec(table, `ALTER TABLE "${table}" ${clause}`);
+    }
+
+    await driftExec(
+      "subscriptions unique stripeSubscriptionId",
+      `CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique"
+       ON "subscriptions" ("stripeSubscriptionId")`
+    );
+    await driftExec(
+      "billingEvents unique stripeEventId",
+      `CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique"
+       ON "billingEvents" ("stripeEventId")`
+    );
+
     // Seed compliance reference data into DB (idempotent upserts)
     await seedComplianceFrameworks(db);
 
