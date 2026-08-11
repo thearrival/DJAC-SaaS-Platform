@@ -10,6 +10,9 @@ import {
   deleteUser,
   getRecentActivity,
   getMonthlyRegistrations,
+  getSubscriptionData,
+  getOrganizationData,
+  getSecurityEvents,
 } from "./admin-dashboard-store";
 
 function requireAdminSession(req: Request, res: Response): boolean {
@@ -177,6 +180,37 @@ export function createAdminDashboardRouter(): Router {
     } catch (error) {
       logger.error({ error }, "Failed to get recent activity");
       res.status(500).json({ error: "Failed to get recent activity" });
+    }
+  });
+
+  router.get("/subscriptions", async (_req, res) => {
+    try {
+      const data = await getSubscriptionData();
+      res.json(data);
+    } catch (error) {
+      logger.error({ error }, "Failed to get subscription data");
+      res.status(500).json({ error: "Failed to get subscription data" });
+    }
+  });
+
+  router.get("/organizations", async (_req, res) => {
+    try {
+      const data = await getOrganizationData();
+      res.json(data);
+    } catch (error) {
+      logger.error({ error }, "Failed to get organization data");
+      res.status(500).json({ error: "Failed to get organization data" });
+    }
+  });
+
+  router.get("/security-events", async (req, res) => {
+    try {
+      const limit = req.query.limit ? Number(req.query.limit) : 200;
+      const events = await getSecurityEvents(limit);
+      res.json(events);
+    } catch (error) {
+      logger.error({ error }, "Failed to get security events");
+      res.status(500).json({ error: "Failed to get security events" });
     }
   });
 

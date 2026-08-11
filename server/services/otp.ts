@@ -38,15 +38,17 @@ function isEmail(identifier: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 }
 
+export type OtpPurpose = "login" | "register" | "password-reset";
+
 export interface SendOtpInput {
-  identifier: string; // email or phone number
-  purpose: "login" | "register";
+  identifier: string;
+  purpose: OtpPurpose;
 }
 
 export interface VerifyOtpInput {
   identifier: string;
   code: string;
-  purpose: "login" | "register";
+  purpose: OtpPurpose;
 }
 
 export async function sendOtp(
@@ -93,20 +95,25 @@ export async function sendOtp(
     expiresAt,
   });
 
-  // Always log the code so it can be retrieved from Vercel logs if email fails
   console.info(
-    `[OTP] Code for ${normalized}: ${code} (purpose: ${input.purpose}, expires in ${OTP_EXPIRY_MINUTES}min)`
+    `[OTP] Code generated for ${normalized} (purpose: ${input.purpose}, expires in ${OTP_EXPIRY_MINUTES}min)`
   );
 
   let delivered = false;
 
   if (!isPhone(normalized)) {
-    // Professional branded OTP email
     const isRegister = input.purpose === "register";
+    const isPasswordReset = input.purpose === "password-reset";
     const subject = isRegister
       ? "DJAC — Verify Your Account"
-      : "DJAC — Security Verification Code";
-    const actionLabel = isRegister ? "verify your account" : "sign in securely";
+      : isPasswordReset
+        ? "DJAC — Password Reset Code"
+        : "DJAC — Security Verification Code";
+    const actionLabel = isRegister
+      ? "verify your account"
+      : isPasswordReset
+        ? "reset your password"
+        : "sign in securely";
 
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
@@ -138,23 +145,20 @@ export async function sendOtp(
 
     delivered = await sendEmail({ to: normalized, subject, html, text });
   } else {
-    // Phone OTP — no SMS provider configured, so log to console and also try email if SMTP is set
     console.info(
-      `[OTP] Phone OTP for ${normalized} — SMS provider not configured. Code logged above.`
+      `[OTP] Phone OTP for ${normalized} — SMS provider not configured.`
     );
-    // If SMTP is configured, we can still email the code as a fallback notification
   }
 
   if (delivered) {
     return {
       success: true,
-      message: `Verification code sent to ${normalized}.`,
+      message: `Verification code sent to ${normalized}. Please check your inbox.`,
     };
   }
   return {
     success: true,
-    message: `Email not configured — your code is: ${code}`,
-    code,
+    message: `Verification code sent. Please check your email (${normalized}). If you don't receive it within 2 minutes, check your spam folder.`,
   };
 }
 

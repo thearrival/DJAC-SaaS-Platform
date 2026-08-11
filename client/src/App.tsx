@@ -44,6 +44,7 @@ const LawLibrary = lazy(() => import("./pages/LawLibrary"));
 const ComplianceTracker = lazy(() => import("./pages/ComplianceTracker"));
 const Signup = lazy(() => import("./pages/Signup"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const ReportCenter = lazy(() => import("./pages/ReportCenter"));
 const Pricing = lazy(() => import("./pages/Pricing"));
@@ -103,6 +104,15 @@ const YallaAdminLogin = lazy(
 const YallaAdminPortal = lazy(
   () => import("./pages/yalla-admin/YallaAdminPortal")
 );
+const SuperAdminLogin = lazy(() => import("./pages/yalla-admin/SuperAdminLogin"));
+const AdminDashboardPage = lazy(() => import("./pages/yalla-admin/SuperAdminDashboard"));
+const AdminUsersPage = lazy(() => import("./pages/yalla-admin/AdminUsers"));
+const AdminMFASetup = lazy(() => import("./pages/yalla-admin/AdminMFASetup"));
+const AdminSubscriptions = lazy(() => import("./pages/yalla-admin/AdminSubscriptions"));
+const AdminOrganizations = lazy(() => import("./pages/yalla-admin/AdminOrganizations"));
+const AdminSecurity = lazy(() => import("./pages/yalla-admin/AdminSecurity"));
+const AdminAudit = lazy(() => import("./pages/yalla-admin/AdminAudit"));
+const AdminAnalytics = lazy(() => import("./pages/yalla-admin/AdminAnalytics"));
 const AdminDashboard = lazy(() => import("./pages/yalla-admin/AdminDashboard"));
 const GlobalRegistry = lazy(() => import("./pages/GlobalRegistry"));
 const GlobalKnowledgeGraph = lazy(() => import("./pages/GlobalKnowledgeGraph"));
@@ -182,6 +192,11 @@ function Router() {
           <ForgotPassword />
         </RouteErrorBoundary>
       </Route>
+      <Route path={"/verify-email"}>
+        <RouteErrorBoundary>
+          <VerifyEmail />
+        </RouteErrorBoundary>
+      </Route>
       <Route path={"/reset-password"}>
         <RouteErrorBoundary>
           <ResetPassword />
@@ -251,6 +266,52 @@ function Router() {
       <Route path={"/yalla-admin"}>
         <RouteErrorBoundary>
           <NotFound />
+        </RouteErrorBoundary>
+      </Route>
+      {/* Yalla Hack Super Admin — new secure dashboard */}
+      <Route path={"/yalla-hack-owners-console/login"}>
+        <RouteErrorBoundary>
+          <SuperAdminLogin />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/dashboard"}>
+        <RouteErrorBoundary>
+          <AdminDashboardPage />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/users"}>
+        <RouteErrorBoundary>
+          <AdminUsersPage />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console"}>
+        <RouteErrorBoundary>
+          <AdminDashboardPage />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/subscriptions"}>
+        <RouteErrorBoundary>
+          <AdminSubscriptions />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/organizations"}>
+        <RouteErrorBoundary>
+          <AdminOrganizations />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/security"}>
+        <RouteErrorBoundary>
+          <AdminSecurity />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/audit"}>
+        <RouteErrorBoundary>
+          <AdminAudit />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/analytics"}>
+        <RouteErrorBoundary>
+          <AdminAnalytics />
         </RouteErrorBoundary>
       </Route>
       {/* All app routes share the DashboardLayout sidebar */}

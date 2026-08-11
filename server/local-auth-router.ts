@@ -229,7 +229,6 @@ export const localAuthRouter = router({
         return {
           success: false,
           message: "OTP delivery failed",
-          code: undefined as string | undefined,
         };
       });
 
@@ -237,7 +236,6 @@ export const localAuthRouter = router({
         pendingVerification: true as const,
         identifier: normalizedEmail,
         otpMessage: otpResult.message,
-        ...(otpResult.code ? { otpCode: otpResult.code } : {}),
       };
     }),
 
@@ -289,9 +287,8 @@ export const localAuthRouter = router({
       );
 
       await updateLocalUserLastSignedIn(user.id);
-      await markLocalUserMfaVerified(user.id);
 
-      // 2FA gate â€” issue short-lived pending token instead of session
+      // 2FA gate — issue short-lived pending token instead of session
       if (user.mfaEnabled) {
         const pendingToken = await signJwt(
           {
@@ -302,8 +299,11 @@ export const localAuthRouter = router({
           },
           "5m"
         );
+        // MFA NOT verified yet — user must complete TOTP challenge first
         return { requireTotp: true as const, pendingToken };
       }
+
+      await markLocalUserMfaVerified(user.id);
 
       const token = await signJwt({
         sub: user.id,
@@ -425,39 +425,38 @@ export const localAuthRouter = router({
   /**
    * Request a password reset OTP.
    * Always returns success to prevent user enumeration.
-   * Sends a 6-digit OTP via email (or phone console log in dev).
+   * Sends a 6-digit OTP via email.
    */
   requestPasswordReset: publicProcedure
     .input(z.object({ email: emailSchema }))
     .mutation(async ({ input, ctx }) => {
       const user = await findLocalUserByEmail(input.email);
-      const activeUser = user?.status === "active" ? user : null;
+      // Allow active AND pending users to reset (pending users who registered
+      // but never verified email can still reset their password)
+      const eligible = user && user.status !== "suspended" ? user : null;
 
-      if (activeUser) {
+      if (eligible) {
         const otpResult = await sendOtp({
           identifier: input.email,
-          purpose: "login",
+          purpose: "password-reset",
         }).catch(e => {
           console.warn("[localAuth] Failed to send reset OTP:", e);
           return {
             success: false,
             message: "OTP delivery failed",
-            code: undefined as string | undefined,
           };
         });
         void recordAuditEvent(ctx, {
           category: "auth",
           action: "password.reset.request",
           entityType: "localUsers",
-          entityId: activeUser.id,
-          localUserId: activeUser.id,
+          entityId: eligible.id,
+          localUserId: eligible.id,
           payload: { method: "otp" },
         });
         return {
           success: true as const,
-          ...(otpResult.code
-            ? { otpCode: otpResult.code, otpMessage: otpResult.message }
-            : {}),
+          otpMessage: otpResult.message,
         };
       }
 
@@ -480,7 +479,7 @@ export const localAuthRouter = router({
       const verifyResult = await verifyOtp({
         identifier: input.email,
         code: input.code,
-        purpose: "login",
+        purpose: "password-reset",
       });
       if (!verifyResult.success) {
         throw new TRPCError({
@@ -490,10 +489,10 @@ export const localAuthRouter = router({
       }
 
       const user = await findLocalUserByEmail(input.email);
-      if (!user || user.status !== "active") {
+      if (!user || user.status === "suspended") {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Account not found.",
+          message: "Account not found or suspended.",
         });
       }
 
@@ -846,19 +845,9 @@ export const localAuthRouter = router({
           });
         backupCodes.splice(backupIdx, 1);
         await consumeLocalUserBackupCode(userId, backupCodes);
-        notifyLogin(
-          ctx.req,
-          { id: user.id, name: user.name, email: user.email },
-          "localUsers"
-        );
         await updateLocalUserLastSignedIn(userId);
         await markLocalUserMfaVerified(userId);
       } else {
-        notifyLogin(
-          ctx.req,
-          { id: user.id, name: user.name, email: user.email },
-          "localUsers"
-        );
         await updateLocalUserLastSignedIn(userId);
         await markLocalUserMfaVerified(userId);
       }
@@ -1018,7 +1007,6 @@ export const localAuthRouter = router({
       return {
         success: true as const,
         message: result.message,
-        ...(result.code ? { code: result.code } : {}),
       };
     }),
 

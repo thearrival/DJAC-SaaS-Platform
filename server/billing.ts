@@ -44,7 +44,7 @@ import {
   billingEvents,
   type Organization,
 } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import {
   TRIAL_DAYS,
   daysRemainingInTrial,
@@ -305,6 +305,7 @@ export const billingRouter = router({
       .select()
       .from(subscriptions)
       .where(eq(subscriptions.organizationId, org.id))
+      .orderBy(desc(subscriptions.createdAt))
       .limit(1);
 
     return {
@@ -479,6 +480,7 @@ export const billingRouter = router({
         .select()
         .from(billingEvents)
         .where(eq(billingEvents.organizationId, input.organizationId))
+        .orderBy(desc(billingEvents.createdAt))
         .limit(50);
 
       return events.map(e => ({

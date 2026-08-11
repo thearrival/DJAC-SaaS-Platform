@@ -8,6 +8,7 @@ import { getDb } from "./db";
 import {
   localMemoryUsers,
   isLocalMemoryFallbackEnabled,
+  createLocalMemoryUser,
 } from "./services/local-jwt";
 
 export type LocalUser = typeof localUsers.$inferSelect;
@@ -147,7 +148,22 @@ export async function insertLocalUser(
   data: InsertLocalUser
 ): Promise<LocalUser> {
   const db = await getDb();
-  if (!db) throw new Error("Database unavailable");
+  if (!db) {
+    if (!isLocalMemoryFallbackEnabled()) throw new Error("Database unavailable");
+    return createLocalMemoryUser({
+      name: data.name ?? "User",
+      email: data.email ?? "",
+      phoneNumber: data.phoneNumber ?? null,
+      passwordHash: data.passwordHash ?? "",
+      userType: (data.userType as "visitor" | "professional" | "admin") ?? "visitor",
+      preferredLocale: (data.preferredLocale as "en" | "ar" | "zh") ?? "en",
+      status: data.status ?? "active",
+      companyName: data.companyName ?? null,
+      jobTitle: data.jobTitle ?? null,
+      industry: data.industry ?? null,
+      complianceResponsibility: data.complianceResponsibility ?? null,
+    });
+  }
   const [row] = await db.insert(localUsers).values(data).returning();
   return row;
 }

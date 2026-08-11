@@ -1048,7 +1048,6 @@ function RoleRegisterForm({
   const [dataConsent, setDataConsent] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
   const [otpCode, setOtpCode] = useState("");
-  const [otpMessage, setOtpMessage] = useState("");
   // ── Role-specific fields
   const [orgName, setOrgName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
@@ -1073,15 +1072,6 @@ function RoleRegisterForm({
       if ("pendingVerification" in data && data.pendingVerification) {
         sounds.success();
         setPendingVerification(true);
-        // Capture OTP code if returned (when SMTP not configured)
-        if ("otpCode" in data && data.otpCode) {
-          setOtpCode(data.otpCode as string);
-          setOtpMessage(
-            "otpMessage" in data && typeof data.otpMessage === "string"
-              ? data.otpMessage
-              : ""
-          );
-        }
       } else if ("user" in data && data.user) {
         sounds.success();
         setTourPending();
@@ -1427,33 +1417,6 @@ function RoleRegisterForm({
               </p>
             </div>
           </div>
-          {otpMessage && (
-            <div
-              style={{
-                background: "#6366f110",
-                border: "1px solid #6366f130",
-                borderRadius: 10,
-                padding: "12px 14px",
-                textAlign: "center",
-              }}
-            >
-              <p style={{ fontSize: 11, color: C.muted, margin: "0 0 6px" }}>
-                {otpMessage}
-              </p>
-              <p
-                style={{
-                  fontSize: 28,
-                  fontWeight: 800,
-                  letterSpacing: 8,
-                  color: "#6366f1",
-                  margin: 0,
-                  fontFamily: "monospace",
-                }}
-              >
-                {otpCode}
-              </p>
-            </div>
-          )}
           <div>
             <label
               style={{

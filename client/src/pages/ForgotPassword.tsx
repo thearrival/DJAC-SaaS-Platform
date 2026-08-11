@@ -52,15 +52,10 @@ export default function ForgotPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [step, setStep] = useState<"input" | "verify" | "done">("input");
   const [error, setError] = useState("");
-  const [otpDisplay, setOtpDisplay] = useState("");
 
   const sendMutation = trpc.localAuth.requestPasswordReset.useMutation({
-    onSuccess: (data: any) => {
+    onSuccess: () => {
       setStep("verify");
-      if (data?.otpCode) {
-        setCode(data.otpCode);
-        setOtpDisplay(data.otpMessage || `Your code: ${data.otpCode}`);
-      }
     },
     onError: e => setError(e.message),
   });
@@ -380,28 +375,6 @@ export default function ForgotPassword() {
                     "A 6-digit code was sent to your email. Enter it below to reset your password."
                   )}
                 </p>
-                {otpDisplay && (
-                  <div
-                    style={{
-                      marginTop: 12,
-                      background: "#6366f110",
-                      border: "1px solid #6366f130",
-                      borderRadius: 10,
-                      padding: "10px 14px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <p
-                      style={{
-                        fontSize: 11,
-                        color: C.muted,
-                        margin: "0 0 4px",
-                      }}
-                    >
-                      {otpDisplay}
-                    </p>
-                  </div>
-                )}
               </div>
               <form
                 onSubmit={handleReset}

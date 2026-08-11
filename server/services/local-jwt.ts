@@ -24,7 +24,7 @@ export function cookieOptions() {
   const isSecure = !ENV.isDevelopment;
   return {
     httpOnly: true,
-    sameSite: "strict" as const,
+    sameSite: "lax" as const,
     secure: isSecure,
     maxAge: COOKIE_MAX_AGE_S * 1000,
     path: "/",

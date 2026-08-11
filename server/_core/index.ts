@@ -23,6 +23,7 @@ import { startInteractionRetentionScheduler } from "../interaction-retention";
 import { startTrialReminderScheduler } from "../trial-reminder-scheduler";
 import { startDeadlineAlertScheduler } from "../deadline-alert-scheduler";
 import { startReportScheduler } from "../report-scheduler";
+import { startOtpCleanupScheduler } from "../services/otp-cleanup";
 import { closeAssessmentQueue } from "../ai/queueFactory";
 import { ensureMigrated } from "./auto-migrate";
 import { ENV } from "./env";
@@ -57,9 +58,13 @@ const AUTH_RATE_LIMIT_WINDOW_MS = 60_000;
 const AUTH_PROCEDURES = new Set([
   "localAuth.login",
   "localAuth.register",
-  "localAuth.forgotPassword",
+  "localAuth.requestPasswordReset",
   "localAuth.resetPassword",
-  "localAuth.enableMfa",
+  "localAuth.sendOtp",
+  "localAuth.verifyOtp",
+  "localAuth.verifyTotp",
+  "localAuth.confirm2fa",
+  "localAuth.changePassword",
 ]);
 
 function getClientKey(req: Request): string {
@@ -408,6 +413,7 @@ let _stopInteractionRetention: (() => void) | null = null;
 let _stopTrialReminder: (() => void) | null = null;
 let _stopDeadlineAlerts: (() => void) | null = null;
 let _stopReportScheduler: (() => void) | null = null;
+let _stopOtpCleanup: (() => void) | null = null;
 let _cleanupAssessmentWs: (() => void) | null = null;
 let _httpServer: ReturnType<typeof createServer> | null = null;
 
@@ -439,6 +445,7 @@ async function startServer() {
   _stopTrialReminder = startTrialReminderScheduler();
   _stopDeadlineAlerts = startDeadlineAlertScheduler();
   _stopReportScheduler = startReportScheduler();
+  _stopOtpCleanup = startOtpCleanupScheduler();
 
   server.on("close", () => {
     _cleanupAssessmentWs?.();
@@ -446,6 +453,7 @@ async function startServer() {
     _stopTrialReminder?.();
     _stopDeadlineAlerts?.();
     _stopReportScheduler?.();
+    _stopOtpCleanup?.();
   });
 
   if (ENV.isDevelopment) {
@@ -529,6 +537,7 @@ function shutdown(signal: string) {
   _stopTrialReminder?.();
   _stopDeadlineAlerts?.();
   _stopReportScheduler?.();
+  _stopOtpCleanup?.();
   _cleanupAssessmentWs?.();
 
   // Release resources (DB pool, Redis, AI queue)

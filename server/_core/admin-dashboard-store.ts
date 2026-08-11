@@ -6,6 +6,8 @@ import {
   users,
   userOnboarding,
   auditLogs,
+  subscriptions,
+  billingEvents,
 } from "../../drizzle/schema";
 import { getDb } from "../db";
 import {
@@ -400,4 +402,93 @@ export async function getMonthlyRegistrations(
     .orderBy(sql`1`);
 
   return rows;
+}
+
+export async function getSubscriptionData(): Promise<{
+  subscriptions: Array<{
+    id: number; plan: string; status: string; billingInterval: string;
+    amountCents: number; currency: string; organizationName: string;
+    billingEmail: string; currentPeriodEnd: string | null; cancelAtPeriodEnd: number;
+    createdAt: string; updatedAt: string;
+  }>;
+}> {
+  const db = await getDb();
+  if (!db) return { subscriptions: [] };
+
+  const rows = await db
+    .select({
+      id: subscriptions.id,
+      plan: subscriptions.plan,
+      status: subscriptions.status,
+      billingInterval: subscriptions.billingInterval,
+      amountCents: subscriptions.amountCents,
+      currency: subscriptions.currency,
+      organizationName: organizations.name,
+      billingEmail: organizations.billingEmail,
+      currentPeriodEnd: subscriptions.currentPeriodEnd,
+      cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+      createdAt: subscriptions.createdAt,
+      updatedAt: subscriptions.updatedAt,
+    })
+    .from(subscriptions)
+    .innerJoin(organizations, eq(subscriptions.organizationId, organizations.id))
+    .orderBy(desc(subscriptions.updatedAt))
+    .limit(500);
+
+  return { subscriptions: rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() || "", updatedAt: r.updatedAt?.toISOString() || "", currentPeriodEnd: r.currentPeriodEnd?.toISOString() || null })) };
+}
+
+export async function getOrganizationData(): Promise<Array<{
+  id: number; name: string; plan: string; status: string;
+  memberCount: number; createdAt: string; lastActivity: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const rows = await db
+    .select({
+      id: organizations.id,
+      name: organizations.name,
+      plan: organizations.plan,
+      status: sql<string>`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'inactive' END`,
+      memberCount: sql<number>`COUNT(DISTINCT ${organizationMembers.id})`,
+      createdAt: organizations.createdAt,
+      lastActivity: sql<string | null>`MAX(${organizationMembers.createdAt})`,
+    })
+    .from(organizations)
+    .leftJoin(organizationMembers, eq(organizations.id, organizationMembers.organizationId))
+    .groupBy(organizations.id)
+    .orderBy(desc(organizations.createdAt))
+    .limit(500);
+
+  return rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() || "", lastActivity: r.lastActivity }));
+}
+
+export async function getSecurityEvents(limit = 200): Promise<Array<{
+  id: number; action: string; category: string; outcome: string;
+  ipAddress: string | null; createdAt: string; targetEntity: string | null;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const rows = await db
+    .select({
+      id: auditLogs.id,
+      action: auditLogs.action,
+      category: auditLogs.category,
+      outcome: auditLogs.outcome,
+      ipAddress: auditLogs.ipHash,
+      createdAt: auditLogs.createdAt,
+      targetEntity: auditLogs.targetEntity,
+    })
+    .from(auditLogs)
+    .where(or(
+      eq(auditLogs.category, "auth"),
+      eq(auditLogs.outcome, "failure"),
+      eq(auditLogs.outcome, "blocked")
+    ))
+    .orderBy(desc(auditLogs.createdAt))
+    .limit(limit);
+
+  return rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() || "" }));
 }
