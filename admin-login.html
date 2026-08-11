@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJAC Admin — One-Click Login</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0a0f; color: #e2e8f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+  .card { max-width: 420px; width: 100%; padding: 40px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(15,15,25,0.95); text-align: center; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.3); font-size: 11px; color: #f87171; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 16px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  p { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+  .btn { display: block; width: 100%; padding: 14px; border-radius: 10px; background: linear-gradient(135deg,#dc2626,#7c3aed); color: #fff; font-size: 15px; font-weight: 700; border: none; cursor: pointer; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.9; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status { margin-top: 16px; font-size: 13px; min-height: 20px; }
+  .status.ok { color: #4ade80; }
+  .status.err { color: #f87171; }
+  .status.loading { color: #a855f7; }
+  .info { margin-top: 24px; padding: 16px; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); text-align: left; }
+  .info label { font-size: 11px; color: #64748b; font-weight: 600; display: block; margin-bottom: 4px; }
+  .info value { font-size: 13px; color: #e2e8f0; font-family: monospace; word-break: break-all; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge">🛡️ YALLA HACK INTERNAL</div>
+  <h1>DJAC Admin Login</h1>
+  <p>One-click secure access to the Super Admin Dashboard.</p>
+  <button class="btn" id="loginBtn" onclick="doLogin()">🔐 Login to Admin Dashboard</button>
+  <div class="status" id="status"></div>
+  <div class="info">
+    <label>USERNAME</label>
+    <value>yalla_admin</value>
+    <label style="margin-top: 12px;">PASSWORD</label>
+    <value>wR!x1bdlaVTov4d8SThnKhfSk8IITQhg</value>
+  </div>
+</div>
+
+<script>
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  
+  const TOKEN = '4f11219a455872d995e5ddf68ec8e2ec1990f2f41725a66ad0d5b5769c9065bf';
+  const BASE = 'https://app.yalla-hack.ae';
+  
+  try {
+    status.className = 'status loading';
+    status.textContent = '🔄 Setting security gate...';
+    
+    // Step 1: Bootstrap (set gate cookie)
+    await fetch(`${BASE}/api/yalla-admin/bootstrap?access_token=${TOKEN}&mode=json`, { credentials: 'include' });
+    
+    status.textContent = '🔄 Authenticating...';
+    
+    // Step 2: Login (set session cookie)
+    const loginRes = await fetch(`${BASE}/api/yalla-admin/login?access_token=${TOKEN}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username: 'yalla_admin', password: 'wR!x1bdlaVTov4d8SThnKhfSk8IITQhg' }),
+    });
+    
+    const loginData = await loginRes.json();
+    
+    if (!loginRes.ok) {
+      status.className = 'status err';
+      status.textContent = '❌ ' + (loginData.error || 'Login failed');
+      btn.disabled = false;
+      return;
+    }
+    
+    status.className = 'status ok';
+    status.textContent = '✅ Login successful! Redirecting...';
+    
+    // Step 3: Redirect to dashboard
+    setTimeout(() => {
+      window.location.href = '/yalla-hack-owners-console/dashboard';
+    }, 1000);
+    
+  } catch (err) {
+    status.className = 'status err';
+    status.textContent = '❌ Network error: ' + err.message;
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
