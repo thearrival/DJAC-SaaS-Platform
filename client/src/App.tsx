@@ -104,7 +104,7 @@ const YallaAdminLogin = lazy(
 const YallaAdminPortal = lazy(
   () => import("./pages/yalla-admin/YallaAdminPortal")
 );
-const SuperAdminLogin = lazy(() => import("./pages/yalla-admin/SuperAdminLogin"));
+const FoundersLogin = lazy(() => import("./pages/yalla-admin/FoundersLogin"));
 const AdminDashboardPage = lazy(() => import("./pages/yalla-admin/SuperAdminDashboard"));
 const AdminUsersPage = lazy(() => import("./pages/yalla-admin/AdminUsers"));
 const AdminMFASetup = lazy(() => import("./pages/yalla-admin/AdminMFASetup"));
@@ -271,7 +271,7 @@ function Router() {
       {/* Yalla Hack Super Admin — new secure dashboard */}
       <Route path={"/yalla-hack-owners-console/login"}>
         <RouteErrorBoundary>
-          <SuperAdminLogin />
+          <FoundersLogin />
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/dashboard"}>

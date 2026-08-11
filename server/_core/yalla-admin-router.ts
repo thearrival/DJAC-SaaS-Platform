@@ -713,6 +713,87 @@ async function handleLogin(req: Request, res: Response): Promise<void> {
   res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
 }
 
+/**
+ * React UI login — bypasses the URL token gate but enforces:
+ * - IP allowlist (via middleware)
+ * - Rate limiting (via middleware)
+ * - Login lockout after failed attempts
+ * - Username + password validation
+ * - Session creation + audit logging
+ */
+async function handleReactLogin(req: Request, res: Response): Promise<void> {
+  const { username, password } = req.body ?? {};
+  const ip = getClientIp(req);
+
+  if (typeof username !== "string" || typeof password !== "string") {
+    res.status(400).json({ error: "Username and password are required." });
+    return;
+  }
+
+  if (username.length > 128 || password.length > 256) {
+    res.status(400).json({ error: "Invalid credentials format." });
+    return;
+  }
+
+  // Check lockout
+  const lockState = loginAttempts.get(ip);
+  if (lockState && lockState.lockedUntil > Date.now()) {
+    const remainingMs = lockState.lockedUntil - Date.now();
+    const retryAfterSec = Math.ceil(remainingMs / 1000);
+    res.setHeader("Retry-After", String(retryAfterSec));
+    res.status(429).json({
+      error: `Too many failed attempts. Locked for ${Math.ceil(remainingMs / 60000)} more minute(s).`,
+      retryAfterSec,
+    });
+    return;
+  }
+
+  const usernameOk = username === ADMIN_USERNAME;
+  let passwordOk = false;
+
+  if (ADMIN_PASSWORD_HASH) {
+    passwordOk = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+  } else if (ENV.isDevelopment) {
+    const devPassword = process.env["YALLA_ADMIN_DEV_PASSWORD"] || "";
+    passwordOk = devPassword.length > 0 && password === devPassword;
+  }
+
+  if (!usernameOk || !passwordOk) {
+    const current = loginAttempts.get(ip) ?? { count: 0, lockedUntil: 0 };
+    const newCount = current.count + 1;
+    const lockedUntil = newCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
+    loginAttempts.set(ip, { count: newCount, lockedUntil });
+    await auditLog(null, username, "login.failed", ip);
+    res.status(401).json({ error: "Invalid credentials." });
+    return;
+  }
+
+  // Clear lockout on success
+  loginAttempts.delete(ip);
+
+  const sessionId = nanoid(32);
+  const expiresAt = new Date(Date.now() + SESSION_TTL_H * 3600 * 1000);
+  const token = await signSession(sessionId, ADMIN_USERNAME);
+
+  try {
+    const db = await getDb();
+    if (db) {
+      await db.execute(sql`
+                INSERT INTO yallaAdminSessions (id, adminUsername, ipAddress, userAgent, expiresAt)
+                VALUES ($${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
+            `);
+    }
+  } catch {
+    logger.warn("[YallaAdmin] Failed to persist session — login proceeds without DB");
+  }
+
+  await auditLog(sessionId, ADMIN_USERNAME, "login.success", ip);
+  broadcastSSE("admin_login", { ip, ts: new Date().toISOString() });
+
+  res.cookie(COOKIE_NAME, token, cookieOptions(req));
+  res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
+}
+
 async function handleLogout(req: Request, res: Response): Promise<void> {
   const session = (
     req as Request & { adminSession?: { username: string; sessionId: string } }
@@ -1952,6 +2033,8 @@ export function createYallaAdminRouter(): Router {
   // Public endpoint — does not require session
   router.get("/bootstrap", (req, res) => void handleBootstrap(req, res));
   router.post("/login", (req, res) => void handleLogin(req, res));
+  // React UI login — bypasses token gate but enforces IP allowlist + rate limiting + credentials
+  router.post("/react-login", (req, res) => void handleReactLogin(req, res));
 
   // Token gate for remaining routes
   router.use(tokenGate);
