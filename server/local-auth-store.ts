@@ -149,13 +149,15 @@ export async function insertLocalUser(
 ): Promise<LocalUser> {
   const db = await getDb();
   if (!db) {
-    if (!isLocalMemoryFallbackEnabled()) throw new Error("Database unavailable");
+    if (!isLocalMemoryFallbackEnabled())
+      throw new Error("Database unavailable");
     return createLocalMemoryUser({
       name: data.name ?? "User",
       email: data.email ?? "",
       phoneNumber: data.phoneNumber ?? null,
       passwordHash: data.passwordHash ?? "",
-      userType: (data.userType as "visitor" | "professional" | "admin") ?? "visitor",
+      userType:
+        (data.userType as "visitor" | "professional" | "admin") ?? "visitor",
       preferredLocale: (data.preferredLocale as "en" | "ar" | "zh") ?? "en",
       status: data.status ?? "active",
       companyName: data.companyName ?? null,

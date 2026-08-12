@@ -11,13 +11,18 @@
  *   - insertLocalUser has in-memory fallback
  */
 import "dotenv/config";
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
 
-interface TestResult { name: string; passed: boolean; detail: string }
+interface TestResult {
+  name: string;
+  passed: boolean;
+  detail: string;
+}
 const results: TestResult[] = [];
 function result(name: string, passed: boolean, detail = "") {
   results.push({ name, passed, detail });
-  console.log(`  [${passed ? "PASS" : "FAIL"}] ${name}${!passed ? " — " + detail : ""}`);
+  console.log(
+    `  [${passed ? "PASS" : "FAIL"}] ${name}${!passed ? " — " + detail : ""}`
+  );
 }
 
 console.log("=".repeat(70));
@@ -73,11 +78,19 @@ result("Remove stale: localAuth.enableMfa (didn't exist)", true);
 result("Auth endpoints limited to 10 req/min", true);
 
 // ── 5. MFA Flow Fixes ─────────────────────────────────────────────
-console.log("\n── 5. MFA Flow (Fix: verified after challenge, no double-notify) ──");
+console.log(
+  "\n── 5. MFA Flow (Fix: verified after challenge, no double-notify) ──"
+);
 result("login() does NOT call markLocalUserMfaVerified for MFA users", true);
 result("login() calls markLocalUserMfaVerified ONLY for non-MFA users", true);
-result("verifyTotp() calls markLocalUserMfaVerified AFTER successful TOTP", true);
-result("verifyTotp() does NOT call notifyLogin (already called in login)", true);
+result(
+  "verifyTotp() calls markLocalUserMfaVerified AFTER successful TOTP",
+  true
+);
+result(
+  "verifyTotp() does NOT call notifyLogin (already called in login)",
+  true
+);
 result("MFA challenge token expires in 5 minutes", true);
 result("Pending token must have purpose 'totp-challenge'", true);
 
@@ -142,7 +155,10 @@ result("Subsequent logins send security alert", true);
 
 // ── 13. Test Account: psn.iawad@outlook.com ───────────────────────
 console.log("\n── 13. Test Account Verification ──");
-result("Email format valid: psn.iawad@outlook.com", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test("psn.iawad@outlook.com"));
+result(
+  "Email format valid: psn.iawad@outlook.com",
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test("psn.iawad@outlook.com")
+);
 result("Would receive OTP via SMTP (hostinger configured)", true);
 result("Password reset OTP uses 'password-reset' purpose", true);
 result("Password reset works for both active and pending users", true);
@@ -152,10 +168,16 @@ result("OTP expires in 5 minutes (no auto-expiry before use)", true);
 const passed = results.filter(r => r.passed).length;
 const failed = results.filter(r => !r.passed).length;
 console.log("\n" + "=".repeat(70));
-console.log(`  RESULTS: ${passed} passed, ${failed} failed, ${results.length} total`);
+console.log(
+  `  RESULTS: ${passed} passed, ${failed} failed, ${results.length} total`
+);
 console.log("=".repeat(70));
 if (failed > 0) {
   console.log("\n  FAILED:");
-  results.filter(r => !r.passed).forEach(r => console.log(`    - ${r.name}: ${r.detail}`));
+  results
+    .filter(r => !r.passed)
+    .forEach(r => console.log(`    - ${r.name}: ${r.detail}`));
 }
-console.log(`\n${failed === 0 ? "All auth flow checks passed!" : `${failed} check(s) need attention.`}`);
+console.log(
+  `\n${failed === 0 ? "All auth flow checks passed!" : `${failed} check(s) need attention.`}`
+);

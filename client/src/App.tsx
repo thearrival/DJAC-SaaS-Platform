@@ -95,25 +95,20 @@ const ThreatIntelFeed = lazy(() => import("./pages/ThreatIntelFeed"));
 const SecurityMaturity = lazy(() => import("./pages/SecurityMaturity"));
 const AdminServiceRequests = lazy(() => import("./pages/AdminServiceRequests"));
 const AdminThreatIntel = lazy(() => import("./pages/AdminThreatIntel"));
-const YallaAdminAccessBootstrap = lazy(
-  () => import("./pages/yalla-admin/YallaAdminAccessBootstrap")
-);
-const YallaAdminLogin = lazy(
-  () => import("./pages/yalla-admin/YallaAdminLogin")
-);
-const YallaAdminPortal = lazy(
-  () => import("./pages/yalla-admin/YallaAdminPortal")
-);
 const FoundersLogin = lazy(() => import("./pages/yalla-admin/FoundersLogin"));
-const AdminDashboardPage = lazy(() => import("./pages/yalla-admin/SuperAdminDashboard"));
+const AdminDashboardPage = lazy(
+  () => import("./pages/yalla-admin/SuperAdminDashboard")
+);
 const AdminUsersPage = lazy(() => import("./pages/yalla-admin/AdminUsers"));
-const AdminMFASetup = lazy(() => import("./pages/yalla-admin/AdminMFASetup"));
-const AdminSubscriptions = lazy(() => import("./pages/yalla-admin/AdminSubscriptions"));
-const AdminOrganizations = lazy(() => import("./pages/yalla-admin/AdminOrganizations"));
+const AdminSubscriptions = lazy(
+  () => import("./pages/yalla-admin/AdminSubscriptions")
+);
+const AdminOrganizations = lazy(
+  () => import("./pages/yalla-admin/AdminOrganizations")
+);
 const AdminSecurity = lazy(() => import("./pages/yalla-admin/AdminSecurity"));
 const AdminAudit = lazy(() => import("./pages/yalla-admin/AdminAudit"));
 const AdminAnalytics = lazy(() => import("./pages/yalla-admin/AdminAnalytics"));
-const AdminDashboard = lazy(() => import("./pages/yalla-admin/AdminDashboard"));
 const GlobalRegistry = lazy(() => import("./pages/GlobalRegistry"));
 const GlobalKnowledgeGraph = lazy(() => import("./pages/GlobalKnowledgeGraph"));
 const GlobalIndustryEditions = lazy(
@@ -237,27 +232,6 @@ function Router() {
           <InteractiveDemo />
         </RouteErrorBoundary>
       </Route>
-      {/* Yalla-Admin — isolated owner portal, outside DashboardLayout, no nav */}
-      <Route path={"/yalla-hack-owners-console/enter"}>
-        <RouteErrorBoundary>
-          <YallaAdminAccessBootstrap />
-        </RouteErrorBoundary>
-      </Route>
-      <Route path={"/yalla-hack-owners-console/login"}>
-        <RouteErrorBoundary>
-          <YallaAdminLogin />
-        </RouteErrorBoundary>
-      </Route>
-      <Route path={"/yalla-hack-owners-console/dashboard"}>
-        <RouteErrorBoundary>
-          <AdminDashboard />
-        </RouteErrorBoundary>
-      </Route>
-      <Route path={"/yalla-hack-owners-console"}>
-        <RouteErrorBoundary>
-          <YallaAdminPortal />
-        </RouteErrorBoundary>
-      </Route>
       <Route path={"/yalla-admin/login"}>
         <RouteErrorBoundary>
           <NotFound />
@@ -268,7 +242,7 @@ function Router() {
           <NotFound />
         </RouteErrorBoundary>
       </Route>
-      {/* Yalla Hack Super Admin — new secure dashboard */}
+      {/* Yalla Hack Founders Portal — secure admin dashboard */}
       <Route path={"/yalla-hack-owners-console/login"}>
         <RouteErrorBoundary>
           <FoundersLogin />

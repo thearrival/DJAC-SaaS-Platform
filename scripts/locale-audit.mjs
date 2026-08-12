@@ -9,22 +9,21 @@ const keyMap = {
 
 let currentLocale = null;
 for (const line of source.split(/\r?\n/)) {
-  const localeMatch = line.match(/^\s{4}(en|ar|zh):\s\{$/);
+  const localeMatch = line.match(/^\s{2}(en|ar|zh):\s*\{$/);
   if (localeMatch) {
     currentLocale = localeMatch[1];
     continue;
   }
 
-  if (currentLocale && /^\s{4}\},\s*$/.test(line)) {
+  if (currentLocale && /^\s{2}\},\s*$/.test(line)) {
     currentLocale = null;
     continue;
   }
-  f;
   if (!currentLocale) {
     continue;
   }
 
-  const keyMatch = line.match(/^\s{8}"([^"]+)"\s*:/);
+  const keyMatch = line.match(/^\s{4}"([^"]+)"\s*:/);
   if (keyMatch) {
     keyMap[currentLocale].add(keyMatch[1]);
   }

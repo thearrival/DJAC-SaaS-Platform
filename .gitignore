@@ -143,3 +143,6 @@ audit/*.log
 
 .env*
 
+
+auth-fix-report.html
+billing-report.html

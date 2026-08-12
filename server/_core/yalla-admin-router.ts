@@ -67,7 +67,9 @@ const IP_ALLOWLIST_RAW = ENV.yallaAdminIpAllowlist;
 const SESSION_TTL_H = ENV.yallaAdminSessionTtlHours;
 const COOKIE_NAME = "yalla_admin_session";
 const GATE_COOKIE_NAME = "yalla_admin_gate";
-const ADMIN_API_PATH = "/api/yalla-admin";
+// Session cookie is shared by the /api/yalla-admin and /api/admin-dashboard
+// routers, so it must be scoped to the shared /api prefix, not one router.
+const ADMIN_COOKIE_PATH = "/api";
 
 const jwtSecretStr =
   ENV.yallaAdminJwtSecret ||
@@ -97,6 +99,28 @@ const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
 const usedOwnerLinkNonces = new Map<string, number>();
+
+// In-memory session revocation set (sessionId -> revokedAt). Works even when
+// the database is unavailable so logged-out sessions are rejected everywhere.
+const revokedSessions = new Map<string, number>();
+
+/** Prune revoked-session entries that have outlived the session TTL */
+function pruneRevokedSessions(): void {
+  const cutoff = Date.now() - SESSION_TTL_H * 3600 * 1000;
+  for (const [id, revokedAt] of revokedSessions) {
+    if (revokedAt < cutoff) revokedSessions.delete(id);
+  }
+}
+
+/** Mark a session revoked in memory (used alongside the DB revocation) */
+export function revokeAdminSession(sessionId: string): void {
+  revokedSessions.set(sessionId, Date.now());
+}
+
+/** True when the session id is revoked in memory */
+export function isAdminSessionRevoked(sessionId: string): boolean {
+  return revokedSessions.has(sessionId);
+}
 
 // General endpoint rate limiter (DoS protection for all admin routes)
 const endpointRateMap = new Map<
@@ -138,7 +162,7 @@ async function signSession(
     .sign(ADMIN_JWT_SECRET);
 }
 
-async function verifySession(
+export async function verifySession(
   token: string
 ): Promise<{ username: string; sessionId: string } | null> {
   try {
@@ -162,7 +186,7 @@ function cookieOptions(req: Request): object {
     secure: isHttps,
     sameSite: "strict" as const,
     maxAge: SESSION_TTL_H * 3600 * 1000,
-    path: ADMIN_API_PATH,
+    path: ADMIN_COOKIE_PATH,
   };
 }
 
@@ -191,7 +215,7 @@ async function auditLog(
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
-function getAdminCookie(req: Request): string | undefined {
+export function getAdminCookie(req: Request): string | undefined {
   const cookieHeader = req.headers.cookie;
   if (!cookieHeader) return undefined;
   const parsed = parseCookieHeader(cookieHeader);
@@ -386,10 +410,11 @@ function hasLinkGate(req: Request): boolean {
 
 /** Check URL secret token OR an active session cookie */
 function tokenGate(req: Request, res: Response, next: NextFunction): void {
-  // Login/me endpoints handle their own auth
+  // Public endpoints handle their own auth
   if (
     req.path === "/bootstrap" ||
     req.path === "/login" ||
+    req.path === "/react-login" ||
     req.path === "/me"
   ) {
     next();
@@ -508,7 +533,7 @@ function requireJsonContentType(
   next();
 }
 
-/** Require authenticated session for all endpoints except /login */
+/** Require authenticated session for all endpoints except public ones */
 async function requireSession(
   req: Request,
   res: Response,
@@ -517,6 +542,7 @@ async function requireSession(
   if (
     req.path === "/bootstrap" ||
     req.path === "/login" ||
+    req.path === "/react-login" ||
     req.path === "/me"
   ) {
     next();
@@ -532,6 +558,12 @@ async function requireSession(
   const parsed = await verifySession(token);
   if (!parsed) {
     res.status(401).json({ error: "Session expired or invalid" });
+    return;
+  }
+
+  pruneRevokedSessions();
+  if (isAdminSessionRevoked(parsed.sessionId)) {
+    res.status(401).json({ error: "Session revoked or expired" });
     return;
   }
 
@@ -784,7 +816,9 @@ async function handleReactLogin(req: Request, res: Response): Promise<void> {
             `);
     }
   } catch {
-    logger.warn("[YallaAdmin] Failed to persist session — login proceeds without DB");
+    logger.warn(
+      "[YallaAdmin] Failed to persist session — login proceeds without DB"
+    );
   }
 
   await auditLog(sessionId, ADMIN_USERNAME, "login.success", ip);
@@ -801,6 +835,7 @@ async function handleLogout(req: Request, res: Response): Promise<void> {
   const ip = getClientIp(req);
 
   if (session) {
+    revokeAdminSession(session.sessionId);
     try {
       const db = await getDb();
       if (db) {
@@ -814,8 +849,8 @@ async function handleLogout(req: Request, res: Response): Promise<void> {
     await auditLog(session.sessionId, session.username, "logout", ip);
   }
 
-  res.clearCookie(COOKIE_NAME, { path: ADMIN_API_PATH });
-  res.clearCookie(GATE_COOKIE_NAME, { path: ADMIN_API_PATH });
+  res.clearCookie(COOKIE_NAME, { path: ADMIN_COOKIE_PATH });
+  res.clearCookie(GATE_COOKIE_NAME, { path: ADMIN_COOKIE_PATH });
   res.json({ ok: true });
 }
 
@@ -830,6 +865,11 @@ async function handleMe(req: Request, res: Response): Promise<void> {
     res.json({ authenticated: false });
     return;
   }
+  if (isAdminSessionRevoked(session.sessionId)) {
+    res.clearCookie(COOKIE_NAME, { path: ADMIN_COOKIE_PATH });
+    res.json({ authenticated: false });
+    return;
+  }
   // Defense-in-depth: verify session is not revoked in DB (catches stolen-cookie scenarios)
   try {
     const db = await getDb();
@@ -841,7 +881,7 @@ async function handleMe(req: Request, res: Response): Promise<void> {
             `);
       const rows = sessionResult.rows as { isRevoked: number }[] | undefined;
       if (!rows || rows.length === 0 || rows[0]?.isRevoked) {
-        res.clearCookie(COOKIE_NAME, { path: ADMIN_API_PATH });
+        res.clearCookie(COOKIE_NAME, { path: ADMIN_COOKIE_PATH });
         res.json({ authenticated: false });
         return;
       }
@@ -876,7 +916,7 @@ async function handleOverview(_req: Request, res: Response): Promise<void> {
     const activeSessionsRow = activeSessionsResult.rows as { total: number }[];
     const todayLoginsResult = await db.execute(sql`
             SELECT COUNT(*) as total FROM auditLogs
-            WHERE action = 'auth.login' AND createdAt >= CURDATE()
+            WHERE action = 'auth.login' AND createdAt >= CURRENT_DATE
         `);
     const todayLoginsRow = todayLoginsResult.rows as { total: number }[];
     const serviceRequestsResult = await db.execute(sql`
@@ -891,11 +931,11 @@ async function handleOverview(_req: Request, res: Response): Promise<void> {
     const assetsRow = assetsResult.rows as { total: number }[];
 
     const todaySignupsResult = await db.execute(sql`
-            SELECT COUNT(*) as total FROM localUsers WHERE DATE(createdAt) = CURDATE()
+            SELECT COUNT(*) as total FROM localUsers WHERE createdAt::date = CURRENT_DATE
         `);
     const todaySignupsRow = todaySignupsResult.rows as { total: number }[];
     const newOrgsResult = await db.execute(sql`
-            SELECT COUNT(*) as total FROM organizations WHERE DATE(createdAt) = CURDATE()
+            SELECT COUNT(*) as total FROM organizations WHERE createdAt::date = CURRENT_DATE
         `);
     const newOrgsRow = newOrgsResult.rows as { total: number }[];
     const revenueResult = await db.execute(sql`
@@ -1493,10 +1533,10 @@ async function handleRealtime(_req: Request, res: Response): Promise<void> {
         sql`SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()`
       ),
       db.execute(
-        sql`SELECT COUNT(*) as total FROM auditLogs WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)`
+        sql`SELECT COUNT(*) as total FROM auditLogs WHERE createdAt >= NOW() - INTERVAL '5 minutes'`
       ),
       db.execute(
-        sql`SELECT COUNT(*) as total FROM localUsers WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 60 MINUTE)`
+        sql`SELECT COUNT(*) as total FROM localUsers WHERE createdAt >= NOW() - INTERVAL '60 minutes'`
       ),
     ]);
     const sessRow = sessResult.rows as { total: number }[];
@@ -2007,7 +2047,7 @@ function scheduleSessionCleanup(): void {
       await db.execute(sql`
                 DELETE FROM yallaAdminSessions
                 WHERE expiresAt < NOW()
-                   OR (isRevoked = 1 AND lastSeenAt < DATE_SUB(NOW(), INTERVAL 7 DAY))
+                   OR (isRevoked = 1 AND lastSeenAt < NOW() - INTERVAL '7 days'))
             `);
     } catch {
       logger.warn(

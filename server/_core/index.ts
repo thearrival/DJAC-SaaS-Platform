@@ -321,8 +321,36 @@ export async function createApp() {
     }
   );
 
-  app.use(express.json({ limit: "2mb" }));
-  app.use(express.urlencoded({ limit: "2mb", extended: true }));
+  // ─── Body parsing ─────────────────────────────────────────────────────────
+  // Vercel's serverless runtime pre-parses application/json and consumes the
+  // request stream before the handler runs. Calling express.json() on such a
+  // request throws "InternalServerError: stream is not readable", which 500s
+  // EVERY JSON POST (login, signup, tRPC mutations, billing, admin). Guard the
+  // parsers so pre-parsed bodies pass straight through.
+  const jsonParser = express.json({ limit: "2mb" });
+  const urlencodedParser = express.urlencoded({ limit: "2mb", extended: true });
+  app.use((req, res, next) => {
+    if (typeof req.body === "object" && req.body !== null) {
+      return next();
+    }
+    const ct = req.headers["content-type"] ?? "";
+    if (ct.includes("application/json")) return jsonParser(req, res, next);
+    if (ct.includes("application/x-www-form-urlencoded")) {
+      return urlencodedParser(req, res, next);
+    }
+    return next();
+  });
+  // If the serverless runtime already consumed the stream (without setting
+  // req.body), the parser throws "stream is not readable" — swallow it and
+  // continue with an empty body rather than 500ing every request.
+  app.use(
+    (err: unknown, _req: Request, _res: Response, next: NextFunction): void => {
+      if (err instanceof Error && err.message === "stream is not readable") {
+        return next();
+      }
+      next(err);
+    }
+  );
 
   // ─── Health / Readiness ─────────────────────────────────────────────────────
   const sendHealth = (_req: Request, res: Response) => {

@@ -26,7 +26,8 @@ vi.mock("../db", () => ({
 }));
 
 vi.mock("../billing", async () => {
-  const actual = await vi.importActual<typeof import("../billing")>("../billing");
+  const actual =
+    await vi.importActual<typeof import("../billing")>("../billing");
   return {
     ...actual,
     getStripe: vi.fn().mockResolvedValue({
@@ -57,9 +58,7 @@ describe("Stripe Price Catalog", () => {
   });
 
   it("each tier should have a unique (plan, interval) combination", () => {
-    const combos = new Set(
-      PRICE_CATALOG.map(t => `${t.plan}:${t.interval}`)
-    );
+    const combos = new Set(PRICE_CATALOG.map(t => `${t.plan}:${t.interval}`));
     expect(combos.size).toBe(12);
   });
 
@@ -109,7 +108,12 @@ describe("Stripe Price Catalog", () => {
   });
 
   it("professional should cost more than starter", () => {
-    for (const interval of ["monthly", "quarterly", "biannual", "annual"] as const) {
+    for (const interval of [
+      "monthly",
+      "quarterly",
+      "biannual",
+      "annual",
+    ] as const) {
       const starter = getPriceTier("starter", interval);
       const pro = getPriceTier("professional", interval);
       if (starter && pro) {
@@ -119,7 +123,12 @@ describe("Stripe Price Catalog", () => {
   });
 
   it("enterprise should cost more than professional", () => {
-    for (const interval of ["monthly", "quarterly", "biannual", "annual"] as const) {
+    for (const interval of [
+      "monthly",
+      "quarterly",
+      "biannual",
+      "annual",
+    ] as const) {
       const pro = getPriceTier("professional", interval);
       const enterprise = getPriceTier("enterprise", interval);
       if (pro && enterprise) {
@@ -182,12 +191,16 @@ describe("Trial System - Comprehensive", () => {
 
   it("isTrialExpired should return false for active trial", () => {
     const future = new Date(Date.now() + 86_400_000);
-    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: future })).toBe(false);
+    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: future })).toBe(
+      false
+    );
   });
 
   it("isTrialExpired should return true for expired trial", () => {
     const past = new Date(Date.now() - 1);
-    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: past })).toBe(true);
+    expect(isTrialExpired({ plan: "free_trial", trialEndsAt: past })).toBe(
+      true
+    );
   });
 
   it("isAccessAllowed should handle all subscription states", () => {
@@ -195,19 +208,48 @@ describe("Trial System - Comprehensive", () => {
     const past = new Date(Date.now() - 86_400_000);
 
     // Active trial
-    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: future })).toBe(true);
+    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: future })).toBe(
+      true
+    );
     // Expired trial, no sub
-    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: past })).toBe(false);
+    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: past })).toBe(
+      false
+    );
     // Active subscription
-    expect(isAccessAllowed({ plan: "starter", trialEndsAt: null }, { status: "active" })).toBe(true);
+    expect(
+      isAccessAllowed(
+        { plan: "starter", trialEndsAt: null },
+        { status: "active" }
+      )
+    ).toBe(true);
     // Past due subscription
-    expect(isAccessAllowed({ plan: "starter", trialEndsAt: null }, { status: "past_due" })).toBe(false);
+    expect(
+      isAccessAllowed(
+        { plan: "starter", trialEndsAt: null },
+        { status: "past_due" }
+      )
+    ).toBe(false);
     // Canceled subscription
-    expect(isAccessAllowed({ plan: "starter", trialEndsAt: null }, { status: "canceled" })).toBe(false);
+    expect(
+      isAccessAllowed(
+        { plan: "starter", trialEndsAt: null },
+        { status: "canceled" }
+      )
+    ).toBe(false);
     // Trialing subscription
-    expect(isAccessAllowed({ plan: "professional", trialEndsAt: null }, { status: "trialing" })).toBe(true);
+    expect(
+      isAccessAllowed(
+        { plan: "professional", trialEndsAt: null },
+        { status: "trialing" }
+      )
+    ).toBe(true);
     // Expired trial but active subscription
-    expect(isAccessAllowed({ plan: "free_trial", trialEndsAt: past }, { status: "active" })).toBe(true);
+    expect(
+      isAccessAllowed(
+        { plan: "free_trial", trialEndsAt: past },
+        { status: "active" }
+      )
+    ).toBe(true);
   });
 });
 
@@ -215,21 +257,41 @@ describe("Trial System - Comprehensive", () => {
 
 describe("Tier Feature Matrix", () => {
   it("should have all 3 plan tiers in TIER_MATRIX", () => {
-    expect(Object.keys(TIER_MATRIX)).toEqual(["starter", "professional", "enterprise"]);
+    expect(Object.keys(TIER_MATRIX)).toEqual([
+      "starter",
+      "professional",
+      "enterprise",
+    ]);
   });
 
   it("professional should have more limits than starter", () => {
-    expect(TIER_MATRIX.professional.maxVendors).toBeGreaterThan(TIER_MATRIX.starter.maxVendors);
-    expect(TIER_MATRIX.professional.maxFrameworks).toBeGreaterThan(TIER_MATRIX.starter.maxFrameworks);
-    expect(TIER_MATRIX.professional.maxSeats).toBeGreaterThan(TIER_MATRIX.starter.maxSeats);
-    expect(TIER_MATRIX.professional.maxAiReportsPerDay).toBeGreaterThan(TIER_MATRIX.starter.maxAiReportsPerDay);
+    expect(TIER_MATRIX.professional.maxVendors).toBeGreaterThan(
+      TIER_MATRIX.starter.maxVendors
+    );
+    expect(TIER_MATRIX.professional.maxFrameworks).toBeGreaterThan(
+      TIER_MATRIX.starter.maxFrameworks
+    );
+    expect(TIER_MATRIX.professional.maxSeats).toBeGreaterThan(
+      TIER_MATRIX.starter.maxSeats
+    );
+    expect(TIER_MATRIX.professional.maxAiReportsPerDay).toBeGreaterThan(
+      TIER_MATRIX.starter.maxAiReportsPerDay
+    );
   });
 
   it("enterprise should have the highest limits", () => {
-    expect(TIER_MATRIX.enterprise.maxVendors).toBeGreaterThan(TIER_MATRIX.professional.maxVendors);
-    expect(TIER_MATRIX.enterprise.maxFrameworks).toBeGreaterThan(TIER_MATRIX.professional.maxFrameworks);
-    expect(TIER_MATRIX.enterprise.maxSeats).toBeGreaterThan(TIER_MATRIX.professional.maxSeats);
-    expect(TIER_MATRIX.enterprise.maxAiReportsPerDay).toBeGreaterThan(TIER_MATRIX.professional.maxAiReportsPerDay);
+    expect(TIER_MATRIX.enterprise.maxVendors).toBeGreaterThan(
+      TIER_MATRIX.professional.maxVendors
+    );
+    expect(TIER_MATRIX.enterprise.maxFrameworks).toBeGreaterThan(
+      TIER_MATRIX.professional.maxFrameworks
+    );
+    expect(TIER_MATRIX.enterprise.maxSeats).toBeGreaterThan(
+      TIER_MATRIX.professional.maxSeats
+    );
+    expect(TIER_MATRIX.enterprise.maxAiReportsPerDay).toBeGreaterThan(
+      TIER_MATRIX.professional.maxAiReportsPerDay
+    );
   });
 
   it("enterprise should have all premium features", () => {

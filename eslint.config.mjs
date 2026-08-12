@@ -20,7 +20,15 @@ const nodeGlobals = {
 };
 
 export default tseslint.config(
-  { ignores: ["dist/", "node_modules/", ".pnpm-store/", "tailwind.config.js"] },
+  {
+    ignores: [
+      "dist/",
+      "node_modules/",
+      ".pnpm-store/",
+      "coverage/",
+      "tailwind.config.js",
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.ts", "**/*.tsx"],

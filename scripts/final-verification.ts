@@ -19,12 +19,20 @@ console.log();
 console.log("── 1. Input Validation ──");
 const passRegEx = /[A-Z]/;
 const numRegEx = /[0-9]/;
-const passOk = TEST_PASSWORD.length >= 8 && TEST_PASSWORD.length <= 128 && passRegEx.test(TEST_PASSWORD) && numRegEx.test(TEST_PASSWORD);
-console.log(`  [${passOk ? "PASS" : "FAIL"}] Password "${TEST_PASSWORD}" valid: ${passOk}`);
+const passOk =
+  TEST_PASSWORD.length >= 8 &&
+  TEST_PASSWORD.length <= 128 &&
+  passRegEx.test(TEST_PASSWORD) &&
+  numRegEx.test(TEST_PASSWORD);
+console.log(
+  `  [${passOk ? "PASS" : "FAIL"}] Password "${TEST_PASSWORD}" valid: ${passOk}`
+);
 console.log(`           (min 8, max 128, uppercase, number)`);
 
 const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(TEST_EMAIL);
-console.log(`  [${emailOk ? "PASS" : "FAIL"}] Email "${TEST_EMAIL}" valid: ${emailOk}`);
+console.log(
+  `  [${emailOk ? "PASS" : "FAIL"}] Email "${TEST_EMAIL}" valid: ${emailOk}`
+);
 console.log(`  [PASS] Name "${TEST_NAME}" valid (min 2, max 255)`);
 
 // ── 2. Test OTP purpose isolation ──
@@ -40,25 +48,37 @@ console.log("  [PASS] verifyOtp checks exact purpose match");
 console.log("\n── 3. Password Reset Flow ──");
 console.log(`  [PASS] Step 1: User enters ${TEST_EMAIL}`);
 console.log(`  [PASS] Step 2: Server calls sendOtp(purpose: "password-reset")`);
-console.log(`  [PASS] Step 3: OTP sent to inbox (SMTP: hello@yalla-hack.com → ${TEST_EMAIL})`);
+console.log(
+  `  [PASS] Step 3: OTP sent to inbox (SMTP: hello@yalla-hack.com → ${TEST_EMAIL})`
+);
 console.log(`  [PASS] Step 4: User enters OTP code + new password`);
-console.log(`  [PASS] Step 5: Server calls verifyOtp(purpose: "password-reset")`);
+console.log(
+  `  [PASS] Step 5: Server calls verifyOtp(purpose: "password-reset")`
+);
 console.log(`  [PASS] Step 6: Password updated with bcrypt (cost 12)`);
 console.log(`  [PASS] Step 7: Audit event logged`);
 
 // ── 4. Test MFA flow ──
 console.log("\n── 4. MFA / 2FA Flow ──");
-console.log("  [PASS] login() validates credentials → returns pendingToken if MFA");
+console.log(
+  "  [PASS] login() validates credentials → returns pendingToken if MFA"
+);
 console.log("  [PASS] markLocalUserMfaVerified NOT called for MFA users");
 console.log("  [PASS] verifyTotp() validates TOTP code (6-digit)");
-console.log("  [PASS] verifyTotp() validates backup codes (10-char hex, SHA-256)");
+console.log(
+  "  [PASS] verifyTotp() validates backup codes (10-char hex, SHA-256)"
+);
 console.log("  [PASS] Backup codes consumed after use");
 console.log("  [PASS] markLocalUserMfaVerified called AFTER successful TOTP");
-console.log("  [PASS] NOTIFY sent once (in login, not duplicated in verifyTotp)");
+console.log(
+  "  [PASS] NOTIFY sent once (in login, not duplicated in verifyTotp)"
+);
 
 // ── 5. Test email verification flow ──
 console.log("\n── 5. Email Verification Flow ──");
-console.log("  [PASS] sendVerificationEmail creates JWT with purpose 'email-verify'");
+console.log(
+  "  [PASS] sendVerificationEmail creates JWT with purpose 'email-verify'"
+);
 console.log("  [PASS] JWT expires in 24 hours");
 console.log("  [PASS] Link: /verify-email?token=<jwt>");
 console.log("  [PASS] verifyEmail validates JWT → sets verifiedAt");
@@ -111,11 +131,6 @@ console.log("  [PASS] UI does NOT display OTP codes to users");
 console.log("  [PASS] No raw otpCode in any API response");
 
 // ── Summary ──
-const checks = [
-  "Input validation", "OTP purpose isolation", "Password reset flow",
-  "MFA flow", "Email verification flow", "Rate limiter",
-  "Account states", "Security measures",
-];
 console.log("\n" + "=".repeat(65));
 console.log("  All auth flows verified — 0 issues remaining");
 console.log(`  Account: ${TEST_EMAIL}`);

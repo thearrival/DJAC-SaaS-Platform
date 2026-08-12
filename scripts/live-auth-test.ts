@@ -6,13 +6,15 @@ import "dotenv/config";
 import { sendEmail } from "../server/email";
 import { createHash, randomInt } from "node:crypto";
 
-console.log("=" .repeat(70));
+console.log("=".repeat(70));
 console.log("  DJAC Auth — Live Pipeline Test");
-console.log("=" .repeat(70));
+console.log("=".repeat(70));
 console.log();
 
 const TEST_EMAIL = "psn.iawad@outlook.com";
-const SMTP_SET = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+const SMTP_SET = Boolean(
+  process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
+);
 console.log(`SMTP Configured: ${SMTP_SET}`);
 console.log(`SMTP Host: ${process.env.SMTP_HOST}`);
 console.log(`SMTP User: ${process.env.SMTP_USER}`);
@@ -67,7 +69,9 @@ const sent = await sendEmail({
   text: `DJAC Password Reset\nCode: ${code}\nExpires in 5 minutes.\n\nThis code can ONLY be used for password reset. It will NOT work for login.`,
 });
 
-console.log(`Delivery result: ${sent ? "SUCCESS" : "FAILED (check SMTP config or spam folder)"}`);
+console.log(
+  `Delivery result: ${sent ? "SUCCESS" : "FAILED (check SMTP config or spam folder)"}`
+);
 console.log();
 
 // Verify code hash
@@ -85,5 +89,9 @@ console.log(`[PASS] Pending users can use this code to reset`);
 console.log(`[PASS] Suspended users are blocked from reset`);
 console.log(`[PASS] Login OTP will NOT work for password reset`);
 console.log();
-console.log(`Email ${sent ? "sent successfully" : "delivery failed"} to ${TEST_EMAIL}`);
-console.log(sent ? "Check the inbox (and spam folder) for the verification code." : "");
+console.log(
+  `Email ${sent ? "sent successfully" : "delivery failed"} to ${TEST_EMAIL}`
+);
+console.log(
+  sent ? "Check the inbox (and spam folder) for the verification code." : ""
+);

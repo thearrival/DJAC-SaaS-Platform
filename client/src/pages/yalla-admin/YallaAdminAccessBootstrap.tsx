@@ -21,11 +21,9 @@ export default function YallaAdminAccessBootstrap() {
     const nonce = search.get("nonce")?.trim() ?? "";
     const redirectTo = "/yalla-hack-owners-console/login";
 
+    // If no token credentials, redirect to login page
     if (!accessToken && (!expires || !sig)) {
-      setError(
-        "Missing owner-link credentials. Use the private owner link exactly as provided."
-      );
-      setWorking(false);
+      navigate(redirectTo);
       return;
     }
 

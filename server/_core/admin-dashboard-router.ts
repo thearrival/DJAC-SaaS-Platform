@@ -1,6 +1,18 @@
-import { Router, type Request, type Response } from "express";
+import {
+  Router,
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
+import { sql } from "drizzle-orm";
+import { getDb } from "../db";
 import { ENV } from "./env";
 import { logger } from "./logger";
+import {
+  getAdminCookie,
+  verifySession,
+  isAdminSessionRevoked,
+} from "./yalla-admin-router";
 import {
   getUnifiedUsers,
   getUserStats,
@@ -15,13 +27,51 @@ import {
   getSecurityEvents,
 } from "./admin-dashboard-store";
 
-function requireAdminSession(req: Request, res: Response): boolean {
-  const sessionCookie = req.cookies?.yalla_admin_session;
-  if (!sessionCookie) {
+export type AdminSessionUser = { username: string; sessionId: string };
+
+async function requireAdminSession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  const token = getAdminCookie(req);
+  if (!token) {
     res.status(401).json({ error: "Unauthorized" });
-    return false;
+    return;
   }
-  return true;
+
+  const parsed = await verifySession(token);
+  if (!parsed) {
+    res.status(401).json({ error: "Session expired or invalid" });
+    return;
+  }
+
+  if (isAdminSessionRevoked(parsed.sessionId)) {
+    res.status(401).json({ error: "Session revoked or expired" });
+    return;
+  }
+
+  // Check session is not revoked or expired
+  try {
+    const db = await getDb();
+    if (db) {
+      const sessionResult = await db.execute(sql`
+                SELECT isRevoked FROM yallaAdminSessions
+                WHERE id = ${parsed.sessionId} AND expiresAt > NOW()
+                LIMIT 1
+            `);
+      const rows = sessionResult.rows as { isRevoked: number }[] | undefined;
+      if (!rows || rows.length === 0 || rows[0]?.isRevoked) {
+        res.status(401).json({ error: "Session revoked or expired" });
+        return;
+      }
+    }
+  } catch (error) {
+    logger.warn({ error }, "Admin dashboard session DB check failed");
+  }
+
+  (req as Request & { adminSession?: AdminSessionUser }).adminSession = parsed;
+  next();
 }
 
 function corsHeaders(res: Response) {
@@ -46,10 +96,7 @@ export function createAdminDashboardRouter(): Router {
     next();
   });
 
-  router.use((req, res, next) => {
-    if (!requireAdminSession(req, res)) return;
-    next();
-  });
+  router.use((req, res, next) => void requireAdminSession(req, res, next));
 
   router.get("/users", async (req, res) => {
     try {

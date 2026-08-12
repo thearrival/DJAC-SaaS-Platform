@@ -12,7 +12,6 @@ import { trpc } from "@/lib/trpc";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
 import { APP_TITLE, APP_LOGO } from "@/const";
-import { Link as LinkIcon } from "lucide-react";
 import {
   CheckCircle2,
   XCircle,
@@ -34,7 +33,7 @@ export default function VerifyEmail() {
 
   const verifyMut = trpc.localAuth.verifyEmail.useMutation({
     onSuccess: () => setStatus("success"),
-    onError: (err) => {
+    onError: err => {
       setStatus("error");
       setErrorMessage(err.message);
     },

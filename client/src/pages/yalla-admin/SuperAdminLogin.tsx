@@ -64,7 +64,11 @@ export default function SuperAdminLogin() {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <img src={APP_LOGO} alt={APP_TITLE} style={{ height: 36, marginBottom: 16 }} />
+          <img
+            src={APP_LOGO}
+            alt={APP_TITLE}
+            style={{ height: 36, marginBottom: 16 }}
+          />
           <div
             style={{
               display: "inline-flex",
@@ -84,7 +88,14 @@ export default function SuperAdminLogin() {
             <Shield size={12} />
             YALLA HACK INTERNAL
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#fff", margin: "0 0 8px" }}>
+          <h1
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              color: "#fff",
+              margin: "0 0 8px",
+            }}
+          >
             Super Admin
           </h1>
           <p style={{ fontSize: 13, color: "#94a3b8", margin: 0 }}>
@@ -92,9 +103,20 @@ export default function SuperAdminLogin() {
           </p>
         </div>
 
-        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <form
+          onSubmit={handleLogin}
+          style={{ display: "flex", flexDirection: "column", gap: 16 }}
+        >
           <div>
-            <label style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600, display: "block", marginBottom: 6 }}>
+            <label
+              style={{
+                fontSize: 12,
+                color: "#94a3b8",
+                fontWeight: 600,
+                display: "block",
+                marginBottom: 6,
+              }}
+            >
               Username
             </label>
             <input
@@ -116,13 +138,27 @@ export default function SuperAdminLogin() {
             />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: "#94a3b8", fontWeight: 600, display: "block", marginBottom: 6 }}>
+            <label
+              style={{
+                fontSize: 12,
+                color: "#94a3b8",
+                fontWeight: 600,
+                display: "block",
+                marginBottom: 6,
+              }}
+            >
               Password
             </label>
             <div style={{ position: "relative" }}>
               <Lock
                 size={13}
-                style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "#64748b" }}
+                style={{
+                  position: "absolute",
+                  left: 12,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#64748b",
+                }}
               />
               <input
                 type="password"
@@ -169,7 +205,9 @@ export default function SuperAdminLogin() {
             style={{
               padding: "12px",
               borderRadius: 10,
-              background: loading ? "rgba(168,85,247,0.5)" : "linear-gradient(135deg,#dc2626,#7c3aed)",
+              background: loading
+                ? "rgba(168,85,247,0.5)"
+                : "linear-gradient(135deg,#dc2626,#7c3aed)",
               color: "#fff",
               fontSize: 14,
               fontWeight: 700,
@@ -182,7 +220,15 @@ export default function SuperAdminLogin() {
           </button>
         </form>
 
-        <p style={{ fontSize: 11, color: "#64748b", textAlign: "center", marginTop: 20, marginBottom: 0 }}>
+        <p
+          style={{
+            fontSize: 11,
+            color: "#64748b",
+            textAlign: "center",
+            marginTop: 20,
+            marginBottom: 0,
+          }}
+        >
           Protected by IP allowlist, rate limiting, and session controls.
         </p>
       </div>

@@ -166,6 +166,10 @@ var init_config_schema = __esm({
       STRIPE_PRICE_PRO_ANNUAL: process.env.STRIPE_PRICE_PRO_ANNUAL ?? "",
       STRIPE_PRICE_ENTERPRISE_MONTHLY:
         process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY ?? "",
+      STRIPE_PRICE_ENTERPRISE_QUARTERLY:
+        process.env.STRIPE_PRICE_ENTERPRISE_QUARTERLY ?? "",
+      STRIPE_PRICE_ENTERPRISE_BIANNUAL:
+        process.env.STRIPE_PRICE_ENTERPRISE_BIANNUAL ?? "",
       STRIPE_PRICE_ENTERPRISE_ANNUAL:
         process.env.STRIPE_PRICE_ENTERPRISE_ANNUAL ?? "",
       // ── Supabase ────────────────────────────────────────────────────────────
@@ -271,6 +275,10 @@ function checkProductionEnv() {
     STRIPE_PRICE_PRO_ANNUAL: parsedEnv.STRIPE_PRICE_PRO_ANNUAL || void 0,
     STRIPE_PRICE_ENTERPRISE_MONTHLY:
       parsedEnv.STRIPE_PRICE_ENTERPRISE_MONTHLY || void 0,
+    STRIPE_PRICE_ENTERPRISE_QUARTERLY:
+      parsedEnv.STRIPE_PRICE_ENTERPRISE_QUARTERLY || void 0,
+    STRIPE_PRICE_ENTERPRISE_BIANNUAL:
+      parsedEnv.STRIPE_PRICE_ENTERPRISE_BIANNUAL || void 0,
     STRIPE_PRICE_ENTERPRISE_ANNUAL:
       parsedEnv.STRIPE_PRICE_ENTERPRISE_ANNUAL || void 0,
   });
@@ -328,6 +336,8 @@ var init_env = __esm({
       "STRIPE_PRICE_PRO_BIANNUAL",
       "STRIPE_PRICE_PRO_ANNUAL",
       "STRIPE_PRICE_ENTERPRISE_MONTHLY",
+      "STRIPE_PRICE_ENTERPRISE_QUARTERLY",
+      "STRIPE_PRICE_ENTERPRISE_BIANNUAL",
       "STRIPE_PRICE_ENTERPRISE_ANNUAL",
     ];
     ENV = {
@@ -346,6 +356,7 @@ var init_env = __esm({
       devAuthEmail: parsedEnv.DEV_AUTH_EMAIL,
       devAuthRole: parseDevRole(parsedEnv.DEV_AUTH_ROLE),
       aiOrchestratorEnabled: parsedEnv.AI_ORCHESTRATOR_ENABLED,
+      openAiApiKey: parsedEnv.OPENAI_API_KEY,
       aiQueueMode: resolveAiQueueMode(parsedEnv.AI_QUEUE_MODE, {
         isProduction: parsedEnv.NODE_ENV === "production",
         redisUrl: parsedEnv.REDIS_URL,
@@ -368,6 +379,7 @@ var init_env = __esm({
       smtpPass: parsedEnv.SMTP_PASS,
       smtpFrom: parsedEnv.SMTP_FROM,
       reportTemplateName: parsedEnv.REPORT_TEMPLATE_NAME,
+      reportNativePdfConversion: parsedEnv.REPORT_NATIVE_PDF_CONVERSION,
       interactionRetentionAutoRun: parsedEnv.INTERACTION_RETENTION_AUTORUN,
       interactionRetentionDays: parsedEnv.INTERACTION_RETENTION_DAYS,
       interactionRetentionIntervalHours:
@@ -404,6 +416,8 @@ import {
   varchar,
   text,
   timestamp,
+  boolean,
+  jsonb,
 } from "drizzle-orm/pg-core";
 var userTypeEnum,
   localeEnum,
@@ -534,7 +548,15 @@ var userTypeEnum,
   regulatoryChanges,
   complianceSimulations,
   aiAgentRunStatusEnum,
-  aiAgentRuns;
+  aiAgentRuns,
+  onboardingProgress,
+  organizationProfilesCustom,
+  userPreferences,
+  featureFlags,
+  analyticsEvents,
+  userActivitySummary,
+  emailLog,
+  notifications;
 var init_schema = __esm({
   "drizzle/schema.ts"() {
     "use strict";
@@ -628,6 +650,29 @@ var init_schema = __esm({
       "Global",
       "Both",
       "Other",
+      "United Kingdom",
+      "Canada",
+      "Australia",
+      "Japan",
+      "South Korea",
+      "Singapore",
+      "India",
+      "South Africa",
+      "Mexico",
+      "Thailand",
+      "Indonesia",
+      "Malaysia",
+      "Philippines",
+      "Vietnam",
+      "Nigeria",
+      "Kenya",
+      "United Arab Emirates",
+      "Qatar",
+      "Kuwait",
+      "Bahrain",
+      "Oman",
+      "Jordan",
+      "Egypt",
     ]);
     planEnum = pgEnum("plan", [
       "free_trial",
@@ -901,6 +946,29 @@ var init_schema = __esm({
       "US",
       "Brazil",
       "Other",
+      "United Kingdom",
+      "Canada",
+      "Australia",
+      "Japan",
+      "South Korea",
+      "Singapore",
+      "India",
+      "South Africa",
+      "Mexico",
+      "Thailand",
+      "Indonesia",
+      "Malaysia",
+      "Philippines",
+      "Vietnam",
+      "Nigeria",
+      "Kenya",
+      "United Arab Emirates",
+      "Qatar",
+      "Kuwait",
+      "Bahrain",
+      "Oman",
+      "Jordan",
+      "Egypt",
     ]);
     dsrStatusEnum = pgEnum("dsrStatus", [
       "received",
@@ -1016,6 +1084,29 @@ var init_schema = __esm({
       "Brazil",
       "Global",
       "Both",
+      "United Kingdom",
+      "Canada",
+      "Australia",
+      "Japan",
+      "South Korea",
+      "Singapore",
+      "India",
+      "South Africa",
+      "Mexico",
+      "Thailand",
+      "Indonesia",
+      "Malaysia",
+      "Philippines",
+      "Vietnam",
+      "Nigeria",
+      "Kenya",
+      "United Arab Emirates",
+      "Qatar",
+      "Kuwait",
+      "Bahrain",
+      "Oman",
+      "Jordan",
+      "Egypt",
     ]);
     deadlinePriorityEnum = pgEnum("deadlinePriority", [
       "low",
@@ -1047,6 +1138,8 @@ var init_schema = __esm({
       mfaEnabled: integer("mfaEnabled").default(0).notNull(),
       mfaBackupCodes: text("mfaBackupCodes"),
       verifiedAt: timestamp("verifiedAt"),
+      lastMfaVerifiedAt: timestamp("lastMfaVerifiedAt"),
+      firstLoginEmailSent: integer("firstLoginEmailSent").default(0).notNull(),
       createdAt: timestamp("createdAt").defaultNow().notNull(),
       updatedAt: timestamp("updatedAt").defaultNow().notNull(),
     });
@@ -1414,8 +1507,8 @@ var init_schema = __esm({
       nonceHash: varchar("nonceHash", { length: 64 }).notNull().unique(),
       redirectTarget: varchar("redirectTarget", { length: 255 }).notNull(),
       expiresAt: timestamp("expiresAt").notNull(),
-      consumedAt: timestamp("consumedAt").defaultNow().notNull(),
-      consumedByIp: varchar("consumedByIp", { length: 64 }).notNull(),
+      consumedAt: timestamp("consumedAt"),
+      consumedByIp: varchar("consumedByIp", { length: 64 }),
       createdAt: timestamp("createdAt").defaultNow().notNull(),
     });
     complianceDeadlines = pgTable("complianceDeadlines", {
@@ -2110,6 +2203,122 @@ var init_schema = __esm({
       createdAt: timestamp("createdAt").defaultNow().notNull(),
       updatedAt: timestamp("updatedAt").defaultNow().notNull(),
     });
+    onboardingProgress = pgTable("onboarding_progress", {
+      id: serial("id").primaryKey(),
+      userId: integer("user_id")
+        .notNull()
+        .unique()
+        .references(() => users.id, { onDelete: "cascade" }),
+      currentStep: integer("current_step").default(0),
+      completedSteps: jsonb("completed_steps").$type().default([]),
+      skipped: boolean("skipped").default(false),
+      completedAt: timestamp("completed_at"),
+      responses: jsonb("responses").$type().default({}),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    });
+    organizationProfilesCustom = pgTable("organization_profiles_custom", {
+      id: serial("id").primaryKey(),
+      organizationId: integer("organization_id")
+        .notNull()
+        .unique()
+        .references(() => organizations.id, { onDelete: "cascade" }),
+      industry: varchar("industry", { length: 120 }),
+      employeeRange: varchar("employee_range", { length: 30 }),
+      complianceMaturity: varchar("compliance_maturity", { length: 30 }),
+      selectedFrameworks: jsonb("selected_frameworks").$type().default([]),
+      businessObjectives: jsonb("business_objectives").$type().default([]),
+      onboardingCompletedAt: timestamp("onboarding_completed_at"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    });
+    userPreferences = pgTable("user_preferences", {
+      id: serial("id").primaryKey(),
+      userId: integer("user_id")
+        .notNull()
+        .unique()
+        .references(() => users.id, { onDelete: "cascade" }),
+      dashboardLayout: jsonb("dashboard_layout").$type().default({}),
+      defaultJurisdictions: jsonb("default_jurisdictions").$type().default([]),
+      notificationPrefs: jsonb("notification_prefs").$type().default({}),
+      theme: varchar("theme", { length: 20 }).default("system"),
+      locale: localeEnum("locale").default("en"),
+      tourCompleted: boolean("tour_completed").default(false),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    });
+    featureFlags = pgTable("feature_flags", {
+      id: serial("id").primaryKey(),
+      name: varchar("name", { length: 100 }).notNull().unique(),
+      description: text("description"),
+      enabled: boolean("enabled").default(false),
+      rolloutPercentage: integer("rollout_percentage").default(0),
+      targetOrgIds: jsonb("target_org_ids").$type().default([]),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    });
+    analyticsEvents = pgTable("analytics_events", {
+      id: serial("id").primaryKey(),
+      userId: integer("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+      organizationId: integer("organization_id")
+        .notNull()
+        .references(() => organizations.id, {
+          onDelete: "cascade",
+        }),
+      event: varchar("event", { length: 100 }).notNull(),
+      category: varchar("category", { length: 50 }).notNull(),
+      properties: jsonb("properties").$type().default({}),
+      sessionId: varchar("session_id", { length: 64 }),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+    });
+    userActivitySummary = pgTable("user_activity_summary", {
+      userId: integer("user_id")
+        .primaryKey()
+        .references(() => users.id, { onDelete: "cascade" }),
+      totalSessions: integer("total_sessions").default(0),
+      totalEvents: integer("total_events").default(0),
+      lastActiveAt: timestamp("last_active_at"),
+      featureAdoption: jsonb("feature_adoption").$type().default({}),
+      activationScore: integer("activation_score").default(0),
+      healthScore: integer("health_score").default(0),
+      updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    });
+    emailLog = pgTable("email_log", {
+      id: serial("id").primaryKey(),
+      userId: integer("user_id").references(() => users.id, {
+        onDelete: "set null",
+      }),
+      organizationId: integer("organization_id").references(
+        () => organizations.id,
+        {
+          onDelete: "set null",
+        }
+      ),
+      template: varchar("template", { length: 100 }).notNull(),
+      recipient: varchar("recipient", { length: 320 }).notNull(),
+      subject: varchar("subject", { length: 500 }),
+      status: varchar("status", { length: 20 }).default("queued").notNull(),
+      sentAt: timestamp("sent_at"),
+      openedAt: timestamp("opened_at"),
+      clickedAt: timestamp("clicked_at"),
+      errorMessage: text("error_message"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+    });
+    notifications = pgTable("notifications", {
+      id: serial("id").primaryKey(),
+      userId: integer("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+      type: varchar("type", { length: 50 }).notNull(),
+      title: varchar("title", { length: 255 }).notNull(),
+      body: text("body"),
+      actionUrl: varchar("action_url", { length: 500 }),
+      isRead: boolean("is_read").default(false),
+      readAt: timestamp("read_at"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+    });
   },
 });
 
@@ -2209,31 +2418,23 @@ async function getDb() {
     return null;
   }
   try {
-    if (ENV.isProduction) {
-      const connectionLimit = ENV.databasePoolSize;
-      const sslUrl = fixSslMode(databaseUrl);
-      _pool = new pg.Pool({
-        connectionString: sslUrl,
-        max: connectionLimit,
-        idleTimeoutMillis: 3e4,
-        connectionTimeoutMillis: 5e3,
-      });
-      _pool.on("error", err => {
-        console.error("[Database] Pool error:", err.message);
-      });
-      const client = await _pool.connect();
-      await client.query("SELECT 1");
-      client.release();
-      _db = drizzle(_pool);
-      _consecutiveFailures = 0;
-      console.info(`[Database] Pool created \u2014 max=${connectionLimit}`);
-    } else {
-      const client = new pg.Client(fixSslMode(databaseUrl));
-      await client.connect();
-      await client.end();
-      _db = drizzle(fixSslMode(databaseUrl));
-      _consecutiveFailures = 0;
-    }
+    const connectionLimit = ENV.databasePoolSize;
+    const sslUrl = fixSslMode(databaseUrl);
+    _pool = new pg.Pool({
+      connectionString: sslUrl,
+      max: connectionLimit,
+      idleTimeoutMillis: 3e4,
+      connectionTimeoutMillis: 5e3,
+    });
+    _pool.on("error", err => {
+      console.error("[Database] Pool error:", err.message);
+    });
+    const client = await _pool.connect();
+    await client.query("SELECT 1");
+    client.release();
+    _db = drizzle(_pool);
+    _consecutiveFailures = 0;
+    console.info(`[Database] Pool created \u2014 max=${connectionLimit}`);
     _lastDbCheckFailedAt = 0;
     return _db;
   } catch (error) {
@@ -2464,6 +2665,7 @@ var init_db = __esm({
 // server/supplier-assessment.ts
 var supplier_assessment_exports = {};
 __export(supplier_assessment_exports, {
+  JURISDICTION_SCORE_KEYS: () => JURISDICTION_SCORE_KEYS,
   buildAssessmentCsv: () => buildAssessmentCsv,
   runDualJurisdictionAssessment: () => runDualJurisdictionAssessment,
 });
@@ -2927,6 +3129,44 @@ function runDualJurisdictionAssessment(vendor) {
   ) {
     saudiScore += 5;
   }
+  const genericDeductions = [
+    !hasIso27001 ? (isHighCriticality ? 18 : 12) : 0,
+    !hasSoc2 ? (hasHighDependencyChain ? 12 : 8) : 0,
+    handlesSensitiveData && !hasIso27701 ? 10 : 0,
+    processingActivities.length === 0 ? 8 : 0,
+    !cloudProvider &&
+    !hasAny([hostingEnvironment], ["on premises", "private cloud"])
+      ? 5
+      : 0,
+    hasAny([hostingEnvironment], ["multi cloud", "hybrid"]) &&
+    cloudProviders.length < 2
+      ? 6
+      : 0,
+    hasHighDependencyChain && !hasSoc2 ? 6 : 0,
+  ].reduce((total, amount) => total + amount, 0);
+  const newJurisdictionScores = {};
+  for (const def of JURISDICTION_DEFS) {
+    const requiresControls =
+      hasAny(jurisdictions, def.matches) ||
+      hasAny(operatingCountries, def.matches) ||
+      hasAny(locations, def.matches);
+    const hasLocation = hasAny(locations, def.locations);
+    let score = 100 - genericDeductions;
+    if (requiresControls && !hasLocation) {
+      score -= def.deduction;
+      gaps.push({
+        code: `LOC-${def.code}-001`,
+        jurisdiction: def.key,
+        frameworks: def.frameworks,
+        severity: "high",
+        title: `Missing ${def.name} data residency evidence`,
+        description: `No ${def.name} data location was declared for ${def.name} data protection obligations.`,
+        mitigation: `Provision ${def.name}-hosted data storage and processing paths for ${def.name} data subjects.`,
+        penaltyContext: makePenaltyContext(def.frameworks),
+      });
+    }
+    newJurisdictionScores[def.key] = clampScore(score);
+  }
   chinaScore = clampScore(chinaScore);
   saudiScore = clampScore(saudiScore);
   euScore = clampScore(euScore);
@@ -2958,6 +3198,7 @@ function runDualJurisdictionAssessment(vendor) {
       us: usScore,
       brazil: brazilScore,
       global: globalScore,
+      ...newJurisdictionScores,
     },
     status,
     riskLevel,
@@ -3018,6 +3259,9 @@ function buildAssessmentCsv(vendor, result) {
   lines.push(`US Score,${result.jurisdictionScores.us}`);
   lines.push(`Brazil Score,${result.jurisdictionScores.brazil}`);
   lines.push(`Global Score,${result.jurisdictionScores.global}`);
+  for (const key of JURISDICTION_SCORE_KEYS) {
+    lines.push(`${key} Score,${result.jurisdictionScores[key]}`);
+  }
   lines.push(`Risk Level,${result.riskLevel}`);
   lines.push(`Status,${result.status}`);
   lines.push("");
@@ -3047,10 +3291,35 @@ function buildAssessmentCsv(vendor, result) {
   }
   return lines.join("\n");
 }
-var PENALTY_CONTEXT;
+var JURISDICTION_SCORE_KEYS, PENALTY_CONTEXT, JURISDICTION_DEFS;
 var init_supplier_assessment = __esm({
   "server/supplier-assessment.ts"() {
     "use strict";
+    JURISDICTION_SCORE_KEYS = [
+      "uk",
+      "canada",
+      "australia",
+      "japan",
+      "southKorea",
+      "singapore",
+      "india",
+      "southAfrica",
+      "mexico",
+      "uae",
+      "qatar",
+      "kuwait",
+      "bahrain",
+      "oman",
+      "jordan",
+      "egypt",
+      "indonesia",
+      "thailand",
+      "vietnam",
+      "philippines",
+      "malaysia",
+      "nigeria",
+      "kenya",
+    ];
     PENALTY_CONTEXT = {
       PIPL: "PIPL penalties can reach up to 5% annual turnover.",
       CSL: "CSL enforcement can include operational restrictions and fines.",
@@ -3071,7 +3340,263 @@ var init_supplier_assessment = __esm({
         "SOC 2 reports provide independent assurance of security, availability, and confidentiality controls.",
       "NIST CSF":
         "NIST CSF provides a comprehensive cybersecurity risk management framework.",
+      "UK GDPR":
+        "UK ICO fines can reach \xA317.5M or 4% of annual global turnover.",
+      "DPA 2018":
+        "UK DPA 2018 aligns with UK GDPR enforcement and data subject rights.",
+      PIPEDA:
+        "PIPEDA penalties under C-27 updates can reach CAD 25M for non-compliance.",
+      "Privacy Act":
+        "OAIC penalties can reach AUD 50M for serious or repeated NDB breaches.",
+      APPI: "APPI enforcement includes corrective orders and criminal fines in Japan.",
+      PIPA: "PIPA fines can reach KRW 300M plus criminal penalties in South Korea.",
+      PDPA: "PDPA breaches can attract substantial fines and corrective orders from the regulator.",
+      "DPDP Act":
+        "DPDP Act penalties can reach INR 250 crore for significant violations.",
+      POPIA:
+        "POPIA fines can reach ZAR 10M with imprisonment for serious violations.",
+      LFPDPPP:
+        "Mexico LFPDPPP sanctions include corrective measures and fines by INAI.",
+      "UAE PDPL":
+        "UAE PDPL penalties can reach AED 3M for violations under federal law.",
+      "Qatar DPL": "Qatar DPL violations attract fines and corrective orders.",
+      "Kuwait PDPL":
+        "Kuwait PDPL violations attract administrative penalties and corrective orders.",
+      "Bahrain PDPL": "Bahrain PDPL penalties can reach BHD 50,000.",
+      "Oman PDPL":
+        "Oman PDPL violations attract fines and corrective measures.",
+      "Jordan PDP":
+        "Jordan PDP violations attract corrective orders and fines.",
+      "Egypt DPL": "Egypt DPL violations can lead to fines and imprisonment.",
+      "UU PDP":
+        "Indonesia's UU PDP penalties include fines up to 2% of annual revenue.",
+      PDPD: "Vietnam's PDPD fines can reach 5% of annual revenue.",
+      "DPA 2012":
+        "Philippines DPA 2012 fines can reach PHP 5M with imprisonment.",
+      NDPA: "Nigeria's NDPA penalties can reach 2% of annual revenue.",
+      "Kenya DPA": "Kenya DPA fines can reach KES 5M.",
     };
+    JURISDICTION_DEFS = [
+      {
+        key: "uk",
+        code: "UK",
+        name: "United Kingdom",
+        matches: ["united kingdom", "britain", "england", "wales", "scotland"],
+        locations: [
+          "united kingdom",
+          "britain",
+          "england",
+          "scotland",
+          "london",
+        ],
+        deduction: 30,
+        frameworks: ["UK GDPR", "DPA 2018"],
+      },
+      {
+        key: "canada",
+        code: "CANADA",
+        name: "Canada",
+        matches: ["canada", "canadian"],
+        locations: ["canada", "toronto", "montreal", "vancouver", "ottawa"],
+        deduction: 25,
+        frameworks: ["PIPEDA"],
+      },
+      {
+        key: "australia",
+        code: "AUSTRALIA",
+        name: "Australia",
+        matches: ["australia", "australian"],
+        locations: ["australia", "sydney", "melbourne", "canberra", "brisbane"],
+        deduction: 25,
+        frameworks: ["Privacy Act"],
+      },
+      {
+        key: "japan",
+        code: "JAPAN",
+        name: "Japan",
+        matches: ["japan", "japanese"],
+        locations: ["japan", "tokyo", "osaka"],
+        deduction: 25,
+        frameworks: ["APPI"],
+      },
+      {
+        key: "southKorea",
+        code: "KOREA",
+        name: "South Korea",
+        matches: ["south korea", "korea", "korean", "rok"],
+        locations: ["south korea", "korea", "seoul", "busan"],
+        deduction: 25,
+        frameworks: ["PIPA"],
+      },
+      {
+        key: "singapore",
+        code: "SINGAPORE",
+        name: "Singapore",
+        matches: ["singapore"],
+        locations: ["singapore"],
+        deduction: 25,
+        frameworks: ["PDPA"],
+      },
+      {
+        key: "india",
+        code: "INDIA",
+        name: "India",
+        matches: ["india", "indian"],
+        locations: ["india", "mumbai", "delhi", "bengaluru"],
+        deduction: 25,
+        frameworks: ["DPDP Act"],
+      },
+      {
+        key: "southAfrica",
+        code: "SAFRICA",
+        name: "South Africa",
+        matches: ["south africa", "south african"],
+        locations: ["south africa", "johannesburg", "cape town"],
+        deduction: 25,
+        frameworks: ["POPIA"],
+      },
+      {
+        key: "mexico",
+        code: "MEXICO",
+        name: "Mexico",
+        matches: ["mexico", "mexican"],
+        locations: ["mexico", "mexico city"],
+        deduction: 25,
+        frameworks: ["LFPDPPP"],
+      },
+      {
+        key: "uae",
+        code: "UAE",
+        name: "United Arab Emirates",
+        matches: [
+          "united arab emirates",
+          "uae",
+          "emirates",
+          "dubai",
+          "abu dhabi",
+        ],
+        locations: ["united arab emirates", "uae", "dubai", "abu dhabi"],
+        deduction: 25,
+        frameworks: ["UAE PDPL"],
+      },
+      {
+        key: "qatar",
+        code: "QATAR",
+        name: "Qatar",
+        matches: ["qatar"],
+        locations: ["qatar", "doha"],
+        deduction: 25,
+        frameworks: ["Qatar DPL"],
+      },
+      {
+        key: "kuwait",
+        code: "KUWAIT",
+        name: "Kuwait",
+        matches: ["kuwait"],
+        locations: ["kuwait", "kuwait city"],
+        deduction: 25,
+        frameworks: ["Kuwait PDPL"],
+      },
+      {
+        key: "bahrain",
+        code: "BAHRAIN",
+        name: "Bahrain",
+        matches: ["bahrain"],
+        locations: ["bahrain", "manama"],
+        deduction: 25,
+        frameworks: ["Bahrain PDPL"],
+      },
+      {
+        key: "oman",
+        code: "OMAN",
+        name: "Oman",
+        matches: ["oman"],
+        locations: ["oman", "muscat"],
+        deduction: 25,
+        frameworks: ["Oman PDPL"],
+      },
+      {
+        key: "jordan",
+        code: "JORDAN",
+        name: "Jordan",
+        matches: ["jordan"],
+        locations: ["jordan", "amman"],
+        deduction: 25,
+        frameworks: ["Jordan PDP"],
+      },
+      {
+        key: "egypt",
+        code: "EGYPT",
+        name: "Egypt",
+        matches: ["egypt"],
+        locations: ["egypt", "cairo"],
+        deduction: 25,
+        frameworks: ["Egypt DPL"],
+      },
+      {
+        key: "indonesia",
+        code: "INDONESIA",
+        name: "Indonesia",
+        matches: ["indonesia"],
+        locations: ["indonesia", "jakarta"],
+        deduction: 25,
+        frameworks: ["UU PDP"],
+      },
+      {
+        key: "thailand",
+        code: "THAILAND",
+        name: "Thailand",
+        matches: ["thailand"],
+        locations: ["thailand", "bangkok"],
+        deduction: 25,
+        frameworks: ["PDPA"],
+      },
+      {
+        key: "vietnam",
+        code: "VIETNAM",
+        name: "Vietnam",
+        matches: ["vietnam"],
+        locations: ["vietnam", "hanoi", "ho chi minh"],
+        deduction: 25,
+        frameworks: ["PDPD"],
+      },
+      {
+        key: "philippines",
+        code: "PHILIPPINES",
+        name: "Philippines",
+        matches: ["philippines"],
+        locations: ["philippines", "manila"],
+        deduction: 25,
+        frameworks: ["DPA 2012"],
+      },
+      {
+        key: "malaysia",
+        code: "MALAYSIA",
+        name: "Malaysia",
+        matches: ["malaysia"],
+        locations: ["malaysia", "kuala lumpur"],
+        deduction: 25,
+        frameworks: ["PDPA"],
+      },
+      {
+        key: "nigeria",
+        code: "NIGERIA",
+        name: "Nigeria",
+        matches: ["nigeria"],
+        locations: ["nigeria", "lagos", "abuja"],
+        deduction: 25,
+        frameworks: ["NDPA"],
+      },
+      {
+        key: "kenya",
+        code: "KENYA",
+        name: "Kenya",
+        matches: ["kenya"],
+        locations: ["kenya", "nairobi"],
+        deduction: 25,
+        frameworks: ["Kenya DPA"],
+      },
+    ];
   },
 });
 
@@ -3084,7 +3609,7 @@ import nodemailer from "nodemailer";
 async function sendEmail(payload) {
   const { smtpHost, smtpPort, smtpUser, smtpPass, smtpFrom, isDevelopment } =
     ENV;
-  const from = smtpFrom || "DJAC Platform <noreply@yalla-hack.net>";
+  const from = smtpFrom || "DJAC by Yalla Hack <hello@yalla-hack.com>";
   if (!smtpHost || !smtpUser || !smtpPass) {
     if (isDevelopment) {
       console.info(
@@ -3099,7 +3624,7 @@ ${payload.text ?? payload.html}
     return false;
   }
   try {
-    const transporter = nodemailer.createTransport({
+    const transporter2 = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
       secure: ENV.smtpSecure,
@@ -3108,14 +3633,14 @@ ${payload.text ?? payload.html}
       greetingTimeout: 5e3,
       socketTimeout: 1e4,
     });
-    await transporter.sendMail({
+    await transporter2.sendMail({
       from,
       to: payload.to,
       subject: payload.subject,
       html: payload.html,
       text: payload.text,
     });
-    transporter.close();
+    transporter2.close();
     console.info(`[EMAIL] Sent to ${payload.to}: "${payload.subject}"`);
     return true;
   } catch (err) {
@@ -3162,7 +3687,7 @@ __export(compliance_db_exports, {
   getVendorById: () => getVendorById,
   getVendorsByUser: () => getVendorsByUser,
 });
-import { and as and7, eq as eq12, or as or3 } from "drizzle-orm";
+import { and as and7, eq as eq13, or as or3 } from "drizzle-orm";
 function normalizeRelationshipType(rawType) {
   switch (rawType) {
     case "harmonization":
@@ -3351,7 +3876,7 @@ async function getFrameworkByCode(code) {
   const result = await db
     .select()
     .from(frameworks)
-    .where(eq12(frameworks.code, code))
+    .where(eq13(frameworks.code, code))
     .limit(1);
   if (result.length > 0) {
     return result[0];
@@ -3373,7 +3898,7 @@ async function getFrameworksByCountry(country) {
       const rows = await db
         .select()
         .from(frameworks)
-        .where(eq12(frameworks.country, country));
+        .where(eq13(frameworks.country, country));
       if (rows.length > 0) {
         return rows;
       }
@@ -3396,7 +3921,7 @@ async function getControlsByFramework(frameworkId) {
     const rows = await db
       .select()
       .from(complianceControls)
-      .where(eq12(complianceControls.frameworkId, frameworkId));
+      .where(eq13(complianceControls.frameworkId, frameworkId));
     if (rows.length > 0) {
       return rows;
     }
@@ -3412,7 +3937,7 @@ async function getControlsByCategory(category) {
   return db
     .select()
     .from(complianceControls)
-    .where(eq12(complianceControls.category, category));
+    .where(eq13(complianceControls.category, category));
 }
 async function getControlByCode(controlCode) {
   const db = await getDb();
@@ -3420,7 +3945,7 @@ async function getControlByCode(controlCode) {
   const result = await db
     .select()
     .from(complianceControls)
-    .where(eq12(complianceControls.controlCode, controlCode))
+    .where(eq13(complianceControls.controlCode, controlCode))
     .limit(1);
   return result.length > 0 ? result[0] : null;
 }
@@ -3439,7 +3964,7 @@ async function getFrameworkRelationships(sourceFrameworkId) {
         .select()
         .from(frameworkRelationships)
         .where(
-          eq12(frameworkRelationships.sourceFrameworkId, sourceFrameworkId)
+          eq13(frameworkRelationships.sourceFrameworkId, sourceFrameworkId)
         );
       if (rows.length > 0) {
         return rows.map(enrichRelationship);
@@ -3461,15 +3986,15 @@ async function getRelationshipsByType(relationshipType) {
           .from(frameworkRelationships)
           .where(
             or3(
-              eq12(frameworkRelationships.relationshipType, "harmonization"),
-              eq12(frameworkRelationships.relationshipType, "coordination")
+              eq13(frameworkRelationships.relationshipType, "harmonization"),
+              eq13(frameworkRelationships.relationshipType, "coordination")
             )
           )
       : await db
           .select()
           .from(frameworkRelationships)
           .where(
-            eq12(frameworkRelationships.relationshipType, relationshipType)
+            eq13(frameworkRelationships.relationshipType, relationshipType)
           );
   return rows.map(enrichRelationship);
 }
@@ -3481,8 +4006,8 @@ async function getConflictingFrameworks(frameworkId) {
     .from(frameworkRelationships)
     .where(
       and7(
-        eq12(frameworkRelationships.sourceFrameworkId, frameworkId),
-        eq12(frameworkRelationships.relationshipType, "conflict")
+        eq13(frameworkRelationships.sourceFrameworkId, frameworkId),
+        eq13(frameworkRelationships.relationshipType, "conflict")
       )
     );
   return rows.map(enrichRelationship);
@@ -3495,8 +4020,8 @@ async function getOverlappingFrameworks(frameworkId) {
     .from(frameworkRelationships)
     .where(
       and7(
-        eq12(frameworkRelationships.sourceFrameworkId, frameworkId),
-        eq12(frameworkRelationships.relationshipType, "overlap")
+        eq13(frameworkRelationships.sourceFrameworkId, frameworkId),
+        eq13(frameworkRelationships.relationshipType, "overlap")
       )
     );
   return rows.map(enrichRelationship);
@@ -3507,7 +4032,7 @@ async function getControlMappings(sourceControlId) {
   return db
     .select()
     .from(controlMappings)
-    .where(eq12(controlMappings.sourceControlId, sourceControlId));
+    .where(eq13(controlMappings.sourceControlId, sourceControlId));
 }
 async function getEquivalentControls(sourceControlId) {
   const db = await getDb();
@@ -3517,15 +4042,15 @@ async function getEquivalentControls(sourceControlId) {
     .from(controlMappings)
     .where(
       and7(
-        eq12(controlMappings.sourceControlId, sourceControlId),
-        eq12(controlMappings.mappingType, "equivalent")
+        eq13(controlMappings.sourceControlId, sourceControlId),
+        eq13(controlMappings.mappingType, "equivalent")
       )
     );
 }
 async function getVendorsByUser(userId) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(vendors).where(eq12(vendors.userId, userId));
+  return db.select().from(vendors).where(eq13(vendors.userId, userId));
 }
 async function getVendorById(vendorId) {
   const db = await getDb();
@@ -3533,7 +4058,7 @@ async function getVendorById(vendorId) {
   const result = await db
     .select()
     .from(vendors)
-    .where(eq12(vendors.id, vendorId))
+    .where(eq13(vendors.id, vendorId))
     .limit(1);
   return result.length > 0 ? result[0] : null;
 }
@@ -3543,7 +4068,7 @@ async function getTechStackByVendor(vendorId) {
   return db
     .select()
     .from(techStackComponents)
-    .where(eq12(techStackComponents.vendorId, vendorId));
+    .where(eq13(techStackComponents.vendorId, vendorId));
 }
 async function getAssessmentsByVendor(vendorId) {
   const db = await getDb();
@@ -3551,7 +4076,7 @@ async function getAssessmentsByVendor(vendorId) {
   return db
     .select()
     .from(vendorAssessments)
-    .where(eq12(vendorAssessments.vendorId, vendorId));
+    .where(eq13(vendorAssessments.vendorId, vendorId));
 }
 async function getAssessmentsByFramework(frameworkId) {
   const db = await getDb();
@@ -3559,7 +4084,7 @@ async function getAssessmentsByFramework(frameworkId) {
   return db
     .select()
     .from(vendorAssessments)
-    .where(eq12(vendorAssessments.frameworkId, frameworkId));
+    .where(eq13(vendorAssessments.frameworkId, frameworkId));
 }
 async function getAssessmentById(assessmentId) {
   const db = await getDb();
@@ -3567,7 +4092,7 @@ async function getAssessmentById(assessmentId) {
   const result = await db
     .select()
     .from(vendorAssessments)
-    .where(eq12(vendorAssessments.id, assessmentId))
+    .where(eq13(vendorAssessments.id, assessmentId))
     .limit(1);
   return result.length > 0 ? result[0] : null;
 }
@@ -3577,7 +4102,7 @@ async function getGapsByAssessment(assessmentId) {
   return db
     .select()
     .from(assessmentGaps)
-    .where(eq12(assessmentGaps.assessmentId, assessmentId));
+    .where(eq13(assessmentGaps.assessmentId, assessmentId));
 }
 async function getCriticalGaps(assessmentId) {
   const db = await getDb();
@@ -3587,8 +4112,8 @@ async function getCriticalGaps(assessmentId) {
     .from(assessmentGaps)
     .where(
       and7(
-        eq12(assessmentGaps.assessmentId, assessmentId),
-        eq12(assessmentGaps.severity, "critical")
+        eq13(assessmentGaps.assessmentId, assessmentId),
+        eq13(assessmentGaps.severity, "critical")
       )
     );
 }
@@ -4006,6 +4531,270 @@ var init_compliance_reference_data = __esm({
         enforcementAuthority:
           "Autoridade Nacional de Prote\xE7\xE3o de Dados (ANPD)",
         maxPenalty: "Up to 2% of revenue in Brazil (capped at BRL 50M)",
+      },
+      {
+        code: "ISO-27001",
+        name: "ISO/IEC 27001",
+        country: "Global",
+        description:
+          "International information security management system (ISMS) standard for establishing, implementing, and continuously improving security controls.",
+        scope:
+          "Organizations of all sizes across sectors with an ISMS program.",
+        enforcementAuthority: "ISO/IEC / accredited certification bodies",
+        maxPenalty:
+          "Certification non-conformities require corrective action; no statutory fine",
+      },
+      {
+        code: "ISO-27701",
+        name: "ISO/IEC 27701",
+        country: "Global",
+        description:
+          "Privacy information management extension to ISO 27001/27002 covering PII controllers and processors.",
+        scope: "Organizations operating privacy governance programs.",
+        enforcementAuthority: "ISO/IEC / accredited certification bodies",
+        maxPenalty:
+          "Certification non-conformities require corrective action; no statutory fine",
+      },
+      {
+        code: "SOC2",
+        name: "SOC 2",
+        country: "US",
+        description:
+          "AICPA attestation framework for service organization controls over security, availability, processing integrity, confidentiality, and privacy.",
+        scope: "Service organizations and their technology infrastructure.",
+        enforcementAuthority: "AICPA / CPA firms",
+        maxPenalty:
+          "No statutory fine; attestation report qualification for gaps",
+      },
+      {
+        code: "NIST-CSF-2",
+        name: "NIST Cybersecurity Framework 2.0",
+        country: "US",
+        description:
+          "Voluntary framework for improving cybersecurity posture through Govern, Identify, Protect, Detect, Respond, and Recover functions.",
+        scope: "Organizations of all sizes across sectors.",
+        enforcementAuthority: "NIST",
+        maxPenalty: "No statutory fine; referenced by US regulatory regimes",
+      },
+      {
+        code: "HIPAA",
+        name: "Health Insurance Portability and Accountability Act",
+        country: "US",
+        description:
+          "US federal law establishing privacy and security standards for protected health information.",
+        scope: "Covered entities and business associates handling PHI.",
+        enforcementAuthority: "HHS Office for Civil Rights (OCR)",
+        maxPenalty: "Up to USD 1.9M per calendar year per violation category",
+      },
+      {
+        code: "PCI-DSS",
+        name: "Payment Card Industry Data Security Standard",
+        country: "Global",
+        description:
+          "Contractual security standard for organizations that store, process, or transmit cardholder data.",
+        scope:
+          "Merchants, processors, acquirers, and issuers in the card payment ecosystem.",
+        enforcementAuthority: "PCI Security Standards Council",
+        maxPenalty:
+          "Fines, card brand penalties, and termination of processing rights",
+      },
+      {
+        code: "NIS2",
+        name: "NIS2 Directive",
+        country: "EU",
+        description:
+          "EU directive strengthening cybersecurity obligations for essential and important entities, including incident reporting and supply-chain security.",
+        scope: "Essential and important entities across the EU.",
+        enforcementAuthority: "ENISA / national competent authorities",
+        maxPenalty: "Up to EUR 10M or 2% of global turnover",
+      },
+      {
+        code: "DORA",
+        name: "Digital Operational Resilience Act",
+        country: "EU",
+        description:
+          "EU regulation for ICT risk management, incident reporting, digital operational resilience testing, and third-party risk in the financial sector.",
+        scope:
+          "EU financial entities and their critical ICT third-party providers.",
+        enforcementAuthority: "European Supervisory Authorities",
+        maxPenalty: "Up to 2% of annual global turnover",
+      },
+      {
+        code: "EU-AI-ACT",
+        name: "EU AI Act",
+        country: "EU",
+        description:
+          "Risk-based regulation of artificial intelligence systems, imposing transparency, governance, and conformity obligations by AI risk class.",
+        scope:
+          "AI providers, deployers, importers, and distributors in the EU.",
+        enforcementAuthority: "European Commission / national authorities",
+        maxPenalty: "Up to EUR 35M or 7% of global turnover",
+      },
+      {
+        code: "UK-GDPR",
+        name: "UK GDPR",
+        country: "United Kingdom",
+        description:
+          "UK-retained data protection framework aligned with GDPR, enforced by the Information Commissioner's Office.",
+        scope: "UK data controllers and processors.",
+        enforcementAuthority: "ICO (Information Commissioner's Office)",
+        maxPenalty: "Up to GBP 17.5M or 4% of global turnover",
+      },
+      {
+        code: "PIPEDA",
+        name: "Personal Information Protection and Electronic Documents Act",
+        country: "Canada",
+        description:
+          "Canadian private-sector privacy law governing collection, use, and disclosure of personal information.",
+        scope: "Private-sector organizations in Canada.",
+        enforcementAuthority: "Office of the Privacy Commissioner of Canada",
+        maxPenalty: "Up to CAD 100K per violation plus court-ordered damages",
+      },
+      {
+        code: "PRIVACY-ACT-AU",
+        name: "Australian Privacy Act",
+        country: "Australia",
+        description:
+          "Australian privacy framework establishing Australian Privacy Principles (APPs) for handling personal information.",
+        scope: "Australian organizations and entities with APP obligations.",
+        enforcementAuthority:
+          "Office of the Australian Information Commissioner (OAIC)",
+        maxPenalty: "Up to AUD 50M or 30% of turnover",
+      },
+      {
+        code: "APPI",
+        name: "Act on the Protection of Personal Information",
+        country: "Japan",
+        description:
+          "Japanese personal data protection law covering acquisition, use, and cross-border transfer of personal information.",
+        scope: "Business operators handling personal information in Japan.",
+        enforcementAuthority:
+          "Personal Information Protection Commission (PPC)",
+        maxPenalty:
+          "Up to JPY 100M for violations; orders and administrative measures",
+      },
+      {
+        code: "PIPA-KR",
+        name: "Personal Information Protection Act",
+        country: "South Korea",
+        description:
+          "South Korean comprehensive privacy law covering personal information processing, rights, and cross-border transfers.",
+        scope: "Personal information controllers and processors in Korea.",
+        enforcementAuthority:
+          "PIPC (Personal Information Protection Commission)",
+        maxPenalty: "Up to 3% of revenue or KRW 1B per violation",
+      },
+      {
+        code: "PDPA-SG",
+        name: "Singapore Personal Data Protection Act",
+        country: "Singapore",
+        description:
+          "Singapore privacy law governing collection, use, and disclosure of personal data, including breach notification and cross-border transfer rules.",
+        scope: "Organizations processing personal data in Singapore.",
+        enforcementAuthority: "PDPC (Personal Data Protection Commission)",
+        maxPenalty: "Up to 10% of annual turnover or SGD 1M",
+      },
+      {
+        code: "DPDP-IN",
+        name: "Digital Personal Data Protection Act",
+        country: "India",
+        description:
+          "India's digital personal data protection framework establishing notice, consent, purpose limitation, and data subject rights obligations.",
+        scope: "Data fiduciaries and processors in India.",
+        enforcementAuthority: "Data Protection Board of India",
+        maxPenalty: "Up to INR 250 Cr per breach",
+      },
+      {
+        code: "POPIA",
+        name: "Protection of Personal Information Act",
+        country: "South Africa",
+        description:
+          "South African privacy law governing lawful processing, conditions, and rights relating to personal information.",
+        scope: "Responsible parties and operators in South Africa.",
+        enforcementAuthority: "Information Regulator (South Africa)",
+        maxPenalty: "Up to ZAR 10M or imprisonment for serious violations",
+      },
+      {
+        code: "MEXICO-DPA",
+        name: "Mexico Federal Data Protection Law",
+        country: "Mexico",
+        description:
+          "Mexican federal privacy law (LFPDPPP) governing processing of personal data by private parties.",
+        scope: "Private-sector entities in Mexico.",
+        enforcementAuthority: "INAI",
+        maxPenalty: "Up to MXN 16M per violation",
+      },
+      {
+        code: "TH-PDPA",
+        name: "Thailand Personal Data Protection Act",
+        country: "Thailand",
+        description:
+          "Thai data protection law covering lawful basis, rights, cross-border transfers, and breach notification.",
+        scope: "Organizations handling personal data in Thailand.",
+        enforcementAuthority: "PDPC Thailand",
+        maxPenalty: "Up to THB 5M plus administrative fines",
+      },
+      {
+        code: "ID-PDP",
+        name: "Indonesia Personal Data Protection Law",
+        country: "Indonesia",
+        description:
+          "Indonesian personal data protection framework (UU PDP) governing processing, rights, and transfers.",
+        scope: "Controllers and processors in Indonesia.",
+        enforcementAuthority: "Ministry of Communication and Digital Affairs",
+        maxPenalty: "Up to 2% of annual revenue or IDR 50B",
+      },
+      {
+        code: "MY-PDPA",
+        name: "Malaysia Personal Data Protection Act",
+        country: "Malaysia",
+        description:
+          "Malaysian personal data protection principles covering consent, purpose, security, and retention.",
+        scope: "Commercial organizations processing personal data in Malaysia.",
+        enforcementAuthority: "Department of Personal Data Protection (JPDP)",
+        maxPenalty: "Up to MYR 1M or imprisonment",
+      },
+      {
+        code: "PH-DPA",
+        name: "Philippines Data Privacy Act",
+        country: "Philippines",
+        description:
+          "Philippine privacy law (RA 10173) governing processing of personal information and breach notification.",
+        scope:
+          "Personal information controllers and processors in the Philippines.",
+        enforcementAuthority: "National Privacy Commission (NPC)",
+        maxPenalty: "Up to PHP 5M or imprisonment",
+      },
+      {
+        code: "VN-PDPD",
+        name: "Vietnam Personal Data Protection Decree",
+        country: "Vietnam",
+        description:
+          "Vietnamese decree governing personal data processing, rights, and cross-border data transfers.",
+        scope: "Organizations processing personal data in Vietnam.",
+        enforcementAuthority: "MPS / MIC",
+        maxPenalty: "Up to 5% of revenue for violations",
+      },
+      {
+        code: "NDPA-NG",
+        name: "Nigeria Data Protection Act",
+        country: "Nigeria",
+        description:
+          "Nigerian data protection law establishing obligations for data controllers and processors.",
+        scope: "Data controllers and processors in Nigeria.",
+        enforcementAuthority: "NDPC (Nigeria Data Protection Commission)",
+        maxPenalty: "Up to 2% of annual gross revenue or NGN 10M",
+      },
+      {
+        code: "KENYA-DPA",
+        name: "Kenya Data Protection Act",
+        country: "Kenya",
+        description:
+          "Kenyan data protection law governing processing, rights, and transfer of personal data.",
+        scope: "Data controllers and processors in Kenya.",
+        enforcementAuthority:
+          "ODPC (Office of the Data Protection Commissioner)",
+        maxPenalty: "Up to KES 5M or 1% of turnover",
       },
     ];
     complianceControls2 = [
@@ -4544,6 +5333,575 @@ var init_compliance_reference_data = __esm({
           "Complete adequacy, contractual, or regulator-approved transfer mechanisms.",
         applicability: "Entities transferring personal data cross-border.",
       },
+      // ISO 27001
+      {
+        frameworkCode: "ISO-27001",
+        controlCode: "ISO-27001-1",
+        controlName: "ISMS Governance and Scope",
+        category: "Governance",
+        description:
+          "Establish an information security management system with defined scope, policy, and leadership commitment.",
+        requirement:
+          "Define ISMS scope, security policy, roles, and continuous improvement processes.",
+        applicability:
+          "Organizations seeking or maintaining ISO 27001 certification.",
+      },
+      {
+        frameworkCode: "ISO-27001",
+        controlCode: "ISO-27001-2",
+        controlName: "Risk Assessment and Treatment",
+        category: "Risk Management",
+        description:
+          "Conduct systematic information security risk assessments and select treatment options.",
+        requirement:
+          "Document risk assessment methodology, results, and risk treatment plans (SoA).",
+        applicability: "All ISMS scoped organizations.",
+      },
+      {
+        frameworkCode: "ISO-27001",
+        controlCode: "ISO-27001-3",
+        controlName: "Annex A Control Implementation",
+        category: "Technical Controls",
+        description:
+          "Implement applicable Annex A controls across organizational, human, physical, and technical domains.",
+        requirement:
+          "Maintain a Statement of Applicability mapping Annex A controls to implementation evidence.",
+        applicability: "All ISMS scoped organizations.",
+      },
+      {
+        frameworkCode: "ISO-27001",
+        controlCode: "ISO-27001-4",
+        controlName: "Internal Audit and Management Review",
+        category: "Audit",
+        description:
+          "Perform planned internal audits and management reviews of the ISMS.",
+        requirement:
+          "Conduct audits at planned intervals and review ISMS performance with management.",
+        applicability: "All ISMS scoped organizations.",
+      },
+      // SOC 2
+      {
+        frameworkCode: "SOC2",
+        controlCode: "SOC2-1",
+        controlName: "Trust Services Criteria Coverage",
+        category: "Assurance",
+        description:
+          "Design controls covering security, availability, processing integrity, confidentiality, and privacy criteria.",
+        requirement:
+          "Map implemented controls to applicable Trust Services Criteria (TSC).",
+        applicability: "Service organizations undergoing SOC 2 attestation.",
+      },
+      {
+        frameworkCode: "SOC2",
+        controlCode: "SOC2-2",
+        controlName: "Control Environment and Monitoring",
+        category: "Governance",
+        description:
+          "Maintain an effective control environment with risk assessment, information, communication, and monitoring activities.",
+        requirement:
+          "Document control environment, communication processes, and ongoing monitoring evidence.",
+        applicability: "Service organizations undergoing SOC 2 attestation.",
+      },
+      {
+        frameworkCode: "SOC2",
+        controlCode: "SOC2-3",
+        controlName: "Evidence Collection for Attestation",
+        category: "Audit",
+        description:
+          "Collect and retain evidence supporting controls for the audit period.",
+        requirement:
+          "Retain audit-ready evidence for the full examination period and support exception responses.",
+        applicability: "Service organizations undergoing SOC 2 attestation.",
+      },
+      // NIST CSF 2.0
+      {
+        frameworkCode: "NIST-CSF-2",
+        controlCode: "NIST-CSF-2-1",
+        controlName: "Govern Function Controls",
+        category: "Governance",
+        description:
+          "Establish organizational cybersecurity governance, risk management strategy, and supply-chain risk management.",
+        requirement:
+          "Define governance structures, roles, and risk appetite aligned to the CSF Govern function.",
+        applicability: "Organizations adopting NIST CSF 2.0.",
+      },
+      {
+        frameworkCode: "NIST-CSF-2",
+        controlCode: "NIST-CSF-2-2",
+        controlName: "Identify and Protect Functions",
+        category: "Security Controls",
+        description:
+          "Develop organizational understanding of assets, vulnerabilities, and risk while deploying protective safeguards.",
+        requirement:
+          "Maintain asset inventory, risk register, identity management, and protective technology controls.",
+        applicability: "Organizations adopting NIST CSF 2.0.",
+      },
+      {
+        frameworkCode: "NIST-CSF-2",
+        controlCode: "NIST-CSF-2-3",
+        controlName: "Detect, Respond, and Recover",
+        category: "Incident Response",
+        description:
+          "Operate detection capabilities, incident response plans, and recovery processes.",
+        requirement:
+          "Deploy continuous monitoring, tested incident playbooks, and documented recovery procedures.",
+        applicability: "Organizations adopting NIST CSF 2.0.",
+      },
+      // HIPAA
+      {
+        frameworkCode: "HIPAA",
+        controlCode: "HIPAA-1",
+        controlName: "Privacy Rule Safeguards",
+        category: "Privacy",
+        description:
+          "Implement privacy policies and safeguards protecting individually identifiable health information (PHI).",
+        requirement:
+          "Maintain notice, authorization, minimum necessary, and patient rights procedures.",
+        applicability: "Covered entities and business associates.",
+      },
+      {
+        frameworkCode: "HIPAA",
+        controlCode: "HIPAA-2",
+        controlName: "Security Rule Administrative and Technical Safeguards",
+        category: "Security",
+        description:
+          "Implement administrative, physical, and technical safeguards for electronic PHI.",
+        requirement:
+          "Deploy access controls, audit controls, integrity controls, and workforce training.",
+        applicability: "Covered entities and business associates.",
+      },
+      {
+        frameworkCode: "HIPAA",
+        controlCode: "HIPAA-3",
+        controlName: "Breach Notification",
+        category: "Incident Response",
+        description:
+          "Notify HHS OCR and affected individuals of breaches of unsecured PHI.",
+        requirement:
+          "Report breaches without unreasonable delay, within 60 days for large breaches.",
+        applicability: "Covered entities and business associates.",
+      },
+      // PCI DSS
+      {
+        frameworkCode: "PCI-DSS",
+        controlCode: "PCI-DSS-1",
+        controlName: "Secure Network and Systems",
+        category: "Network Security",
+        description:
+          "Install and maintain network security controls and secure configuration of systems.",
+        requirement:
+          "Configure firewalls, hardening baselines, and change management for system components.",
+        applicability:
+          "Organizations storing, processing, or transmitting cardholder data.",
+      },
+      {
+        frameworkCode: "PCI-DSS",
+        controlCode: "PCI-DSS-2",
+        controlName: "Cardholder Data Protection",
+        category: "Data Security",
+        description:
+          "Protect stored cardholder data and encrypt cardholder data over open networks.",
+        requirement:
+          "Minimize stored data, protect with strong cryptography, and mask PAN where displayed.",
+        applicability: "Card data environment components.",
+      },
+      {
+        frameworkCode: "PCI-DSS",
+        controlCode: "PCI-DSS-3",
+        controlName: "Access Control and Monitoring",
+        category: "Access Control",
+        description:
+          "Restrict access to cardholder data and track and monitor all access to system components.",
+        requirement:
+          "Apply least privilege, unique IDs, MFA, and log monitoring for card data environments.",
+        applicability: "Organizations in the card payment ecosystem.",
+      },
+      // NIS2
+      {
+        frameworkCode: "NIS2",
+        controlCode: "NIS2-1",
+        controlName: "Cybersecurity Risk Management Measures",
+        category: "Governance",
+        description:
+          "Adopt technical, operational, and organizational measures for managing cybersecurity risk.",
+        requirement:
+          "Implement measures covering risk analysis, incident handling, business continuity, and supply-chain security.",
+        applicability: "Essential and important entities under NIS2.",
+      },
+      {
+        frameworkCode: "NIS2",
+        controlCode: "NIS2-2",
+        controlName: "Incident Reporting Obligations",
+        category: "Incident Response",
+        description:
+          "Report significant incidents to national CSIRT/competent authority.",
+        requirement:
+          "Submit early warning within 24 hours, notification within 72 hours, and final report within 1 month.",
+        applicability: "Essential and important entities under NIS2.",
+      },
+      {
+        frameworkCode: "NIS2",
+        controlCode: "NIS2-3",
+        controlName: "Management Accountability",
+        category: "Governance",
+        description:
+          "Hold management accountable for cybersecurity risk management and compliance.",
+        requirement:
+          "Board approval of risk measures and training obligations for management.",
+        applicability: "Essential and important entities under NIS2.",
+      },
+      // DORA
+      {
+        frameworkCode: "DORA",
+        controlCode: "DORA-1",
+        controlName: "ICT Risk Management Framework",
+        category: "Risk Management",
+        description:
+          "Establish a sound, comprehensive, and well-documented ICT risk management framework.",
+        requirement:
+          "Define ICT risk governance, protection, detection, response, and recovery processes.",
+        applicability: "EU financial entities.",
+      },
+      {
+        frameworkCode: "DORA",
+        controlCode: "DORA-2",
+        controlName: "ICT Third-Party Risk Management",
+        category: "Third-party",
+        description:
+          "Manage ICT third-party risk including the register of information, risk assessments, and contractual protections.",
+        requirement:
+          "Maintain an ICT third-party register and enforce contract clauses on subcontracting and exit.",
+        applicability: "EU financial entities and critical ICT providers.",
+      },
+      {
+        frameworkCode: "DORA",
+        controlCode: "DORA-3",
+        controlName: "Digital Operational Resilience Testing",
+        category: "Resilience",
+        description:
+          "Perform regular testing of ICT systems and resilience capabilities.",
+        requirement:
+          "Conduct vulnerability, penetration, and scenario-based testing at defined frequencies.",
+        applicability: "EU financial entities.",
+      },
+      // EU AI Act
+      {
+        frameworkCode: "EU-AI-ACT",
+        controlCode: "EU-AI-ACT-1",
+        controlName: "AI System Risk Classification",
+        category: "AI Governance",
+        description:
+          "Determine the risk class (prohibited, high-risk, limited, minimal) of AI systems.",
+        requirement:
+          "Document classification rationale and applicable obligations per risk class.",
+        applicability: "AI providers and deployers in the EU.",
+      },
+      {
+        frameworkCode: "EU-AI-ACT",
+        controlCode: "EU-AI-ACT-2",
+        controlName: "High-Risk AI Conformity Assessment",
+        category: "AI Governance",
+        description:
+          "Perform conformity assessment, technical documentation, and registration for high-risk AI systems.",
+        requirement:
+          "Maintain EU declaration of conformity, logging, and post-market monitoring.",
+        applicability: "High-risk AI system providers.",
+      },
+      {
+        frameworkCode: "EU-AI-ACT",
+        controlCode: "EU-AI-ACT-3",
+        controlName: "Transparency and Human Oversight",
+        category: "AI Governance",
+        description:
+          "Ensure transparency obligations and human oversight for AI systems.",
+        requirement:
+          "Disclose AI-generated content and design human oversight mechanisms.",
+        applicability: "AI providers and deployers in the EU.",
+      },
+      // UK GDPR
+      {
+        frameworkCode: "UK-GDPR",
+        controlCode: "UK-GDPR-1",
+        controlName: "UK Lawful Basis and Rights",
+        category: "Privacy Governance",
+        description:
+          "Establish lawful basis for processing and uphold data subject rights under UK GDPR.",
+        requirement:
+          "Maintain records of processing, consent mechanisms, and rights request workflows.",
+        applicability: "UK data controllers and processors.",
+      },
+      {
+        frameworkCode: "UK-GDPR",
+        controlCode: "UK-GDPR-2",
+        controlName: "UK Breach Notification to ICO",
+        category: "Incident Response",
+        description:
+          "Notify the ICO of personal data breaches within 72 hours.",
+        requirement:
+          "Operate breach detection and notification procedures aligned to ICO requirements.",
+        applicability: "UK data controllers.",
+      },
+      {
+        frameworkCode: "UK-GDPR",
+        controlCode: "UK-GDPR-3",
+        controlName: "International Data Transfers",
+        category: "Cross-border Transfer",
+        description:
+          "Manage international data transfers under UK adequacy, IDTA, or other safeguards.",
+        requirement:
+          "Use UK International Data Transfer Agreement or adequacy decisions for transfers.",
+        applicability: "UK controllers transferring personal data overseas.",
+      },
+      // APPI (Japan)
+      {
+        frameworkCode: "APPI",
+        controlCode: "APPI-1",
+        controlName: "Utilization Purpose and Consent",
+        category: "Privacy Governance",
+        description:
+          "Specify the purpose of use and obtain consent where required for personal information.",
+        requirement:
+          "Notify or publish utilization purposes and obtain consent for changes.",
+        applicability:
+          "Business operators handling personal information in Japan.",
+      },
+      {
+        frameworkCode: "APPI",
+        controlCode: "APPI-2",
+        controlName: "Secure Management and Breach Handling",
+        category: "Data Security",
+        description:
+          "Implement necessary and appropriate security measures and breach notification procedures.",
+        requirement:
+          "Report qualifying breaches to the PPC and affected data subjects.",
+        applicability:
+          "Business operators handling personal information in Japan.",
+      },
+      {
+        frameworkCode: "APPI",
+        controlCode: "APPI-3",
+        controlName: "Cross-border Provision Rules",
+        category: "Cross-border Transfer",
+        description:
+          "Provide personal data to third parties in foreign countries in compliance with APPI rules.",
+        requirement:
+          "Disclose destination country and obtain consent or rely on adequate safeguards.",
+        applicability: "Business operators transferring personal data abroad.",
+      },
+      // PIPA-KR (South Korea)
+      {
+        frameworkCode: "PIPA-KR",
+        controlCode: "PIPA-KR-1",
+        controlName: "Consent and Purpose Limitation",
+        category: "Privacy Governance",
+        description:
+          "Obtain consent and limit processing to notified purposes for personal information.",
+        requirement:
+          "Operate granular consent collection and purpose-restricted processing.",
+        applicability: "Personal information controllers in Korea.",
+      },
+      {
+        frameworkCode: "PIPA-KR",
+        controlCode: "PIPA-KR-2",
+        controlName: "Data Subject Rights",
+        category: "Data Subject Rights",
+        description:
+          "Support access, correction, deletion, and suspension rights of data subjects.",
+        requirement:
+          "Operate rights request workflows with defined response timelines.",
+        applicability: "Personal information controllers in Korea.",
+      },
+      {
+        frameworkCode: "PIPA-KR",
+        controlCode: "PIPA-KR-3",
+        controlName: "Cross-border Transfer and Pseudonymization",
+        category: "Cross-border Transfer",
+        description:
+          "Apply cross-border transfer requirements and pseudonymization duties.",
+        requirement:
+          "Notify transfer details, obtain consent, and apply pseudonymization where required.",
+        applicability: "Controllers transferring data overseas.",
+      },
+      // PDPA-SG (Singapore)
+      {
+        frameworkCode: "PDPA-SG",
+        controlCode: "PDPA-SG-1",
+        controlName: "Consent and Purpose Limitation",
+        category: "Privacy Governance",
+        description:
+          "Obtain consent for collection, use, and disclosure of personal data.",
+        requirement:
+          "Operate consent mechanisms, purpose notification, and withdrawal processes.",
+        applicability: "Organizations processing personal data in Singapore.",
+      },
+      {
+        frameworkCode: "PDPA-SG",
+        controlCode: "PDPA-SG-2",
+        controlName: "Breach Notification",
+        category: "Incident Response",
+        description:
+          "Notify the PDPC of notifiable data breaches and affected individuals.",
+        requirement:
+          "Assess and notify qualifying breaches within prescribed timelines.",
+        applicability: "Organizations in Singapore.",
+      },
+      {
+        frameworkCode: "PDPA-SG",
+        controlCode: "PDPA-SG-3",
+        controlName: "Transfer Limitation",
+        category: "Cross-border Transfer",
+        description:
+          "Ensure comparable protection for transfers of personal data overseas.",
+        requirement:
+          "Apply transfer impact assessment and contractual safeguards for cross-border transfers.",
+        applicability: "Organizations transferring data outside Singapore.",
+      },
+      // DPDP-IN (India)
+      {
+        frameworkCode: "DPDP-IN",
+        controlCode: "DPDP-IN-1",
+        controlName: "Notice and Consent",
+        category: "Privacy Governance",
+        description:
+          "Provide notice of personal data processing and obtain verifiable consent.",
+        requirement:
+          "Deliver notice in specified languages and maintain consent records.",
+        applicability: "Data fiduciaries in India.",
+      },
+      {
+        frameworkCode: "DPDP-IN",
+        controlCode: "DPDP-IN-2",
+        controlName: "Data Subject Rights and Grievances",
+        category: "Data Subject Rights",
+        description:
+          "Support rights of access, correction, erasure, portability, and grievance redressal.",
+        requirement:
+          "Operate rights fulfillment and grievance redressal mechanisms with timelines.",
+        applicability: "Data fiduciaries in India.",
+      },
+      {
+        frameworkCode: "DPDP-IN",
+        controlCode: "DPDP-IN-3",
+        controlName: "Breach Notification",
+        category: "Incident Response",
+        description:
+          "Notify the Data Protection Board and affected data principals of data breaches.",
+        requirement: "Operate breach detection and notification procedures.",
+        applicability: "Data fiduciaries in India.",
+      },
+      // POPIA (South Africa)
+      {
+        frameworkCode: "POPIA",
+        controlCode: "POPIA-1",
+        controlName: "Processing Conditions and Accountability",
+        category: "Privacy Governance",
+        description:
+          "Comply with the eight POPIA processing conditions and accountability duties.",
+        requirement:
+          "Document lawful grounds, purpose specification, security safeguards, and information officer appointment.",
+        applicability: "Responsible parties in South Africa.",
+      },
+      {
+        frameworkCode: "POPIA",
+        controlCode: "POPIA-2",
+        controlName: "Cross-border Transfer Conditions",
+        category: "Cross-border Transfer",
+        description:
+          "Transfer personal information cross-border only where recipient ensures adequate protection.",
+        requirement:
+          "Apply contracts, adequacy assessments, or consent before transfers.",
+        applicability:
+          "Responsible parties transferring data outside South Africa.",
+      },
+      {
+        frameworkCode: "POPIA",
+        controlCode: "POPIA-3",
+        controlName: "Security Breach Notification",
+        category: "Incident Response",
+        description:
+          "Notify the Information Regulator and data subjects of security compromises.",
+        requirement:
+          "Operate breach detection and notification procedures with documented timelines.",
+        applicability: "Responsible parties in South Africa.",
+      },
+      // PIPEDA (Canada)
+      {
+        frameworkCode: "PIPEDA",
+        controlCode: "PIPEDA-1",
+        controlName: "Consent and Openness",
+        category: "Privacy Governance",
+        description:
+          "Obtain meaningful consent and provide transparent privacy policies.",
+        requirement:
+          "Operate consent mechanisms and published privacy policies under PIPEDA.",
+        applicability: "Private-sector organizations in Canada.",
+      },
+      {
+        frameworkCode: "PIPEDA",
+        controlCode: "PIPEDA-2",
+        controlName: "Safeguards and Breach Reporting",
+        category: "Data Security",
+        description:
+          "Protect personal information with safeguards and report material breaches.",
+        requirement:
+          "Operate security safeguards, breach records, and notification to OPC and affected individuals.",
+        applicability: "Private-sector organizations in Canada.",
+      },
+      // Privacy Act AU
+      {
+        frameworkCode: "PRIVACY-ACT-AU",
+        controlCode: "PRIVACY-ACT-AU-1",
+        controlName: "Australian Privacy Principles Compliance",
+        category: "Privacy Governance",
+        description: "Comply with the 13 Australian Privacy Principles (APPs).",
+        requirement:
+          "Operate APP-compliant collection, use, disclosure, access, and correction practices.",
+        applicability: "Australian organizations with APP obligations.",
+      },
+      {
+        frameworkCode: "PRIVACY-ACT-AU",
+        controlCode: "PRIVACY-ACT-AU-2",
+        controlName: "Notifiable Data Breaches",
+        category: "Incident Response",
+        description:
+          "Notify affected individuals and the OAIC of eligible data breaches.",
+        requirement:
+          "Operate breach assessment and notification procedures within statutory timelines.",
+        applicability: "Entities with APP obligations.",
+      },
+      // MEXICO-DPA
+      {
+        frameworkCode: "MEXICO-DPA",
+        controlCode: "MEXICO-DPA-1",
+        controlName: "Privacy Notice and Consent",
+        category: "Privacy Governance",
+        description:
+          "Provide privacy notices and obtain consent for personal data processing.",
+        requirement:
+          "Operate privacy notices with legal basis and consent management.",
+        applicability: "Private-sector entities in Mexico.",
+      },
+      {
+        frameworkCode: "MEXICO-DPA",
+        controlCode: "MEXICO-DPA-2",
+        controlName: "ARCO Rights",
+        category: "Data Subject Rights",
+        description:
+          "Support access, rectification, cancellation, and opposition (ARCO) rights.",
+        requirement:
+          "Operate ARCO rights request workflows with statutory response timelines.",
+        applicability: "Private-sector entities in Mexico.",
+      },
+      {
+        frameworkCode: "MEXICO-DPA",
+        controlCode: "MEXICO-DPA-3",
+        controlName: "Breach Notification",
+        category: "Incident Response",
+        description: "Notify INAI of breaches involving personal data.",
+        requirement:
+          "Operate breach detection and INAI notification procedures.",
+        applicability: "Private-sector entities in Mexico.",
+      },
     ];
     complianceRelationships = [
       {
@@ -4831,6 +6189,281 @@ var init_compliance_reference_data = __esm({
         riskLevel: "medium",
         mitigation:
           "Unify vulnerability lifecycle tooling while preserving local reporting timelines and authority channels.",
+      },
+      {
+        sourceFrameworkCode: "ISO-27001",
+        targetFrameworkCode: "NIST-CSF-2",
+        relationshipType: "overlap",
+        description:
+          "ISO 27001 ISMS controls and NIST CSF 2.0 functions share a common technical and organizational control baseline.",
+        severity: "high",
+        riskLevel: "high",
+        mitigation:
+          "Maintain one unified control catalog mapped to both ISO 27001 Annex A and NIST CSF functions.",
+      },
+      {
+        sourceFrameworkCode: "ISO-27701",
+        targetFrameworkCode: "ISO-27001",
+        relationshipType: "dependency",
+        description:
+          "ISO 27701 privacy information management extends the ISO 27001 ISMS with PIMS requirements.",
+        severity: "high",
+        riskLevel: "high",
+        mitigation:
+          "Build the PIMS as an extension of an existing certified ISMS to minimize duplicate effort.",
+      },
+      {
+        sourceFrameworkCode: "ISO-27701",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "overlap",
+        description:
+          "ISO 27701 PIMS controls map closely to GDPR accountability and data subject rights obligations.",
+        severity: "high",
+        riskLevel: "high",
+        mitigation:
+          "Use ISO 27701 mappings as evidence of GDPR accountability for international operators.",
+      },
+      {
+        sourceFrameworkCode: "ISO-27701",
+        targetFrameworkCode: "PIPL",
+        relationshipType: "overlap",
+        description:
+          "PIMS privacy controls overlap with PIPL requirements for transparency, rights, and security.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Apply PIMS control evidence with PIPL-specific local overlays for notices and export approvals.",
+      },
+      {
+        sourceFrameworkCode: "ISO-27701",
+        targetFrameworkCode: "PDPL",
+        relationshipType: "overlap",
+        description:
+          "PIMS privacy controls align with PDPL accountability and data subject rights duties.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Reuse PIMS evidence with PDPL-specific local requirements for cross-border processing.",
+      },
+      {
+        sourceFrameworkCode: "SOC2",
+        targetFrameworkCode: "ISO-27001",
+        relationshipType: "overlap",
+        description:
+          "SOC 2 Trust Services Criteria and ISO 27001 Annex A share substantial security control coverage.",
+        severity: "high",
+        riskLevel: "high",
+        mitigation:
+          "Maintain a shared control matrix to satisfy both SOC 2 examination and ISO certification audits.",
+      },
+      {
+        sourceFrameworkCode: "SOC2",
+        targetFrameworkCode: "NIST-CSF-2",
+        relationshipType: "overlap",
+        description:
+          "SOC 2 controls can be mapped to NIST CSF 2.0 functions for consolidated security posture reporting.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Align TSC control narratives with NIST CSF function and category identifiers.",
+      },
+      {
+        sourceFrameworkCode: "HIPAA",
+        targetFrameworkCode: "NIST-CSF-2",
+        relationshipType: "coordination",
+        description:
+          "HIPAA safeguards are commonly operationalized through NIST CSF 2.0 technical controls.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Use NIST CSF controls as the technical baseline for HIPAA administrative, physical, and technical safeguards.",
+      },
+      {
+        sourceFrameworkCode: "PCI-DSS",
+        targetFrameworkCode: "ISO-27001",
+        relationshipType: "overlap",
+        description:
+          "PCI DSS requirements and ISO 27001 Annex A controls overlap for network and access security.",
+        severity: "high",
+        riskLevel: "high",
+        mitigation:
+          "Satisfy PCI DSS requirements using ISO 27001 control evidence where coverage is equivalent.",
+      },
+      {
+        sourceFrameworkCode: "NIS2",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "NIS2 security measures and GDPR security-of-processing duties require coordinated incident governance.",
+        severity: "high",
+        riskLevel: "high",
+        mitigation:
+          "Run a unified incident response function feeding both NIS2 CSIRT and GDPR supervisory notifications.",
+      },
+      {
+        sourceFrameworkCode: "DORA",
+        targetFrameworkCode: "NIS2",
+        relationshipType: "overlap",
+        description:
+          "DORA ICT risk requirements for financial entities overlap NIS2 security measures for essential entities.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "For financial entities, prefer DORA-specific controls and align NIS2 reporting where applicable.",
+      },
+      {
+        sourceFrameworkCode: "EU-AI-ACT",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "AI Act obligations interplay with GDPR for AI systems processing personal data.",
+        severity: "high",
+        riskLevel: "high",
+        mitigation:
+          "Maintain a coordinated AI governance layer addressing both data protection and AI risk obligations.",
+      },
+      {
+        sourceFrameworkCode: "UK-GDPR",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "overlap",
+        description:
+          "UK GDPR mirrors EU GDPR with distinct enforcement, adequacy, and transfer mechanics.",
+        severity: "high",
+        riskLevel: "high",
+        mitigation:
+          "Run one privacy program with UK- and EU-specific transfer tooling and regulator reporting.",
+      },
+      {
+        sourceFrameworkCode: "APPI",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Japan APPI and GDPR share accountability and rights principles with different consent and transfer mechanics.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Harmonize global privacy policies while keeping jurisdiction-specific consent and transfer flows.",
+      },
+      {
+        sourceFrameworkCode: "PIPA-KR",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Korea PIPA and GDPR both require strong consent and rights frameworks with distinct local enforcement.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Use a global privacy baseline with Korean-specific consent granularity and notification duties.",
+      },
+      {
+        sourceFrameworkCode: "PDPA-SG",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Singapore PDPA and GDPR align on consent and rights principles with different breach timelines.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Share the privacy program baseline while honoring PDPC-specific timelines and exemptions.",
+      },
+      {
+        sourceFrameworkCode: "DPDP-IN",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "India DPDP Act and GDPR share accountability principles with different consent and notice mechanics.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Maintain a global privacy baseline with DPDP-specific notice languages and verifiable consent flows.",
+      },
+      {
+        sourceFrameworkCode: "POPIA",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "overlap",
+        description:
+          "South Africa POPIA conditions closely track GDPR principles with local enforcement nuances.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Extend the GDPR baseline to POPIA conditions with local information officer and breach duties.",
+      },
+      {
+        sourceFrameworkCode: "PIPEDA",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Canada PIPEDA and GDPR align on consent, access, and safeguards with distinct exemption regimes.",
+        severity: "low",
+        riskLevel: "low",
+        mitigation:
+          "Use one privacy program with PIPEDA-specific consent and material breach notification handling.",
+      },
+      {
+        sourceFrameworkCode: "PRIVACY-ACT-AU",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Australian Privacy Principles and GDPR share rights and transparency duties with different scope.",
+        severity: "low",
+        riskLevel: "low",
+        mitigation:
+          "Operate APP-aligned practices as the local baseline while satisfying GDPR where it applies.",
+      },
+      {
+        sourceFrameworkCode: "MEXICO-DPA",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Mexican Federal Law and GDPR both require transparency, consent, and rights with local nuances.",
+        severity: "low",
+        riskLevel: "low",
+        mitigation:
+          "Layer Mexican privacy notice and ARCO workflows onto the global privacy baseline.",
+      },
+      {
+        sourceFrameworkCode: "ISO-27001",
+        targetFrameworkCode: "CSL",
+        relationshipType: "coordination",
+        description:
+          "ISO 27001 ISMS controls can underpin CSL network security baseline obligations for international operators.",
+        severity: "medium",
+        riskLevel: "medium",
+        mitigation:
+          "Use the certified ISMS as evidence for CSL baseline controls with local incident reporting overlays.",
+      },
+      {
+        sourceFrameworkCode: "TH-PDPA",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Thailand PDPA aligns with GDPR principles for lawful basis, rights, and breach notification.",
+        severity: "low",
+        riskLevel: "low",
+        mitigation:
+          "Reuse the global privacy baseline with PDPC Thai-specific consent and DPO requirements.",
+      },
+      {
+        sourceFrameworkCode: "NDPA-NG",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Nigeria NDPA and its Data Protection Act share GDPR-style accountability and rights duties.",
+        severity: "low",
+        riskLevel: "low",
+        mitigation:
+          "Extend the global privacy baseline with NDPA registration, officer, and breach duties.",
+      },
+      {
+        sourceFrameworkCode: "KENYA-DPA",
+        targetFrameworkCode: "GDPR",
+        relationshipType: "coordination",
+        description:
+          "Kenya Data Protection Act mirrors GDPR principles with local licensing and transfer rules.",
+        severity: "low",
+        riskLevel: "low",
+        mitigation:
+          "Layer Kenya DPO registration and local transfer safeguards onto the global baseline.",
       },
     ];
   },
@@ -5488,6 +7121,24 @@ var vendorCountryValues = [
   "netherlands",
   "united-kingdom",
   "united-states",
+  "canada",
+  "australia",
+  "japan",
+  "south-korea",
+  "south-africa",
+  "mexico",
+  "qatar",
+  "kuwait",
+  "oman",
+  "jordan",
+  "egypt",
+  "indonesia",
+  "thailand",
+  "vietnam",
+  "philippines",
+  "malaysia",
+  "nigeria",
+  "kenya",
   "other",
 ];
 var vendorJurisdictionValues = [
@@ -5502,6 +7153,25 @@ var vendorJurisdictionValues = [
   "united-kingdom",
   "united-states",
   "apac",
+  "canada",
+  "australia",
+  "japan",
+  "south-korea",
+  "south-africa",
+  "mexico",
+  "qatar",
+  "kuwait",
+  "bahrain",
+  "oman",
+  "jordan",
+  "egypt",
+  "indonesia",
+  "thailand",
+  "vietnam",
+  "philippines",
+  "malaysia",
+  "nigeria",
+  "kenya",
 ];
 var vendorComplianceStandardValues = [
   "iso-27001",
@@ -6732,6 +8402,14 @@ function buildRegionCoverage(vendorRows, assessmentRows) {
     "US",
     "Brazil",
     "Global",
+    "United Kingdom",
+    "Canada",
+    "Australia",
+    "Japan",
+    "Singapore",
+    "India",
+    "South Africa",
+    "United Arab Emirates",
   ];
   const coverage = trackedRegions.map(region => ({
     region,
@@ -6898,6 +8576,7 @@ function isAccessAllowed(org, sub) {
 }
 
 // server/_core/trpc.ts
+init_schema();
 var t = initTRPC.context().create({
   transformer: superjson,
 });
@@ -7109,6 +8788,55 @@ var requireOnboardingComplete = t.middleware(async opts => {
   }
   return next({ ctx: { ...ctx, user: ctx.user } });
 });
+var MFA_WINDOW_MS = 30 * 60 * 1e3;
+var requireMfa = t.middleware(async opts => {
+  const { ctx, next } = opts;
+  if (!ctx.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+  }
+  const pass = () =>
+    next({
+      ctx: {
+        ...ctx,
+        user: ctx.user,
+        organizationId: ctx.organizationId,
+        organizationRole: ctx.organizationRole,
+      },
+    });
+  const openId = ctx.user.openId ?? "";
+  if (!openId.startsWith("local:")) {
+    return pass();
+  }
+  const localUserIdMatch = /^local:(\d+)$/.exec(openId);
+  if (!localUserIdMatch) {
+    return pass();
+  }
+  const db = await getDb();
+  if (!db) {
+    return pass();
+  }
+  const [lu] = await db
+    .select({
+      mfaEnabled: localUsers.mfaEnabled,
+      lastMfaVerifiedAt: localUsers.lastMfaVerifiedAt,
+    })
+    .from(localUsers)
+    .where(eq4(localUsers.id, Number(localUserIdMatch[1])))
+    .limit(1);
+  if (!lu || !lu.mfaEnabled) {
+    return pass();
+  }
+  if (
+    !lu.lastMfaVerifiedAt ||
+    Date.now() - lu.lastMfaVerifiedAt.getTime() > MFA_WINDOW_MS
+  ) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "mfa_required",
+    });
+  }
+  return pass();
+});
 var onboardedProcedure = protectedProcedure.use(requireOnboardingComplete);
 
 // server/admin-store.ts
@@ -7208,6 +8936,7 @@ var adminRouter = router({
       );
     }),
   deleteInteractionData: adminProcedure
+    .use(requireMfa)
     .input(
       z
         .object({
@@ -7292,6 +9021,7 @@ var adminRouter = router({
       });
     }),
   updateUserAccess: adminProcedure
+    .use(requireMfa)
     .input(
       z.object({
         userId: z.number().int().positive(),
@@ -7765,7 +9495,11 @@ init_supplier_assessment();
 init_env();
 
 // server/ai/schemas.ts
+init_supplier_assessment();
 import { z as z2 } from "zod";
+var jurisdictionScoreShape = Object.fromEntries(
+  JURISDICTION_SCORE_KEYS.map(key => [key, z2.number().int().min(0).max(100)])
+);
 var aiJobStatusSchema = z2.enum(["queued", "running", "completed", "failed"]);
 var aiJobStageSchema = z2.enum([
   "queued",
@@ -7792,6 +9526,29 @@ var supplierGapSchema = z2.object({
     "brazil",
     "cross_border",
     "global",
+    "uk",
+    "canada",
+    "australia",
+    "japan",
+    "southKorea",
+    "singapore",
+    "india",
+    "southAfrica",
+    "mexico",
+    "uae",
+    "qatar",
+    "kuwait",
+    "bahrain",
+    "oman",
+    "jordan",
+    "egypt",
+    "indonesia",
+    "thailand",
+    "vietnam",
+    "philippines",
+    "malaysia",
+    "nigeria",
+    "kenya",
   ]),
   frameworks: z2.array(z2.string().trim().min(1).max(32)).min(1).max(8),
   severity: assessmentSeveritySchema,
@@ -7811,6 +9568,7 @@ var supplierAssessmentSchema = z2.object({
     us: z2.number().int().min(0).max(100),
     brazil: z2.number().int().min(0).max(100),
     global: z2.number().int().min(0).max(100),
+    ...jurisdictionScoreShape,
   }),
   status: z2.enum(["compliant", "partial", "non_compliant"]),
   riskLevel: z2.enum(["low", "medium", "high", "critical"]),
@@ -7907,14 +9665,42 @@ var DEFAULT_KNOWN_FRAMEWORKS = [
   "MLPS 2.0",
   "PDPL",
   "NCA",
+  "GDPR",
+  "CCPA",
+  "LGPD",
+  "ISO 27001",
+  "ISO 27701",
+  "SOC 2",
+  "NIST CSF",
+  "HIPAA",
+  "PCI DSS",
+  "NIS2",
+  "SOX",
 ];
 var JURISDICTION_FRAMEWORKS = {
   china: ["PIPL", "CSL", "DSL", "MLPS 2.0"],
   saudi: ["PDPL", "NCA"],
-  eu: ["GDPR"],
-  us: ["CCPA", "HIPAA", "SOX"],
+  eu: ["GDPR", "NIS2", "DORA", "EU-AI-ACT"],
+  us: ["CCPA", "HIPAA", "SOX", "PCI-DSS", "NIST-CSF-2"],
   brazil: ["LGPD"],
-  global: ["ISO 27001", "ISO 27701", "SOC 2", "NIST CSF"],
+  global: ["ISO 27001", "ISO 27701", "SOC 2", "NIST CSF", "PCI-DSS"],
+  uk: ["UK-GDPR"],
+  canada: ["PIPEDA"],
+  australia: ["PRIVACY-ACT-AU"],
+  japan: ["APPI"],
+  southKorea: ["PIPA-KR"],
+  singapore: ["PDPA-SG"],
+  india: ["DPDP-IN"],
+  southAfrica: ["POPIA"],
+  mexico: ["MEXICO-DPA"],
+  uae: ["ISO 27701", "ISO 27001"],
+  thailand: ["TH-PDPA"],
+  indonesia: ["ID-PDP"],
+  malaysia: ["MY-PDPA"],
+  philippines: ["PH-DPA"],
+  vietnam: ["VN-PDPD"],
+  nigeria: ["NDPA-NG"],
+  kenya: ["KENYA-DPA"],
 };
 var INJECTION_PATTERNS = [
   /ignore\s+all\s+previous\s+instructions/i,
@@ -7942,6 +9728,22 @@ var CONTROL_BUCKET_KEYWORDS = {
     "riyadh",
     "beijing",
     "shanghai",
+    "london",
+    "tokyo",
+    "singapore",
+    "toronto",
+    "sydney",
+    "mumbai",
+    "johannesburg",
+    "dubai",
+    "abu dhabi",
+    "doha",
+    "mexico city",
+    "nairobi",
+    "lagos",
+    "bangkok",
+    "jakarta",
+    "kuala lumpur",
     "localization",
   ],
   "Access Control": ["access", "identity", "iam", "mfa", "privilege"],
@@ -8323,7 +10125,8 @@ function buildDbPayload(assessment, remediationPlan, ragControls) {
   ).flatMap(([jurisdiction, codes]) =>
     codes.map(code => ({
       frameworkCode: code,
-      complianceScore: assessment.jurisdictionScores[jurisdiction],
+      complianceScore:
+        assessment.jurisdictionScores[jurisdiction] ?? assessment.overallScore,
       riskLevel: assessment.riskLevel,
       status: assessment.status,
       findings: assessment.gaps
@@ -8380,6 +10183,12 @@ async function executeAssessmentPipeline(input, reportStage) {
   });
   const assessment =
     externalAssessment || runJudge(input.vendor, extractedFacts);
+  for (const key of JURISDICTION_SCORE_KEYS) {
+    const score = assessment.jurisdictionScores[key];
+    if (typeof score !== "number" || !Number.isFinite(score)) {
+      assessment.jurisdictionScores[key] = assessment.overallScore;
+    }
+  }
   reportStage(
     "synthesizer",
     "Strategic synthesizer drafting remediation plan."
@@ -9724,10 +11533,78 @@ var aiRouter = router({
 import { z as z4 } from "zod";
 import { TRPCError as TRPCError4 } from "@trpc/server";
 init_env();
+
+// server/_core/jurisdictions.ts
+var NEW_GLOBAL_JURISDICTIONS = [
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Japan",
+  "South Korea",
+  "Singapore",
+  "India",
+  "South Africa",
+  "Mexico",
+  "Thailand",
+  "Indonesia",
+  "Malaysia",
+  "Philippines",
+  "Vietnam",
+  "Nigeria",
+  "Kenya",
+  "United Arab Emirates",
+  "Qatar",
+  "Kuwait",
+  "Bahrain",
+  "Oman",
+  "Jordan",
+  "Egypt",
+];
+var GLOBAL_JURISDICTIONS = [
+  "China",
+  "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
+  "Global",
+  "Both",
+  "Other",
+  ...NEW_GLOBAL_JURISDICTIONS,
+];
+var REPORT_JURISDICTIONS = [
+  "Saudi Arabia",
+  "China",
+  "EU",
+  "US",
+  "Brazil",
+  "Global",
+  "both",
+  ...NEW_GLOBAL_JURISDICTIONS,
+];
+var TIMETABLE_JURISDICTIONS = [
+  "Saudi Arabia",
+  "China",
+  "EU",
+  "US",
+  "Brazil",
+  ...NEW_GLOBAL_JURISDICTIONS,
+];
+var DEADLINE_JURISDICTIONS = [
+  "China",
+  "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
+  "Global",
+  "Both",
+  ...NEW_GLOBAL_JURISDICTIONS,
+];
+
+// server/billing.ts
 init_config_schema();
 init_db();
 init_schema();
-import { eq as eq7 } from "drizzle-orm";
+import { eq as eq7, desc as desc4 } from "drizzle-orm";
 var PRICE_CATALOG = [
   // ── Starter ──────────────────────────────────────────────────────────────
   {
@@ -9800,6 +11677,22 @@ var PRICE_CATALOG = [
     amountCents: 19900,
     label: "From $199 / mo",
     stripePriceId: parsedEnv.STRIPE_PRICE_ENTERPRISE_MONTHLY,
+  },
+  {
+    plan: "enterprise",
+    interval: "quarterly",
+    amountCents: 54900,
+    label: "From $549 / qtr",
+    savingsLabel: "Save 8%",
+    stripePriceId: parsedEnv.STRIPE_PRICE_ENTERPRISE_QUARTERLY,
+  },
+  {
+    plan: "enterprise",
+    interval: "biannual",
+    amountCents: 99900,
+    label: "From $999 / 6mo",
+    savingsLabel: "Save 16%",
+    stripePriceId: parsedEnv.STRIPE_PRICE_ENTERPRISE_BIANNUAL,
   },
   {
     plan: "enterprise",
@@ -9906,6 +11799,7 @@ var billingRouter = router({
       .select()
       .from(subscriptions)
       .where(eq7(subscriptions.organizationId, org.id))
+      .orderBy(desc4(subscriptions.createdAt))
       .limit(1);
     return {
       plan: org.plan,
@@ -9921,6 +11815,7 @@ var billingRouter = router({
   }),
   /** Create a Stripe Checkout Session — redirects browser to hosted checkout */
   createCheckoutSession: orgAdminProcedure
+    .use(requireMfa)
     .input(
       z4.object({
         plan: planSchema,
@@ -10008,6 +11903,7 @@ var billingRouter = router({
     }),
   /** Open Stripe Customer Portal (manage / cancel subscription) */
   createPortalSession: orgAdminProcedure
+    .use(requireMfa)
     .input(z4.object({ organizationId: z4.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
       if (input.organizationId !== ctx.organizationId) {
@@ -10056,6 +11952,7 @@ var billingRouter = router({
         .select()
         .from(billingEvents)
         .where(eq7(billingEvents.organizationId, input.organizationId))
+        .orderBy(desc4(billingEvents.createdAt))
         .limit(50);
       return events.map(e => ({
         id: e.id,
@@ -10077,18 +11974,7 @@ var billingRouter = router({
           .max(255),
         billingEmail: z4.string().email(),
         industry: z4.string().max(120).optional(),
-        primaryJurisdiction: z4
-          .enum([
-            "China",
-            "Saudi Arabia",
-            "EU",
-            "US",
-            "Brazil",
-            "Global",
-            "Both",
-            "Other",
-          ])
-          .optional(),
+        primaryJurisdiction: z4.enum(GLOBAL_JURISDICTIONS).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -10100,18 +11986,21 @@ var billingRouter = router({
         });
       }
       const userId = ctx.user.id;
+      const openId = ctx.user.openId ?? "";
+      const localUserId = /^local:(\d+)$/.exec(openId)?.[1];
       const slug = input.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "")
         .slice(0, 80);
       const org = await createOrganizationForUser({
-        slug: `${slug}-${userId}`,
+        slug: `${slug}-${localUserId ?? userId}`,
         name: input.name,
         billingEmail: input.billingEmail,
         industry: input.industry,
         primaryJurisdiction: input.primaryJurisdiction,
-        ownerUserId: userId,
+        ownerUserId: localUserId ? void 0 : userId,
+        ownerLocalUserId: localUserId ? Number(localUserId) : void 0,
       });
       void recordUserInteraction(ctx, {
         context: "billing.organization",
@@ -10339,7 +12228,7 @@ async function checkRedisReadiness() {
       details: `Redis connection failed: ${String(error)}`,
     };
   } finally {
-    client.disconnect();
+    client.quit().catch(() => void 0);
   }
 }
 function checkBillingReadiness() {
@@ -10605,20 +12494,314 @@ import {
 import qrcode from "qrcode";
 init_email();
 
+// server/services/login-notification.ts
+init_db();
+init_schema();
+import { eq as eq8 } from "drizzle-orm";
+
+// server/email/service.ts
+import { createTransport } from "nodemailer";
+var FROM = "DJAC by Yalla Hack <hello@yalla-hack.com>";
+var REPLY_TO = "hello@yalla-hack.com";
+var transporter = null;
+function getTransporter() {
+  if (transporter) return transporter;
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT || "587", 10);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  if (!host || !user || !pass) {
+    console.warn(
+      "[Email] SMTP not configured \u2014 emails will be logged only."
+    );
+    return null;
+  }
+  transporter = createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
+  return transporter;
+}
+function baseTemplate(content) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f8fafc; margin: 0; padding: 0; }
+  .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; }
+  .header { background: linear-gradient(135deg, #0891b2, #7c3aed); padding: 32px; }
+  .header-logo { color: #fff; font-size: 24px; font-weight: 700; margin: 0; }
+  .header-sub { color: rgba(255,255,255,0.85); font-size: 14px; margin: 4px 0 0; }
+  .content { padding: 32px; }
+  .content h2 { font-size: 20px; color: #0f172a; margin: 0 0 16px; }
+  .content p { font-size: 14px; color: #334155; line-height: 1.6; margin: 0 0 12px; }
+  .btn { display: inline-block; background: #0891b2; color: #fff !important; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0; }
+  .footer { padding: 16px 32px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }
+  .footer p { margin: 0 0 4px; }
+  .steps { margin: 16px 0; padding: 0; list-style: none; }
+  .steps li { padding: 6px 0; font-size: 14px; color: #334155; }
+  .steps li::before { content: "\u2713 "; color: #22c55e; font-weight: 700; }
+</style>
+</head>
+<body style="padding: 24px 0;">
+<div class="container">
+  <div class="header">
+    <h1 class="header-logo">Yalla Hack</h1>
+    <p class="header-sub">DJAC Compliance Platform</p>
+  </div>
+  <div class="content">
+    ${content}
+  </div>
+  <div class="footer">
+    <p><strong>Yalla Hack</strong> \xB7 hello@yalla-hack.com</p>
+    <p>DJAC \u2014 Multi-jurisdiction compliance across 29 jurisdictions</p>
+  </div>
+</div>
+</body>
+</html>`;
+}
+var emailService = {
+  async sendWelcome(user, org) {
+    const html = baseTemplate(`
+      <h2>Welcome to DJAC, ${user.name || "there"}!</h2>
+      <p>Your organization <strong>${org.name}</strong> is now set up on DJAC \u2014 the multi-jurisdiction compliance platform covering 29 jurisdictions across APAC, EMEA, and the Americas.</p>
+      <p>Here&rsquo;s what to do next:</p>
+      <ol class="steps">
+        <li>Complete your onboarding \u2014 select frameworks and objectives</li>
+        <li>Add your first vendor for AI-powered compliance assessment</li>
+        <li>Explore the Compliance Framework Library</li>
+        <li>Set up deadline tracking for regulatory obligations</li>
+      </ol>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/dashboard" class="btn">Launch Dashboard \u2192</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #94a3b8;">Need help? Reply to this email or visit our support center.</p>
+    `);
+    return send(user, "Welcome to DJAC", html, "welcome");
+  },
+  async sendVerification(user, token) {
+    const url = `${process.env.APP_URL || "https://app.yalla-hack.ae"}/verify?token=${token}`;
+    const html = baseTemplate(`
+      <h2>Verify Your Email</h2>
+      <p>Please verify your email address to activate your DJAC account.</p>
+      <a href="${url}" class="btn">Verify Email \u2192</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #94a3b8;">This link expires in 24 hours. If you didn&rsquo;t create an account, you can ignore this email.</p>
+    `);
+    return send(user, "Verify Your Email \u2014 DJAC", html, "verify-email");
+  },
+  async sendPasswordReset(user, token) {
+    const url = `${process.env.APP_URL || "https://app.yalla-hack.ae"}/reset-password?token=${token}`;
+    const html = baseTemplate(`
+      <h2>Reset Your Password</h2>
+      <p>You requested a password reset for your DJAC account.</p>
+      <a href="${url}" class="btn">Reset Password \u2192</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #94a3b8;">This link expires in 1 hour. If you didn&rsquo;t request this, please ignore this email.</p>
+    `);
+    return send(
+      user,
+      "Reset Your Password \u2014 DJAC",
+      html,
+      "password-reset"
+    );
+  },
+  async sendTeamInvite(inviter, inviteeEmail, org) {
+    const url = `${process.env.APP_URL || "https://app.yalla-hack.ae"}/accept-invite?org=${org.id}`;
+    const html = baseTemplate(`
+      <h2>You're Invited to DJAC</h2>
+      <p><strong>${inviter.name || "A team member"}</strong> has invited you to join <strong>${org.name}</strong> on DJAC.</p>
+      <p>DJAC helps your team manage compliance across 29 jurisdictions with AI-powered assessments, deadline tracking, and automated reporting.</p>
+      <a href="${url}" class="btn">Accept Invitation \u2192</a>
+    `);
+    return sendTo(
+      inviteeEmail,
+      `You're Invited to Join ${org.name} \u2014 DJAC`,
+      html,
+      "team-invite"
+    );
+  },
+  async sendSecurityAlert(user, ip, location, timestamp2, device) {
+    const html = baseTemplate(`
+      <h2>Security Alert \u2014 New Sign-in</h2>
+      <p>Your DJAC account <strong>${user.email || "unknown"}</strong> was just accessed from a new session.</p>
+      <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin: 16px 0;">
+        <p style="margin: 0 0 8px; font-weight: 600; color: #991b1b;">Sign-in Details</p>
+        <table style="width: 100%%; font-size: 13px; color: #334155; border-collapse: collapse;">
+          <tr><td style="padding: 4px 8px 4px 0; color: #64748b;">Time</td><td style="padding: 4px 0;">${timestamp2}</td></tr>
+          <tr><td style="padding: 4px 8px 4px 0; color: #64748b;">IP Address</td><td style="padding: 4px 0;">${ip}</td></tr>
+          <tr><td style="padding: 4px 8px 4px 0; color: #64748b;">Location</td><td style="padding: 4px 0;">${location}</td></tr>
+          <tr><td style="padding: 4px 8px 4px 0; color: #64748b;">Device</td><td style="padding: 4px 0; font-size: 12px;">${device}</td></tr>
+        </table>
+      </div>
+      <p>If this was you, no action is needed. If you don't recognise this activity, please reset your password immediately and review your account security settings.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/settings" class="btn" style="background: #dc2626;">Review Account \u2192</a>
+      <p style="margin-top: 12px; font-size: 11px; color: #94a3b8;">This is an automated security notification. Replies are not monitored. Contact hello@yalla-hack.com for support.</p>
+    `);
+    return send(
+      user,
+      "Security Alert \u2014 New Sign-in to DJAC",
+      html,
+      "security-alert"
+    );
+  },
+};
+async function send(user, subject, html, template) {
+  const email = user.email;
+  if (!email) return;
+  const t2 = getTransporter();
+  if (!t2) {
+    console.info(`[Email] ${template} to ${email}: ${subject}`);
+    return;
+  }
+  try {
+    await t2.sendMail({
+      from: FROM,
+      to: email,
+      replyTo: REPLY_TO,
+      subject,
+      html,
+    });
+  } catch (e) {
+    console.error(`[Email] Failed to send ${template}:`, e);
+  }
+}
+async function sendTo(email, subject, html, template) {
+  const t2 = getTransporter();
+  if (!t2) {
+    console.info(`[Email] ${template} to ${email}: ${subject}`);
+    return;
+  }
+  try {
+    await t2.sendMail({
+      from: FROM,
+      to: email,
+      replyTo: REPLY_TO,
+      subject,
+      html,
+    });
+  } catch (e) {
+    console.error(`[Email] Failed to send ${template}:`, e);
+  }
+}
+
+// server/services/login-notification.ts
+function getClientIp3(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    return forwarded.split(",")[0]?.trim() || "unknown";
+  }
+  return req.socket?.remoteAddress || "unknown";
+}
+function getApproximateLocation(req) {
+  const country =
+    req.headers["cf-ipcountry"] || req.headers["x-vercel-ip-country"];
+  const region = req.headers["x-vercel-ip-region"];
+  const city = req.headers["x-vercel-ip-city"];
+  if (typeof country === "string" && country.trim()) {
+    const parts = [];
+    if (typeof city === "string" && city.trim()) parts.push(city.trim());
+    if (typeof region === "string" && region.trim()) parts.push(region.trim());
+    parts.push(country.trim());
+    return parts.join(", ");
+  }
+  const geo = req.headers["x-geo-location"] || req.headers["x-client-geo"];
+  if (typeof geo === "string" && geo.trim()) return geo.trim();
+  return "Unknown location";
+}
+function getUserAgent(req) {
+  const ua = req.headers["user-agent"];
+  return typeof ua === "string" ? ua.slice(0, 200) : "Unknown device";
+}
+async function markFirstLoginSent(table, pk) {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    if (table === "localUsers") {
+      await db
+        .update(localUsers)
+        .set({ firstLoginEmailSent: 1, updatedAt: /* @__PURE__ */ new Date() })
+        .where(eq8(localUsers.id, pk));
+    } else {
+      await db
+        .update(users)
+        .set({ updatedAt: /* @__PURE__ */ new Date() })
+        .where(eq8(users.id, pk));
+    }
+  } catch {}
+}
+async function hasFirstLoginBeenSent(table, pk) {
+  const db = await getDb();
+  if (!db) return false;
+  try {
+    if (table === "localUsers") {
+      const [row] = await db
+        .select({ firstLoginEmailSent: localUsers.firstLoginEmailSent })
+        .from(localUsers)
+        .where(eq8(localUsers.id, pk))
+        .limit(1);
+      return row?.firstLoginEmailSent === 1;
+    } else {
+      const [row] = await db
+        .select({ lastActivityAt: users.lastActivityAt })
+        .from(users)
+        .where(eq8(users.id, pk))
+        .limit(1);
+      if (!row) return false;
+      return row.lastActivityAt != null;
+    }
+  } catch {
+    return false;
+  }
+}
+function notifyLogin(req, user, table, org) {
+  const email = user.email;
+  if (!email) return;
+  (async () => {
+    try {
+      const sent = await hasFirstLoginBeenSent(table, user.id);
+      if (!sent) {
+        await emailService.sendWelcome(user, org);
+        await markFirstLoginSent(table, user.id);
+        console.info(
+          `[LoginNotification] Welcome email sent to ${email} (first login)`
+        );
+      } else {
+        const ip = getClientIp3(req);
+        const location = getApproximateLocation(req);
+        const device = getUserAgent(req);
+        const timestamp2 = /* @__PURE__ */ new Date().toISOString();
+        await emailService.sendSecurityAlert(
+          user,
+          ip,
+          location,
+          timestamp2,
+          device
+        );
+        console.info(
+          `[LoginNotification] Security alert sent to ${email} (IP: ${ip})`
+        );
+      }
+    } catch (err) {
+      console.warn("[LoginNotification] Failed to send:", err.message);
+    }
+  })();
+}
+
 // server/services/local-jwt.ts
 init_schema();
 init_db();
 init_env();
 import * as jose from "jose";
 import { parse as parseCookieHeader2 } from "cookie";
-import { eq as eq8 } from "drizzle-orm";
+import { eq as eq9 } from "drizzle-orm";
 var LOCAL_AUTH_COOKIE = "djac_local_session";
 var COOKIE_MAX_AGE_S = 60 * 60 * 24 * 7;
 function cookieOptions() {
   const isSecure = !ENV.isDevelopment;
   return {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
     secure: isSecure,
     maxAge: COOKIE_MAX_AGE_S * 1e3,
     path: "/",
@@ -10683,6 +12866,8 @@ function createLocalMemoryUser(input) {
     mfaBackupCodes: null,
     phoneNumber: null,
     verifiedAt: null,
+    lastMfaVerifiedAt: null,
+    firstLoginEmailSent: 0,
     createdAt: now,
     updatedAt: now,
   };
@@ -10701,7 +12886,7 @@ async function resolveLocalSession(req) {
     const [row] = await db
       .select()
       .from(localUsers)
-      .where(eq8(localUsers.id, userId))
+      .where(eq9(localUsers.id, userId))
       .limit(1);
     return row ?? null;
   }
@@ -10714,7 +12899,7 @@ async function resolveLocalSession(req) {
 // server/local-auth-store.ts
 init_schema();
 init_db();
-import { eq as eq9 } from "drizzle-orm";
+import { eq as eq10 } from "drizzle-orm";
 async function findLocalUserByEmail(email) {
   const db = await getDb();
   if (!db) {
@@ -10724,7 +12909,7 @@ async function findLocalUserByEmail(email) {
   const [row] = await db
     .select()
     .from(localUsers)
-    .where(eq9(localUsers.email, email))
+    .where(eq10(localUsers.email, email))
     .limit(1);
   return row ?? null;
 }
@@ -10737,7 +12922,7 @@ async function findLocalUserById(id) {
   const [row] = await db
     .select()
     .from(localUsers)
-    .where(eq9(localUsers.id, id))
+    .where(eq10(localUsers.id, id))
     .limit(1);
   return row ?? null;
 }
@@ -10750,7 +12935,7 @@ async function findLocalUserByPhone(phone) {
   const [row] = await db
     .select()
     .from(localUsers)
-    .where(eq9(localUsers.phoneNumber, phone))
+    .where(eq10(localUsers.phoneNumber, phone))
     .limit(1);
   return row ?? null;
 }
@@ -10764,7 +12949,7 @@ async function checkEmailExists(email) {
   const rows = await db
     .select({ id: localUsers.id })
     .from(localUsers)
-    .where(eq9(localUsers.email, email))
+    .where(eq10(localUsers.email, email))
     .limit(1);
   return rows.length > 0;
 }
@@ -10778,7 +12963,7 @@ async function checkPhoneExists(phone) {
   const rows = await db
     .select({ id: localUsers.id })
     .from(localUsers)
-    .where(eq9(localUsers.phoneNumber, phone))
+    .where(eq10(localUsers.phoneNumber, phone))
     .limit(1);
   return rows.length > 0;
 }
@@ -10821,7 +13006,23 @@ async function listLocalUsersForAdmin() {
 }
 async function insertLocalUser(data) {
   const db = await getDb();
-  if (!db) throw new Error("Database unavailable");
+  if (!db) {
+    if (!isLocalMemoryFallbackEnabled())
+      throw new Error("Database unavailable");
+    return createLocalMemoryUser({
+      name: data.name ?? "User",
+      email: data.email ?? "",
+      phoneNumber: data.phoneNumber ?? null,
+      passwordHash: data.passwordHash ?? "",
+      userType: data.userType ?? "visitor",
+      preferredLocale: data.preferredLocale ?? "en",
+      status: data.status ?? "active",
+      companyName: data.companyName ?? null,
+      jobTitle: data.jobTitle ?? null,
+      industry: data.industry ?? null,
+      complianceResponsibility: data.complianceResponsibility ?? null,
+    });
+  }
   const [row] = await db.insert(localUsers).values(data).returning();
   return row;
 }
@@ -10838,7 +13039,15 @@ async function updateLocalUserLastSignedIn(id) {
   await db
     .update(localUsers)
     .set({ lastSignedIn: /* @__PURE__ */ new Date() })
-    .where(eq9(localUsers.id, id));
+    .where(eq10(localUsers.id, id));
+}
+async function markLocalUserMfaVerified(id) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(localUsers)
+    .set({ lastMfaVerifiedAt: /* @__PURE__ */ new Date() })
+    .where(eq10(localUsers.id, id));
 }
 async function updateLocalUserStatus(id, status) {
   const db = await getDb();
@@ -10850,7 +13059,7 @@ async function updateLocalUserStatus(id, status) {
     }
     return;
   }
-  await db.update(localUsers).set({ status }).where(eq9(localUsers.id, id));
+  await db.update(localUsers).set({ status }).where(eq10(localUsers.id, id));
 }
 async function updateLocalUserPassword(id, passwordHash) {
   const db = await getDb();
@@ -10865,7 +13074,7 @@ async function updateLocalUserPassword(id, passwordHash) {
   await db
     .update(localUsers)
     .set({ passwordHash, updatedAt: /* @__PURE__ */ new Date() })
-    .where(eq9(localUsers.id, id));
+    .where(eq10(localUsers.id, id));
 }
 async function updateLocalUserProfile(id, fields) {
   const db = await getDb();
@@ -10880,7 +13089,7 @@ async function updateLocalUserProfile(id, fields) {
   await db
     .update(localUsers)
     .set({ ...fields, updatedAt: /* @__PURE__ */ new Date() })
-    .where(eq9(localUsers.id, id));
+    .where(eq10(localUsers.id, id));
 }
 async function updateLocalUserTotpSecret(id, secret) {
   const db = await getDb();
@@ -10892,7 +13101,7 @@ async function updateLocalUserTotpSecret(id, secret) {
   await db
     .update(localUsers)
     .set({ totpSecret: secret })
-    .where(eq9(localUsers.id, id));
+    .where(eq10(localUsers.id, id));
 }
 async function enableLocalUserMfa(id, hashedBackupCodes) {
   const db = await getDb();
@@ -10912,7 +13121,7 @@ async function enableLocalUserMfa(id, hashedBackupCodes) {
       mfaBackupCodes: JSON.stringify(hashedBackupCodes),
       updatedAt: /* @__PURE__ */ new Date(),
     })
-    .where(eq9(localUsers.id, id));
+    .where(eq10(localUsers.id, id));
 }
 async function disableLocalUserMfa(id) {
   const db = await getDb();
@@ -10934,7 +13143,7 @@ async function disableLocalUserMfa(id) {
       mfaBackupCodes: null,
       updatedAt: /* @__PURE__ */ new Date(),
     })
-    .where(eq9(localUsers.id, id));
+    .where(eq10(localUsers.id, id));
 }
 async function consumeLocalUserBackupCode(id, remainingCodes) {
   const db = await getDb();
@@ -10952,7 +13161,7 @@ async function consumeLocalUserBackupCode(id, remainingCodes) {
       mfaBackupCodes: JSON.stringify(remainingCodes),
       lastSignedIn: /* @__PURE__ */ new Date(),
     })
-    .where(eq9(localUsers.id, id));
+    .where(eq10(localUsers.id, id));
 }
 async function verifyLocalUserEmail(id) {
   const db = await getDb();
@@ -10970,23 +13179,22 @@ async function verifyLocalUserEmail(id) {
       verifiedAt: /* @__PURE__ */ new Date(),
       updatedAt: /* @__PURE__ */ new Date(),
     })
-    .where(eq9(localUsers.id, id));
+    .where(eq10(localUsers.id, id));
 }
 
 // server/services/otp.ts
 init_schema();
 init_db();
 init_email();
-import { createHash as createHash3 } from "node:crypto";
-import { eq as eq10, and as and5, lt as lt2 } from "drizzle-orm";
+import { createHash as createHash3, randomInt } from "node:crypto";
+import { eq as eq11, and as and5, lt as lt2 } from "drizzle-orm";
 var OTP_EXPIRY_MINUTES = 5;
 var OTP_MAX_ATTEMPTS = 5;
 var OTP_LENGTH = 6;
 function generateCode() {
-  const digits = "0123456789";
   let code = "";
   for (let i = 0; i < OTP_LENGTH; i++) {
-    code += digits[Math.floor(Math.random() * digits.length)];
+    code += randomInt(0, 10).toString();
   }
   return code;
 }
@@ -11014,7 +13222,7 @@ async function sendOtp(input) {
   const recentCount = await db
     .select()
     .from(otpCodes)
-    .where(and5(eq10(otpCodes.identifier, normalized)))
+    .where(and5(eq11(otpCodes.identifier, normalized)))
     .limit(10);
   const inWindow = recentCount.filter(
     r => new Date(r.createdAt).getTime() > Date.now() - 5 * 60 * 1e3
@@ -11035,15 +13243,22 @@ async function sendOtp(input) {
     expiresAt,
   });
   console.info(
-    `[OTP] Code for ${normalized}: ${code} (purpose: ${input.purpose}, expires in ${OTP_EXPIRY_MINUTES}min)`
+    `[OTP] Code generated for ${normalized} (purpose: ${input.purpose}, expires in ${OTP_EXPIRY_MINUTES}min)`
   );
   let delivered = false;
   if (!isPhone(normalized)) {
     const isRegister = input.purpose === "register";
+    const isPasswordReset = input.purpose === "password-reset";
     const subject = isRegister
       ? "DJAC \u2014 Verify Your Account"
-      : "DJAC \u2014 Security Verification Code";
-    const actionLabel = isRegister ? "verify your account" : "sign in securely";
+      : isPasswordReset
+        ? "DJAC \u2014 Password Reset Code"
+        : "DJAC \u2014 Security Verification Code";
+    const actionLabel = isRegister
+      ? "verify your account"
+      : isPasswordReset
+        ? "reset your password"
+        : "sign in securely";
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
@@ -11084,19 +13299,18 @@ DJAC Tool \u2014 China-Saudi Compliance Intelligence`;
     delivered = await sendEmail({ to: normalized, subject, html, text: text2 });
   } else {
     console.info(
-      `[OTP] Phone OTP for ${normalized} \u2014 SMS provider not configured. Code logged above.`
+      `[OTP] Phone OTP for ${normalized} \u2014 SMS provider not configured.`
     );
   }
   if (delivered) {
     return {
       success: true,
-      message: `Verification code sent to ${normalized}.`,
+      message: `Verification code sent to ${normalized}. Please check your inbox.`,
     };
   }
   return {
     success: true,
-    message: `Email not configured \u2014 your code is: ${code}`,
-    code,
+    message: `Verification code sent. Please check your email (${normalized}). If you don't receive it within 2 minutes, check your spam folder.`,
   };
 }
 async function verifyOtp(input) {
@@ -11120,8 +13334,8 @@ async function verifyOtp(input) {
     .from(otpCodes)
     .where(
       and5(
-        eq10(otpCodes.identifier, normalized),
-        eq10(otpCodes.purpose, input.purpose)
+        eq11(otpCodes.identifier, normalized),
+        eq11(otpCodes.purpose, input.purpose)
       )
     )
     .orderBy(otpCodes.createdAt)
@@ -11140,8 +13354,8 @@ async function verifyOtp(input) {
         .delete(otpCodes)
         .where(
           and5(
-            eq10(otpCodes.identifier, normalized),
-            eq10(otpCodes.purpose, input.purpose)
+            eq11(otpCodes.identifier, normalized),
+            eq11(otpCodes.purpose, input.purpose)
           )
         );
       return { success: true, message: "Code verified." };
@@ -11149,9 +13363,16 @@ async function verifyOtp(input) {
     await db
       .update(otpCodes)
       .set({ attempts: row.attempts + 1 })
-      .where(eq10(otpCodes.id, row.id));
+      .where(eq11(otpCodes.id, row.id));
   }
   return { success: false, message: "Invalid or expired verification code." };
+}
+async function cleanupExpiredOtps() {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .delete(otpCodes)
+    .where(lt2(otpCodes.expiresAt, /* @__PURE__ */ new Date()));
 }
 
 // server/local-auth-router.ts
@@ -11300,14 +13521,12 @@ var localAuthRouter = router({
         return {
           success: false,
           message: "OTP delivery failed",
-          code: void 0,
         };
       });
       return {
         pendingVerification: true,
         identifier: normalizedEmail,
         otpMessage: otpResult.message,
-        ...(otpResult.code ? { otpCode: otpResult.code } : {}),
       };
     }),
   /** Login with email + password */
@@ -11343,6 +13562,11 @@ var localAuthRouter = router({
           message: "This account has been suspended. Contact support.",
         });
       }
+      notifyLogin(
+        ctx.req,
+        { id: user.id, name: user.name, email: user.email },
+        "localUsers"
+      );
       await updateLocalUserLastSignedIn(user.id);
       if (user.mfaEnabled) {
         const pendingToken = await signJwt(
@@ -11356,6 +13580,7 @@ var localAuthRouter = router({
         );
         return { requireTotp: true, pendingToken };
       }
+      await markLocalUserMfaVerified(user.id);
       const token = await signJwt({
         sub: user.id,
         type: "local",
@@ -11468,38 +13693,35 @@ var localAuthRouter = router({
   /**
    * Request a password reset OTP.
    * Always returns success to prevent user enumeration.
-   * Sends a 6-digit OTP via email (or phone console log in dev).
+   * Sends a 6-digit OTP via email.
    */
   requestPasswordReset: publicProcedure
     .input(z7.object({ email: emailSchema }))
     .mutation(async ({ input, ctx }) => {
       const user = await findLocalUserByEmail(input.email);
-      const activeUser = user?.status === "active" ? user : null;
-      if (activeUser) {
+      const eligible = user && user.status !== "suspended" ? user : null;
+      if (eligible) {
         const otpResult = await sendOtp({
           identifier: input.email,
-          purpose: "login",
+          purpose: "password-reset",
         }).catch(e => {
           console.warn("[localAuth] Failed to send reset OTP:", e);
           return {
             success: false,
             message: "OTP delivery failed",
-            code: void 0,
           };
         });
         void recordAuditEvent(ctx, {
           category: "auth",
           action: "password.reset.request",
           entityType: "localUsers",
-          entityId: activeUser.id,
-          localUserId: activeUser.id,
+          entityId: eligible.id,
+          localUserId: eligible.id,
           payload: { method: "otp" },
         });
         return {
           success: true,
-          ...(otpResult.code
-            ? { otpCode: otpResult.code, otpMessage: otpResult.message }
-            : {}),
+          otpMessage: otpResult.message,
         };
       }
       return { success: true };
@@ -11520,7 +13742,7 @@ var localAuthRouter = router({
       const verifyResult = await verifyOtp({
         identifier: input.email,
         code: input.code,
-        purpose: "login",
+        purpose: "password-reset",
       });
       if (!verifyResult.success) {
         throw new TRPCError6({
@@ -11529,10 +13751,10 @@ var localAuthRouter = router({
         });
       }
       const user = await findLocalUserByEmail(input.email);
-      if (!user || user.status !== "active") {
+      if (!user || user.status === "suspended") {
         throw new TRPCError6({
           code: "NOT_FOUND",
-          message: "Account not found.",
+          message: "Account not found or suspended.",
         });
       }
       const newHash = await bcrypt.hash(input.newPassword, BCRYPT_ROUNDS);
@@ -11858,8 +14080,11 @@ var localAuthRouter = router({
           });
         backupCodes.splice(backupIdx, 1);
         await consumeLocalUserBackupCode(userId, backupCodes);
+        await updateLocalUserLastSignedIn(userId);
+        await markLocalUserMfaVerified(userId);
       } else {
         await updateLocalUserLastSignedIn(userId);
+        await markLocalUserMfaVerified(userId);
       }
       const sessionToken = await signJwt({
         sub: user.id,
@@ -12013,7 +14238,6 @@ If you did not create this account, ignore this email.`,
       return {
         success: true,
         message: result.message,
-        ...(result.code ? { code: result.code } : {}),
       };
     }),
   /** Verify OTP — logs in existing user or creates a new account if registering */
@@ -12601,6 +14825,202 @@ var COMPLIANCE_OBLIGATIONS = [
       "Under LGPD Art. 18, data subjects have rights to confirmation of processing, access, correction, anonymization, portability, deletion, and information about shared entities. Controllers must respond within 15 days.",
     references: ["LGPD Art. 18-22", "ANPD Enforcement Guidelines"],
   },
+  {
+    id: "uk-gdpr-ico-notification",
+    country: "United Kingdom",
+    framework: "UK-GDPR",
+    requirement: "ICO Breach Notification (72 hours)",
+    frequency: "within_72h",
+    authority: "ICO",
+    riskLevel: "critical",
+    description:
+      "Under UK GDPR Article 33, controllers must notify the ICO of personal data breaches within 72 hours unless the breach is unlikely to result in risk to individuals. Data subjects must be notified where high risk.",
+    references: ["UK GDPR Art. 33-34", "ICO Breach Reporting Guidance"],
+  },
+  {
+    id: "uk-gdpr-idta-transfers",
+    country: "United Kingdom",
+    framework: "UK-GDPR",
+    requirement: "UK IDTA for International Transfers",
+    frequency: "ongoing",
+    authority: "ICO",
+    riskLevel: "high",
+    description:
+      "Transfers to third countries require UK adequacy regulations, the UK International Data Transfer Agreement (IDTA), or recognised safeguards under Article 46.",
+    references: [
+      "UK GDPR Art. 44-49",
+      "UK IDTA",
+      "ICO Transfer Risk Assessment",
+    ],
+  },
+  {
+    id: "uk-gdpr-dpo-representative",
+    country: "United Kingdom",
+    framework: "UK-GDPR",
+    requirement: "UK Representative for Non-UK Controllers",
+    frequency: "ongoing",
+    authority: "ICO",
+    riskLevel: "medium",
+    description:
+      "Non-UK controllers offering goods or services in the UK must appoint a UK representative per UK GDPR Article 27.",
+    references: ["UK GDPR Art. 27", "ICO Representative Guidance"],
+  },
+  {
+    id: "ca-pipeda-breach",
+    country: "Canada",
+    framework: "PIPEDA",
+    requirement: "Material Breach Reporting to OPC",
+    frequency: "ongoing",
+    authority: "OPC",
+    riskLevel: "high",
+    description:
+      "Report material breaches to the OPC and notify affected individuals where real risk of significant harm exists; maintain breach records.",
+    references: ["PIPEDA Part 1.1", "OPC Breach Guidance"],
+  },
+  {
+    id: "au-app-ndb",
+    country: "Australia",
+    framework: "PRIVACY-ACT-AU",
+    requirement: "Notifiable Data Breach Reporting",
+    frequency: "ongoing",
+    authority: "OAIC",
+    riskLevel: "high",
+    description:
+      "Notify the OAIC and affected individuals when a data breach is likely to result in serious harm; assess eligibility without unreasonable delay.",
+    references: ["Privacy Act 1988 Part IIIC", "OAIC NDB Guidance"],
+  },
+  {
+    id: "au-app-cross-border",
+    country: "Australia",
+    framework: "PRIVACY-ACT-AU",
+    requirement: "APP 8 Cross-Border Disclosure",
+    frequency: "ongoing",
+    authority: "OAIC",
+    riskLevel: "high",
+    description:
+      "Before disclosing personal information overseas, ensure the recipient is covered by the APPs or an enforceable mechanism, or obtain consent.",
+    references: ["APP 8", "OAIC Cross-Border Disclosure Guidance"],
+  },
+  {
+    id: "jp-appi-breach",
+    country: "Japan",
+    framework: "APPI",
+    requirement: "PPC Breach Reporting",
+    frequency: "ongoing",
+    authority: "PPC",
+    riskLevel: "high",
+    description:
+      "Report qualifying breaches (risk to rights and interests) to the Personal Information Protection Commission and notify affected data subjects.",
+    references: ["APPI Art. 32-33", "PPC Guidelines"],
+  },
+  {
+    id: "jp-appi-cross-border",
+    country: "Japan",
+    framework: "APPI",
+    requirement: "APPI Cross-Border Provision Rules",
+    frequency: "ongoing",
+    authority: "PPC",
+    riskLevel: "high",
+    description:
+      "Disclose the destination country and obtain consent, or rely on safeguards, before providing personal data to third parties in foreign countries.",
+    references: ["APPI Art. 28", "PPC Transfer Guidelines"],
+  },
+  {
+    id: "kr-pipa-breach",
+    country: "South Korea",
+    framework: "PIPA-KR",
+    requirement: "PIPC Breach Notification",
+    frequency: "ongoing",
+    authority: "PIPC",
+    riskLevel: "high",
+    description:
+      "Notify the PIPC and affected data subjects of personal information breaches without delay, and submit follow-up reports where required.",
+    references: ["PIPA Art. 34", "PIPC Enforcement Guidelines"],
+  },
+  {
+    id: "sg-pdpa-breach",
+    country: "Singapore",
+    framework: "PDPA-SG",
+    requirement: "Notifiable Data Breach Reporting",
+    frequency: "ongoing",
+    authority: "PDPC",
+    riskLevel: "high",
+    description:
+      "Assess whether a breach is notifiable and inform the PDPC and affected individuals of breaches that result in significant harm.",
+    references: ["PDPA Part VIA", "PDPC Breach Guidelines"],
+  },
+  {
+    id: "sg-pdpa-dpo",
+    country: "Singapore",
+    framework: "PDPA-SG",
+    requirement: "Data Protection Officer Appointment",
+    frequency: "ongoing",
+    authority: "PDPC",
+    riskLevel: "medium",
+    description:
+      "Organisations must designate at least one Data Protection Officer and make their business contact publicly available.",
+    references: ["PDPA Schedule 1", "PDPC DPO Guidance"],
+  },
+  {
+    id: "in-dpdp-breach",
+    country: "India",
+    framework: "DPDP-IN",
+    requirement: "DPDP Act Breach Notification",
+    frequency: "ongoing",
+    authority: "Data Protection Board",
+    riskLevel: "high",
+    description:
+      "Notify the Data Protection Board of India and affected data principals of personal data breaches per the DPDP Act rules.",
+    references: ["DPDP Act 2023 S.8", "MeitY Rules"],
+  },
+  {
+    id: "za-popia-breach",
+    country: "South Africa",
+    framework: "POPIA",
+    requirement: "POPIA Security Compromise Notification",
+    frequency: "ongoing",
+    authority: "Information Regulator",
+    riskLevel: "high",
+    description:
+      "Notify the Information Regulator and affected data subjects of security compromises per POPIA Section 22, including the identity of all affected parties.",
+    references: ["POPIA S.22", "Information Regulator Guidance"],
+  },
+  {
+    id: "za-popia-info-officer",
+    country: "South Africa",
+    framework: "POPIA",
+    requirement: "Information Officer Registration",
+    frequency: "annual",
+    authority: "Information Regulator",
+    riskLevel: "medium",
+    description:
+      "Responsible parties must register an Information Officer and maintain a POPIA compliance framework.",
+    references: ["POPIA S.55", "Information Regulator Registration"],
+  },
+  {
+    id: "mx-lfpdp-breach",
+    country: "Mexico",
+    framework: "MEXICO-DPA",
+    requirement: "INAI Breach Notification",
+    frequency: "ongoing",
+    authority: "INAI",
+    riskLevel: "high",
+    description:
+      "Notify INAI and affected data owners of significant security breaches without delay, including scope and corrective actions.",
+    references: ["LFPDPPP Art. 20", "INAI Guidance"],
+  },
+  {
+    id: "ae-pdpl-breach",
+    country: "United Arab Emirates",
+    framework: "ISO-27701",
+    requirement: "UAE PDPL Breach Notification",
+    frequency: "ongoing",
+    authority: "UAE Federal Authority",
+    riskLevel: "high",
+    description:
+      "Under UAE Federal Decree-Law No. 45 of 2021, controllers must notify authorities and data subjects of personal data breaches and security incidents.",
+    references: ["UAE PDPL Law", "DIFC/ADGM local rules"],
+  },
 ];
 var COMPARISON_TABLE = [
   {
@@ -12768,6 +15188,46 @@ var COMPARISON_TABLE = [
       "Health, biometric, genetic, political, religious, sexual orientation (Art. 11)",
     notes:
       "EU and Brazil definitions nearly identical; China includes location and minors data.",
+  },
+  {
+    topic: "International Standards Baseline",
+    saudiArabia: "ISO 27001 encouraged; NCA-ECC self-assessments",
+    china: "GB/T 22239 (MLPS 2.0) aligned with ISO 27001 for cloud",
+    eu: "ISO 27001 + NIS2 risk measures for essential entities",
+    us: "SOC 2 + NIST CSF 2.0 for SaaS and cloud providers",
+    brazil: "ISO 27001 widely adopted for ANPD compliance evidence",
+    notes:
+      "ISO 27001, SOC 2, and NIST CSF serve as the common control baseline across all major markets.",
+  },
+  {
+    topic: "Breach Notification \u2014 Global Benchmarks",
+    saudiArabia: "72 hours to SDAIA",
+    china: "2 hours initial + 24 hours detailed to CAC",
+    eu: "72 hours to DPA (GDPR Art. 33); NIS2 24h/72h for CSIRT",
+    us: "HIPAA 60 days; state laws vary",
+    brazil: "Reasonable time per ANPD (Art. 48)",
+    notes:
+      "UK (ICO 72h), Canada (OPC material breach), Australia (OAIC serious harm), Singapore (PDPC significant harm), India (DPDP Board), Japan (PPC), South Korea (PIPC), and South Africa (Regulator) all mandate breach notification with local timelines.",
+  },
+  {
+    topic: "International Transfer Safeguards",
+    saudiArabia: "SDAIA approval, SCCs, or adequacy",
+    china: "CAC security assessment, standard contract, or certification",
+    eu: "Adequacy decision, SCCs, BCRs, or derogations (Art. 44-49)",
+    us: "No federal restriction; state laws vary",
+    brazil: "ANPD adequacy, SCCs, BCRs, or specific consent (Art. 33)",
+    notes:
+      "UK uses the IDTA; Japan and South Korea rely on adequacy decisions; Australia, Canada, Mexico, and South Africa require consent or adequacy for cross-border flows.",
+  },
+  {
+    topic: "Executive Accountability",
+    saudiArabia: "Royal Decree M/117 individual liability",
+    china: "PIPL + CSL 2026: personal fines + up to 10-year industry ban",
+    eu: "GDPR: managers liable via Member State law; NIS2: management approval + training",
+    us: "SOX: personal liability for certification; HIPAA: individual criminal penalties",
+    brazil: "LGPD: personal liability for controllers and operators",
+    notes:
+      "NIS2 makes management directly accountable for cybersecurity measures; executive accountability is now global across all major regimes.",
   },
 ];
 function listComplianceObligations() {
@@ -14593,6 +17053,840 @@ var LAW_KNOWLEDGE_BASE = [
       },
     ],
     sources: ["DJAC comparative framework analysis"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "uk-gdpr-regime",
+    title: "UK GDPR and Data Protection Act 2018",
+    jurisdiction: "United Kingdom",
+    frameworkCodes: ["UK-GDPR"],
+    summary:
+      "UK GDPR mirrors EU GDPR but is a separate regime enforced by the ICO, with its own adequacy assessments, the UK International Data Transfer Agreement (IDTA), and post-Brexit divergence.",
+    keyTopics: [
+      "UK GDPR lawful basis",
+      "ICO breach notification 72 hours",
+      "UK IDTA transfers",
+      "Data Protection Act 2018",
+      "UK adequacy",
+    ],
+    sections: [
+      {
+        title: "Lawful basis and rights",
+        excerpt:
+          "Controllers must document lawful bases and honour UK data subject rights; the ICO may fine up to GBP 17.5M or 4% of annual turnover.",
+        keywords: ["consent", "rights", "lawful basis", "ico"],
+      },
+      {
+        title: "International transfers",
+        excerpt:
+          "Transfers to third countries require UK adequacy regulations, the UK IDTA, or recognised safeguards.",
+        keywords: ["idta", "transfer", "adequacy", "international"],
+      },
+      {
+        title: "Breach notification",
+        excerpt:
+          "Notify the ICO within 72 hours of a personal data breach unless low risk to individuals.",
+        keywords: ["breach", "notification", "72 hours", "incident"],
+      },
+    ],
+    sources: ["UK GDPR", "Data Protection Act 2018", "ICO guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "canada-pipeda-regime",
+    title: "Canada PIPEDA and Provincial Privacy Laws",
+    jurisdiction: "Canada",
+    frameworkCodes: ["PIPEDA"],
+    summary:
+      "PIPEDA governs private-sector personal information handling in Canada, complemented by provincial laws (Alberta, BC, Quebec), with mandatory breach reporting to the OPC.",
+    keyTopics: [
+      "PIPEDA consent",
+      "OPC breach reporting",
+      "material breach",
+      "privacy program",
+      "provincial laws",
+    ],
+    sections: [
+      {
+        title: "Consent and accountability",
+        excerpt:
+          "Organizations must obtain meaningful consent, appoint accountability leads, and document handling practices.",
+        keywords: ["consent", "accountability", "privacy program"],
+      },
+      {
+        title: "Breach reporting",
+        excerpt:
+          "Report material data breaches to the OPC and notify affected individuals where real risk of significant harm exists.",
+        keywords: ["breach", "opc", "material", "notification"],
+      },
+      {
+        title: "Data stewardship",
+        excerpt:
+          "Limit collection to what is necessary, safeguard personal information, and support access and correction requests.",
+        keywords: ["collection", "safeguards", "access", "correction"],
+      },
+    ],
+    sources: ["PIPEDA", "OPC guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "australia-privacy-act",
+    title: "Australia Privacy Act and Australian Privacy Principles",
+    jurisdiction: "Australia",
+    frameworkCodes: ["PRIVACY-ACT-AU"],
+    summary:
+      "The Privacy Act 1988 and its 13 Australian Privacy Principles (APPs) regulate handling of personal information, with Notifiable Data Breach (NDB) duties to the OAIC.",
+    keyTopics: [
+      "Australian Privacy Principles",
+      "OAIC notifiable data breach",
+      "APP entity obligations",
+      "cross-border disclosure",
+      "privacy policy",
+    ],
+    sections: [
+      {
+        title: "APP compliance",
+        excerpt:
+          "Entities must comply with all 13 APPs covering collection, use, disclosure, quality, security, access, and correction.",
+        keywords: ["app", "principles", "collection", "disclosure"],
+      },
+      {
+        title: "Notifiable data breaches",
+        excerpt:
+          "Notify affected individuals and the OAIC when a data breach is likely to result in serious harm.",
+        keywords: ["notifiable data breach", "oaic", "serious harm"],
+      },
+      {
+        title: "Cross-border disclosure",
+        excerpt:
+          "Before disclosing personal information overseas, ensure the recipient is covered by the APPs or equivalent safeguards.",
+        keywords: ["cross-border", "transfer", "overseas", "disclosure"],
+      },
+    ],
+    sources: ["Privacy Act 1988", "OAIC guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "japan-appi-regime",
+    title: "Japan APPI \u2014 Act on the Protection of Personal Information",
+    jurisdiction: "Japan",
+    frameworkCodes: ["APPI"],
+    summary:
+      "APPI regulates business operators handling personal information in Japan, requiring utilization purpose disclosure, secure management, and PPC breach reporting.",
+    keyTopics: [
+      "APPI utilization purpose",
+      "PPC breach reporting",
+      "cross-border provision",
+      "anonymized information",
+      "sensitive data",
+    ],
+    sections: [
+      {
+        title: "Purpose of use and consent",
+        excerpt:
+          "Specify utilization purposes, obtain consent where required, and notify or publish purposes on the PPC website.",
+        keywords: ["purpose", "consent", "utilization"],
+      },
+      {
+        title: "Breach reporting",
+        excerpt:
+          "Report qualifying breaches to the Personal Information Protection Commission (PPC) and notify affected data subjects.",
+        keywords: ["breach", "ppc", "reporting"],
+      },
+      {
+        title: "Cross-border provision",
+        excerpt:
+          "Provide personal data to foreign third parties only after disclosing the destination country and obtaining consent or equivalent safeguards.",
+        keywords: ["cross-border", "foreign", "consent", "provision"],
+      },
+    ],
+    sources: ["APPI", "PPC guidelines"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "korea-pipa-regime",
+    title: "South Korea PIPA \u2014 Personal Information Protection Act",
+    jurisdiction: "South Korea",
+    frameworkCodes: ["PIPA-KR"],
+    summary:
+      "PIPA is Korea's comprehensive data protection law, requiring consent-based processing, strong data subject rights, pseudonymization duties, and PIPC breach reporting.",
+    keyTopics: [
+      "PIPA consent",
+      "PIPC breach notification",
+      "pseudonymization",
+      "data subject rights",
+      "cross-border transfer",
+    ],
+    sections: [
+      {
+        title: "Consent and rights",
+        excerpt:
+          "Collect explicit consent where required and honour access, correction, deletion, and suspension rights within defined timelines.",
+        keywords: ["consent", "rights", "deletion", "suspension"],
+      },
+      {
+        title: "Security and breach duties",
+        excerpt:
+          "Implement required technical safeguards, pseudonymization duties, and notify the PIPC and data subjects of breaches.",
+        keywords: ["security", "breach", "pipc", "pseudonymization"],
+      },
+      {
+        title: "Cross-border transfer",
+        excerpt:
+          "Notify transfer details and obtain consent for overseas transfers, or rely on adequacy and safeguards.",
+        keywords: ["cross-border", "overseas", "transfer", "consent"],
+      },
+    ],
+    sources: ["PIPA", "PIPC guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "singapore-pdpa-regime",
+    title: "Singapore PDPA \u2014 Personal Data Protection Act",
+    jurisdiction: "Singapore",
+    frameworkCodes: ["PDPA-SG"],
+    summary:
+      "The PDPA regulates personal data handling in Singapore with a consent framework, DNC registry, breach notification to the PDPC, and transfer limitation obligations.",
+    keyTopics: [
+      "PDPA consent",
+      "PDPC breach notification",
+      "transfer limitation",
+      "DNC registry",
+      "data protection officer",
+    ],
+    sections: [
+      {
+        title: "Consent framework",
+        excerpt:
+          "Obtain consent for collection, use, and disclosure, and provide withdrawal and access channels.",
+        keywords: ["consent", "withdrawal", "access", "disclosure"],
+      },
+      {
+        title: "Breach notification",
+        excerpt:
+          "Assess and notify the PDPC of notifiable data breaches and inform affected individuals.",
+        keywords: ["breach", "pdpc", "notifiable"],
+      },
+      {
+        title: "Transfer limitation",
+        excerpt:
+          "Ensure overseas recipients provide comparable protection before transferring personal data outside Singapore.",
+        keywords: ["transfer limitation", "overseas", "comparable protection"],
+      },
+    ],
+    sources: ["PDPA", "PDPC guidelines"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "india-dpdp-regime",
+    title: "India DPDP Act 2023 \u2014 Digital Personal Data Protection",
+    jurisdiction: "India",
+    frameworkCodes: ["DPDP-IN"],
+    summary:
+      "The DPDP Act regulates digital personal data processing in India, requiring notice and verifiable consent, rights fulfillment, and Data Protection Board breach reporting.",
+    keyTopics: [
+      "DPDP notice and consent",
+      "verifiable consent",
+      "Data Protection Board",
+      "data fiduciary duties",
+      "breach notification",
+    ],
+    sections: [
+      {
+        title: "Notice and consent",
+        excerpt:
+          "Provide notice in specified languages and obtain verifiable consent for processing personal data.",
+        keywords: ["notice", "consent", "verifiable"],
+      },
+      {
+        title: "Data principal rights",
+        excerpt:
+          "Support access, correction, erasure, portability, and grievance redressal with defined timelines.",
+        keywords: ["access", "correction", "erasure", "grievance"],
+      },
+      {
+        title: "Breach notification",
+        excerpt:
+          "Notify the Data Protection Board and affected data principals of personal data breaches.",
+        keywords: ["breach", "board", "notification"],
+      },
+    ],
+    sources: ["DPDP Act 2023", "MeitY guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "south-africa-popia-regime",
+    title: "South Africa POPIA \u2014 Protection of Personal Information Act",
+    jurisdiction: "South Africa",
+    frameworkCodes: ["POPIA"],
+    summary:
+      "POPIA imposes eight processing conditions on responsible parties, requires an Information Officer, and mandates Information Regulator breach notification.",
+    keyTopics: [
+      "POPIA processing conditions",
+      "Information Officer",
+      "Information Regulator",
+      "cross-border transfer",
+      "security breach notification",
+    ],
+    sections: [
+      {
+        title: "Processing conditions",
+        excerpt:
+          "Comply with the eight conditions: accountability, processing limitation, purpose specification, further processing, information quality, openness, security, and data subject participation.",
+        keywords: ["conditions", "accountability", "purpose specification"],
+      },
+      {
+        title: "Information officer",
+        excerpt:
+          "Register an Information Officer and maintain a POPIA compliance framework.",
+        keywords: ["information officer", "registration", "compliance"],
+      },
+      {
+        title: "Cross-border and breach duties",
+        excerpt:
+          "Transfer data only to countries with adequate protection and notify the Regulator of security compromises.",
+        keywords: ["cross-border", "breach", "regulator"],
+      },
+    ],
+    sources: ["POPIA", "Information Regulator guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "uae-data-protection-regime",
+    title: "UAE Federal Data Protection Law (PDPL)",
+    jurisdiction: "United Arab Emirates",
+    frameworkCodes: ["UAE PDPL"],
+    summary:
+      "The UAE Federal Decree-Law No. 45 of 2021 on Personal Data Protection establishes consent-based processing, DSR rights, and cross-border transfer restrictions under federal supervision.",
+    keyTopics: [
+      "UAE PDPL consent",
+      "data subject rights",
+      "cross-border transfer",
+      "federal enforcement",
+      "DIFC and ADGM regimes",
+    ],
+    sections: [
+      {
+        title: "Consent and purpose",
+        excerpt:
+          "Process personal data on lawful grounds with explicit consent for sensitive data and specified purposes.",
+        keywords: ["consent", "purpose", "sensitive data"],
+      },
+      {
+        title: "Rights and transfers",
+        excerpt:
+          "Support access, correction, and deletion rights and restrict transfers to countries without adequate protection.",
+        keywords: ["rights", "access", "transfer", "adequate"],
+      },
+      {
+        title: "Financial free-zone overlays",
+        excerpt:
+          "Entities in DIFC (DPF Law) and ADGM (DPR) must satisfy additional financial centre data protection rules.",
+        keywords: ["difc", "adgm", "financial free zone"],
+      },
+    ],
+    sources: [
+      "UAE Federal Decree-Law No. 45 of 2021",
+      "DIFC DPF Law",
+      "ADGM DPR",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "mexico-dpa-regime",
+    title: "Mexico Federal Law on Protection of Personal Data (LFPDPPP)",
+    jurisdiction: "Mexico",
+    frameworkCodes: ["MEXICO-DPA"],
+    summary:
+      "Mexico's LFPDPPP requires privacy notices, consent for sensitive data, ARCO rights (access, rectification, cancellation, opposition), and INAI breach notification.",
+    keyTopics: [
+      "privacy notice",
+      "ARCO rights",
+      "INAI breach notification",
+      "consent",
+      "transfer of data",
+    ],
+    sections: [
+      {
+        title: "Privacy notice and consent",
+        excerpt:
+          "Provide full privacy notices and obtain consent where required, especially for sensitive personal data.",
+        keywords: ["privacy notice", "consent", "sensitive"],
+      },
+      {
+        title: "ARCO rights",
+        excerpt:
+          "Operate procedures for access, rectification, cancellation, and opposition requests with statutory response timelines.",
+        keywords: ["arco", "access", "rectification", "opposition"],
+      },
+      {
+        title: "Breach notification",
+        excerpt:
+          "Notify INAI and affected owners of significant data breaches without delay.",
+        keywords: ["breach", "inai", "notification"],
+      },
+    ],
+    sources: ["LFPDPPP", "INAI guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "eu-cyber-resilience-regime",
+    title: "EU NIS2, DORA and AI Act Digital Resilience",
+    jurisdiction: "EU",
+    frameworkCodes: ["NIS2", "DORA", "EU-AI-ACT"],
+    summary:
+      "The EU digital resilience stack \u2014 NIS2 for essential entities, DORA for financial sector ICT risk, and the AI Act for AI systems \u2014 imposes reporting, governance, and testing duties.",
+    keyTopics: [
+      "NIS2 incident reporting",
+      "DORA ICT risk",
+      "EU AI Act risk classes",
+      "supply chain security",
+      "digital operational resilience",
+    ],
+    sections: [
+      {
+        title: "NIS2 reporting",
+        excerpt:
+          "Report significant incidents to the CSIRT within 24 hours (early warning) and a full notification within 72 hours.",
+        keywords: ["nis2", "csirt", "24 hours", "72 hours"],
+      },
+      {
+        title: "DORA ICT risk",
+        excerpt:
+          "Financial entities must run an ICT risk framework, third-party register, and regular resilience testing.",
+        keywords: ["dora", "ict risk", "third-party", "testing"],
+      },
+      {
+        title: "AI Act obligations",
+        excerpt:
+          "Classify AI systems by risk, run conformity assessments for high-risk systems, and maintain transparency.",
+        keywords: ["ai act", "risk classification", "conformity"],
+      },
+    ],
+    sources: ["NIS2 Directive", "DORA Regulation", "EU AI Act"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "global-isms-privacy-regime",
+    title:
+      "Global ISMS and Privacy Standards (ISO 27001/27701, SOC 2, NIST CSF)",
+    jurisdiction: "Global",
+    frameworkCodes: ["ISO-27001", "ISO-27701", "SOC2", "NIST-CSF-2"],
+    summary:
+      "International frameworks \u2014 ISO 27001 ISMS, ISO 27701 PIMS, SOC 2 trust services criteria, and NIST CSF 2.0 \u2014 provide the common control baseline for multi-jurisdiction compliance.",
+    keyTopics: [
+      "ISO 27001 ISMS",
+      "ISO 27701 PIMS",
+      "SOC 2 attestation",
+      "NIST CSF 2.0",
+      "shared control baseline",
+    ],
+    sections: [
+      {
+        title: "ISO 27001 ISMS",
+        excerpt:
+          "Establish a certified ISMS with risk assessment, Statement of Applicability, and Annex A controls.",
+        keywords: ["isms", "statement of applicability", "annex a"],
+      },
+      {
+        title: "ISO 27701 PIMS",
+        excerpt:
+          "Extend the ISMS with privacy controls aligned to GDPR and other privacy regimes.",
+        keywords: ["pims", "privacy", "gdpr"],
+      },
+      {
+        title: "SOC 2 and NIST CSF",
+        excerpt:
+          "Map Trust Services Criteria and NIST CSF functions to evidence artifacts for customer assurance.",
+        keywords: ["soc 2", "nist csf", "trust services criteria"],
+      },
+    ],
+    sources: ["ISO 27001", "ISO 27701", "AICPA TSC", "NIST CSF 2.0"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "thailand-pdpa",
+    title: "Thailand Personal Data Protection Act (PDPA)",
+    jurisdiction: "Thailand",
+    frameworkCodes: ["PDPA"],
+    summary:
+      "Thailand's PDPA B.E. 2562 governs personal data collection, use, and disclosure with consent-based processing and PDPC oversight.",
+    keyTopics: [
+      "Consent",
+      "Data subject rights",
+      "Cross-border transfer",
+      "PDPC enforcement",
+    ],
+    sections: [
+      {
+        title: "Core obligations and PDPC enforcement",
+        excerpt:
+          "The PDPA requires consent for data processing unless exempt, mandates data protection officers for certain controllers, and empowers the PDPC to issue administrative fines up to THB 5 million per violation.",
+        keywords: ["pdpa", "pdpc", "consent", "dpo", "fines"],
+      },
+    ],
+    sources: [
+      "Thailand Personal Data Protection Act B.E. 2562",
+      "PDPC notifications",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "indonesia-pdp-law",
+    title: "Indonesia Personal Data Protection Law (UU PDP)",
+    jurisdiction: "Indonesia",
+    frameworkCodes: ["UU PDP"],
+    summary:
+      "Indonesia's UU No. 27/2022 on Personal Data Protection establishes consent requirements, data subject rights, and Kominfo agency enforcement with fines up to 2% of annual revenue.",
+    keyTopics: [
+      "Consent and lawful basis",
+      "Data localization",
+      "Cross-border transfer",
+      "Denda administratif",
+    ],
+    sections: [
+      {
+        title: "Consent, localization, and penalties",
+        excerpt:
+          "UU PDP mandates explicit consent for sensitive data, requires data controllers to notify breaches within 3\xD724 hours, and authorizes administrative fines up to 2% of annual revenue with criminal sanctions for intentional misuse.",
+        keywords: [
+          "uu pdp",
+          "kominfo",
+          "consent",
+          "localization",
+          "2 percent fine",
+        ],
+      },
+    ],
+    sources: [
+      "UU No. 27/2022 tentang Pelindungan Data Pribadi",
+      "Kominfo implementing regulations",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "malaysia-pdpa",
+    title: "Malaysia Personal Data Protection Act (PDPA)",
+    jurisdiction: "Malaysia",
+    frameworkCodes: ["PDPA"],
+    summary:
+      "Malaysia's PDPA 2010 regulates personal data processing in commercial transactions with registration and consent requirements enforced by the PDP Commissioner.",
+    keyTopics: [
+      "Data user registration",
+      "Consent principles",
+      "Cross-border restrictions",
+      "Enforcement",
+    ],
+    sections: [
+      {
+        title: "Registration, consent, and cross-border restrictions",
+        excerpt:
+          "Data users in specified classes must register with the Commissioner. Cross-border transfers are restricted to approved jurisdictions or with consent and contractual safeguards. Penalties can reach MYR 500,000 and/or imprisonment.",
+        keywords: [
+          "pdpa malaysia",
+          "commissioner",
+          "registration",
+          "cross-border",
+        ],
+      },
+    ],
+    sources: [
+      "Malaysia Personal Data Protection Act 2010 (Act 709)",
+      "PDP Commissioner guidelines",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "philippines-dpa",
+    title: "Philippines Data Privacy Act (DPA 2012)",
+    jurisdiction: "Philippines",
+    frameworkCodes: ["DPA 2012"],
+    summary:
+      "The Philippines DPA of 2012 establishes the National Privacy Commission (NPC) with comprehensive data privacy obligations, breach notification, and criminal penalties.",
+    keyTopics: [
+      "NPC authority",
+      "Data subject rights",
+      "Breach notification",
+      "Penalties",
+    ],
+    sections: [
+      {
+        title: "NPC governance and enforcement",
+        excerpt:
+          "The NPC enforces compliance with breach notification within 72 hours, registration of data processing systems, and appointment of Data Protection Officers for large-scale processing. Penalties include imprisonment for unauthorized disclosure and PHP 5 million fines.",
+        keywords: ["dpa 2012", "npc", "dpo", "breach notification", "72 hours"],
+      },
+    ],
+    sources: ["Republic Act No. 10173", "NPC Circulars and Advisories"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "vietnam-pdpd",
+    title: "Vietnam Decree on Personal Data Protection (PDPD)",
+    jurisdiction: "Vietnam",
+    frameworkCodes: ["PDPD"],
+    summary:
+      "Vietnam's PDPD (Decree 13/2023/ND-CP) mandates consent-based processing, data localization requirements for Vietnamese users, and enforcement by the Ministry of Public Security.",
+    keyTopics: [
+      "Consent",
+      "Data localization",
+      "Cross-border transfer",
+      "MPS enforcement",
+    ],
+    sections: [
+      {
+        title: "Data localization and cross-border transfer rules",
+        excerpt:
+          "The PDPD requires personal data of Vietnamese data subjects to be stored in Vietnam and restricts cross-border transfers without consent and regulatory assessment. Violations can result in fines up to 5% of annual revenue and suspension of processing activities.",
+        keywords: ["pdpa", "decree 13", "data localization", "vietnam storage"],
+      },
+    ],
+    sources: ["Decree 13/2023/ND-CP", "Ministry of Public Security guidance"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "nigeria-ndpa",
+    title: "Nigeria Data Protection Act (NDPA)",
+    jurisdiction: "Nigeria",
+    frameworkCodes: ["NDPA"],
+    summary:
+      "Nigeria's NDPA 2023 establishes the Nigeria Data Protection Commission (NDPC) with comprehensive data processing principles, DPO requirements, and penalties up to 2% of annual gross revenue.",
+    keyTopics: [
+      "NDPC governance",
+      "Data controller obligations",
+      "Data subject rights",
+      "Cross-border transfer",
+    ],
+    sections: [
+      {
+        title: "NDPC enforcement and compliance obligations",
+        excerpt:
+          "The NDPA requires data controllers to register with the NDPC, appoint Data Protection Officers for major processing, conduct Data Protection Impact Assessments for high-risk processing, and report breaches within 72 hours. Non-compliance attracts fines up to 2% of annual gross revenue.",
+        keywords: ["ndpa", "ndpc", "nigeria data protection", "dpo", "dpia"],
+      },
+    ],
+    sources: [
+      "Nigeria Data Protection Act 2023",
+      "NDPC Implementation Framework",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "kenya-dpa",
+    title: "Kenya Data Protection Act (DPA)",
+    jurisdiction: "Kenya",
+    frameworkCodes: ["Kenya DPA"],
+    summary:
+      "Kenya's Data Protection Act 2019 establishes the Office of the Data Protection Commissioner (ODPC) with EU-aligned data processing principles, registration requirements, and enforcement powers.",
+    keyTopics: [
+      "ODPC registration",
+      "Data processing principles",
+      "Cross-border safeguards",
+      "Enforcement",
+    ],
+    sections: [
+      {
+        title: "ODPC oversight and compliance requirements",
+        excerpt:
+          "Data controllers and processors must register with the ODPC, implement data protection by design, conduct DPIAs for high-risk processing, and ensure adequate safeguards for cross-border transfers. Penalties can reach KES 5 million or 1% of annual turnover for severe violations.",
+        keywords: [
+          "kenya dpa",
+          "odpc",
+          "registration",
+          "dpia",
+          "kes 5 million",
+        ],
+      },
+    ],
+    sources: [
+      "Kenya Data Protection Act No. 24 of 2019",
+      "ODPC guidance notes",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "qatar-dpl",
+    title: "Qatar Personal Data Privacy Protection Law (DPL)",
+    jurisdiction: "Qatar",
+    frameworkCodes: ["Qatar DPL"],
+    summary:
+      "Qatar's Law No. 13 of 2016 on Personal Data Privacy Protection governs the collection and processing of personal data with consent requirements and compliance oversight by the Ministry of Transport and Communications.",
+    keyTopics: [
+      "Consent requirements",
+      "Data processing limits",
+      "Rights of individuals",
+      "MOTC oversight",
+    ],
+    sections: [
+      {
+        title: "Consent, obligations, and enforcement",
+        excerpt:
+          "Personal data processing requires explicit consent unless an exception applies. Controllers must implement appropriate security measures, limit processing to specified purposes, and provide individuals with rights to access and correct their data. Non-compliance can result in fines and corrective orders.",
+        keywords: ["qatar dpl", "law 13", "consent", "motc", "data privacy"],
+      },
+    ],
+    sources: [
+      "Law No. 13 of 2016 \u2014 Qatar Personal Data Privacy Protection Law",
+      "MOTC regulatory communications",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "kuwait-pdpl",
+    title: "Kuwait Data Privacy Protection Regulation (PDPL)",
+    jurisdiction: "Kuwait",
+    frameworkCodes: ["Kuwait PDPL"],
+    summary:
+      "Kuwait's Communication and Information Technology Regulatory Authority (CITRA) Resolution No. 42/2021 establishes data privacy principles for telecommunications and IT service providers in Kuwait.",
+    keyTopics: [
+      "CITRA authority",
+      "Consent and notice",
+      "Data localization",
+      "Breach obligations",
+    ],
+    sections: [
+      {
+        title: "CITRA data privacy framework",
+        excerpt:
+          "CITRA's resolution requires service providers to obtain clear consent for data collection, notify users of processing purposes, implement adequate security safeguards, and store certain categories of data within Kuwait. Violations may lead to administrative penalties and license suspension.",
+        keywords: [
+          "kuwait pdpl",
+          "citra",
+          "resolution 42",
+          "data localization",
+        ],
+      },
+    ],
+    sources: ["CITRA Resolution No. 42/2021", "Kuwait Telecommunications Law"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "bahrain-pdpl",
+    title: "Bahrain Personal Data Protection Law (PDPL)",
+    jurisdiction: "Bahrain",
+    frameworkCodes: ["Bahrain PDPL"],
+    summary:
+      "Bahrain's Law No. 30 of 2018 on Personal Data Protection (PDPL) establishes the Personal Data Protection Authority with GDPR-aligned principles for consent, data subject rights, and cross-border transfer restrictions.",
+    keyTopics: [
+      "PDP Authority",
+      "Data subject rights",
+      "Cross-border adequacy",
+      "Penalties",
+    ],
+    sections: [
+      {
+        title: "PDP Authority governance and compliance",
+        excerpt:
+          "The Personal Data Protection Authority supervises compliance, issues adequacy decisions for cross-border transfers, and requires controllers to implement appropriate technical and organizational measures, report breaches, and register data processing. Penalties can reach BHD 50,000 with criminal sanctions for intentional violations.",
+        keywords: [
+          "bahrain pdpl",
+          "law 30",
+          "authority",
+          "cross-border adequacy",
+          "bhd 50000",
+        ],
+      },
+    ],
+    sources: [
+      "Law No. 30 of 2018 \u2014 Bahrain PDPL",
+      "Personal Data Protection Authority directives",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "oman-pdpl",
+    title: "Oman Personal Data Protection Law (PDPL)",
+    jurisdiction: "Oman",
+    frameworkCodes: ["Oman PDPL"],
+    summary:
+      "Oman's Royal Decree 6/2022 on Personal Data Protection establishes the Ministry of Transport, Communications and Information Technology as the supervisory authority for data protection compliance.",
+    keyTopics: [
+      "Consent and processing",
+      "Cross-border transfers",
+      "Data subject rights",
+      "MTCIT supervision",
+    ],
+    sections: [
+      {
+        title: "Processing requirements and MTCIT oversight",
+        excerpt:
+          "Personal data may only be processed for specified, legitimate purposes with the data subject's consent or other lawful basis. Cross-border transfers require adequate protection or consent. Failure to comply may result in fines and corrective measures ordered by MTCIT.",
+        keywords: [
+          "oman pdpl",
+          "royal decree 6",
+          "mtcit",
+          "consent",
+          "transfer",
+        ],
+      },
+    ],
+    sources: ["Royal Decree 6/2022 \u2014 Oman PDPL", "MTCIT regulations"],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "jordan-pdp",
+    title: "Jordan Personal Data Protection Law (PDP)",
+    jurisdiction: "Jordan",
+    frameworkCodes: ["Jordan PDP"],
+    summary:
+      "Jordan's draft Personal Data Protection Law provides a framework for personal data rights and controller obligations, to be enforced by the Ministry of Digital Economy and Entrepreneurship.",
+    keyTopics: [
+      "Data subject consent",
+      "Controller obligations",
+      "Cross-border flow",
+      "Regulatory oversight",
+    ],
+    sections: [
+      {
+        title: "Proposed legal framework and compliance requirements",
+        excerpt:
+          "The Jordan PDP requires data processing to be based on consent or legitimate legal grounds, mandates security measures proportionate to sensitivity, and restricts cross-border data transfers to jurisdictions with adequate protection. Regulators may issue fines and corrective orders for non-compliance.",
+        keywords: [
+          "jordan pdp",
+          "modee",
+          "consent",
+          "cross-border",
+          "digital economy",
+        ],
+      },
+    ],
+    sources: [
+      "Jordan Personal Data Protection Law (draft)",
+      "Ministry of Digital Economy and Entrepreneurship",
+    ],
+    updatedAt: "2026-03-16",
+  },
+  {
+    slug: "egypt-dpl",
+    title: "Egypt Data Protection Law (DPL)",
+    jurisdiction: "Egypt",
+    frameworkCodes: ["Egypt DPL"],
+    summary:
+      "Egypt's Law No. 151 of 2020 on Personal Data Protection establishes the Personal Data Protection Centre and imposes consent-based processing, DPO requirements, and cross-border transfer restrictions.",
+    keyTopics: [
+      "Protection Centre",
+      "Consent and licensing",
+      "Cross-border controls",
+      "Criminal sanctions",
+    ],
+    sections: [
+      {
+        title: "Centre oversight, licenses, and cross-border transfers",
+        excerpt:
+          "Controllers must obtain a license from the Protection Centre for processing sensitive data or cross-border transfers. DPO appointments are mandatory for large-scale processors. Violations can lead to fines and imprisonment under Egypt's criminal code. Cross-border transfers are restricted to countries with adequate protection levels.",
+        keywords: [
+          "egypt dpl",
+          "law 151",
+          "protection centre",
+          "license",
+          "cross-border",
+        ],
+      },
+    ],
+    sources: [
+      "Law No. 151 of 2020 \u2014 Egypt Data Protection Law",
+      "Personal Data Protection Centre regulations",
+    ],
     updatedAt: "2026-03-16",
   },
 ];
@@ -16762,9 +20056,9 @@ async function generateComplianceReportDocx(options) {
   };
 }
 async function emailComplianceReport(input) {
-  if (!ENV.smtpHost || !ENV.smtpFrom) {
+  if (!ENV.smtpHost) {
     throw new Error(
-      "SMTP is not configured. Set SMTP_HOST and SMTP_FROM to enable report email delivery."
+      "SMTP is not configured. Set SMTP_HOST to enable report email delivery."
     );
   }
   const report = generateComplianceReport(input);
@@ -16773,7 +20067,7 @@ async function emailComplianceReport(input) {
   const pdfBuffer =
     nativePdfBuffer ?? (await buildPdfBuffer(input, report)).buffer;
   const pdfMode = nativePdfBuffer ? "template-native" : "rendered";
-  const transporter = nodemailer2.createTransport({
+  const transporter2 = nodemailer2.createTransport({
     host: ENV.smtpHost,
     port: ENV.smtpPort,
     secure: ENV.smtpSecure,
@@ -16784,8 +20078,8 @@ async function emailComplianceReport(input) {
         }
       : void 0,
   });
-  const info = await transporter.sendMail({
-    from: ENV.smtpFrom,
+  const info = await transporter2.sendMail({
+    from: ENV.smtpFrom || "DJAC by Yalla Hack <hello@yalla-hack.com>",
     to: input.recipientEmail,
     subject: `${report.title} (${report.reportId})`,
     text: `Please find attached the generated compliance report ${report.reportId}.
@@ -16823,7 +20117,7 @@ Generated at: ${report.generatedAt}
 init_db();
 init_schema();
 import crypto from "node:crypto";
-import { and as and6, eq as eq11, gt, lt as lt3 } from "drizzle-orm";
+import { and as and6, eq as eq12, gt, lt as lt3 } from "drizzle-orm";
 var memShares = /* @__PURE__ */ new Map();
 function generateToken() {
   return crypto.randomBytes(24).toString("hex");
@@ -16861,7 +20155,7 @@ async function createReportShare(params) {
   const [row] = await db
     .select()
     .from(reportShares)
-    .where(eq11(reportShares.token, token))
+    .where(eq12(reportShares.token, token))
     .limit(1);
   return row;
 }
@@ -16879,14 +20173,14 @@ async function getReportShareByToken(token) {
     .select()
     .from(reportShares)
     .where(
-      and6(eq11(reportShares.token, token), gt(reportShares.expiresAt, now))
+      and6(eq12(reportShares.token, token), gt(reportShares.expiresAt, now))
     )
     .limit(1);
   if (!row) return null;
   void db
     .update(reportShares)
     .set({ viewCount: row.viewCount + 1 })
-    .where(eq11(reportShares.id, row.id))
+    .where(eq12(reportShares.id, row.id))
     .catch(() => {});
   return row;
 }
@@ -18688,7 +21982,7 @@ var complianceFrameworkRouter = router({
     return listComplianceObligations();
   }),
   timetableByCountry: publicProcedure
-    .input(z8.enum(["Saudi Arabia", "China", "EU", "US", "Brazil"]))
+    .input(z8.enum(TIMETABLE_JURISDICTIONS))
     .query(({ input }) => {
       return getObligationsByCountry(input);
     }),
@@ -18699,15 +21993,7 @@ var complianceFrameworkRouter = router({
   report: protectedProcedure
     .input(
       z8.object({
-        jurisdiction: z8.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z8.enum(REPORT_JURISDICTIONS),
         locale: z8.enum(["en", "ar", "zh"]).default("en"),
         reportType: z8
           .enum([
@@ -18752,15 +22038,7 @@ var complianceFrameworkRouter = router({
   reportPdf: protectedProcedure
     .input(
       z8.object({
-        jurisdiction: z8.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z8.enum(REPORT_JURISDICTIONS),
         locale: z8.enum(["en", "ar", "zh"]).default("en"),
         reportType: z8
           .enum([
@@ -18806,15 +22084,7 @@ var complianceFrameworkRouter = router({
   reportDocx: protectedProcedure
     .input(
       z8.object({
-        jurisdiction: z8.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z8.enum(REPORT_JURISDICTIONS),
         locale: z8.enum(["en", "ar", "zh"]).default("en"),
         reportType: z8
           .enum([
@@ -18860,15 +22130,7 @@ var complianceFrameworkRouter = router({
   emailReport: protectedProcedure
     .input(
       z8.object({
-        jurisdiction: z8.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z8.enum(REPORT_JURISDICTIONS),
         locale: z8.enum(["en", "ar", "zh"]).default("en"),
         reportType: z8
           .enum([
@@ -18917,15 +22179,7 @@ var complianceFrameworkRouter = router({
   createShareLink: protectedProcedure
     .input(
       z8.object({
-        jurisdiction: z8.enum([
-          "Saudi Arabia",
-          "China",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "both",
-        ]),
+        jurisdiction: z8.enum(REPORT_JURISDICTIONS),
         locale: z8.enum(["en", "ar", "zh"]).default("en"),
         reportType: z8
           .enum([
@@ -19518,9 +22772,9 @@ init_db();
 init_schema();
 import {
   and as and8,
-  eq as eq13,
+  eq as eq14,
   isNull,
-  desc as desc4,
+  desc as desc5,
   or as or4,
 } from "drizzle-orm";
 var NOW = /* @__PURE__ */ new Date("2026-03-23T00:00:00Z");
@@ -19850,9 +23104,485 @@ var GLOBAL_DEADLINES = [
     createdAt: NOW,
     updatedAt: NOW,
   },
+  {
+    id: 20,
+    organizationId: null,
+    frameworkCode: "UK-GDPR",
+    title: "UK GDPR ICO Breach Notification (72 hours)",
+    description:
+      "Notify the ICO within 72 hours of becoming aware of a personal data breach posing risk to individuals, per UK GDPR Article 33.",
+    deadlineDate: d(5),
+    jurisdiction: "United Kingdom",
+    priority: "critical",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 21,
+    organizationId: null,
+    frameworkCode: "UK-GDPR",
+    title: "UK IDTA Transfer Review",
+    description:
+      "Complete UK International Data Transfer Agreement documentation for transfers to third countries without UK adequacy.",
+    deadlineDate: d(40),
+    jurisdiction: "United Kingdom",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 22,
+    organizationId: null,
+    frameworkCode: "NIS2",
+    title: "NIS2 Incident Early Warning (24 hours)",
+    description:
+      "Essential and important entities must submit an early warning to the national CSIRT within 24 hours of a significant incident.",
+    deadlineDate: d(10),
+    jurisdiction: "EU",
+    priority: "critical",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 23,
+    organizationId: null,
+    frameworkCode: "DORA",
+    title: "DORA ICT Third-Party Register Update",
+    description:
+      "EU financial entities must maintain and update the register of ICT third-party arrangements for supervisory reporting.",
+    deadlineDate: d(30),
+    jurisdiction: "EU",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 24,
+    organizationId: null,
+    frameworkCode: "PIPEDA",
+    title: "PIPEDA Material Breach Reporting to OPC",
+    description:
+      "Report material data breaches to the Office of the Privacy Commissioner of Canada and notify affected individuals where risk of significant harm exists.",
+    deadlineDate: d(25),
+    jurisdiction: "Canada",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 25,
+    organizationId: null,
+    frameworkCode: "PRIVACY-ACT-AU",
+    title: "Australia Notifiable Data Breach Reporting",
+    description:
+      "Notify the OAIC and affected individuals when a data breach is likely to result in serious harm under the Notifiable Data Breaches scheme.",
+    deadlineDate: d(35),
+    jurisdiction: "Australia",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 26,
+    organizationId: null,
+    frameworkCode: "APPI",
+    title: "APPI PPC Breach Notification",
+    description:
+      "Report qualifying personal data breaches to Japan's Personal Information Protection Commission and notify affected data subjects.",
+    deadlineDate: d(15),
+    jurisdiction: "Japan",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 27,
+    organizationId: null,
+    frameworkCode: "PIPA-KR",
+    title: "PIPA PIPC Breach Notification",
+    description:
+      "Notify Korea's Personal Information Protection Commission and affected data subjects of personal information breaches without delay.",
+    deadlineDate: d(20),
+    jurisdiction: "South Korea",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 28,
+    organizationId: null,
+    frameworkCode: "PDPA-SG",
+    title: "Singapore PDPA Notifiable Breach Assessment",
+    description:
+      "Assess whether a data breach is notifiable and inform the PDPC and affected individuals within prescribed timelines.",
+    deadlineDate: d(12),
+    jurisdiction: "Singapore",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 29,
+    organizationId: null,
+    frameworkCode: "DPDP-IN",
+    title: "DPDP Act Breach Notification to Data Protection Board",
+    description:
+      "Notify the Data Protection Board of India and affected data principals of personal data breaches per DPDP Act obligations.",
+    deadlineDate: d(18),
+    jurisdiction: "India",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 30,
+    organizationId: null,
+    frameworkCode: "POPIA",
+    title: "POPIA Security Compromise Notification",
+    description:
+      "Notify the South African Information Regulator and affected data subjects of security compromises per POPIA Section 22.",
+    deadlineDate: d(22),
+    jurisdiction: "South Africa",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 31,
+    organizationId: null,
+    frameworkCode: "PCI-DSS",
+    title: "PCI DSS Annual SAQ and Attestation of Compliance",
+    description:
+      "Complete the annual Self-Assessment Questionnaire and Attestation of Compliance for cardholder data environments.",
+    deadlineDate: d(55),
+    jurisdiction: "Global",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 32,
+    organizationId: null,
+    frameworkCode: "ISO-27001",
+    title: "ISO 27001 Surveillance Audit Preparation",
+    description:
+      "Prepare evidence for the annual ISO 27001 surveillance audit, including management review and internal audit records.",
+    deadlineDate: d(50),
+    jurisdiction: "Global",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 33,
+    organizationId: null,
+    frameworkCode: "MEXICO-DPA",
+    title: "Mexico ARCO Rights Response Obligation",
+    description:
+      "Respond to ARCO rights requests within statutory timelines and maintain the privacy notice registry under LFPDPPP.",
+    deadlineDate: d(28),
+    jurisdiction: "Mexico",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 34,
+    organizationId: null,
+    frameworkCode: "UAE-PDPL",
+    title: "UAE PDPL Annual Compliance Review",
+    description:
+      "Conduct annual data protection compliance self-assessment and update processing records as required by UAE PDPL.",
+    deadlineDate: d(45),
+    jurisdiction: "United Arab Emirates",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 35,
+    organizationId: null,
+    frameworkCode: "QATAR-DPL",
+    title: "Qatar Data Privacy Consent Registry Update",
+    description:
+      "Review and update consent records and data processing registrations to align with Qatar's Law No. 13 privacy obligations.",
+    deadlineDate: d(30),
+    jurisdiction: "Qatar",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 36,
+    organizationId: null,
+    frameworkCode: "KUWAIT-PDPL",
+    title: "Kuwait CITRA Resolution 42 Security Audit",
+    description:
+      "Perform security safeguard audit and update processing notifications as required by CITRA for licensed service providers.",
+    deadlineDate: d(25),
+    jurisdiction: "Kuwait",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 37,
+    organizationId: null,
+    frameworkCode: "BAHRAIN-PDPL",
+    title: "Bahrain PDPL Data Protection Registration",
+    description:
+      "Register or renew data processing with the Bahrain Personal Data Protection Authority and update Data Protection Officer details.",
+    deadlineDate: d(20),
+    jurisdiction: "Bahrain",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 38,
+    organizationId: null,
+    frameworkCode: "THAILAND-PDPA",
+    title: "Thailand PDPA Cross-Border Transfer Assessment",
+    description:
+      "Conduct transfer impact assessment for personal data sent abroad and document adequacy safeguards under Thailand's PDPA.",
+    deadlineDate: d(35),
+    jurisdiction: "Thailand",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 39,
+    organizationId: null,
+    frameworkCode: "INDONESIA-PDP",
+    title: "Indonesia UU PDP DPO Appointment",
+    description:
+      "Appoint or confirm Data Protection Officer registration with Kominfo and document internal data protection policies.",
+    deadlineDate: d(40),
+    jurisdiction: "Indonesia",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 40,
+    organizationId: null,
+    frameworkCode: "MALAYSIA-PDPA",
+    title: "Malaysia PDPA Data User Registration",
+    description:
+      "Renew or submit data user registration certificate with the PDP Commissioner for classified processing activities.",
+    deadlineDate: d(15),
+    jurisdiction: "Malaysia",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 41,
+    organizationId: null,
+    frameworkCode: "PHILIPPINES-DPA",
+    title: "Philippines DPA Breach Notification Exercise",
+    description:
+      "Complete NPC breach notification drill and verify 72-hour notification readiness for unauthorized data access incidents.",
+    deadlineDate: d(28),
+    jurisdiction: "Philippines",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 42,
+    organizationId: null,
+    frameworkCode: "VIETNAM-PDPD",
+    title: "Vietnam PDPD Data Localization Compliance",
+    description:
+      "Verify that Vietnamese user personal data is stored in accordance with Decree 13 localization requirements and document processing purposes.",
+    deadlineDate: d(50),
+    jurisdiction: "Vietnam",
+    priority: "critical",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 43,
+    organizationId: null,
+    frameworkCode: "NIGERIA-NDPA",
+    title: "Nigeria NDPA DPIA Submission",
+    description:
+      "Submit high-risk processing Data Protection Impact Assessment to NDPC and appoint/confirm Data Protection Officer registration.",
+    deadlineDate: d(30),
+    jurisdiction: "Nigeria",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 44,
+    organizationId: null,
+    frameworkCode: "KENYA-DPA",
+    title: "Kenya DPA Controller Registration",
+    description:
+      "Register or renew data controller/processor registration with the ODPC and file annual data protection compliance self-assessment.",
+    deadlineDate: d(20),
+    jurisdiction: "Kenya",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 45,
+    organizationId: null,
+    frameworkCode: "OMAN-PDPL",
+    title: "Oman PDPL Data Protection Policy Review",
+    description:
+      "Review and update personal data processing policy and consent mechanisms in compliance with Royal Decree 6/2022.",
+    deadlineDate: d(35),
+    jurisdiction: "Oman",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 46,
+    organizationId: null,
+    frameworkCode: "JORDAN-PDP",
+    title: "Jordan PDP Controller Registration",
+    description:
+      "File data controller registration with the Ministry of Digital Economy and Entrepreneurship for processing operations in Jordan.",
+    deadlineDate: d(40),
+    jurisdiction: "Jordan",
+    priority: "medium",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
+  {
+    id: 47,
+    organizationId: null,
+    frameworkCode: "EGYPT-DPL",
+    title: "Egypt DPL Cross-Border Data Transfer License",
+    description:
+      "Apply for or renew cross-border data transfer license with the Personal Data Protection Centre for international data flows.",
+    deadlineDate: d(55),
+    jurisdiction: "Egypt",
+    priority: "high",
+    status: "upcoming",
+    notificationsSent: null,
+    assignedToUserId: null,
+    completedAt: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+  },
 ];
 var memoryDeadlines = [...GLOBAL_DEADLINES];
-var nextId = GLOBAL_DEADLINES.length + 1;
+var nextId = Math.max(0, ...GLOBAL_DEADLINES.map(d2 => d2.id)) + 1;
 async function listDeadlines(filters = {}) {
   const db = await getDb();
   const limit = filters.limit ?? 200;
@@ -19877,19 +23607,19 @@ async function listDeadlines(filters = {}) {
   }
   const conditions = [];
   if (filters.status)
-    conditions.push(eq13(complianceDeadlines.status, filters.status));
+    conditions.push(eq14(complianceDeadlines.status, filters.status));
   if (filters.jurisdiction)
     conditions.push(
-      eq13(complianceDeadlines.jurisdiction, filters.jurisdiction)
+      eq14(complianceDeadlines.jurisdiction, filters.jurisdiction)
     );
   if (filters.frameworkCode)
     conditions.push(
-      eq13(complianceDeadlines.frameworkCode, filters.frameworkCode)
+      eq14(complianceDeadlines.frameworkCode, filters.frameworkCode)
     );
   if (filters.organizationId != null) {
     conditions.push(
       or4(
-        eq13(complianceDeadlines.organizationId, filters.organizationId),
+        eq14(complianceDeadlines.organizationId, filters.organizationId),
         isNull(complianceDeadlines.organizationId)
       )
     );
@@ -19898,7 +23628,7 @@ async function listDeadlines(filters = {}) {
     .select()
     .from(complianceDeadlines)
     .where(conditions.length > 0 ? and8(...conditions) : void 0)
-    .orderBy(desc4(complianceDeadlines.deadlineDate))
+    .orderBy(desc5(complianceDeadlines.deadlineDate))
     .limit(limit);
   return rows;
 }
@@ -19945,7 +23675,7 @@ async function createDeadline(input) {
   const [row] = await db
     .select()
     .from(complianceDeadlines)
-    .where(eq13(complianceDeadlines.id, id))
+    .where(eq14(complianceDeadlines.id, id))
     .limit(1);
   return row;
 }
@@ -19970,10 +23700,10 @@ async function completeDeadline(id, organizationId) {
   const whereClause =
     organizationId != null
       ? and8(
-          eq13(complianceDeadlines.id, id),
-          eq13(complianceDeadlines.organizationId, organizationId)
+          eq14(complianceDeadlines.id, id),
+          eq14(complianceDeadlines.organizationId, organizationId)
         )
-      : eq13(complianceDeadlines.id, id);
+      : eq14(complianceDeadlines.id, id);
   await db
     .update(complianceDeadlines)
     .set({ status: "completed", completedAt: now })
@@ -19981,7 +23711,7 @@ async function completeDeadline(id, organizationId) {
   const [row] = await db
     .select()
     .from(complianceDeadlines)
-    .where(eq13(complianceDeadlines.id, id))
+    .where(eq14(complianceDeadlines.id, id))
     .limit(1);
   return row ?? null;
 }
@@ -20009,11 +23739,11 @@ async function listOrgMembersForDeadlines(organizationId) {
       userEmail: users.email,
     })
     .from(organizationMembers)
-    .leftJoin(users, eq13(organizationMembers.userId, users.id))
+    .leftJoin(users, eq14(organizationMembers.userId, users.id))
     .where(
       and8(
-        eq13(organizationMembers.organizationId, organizationId),
-        eq13(organizationMembers.status, "active")
+        eq14(organizationMembers.organizationId, organizationId),
+        eq14(organizationMembers.status, "active")
       )
     );
   return rows
@@ -20032,17 +23762,7 @@ var deadlineRouter = router({
     .input(
       z10
         .object({
-          jurisdiction: z10
-            .enum([
-              "China",
-              "Saudi Arabia",
-              "EU",
-              "US",
-              "Brazil",
-              "Global",
-              "Both",
-            ])
-            .optional(),
+          jurisdiction: z10.enum(DEADLINE_JURISDICTIONS).optional(),
           status: z10
             .enum(["upcoming", "overdue", "completed", "waived"])
             .optional(),
@@ -20078,15 +23798,7 @@ var deadlineRouter = router({
         title: z10.string().trim().min(3).max(255),
         description: z10.string().trim().max(2e3).optional(),
         deadlineDate: z10.string().datetime(),
-        jurisdiction: z10.enum([
-          "China",
-          "Saudi Arabia",
-          "EU",
-          "US",
-          "Brazil",
-          "Global",
-          "Both",
-        ]),
+        jurisdiction: z10.enum(DEADLINE_JURISDICTIONS),
         priority: z10.enum(["low", "medium", "high", "critical"]).optional(),
         assignedToUserId: z10.number().int().positive().optional(),
       })
@@ -20174,7 +23886,7 @@ import { TRPCError as TRPCError8 } from "@trpc/server";
 // server/role-store.ts
 init_schema();
 init_db();
-import { and as and9, desc as desc5, eq as eq14 } from "drizzle-orm";
+import { and as and9, desc as desc6, eq as eq15 } from "drizzle-orm";
 async function listUsersWithRoles(limit, offset) {
   const db = await getDb();
   if (!db) return [];
@@ -20203,13 +23915,13 @@ async function assignUserRole(targetUserId, newRole) {
       role: users.role,
     })
     .from(users)
-    .where(eq14(users.id, targetUserId))
+    .where(eq15(users.id, targetUserId))
     .limit(1);
   if (!target) return null;
   await db
     .update(users)
     .set({ role: newRole, updatedAt: /* @__PURE__ */ new Date() })
-    .where(eq14(users.id, targetUserId));
+    .where(eq15(users.id, targetUserId));
   return target;
 }
 async function assignLocalUserRole(targetLocalUserId, newUserType) {
@@ -20223,26 +23935,26 @@ async function assignLocalUserRole(targetLocalUserId, newUserType) {
       userType: localUsers.userType,
     })
     .from(localUsers)
-    .where(eq14(localUsers.id, targetLocalUserId))
+    .where(eq15(localUsers.id, targetLocalUserId))
     .limit(1);
   if (!target) return null;
   await db
     .update(localUsers)
     .set({ userType: newUserType, updatedAt: /* @__PURE__ */ new Date() })
-    .where(eq14(localUsers.id, targetLocalUserId));
+    .where(eq15(localUsers.id, targetLocalUserId));
   return target;
 }
 async function listAuditLogs(limit, offset, category, outcome) {
   const db = await getDb();
   if (!db) return [];
   const conditions = [];
-  if (category) conditions.push(eq14(auditLogs.category, category));
-  if (outcome) conditions.push(eq14(auditLogs.outcome, outcome));
+  if (category) conditions.push(eq15(auditLogs.category, category));
+  if (outcome) conditions.push(eq15(auditLogs.outcome, outcome));
   return db
     .select()
     .from(auditLogs)
     .where(conditions.length > 0 ? and9(...conditions) : void 0)
-    .orderBy(desc5(auditLogs.createdAt))
+    .orderBy(desc6(auditLogs.createdAt))
     .limit(limit)
     .offset(offset);
 }
@@ -20290,6 +24002,7 @@ var roleRouter = router({
    * Cannot self-demote from super_admin.
    */
   assignUserRole: platformAdminProcedure
+    .use(requireMfa)
     .input(
       z12.object({
         targetUserId: z12.number().int().positive(),
@@ -20343,6 +24056,7 @@ var roleRouter = router({
    * Restricted to Platform Admin and above.
    */
   assignLocalUserRole: platformAdminProcedure
+    .use(requireMfa)
     .input(
       z12.object({
         targetLocalUserId: z12.number().int().positive(),
@@ -20518,7 +24232,7 @@ import { randomBytes } from "crypto";
 init_schema();
 init_db();
 init_env();
-import { eq as eq15, and as and10 } from "drizzle-orm";
+import { eq as eq16, and as and10 } from "drizzle-orm";
 async function getMyOrg(orgId, role) {
   const db = await getDb();
   if (!db) {
@@ -20565,7 +24279,7 @@ async function getMyOrg(orgId, role) {
       createdAt: organizations.createdAt,
     })
     .from(organizations)
-    .where(eq15(organizations.id, orgId))
+    .where(eq16(organizations.id, orgId))
     .limit(1);
   if (!org) return null;
   return { ...org, currentUserRole: role };
@@ -20591,9 +24305,9 @@ async function listOrgMembers(orgId, currentUserId) {
       oauthJobTitle: users.jobTitle,
     })
     .from(organizationMembers)
-    .leftJoin(localUsers, eq15(organizationMembers.localUserId, localUsers.id))
-    .leftJoin(users, eq15(organizationMembers.userId, users.id))
-    .where(eq15(organizationMembers.organizationId, orgId))
+    .leftJoin(localUsers, eq16(organizationMembers.localUserId, localUsers.id))
+    .leftJoin(users, eq16(organizationMembers.userId, users.id))
+    .where(eq16(organizationMembers.organizationId, orgId))
     .orderBy(organizationMembers.createdAt);
   return rows.map(r => ({
     id: r.id,
@@ -20615,8 +24329,8 @@ async function getOrgMember(orgId, memberId) {
     .from(organizationMembers)
     .where(
       and10(
-        eq15(organizationMembers.id, memberId),
-        eq15(organizationMembers.organizationId, orgId)
+        eq16(organizationMembers.id, memberId),
+        eq16(organizationMembers.organizationId, orgId)
       )
     )
     .limit(1);
@@ -20628,14 +24342,14 @@ async function updateMemberRole(memberId, newRole) {
   await db
     .update(organizationMembers)
     .set({ role: newRole, updatedAt: /* @__PURE__ */ new Date() })
-    .where(eq15(organizationMembers.id, memberId));
+    .where(eq16(organizationMembers.id, memberId));
 }
 async function deleteMember(memberId) {
   const db = await getDb();
   if (!db) return;
   await db
     .delete(organizationMembers)
-    .where(eq15(organizationMembers.id, memberId));
+    .where(eq16(organizationMembers.id, memberId));
 }
 async function getOrgForInvite(orgId) {
   const db = await getDb();
@@ -20643,7 +24357,7 @@ async function getOrgForInvite(orgId) {
   const [org] = await db
     .select({ maxSeats: organizations.maxSeats, name: organizations.name })
     .from(organizations)
-    .where(eq15(organizations.id, orgId))
+    .where(eq16(organizations.id, orgId))
     .limit(1);
   return org ?? null;
 }
@@ -20655,8 +24369,8 @@ async function countActiveMembers(orgId) {
     .from(organizationMembers)
     .where(
       and10(
-        eq15(organizationMembers.organizationId, orgId),
-        eq15(organizationMembers.status, "active")
+        eq16(organizationMembers.organizationId, orgId),
+        eq16(organizationMembers.status, "active")
       )
     );
   return rows.length;
@@ -20672,9 +24386,9 @@ async function checkDuplicateInvite(orgId, email) {
       localEmail: localUsers.email,
     })
     .from(organizationMembers)
-    .leftJoin(users, eq15(organizationMembers.userId, users.id))
-    .leftJoin(localUsers, eq15(organizationMembers.localUserId, localUsers.id))
-    .where(eq15(organizationMembers.organizationId, orgId));
+    .leftJoin(users, eq16(organizationMembers.userId, users.id))
+    .leftJoin(localUsers, eq16(organizationMembers.localUserId, localUsers.id))
+    .where(eq16(organizationMembers.organizationId, orgId));
   return rows.some(row => {
     const candidates = [row.inviteEmail, row.oauthEmail, row.localEmail];
     return candidates.some(
@@ -20711,9 +24425,9 @@ async function lookupInviteToken(token) {
     .from(organizationMembers)
     .innerJoin(
       organizations,
-      eq15(organizationMembers.organizationId, organizations.id)
+      eq16(organizationMembers.organizationId, organizations.id)
     )
-    .where(eq15(organizationMembers.inviteToken, token))
+    .where(eq16(organizationMembers.inviteToken, token))
     .limit(1);
   return row ?? null;
 }
@@ -20729,7 +24443,7 @@ async function getInviteByToken(token) {
       inviteEmail: organizationMembers.inviteEmail,
     })
     .from(organizationMembers)
-    .where(eq15(organizationMembers.inviteToken, token))
+    .where(eq16(organizationMembers.inviteToken, token))
     .limit(1);
   return row ?? null;
 }
@@ -20745,7 +24459,7 @@ async function activateInvite(memberId, userId) {
       inviteToken: null,
       updatedAt: /* @__PURE__ */ new Date(),
     })
-    .where(eq15(organizationMembers.id, memberId));
+    .where(eq16(organizationMembers.id, memberId));
 }
 
 // server/org-members-router.ts
@@ -20760,6 +24474,7 @@ var orgMembersRouter = router({
     return listOrgMembers(ctx.organizationId, ctx.user?.id ?? -999);
   }),
   updateRole: orgAdminProcedure
+    .use(requireMfa)
     .input(
       z14.object({
         memberId: z14.number().int().positive(),
@@ -20792,6 +24507,7 @@ var orgMembersRouter = router({
       return { success: true };
     }),
   remove: orgAdminProcedure
+    .use(requireMfa)
     .input(z14.number().int().positive())
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "team_members", "canDelete");
@@ -20820,6 +24536,7 @@ var orgMembersRouter = router({
       return { success: true };
     }),
   invite: orgAdminProcedure
+    .use(requireMfa)
     .input(
       z14.object({
         email: z14.string().email().max(320),
@@ -20984,7 +24701,7 @@ import { TRPCError as TRPCError10 } from "@trpc/server";
 init_db();
 init_env();
 init_schema();
-import { eq as eq16 } from "drizzle-orm";
+import { eq as eq17 } from "drizzle-orm";
 async function getOrgSettings(orgId, role) {
   const db = await getDb();
   if (!db) {
@@ -21026,7 +24743,7 @@ async function getOrgSettings(orgId, role) {
   const [org] = await db
     .select()
     .from(organizations)
-    .where(eq16(organizations.id, orgId))
+    .where(eq17(organizations.id, orgId))
     .limit(1);
   if (!org) return null;
   return { ...org, currentUserRole: role ?? "analyst" };
@@ -21043,20 +24760,11 @@ async function updateOrgSettings(orgId, input) {
   await db
     .update(organizations)
     .set(patch)
-    .where(eq16(organizations.id, orgId));
+    .where(eq17(organizations.id, orgId));
 }
 
 // server/org-settings-router.ts
-var JURISDICTION_VALUES = [
-  "China",
-  "Saudi Arabia",
-  "EU",
-  "US",
-  "Brazil",
-  "Global",
-  "Both",
-  "Other",
-];
+var JURISDICTION_VALUES = GLOBAL_JURISDICTIONS;
 var updateOrgSchema = z15.object({
   name: z15
     .string()
@@ -21091,6 +24799,7 @@ var orgSettingsRouter = router({
    * Slug and plan are intentionally excluded — those are system-managed.
    */
   update: orgAdminProcedure
+    .use(requireMfa)
     .input(updateOrgSchema)
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "org_settings", "canEdit");
@@ -21114,7 +24823,7 @@ var orgSettingsRouter = router({
 // server/scorecard-store.ts
 init_schema();
 init_db();
-import { and as and11, desc as desc6, eq as eq17 } from "drizzle-orm";
+import { and as and11, desc as desc7, eq as eq18 } from "drizzle-orm";
 function makeEmptyScorecard(totalVendors) {
   return {
     totalVendors,
@@ -21145,7 +24854,7 @@ async function getOrgScorecard(orgId, userId) {
   const vendorRows = await db
     .select({ id: vendors.id, vendorName: vendors.vendorName })
     .from(vendors)
-    .where(eq17(vendors.organizationId, orgId));
+    .where(eq18(vendors.organizationId, orgId));
   const totalVendors = vendorRows.length;
   if (totalVendors === 0) return makeEmptyScorecard(0);
   const assessmentRows = await db
@@ -21162,10 +24871,10 @@ async function getOrgScorecard(orgId, userId) {
       assessmentDate: vendorAssessments.assessmentDate,
     })
     .from(vendorAssessments)
-    .innerJoin(vendors, eq17(vendorAssessments.vendorId, vendors.id))
-    .innerJoin(frameworks, eq17(vendorAssessments.frameworkId, frameworks.id))
-    .where(eq17(vendors.organizationId, orgId))
-    .orderBy(desc6(vendorAssessments.assessmentDate));
+    .innerJoin(vendors, eq18(vendorAssessments.vendorId, vendors.id))
+    .innerJoin(frameworks, eq18(vendorAssessments.frameworkId, frameworks.id))
+    .where(eq18(vendors.organizationId, orgId))
+    .orderBy(desc7(vendorAssessments.assessmentDate));
   const latestMap = /* @__PURE__ */ new Map();
   for (const row of assessmentRows) {
     const key = `${row.vendorId}:${row.frameworkId}`;
@@ -21227,10 +24936,10 @@ async function getOrgScorecard(orgId, userId) {
     .from(assessmentGaps)
     .innerJoin(
       vendorAssessments,
-      eq17(assessmentGaps.assessmentId, vendorAssessments.id)
+      eq18(assessmentGaps.assessmentId, vendorAssessments.id)
     )
-    .innerJoin(vendors, eq17(vendorAssessments.vendorId, vendors.id))
-    .where(eq17(vendors.organizationId, orgId));
+    .innerJoin(vendors, eq18(vendorAssessments.vendorId, vendors.id))
+    .where(eq18(vendors.organizationId, orgId));
   for (const g of gapRows) {
     if (g.severity && g.severity in gapsBySeverity) {
       gapsBySeverity[g.severity]++;
@@ -21248,11 +24957,11 @@ async function getOrgScorecard(orgId, userId) {
     .from(complianceReports)
     .where(
       and11(
-        eq17(complianceReports.organizationId, orgId),
-        eq17(complianceReports.status, "ready")
+        eq18(complianceReports.organizationId, orgId),
+        eq18(complianceReports.status, "ready")
       )
     )
-    .orderBy(desc6(complianceReports.createdAt))
+    .orderBy(desc7(complianceReports.createdAt))
     .limit(5);
   return {
     totalVendors,
@@ -21290,7 +24999,7 @@ import { TRPCError as TRPCError11 } from "@trpc/server";
 init_schema();
 init_db();
 import crypto2 from "crypto";
-import { and as and12, eq as eq18, isNull as isNull2 } from "drizzle-orm";
+import { and as and12, eq as eq19, isNull as isNull2 } from "drizzle-orm";
 var MEM_KEYS = [];
 var memIdSeq = 1;
 function genApiKey() {
@@ -21318,7 +25027,7 @@ async function listApiKeys(orgId) {
     })
     .from(apiKeys)
     .where(
-      and12(eq18(apiKeys.organizationId, orgId), isNull2(apiKeys.revokedAt))
+      and12(eq19(apiKeys.organizationId, orgId), isNull2(apiKeys.revokedAt))
     );
 }
 async function createApiKey(
@@ -21374,12 +25083,12 @@ async function revokeApiKey(orgId, keyId) {
   const [existing] = await db
     .select({ id: apiKeys.id })
     .from(apiKeys)
-    .where(and12(eq18(apiKeys.id, keyId), eq18(apiKeys.organizationId, orgId)));
+    .where(and12(eq19(apiKeys.id, keyId), eq19(apiKeys.organizationId, orgId)));
   if (!existing) return false;
   await db
     .update(apiKeys)
     .set({ revokedAt: /* @__PURE__ */ new Date() })
-    .where(eq18(apiKeys.id, keyId));
+    .where(eq19(apiKeys.id, keyId));
   return true;
 }
 
@@ -21398,6 +25107,7 @@ var apiKeysRouter = router({
    * Only org admins can create keys.
    */
   create: orgAdminProcedure
+    .use(requireMfa)
     .input(
       z16.object({
         name: z16
@@ -21450,6 +25160,7 @@ var apiKeysRouter = router({
    * Revoke an API key by id. Only org admins can revoke.
    */
   revoke: orgAdminProcedure
+    .use(requireMfa)
     .input(z16.number().int().positive())
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "api_keys", "canDelete");
@@ -21474,7 +25185,7 @@ import { TRPCError as TRPCError12 } from "@trpc/server";
 // server/remediation-store.ts
 init_schema();
 init_db();
-import { and as and13, desc as desc7, eq as eq19 } from "drizzle-orm";
+import { and as and13, desc as desc8, eq as eq20 } from "drizzle-orm";
 var MEM_TASKS = [];
 var memSeq = 1;
 async function listTasks(orgId) {
@@ -21487,8 +25198,8 @@ async function listTasks(orgId) {
   return db
     .select()
     .from(remediationTasks)
-    .where(eq19(remediationTasks.organizationId, orgId))
-    .orderBy(desc7(remediationTasks.createdAt));
+    .where(eq20(remediationTasks.organizationId, orgId))
+    .orderBy(desc8(remediationTasks.createdAt));
 }
 async function createTask(orgId, input) {
   const db = await getDb();
@@ -21561,8 +25272,8 @@ async function updateTaskStatus(orgId, id, status) {
     .set({ status, updatedAt: /* @__PURE__ */ new Date() })
     .where(
       and13(
-        eq19(remediationTasks.id, id),
-        eq19(remediationTasks.organizationId, orgId)
+        eq20(remediationTasks.id, id),
+        eq20(remediationTasks.organizationId, orgId)
       )
     );
   return { id, status };
@@ -21586,8 +25297,8 @@ async function patchTask(orgId, id, fields, dueDate) {
     .set(updates)
     .where(
       and13(
-        eq19(remediationTasks.id, id),
-        eq19(remediationTasks.organizationId, orgId)
+        eq20(remediationTasks.id, id),
+        eq20(remediationTasks.organizationId, orgId)
       )
     );
   return { id };
@@ -21606,8 +25317,8 @@ async function removeTask(orgId, id) {
     .delete(remediationTasks)
     .where(
       and13(
-        eq19(remediationTasks.id, id),
-        eq19(remediationTasks.organizationId, orgId)
+        eq20(remediationTasks.id, id),
+        eq20(remediationTasks.organizationId, orgId)
       )
     );
   return true;
@@ -21744,7 +25455,7 @@ import { TRPCError as TRPCError13 } from "@trpc/server";
 // server/risk-register-store.ts
 init_schema();
 init_db();
-import { and as and14, desc as desc8, eq as eq20 } from "drizzle-orm";
+import { and as and14, desc as desc9, eq as eq21 } from "drizzle-orm";
 var MEM_RISKS = [];
 var memSeq2 = 1;
 async function listRisks(orgId) {
@@ -21757,8 +25468,8 @@ async function listRisks(orgId) {
   return db
     .select()
     .from(riskRegister)
-    .where(eq20(riskRegister.organizationId, orgId))
-    .orderBy(desc8(riskRegister.createdAt));
+    .where(eq21(riskRegister.organizationId, orgId))
+    .orderBy(desc9(riskRegister.createdAt));
 }
 async function createRisk(orgId, input) {
   const db = await getDb();
@@ -21843,7 +25554,7 @@ async function patchRisk(orgId, id, fields, reviewDate) {
     .update(riskRegister)
     .set(updates)
     .where(
-      and14(eq20(riskRegister.id, id), eq20(riskRegister.organizationId, orgId))
+      and14(eq21(riskRegister.id, id), eq21(riskRegister.organizationId, orgId))
     );
   return { id };
 }
@@ -21861,13 +25572,13 @@ async function removeRisk(orgId, id) {
     .select({ id: riskRegister.id })
     .from(riskRegister)
     .where(
-      and14(eq20(riskRegister.id, id), eq20(riskRegister.organizationId, orgId))
+      and14(eq21(riskRegister.id, id), eq21(riskRegister.organizationId, orgId))
     );
   if (!rows.length) return false;
   await db
     .delete(riskRegister)
     .where(
-      and14(eq20(riskRegister.id, id), eq20(riskRegister.organizationId, orgId))
+      and14(eq21(riskRegister.id, id), eq21(riskRegister.organizationId, orgId))
     );
   return true;
 }
@@ -21995,7 +25706,7 @@ import { TRPCError as TRPCError14 } from "@trpc/server";
 // server/policy-store.ts
 init_schema();
 init_db();
-import { and as and15, desc as desc9, eq as eq21 } from "drizzle-orm";
+import { and as and15, desc as desc10, eq as eq22 } from "drizzle-orm";
 var MEM_POLICIES = [];
 var memSeq3 = 1;
 async function listPolicies(orgId) {
@@ -22008,8 +25719,8 @@ async function listPolicies(orgId) {
   return db
     .select()
     .from(compliancePolicies)
-    .where(eq21(compliancePolicies.organizationId, orgId))
-    .orderBy(desc9(compliancePolicies.createdAt));
+    .where(eq22(compliancePolicies.organizationId, orgId))
+    .orderBy(desc10(compliancePolicies.createdAt));
 }
 async function createPolicy(orgId, input) {
   const db = await getDb();
@@ -22097,8 +25808,8 @@ async function patchPolicy(orgId, id, updates) {
     .from(compliancePolicies)
     .where(
       and15(
-        eq21(compliancePolicies.id, id),
-        eq21(compliancePolicies.organizationId, orgId)
+        eq22(compliancePolicies.id, id),
+        eq22(compliancePolicies.organizationId, orgId)
       )
     );
   if (!existing.length) return null;
@@ -22107,8 +25818,8 @@ async function patchPolicy(orgId, id, updates) {
     .set(updates)
     .where(
       and15(
-        eq21(compliancePolicies.id, id),
-        eq21(compliancePolicies.organizationId, orgId)
+        eq22(compliancePolicies.id, id),
+        eq22(compliancePolicies.organizationId, orgId)
       )
     );
   return { id };
@@ -22126,8 +25837,8 @@ async function getPolicyStatus(orgId, id) {
     .from(compliancePolicies)
     .where(
       and15(
-        eq21(compliancePolicies.id, id),
-        eq21(compliancePolicies.organizationId, orgId)
+        eq22(compliancePolicies.id, id),
+        eq22(compliancePolicies.organizationId, orgId)
       )
     );
   return rows[0]?.status ?? null;
@@ -22157,8 +25868,8 @@ async function applyPolicyStatusTransition(orgId, id, newStatus) {
     .set(setPatch)
     .where(
       and15(
-        eq21(compliancePolicies.id, id),
-        eq21(compliancePolicies.organizationId, orgId)
+        eq22(compliancePolicies.id, id),
+        eq22(compliancePolicies.organizationId, orgId)
       )
     );
   return { id, status: newStatus };
@@ -22178,8 +25889,8 @@ async function deletePolicy(orgId, id) {
     .from(compliancePolicies)
     .where(
       and15(
-        eq21(compliancePolicies.id, id),
-        eq21(compliancePolicies.organizationId, orgId)
+        eq22(compliancePolicies.id, id),
+        eq22(compliancePolicies.organizationId, orgId)
       )
     );
   if (!rows.length) return false;
@@ -22187,8 +25898,8 @@ async function deletePolicy(orgId, id) {
     .delete(compliancePolicies)
     .where(
       and15(
-        eq21(compliancePolicies.id, id),
-        eq21(compliancePolicies.organizationId, orgId)
+        eq22(compliancePolicies.id, id),
+        eq22(compliancePolicies.organizationId, orgId)
       )
     );
   return true;
@@ -22329,7 +26040,7 @@ import { TRPCError as TRPCError15 } from "@trpc/server";
 // server/incident-store.ts
 init_schema();
 init_db();
-import { and as and16, desc as desc10, eq as eq22 } from "drizzle-orm";
+import { and as and16, desc as desc11, eq as eq23 } from "drizzle-orm";
 var MEM_INCIDENTS = [];
 var memSeq4 = 1;
 async function listIncidents(orgId) {
@@ -22342,8 +26053,8 @@ async function listIncidents(orgId) {
   return db
     .select()
     .from(complianceIncidents)
-    .where(eq22(complianceIncidents.organizationId, orgId))
-    .orderBy(desc10(complianceIncidents.createdAt));
+    .where(eq23(complianceIncidents.organizationId, orgId))
+    .orderBy(desc11(complianceIncidents.createdAt));
 }
 async function createIncident(orgId, input) {
   const db = await getDb();
@@ -22427,8 +26138,8 @@ async function patchIncident(orgId, id, updates) {
     .from(complianceIncidents)
     .where(
       and16(
-        eq22(complianceIncidents.id, id),
-        eq22(complianceIncidents.organizationId, orgId)
+        eq23(complianceIncidents.id, id),
+        eq23(complianceIncidents.organizationId, orgId)
       )
     );
   if (!existing.length) return null;
@@ -22437,8 +26148,8 @@ async function patchIncident(orgId, id, updates) {
     .set(updates)
     .where(
       and16(
-        eq22(complianceIncidents.id, id),
-        eq22(complianceIncidents.organizationId, orgId)
+        eq23(complianceIncidents.id, id),
+        eq23(complianceIncidents.organizationId, orgId)
       )
     );
   return { id };
@@ -22456,8 +26167,8 @@ async function getIncidentStatus(orgId, id) {
     .from(complianceIncidents)
     .where(
       and16(
-        eq22(complianceIncidents.id, id),
-        eq22(complianceIncidents.organizationId, orgId)
+        eq23(complianceIncidents.id, id),
+        eq23(complianceIncidents.organizationId, orgId)
       )
     );
   return rows[0]?.status ?? null;
@@ -22489,8 +26200,8 @@ async function applyIncidentStatusTransition(orgId, id, newStatus) {
     .set(setPatch)
     .where(
       and16(
-        eq22(complianceIncidents.id, id),
-        eq22(complianceIncidents.organizationId, orgId)
+        eq23(complianceIncidents.id, id),
+        eq23(complianceIncidents.organizationId, orgId)
       )
     );
   return { id, status: newStatus };
@@ -22512,8 +26223,8 @@ async function markIncidentNotified(orgId, id) {
     .from(complianceIncidents)
     .where(
       and16(
-        eq22(complianceIncidents.id, id),
-        eq22(complianceIncidents.organizationId, orgId)
+        eq23(complianceIncidents.id, id),
+        eq23(complianceIncidents.organizationId, orgId)
       )
     );
   if (!rows.length) return null;
@@ -22522,8 +26233,8 @@ async function markIncidentNotified(orgId, id) {
     .set({ regulatoryNotificationSentAt: now, updatedAt: now })
     .where(
       and16(
-        eq22(complianceIncidents.id, id),
-        eq22(complianceIncidents.organizationId, orgId)
+        eq23(complianceIncidents.id, id),
+        eq23(complianceIncidents.organizationId, orgId)
       )
     );
   return { id, notifiedAt: now };
@@ -22543,8 +26254,8 @@ async function deleteIncident(orgId, id) {
     .from(complianceIncidents)
     .where(
       and16(
-        eq22(complianceIncidents.id, id),
-        eq22(complianceIncidents.organizationId, orgId)
+        eq23(complianceIncidents.id, id),
+        eq23(complianceIncidents.organizationId, orgId)
       )
     );
   if (!rows.length) return false;
@@ -22552,8 +26263,8 @@ async function deleteIncident(orgId, id) {
     .delete(complianceIncidents)
     .where(
       and16(
-        eq22(complianceIncidents.id, id),
-        eq22(complianceIncidents.organizationId, orgId)
+        eq23(complianceIncidents.id, id),
+        eq23(complianceIncidents.organizationId, orgId)
       )
     );
   return true;
@@ -22717,7 +26428,7 @@ import { TRPCError as TRPCError16 } from "@trpc/server";
 // server/audit-schedule-store.ts
 init_schema();
 init_db();
-import { and as and17, asc, eq as eq23 } from "drizzle-orm";
+import { and as and17, asc, eq as eq24 } from "drizzle-orm";
 var MEM_AUDITS = [];
 var memSeq5 = 1;
 function addMonths(d2, n) {
@@ -22749,7 +26460,7 @@ async function listAudits(orgId) {
   return db
     .select()
     .from(auditSchedules)
-    .where(eq23(auditSchedules.organizationId, orgId))
+    .where(eq24(auditSchedules.organizationId, orgId))
     .orderBy(asc(auditSchedules.scheduledDate));
 }
 async function createAudit(orgId, input) {
@@ -22816,8 +26527,8 @@ async function patchAudit(orgId, id, updates) {
     .set({ ...updates, updatedAt: /* @__PURE__ */ new Date() })
     .where(
       and17(
-        eq23(auditSchedules.id, id),
-        eq23(auditSchedules.organizationId, orgId)
+        eq24(auditSchedules.id, id),
+        eq24(auditSchedules.organizationId, orgId)
       )
     );
 }
@@ -22846,8 +26557,8 @@ async function completeAudit(orgId, id, findings) {
     .from(auditSchedules)
     .where(
       and17(
-        eq23(auditSchedules.id, id),
-        eq23(auditSchedules.organizationId, orgId)
+        eq24(auditSchedules.id, id),
+        eq24(auditSchedules.organizationId, orgId)
       )
     );
   if (!rows.length) return { nextOccurrence: null, found: false };
@@ -22863,7 +26574,7 @@ async function completeAudit(orgId, id, findings) {
       nextOccurrence: nextOcc ?? null,
       updatedAt: /* @__PURE__ */ new Date(),
     })
-    .where(eq23(auditSchedules.id, id));
+    .where(eq24(auditSchedules.id, id));
   return { nextOccurrence: nextOcc?.toISOString() ?? null, found: true };
 }
 async function removeAudit(orgId, id) {
@@ -22879,8 +26590,8 @@ async function removeAudit(orgId, id) {
     .delete(auditSchedules)
     .where(
       and17(
-        eq23(auditSchedules.id, id),
-        eq23(auditSchedules.organizationId, orgId)
+        eq24(auditSchedules.id, id),
+        eq24(auditSchedules.organizationId, orgId)
       )
     );
 }
@@ -23014,7 +26725,7 @@ import { TRPCError as TRPCError17 } from "@trpc/server";
 // server/vendor-compliance-store.ts
 init_schema();
 init_db();
-import { and as and18, eq as eq24, inArray as inArray3 } from "drizzle-orm";
+import { and as and18, eq as eq25, inArray as inArray3 } from "drizzle-orm";
 function calcRiskLevel(score) {
   if (score < 40) return "critical";
   if (score < 60) return "high";
@@ -23048,7 +26759,7 @@ async function getVendorComplianceList(orgId) {
       riskTier: vendors.riskTier,
     })
     .from(vendors)
-    .where(eq24(vendors.organizationId, orgId));
+    .where(eq25(vendors.organizationId, orgId));
   if (!vendorRows.length) return [];
   const vendorIds = vendorRows.map(v => v.id);
   const assessRows = await db
@@ -23078,14 +26789,14 @@ async function getVendorComplianceList(orgId) {
         impact: riskRegister.impact,
       })
       .from(riskRegister)
-      .where(eq24(riskRegister.organizationId, orgId)),
+      .where(eq25(riskRegister.organizationId, orgId)),
     db
       .select({
         vendorId: remediationTasks.vendorId,
         status: remediationTasks.status,
       })
       .from(remediationTasks)
-      .where(eq24(remediationTasks.organizationId, orgId)),
+      .where(eq25(remediationTasks.organizationId, orgId)),
     db
       .select({
         affectedVendorId: complianceIncidents.affectedVendorId,
@@ -23093,7 +26804,7 @@ async function getVendorComplianceList(orgId) {
         status: complianceIncidents.status,
       })
       .from(complianceIncidents)
-      .where(eq24(complianceIncidents.organizationId, orgId)),
+      .where(eq25(complianceIncidents.organizationId, orgId)),
   ]);
   return vendorRows
     .map(v => {
@@ -23174,21 +26885,21 @@ async function getVendorComplianceProfile(orgId, vendorId) {
     .select()
     .from(vendors)
     .where(
-      and18(eq24(vendors.id, vendorId), eq24(vendors.organizationId, orgId))
+      and18(eq25(vendors.id, vendorId), eq25(vendors.organizationId, orgId))
     );
   if (!vendor) return null;
   const [assessRows, riskRows, remRows, incRows] = await Promise.all([
     db
       .select()
       .from(vendorAssessments)
-      .where(eq24(vendorAssessments.vendorId, vendorId)),
+      .where(eq25(vendorAssessments.vendorId, vendorId)),
     db
       .select()
       .from(riskRegister)
       .where(
         and18(
-          eq24(riskRegister.organizationId, orgId),
-          eq24(riskRegister.vendorId, vendorId)
+          eq25(riskRegister.organizationId, orgId),
+          eq25(riskRegister.vendorId, vendorId)
         )
       ),
     db
@@ -23196,8 +26907,8 @@ async function getVendorComplianceProfile(orgId, vendorId) {
       .from(remediationTasks)
       .where(
         and18(
-          eq24(remediationTasks.organizationId, orgId),
-          eq24(remediationTasks.vendorId, vendorId)
+          eq25(remediationTasks.organizationId, orgId),
+          eq25(remediationTasks.vendorId, vendorId)
         )
       ),
     db
@@ -23205,8 +26916,8 @@ async function getVendorComplianceProfile(orgId, vendorId) {
       .from(complianceIncidents)
       .where(
         and18(
-          eq24(complianceIncidents.organizationId, orgId),
-          eq24(complianceIncidents.affectedVendorId, vendorId)
+          eq25(complianceIncidents.organizationId, orgId),
+          eq25(complianceIncidents.affectedVendorId, vendorId)
         )
       ),
   ]);
@@ -23266,7 +26977,7 @@ import { z as z23 } from "zod";
 // server/compliance-report-store.ts
 init_schema();
 init_db();
-import { eq as eq25, inArray as inArray4 } from "drizzle-orm";
+import { eq as eq26, inArray as inArray4 } from "drizzle-orm";
 function toIso2(d2) {
   if (!d2) return null;
   return d2 instanceof Date ? d2.toISOString() : String(d2);
@@ -23292,7 +27003,7 @@ async function getComplianceSummary(orgId) {
   const vRows = await db
     .select({ id: vendors.id })
     .from(vendors)
-    .where(eq25(vendors.organizationId, orgId));
+    .where(eq26(vendors.organizationId, orgId));
   const vendorIds = vRows.map(v => v.id);
   let gapRows = [];
   if (vendorIds.length) {
@@ -23316,29 +27027,29 @@ async function getComplianceSummary(orgId) {
         impact: riskRegister.impact,
       })
       .from(riskRegister)
-      .where(eq25(riskRegister.organizationId, orgId)),
+      .where(eq26(riskRegister.organizationId, orgId)),
     db
       .select({ status: remediationTasks.status })
       .from(remediationTasks)
-      .where(eq25(remediationTasks.organizationId, orgId)),
+      .where(eq26(remediationTasks.organizationId, orgId)),
     db
       .select({ status: compliancePolicies.status })
       .from(compliancePolicies)
-      .where(eq25(compliancePolicies.organizationId, orgId)),
+      .where(eq26(compliancePolicies.organizationId, orgId)),
     db
       .select({
         status: complianceIncidents.status,
         severity: complianceIncidents.severity,
       })
       .from(complianceIncidents)
-      .where(eq25(complianceIncidents.organizationId, orgId)),
+      .where(eq26(complianceIncidents.organizationId, orgId)),
     db
       .select({
         status: auditSchedules.status,
         scheduledDate: auditSchedules.scheduledDate,
       })
       .from(auditSchedules)
-      .where(eq25(auditSchedules.organizationId, orgId)),
+      .where(eq26(auditSchedules.organizationId, orgId)),
   ]);
   return {
     generatedAt: now.toISOString(),
@@ -23400,7 +27111,7 @@ async function getComplianceModuleData(orgId, module) {
       const vRows = await db
         .select({ id: vendors.id, vendorName: vendors.vendorName })
         .from(vendors)
-        .where(eq25(vendors.organizationId, orgId));
+        .where(eq26(vendors.organizationId, orgId));
       if (!vRows.length) return [];
       const vendorIds = vRows.map(v => v.id);
       const aRows = await db
@@ -23437,7 +27148,7 @@ async function getComplianceModuleData(orgId, module) {
       const rows = await db
         .select()
         .from(riskRegister)
-        .where(eq25(riskRegister.organizationId, orgId));
+        .where(eq26(riskRegister.organizationId, orgId));
       return rows.map(r => ({
         ...r,
         score: (r.likelihood ?? 1) * (r.impact ?? 1),
@@ -23450,7 +27161,7 @@ async function getComplianceModuleData(orgId, module) {
       const rows = await db
         .select()
         .from(remediationTasks)
-        .where(eq25(remediationTasks.organizationId, orgId));
+        .where(eq26(remediationTasks.organizationId, orgId));
       return rows.map(r => ({
         ...r,
         dueDate: toIso2(r.dueDate),
@@ -23462,7 +27173,7 @@ async function getComplianceModuleData(orgId, module) {
       const rows = await db
         .select()
         .from(compliancePolicies)
-        .where(eq25(compliancePolicies.organizationId, orgId));
+        .where(eq26(compliancePolicies.organizationId, orgId));
       return rows.map(r => ({
         ...r,
         lastApprovedAt: toIso2(r.lastApprovedAt),
@@ -23475,7 +27186,7 @@ async function getComplianceModuleData(orgId, module) {
       const rows = await db
         .select()
         .from(complianceIncidents)
-        .where(eq25(complianceIncidents.organizationId, orgId));
+        .where(eq26(complianceIncidents.organizationId, orgId));
       return rows.map(r => ({
         ...r,
         occurredAt: toIso2(r.occurredAt),
@@ -23490,7 +27201,7 @@ async function getComplianceModuleData(orgId, module) {
       const rows = await db
         .select()
         .from(auditSchedules)
-        .where(eq25(auditSchedules.organizationId, orgId));
+        .where(eq26(auditSchedules.organizationId, orgId));
       return rows.map(r => ({
         ...r,
         scheduledDate: toIso2(r.scheduledDate),
@@ -23536,8 +27247,8 @@ init_schema();
 init_db();
 import {
   and as and19,
-  desc as desc11,
-  eq as eq26,
+  desc as desc12,
+  eq as eq27,
   inArray as inArray5,
 } from "drizzle-orm";
 var SEVERITY_WEIGHT = {
@@ -23814,7 +27525,7 @@ async function executeContinuousComplianceRun(params) {
     await db
       .update(continuousComplianceRuns)
       .set({ runStatus: "running" })
-      .where(eq26(continuousComplianceRuns.id, runId));
+      .where(eq27(continuousComplianceRuns.id, runId));
   }
   try {
     const assetQuery = db
@@ -23822,9 +27533,9 @@ async function executeContinuousComplianceRun(params) {
       .from(ctemAssets)
       .where(
         and19(
-          eq26(ctemAssets.organizationId, organizationId),
-          eq26(ctemAssets.status, "active"),
-          ...(vendorId ? [eq26(ctemAssets.vendorId, vendorId)] : [])
+          eq27(ctemAssets.organizationId, organizationId),
+          eq27(ctemAssets.status, "active"),
+          ...(vendorId ? [eq27(ctemAssets.vendorId, vendorId)] : [])
         )
       );
     const assets = await assetQuery;
@@ -23836,7 +27547,7 @@ async function executeContinuousComplianceRun(params) {
           completedAt: /* @__PURE__ */ new Date(),
           summary: "No active assets found.",
         })
-        .where(eq26(continuousComplianceRuns.id, runId));
+        .where(eq27(continuousComplianceRuns.id, runId));
       return {
         runId,
         assetsScanned: 0,
@@ -23900,7 +27611,7 @@ async function executeContinuousComplianceRun(params) {
             previousFinalScore: prev,
             updatedAt: /* @__PURE__ */ new Date(),
           })
-          .where(eq26(ctemRiskScores.assetId, asset.id));
+          .where(eq27(ctemRiskScores.assetId, asset.id));
       } else {
         await db.insert(ctemRiskScores).values({
           assetId: asset.id,
@@ -23925,10 +27636,10 @@ async function executeContinuousComplianceRun(params) {
             .from(complianceExposureMappings)
             .where(
               and19(
-                eq26(complianceExposureMappings.vulnerabilityId, vuln.id),
+                eq27(complianceExposureMappings.vulnerabilityId, vuln.id),
                 ...(m.frameworkCode
                   ? [
-                      eq26(
+                      eq27(
                         complianceExposureMappings.frameworkCode,
                         m.frameworkCode
                       ),
@@ -23958,11 +27669,11 @@ async function executeContinuousComplianceRun(params) {
       .from(continuousComplianceRuns)
       .where(
         and19(
-          eq26(continuousComplianceRuns.organizationId, organizationId),
-          eq26(continuousComplianceRuns.runStatus, "completed")
+          eq27(continuousComplianceRuns.organizationId, organizationId),
+          eq27(continuousComplianceRuns.runStatus, "completed")
         )
       )
-      .orderBy(desc11(continuousComplianceRuns.startedAt))
+      .orderBy(desc12(continuousComplianceRuns.startedAt))
       .limit(1);
     const runDelta = prevRun ? avgScore - prevRun.avgPriorityScore : null;
     await db
@@ -23978,7 +27689,7 @@ async function executeContinuousComplianceRun(params) {
         completedAt: /* @__PURE__ */ new Date(),
         summary: `Scanned ${assets.length} asset(s). Found ${totalVulns} vulnerability/ies, ${exploitable} exploitable. Average risk score: ${avgScore}/100.`,
       })
-      .where(eq26(continuousComplianceRuns.id, runId));
+      .where(eq27(continuousComplianceRuns.id, runId));
     if (alertRaised) {
       await db.insert(adminNotifications).values({
         category: "system",
@@ -24007,7 +27718,7 @@ async function executeContinuousComplianceRun(params) {
         completedAt: /* @__PURE__ */ new Date(),
         summary: String(err),
       })
-      .where(eq26(continuousComplianceRuns.id, runId));
+      .where(eq27(continuousComplianceRuns.id, runId));
     throw err;
   }
 }
@@ -24055,8 +27766,8 @@ init_schema();
 init_db();
 import {
   and as and20,
-  desc as desc12,
-  eq as eq27,
+  desc as desc13,
+  eq as eq28,
   inArray as inArray6,
 } from "drizzle-orm";
 function inMemoryDemoData(orgId) {
@@ -24228,16 +27939,16 @@ function inMemoryDemoData(orgId) {
 async function listCtemAssets(orgId, filters) {
   const db = await getDb();
   if (!db) return inMemoryDemoData(orgId).assets;
-  const where = [eq27(ctemAssets.organizationId, orgId)];
-  if (filters?.region) where.push(eq27(ctemAssets.region, filters.region));
+  const where = [eq28(ctemAssets.organizationId, orgId)];
+  if (filters?.region) where.push(eq28(ctemAssets.region, filters.region));
   if (filters?.vendorId)
-    where.push(eq27(ctemAssets.vendorId, filters.vendorId));
-  if (filters?.status) where.push(eq27(ctemAssets.status, filters.status));
+    where.push(eq28(ctemAssets.vendorId, filters.vendorId));
+  if (filters?.status) where.push(eq28(ctemAssets.status, filters.status));
   return db
     .select()
     .from(ctemAssets)
     .where(and20(...where))
-    .orderBy(desc12(ctemAssets.createdAt));
+    .orderBy(desc13(ctemAssets.createdAt));
 }
 async function createCtemAsset(orgId, input) {
   const db = await getDb();
@@ -24263,7 +27974,7 @@ async function createCtemAsset(orgId, input) {
   const [row] = await db
     .select()
     .from(ctemAssets)
-    .where(eq27(ctemAssets.id, id));
+    .where(eq28(ctemAssets.id, id));
   return row;
 }
 async function updateCtemAsset(id, patch) {
@@ -24297,17 +28008,17 @@ async function updateCtemAsset(id, patch) {
       }),
       ...(patch.notes !== void 0 && { notes: patch.notes }),
     })
-    .where(eq27(ctemAssets.id, id));
+    .where(eq28(ctemAssets.id, id));
   const [row] = await db
     .select()
     .from(ctemAssets)
-    .where(eq27(ctemAssets.id, id));
+    .where(eq28(ctemAssets.id, id));
   return row;
 }
 async function deleteCtemAsset(id) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.delete(ctemAssets).where(eq27(ctemAssets.id, id));
+  await db.delete(ctemAssets).where(eq28(ctemAssets.id, id));
 }
 async function listCtemVulnerabilities(orgId, filters) {
   const db = await getDb();
@@ -24323,24 +28034,24 @@ async function listCtemVulnerabilities(orgId, filters) {
   const orgAssets = await db
     .select({ id: ctemAssets.id })
     .from(ctemAssets)
-    .where(eq27(ctemAssets.organizationId, orgId));
+    .where(eq28(ctemAssets.organizationId, orgId));
   const orgAssetIds = orgAssets.map(a => a.id);
   if (orgAssetIds.length === 0) return [];
   const vulnFilters = [];
   if (filters?.assetId) {
-    vulnFilters.push(eq27(ctemVulnerabilities.assetId, filters.assetId));
+    vulnFilters.push(eq28(ctemVulnerabilities.assetId, filters.assetId));
   } else {
     vulnFilters.push(inArray6(ctemVulnerabilities.assetId, orgAssetIds));
   }
   if (filters?.severity)
-    vulnFilters.push(eq27(ctemVulnerabilities.severity, filters.severity));
+    vulnFilters.push(eq28(ctemVulnerabilities.severity, filters.severity));
   if (filters?.exploitableOnly)
-    vulnFilters.push(eq27(ctemVulnerabilities.exploitAvailable, 1));
+    vulnFilters.push(eq28(ctemVulnerabilities.exploitAvailable, 1));
   const rows = await db
     .select()
     .from(ctemVulnerabilities)
     .where(and20(...vulnFilters))
-    .orderBy(desc12(ctemVulnerabilities.cvssScore));
+    .orderBy(desc13(ctemVulnerabilities.cvssScore));
   if (!filters?.includeMappings) return rows;
   const vulnIds = rows.map(r => r.id);
   const mappings =
@@ -24361,7 +28072,7 @@ async function getCtemVulnAssetOwner(vulnId) {
   const [row] = await db
     .select({ assetId: ctemVulnerabilities.assetId })
     .from(ctemVulnerabilities)
-    .where(eq27(ctemVulnerabilities.id, vulnId));
+    .where(eq28(ctemVulnerabilities.id, vulnId));
   return row ?? null;
 }
 async function createCtemVulnerability(input) {
@@ -24386,7 +28097,7 @@ async function createCtemVulnerability(input) {
   const [row] = await db
     .select()
     .from(ctemVulnerabilities)
-    .where(eq27(ctemVulnerabilities.id, id));
+    .where(eq28(ctemVulnerabilities.id, id));
   return row;
 }
 async function patchCtemVulnerability(id, patch) {
@@ -24407,11 +28118,11 @@ async function patchCtemVulnerability(id, patch) {
     await db
       .update(ctemVulnerabilities)
       .set(update)
-      .where(eq27(ctemVulnerabilities.id, id));
+      .where(eq28(ctemVulnerabilities.id, id));
   const [row] = await db
     .select()
     .from(ctemVulnerabilities)
-    .where(eq27(ctemVulnerabilities.id, id));
+    .where(eq28(ctemVulnerabilities.id, id));
   return row;
 }
 async function listCtemRiskScores(orgId, filters) {
@@ -24423,11 +28134,11 @@ async function listCtemRiskScores(orgId, filters) {
       return { ...s, asset: a ?? null };
     });
   }
-  const assetFilters = [eq27(ctemAssets.organizationId, orgId)];
+  const assetFilters = [eq28(ctemAssets.organizationId, orgId)];
   if (filters?.region)
-    assetFilters.push(eq27(ctemAssets.region, filters.region));
+    assetFilters.push(eq28(ctemAssets.region, filters.region));
   if (filters?.vendorId)
-    assetFilters.push(eq27(ctemAssets.vendorId, filters.vendorId));
+    assetFilters.push(eq28(ctemAssets.vendorId, filters.vendorId));
   const orgAssets = await db
     .select()
     .from(ctemAssets)
@@ -24436,12 +28147,12 @@ async function listCtemRiskScores(orgId, filters) {
   const assetIds = orgAssets.map(a => a.id);
   const scoreFilters = [inArray6(ctemRiskScores.assetId, assetIds)];
   if (filters?.tier)
-    scoreFilters.push(eq27(ctemRiskScores.priorityTier, filters.tier));
+    scoreFilters.push(eq28(ctemRiskScores.priorityTier, filters.tier));
   const scores = await db
     .select()
     .from(ctemRiskScores)
     .where(and20(...scoreFilters))
-    .orderBy(desc12(ctemRiskScores.finalPriorityScore));
+    .orderBy(desc13(ctemRiskScores.finalPriorityScore));
   return scores.map(s => ({
     ...s,
     asset: orgAssets.find(a => a.id === s.assetId) ?? null,
@@ -24486,7 +28197,7 @@ async function getCtemRiskSummary(orgId) {
   const orgAssets = await db
     .select()
     .from(ctemAssets)
-    .where(eq27(ctemAssets.organizationId, orgId));
+    .where(eq28(ctemAssets.organizationId, orgId));
   const assetIds = orgAssets.map(a => a.id);
   const vulnCounts =
     assetIds.length > 0
@@ -24505,8 +28216,8 @@ async function getCtemRiskSummary(orgId) {
   const [lastRun] = await db
     .select()
     .from(continuousComplianceRuns)
-    .where(eq27(continuousComplianceRuns.organizationId, orgId))
-    .orderBy(desc12(continuousComplianceRuns.startedAt))
+    .where(eq28(continuousComplianceRuns.organizationId, orgId))
+    .orderBy(desc13(continuousComplianceRuns.startedAt))
     .limit(1);
   const vulnIds = vulnCounts.map(v => v.id);
   const mappings =
@@ -24588,8 +28299,8 @@ async function listCtemRuns(orgId, limit = 20) {
   return db
     .select()
     .from(continuousComplianceRuns)
-    .where(eq27(continuousComplianceRuns.organizationId, orgId))
-    .orderBy(desc12(continuousComplianceRuns.startedAt))
+    .where(eq28(continuousComplianceRuns.organizationId, orgId))
+    .orderBy(desc13(continuousComplianceRuns.startedAt))
     .limit(limit);
 }
 async function getCtemFrameworkExposure(orgId) {
@@ -24641,7 +28352,7 @@ async function getCtemFrameworkExposure(orgId) {
   const orgAssets = await db
     .select({ id: ctemAssets.id })
     .from(ctemAssets)
-    .where(eq27(ctemAssets.organizationId, orgId));
+    .where(eq28(ctemAssets.organizationId, orgId));
   if (orgAssets.length === 0) return [];
   const assetIds = orgAssets.map(a => a.id);
   const vulnIds =
@@ -24684,7 +28395,7 @@ async function listVendorsForCtemAssets(orgId) {
   return db
     .select({ id: vendors.id, vendorName: vendors.vendorName })
     .from(vendors)
-    .where(eq27(vendors.organizationId, orgId));
+    .where(eq28(vendors.organizationId, orgId));
 }
 async function getCtemAssetOrgId(assetId) {
   const db = await getDb();
@@ -24692,7 +28403,7 @@ async function getCtemAssetOrgId(assetId) {
   const [row] = await db
     .select({ orgId: ctemAssets.organizationId })
     .from(ctemAssets)
-    .where(eq27(ctemAssets.id, assetId));
+    .where(eq28(ctemAssets.id, assetId));
   return row?.orgId ?? null;
 }
 
@@ -24950,7 +28661,7 @@ import { TRPCError as TRPCError19 } from "@trpc/server";
 // server/evidence-store.ts
 init_schema();
 init_db();
-import { and as and21, desc as desc13, eq as eq28 } from "drizzle-orm";
+import { and as and21, desc as desc14, eq as eq29 } from "drizzle-orm";
 var SOURCE_TYPES = [
   "audit_schedule",
   "policy",
@@ -25027,15 +28738,15 @@ async function listEvidence(orgId, sourceType, sourceId) {
     if (sourceId) items = items.filter(e => e.sourceId === sourceId);
     return items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
-  const conditions = [eq28(complianceEvidence.organizationId, orgId)];
+  const conditions = [eq29(complianceEvidence.organizationId, orgId)];
   if (sourceType)
-    conditions.push(eq28(complianceEvidence.sourceType, sourceType));
-  if (sourceId) conditions.push(eq28(complianceEvidence.sourceId, sourceId));
+    conditions.push(eq29(complianceEvidence.sourceType, sourceType));
+  if (sourceId) conditions.push(eq29(complianceEvidence.sourceId, sourceId));
   return db
     .select()
     .from(complianceEvidence)
     .where(and21(...conditions))
-    .orderBy(desc13(complianceEvidence.createdAt));
+    .orderBy(desc14(complianceEvidence.createdAt));
 }
 async function addEvidence(orgId, input, addedByUserId) {
   const db = await getDb();
@@ -25089,7 +28800,7 @@ async function getEvidenceForRemoval(orgId, evidenceId) {
       organizationId: complianceEvidence.organizationId,
     })
     .from(complianceEvidence)
-    .where(eq28(complianceEvidence.id, evidenceId));
+    .where(eq29(complianceEvidence.id, evidenceId));
   return row ?? null;
 }
 async function removeEvidence(orgId, evidenceId) {
@@ -25105,8 +28816,8 @@ async function removeEvidence(orgId, evidenceId) {
     .delete(complianceEvidence)
     .where(
       and21(
-        eq28(complianceEvidence.id, evidenceId),
-        eq28(complianceEvidence.organizationId, orgId)
+        eq29(complianceEvidence.id, evidenceId),
+        eq29(complianceEvidence.organizationId, orgId)
       )
     );
 }
@@ -25200,7 +28911,7 @@ import { TRPCError as TRPCError20 } from "@trpc/server";
 // server/dsr-store.ts
 init_schema();
 init_db();
-import { and as and22, asc as asc2, eq as eq29 } from "drizzle-orm";
+import { and as and22, asc as asc2, eq as eq30 } from "drizzle-orm";
 var REQUEST_TYPES = [
   "access",
   "rectification",
@@ -25210,7 +28921,15 @@ var REQUEST_TYPES = [
   "objection",
   "explanation",
 ];
-var JURISDICTIONS = ["China", "Saudi Arabia", "EU", "US", "Brazil", "Other"];
+var JURISDICTIONS = [
+  "China",
+  "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
+  "Other",
+  ...NEW_GLOBAL_JURISDICTIONS,
+];
 var STATUSES = [
   "received",
   "in_review",
@@ -25421,13 +29140,13 @@ async function listDsrs(orgId, filters) {
       items = items.filter(d2 => d2.jurisdiction === filters.jurisdiction);
     return [...items].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   }
-  const conditions = [eq29(dsrRequests.organizationId, orgId)];
+  const conditions = [eq30(dsrRequests.organizationId, orgId)];
   if (filters?.status)
-    conditions.push(eq29(dsrRequests.status, filters.status));
+    conditions.push(eq30(dsrRequests.status, filters.status));
   if (filters?.requestType)
-    conditions.push(eq29(dsrRequests.requestType, filters.requestType));
+    conditions.push(eq30(dsrRequests.requestType, filters.requestType));
   if (filters?.jurisdiction)
-    conditions.push(eq29(dsrRequests.jurisdiction, filters.jurisdiction));
+    conditions.push(eq30(dsrRequests.jurisdiction, filters.jurisdiction));
   return db
     .select()
     .from(dsrRequests)
@@ -25494,13 +29213,13 @@ async function patchDsr(orgId, id, update) {
   const [existing] = await db
     .select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId })
     .from(dsrRequests)
-    .where(eq29(dsrRequests.id, id));
+    .where(eq30(dsrRequests.id, id));
   if (!existing || existing.organizationId !== orgId) return false;
   await db
     .update(dsrRequests)
     .set(update)
     .where(
-      and22(eq29(dsrRequests.id, id), eq29(dsrRequests.organizationId, orgId))
+      and22(eq30(dsrRequests.id, id), eq30(dsrRequests.organizationId, orgId))
     );
   return true;
 }
@@ -25517,12 +29236,12 @@ async function removeDsr(orgId, id) {
   const [existing] = await db
     .select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId })
     .from(dsrRequests)
-    .where(eq29(dsrRequests.id, id));
+    .where(eq30(dsrRequests.id, id));
   if (!existing || existing.organizationId !== orgId) return false;
   await db
     .delete(dsrRequests)
     .where(
-      and22(eq29(dsrRequests.id, id), eq29(dsrRequests.organizationId, orgId))
+      and22(eq30(dsrRequests.id, id), eq30(dsrRequests.organizationId, orgId))
     );
   return true;
 }
@@ -25539,7 +29258,7 @@ async function getDsrSummary(orgId) {
   const rows = await db
     .select({ status: dsrRequests.status, dueDate: dsrRequests.dueDate })
     .from(dsrRequests)
-    .where(eq29(dsrRequests.organizationId, orgId));
+    .where(eq30(dsrRequests.organizationId, orgId));
   return buildDsrSummary(rows);
 }
 
@@ -25844,7 +29563,7 @@ var chatInputSchema = z27.object({
    * Omit or pass "all" to search across all jurisdictions.
    */
   jurisdiction: z27
-    .enum(["all", "China", "Saudi Arabia", "EU", "US", "Brazil", "Global"])
+    .enum(["all", ...GLOBAL_JURISDICTIONS])
     .optional()
     .default("all"),
 });
@@ -25853,10 +29572,20 @@ var SYSTEM_PROMPT_PREFIX = `You are the DJAC Compliance Assistant \u2014 an expe
 Your knowledge covers:
 \u2022 China: PIPL (Personal Information Protection Law), CSL (Cybersecurity Law), DSL (Data Security Law)
 \u2022 Saudi Arabia: PDPL (Personal Data Protection Law), NCA Essential Cybersecurity Controls (ECC)
-\u2022 EU: GDPR (General Data Protection Regulation)
-\u2022 US: CCPA (California Consumer Privacy Act), HIPAA, SOX
+\u2022 EU: GDPR, NIS2, DORA, EU AI Act
+\u2022 US: CCPA (California Consumer Privacy Act), HIPAA, SOX, PCI DSS, NIST CSF 2.0
 \u2022 Brazil: LGPD (Lei Geral de Prote\xE7\xE3o de Dados)
-\u2022 Global: ISO 27001, ISO 27701, SOC 2, NIST CSF
+\u2022 UK: UK GDPR (ICO) and its international data transfer agreement
+\u2022 Canada: PIPEDA (and provincial privacy laws)
+\u2022 Australia: Privacy Act 1988 and Australian Privacy Principles (APPs)
+\u2022 Japan: APPI (Act on the Protection of Personal Information)
+\u2022 South Korea: PIPA
+\u2022 Singapore: PDPA
+\u2022 India: DPDP Act 2023
+\u2022 South Africa: POPIA
+\u2022 Mexico: Federal Law on Protection of Personal Data (INAI)
+\u2022 Gulf: UAE, Qatar, Kuwait, Bahrain, Oman, Jordan, Egypt data protection regimes
+\u2022 Global: ISO 27001, ISO 27701, SOC 2, NIST CSF, PCI DSS
 \u2022 Cross-border data transfer frameworks, adequacy assessments, and multi-jurisdiction compliance strategies
 
 Guidelines:
@@ -25982,7 +29711,7 @@ init_env();
 // server/service-request-store.ts
 init_schema();
 init_db();
-import { and as and23, desc as desc14, eq as eq30 } from "drizzle-orm";
+import { and as and23, desc as desc15, eq as eq31 } from "drizzle-orm";
 var SERVICE_TYPES = [
   "penetration_test",
   "red_team",
@@ -26019,8 +29748,8 @@ async function listRequests(orgId) {
   return db
     .select()
     .from(serviceRequests)
-    .where(eq30(serviceRequests.organizationId, orgId))
-    .orderBy(desc14(serviceRequests.createdAt));
+    .where(eq31(serviceRequests.organizationId, orgId))
+    .orderBy(desc15(serviceRequests.createdAt));
 }
 async function getRequest(orgId, id) {
   const db = await getDb();
@@ -26034,8 +29763,8 @@ async function getRequest(orgId, id) {
     .from(serviceRequests)
     .where(
       and23(
-        eq30(serviceRequests.id, id),
-        eq30(serviceRequests.organizationId, orgId)
+        eq31(serviceRequests.id, id),
+        eq31(serviceRequests.organizationId, orgId)
       )
     )
     .limit(1);
@@ -26090,7 +29819,7 @@ async function createRequest(orgId, input, localUserId) {
   const [created] = await db
     .select()
     .from(serviceRequests)
-    .where(eq30(serviceRequests.id, insertId))
+    .where(eq31(serviceRequests.id, insertId))
     .limit(1);
   return { row: created, insertId };
 }
@@ -26111,8 +29840,8 @@ async function cancelRequest(orgId, id) {
     .from(serviceRequests)
     .where(
       and23(
-        eq30(serviceRequests.id, id),
-        eq30(serviceRequests.organizationId, orgId)
+        eq31(serviceRequests.id, id),
+        eq31(serviceRequests.organizationId, orgId)
       )
     )
     .limit(1);
@@ -26122,7 +29851,7 @@ async function cancelRequest(orgId, id) {
   await db
     .update(serviceRequests)
     .set({ status: "cancelled", updatedAt: /* @__PURE__ */ new Date() })
-    .where(eq30(serviceRequests.id, id));
+    .where(eq31(serviceRequests.id, id));
   return { id, status: "cancelled" };
 }
 async function adminListRequests() {
@@ -26135,7 +29864,7 @@ async function adminListRequests() {
   return db
     .select()
     .from(serviceRequests)
-    .orderBy(desc14(serviceRequests.createdAt));
+    .orderBy(desc15(serviceRequests.createdAt));
 }
 async function adminUpdateRequest(id, updateValues) {
   const db = await getDb();
@@ -26148,11 +29877,11 @@ async function adminUpdateRequest(id, updateValues) {
   await db
     .update(serviceRequests)
     .set(updateValues)
-    .where(eq30(serviceRequests.id, id));
+    .where(eq31(serviceRequests.id, id));
   const [updated] = await db
     .select()
     .from(serviceRequests)
-    .where(eq30(serviceRequests.id, id))
+    .where(eq31(serviceRequests.id, id))
     .limit(1);
   return updated ?? null;
 }
@@ -26322,7 +30051,7 @@ import { TRPCError as TRPCError23 } from "@trpc/server";
 // server/asset-inventory-store.ts
 init_schema();
 init_db();
-import { and as and24, desc as desc15, eq as eq31 } from "drizzle-orm";
+import { and as and24, desc as desc16, eq as eq32 } from "drizzle-orm";
 var ASSET_TYPES = [
   "server",
   "workstation",
@@ -26376,8 +30105,8 @@ async function listAssets(orgId) {
   return db
     .select()
     .from(assetInventory)
-    .where(eq31(assetInventory.organizationId, orgId))
-    .orderBy(desc15(assetInventory.createdAt));
+    .where(eq32(assetInventory.organizationId, orgId))
+    .orderBy(desc16(assetInventory.createdAt));
 }
 async function getAsset(orgId, id) {
   const db = await getDb();
@@ -26391,8 +30120,8 @@ async function getAsset(orgId, id) {
     .from(assetInventory)
     .where(
       and24(
-        eq31(assetInventory.id, id),
-        eq31(assetInventory.organizationId, orgId)
+        eq32(assetInventory.id, id),
+        eq32(assetInventory.organizationId, orgId)
       )
     )
     .limit(1);
@@ -26452,7 +30181,7 @@ async function createAsset(orgId, input, localUserId) {
   const [created] = await db
     .select()
     .from(assetInventory)
-    .where(eq31(assetInventory.id, insertId))
+    .where(eq32(assetInventory.id, insertId))
     .limit(1);
   return created;
 }
@@ -26468,8 +30197,8 @@ async function getAssetForPatch(orgId, id) {
     .from(assetInventory)
     .where(
       and24(
-        eq31(assetInventory.id, id),
-        eq31(assetInventory.organizationId, orgId)
+        eq32(assetInventory.id, id),
+        eq32(assetInventory.organizationId, orgId)
       )
     )
     .limit(1);
@@ -26488,11 +30217,11 @@ async function patchAssetRow(orgId, id, updateValues) {
   await db
     .update(assetInventory)
     .set(updateValues)
-    .where(eq31(assetInventory.id, id));
+    .where(eq32(assetInventory.id, id));
   const [updated] = await db
     .select()
     .from(assetInventory)
-    .where(eq31(assetInventory.id, id))
+    .where(eq32(assetInventory.id, id))
     .limit(1);
   return updated ?? null;
 }
@@ -26511,13 +30240,13 @@ async function deleteAsset(orgId, id) {
     .from(assetInventory)
     .where(
       and24(
-        eq31(assetInventory.id, id),
-        eq31(assetInventory.organizationId, orgId)
+        eq32(assetInventory.id, id),
+        eq32(assetInventory.organizationId, orgId)
       )
     )
     .limit(1);
   if (!existing) return { found: false };
-  await db.delete(assetInventory).where(eq31(assetInventory.id, id));
+  await db.delete(assetInventory).where(eq32(assetInventory.id, id));
   return { found: true, name: existing.name };
 }
 async function getAllOrgAssets(orgId) {
@@ -26528,7 +30257,7 @@ async function getAllOrgAssets(orgId) {
   return db
     .select()
     .from(assetInventory)
-    .where(eq31(assetInventory.organizationId, orgId));
+    .where(eq32(assetInventory.organizationId, orgId));
 }
 
 // server/asset-inventory-router.ts
@@ -26672,8 +30401,8 @@ init_schema();
 init_db();
 import {
   and as and25,
-  desc as desc16,
-  eq as eq32,
+  desc as desc17,
+  eq as eq33,
   isNull as isNull3,
   or as or5,
 } from "drizzle-orm";
@@ -26773,14 +30502,14 @@ async function getThreatFeed(orgId, filters) {
       .from(threatIntelItems)
       .where(
         and25(
-          eq32(threatIntelItems.isActive, 1),
+          eq33(threatIntelItems.isActive, 1),
           or5(
             isNull3(threatIntelItems.organizationId),
-            eq32(threatIntelItems.organizationId, orgId)
+            eq33(threatIntelItems.organizationId, orgId)
           )
         )
       )
-      .orderBy(desc16(threatIntelItems.publishedAt))
+      .orderBy(desc17(threatIntelItems.publishedAt))
       .limit(filters.limit);
   }
   if (filters.severity)
@@ -26802,10 +30531,10 @@ async function getThreatItem(orgId, id) {
     .from(threatIntelItems)
     .where(
       and25(
-        eq32(threatIntelItems.id, id),
+        eq33(threatIntelItems.id, id),
         or5(
           isNull3(threatIntelItems.organizationId),
-          eq32(threatIntelItems.organizationId, orgId)
+          eq33(threatIntelItems.organizationId, orgId)
         )
       )
     )
@@ -26863,7 +30592,7 @@ async function adminCreateThreatItem(input, localUserId) {
   const [created] = await db
     .select()
     .from(threatIntelItems)
-    .where(eq32(threatIntelItems.id, insertId))
+    .where(eq33(threatIntelItems.id, insertId))
     .limit(1);
   return created;
 }
@@ -26878,11 +30607,11 @@ async function adminUpdateThreatItem(id, updateValues) {
   await db
     .update(threatIntelItems)
     .set(updateValues)
-    .where(eq32(threatIntelItems.id, id));
+    .where(eq33(threatIntelItems.id, id));
   const [updated] = await db
     .select()
     .from(threatIntelItems)
-    .where(eq32(threatIntelItems.id, id))
+    .where(eq33(threatIntelItems.id, id))
     .limit(1);
   return updated ?? null;
 }
@@ -26898,7 +30627,7 @@ async function adminRemoveThreatItem(id) {
   await db
     .update(threatIntelItems)
     .set({ isActive: 0, updatedAt: /* @__PURE__ */ new Date() })
-    .where(eq32(threatIntelItems.id, id));
+    .where(eq33(threatIntelItems.id, id));
   return true;
 }
 
@@ -27030,7 +30759,7 @@ import { TRPCError as TRPCError25 } from "@trpc/server";
 // server/security-maturity-store.ts
 init_schema();
 init_db();
-import { desc as desc17, eq as eq33 } from "drizzle-orm";
+import { desc as desc18, eq as eq34 } from "drizzle-orm";
 var MEM_ASSESSMENTS = [];
 var memSeq11 = 1;
 function toMaturityLevel(overallScore) {
@@ -27055,8 +30784,8 @@ async function listAssessments(orgId) {
   return db
     .select()
     .from(securityMaturityAssessments)
-    .where(eq33(securityMaturityAssessments.organizationId, orgId))
-    .orderBy(desc17(securityMaturityAssessments.createdAt));
+    .where(eq34(securityMaturityAssessments.organizationId, orgId))
+    .orderBy(desc18(securityMaturityAssessments.createdAt));
 }
 async function getLatestAssessment(orgId) {
   const db = await getDb();
@@ -27069,8 +30798,8 @@ async function getLatestAssessment(orgId) {
   const [row] = await db
     .select()
     .from(securityMaturityAssessments)
-    .where(eq33(securityMaturityAssessments.organizationId, orgId))
-    .orderBy(desc17(securityMaturityAssessments.createdAt))
+    .where(eq34(securityMaturityAssessments.organizationId, orgId))
+    .orderBy(desc18(securityMaturityAssessments.createdAt))
     .limit(1);
   return row ?? null;
 }
@@ -27085,7 +30814,7 @@ async function getAssessment(orgId, id) {
   const [row] = await db
     .select()
     .from(securityMaturityAssessments)
-    .where(eq33(securityMaturityAssessments.id, id))
+    .where(eq34(securityMaturityAssessments.id, id))
     .limit(1);
   if (!row || row.organizationId !== orgId) return null;
   return row;
@@ -27141,7 +30870,7 @@ async function createAssessmentRow(orgId, input, localUserId) {
   const [created] = await db
     .select()
     .from(securityMaturityAssessments)
-    .where(eq33(securityMaturityAssessments.id, insertId))
+    .where(eq34(securityMaturityAssessments.id, insertId))
     .limit(1);
   return created;
 }
@@ -27158,12 +30887,12 @@ async function deleteAssessmentRow(orgId, id) {
   const [existing] = await db
     .select({ id: securityMaturityAssessments.id })
     .from(securityMaturityAssessments)
-    .where(eq33(securityMaturityAssessments.id, id))
+    .where(eq34(securityMaturityAssessments.id, id))
     .limit(1);
   if (!existing) return false;
   await db
     .delete(securityMaturityAssessments)
-    .where(eq33(securityMaturityAssessments.id, id));
+    .where(eq34(securityMaturityAssessments.id, id));
   return true;
 }
 
@@ -27406,7 +31135,7 @@ init_db();
 init_schema();
 import {
   and as and26,
-  eq as eq34,
+  eq as eq35,
   or as or6,
   like,
   sql as sql2,
@@ -27420,7 +31149,7 @@ async function seedKnowledgeGraph(input, organizationId) {
     const existing = await db
       .select()
       .from(knowledgeGraphNodes)
-      .where(eq34(knowledgeGraphNodes.nodeId, n.id))
+      .where(eq35(knowledgeGraphNodes.nodeId, n.id))
       .limit(1);
     if (existing.length === 0) {
       await db.insert(knowledgeGraphNodes).values({
@@ -27439,9 +31168,9 @@ async function seedKnowledgeGraph(input, organizationId) {
       .from(knowledgeGraphEdges)
       .where(
         and26(
-          eq34(knowledgeGraphEdges.sourceNodeId, e.source),
-          eq34(knowledgeGraphEdges.targetNodeId, e.target),
-          eq34(knowledgeGraphEdges.relation, e.relation)
+          eq35(knowledgeGraphEdges.sourceNodeId, e.source),
+          eq35(knowledgeGraphEdges.targetNodeId, e.target),
+          eq35(knowledgeGraphEdges.relation, e.relation)
         )
       )
       .limit(1);
@@ -27466,10 +31195,10 @@ async function queryKnowledgeGraph(query) {
     );
   }
   if (query.region) {
-    conditions.push(eq34(knowledgeGraphNodes.region, query.region));
+    conditions.push(eq35(knowledgeGraphNodes.region, query.region));
   }
   if (query.jurisdiction) {
-    conditions.push(eq34(knowledgeGraphNodes.jurisdiction, query.jurisdiction));
+    conditions.push(eq35(knowledgeGraphNodes.jurisdiction, query.jurisdiction));
   }
   if (query.search) {
     const q = `%${query.search.toLowerCase()}%`;
@@ -27544,13 +31273,13 @@ async function deleteKnowledgeGraphNode(nodeId) {
     .delete(knowledgeGraphEdges)
     .where(
       or6(
-        eq34(knowledgeGraphEdges.sourceNodeId, nodeId),
-        eq34(knowledgeGraphEdges.targetNodeId, nodeId)
+        eq35(knowledgeGraphEdges.sourceNodeId, nodeId),
+        eq35(knowledgeGraphEdges.targetNodeId, nodeId)
       )
     );
   await db
     .delete(knowledgeGraphNodes)
-    .where(eq34(knowledgeGraphNodes.nodeId, nodeId));
+    .where(eq35(knowledgeGraphNodes.nodeId, nodeId));
 }
 async function createCustomNode(input) {
   const db = await getDb();
@@ -27691,8 +31420,8 @@ init_schema();
 init_db();
 import {
   and as and27,
-  desc as desc18,
-  eq as eq35,
+  desc as desc19,
+  eq as eq36,
   sql as sql3,
 } from "drizzle-orm";
 var MEM_CHANGES = [];
@@ -28108,17 +31837,17 @@ async function listRegulatoryChanges(orgId, filters) {
   }
   const conditions = [];
   if (filters?.jurisdiction) {
-    conditions.push(eq35(regulatoryChanges.jurisdiction, filters.jurisdiction));
+    conditions.push(eq36(regulatoryChanges.jurisdiction, filters.jurisdiction));
   }
   if (filters?.status) {
-    conditions.push(eq35(regulatoryChanges.status, filters.status));
+    conditions.push(eq36(regulatoryChanges.status, filters.status));
   }
   if (filters?.changeType) {
-    conditions.push(eq35(regulatoryChanges.changeType, filters.changeType));
+    conditions.push(eq36(regulatoryChanges.changeType, filters.changeType));
   }
   if (filters?.frameworkCode) {
     conditions.push(
-      eq35(regulatoryChanges.frameworkCode, filters.frameworkCode)
+      eq36(regulatoryChanges.frameworkCode, filters.frameworkCode)
     );
   }
   const where = conditions.length > 0 ? and27(...conditions) : void 0;
@@ -28127,7 +31856,7 @@ async function listRegulatoryChanges(orgId, filters) {
       .select()
       .from(regulatoryChanges)
       .where(where)
-      .orderBy(desc18(regulatoryChanges.publicationDate))
+      .orderBy(desc19(regulatoryChanges.publicationDate))
       .limit(limit)
       .offset(offset),
     db
@@ -28146,7 +31875,7 @@ async function getRegulatoryChangeById(id) {
   const rows = await db
     .select()
     .from(regulatoryChanges)
-    .where(eq35(regulatoryChanges.id, id))
+    .where(eq36(regulatoryChanges.id, id))
     .limit(1);
   return rows.length > 0 ? rows[0] : null;
 }
@@ -28254,8 +31983,8 @@ async function markRegulatoryChangeEffective(id) {
     .set({ status: "in_effect", updatedAt: /* @__PURE__ */ new Date() })
     .where(
       and27(
-        eq35(regulatoryChanges.id, id),
-        eq35(regulatoryChanges.status, "pending")
+        eq36(regulatoryChanges.id, id),
+        eq36(regulatoryChanges.status, "pending")
       )
     );
   return getRegulatoryChangeById(id);
@@ -28268,7 +31997,7 @@ async function removeRegulatoryChange(id) {
     MEM_CHANGES.splice(idx, 1);
     return true;
   }
-  await db.delete(regulatoryChanges).where(eq35(regulatoryChanges.id, id));
+  await db.delete(regulatoryChanges).where(eq36(regulatoryChanges.id, id));
   return true;
 }
 function aggregateJurisdictions(changes) {
@@ -28432,8 +32161,8 @@ init_schema();
 init_db();
 import {
   and as and28,
-  desc as desc19,
-  eq as eq36,
+  desc as desc20,
+  eq as eq37,
   inArray as inArray7,
 } from "drizzle-orm";
 var SCENARIOS = [
@@ -28986,7 +32715,7 @@ async function runSimulationEngine(orgId, params, userId) {
     const [row] = await db
       .select()
       .from(complianceSimulations)
-      .where(eq36(complianceSimulations.id, inserted.id))
+      .where(eq37(complianceSimulations.id, inserted.id))
       .limit(1);
     return {
       id: row.id,
@@ -29046,11 +32775,11 @@ async function getSimulationHistory(orgId) {
       .from(complianceSimulations)
       .where(
         and28(
-          eq36(complianceSimulations.organizationId, orgId),
+          eq37(complianceSimulations.organizationId, orgId),
           inArray7(complianceSimulations.status, ["completed", "draft"])
         )
       )
-      .orderBy(desc19(complianceSimulations.createdAt));
+      .orderBy(desc20(complianceSimulations.createdAt));
     return rows.map(r => {
       const frameworks2 = JSON.parse(r.frameworks);
       return {
@@ -29095,8 +32824,8 @@ async function getSimulationById(orgId, id) {
       .from(complianceSimulations)
       .where(
         and28(
-          eq36(complianceSimulations.id, id),
-          eq36(complianceSimulations.organizationId, orgId)
+          eq37(complianceSimulations.id, id),
+          eq37(complianceSimulations.organizationId, orgId)
         )
       )
       .limit(1);
@@ -29138,8 +32867,8 @@ async function archiveSimulation(orgId, id) {
       .from(complianceSimulations)
       .where(
         and28(
-          eq36(complianceSimulations.id, id),
-          eq36(complianceSimulations.organizationId, orgId)
+          eq37(complianceSimulations.id, id),
+          eq37(complianceSimulations.organizationId, orgId)
         )
       )
       .limit(1);
@@ -29147,7 +32876,7 @@ async function archiveSimulation(orgId, id) {
     await db
       .update(complianceSimulations)
       .set({ status: "archived", updatedAt: /* @__PURE__ */ new Date() })
-      .where(eq36(complianceSimulations.id, id));
+      .where(eq37(complianceSimulations.id, id));
     return true;
   }
   const mem = MEM_SIMULATIONS.find(
@@ -29355,7 +33084,7 @@ import { z as z36 } from "zod";
 
 // server/cross-border-data-flow-store.ts
 var JURISDICTION_REQUIREMENTS = {
-  "European Union": {
+  EU: {
     adequacyDecisions: ["UK", "Argentina", "Japan", "South Korea", "Canada"],
     sccAllowed: true,
     bcrAllowed: true,
@@ -29382,7 +33111,7 @@ var JURISDICTION_REQUIREMENTS = {
     dataLocalization: true,
     transferImpactAssessment: true,
   },
-  "United States": {
+  US: {
     adequacyDecisions: [],
     sccAllowed: false,
     bcrAllowed: false,
@@ -29427,6 +33156,195 @@ var JURISDICTION_REQUIREMENTS = {
     dataLocalization: true,
     transferImpactAssessment: true,
   },
+  "United Kingdom": {
+    adequacyDecisions: [
+      "EU",
+      "EEA",
+      "Argentina",
+      "Japan",
+      "South Korea",
+      "Canada",
+      "Australia",
+      "Singapore",
+    ],
+    sccAllowed: true,
+    bcrAllowed: true,
+    consentRequired: false,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Canada: {
+    adequacyDecisions: ["EU", "UK"],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: false,
+  },
+  Australia: {
+    adequacyDecisions: ["EU", "UK"],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Japan: {
+    adequacyDecisions: ["EU", "UK"],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  "South Korea": {
+    adequacyDecisions: ["EU", "UK"],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  "South Africa": {
+    adequacyDecisions: ["EU"],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Mexico: {
+    adequacyDecisions: ["EU"],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: false,
+  },
+  Qatar: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Kuwait: {
+    adequacyDecisions: [],
+    sccAllowed: false,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: true,
+    transferImpactAssessment: false,
+  },
+  Bahrain: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Thailand: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Indonesia: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Malaysia: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Philippines: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Vietnam: {
+    adequacyDecisions: [],
+    sccAllowed: false,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: true,
+    transferImpactAssessment: true,
+  },
+  Nigeria: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Kenya: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: false,
+  },
+  Oman: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
+  Jordan: {
+    adequacyDecisions: [],
+    sccAllowed: false,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: false,
+    dataLocalization: false,
+    transferImpactAssessment: false,
+  },
+  Egypt: {
+    adequacyDecisions: [],
+    sccAllowed: true,
+    bcrAllowed: false,
+    consentRequired: true,
+    localRepresentative: true,
+    dataLocalization: false,
+    transferImpactAssessment: true,
+  },
 };
 var ALL_JURISDICTIONS = Object.keys(JURISDICTION_REQUIREMENTS);
 function getDataFlowRoutes(source, target, dataCategories) {
@@ -29441,7 +33359,7 @@ function getDataFlowRoutes(source, target, dataCategories) {
       riskLevel: "high",
       restrictions: ["Jurisdiction requirements not found in knowledge base"],
       requirements: ["Consult local legal counsel"],
-      estimatedComplianceCost: "TBD",
+      estimatedComplianceCost: "Unknown",
     };
   }
   const restrictions = [];
@@ -29550,6 +33468,631 @@ var crossBorderDataFlowRouter = router({
   }),
 });
 
+// server/onboarding-router.ts
+init_schema();
+init_db();
+import { z as z37 } from "zod";
+import { eq as eq38 } from "drizzle-orm";
+import { TRPCError as TRPCError29 } from "@trpc/server";
+var onboardingResponsesSchema = z37.object({
+  frameworks: z37.array(z37.string().min(1)).max(20).optional(),
+  objectives: z37.array(z37.string().min(1)).max(12).optional(),
+  organization: z37
+    .object({
+      name: z37.string().min(1).max(255).optional(),
+      industry: z37.string().max(120).optional(),
+      employeeRange: z37.string().max(30).optional(),
+      country: z37.string().max(120).optional(),
+    })
+    .optional(),
+  profile: z37
+    .object({
+      name: z37.string().max(255).optional(),
+      jobTitle: z37.string().max(255).optional(),
+      complianceExperience: z37
+        .enum(["beginner", "intermediate", "expert"])
+        .optional(),
+    })
+    .optional(),
+});
+var onboardingRouter = router({
+  getProgress: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db)
+      throw new TRPCError29({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database unavailable",
+      });
+    const rows = await db
+      .select()
+      .from(onboardingProgress)
+      .where(eq38(onboardingProgress.userId, ctx.user.id));
+    return rows[0] ?? null;
+  }),
+  updateProgress: protectedProcedure
+    .input(
+      z37.object({
+        step: z37.number().int().min(0).max(6),
+        responses: onboardingResponsesSchema.optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError29({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
+      const existing = await db
+        .select()
+        .from(onboardingProgress)
+        .where(eq38(onboardingProgress.userId, ctx.user.id));
+      const row = existing[0];
+      if (row) {
+        const completed = new Set(row.completedSteps ?? []);
+        completed.add(String(input.step));
+        await db
+          .update(onboardingProgress)
+          .set({
+            currentStep: input.step,
+            completedSteps: Array.from(completed),
+            responses: input.responses ?? void 0,
+            updatedAt: /* @__PURE__ */ new Date(),
+          })
+          .where(eq38(onboardingProgress.userId, ctx.user.id));
+      } else {
+        await db.insert(onboardingProgress).values({
+          userId: ctx.user.id,
+          currentStep: input.step,
+          completedSteps: [String(input.step)],
+          responses: input.responses ?? {},
+        });
+      }
+      if (input.responses?.organization && ctx.organizationId) {
+        await db
+          .insert(organizationProfilesCustom)
+          .values({
+            organizationId: ctx.organizationId,
+            industry: input.responses.organization.industry,
+            employeeRange: input.responses.organization.employeeRange,
+          })
+          .onConflictDoUpdate({
+            target: organizationProfilesCustom.organizationId,
+            set: {
+              industry: input.responses.organization.industry,
+              employeeRange: input.responses.organization.employeeRange,
+              updatedAt: /* @__PURE__ */ new Date(),
+            },
+          });
+      }
+      return { ok: true };
+    }),
+  skip: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db)
+      throw new TRPCError29({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database unavailable",
+      });
+    const existing = await db
+      .select()
+      .from(onboardingProgress)
+      .where(eq38(onboardingProgress.userId, ctx.user.id));
+    if (existing[0]) {
+      await db
+        .update(onboardingProgress)
+        .set({ skipped: true, updatedAt: /* @__PURE__ */ new Date() })
+        .where(eq38(onboardingProgress.userId, ctx.user.id));
+    } else {
+      await db.insert(onboardingProgress).values({
+        userId: ctx.user.id,
+        skipped: true,
+      });
+    }
+    return { ok: true };
+  }),
+  complete: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db)
+      throw new TRPCError29({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database unavailable",
+      });
+    const existing = await db
+      .select()
+      .from(onboardingProgress)
+      .where(eq38(onboardingProgress.userId, ctx.user.id));
+    if (existing[0]) {
+      await db
+        .update(onboardingProgress)
+        .set({
+          completedAt: /* @__PURE__ */ new Date(),
+          updatedAt: /* @__PURE__ */ new Date(),
+        })
+        .where(eq38(onboardingProgress.userId, ctx.user.id));
+    } else {
+      await db.insert(onboardingProgress).values({
+        userId: ctx.user.id,
+        completedAt: /* @__PURE__ */ new Date(),
+      });
+    }
+    return { ok: true };
+  }),
+});
+
+// server/analytics-router.ts
+init_schema();
+init_db();
+import { z as z38 } from "zod";
+import { eq as eq39, desc as desc21, sql as sql4 } from "drizzle-orm";
+import { TRPCError as TRPCError30 } from "@trpc/server";
+var analyticsRouter = router({
+  track: protectedProcedure
+    .input(
+      z38.object({
+        event: z38.string().min(1).max(100),
+        category: z38.string().min(1).max(50),
+        properties: z38.record(z38.string(), z38.unknown()).optional(),
+        sessionId: z38.string().max(64).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError30({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
+      await db.insert(analyticsEvents).values({
+        userId: ctx.user.id,
+        organizationId: ctx.organizationId ?? 0,
+        event: input.event,
+        category: input.category,
+        properties: input.properties ?? {},
+        sessionId: input.sessionId,
+      });
+      await db
+        .insert(userActivitySummary)
+        .values({
+          userId: ctx.user.id,
+          totalSessions: input.sessionId ? 1 : 0,
+          totalEvents: 1,
+          lastActiveAt: /* @__PURE__ */ new Date(),
+        })
+        .onConflictDoUpdate({
+          target: userActivitySummary.userId,
+          set: {
+            totalEvents: sql4`${userActivitySummary.totalEvents} + 1`,
+            lastActiveAt: /* @__PURE__ */ new Date(),
+          },
+        });
+      return { ok: true };
+    }),
+  getUserMetrics: protectedProcedure
+    .input(
+      z38.object({
+        days: z38.number().int().min(1).max(365).optional(),
+      })
+    )
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError30({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
+      const rows = await db
+        .select()
+        .from(userActivitySummary)
+        .where(eq39(userActivitySummary.userId, ctx.user.id));
+      const summary = rows[0];
+      return {
+        totalEvents: summary?.totalEvents ?? 0,
+        totalSessions: summary?.totalSessions ?? 0,
+        lastActiveAt: summary?.lastActiveAt?.toISOString() ?? null,
+        activationScore: summary?.activationScore ?? 0,
+        healthScore: summary?.healthScore ?? 0,
+      };
+    }),
+  getRecentEvents: protectedProcedure
+    .input(
+      z38.object({
+        limit: z38.number().int().min(1).max(500).default(50),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError30({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
+      const rows = await db
+        .select()
+        .from(analyticsEvents)
+        .where(eq39(analyticsEvents.userId, ctx.user.id))
+        .orderBy(desc21(analyticsEvents.createdAt))
+        .limit(input.limit);
+      return rows;
+    }),
+});
+
+// server/notification-router.ts
+init_schema();
+init_db();
+import { z as z39 } from "zod";
+import { eq as eq40, desc as desc22, and as and29 } from "drizzle-orm";
+import { TRPCError as TRPCError31 } from "@trpc/server";
+var notificationsRouter = router({
+  list: protectedProcedure
+    .input(
+      z39.object({
+        limit: z39.number().int().min(1).max(100).default(20),
+        offset: z39.number().int().min(0).default(0),
+        unreadOnly: z39.boolean().default(false),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError31({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
+      const conditions = [eq40(notifications.userId, ctx.user.id)];
+      if (input.unreadOnly) {
+        conditions.push(eq40(notifications.isRead, false));
+      }
+      const query = db
+        .select()
+        .from(notifications)
+        .where(and29(...conditions))
+        .orderBy(desc22(notifications.createdAt))
+        .limit(input.limit);
+      if (input.offset > 0) {
+        query.offset(input.offset);
+      }
+      return await query;
+    }),
+  unreadCount: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db)
+      throw new TRPCError31({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database unavailable",
+      });
+    const rows = await db
+      .select()
+      .from(notifications)
+      .where(
+        and29(
+          eq40(notifications.userId, ctx.user.id),
+          eq40(notifications.isRead, false)
+        )
+      );
+    return rows.length;
+  }),
+  markRead: protectedProcedure
+    .input(z39.object({ id: z39.number().int() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError31({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
+      await db
+        .update(notifications)
+        .set({ isRead: true, readAt: /* @__PURE__ */ new Date() })
+        .where(
+          and29(
+            eq40(notifications.id, input.id),
+            eq40(notifications.userId, ctx.user.id)
+          )
+        );
+      return { ok: true };
+    }),
+  markAllRead: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db)
+      throw new TRPCError31({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database unavailable",
+      });
+    await db
+      .update(notifications)
+      .set({ isRead: true, readAt: /* @__PURE__ */ new Date() })
+      .where(
+        and29(
+          eq40(notifications.userId, ctx.user.id),
+          eq40(notifications.isRead, false)
+        )
+      );
+    return { ok: true };
+  }),
+});
+
+// server/personalization-router.ts
+import { z as z40 } from "zod";
+
+// server/personalization.ts
+init_db();
+init_schema();
+import { inArray as inArray8 } from "drizzle-orm";
+var INDUSTRY_FRAMEWORKS = {
+  "financial services": ["PDPL", "PCI DSS", "ISO 27001", "GDPR"],
+  healthcare: ["HIPAA", "GDPR", "ISO 27701", "NIST CSF"],
+  technology: ["SOC 2", "ISO 27001", "NIST CSF", "CCPA"],
+  government: ["NIST CSF", "ISO 27001", "NCA ECC", "CSL"],
+  energy: ["NCA ECC", "ISO 27001", "NIST CSF"],
+  manufacturing: ["ISO 27001", "GDPR", "CCPA"],
+  retail: ["PCI DSS", "GDPR", "CCPA"],
+  "professional services": ["GDPR", "ISO 27001", "SOC 2"],
+};
+var OBJECTIVE_ACTIONS = {
+  "Regulatory Compliance": [
+    {
+      title: "Complete jurisdiction-specific framework mapping",
+      description:
+        "Map your selected frameworks to regulatory obligations in your primary jurisdictions.",
+      category: "assessment",
+      urgency: "immediate",
+    },
+  ],
+  "Vendor Risk Management": [
+    {
+      title: "Assess your top 3 vendors",
+      description:
+        "Run AI-powered compliance assessments on your most critical third-party vendors.",
+      category: "vendor",
+      urgency: "this-week",
+    },
+  ],
+  "Audit Readiness": [
+    {
+      title: "Set up audit schedule",
+      description:
+        "Create recurring audit events aligned to your frameworks and regulatory calendar.",
+      category: "deadline",
+      urgency: "this-week",
+    },
+  ],
+  "AI-Powered Reports": [
+    {
+      title: "Generate your first compliance report",
+      description:
+        "Use AI to produce a cross-jurisdiction compliance report with gap analysis.",
+      category: "report",
+      urgency: "this-week",
+    },
+  ],
+  "Risk Assessment": [
+    {
+      title: "Create initial risk register entries",
+      description:
+        "Log top organisational risks and auto-map them to your compliance frameworks.",
+      category: "risk",
+      urgency: "immediate",
+    },
+  ],
+  "Continuous Monitoring": [
+    {
+      title: "Configure CTEM monitoring scope",
+      description:
+        "Set up continuous threat exposure monitoring for your critical assets.",
+      category: "assessment",
+      urgency: "this-month",
+    },
+  ],
+};
+async function generateRecommendations(profile) {
+  const db = await getDb();
+  if (!db) return emptyRecommendations();
+  const allFrameworks = await db
+    .select()
+    .from(frameworks)
+    .where(inArray8(frameworks.code, profile.frameworks));
+  const industryRecs = (INDUSTRY_FRAMEWORKS[profile.industry] || []).filter(
+    f => !profile.frameworks.includes(f)
+  );
+  const frameworkRecs = [
+    ...industryRecs.map(code => ({
+      code,
+      reason: `Commonly required for ${profile.industry} organisations`,
+      priority: "should-have",
+    })),
+  ];
+  const actionRecs = [];
+  for (const obj of profile.objectives) {
+    const actions = OBJECTIVE_ACTIONS[obj] || [];
+    for (const action of actions) {
+      if (!actionRecs.some(a => a.title === action.title)) {
+        actionRecs.push(action);
+      }
+    }
+  }
+  if (actionRecs.length === 0) {
+    actionRecs.push({
+      title: "Explore the Compliance Framework Library",
+      description:
+        "Browse 46 frameworks across 29 jurisdictions to understand your obligations.",
+      category: "assessment",
+      urgency: "this-week",
+    });
+  }
+  const widgets = ["compliance_health", "upcoming_deadlines"];
+  if (profile.objectives.includes("Vendor Risk Management"))
+    widgets.push("vendor_risk");
+  if (profile.objectives.includes("Risk Assessment"))
+    widgets.push("risk_register");
+  if (profile.objectives.includes("AI-Powered Reports"))
+    widgets.push("recent_reports");
+  if (profile.objectives.includes("Continuous Monitoring"))
+    widgets.push("ctem_overview");
+  const maturityTimeline = {
+    beginner:
+      "We recommend a phased approach: complete setup this week, run your first assessment in week 2, and establish a recurring compliance cadence by month's end.",
+    intermediate:
+      "Focus on closing gaps and automating recurring tasks this month. Leverage AI reports for executive stakeholders.",
+    advanced:
+      "Optimize your compliance posture with advanced CTEM monitoring, cross-jurisdiction analysis, and custom report automation.",
+  };
+  return {
+    frameworks: frameworkRecs,
+    actions: actionRecs,
+    dashboardWidgets: widgets,
+    timeline:
+      maturityTimeline[profile.complianceMaturity] || maturityTimeline.beginner,
+    intro: `Based on your profile (${profile.industry}, ${profile.country}), we've tailored DJAC to prioritize ${profile.frameworks.slice(0, 3).join(", ")} compliance. ${allFrameworks.length > 0 ? `Your ${allFrameworks.length} selected framework(s) are ready.` : ""}`,
+  };
+}
+function emptyRecommendations() {
+  return {
+    frameworks: [],
+    actions: [
+      {
+        title: "Complete your onboarding",
+        description:
+          "Finish setting up your profile to receive personalised recommendations.",
+        category: "assessment",
+        urgency: "immediate",
+      },
+    ],
+    dashboardWidgets: ["compliance_health", "upcoming_deadlines"],
+    timeline:
+      "Complete your onboarding profile to receive a personalised compliance timeline.",
+    intro:
+      "Welcome to DJAC! Complete your onboarding to unlock personalised recommendations.",
+  };
+}
+
+// server/personalization-router.ts
+var personalizationRouter = router({
+  getRecommendations: protectedProcedure
+    .input(
+      z40.object({
+        frameworks: z40.array(z40.string()).max(20).default([]),
+        objectives: z40.array(z40.string()).max(12).default([]),
+        industry: z40.string().default(""),
+        country: z40.string().default(""),
+        complianceMaturity: z40
+          .enum(["beginner", "intermediate", "advanced"])
+          .default("beginner"),
+      })
+    )
+    .query(async ({ input }) => {
+      return generateRecommendations(input);
+    }),
+});
+
+// server/customer-360-router.ts
+init_schema();
+init_db();
+import { z as z41 } from "zod";
+import { eq as eq41, desc as desc23 } from "drizzle-orm";
+import { TRPCError as TRPCError32 } from "@trpc/server";
+var customer360Router = router({
+  list: adminProcedure
+    .input(
+      z41.object({
+        limit: z41.number().int().min(1).max(100).default(20),
+        offset: z41.number().int().min(0).default(0),
+      })
+    )
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError32({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable",
+        });
+      const userRows = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          role: users.role,
+          status: users.status,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .orderBy(desc23(users.createdAt))
+        .limit(input.limit)
+        .offset(input.offset);
+      return userRows;
+    }),
+  getProfile: adminProcedure
+    .input(z41.object({ userId: z41.number().int() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError32({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "DB unavailable",
+        });
+      const userRows = await db
+        .select()
+        .from(users)
+        .where(eq41(users.id, input.userId))
+        .limit(1);
+      const user = userRows[0];
+      if (!user) return null;
+      let activity = null;
+      try {
+        const rows = await db
+          .select()
+          .from(userActivitySummary)
+          .where(eq41(userActivitySummary.userId, input.userId));
+        activity = rows[0] ?? null;
+      } catch {}
+      const recentEvents = await db
+        .select()
+        .from(analyticsEvents)
+        .where(eq41(analyticsEvents.userId, input.userId))
+        .orderBy(desc23(analyticsEvents.createdAt))
+        .limit(20);
+      return {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          joinedAt: user.createdAt,
+        },
+        activity: activity
+          ? {
+              totalEvents: activity.totalEvents ?? 0,
+              totalSessions: activity.totalSessions ?? 0,
+              lastActiveAt: activity.lastActiveAt,
+              healthScore: activity.healthScore ?? 0,
+            }
+          : null,
+        recentEvents: recentEvents.map(e => ({
+          event: e.event,
+          category: e.category,
+          createdAt: e.createdAt,
+        })),
+        healthScore: computeHealthScore(activity),
+      };
+    }),
+});
+function computeHealthScore(activity) {
+  let score = 50;
+  if (!activity) return score;
+  const te = activity.totalEvents ?? 0;
+  if (te > 50) score += 20;
+  else if (te > 10) score += 10;
+  if (activity.lastActiveAt) {
+    const daysSince =
+      (Date.now() - new Date(activity.lastActiveAt).getTime()) / 864e5;
+    if (daysSince < 1) score += 20;
+    else if (daysSince < 7) score += 10;
+    else if (daysSince > 14) score -= 30;
+  }
+  return Math.max(0, Math.min(100, score));
+}
+
 // server/routers.ts
 var appRouter = router({
   system: systemRouter,
@@ -29588,6 +34131,11 @@ var appRouter = router({
   auth: authRouter,
   compliance: complianceFrameworkRouter,
   vendor: vendorRouter,
+  onboarding: onboardingRouter,
+  analytics: analyticsRouter,
+  notifications: notificationsRouter,
+  personalization: personalizationRouter,
+  customer360: customer360Router,
 });
 
 // server/_core/context.ts
@@ -29598,7 +34146,7 @@ init_schema();
 init_db();
 init_env();
 import crypto3 from "crypto";
-import { and as and29, eq as eq37, isNull as isNull4 } from "drizzle-orm";
+import { and as and30, eq as eq42, isNull as isNull4 } from "drizzle-orm";
 async function resolveDevBypassUser() {
   const now = /* @__PURE__ */ new Date();
   return {
@@ -29637,12 +34185,12 @@ async function resolveApiKeyAuth(req) {
       expiresAt: apiKeys.expiresAt,
     })
     .from(apiKeys)
-    .where(and29(eq37(apiKeys.keyHash, keyHash), isNull4(apiKeys.revokedAt)))
+    .where(and30(eq42(apiKeys.keyHash, keyHash), isNull4(apiKeys.revokedAt)))
     .limit(1);
   if (!keyRow || (keyRow.expiresAt && keyRow.expiresAt <= now)) return null;
   db.update(apiKeys)
     .set({ lastUsedAt: now })
-    .where(eq37(apiKeys.id, keyRow.id))
+    .where(eq42(apiKeys.id, keyRow.id))
     .catch(() => {});
   const user = {
     id: -(1e4 + keyRow.id),
@@ -29711,9 +34259,9 @@ async function resolveOAuthUser(req) {
 // server/services/org-context.ts
 init_schema();
 init_db();
-import { and as and30, eq as eq38 } from "drizzle-orm";
-async function createDefaultOrganizationForUser(user) {
-  if (user.id <= 0) return null;
+import { and as and31, eq as eq43 } from "drizzle-orm";
+async function createDefaultOrganizationForUser(user, localUserId) {
+  if (user.id <= 0 && !localUserId) return null;
   const db = await getDb();
   if (!db) return null;
   const now = /* @__PURE__ */ new Date();
@@ -29722,7 +34270,8 @@ async function createDefaultOrganizationForUser(user) {
     user.organizationName && user.organizationName.trim()
       ? user.organizationName.trim()
       : `${(user.name || "New User").trim()} Organization`;
-  const safeSlug = `org-${user.id}-${
+  const ownerKey = localUserId ?? user.id;
+  const safeSlug = `org-${ownerKey}-${
     orgName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -29734,7 +34283,7 @@ async function createDefaultOrganizationForUser(user) {
     .values({
       slug: safeSlug,
       name: orgName,
-      billingEmail: user.email || `user-${user.id}@example.local`,
+      billingEmail: user.email || `user-${ownerKey}@example.local`,
       primaryJurisdiction: "Both",
       plan: "free_trial",
       trialStartedAt: now,
@@ -29746,11 +34295,16 @@ async function createDefaultOrganizationForUser(user) {
   const organizationId = inserted.id;
   await db.insert(organizationMembers).values({
     organizationId,
-    userId: user.id,
+    ...(localUserId != null ? { localUserId } : { userId: user.id }),
     role: "owner",
     status: "active",
   });
   return { organizationId, organizationRole: "owner" };
+}
+function getLocalUserIdFromOpenId(openId) {
+  if (!openId) return null;
+  const m = /^local:(\d+)$/.exec(openId);
+  return m ? Number(m[1]) : null;
 }
 async function resolveOrganizationForUser(user) {
   const db = await getDb();
@@ -29762,14 +34316,46 @@ async function resolveOrganizationForUser(user) {
     })
     .from(organizationMembers)
     .where(
-      and30(
-        eq38(organizationMembers.userId, user.id),
-        eq38(organizationMembers.status, "active")
+      and31(
+        eq43(organizationMembers.userId, user.id),
+        eq43(organizationMembers.status, "active")
       )
     )
     .limit(1);
   if (!membership) {
     const seeded = await createDefaultOrganizationForUser(user);
+    if (seeded) {
+      return {
+        organizationId: seeded.organizationId,
+        organizationRole: seeded.organizationRole,
+      };
+    }
+  }
+  return {
+    organizationId: membership?.organizationId ?? null,
+    organizationRole: membership?.role ?? null,
+  };
+}
+async function resolveOrganizationForLocalUser(user) {
+  const localUserId = getLocalUserIdFromOpenId(user.openId);
+  if (!localUserId) return { organizationId: null, organizationRole: null };
+  const db = await getDb();
+  if (!db) return { organizationId: null, organizationRole: null };
+  const [membership] = await db
+    .select({
+      organizationId: organizationMembers.organizationId,
+      role: organizationMembers.role,
+    })
+    .from(organizationMembers)
+    .where(
+      and31(
+        eq43(organizationMembers.localUserId, localUserId),
+        eq43(organizationMembers.status, "active")
+      )
+    )
+    .limit(1);
+  if (!membership) {
+    const seeded = await createDefaultOrganizationForUser(user, localUserId);
     if (seeded) {
       return {
         organizationId: seeded.organizationId,
@@ -29809,8 +34395,9 @@ async function createContext(opts) {
     if (!user) {
       user = await resolveLocalAuthUser(opts.req);
       if (user) {
-        organizationId = -1;
-        organizationRole = "owner";
+        const org = await resolveOrganizationForLocalUser(user);
+        organizationId = org.organizationId;
+        organizationRole = org.organizationRole;
       }
     }
   }
@@ -30151,7 +34738,7 @@ function registerAssessmentWebSocketServer(server) {
 init_env();
 init_db();
 init_schema();
-import { eq as eq39 } from "drizzle-orm";
+import { eq as eq44 } from "drizzle-orm";
 function mapStripeStatus(s) {
   const valid = [
     "trialing",
@@ -30180,7 +34767,7 @@ async function upsertSubscriptionRecord(db, params) {
     .select({ id: subscriptions.id })
     .from(subscriptions)
     .where(
-      eq39(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
+      eq44(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
     )
     .limit(1);
   const payload = {
@@ -30204,7 +34791,7 @@ async function upsertSubscriptionRecord(db, params) {
       .update(subscriptions)
       .set(payload)
       .where(
-        eq39(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
+        eq44(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
       );
     return;
   }
@@ -30252,7 +34839,7 @@ async function processStripeEvent(event, db) {
     const existing = await db
       .select({ id: billingEvents.id })
       .from(billingEvents)
-      .where(eq39(billingEvents.stripeEventId, event.id))
+      .where(eq44(billingEvents.stripeEventId, event.id))
       .limit(1);
     return existing.length > 0;
   };
@@ -30280,7 +34867,7 @@ async function processStripeEvent(event, db) {
       await db
         .update(organizations)
         .set({ plan, stripeCustomerId: String(session.customer ?? "") })
-        .where(eq39(organizations.id, orgId));
+        .where(eq44(organizations.id, orgId));
       await upsertSubscriptionRecord(db, {
         organizationId: orgId,
         stripeSubscriptionId: String(session.subscription),
@@ -30296,7 +34883,7 @@ async function processStripeEvent(event, db) {
       await db
         .update(billingEvents)
         .set({ status: "success" })
-        .where(eq39(billingEvents.stripeEventId, event.id));
+        .where(eq44(billingEvents.stripeEventId, event.id));
       break;
     }
     // ── Invoice paid → subscription active ───────────────────────────────────
@@ -30306,7 +34893,7 @@ async function processStripeEvent(event, db) {
         .select({ id: organizations.id })
         .from(organizations)
         .where(
-          eq39(organizations.stripeCustomerId, String(invoice.customer ?? ""))
+          eq44(organizations.stripeCustomerId, String(invoice.customer ?? ""))
         )
         .limit(1);
       const orgId = orgResult[0]?.id;
@@ -30348,7 +34935,7 @@ async function processStripeEvent(event, db) {
         await db
           .update(subscriptions)
           .set({ status: "active", lastInvoiceId: invoice.id })
-          .where(eq39(subscriptions.stripeSubscriptionId, subId));
+          .where(eq44(subscriptions.stripeSubscriptionId, subId));
       }
       await db.insert(billingEvents).values({
         organizationId: orgId,
@@ -30369,7 +34956,7 @@ async function processStripeEvent(event, db) {
         .select({ id: organizations.id })
         .from(organizations)
         .where(
-          eq39(organizations.stripeCustomerId, String(invoice.customer ?? ""))
+          eq44(organizations.stripeCustomerId, String(invoice.customer ?? ""))
         )
         .limit(1);
       const orgId = orgResult[0]?.id;
@@ -30381,7 +34968,7 @@ async function processStripeEvent(event, db) {
       await db
         .update(subscriptions)
         .set({ status: "past_due" })
-        .where(eq39(subscriptions.stripeSubscriptionId, subIdFailed));
+        .where(eq44(subscriptions.stripeSubscriptionId, subIdFailed));
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -30398,7 +34985,7 @@ async function processStripeEvent(event, db) {
       const orgResult = await db
         .select({ id: organizations.id })
         .from(organizations)
-        .where(eq39(organizations.stripeCustomerId, String(sub.customer ?? "")))
+        .where(eq44(organizations.stripeCustomerId, String(sub.customer ?? "")))
         .limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
@@ -30433,7 +35020,7 @@ async function processStripeEvent(event, db) {
         await db
           .update(organizations)
           .set({ plan: planInfo.plan })
-          .where(eq39(organizations.id, orgId));
+          .where(eq44(organizations.id, orgId));
       } else {
         await db
           .update(subscriptions)
@@ -30449,7 +35036,7 @@ async function processStripeEvent(event, db) {
             cancelAtPeriodEnd: sub.cancel_at_period_end ? 1 : 0,
             stripeMetadata: JSON.stringify(sub.metadata ?? {}),
           })
-          .where(eq39(subscriptions.stripeSubscriptionId, sub.id));
+          .where(eq44(subscriptions.stripeSubscriptionId, sub.id));
       }
       await db.insert(billingEvents).values({
         organizationId: orgId,
@@ -30467,7 +35054,7 @@ async function processStripeEvent(event, db) {
       const orgResult = await db
         .select({ id: organizations.id })
         .from(organizations)
-        .where(eq39(organizations.stripeCustomerId, String(sub.customer ?? "")))
+        .where(eq44(organizations.stripeCustomerId, String(sub.customer ?? "")))
         .limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
@@ -30480,7 +35067,7 @@ async function processStripeEvent(event, db) {
             ? new Date(sub.canceled_at * 1e3)
             : /* @__PURE__ */ new Date(),
         })
-        .where(eq39(subscriptions.stripeSubscriptionId, sub.id));
+        .where(eq44(subscriptions.stripeSubscriptionId, sub.id));
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -30545,7 +35132,7 @@ init_schema();
 init_db();
 init_email();
 init_env();
-import { eq as eq40 } from "drizzle-orm";
+import { eq as eq45 } from "drizzle-orm";
 var INTERVAL_MS = 6 * 60 * 60 * 1e3;
 var DAY_MS = 24 * 60 * 60 * 1e3;
 function milestoneColumn(milestone) {
@@ -30634,7 +35221,7 @@ async function runReminderCheck() {
       trialExpiredNoticeSent: organizations.trialExpiredNoticeSent,
     })
     .from(organizations)
-    .where(eq40(organizations.plan, "free_trial"));
+    .where(eq45(organizations.plan, "free_trial"));
   if (trialOrgs.length === 0) return;
   const pricingUrl = `${ENV.appUrl}/pricing`;
   let sent = 0;
@@ -30663,7 +35250,7 @@ async function runReminderCheck() {
       await db
         .update(organizations)
         .set({ [col]: 1 })
-        .where(eq40(organizations.id, org.id));
+        .where(eq45(organizations.id, org.id));
       sent++;
     } catch (err) {
       console.warn(
@@ -30701,11 +35288,11 @@ init_db();
 init_email();
 init_env();
 import {
-  and as and31,
-  eq as eq41,
+  and as and32,
+  eq as eq46,
   lte,
   gte,
-  inArray as inArray8,
+  inArray as inArray9,
 } from "drizzle-orm";
 var INTERVAL_MS2 = 2 * 60 * 60 * 1e3;
 var DAY_MS2 = 24 * 60 * 60 * 1e3;
@@ -30768,8 +35355,8 @@ async function runAlertCheck() {
     .select()
     .from(complianceDeadlines)
     .where(
-      and31(
-        eq41(complianceDeadlines.status, "upcoming"),
+      and32(
+        eq46(complianceDeadlines.status, "upcoming"),
         gte(complianceDeadlines.deadlineDate, now),
         lte(complianceDeadlines.deadlineDate, horizon)
       )
@@ -30788,7 +35375,7 @@ async function runAlertCheck() {
       })
       .from(organizations)
       .where(
-        inArray8(organizations.plan, [
+        inArray9(organizations.plan, [
           "free_trial",
           "professional",
           "enterprise",
@@ -30823,12 +35410,12 @@ async function runAlertCheck() {
     const members = await db
       .select({ email: users.email, name: users.name })
       .from(organizationMembers)
-      .innerJoin(users, eq41(organizationMembers.userId, users.id))
+      .innerJoin(users, eq46(organizationMembers.userId, users.id))
       .where(
-        and31(
-          eq41(organizationMembers.organizationId, deadline.organizationId),
-          eq41(organizationMembers.status, "active"),
-          inArray8(organizationMembers.role, [
+        and32(
+          eq46(organizationMembers.organizationId, deadline.organizationId),
+          eq46(organizationMembers.status, "active"),
+          inArray9(organizationMembers.role, [
             "owner",
             "admin",
             "compliance_officer",
@@ -30839,10 +35426,10 @@ async function runAlertCheck() {
       .select({ inviteEmail: organizationMembers.inviteEmail })
       .from(organizationMembers)
       .where(
-        and31(
-          eq41(organizationMembers.organizationId, deadline.organizationId),
-          eq41(organizationMembers.status, "invited"),
-          inArray8(organizationMembers.role, [
+        and32(
+          eq46(organizationMembers.organizationId, deadline.organizationId),
+          eq46(organizationMembers.status, "invited"),
+          inArray9(organizationMembers.role, [
             "owner",
             "admin",
             "compliance_officer",
@@ -30894,7 +35481,7 @@ function startDeadlineAlertScheduler() {
 // server/report-scheduler.ts
 init_schema();
 init_db();
-import { eq as eq42 } from "drizzle-orm";
+import { eq as eq47 } from "drizzle-orm";
 init_env();
 var INTERVAL_MS3 = 6 * 60 * 60 * 1e3;
 var sentSet2 = /* @__PURE__ */ new Set();
@@ -30953,7 +35540,7 @@ async function runScheduledReports() {
       primaryJurisdiction: organizations.primaryJurisdiction,
     })
     .from(organizations)
-    .where(eq42(organizations.isActive, 1));
+    .where(eq47(organizations.isActive, 1));
   for (const org of activeOrgs) {
     if (!org.billingEmail) continue;
     const jurisdiction = mapJurisdiction(org.primaryJurisdiction);
@@ -31029,10 +35616,31 @@ function startReportScheduler() {
   };
 }
 
+// server/services/otp-cleanup.ts
+var CLEANUP_INTERVAL_MS = 15 * 60 * 1e3;
+function startOtpCleanupScheduler() {
+  let running = false;
+  const run = async () => {
+    if (running) return;
+    running = true;
+    try {
+      await cleanupExpiredOtps();
+    } catch (err) {
+      console.warn("[OtpCleanup] Cleanup failed:", err.message);
+    } finally {
+      running = false;
+    }
+  };
+  void run();
+  const timer = setInterval(() => void run(), CLEANUP_INTERVAL_MS);
+  console.info("[OtpCleanup] Scheduler started. Interval: 15min.");
+  return () => clearInterval(timer);
+}
+
 // server/_core/auto-migrate.ts
 init_db();
 init_env();
-import { sql as sql4 } from "drizzle-orm";
+import { sql as sql5 } from "drizzle-orm";
 var migrationApplied = false;
 async function seedComplianceFrameworks(db) {
   try {
@@ -31045,7 +35653,7 @@ async function seedComplianceFrameworks(db) {
       );
     let seeded = 0;
     for (const fw of complianceFrameworks2) {
-      await db.execute(sql4`
+      await db.execute(sql5`
                 INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
                 VALUES (${fw.code}, ${fw.name}, ${fw.country}, ${fw.description ?? null}, ${fw.scope ?? null}, ${fw.enforcementAuthority ?? null}, ${fw.maxPenalty ?? null})
                 ON CONFLICT ("code") DO UPDATE SET
@@ -31074,10 +35682,16 @@ async function ensureMigrated() {
   const db = await getDb();
   if (!db) return;
   try {
-    await db.execute(sql4`
+    await db.execute(sql5`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "verifiedAt" timestamp
         `);
-    await db.execute(sql4`
+    await db.execute(sql5`
+            ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "lastMfaVerifiedAt" timestamp
+        `);
+    await db.execute(sql5`
+            ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "firstLoginEmailSent" integer DEFAULT 0 NOT NULL
+        `);
+    await db.execute(sql5`
             CREATE TABLE IF NOT EXISTS "yallaAdminSessions" (
                 "id"            varchar(64)   NOT NULL PRIMARY KEY,
                 "adminUsername" varchar(120)  NOT NULL,
@@ -31089,7 +35703,7 @@ async function ensureMigrated() {
                 "isRevoked"     integer       NOT NULL DEFAULT 0
             )
         `);
-    await db.execute(sql4`
+    await db.execute(sql5`
             CREATE TABLE IF NOT EXISTS "yallaAdminAuditLogs" (
                 "id"            serial        PRIMARY KEY,
                 "sessionId"     varchar(64),
@@ -31101,17 +35715,17 @@ async function ensureMigrated() {
                 "createdAt"     timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql4`
+    await db.execute(sql5`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "phoneNumber" varchar(20)
         `);
-    await db.execute(sql4`
+    await db.execute(sql5`
             ALTER TABLE "complianceControls" ADD COLUMN IF NOT EXISTS "applicability" varchar(255)
         `);
-    await db.execute(sql4`
+    await db.execute(sql5`
             CREATE UNIQUE INDEX IF NOT EXISTS "localUsers_phoneNumber_idx"
             ON "localUsers" ("phoneNumber") WHERE "phoneNumber" IS NOT NULL
         `);
-    await db.execute(sql4`
+    await db.execute(sql5`
             CREATE TABLE IF NOT EXISTS "otpCodes" (
                 "id"         serial        PRIMARY KEY,
                 "identifier" varchar(320)  NOT NULL,
@@ -31122,7 +35736,7 @@ async function ensureMigrated() {
                 "createdAt"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql4`
+    await db.execute(sql5`
             CREATE TABLE IF NOT EXISTS "auditLogs" (
                 "id"             serial        PRIMARY KEY,
                 "userId"         integer,
@@ -31155,16 +35769,505 @@ async function ensureMigrated() {
       `CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`,
     ];
     for (const idx of indexes) {
-      await db.execute(sql4.raw(idx));
+      await db.execute(sql5.raw(idx));
     }
-    await db.execute(sql4`
+    await db.execute(sql5`
             CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx"
             ON "complianceControls" ("frameworkId", "controlCode")
         `);
-    await db.execute(sql4`
+    await db.execute(sql5`
             CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx"
             ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")
         `);
+    const globalJurisdictions = [
+      "United Kingdom",
+      "Canada",
+      "Australia",
+      "Japan",
+      "South Korea",
+      "Singapore",
+      "India",
+      "South Africa",
+      "Mexico",
+      "Thailand",
+      "Indonesia",
+      "Malaysia",
+      "Philippines",
+      "Vietnam",
+      "Nigeria",
+      "Kenya",
+      "United Arab Emirates",
+      "Qatar",
+      "Kuwait",
+      "Bahrain",
+      "Oman",
+      "Jordan",
+      "Egypt",
+    ];
+    for (const j of globalJurisdictions) {
+      const escaped = j.replace(/'/g, "''");
+      await db.execute(
+        sql5.raw(
+          `ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
+        )
+      );
+      await db.execute(
+        sql5.raw(
+          `ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
+        )
+      );
+      await db.execute(
+        sql5.raw(
+          `ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
+        )
+      );
+    }
+    const newRegions = [
+      "North America",
+      "Europe",
+      "APAC",
+      "EMEA",
+      "Latin America",
+      "Africa",
+      "Global",
+    ];
+    for (const r of newRegions) {
+      const escapedR = r.replace(/'/g, "''");
+      await db.execute(
+        sql5.raw(`ALTER TYPE "region" ADD VALUE IF NOT EXISTS '${escapedR}'`)
+      );
+    }
+    await db.execute(sql5`
+            ALTER TABLE "yallaAdminAccessLinkNonces"
+            ALTER COLUMN "consumedAt" DROP DEFAULT
+        `);
+    await db.execute(sql5`
+            ALTER TABLE "yallaAdminAccessLinkNonces"
+            ALTER COLUMN "consumedAt" DROP NOT NULL
+        `);
+    await db.execute(sql5`
+            ALTER TABLE "yallaAdminAccessLinkNonces"
+            ALTER COLUMN "consumedByIp" DROP NOT NULL
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "onboarding_progress" (
+                "id"              serial        PRIMARY KEY,
+                "user_id"         integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
+                "current_step"    integer       DEFAULT 0,
+                "completed_steps" jsonb         DEFAULT '[]'::jsonb,
+                "skipped"         boolean       DEFAULT false,
+                "completed_at"    timestamp,
+                "responses"       jsonb         DEFAULT '{}'::jsonb,
+                "created_at"      timestamp     NOT NULL DEFAULT now(),
+                "updated_at"      timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "organization_profiles_custom" (
+                "id"                       serial        PRIMARY KEY,
+                "organization_id"          integer       NOT NULL UNIQUE REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "industry"                 varchar(120),
+                "employee_range"           varchar(30),
+                "compliance_maturity"      varchar(30),
+                "selected_frameworks"      jsonb         DEFAULT '[]'::jsonb,
+                "business_objectives"      jsonb         DEFAULT '[]'::jsonb,
+                "onboarding_completed_at"  timestamp,
+                "created_at"               timestamp     NOT NULL DEFAULT now(),
+                "updated_at"               timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "user_preferences" (
+                "id"                    serial        PRIMARY KEY,
+                "user_id"               integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
+                "dashboard_layout"      jsonb         DEFAULT '{}'::jsonb,
+                "default_jurisdictions" jsonb         DEFAULT '[]'::jsonb,
+                "notification_prefs"    jsonb         DEFAULT '{}'::jsonb,
+                "theme"                 varchar(20)   DEFAULT 'system',
+                "locale"                varchar(10)   DEFAULT 'en',
+                "tour_completed"        boolean       DEFAULT false,
+                "created_at"            timestamp     NOT NULL DEFAULT now(),
+                "updated_at"            timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "feature_flags" (
+                "id"                   serial        PRIMARY KEY,
+                "name"                 varchar(100)  NOT NULL UNIQUE,
+                "description"          text,
+                "enabled"              boolean       DEFAULT false,
+                "rollout_percentage"   integer       DEFAULT 0,
+                "target_org_ids"       jsonb         DEFAULT '[]'::jsonb,
+                "created_at"           timestamp     NOT NULL DEFAULT now(),
+                "updated_at"           timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "analytics_events" (
+                "id"               serial        PRIMARY KEY,
+                "user_id"          integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+                "organization_id"  integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "event"            varchar(100)  NOT NULL,
+                "category"         varchar(50)   NOT NULL,
+                "properties"       jsonb         DEFAULT '{}'::jsonb,
+                "session_id"       varchar(64),
+                "created_at"       timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "user_activity_summary" (
+                "user_id"           integer       PRIMARY KEY REFERENCES "users" ("id") ON DELETE CASCADE,
+                "total_sessions"    integer       DEFAULT 0,
+                "total_events"      integer       DEFAULT 0,
+                "last_active_at"    timestamp,
+                "feature_adoption"  jsonb         DEFAULT '{}'::jsonb,
+                "activation_score"  integer       DEFAULT 0,
+                "health_score"      integer       DEFAULT 0,
+                "updated_at"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "email_log" (
+                "id"               serial        PRIMARY KEY,
+                "user_id"          integer       REFERENCES "users" ("id") ON DELETE SET NULL,
+                "organization_id"  integer       REFERENCES "organizations" ("id") ON DELETE SET NULL,
+                "template"         varchar(100)  NOT NULL,
+                "recipient"        varchar(320)  NOT NULL,
+                "subject"          varchar(500),
+                "status"           varchar(20)   DEFAULT 'queued' NOT NULL,
+                "sent_at"          timestamp,
+                "opened_at"        timestamp,
+                "clicked_at"       timestamp,
+                "error_message"    text,
+                "created_at"       timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "notifications" (
+                "id"          serial        PRIMARY KEY,
+                "user_id"     integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+                "type"        varchar(50)   NOT NULL,
+                "title"       varchar(255)  NOT NULL,
+                "body"        text,
+                "action_url"  varchar(500),
+                "is_read"     boolean       DEFAULT false,
+                "read_at"     timestamp,
+                "created_at"  timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            DO $$ BEGIN
+                CREATE TYPE "knowledgeGraphNodeKind" AS ENUM (
+                    'region','framework','standard','edition','agent','regulator',
+                    'country','control','threat','vendor','certification','policy',
+                    'technology','data_type','industry','risk_scenario'
+                );
+            EXCEPTION WHEN duplicate_object THEN NULL;
+            END $$;
+        `);
+    await db.execute(sql5`
+            DO $$ BEGIN
+                CREATE TYPE "knowledgeGraphEdgeRelation" AS ENUM (
+                    'contains','activates','supports','maps_to','requires','conflicts',
+                    'depends_on','governs','references','impacts','mitigates',
+                    'translates_to','equivalent_to','cross_border_to'
+                );
+            EXCEPTION WHEN duplicate_object THEN NULL;
+            END $$;
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "knowledgeGraphNodes" (
+                "id"               serial        PRIMARY KEY,
+                "nodeId"           varchar(120)  NOT NULL UNIQUE,
+                "label"            varchar(255)  NOT NULL,
+                "kind"             varchar(50)   NOT NULL,
+                "description"      text,
+                "region"           varchar(120),
+                "jurisdiction"     varchar(120),
+                "metadata"         text,
+                "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "isCustom"         integer       DEFAULT 0 NOT NULL,
+                "createdAt"        timestamp     NOT NULL DEFAULT now(),
+                "updatedAt"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "knowledgeGraphEdges" (
+                "id"               serial        PRIMARY KEY,
+                "sourceNodeId"     varchar(120)  NOT NULL,
+                "targetNodeId"     varchar(120)  NOT NULL,
+                "relation"         varchar(60)   NOT NULL,
+                "weight"           integer       DEFAULT 1 NOT NULL,
+                "metadata"         text,
+                "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "createdAt"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "regulatoryChanges" (
+                "id"               serial        PRIMARY KEY,
+                "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE SET NULL,
+                "frameworkCode"    varchar(50)   NOT NULL,
+                "title"            text          NOT NULL,
+                "description"      text          NOT NULL,
+                "changeType"       varchar(50)   NOT NULL,
+                "jurisdiction"     text          NOT NULL,
+                "source"           text          NOT NULL,
+                "effectiveDate"    timestamp     NOT NULL,
+                "publicationDate"  timestamp     NOT NULL,
+                "status"           varchar(50)   NOT NULL DEFAULT 'pending',
+                "impact"           text          NOT NULL,
+                "url"              varchar(1024),
+                "createdAt"        timestamp     NOT NULL DEFAULT now(),
+                "updatedAt"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "complianceSimulations" (
+                "id"                   serial        PRIMARY KEY,
+                "organizationId"       integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "name"                 text          NOT NULL,
+                "description"          text,
+                "simulationType"       varchar(50)   NOT NULL,
+                "jurisdiction"         text          NOT NULL,
+                "frameworks"           text          NOT NULL,
+                "maturityScores"       text          NOT NULL,
+                "gapCounts"            text          NOT NULL,
+                "totalGaps"            integer       DEFAULT 0 NOT NULL,
+                "costEstimateLow"      integer,
+                "costEstimateHigh"     integer,
+                "costEstimateCurrency" text          DEFAULT 'USD' NOT NULL,
+                "riskLevel"            varchar(20)   DEFAULT 'medium' NOT NULL,
+                "status"               varchar(20)   DEFAULT 'completed' NOT NULL,
+                "summary"              text,
+                "createdByUserId"      integer       REFERENCES "localUsers" ("id") ON DELETE SET NULL,
+                "createdAt"            timestamp     NOT NULL DEFAULT now(),
+                "updatedAt"            timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql5`
+            CREATE TABLE IF NOT EXISTS "aiAgentRuns" (
+                "id"               serial        PRIMARY KEY,
+                "organizationId"   integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "agentCode"        varchar(120)  NOT NULL,
+                "agentName"        varchar(255)  NOT NULL,
+                "triggerType"      varchar(64)   DEFAULT 'manual' NOT NULL,
+                "inputPayload"     text,
+                "outputPayload"    text,
+                "status"           varchar(20)   DEFAULT 'queued' NOT NULL,
+                "startedAt"        timestamp,
+                "completedAt"      timestamp,
+                "errorMessage"     text,
+                "durationMs"       integer,
+                "createdByUserId"  integer       REFERENCES "localUsers" ("id") ON DELETE SET NULL,
+                "createdAt"        timestamp     NOT NULL DEFAULT now(),
+                "updatedAt"        timestamp     NOT NULL DEFAULT now()
+            )
+        `);
+    const driftExec = async (label, stmt) => {
+      try {
+        await db.execute(sql5.raw(stmt));
+        if (!ENV.isProduction) console.info(`[Migrate] Drift ok: ${label}`);
+      } catch (err) {
+        console.warn(`[Migrate] Drift repair skipped (${label}):`, err.message);
+      }
+    };
+    const driftEnums = {
+      plan: ["free_trial", "starter", "professional", "enterprise"],
+      paidPlan: ["starter", "professional", "enterprise"],
+      billingInterval: ["monthly", "quarterly", "biannual", "annual"],
+      subscriptionStatus: [
+        "trialing",
+        "active",
+        "past_due",
+        "canceled",
+        "incomplete",
+        "paused",
+      ],
+      billingEventStatus: ["success", "failed", "pending", "refunded"],
+      orgMemberRole: ["owner", "admin", "compliance_officer", "analyst"],
+      orgMemberStatus: ["active", "invited", "suspended"],
+    };
+    for (const [typeName, values] of Object.entries(driftEnums)) {
+      await driftExec(
+        `create enum ${typeName}`,
+        `DO $$ BEGIN
+           CREATE TYPE "${typeName}" AS ENUM (${values.map(v => `'${v}'`).join(",")});
+         EXCEPTION WHEN duplicate_object THEN NULL;
+         END $$;`
+      );
+      for (const v of values) {
+        await driftExec(
+          `enum ${typeName}.${v}`,
+          `ALTER TYPE "${typeName}" ADD VALUE IF NOT EXISTS '${v}'`
+        );
+      }
+    }
+    const driftColumns = [
+      // organizations — billing/trial/stripe columns
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`,
+      ],
+      ["organizations", `ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`,
+      ],
+      ["organizations", `ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`],
+      ["organizations", `ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`,
+      ],
+      [
+        "organizations",
+        `ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`,
+      ],
+      ["organizations", `ADD COLUMN IF NOT EXISTS "metadata" text`],
+      // auditLogs — local-user actor columns
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "localUserId" integer`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "organizationId" integer`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
+      [
+        "auditLogs",
+        `ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`,
+      ],
+      [
+        "auditLogs",
+        `ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`,
+      ],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "entityId" integer`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
+      [
+        "auditLogs",
+        `ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`,
+      ],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "payload" text`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
+      ["auditLogs", `ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
+      // subscriptions — Stripe sync columns
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`,
+      ],
+      ["subscriptions", `ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`,
+      ],
+      [
+        "subscriptions",
+        `ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`,
+      ],
+      ["subscriptions", `ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
+      ["subscriptions", `ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`],
+      ["subscriptions", `ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
+      // billingEvents — Stripe event log columns
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`],
+      [
+        "billingEvents",
+        `ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`,
+      ],
+      [
+        "billingEvents",
+        `ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`,
+      ],
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "amountCents" integer`],
+      [
+        "billingEvents",
+        `ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`,
+      ],
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "description" text`],
+      ["billingEvents", `ADD COLUMN IF NOT EXISTS "rawPayload" text`],
+      // organizationMembers — local-user membership columns
+      ["organizationMembers", `ADD COLUMN IF NOT EXISTS "localUserId" integer`],
+      ["organizationMembers", `ADD COLUMN IF NOT EXISTS "userId" integer`],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`,
+      ],
+      [
+        "organizationMembers",
+        `ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`,
+      ],
+    ];
+    for (const [table, clause] of driftColumns) {
+      await driftExec(table, `ALTER TABLE "${table}" ${clause}`);
+    }
+    await driftExec(
+      "subscriptions unique stripeSubscriptionId",
+      `CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique"
+       ON "subscriptions" ("stripeSubscriptionId")`
+    );
+    await driftExec(
+      "billingEvents unique stripeEventId",
+      `CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique"
+       ON "billingEvents" ("stripeEventId")`
+    );
     await seedComplianceFrameworks(db);
     migrationApplied = true;
     if (!ENV.isProduction) {
@@ -31214,12 +36317,14 @@ function getRedis() {
   }
 }
 var _memStore = /* @__PURE__ */ new Map();
-setInterval(() => {
+var _pruneInterval = null;
+_pruneInterval = setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of _memStore) {
     if (now > entry.resetAt) _memStore.delete(key);
   }
-}, 5 * 6e4).unref();
+}, 5 * 6e4);
+_pruneInterval.unref();
 async function checkRateLimit(key, limit, windowMs) {
   const windowIndex = Math.floor(Date.now() / windowMs);
   const windowResetMs = (windowIndex + 1) * windowMs;
@@ -31268,6 +36373,10 @@ function getRateLimiterStats() {
   };
 }
 async function closeRateLimiter() {
+  if (_pruneInterval) {
+    clearInterval(_pruneInterval);
+    _pruneInterval = null;
+  }
   if (_redis) {
     await _redis.quit();
     _redis = null;
@@ -31326,19 +36435,6 @@ function normalizePath(pathname) {
   const [withoutQuery] = pathname.split(/[?#]/, 1);
   const normalized = withoutQuery.trim().toLowerCase();
   return normalized || "/";
-}
-function shouldBypassApiRateLimit(pathname) {
-  const normalized = normalizePath(pathname);
-  return (
-    normalized === "/api/health" ||
-    normalized === "/api/healthz" ||
-    normalized === "/api/readiness" ||
-    normalized === "/api/readyz" ||
-    normalized === "/health" ||
-    normalized === "/healthz" ||
-    normalized === "/readiness" ||
-    normalized === "/readyz"
-  );
 }
 function shouldNoIndex(pathname) {
   const normalized = normalizePath(pathname);
@@ -31416,7 +36512,7 @@ function parseCspReport(body) {
   if (!report || typeof report !== "object") return {};
   return report;
 }
-function getClientIp3(req) {
+function getClientIp4(req) {
   const cfConnectingIp = req.headers["cf-connecting-ip"];
   if (typeof cfConnectingIp === "string" && cfConnectingIp.trim()) {
     return cfConnectingIp.trim();
@@ -31448,7 +36544,7 @@ import { SignJWT as SignJWT3, jwtVerify as jwtVerify3 } from "jose";
 import { nanoid } from "nanoid";
 import { parse as parseCookieHeader4 } from "cookie";
 init_env();
-import { sql as sql5 } from "drizzle-orm";
+import { sql as sql6 } from "drizzle-orm";
 var ADMIN_SECRET = ENV.yallaAdminSecret;
 var ADMIN_USERNAME = ENV.yallaAdminUsername;
 var ADMIN_PASSWORD_HASH = ENV.yallaAdminPasswordHash;
@@ -31484,7 +36580,7 @@ var usedOwnerLinkNonces = /* @__PURE__ */ new Map();
 var endpointRateMap = /* @__PURE__ */ new Map();
 var ENDPOINT_WINDOW_MS = 5 * 60 * 1e3;
 var ENDPOINT_RATE_MAX = 300;
-function getClientIp4(req) {
+function getClientIp5(req) {
   const hdr = req.headers["x-forwarded-for"];
   if (typeof hdr === "string") {
     const parts = hdr.split(",");
@@ -31533,9 +36629,9 @@ async function auditLog(sessionId, adminUsername, action, ip, target, payload) {
     const db = await getDb();
     if (!db) return;
     const payloadStr = payload ? JSON.stringify(payload) : null;
-    await db.execute(sql5`
+    await db.execute(sql6`
             INSERT INTO yallaAdminAuditLogs (sessionId, adminUsername, action, target, ipAddress, payload)
-            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql5`CAST(${payloadStr} AS JSON)` : null})
+            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql6`CAST(${payloadStr} AS JSON)` : null})
         `);
   } catch {}
 }
@@ -31634,7 +36730,7 @@ async function hasUsedOwnerLinkNonce(nonce) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    const linkResult = await db.execute(sql5`
+    const linkResult = await db.execute(sql6`
             SELECT id FROM yallaAdminAccessLinkNonces
             WHERE nonceHash = ${nonceHash}
             LIMIT 1
@@ -31654,9 +36750,9 @@ async function consumeOwnerLinkNonce(req, nonce, expiresAt, redirectTarget) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    await db.execute(sql5`
+    await db.execute(sql6`
             INSERT INTO yallaAdminAccessLinkNonces (nonceHash, redirectTarget, expiresAt, consumedByIp)
-            VALUES (${nonceHash}, ${redirectTarget}, FROM_UNIXTIME(${expiresAt}), ${getClientIp4(req)})
+            VALUES (${nonceHash}, ${redirectTarget}, FROM_UNIXTIME(${expiresAt}), ${getClientIp5(req)})
         `);
   } catch {
     consumeOwnerLinkNonceInMemory(nonce, expiresAt);
@@ -31702,6 +36798,7 @@ function tokenGate(req, res, next) {
   if (
     req.path === "/bootstrap" ||
     req.path === "/login" ||
+    req.path === "/react-login" ||
     req.path === "/me"
   ) {
     next();
@@ -31727,7 +36824,7 @@ function ipAllowlist(req, res, next) {
     next();
     return;
   }
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   const allowed = IP_ALLOWLIST.some(
     entry => ip === entry || ip.startsWith(entry.split("/")[0])
   );
@@ -31760,7 +36857,7 @@ function ownerPortalHeaders(_req, res, next) {
   next();
 }
 function adminEndpointRateLimit(req, res, next) {
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   const now = Date.now();
   const entry = endpointRateMap.get(ip);
   if (!entry || now - entry.windowStart > ENDPOINT_WINDOW_MS) {
@@ -31795,6 +36892,7 @@ async function requireSession(req, res, next) {
   if (
     req.path === "/bootstrap" ||
     req.path === "/login" ||
+    req.path === "/react-login" ||
     req.path === "/me"
   ) {
     next();
@@ -31813,7 +36911,7 @@ async function requireSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql5`
+      const sessionResult = await db.execute(sql6`
                 SELECT isRevoked FROM yallaAdminSessions
                 WHERE id = ${parsed.sessionId} AND expiresAt > NOW()
                 LIMIT 1
@@ -31831,7 +36929,7 @@ async function requireSession(req, res, next) {
   next();
 }
 async function handleBootstrap(req, res) {
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   const token = getAccessToken(req);
   const redirectTarget = resolveRedirectTarget(req);
   const mode =
@@ -31889,7 +36987,7 @@ async function handleBootstrap(req, res) {
 }
 async function handleLogin(req, res) {
   const { username, password } = req.body ?? {};
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   if (!hasLinkGate(req)) {
     await auditLog(
       null,
@@ -31945,7 +37043,7 @@ async function handleLogin(req, res) {
   try {
     const db = await getDb();
     if (db) {
-      await db.execute(sql5`
+      await db.execute(sql6`
                 INSERT INTO yallaAdminSessions (id, adminUsername, ipAddress, userAgent, expiresAt)
                 VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
             `);
@@ -31964,14 +37062,78 @@ async function handleLogin(req, res) {
   setGateCookie(req, res);
   res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
 }
+async function handleReactLogin(req, res) {
+  const { username, password } = req.body ?? {};
+  const ip = getClientIp5(req);
+  if (typeof username !== "string" || typeof password !== "string") {
+    res.status(400).json({ error: "Username and password are required." });
+    return;
+  }
+  if (username.length > 128 || password.length > 256) {
+    res.status(400).json({ error: "Invalid credentials format." });
+    return;
+  }
+  const lockState = loginAttempts.get(ip);
+  if (lockState && lockState.lockedUntil > Date.now()) {
+    const remainingMs = lockState.lockedUntil - Date.now();
+    const retryAfterSec = Math.ceil(remainingMs / 1e3);
+    res.setHeader("Retry-After", String(retryAfterSec));
+    res.status(429).json({
+      error: `Too many failed attempts. Locked for ${Math.ceil(remainingMs / 6e4)} more minute(s).`,
+      retryAfterSec,
+    });
+    return;
+  }
+  const usernameOk = username === ADMIN_USERNAME;
+  let passwordOk = false;
+  if (ADMIN_PASSWORD_HASH) {
+    passwordOk = await bcrypt2.compare(password, ADMIN_PASSWORD_HASH);
+  } else if (ENV.isDevelopment) {
+    const devPassword = process.env["YALLA_ADMIN_DEV_PASSWORD"] || "";
+    passwordOk = devPassword.length > 0 && password === devPassword;
+  }
+  if (!usernameOk || !passwordOk) {
+    const current = loginAttempts.get(ip) ?? { count: 0, lockedUntil: 0 };
+    const newCount = current.count + 1;
+    const lockedUntil = newCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
+    loginAttempts.set(ip, { count: newCount, lockedUntil });
+    await auditLog(null, username, "login.failed", ip);
+    res.status(401).json({ error: "Invalid credentials." });
+    return;
+  }
+  loginAttempts.delete(ip);
+  const sessionId = nanoid(32);
+  const expiresAt = new Date(Date.now() + SESSION_TTL_H * 3600 * 1e3);
+  const token = await signSession(sessionId, ADMIN_USERNAME);
+  try {
+    const db = await getDb();
+    if (db) {
+      await db.execute(sql6`
+                INSERT INTO yallaAdminSessions (id, adminUsername, ipAddress, userAgent, expiresAt)
+                VALUES ($${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
+            `);
+    }
+  } catch {
+    logger.warn(
+      "[YallaAdmin] Failed to persist session \u2014 login proceeds without DB"
+    );
+  }
+  await auditLog(sessionId, ADMIN_USERNAME, "login.success", ip);
+  broadcastSSE("admin_login", {
+    ip,
+    ts: /* @__PURE__ */ new Date().toISOString(),
+  });
+  res.cookie(COOKIE_NAME2, token, cookieOptions2(req));
+  res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
+}
 async function handleLogout(req, res) {
   const session = req.adminSession;
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   if (session) {
     try {
       const db = await getDb();
       if (db) {
-        await db.execute(sql5`
+        await db.execute(sql6`
                     UPDATE yallaAdminSessions SET isRevoked = 1 WHERE id = ${session.sessionId}
                 `);
       }
@@ -31998,7 +37160,7 @@ async function handleMe(req, res) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql5`
+      const sessionResult = await db.execute(sql6`
                 SELECT isRevoked FROM yallaAdminSessions
                 WHERE id = ${session.sessionId} AND expiresAt > NOW()
                 LIMIT 1
@@ -32025,39 +37187,39 @@ async function handleOverview(_req, res) {
       return;
     }
     const usersResult = await db.execute(
-      sql5`SELECT COUNT(*) as total FROM localUsers`
+      sql6`SELECT COUNT(*) as total FROM localUsers`
     );
     const usersRow = usersResult.rows;
     const orgsResult = await db.execute(
-      sql5`SELECT COUNT(*) as total FROM organizations`
+      sql6`SELECT COUNT(*) as total FROM organizations`
     );
     const orgsRow = orgsResult.rows;
-    const activeSessionsResult = await db.execute(sql5`
+    const activeSessionsResult = await db.execute(sql6`
             SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()
         `);
     const activeSessionsRow = activeSessionsResult.rows;
-    const todayLoginsResult = await db.execute(sql5`
+    const todayLoginsResult = await db.execute(sql6`
             SELECT COUNT(*) as total FROM auditLogs
             WHERE action = 'auth.login' AND createdAt >= CURDATE()
         `);
     const todayLoginsRow = todayLoginsResult.rows;
-    const serviceRequestsResult = await db.execute(sql5`
+    const serviceRequestsResult = await db.execute(sql6`
             SELECT COUNT(*) as total FROM serviceRequests WHERE status NOT IN ('completed', 'cancelled')
         `);
     const serviceRequestsRow = serviceRequestsResult.rows;
     const assetsResult = await db.execute(
-      sql5`SELECT COUNT(*) as total FROM assetInventory`
+      sql6`SELECT COUNT(*) as total FROM assetInventory`
     );
     const assetsRow = assetsResult.rows;
-    const todaySignupsResult = await db.execute(sql5`
+    const todaySignupsResult = await db.execute(sql6`
             SELECT COUNT(*) as total FROM localUsers WHERE DATE(createdAt) = CURDATE()
         `);
     const todaySignupsRow = todaySignupsResult.rows;
-    const newOrgsResult = await db.execute(sql5`
+    const newOrgsResult = await db.execute(sql6`
             SELECT COUNT(*) as total FROM organizations WHERE DATE(createdAt) = CURDATE()
         `);
     const newOrgsRow = newOrgsResult.rows;
-    const revenueResult = await db.execute(sql5`
+    const revenueResult = await db.execute(sql6`
             SELECT COUNT(*) as total FROM organizations WHERE plan IN ('professional','enterprise') AND isActive = 1
         `);
     const revenueRow = revenueResult.rows;
@@ -32085,7 +37247,7 @@ async function handleUsers(req, res) {
     }
     const limit = Math.min(parseInt(req.query.limit ?? "50", 10) || 50, 200);
     const offset = parseInt(req.query.offset ?? "0", 10) || 0;
-    const usersDbResult = await db.execute(sql5`
+    const usersDbResult = await db.execute(sql6`
             SELECT
                 u.id,
                 u.username,
@@ -32119,10 +37281,10 @@ async function handleSystem(_req, res) {
     let tableCount = 0;
     if (db) {
       try {
-        const versionResult = await db.execute(sql5`SELECT VERSION() as v`);
+        const versionResult = await db.execute(sql6`SELECT VERSION() as v`);
         const vRow = versionResult.rows;
         dbVersion = vRow?.[0]?.v ?? "";
-        const tableResult = await db.execute(sql5`
+        const tableResult = await db.execute(sql6`
                     SELECT COUNT(*) as c FROM information_schema.TABLES
                     WHERE TABLE_SCHEMA = DATABASE()
                 `);
@@ -32170,8 +37332,8 @@ async function handleAudit(req, res) {
     const action = req.query.action;
     const auditResult = await db.execute(
       action
-        ? sql5`SELECT * FROM yallaAdminAuditLogs WHERE action = ${action} ORDER BY createdAt DESC LIMIT ${limit}`
-        : sql5`SELECT * FROM yallaAdminAuditLogs ORDER BY createdAt DESC LIMIT ${limit}`
+        ? sql6`SELECT * FROM yallaAdminAuditLogs WHERE action = ${action} ORDER BY createdAt DESC LIMIT ${limit}`
+        : sql6`SELECT * FROM yallaAdminAuditLogs ORDER BY createdAt DESC LIMIT ${limit}`
     );
     const rows = auditResult.rows;
     res.json(rows ?? []);
@@ -32190,8 +37352,8 @@ async function handlePlatformAudit(req, res) {
     const category = req.query.category;
     const platformAuditResult = await db.execute(
       category
-        ? sql5`SELECT * FROM auditLogs WHERE category = ${category} ORDER BY createdAt DESC LIMIT ${limit}`
-        : sql5`SELECT * FROM auditLogs ORDER BY createdAt DESC LIMIT ${limit}`
+        ? sql6`SELECT * FROM auditLogs WHERE category = ${category} ORDER BY createdAt DESC LIMIT ${limit}`
+        : sql6`SELECT * FROM auditLogs ORDER BY createdAt DESC LIMIT ${limit}`
     );
     const rows = platformAuditResult.rows;
     res.json(rows ?? []);
@@ -32211,7 +37373,7 @@ async function handleInteractions(req, res) {
     const action = req.query.action?.trim();
     const interactionResult = await db.execute(
       context && action
-        ? sql5`
+        ? sql6`
                     SELECT
                         l.id,
                         l.context,
@@ -32235,7 +37397,7 @@ async function handleInteractions(req, res) {
                     LIMIT ${limit}
                 `
         : context
-          ? sql5`
+          ? sql6`
                         SELECT
                             l.id,
                             l.context,
@@ -32259,7 +37421,7 @@ async function handleInteractions(req, res) {
                         LIMIT ${limit}
                     `
           : action
-            ? sql5`
+            ? sql6`
                             SELECT
                                 l.id,
                                 l.context,
@@ -32282,7 +37444,7 @@ async function handleInteractions(req, res) {
                             ORDER BY l.createdAt DESC
                             LIMIT ${limit}
                         `
-            : sql5`
+            : sql6`
                             SELECT
                                 l.id,
                                 l.context,
@@ -32321,7 +37483,7 @@ async function handleIntake(req, res) {
     ]);
     let serviceRequests2 = [];
     if (db) {
-      const srResult = await db.execute(sql5`
+      const srResult = await db.execute(sql6`
                 SELECT
                     sr.id,
                     sr.serviceType,
@@ -32368,13 +37530,13 @@ async function handleOnboarding(req, res) {
     }
     const limit = Math.min(parseInt(req.query.limit ?? "50", 10) || 50, 200);
     const [countsResult, recentResult] = await Promise.all([
-      db.execute(sql5`
+      db.execute(sql6`
                 SELECT stage, COUNT(*) as total
                 FROM userOnboarding
                 GROUP BY stage
                 ORDER BY total DESC
             `),
-      db.execute(sql5`
+      db.execute(sql6`
                 SELECT
                     o.id,
                     o.stage,
@@ -32407,7 +37569,7 @@ async function handleValidationFailures(req, res) {
       return;
     }
     const limit = Math.min(parseInt(req.query.limit ?? "100", 10) || 100, 500);
-    const validationResult = await db.execute(sql5`
+    const validationResult = await db.execute(sql6`
             SELECT
                 id,
                 category,
@@ -32439,7 +37601,7 @@ async function handleSubscriptions(req, res) {
     }
     const limit = Math.min(parseInt(req.query.limit ?? "100", 10) || 100, 500);
     const [subsResult, eventsResult, summaryResult] = await Promise.all([
-      db.execute(sql5`
+      db.execute(sql6`
                 SELECT
                     s.id,
                     s.plan,
@@ -32462,7 +37624,7 @@ async function handleSubscriptions(req, res) {
                 ORDER BY s.updatedAt DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql5`
+      db.execute(sql6`
                 SELECT
                     be.id,
                     be.eventType,
@@ -32477,7 +37639,7 @@ async function handleSubscriptions(req, res) {
                 ORDER BY be.createdAt DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql5`
+      db.execute(sql6`
                 SELECT
                     plan,
                     status,
@@ -32509,7 +37671,7 @@ async function handleSignups(req, res) {
       return;
     }
     const limit = Math.min(parseInt(req.query.limit ?? "50", 10) || 50, 200);
-    const signupsResult = await db.execute(sql5`
+    const signupsResult = await db.execute(sql6`
             SELECT
                 u.id,
                 u.username,
@@ -32541,7 +37703,7 @@ async function handleOrgs(req, res) {
       return;
     }
     const limit = Math.min(parseInt(req.query.limit ?? "100", 10) || 100, 500);
-    const orgsResult = await db.execute(sql5`
+    const orgsResult = await db.execute(sql6`
             SELECT
                 o.id,
                 o.name,
@@ -32580,13 +37742,13 @@ async function handleRealtime(_req, res) {
     }
     const [sessResult, actResult, newUsersResult] = await Promise.all([
       db.execute(
-        sql5`SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()`
+        sql6`SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()`
       ),
       db.execute(
-        sql5`SELECT COUNT(*) as total FROM auditLogs WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)`
+        sql6`SELECT COUNT(*) as total FROM auditLogs WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)`
       ),
       db.execute(
-        sql5`SELECT COUNT(*) as total FROM localUsers WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 60 MINUTE)`
+        sql6`SELECT COUNT(*) as total FROM localUsers WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 60 MINUTE)`
       ),
     ]);
     const sessRow = sessResult.rows;
@@ -32618,7 +37780,7 @@ async function handleUserDetail(req, res) {
     }
     const [userResult, sessionResult, auditResult, interactionResult] =
       await Promise.all([
-        db.execute(sql5`
+        db.execute(sql6`
                 SELECT u.id, u.username, u.email, u.role, u.status, u.isEmailVerified, u.isMfaEnabled,
                        u.createdAt, u.lastLoginAt, o.name AS organizationName, o.plan AS organizationPlan
                 FROM localUsers u
@@ -32626,17 +37788,17 @@ async function handleUserDetail(req, res) {
                 LEFT JOIN organizations o ON o.id = om.organizationId
                 WHERE u.id = ${userId} LIMIT 1
             `),
-        db.execute(sql5`
+        db.execute(sql6`
                 SELECT id, ipAddress, userAgent, createdAt, expiresAt
                 FROM localUserSessions WHERE userId = ${userId}
                 ORDER BY createdAt DESC LIMIT 20
             `),
-        db.execute(sql5`
+        db.execute(sql6`
                 SELECT category, action, outcome, createdAt
                 FROM auditLogs WHERE localUserId = ${userId}
                 ORDER BY createdAt DESC LIMIT 30
             `),
-        db.execute(sql5`
+        db.execute(sql6`
                 SELECT context, action, entityType, createdAt, durationMs
                 FROM userInteractionLogs WHERE localUserId = ${userId}
                 ORDER BY createdAt DESC LIMIT 30
@@ -32671,12 +37833,12 @@ async function handleOrgDetail(req, res) {
     }
     const [orgResult, membersResult, subscriptionResult, auditResult] =
       await Promise.all([
-        db.execute(sql5`
+        db.execute(sql6`
                 SELECT id, name, plan, status, isActive, trialEndsAt, createdAt, updatedAt,
                        contactEmail, billingEmail
                 FROM organizations WHERE id = ${orgId} LIMIT 1
             `),
-        db.execute(sql5`
+        db.execute(sql6`
                 SELECT om.role, u.id AS userId, u.username, u.email, u.status AS userStatus,
                        u.lastLoginAt, om.joinedAt
                 FROM organizationMembers om
@@ -32685,13 +37847,13 @@ async function handleOrgDetail(req, res) {
                 ORDER BY om.joinedAt ASC
                 LIMIT 50
             `),
-        db.execute(sql5`
+        db.execute(sql6`
                 SELECT id, plan, status, currentPeriodStart, currentPeriodEnd, cancelAtPeriodEnd,
                        createdAt, updatedAt
                 FROM subscriptions WHERE organizationId = ${orgId}
                 ORDER BY createdAt DESC LIMIT 1
             `),
-        db.execute(sql5`
+        db.execute(sql6`
                 SELECT category, action, outcome, createdAt
                 FROM auditLogs WHERE organizationId = ${orgId}
                 ORDER BY createdAt DESC LIMIT 30
@@ -32714,7 +37876,7 @@ async function handleOrgDetail(req, res) {
 }
 async function handleSuspendUser(req, res) {
   const session = req.adminSession;
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   const userId = parseInt(req.params.id ?? "", 10);
   if (!userId) {
     res.status(400).json({ error: "Invalid user id" });
@@ -32732,7 +37894,7 @@ async function handleSuspendUser(req, res) {
       return;
     }
     const userResult = await db.execute(
-      sql5`SELECT id, email, status FROM localUsers WHERE id = ${userId} LIMIT 1`
+      sql6`SELECT id, email, status FROM localUsers WHERE id = ${userId} LIMIT 1`
     );
     const rows = userResult.rows;
     const user = rows[0];
@@ -32742,7 +37904,7 @@ async function handleSuspendUser(req, res) {
     }
     const newStatus = suspend ? "suspended" : "active";
     await db.execute(
-      sql5`UPDATE localUsers SET status = ${newStatus}, updatedAt = NOW() WHERE id = ${userId}`
+      sql6`UPDATE localUsers SET status = ${newStatus}, updatedAt = NOW() WHERE id = ${userId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -32765,7 +37927,7 @@ async function handleSuspendUser(req, res) {
 }
 async function handleRevokeUserSessions(req, res) {
   const session = req.adminSession;
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   const userId = parseInt(req.params.id ?? "", 10);
   if (!userId) {
     res.status(400).json({ error: "Invalid user id" });
@@ -32778,7 +37940,7 @@ async function handleRevokeUserSessions(req, res) {
       return;
     }
     await db.execute(
-      sql5`DELETE FROM localUserSessions WHERE userId = ${userId}`
+      sql6`DELETE FROM localUserSessions WHERE userId = ${userId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -32799,7 +37961,7 @@ async function handleRevokeUserSessions(req, res) {
 }
 async function handleSuspendOrg(req, res) {
   const session = req.adminSession;
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   const orgId = parseInt(req.params.id ?? "", 10);
   if (!orgId) {
     res.status(400).json({ error: "Invalid org id" });
@@ -32817,7 +37979,7 @@ async function handleSuspendOrg(req, res) {
       return;
     }
     const orgCheckResult = await db.execute(
-      sql5`SELECT id, name, status FROM organizations WHERE id = ${orgId} LIMIT 1`
+      sql6`SELECT id, name, status FROM organizations WHERE id = ${orgId} LIMIT 1`
     );
     const rows = orgCheckResult.rows;
     const org = rows[0];
@@ -32827,7 +37989,7 @@ async function handleSuspendOrg(req, res) {
     }
     const newStatus = suspend ? "suspended" : "active";
     await db.execute(
-      sql5`UPDATE organizations SET status = ${newStatus}, updatedAt = NOW() WHERE id = ${orgId}`
+      sql6`UPDATE organizations SET status = ${newStatus}, updatedAt = NOW() WHERE id = ${orgId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -32850,7 +38012,7 @@ async function handleSuspendOrg(req, res) {
 }
 async function handleGenerateAccessLink(req, res) {
   const session = req.adminSession;
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   if (!ADMIN_SECRET) {
     res.status(400).json({ error: "YALLA_ADMIN_SECRET is not configured." });
     return;
@@ -32916,7 +38078,7 @@ async function handleGenerateAccessLink(req, res) {
 }
 async function handleExportCsv(req, res) {
   const session = req.adminSession;
-  const ip = getClientIp4(req);
+  const ip = getClientIp5(req);
   const type = req.query.type ?? "users";
   await auditLog(
     session?.sessionId ?? null,
@@ -32935,7 +38097,7 @@ async function handleExportCsv(req, res) {
     let headers;
     let filename;
     if (type === "users") {
-      const userExportResult = await db.execute(sql5`
+      const userExportResult = await db.execute(sql6`
                 SELECT id, username, email, role, isEmailVerified, isMfaEnabled, createdAt, lastLoginAt
                 FROM localUsers ORDER BY createdAt DESC LIMIT 10000
             `);
@@ -32945,7 +38107,7 @@ async function handleExportCsv(req, res) {
         "id,username,email,role,isEmailVerified,isMfaEnabled,createdAt,lastLoginAt";
       filename = "users-export.csv";
     } else if (type === "orgs") {
-      const orgExportResult = await db.execute(sql5`
+      const orgExportResult = await db.execute(sql6`
                 SELECT id, name, plan, isActive, trialEndsAt, createdAt
                 FROM organizations ORDER BY createdAt DESC LIMIT 10000
             `);
@@ -32954,7 +38116,7 @@ async function handleExportCsv(req, res) {
       headers = "id,name,plan,isActive,trialEndsAt,createdAt";
       filename = "orgs-export.csv";
     } else if (type === "subscriptions") {
-      const subExportResult = await db.execute(sql5`
+      const subExportResult = await db.execute(sql6`
                 SELECT s.id, s.plan, s.status, s.currentPeriodStart, s.currentPeriodEnd,
                        s.cancelAtPeriodEnd, o.name AS orgName, s.createdAt
                 FROM subscriptions s
@@ -32967,7 +38129,7 @@ async function handleExportCsv(req, res) {
         "id,plan,status,currentPeriodStart,currentPeriodEnd,cancelAtPeriodEnd,orgName,createdAt";
       filename = "subscriptions-export.csv";
     } else if (type === "audit") {
-      const auditExportResult = await db.execute(sql5`
+      const auditExportResult = await db.execute(sql6`
                 SELECT id, category, action, outcome, ipAddress, createdAt
                 FROM auditLogs ORDER BY createdAt DESC LIMIT 10000
             `);
@@ -33026,7 +38188,7 @@ function scheduleSessionCleanup() {
     try {
       const db = await getDb();
       if (!db) return;
-      await db.execute(sql5`
+      await db.execute(sql6`
                 DELETE FROM yallaAdminSessions
                 WHERE expiresAt < NOW()
                    OR (isRevoked = 1 AND lastSeenAt < DATE_SUB(NOW(), INTERVAL 7 DAY))
@@ -33048,6 +38210,7 @@ function createYallaAdminRouter() {
   router2.use(requireJsonContentType);
   router2.get("/bootstrap", (req, res) => void handleBootstrap(req, res));
   router2.post("/login", (req, res) => void handleLogin(req, res));
+  router2.post("/react-login", (req, res) => void handleReactLogin(req, res));
   router2.use(tokenGate);
   router2.use((req, res, next) => void requireSession(req, res, next));
   router2.post("/logout", (req, res) => void handleLogout(req, res));
@@ -33118,14 +38281,14 @@ import { Router } from "express";
 init_schema();
 init_db();
 import {
-  and as and32,
+  and as and33,
   count,
-  desc as desc20,
-  eq as eq43,
+  desc as desc24,
+  eq as eq48,
   gte as gte2,
   like as like2,
   or as or7,
-  sql as sql6,
+  sql as sql7,
 } from "drizzle-orm";
 async function getUnifiedUsers(options) {
   const db = await getDb();
@@ -33170,9 +38333,9 @@ async function getUnifiedUsers(options) {
     );
   }
   if (options.status) {
-    conditions.push(eq43(localUsers.status, options.status));
+    conditions.push(eq48(localUsers.status, options.status));
   }
-  const whereClause = conditions.length > 0 ? and32(...conditions) : void 0;
+  const whereClause = conditions.length > 0 ? and33(...conditions) : void 0;
   const [total] = await db
     .select({ count: count() })
     .from(localUsers)
@@ -33180,12 +38343,12 @@ async function getUnifiedUsers(options) {
   const rows = await db
     .select({
       id: localUsers.id,
-      source: sql6`'local'`.as("source"),
+      source: sql7`'local'`.as("source"),
       name: localUsers.name,
       email: localUsers.email,
       phoneNumber: localUsers.phoneNumber,
-      role: sql6`${localUsers.userType}`,
-      status: sql6`${localUsers.status}`,
+      role: sql7`${localUsers.userType}`,
+      status: sql7`${localUsers.status}`,
       companyName: localUsers.companyName,
       jobTitle: localUsers.jobTitle,
       industry: localUsers.industry,
@@ -33195,7 +38358,7 @@ async function getUnifiedUsers(options) {
     })
     .from(localUsers)
     .where(whereClause)
-    .orderBy(desc20(localUsers.createdAt))
+    .orderBy(desc24(localUsers.createdAt))
     .limit(options.limit ?? 50)
     .offset(options.offset ?? 0);
   const orgCounts = await db
@@ -33205,9 +38368,9 @@ async function getUnifiedUsers(options) {
     })
     .from(organizationMembers)
     .where(
-      and32(
-        sql6`${organizationMembers.localUserId} IS NOT NULL`,
-        eq43(organizationMembers.status, "active")
+      and33(
+        sql7`${organizationMembers.localUserId} IS NOT NULL`,
+        eq48(organizationMembers.status, "active")
       )
     )
     .groupBy(organizationMembers.localUserId);
@@ -33236,10 +38399,10 @@ async function getUserStats() {
   const [localCounts] = await db
     .select({
       total: count(),
-      active: sql6`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
-      suspended: sql6`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
-      pending: sql6`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
-      newThisMonth: sql6`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`,
+      active: sql7`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
+      suspended: sql7`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
+      pending: sql7`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
+      newThisMonth: sql7`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`,
     })
     .from(localUsers);
   const [oauthCounts] = await db.select({ total: count() }).from(users);
@@ -33271,7 +38434,7 @@ async function getUserDetail(userId) {
   const [user] = await db
     .select()
     .from(localUsers)
-    .where(eq43(localUsers.id, userId))
+    .where(eq48(localUsers.id, userId))
     .limit(1);
   if (!user) return null;
   const memberships = await db
@@ -33284,12 +38447,12 @@ async function getUserDetail(userId) {
     .from(organizationMembers)
     .innerJoin(
       organizations,
-      eq43(organizationMembers.organizationId, organizations.id)
+      eq48(organizationMembers.organizationId, organizations.id)
     )
     .where(
-      and32(
-        eq43(organizationMembers.localUserId, userId),
-        eq43(organizationMembers.status, "active")
+      and33(
+        eq48(organizationMembers.localUserId, userId),
+        eq48(organizationMembers.status, "active")
       )
     );
   const activity = await db
@@ -33300,8 +38463,8 @@ async function getUserDetail(userId) {
       createdAt: auditLogs.createdAt,
     })
     .from(auditLogs)
-    .where(eq43(auditLogs.localUserId, userId))
-    .orderBy(desc20(auditLogs.createdAt))
+    .where(eq48(auditLogs.localUserId, userId))
+    .orderBy(desc24(auditLogs.createdAt))
     .limit(50);
   return {
     id: user.id,
@@ -33331,7 +38494,7 @@ async function toggleUserSuspension(userId, suspend) {
       status: suspend ? "suspended" : "active",
       updatedAt: /* @__PURE__ */ new Date(),
     })
-    .where(eq43(localUsers.id, userId));
+    .where(eq48(localUsers.id, userId));
   return true;
 }
 async function updateUserRole(userId, newRole) {
@@ -33343,7 +38506,7 @@ async function updateUserRole(userId, newRole) {
       userType: newRole,
       updatedAt: /* @__PURE__ */ new Date(),
     })
-    .where(eq43(localUsers.id, userId));
+    .where(eq48(localUsers.id, userId));
   return true;
 }
 async function deleteUser(userId) {
@@ -33351,12 +38514,12 @@ async function deleteUser(userId) {
   if (!db) return false;
   await db
     .delete(organizationMembers)
-    .where(eq43(organizationMembers.localUserId, userId));
-  await db.delete(auditLogs).where(eq43(auditLogs.localUserId, userId));
+    .where(eq48(organizationMembers.localUserId, userId));
+  await db.delete(auditLogs).where(eq48(auditLogs.localUserId, userId));
   await db
     .delete(userOnboarding)
-    .where(eq43(userOnboarding.localUserId, userId));
-  await db.delete(localUsers).where(eq43(localUsers.id, userId));
+    .where(eq48(userOnboarding.localUserId, userId));
+  await db.delete(localUsers).where(eq48(localUsers.id, userId));
   return true;
 }
 async function getRecentActivity(limit = 100) {
@@ -33375,8 +38538,8 @@ async function getRecentActivity(limit = 100) {
       createdAt: auditLogs.createdAt,
     })
     .from(auditLogs)
-    .leftJoin(localUsers, eq43(auditLogs.localUserId, localUsers.id))
-    .orderBy(desc20(auditLogs.createdAt))
+    .leftJoin(localUsers, eq48(auditLogs.localUserId, localUsers.id))
+    .orderBy(desc24(auditLogs.createdAt))
     .limit(limit);
 }
 async function getMonthlyRegistrations(months = 12) {
@@ -33384,19 +38547,105 @@ async function getMonthlyRegistrations(months = 12) {
   if (!db) return [];
   const rows = await db
     .select({
-      month: sql6`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
+      month: sql7`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
       count: count(),
     })
     .from(localUsers)
     .where(
       gte2(
         localUsers.createdAt,
-        sql6`CURRENT_DATE - INTERVAL '${sql6.raw(String(months))} months'`
+        sql7`CURRENT_DATE - INTERVAL '${sql7.raw(String(months))} months'`
       )
     )
-    .groupBy(sql6`1`)
-    .orderBy(sql6`1`);
+    .groupBy(sql7`1`)
+    .orderBy(sql7`1`);
   return rows;
+}
+async function getSubscriptionData() {
+  const db = await getDb();
+  if (!db) return { subscriptions: [] };
+  const rows = await db
+    .select({
+      id: subscriptions.id,
+      plan: subscriptions.plan,
+      status: subscriptions.status,
+      billingInterval: subscriptions.billingInterval,
+      amountCents: subscriptions.amountCents,
+      currency: subscriptions.currency,
+      organizationName: organizations.name,
+      billingEmail: organizations.billingEmail,
+      currentPeriodEnd: subscriptions.currentPeriodEnd,
+      cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+      createdAt: subscriptions.createdAt,
+      updatedAt: subscriptions.updatedAt,
+    })
+    .from(subscriptions)
+    .innerJoin(
+      organizations,
+      eq48(subscriptions.organizationId, organizations.id)
+    )
+    .orderBy(desc24(subscriptions.updatedAt))
+    .limit(500);
+  return {
+    subscriptions: rows.map(r => ({
+      ...r,
+      createdAt: r.createdAt?.toISOString() || "",
+      updatedAt: r.updatedAt?.toISOString() || "",
+      currentPeriodEnd: r.currentPeriodEnd?.toISOString() || null,
+    })),
+  };
+}
+async function getOrganizationData() {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: organizations.id,
+      name: organizations.name,
+      plan: organizations.plan,
+      status: sql7`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'inactive' END`,
+      memberCount: sql7`COUNT(DISTINCT ${organizationMembers.id})`,
+      createdAt: organizations.createdAt,
+      lastActivity: sql7`MAX(${organizationMembers.createdAt})`,
+    })
+    .from(organizations)
+    .leftJoin(
+      organizationMembers,
+      eq48(organizations.id, organizationMembers.organizationId)
+    )
+    .groupBy(organizations.id)
+    .orderBy(desc24(organizations.createdAt))
+    .limit(500);
+  return rows.map(r => ({
+    ...r,
+    createdAt: r.createdAt?.toISOString() || "",
+    lastActivity: r.lastActivity,
+  }));
+}
+async function getSecurityEvents(limit = 200) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: auditLogs.id,
+      action: auditLogs.action,
+      category: auditLogs.category,
+      outcome: auditLogs.outcome,
+      ipAddress: auditLogs.ipHash,
+      createdAt: auditLogs.createdAt,
+      targetEntity: auditLogs.targetEntity,
+    })
+    .from(auditLogs)
+    .where(
+      or7(
+        eq48(auditLogs.category, "auth"),
+        eq48(auditLogs.outcome, "failure"),
+        eq48(auditLogs.outcome, "blocked")
+      )
+    )
+    .orderBy(desc24(auditLogs.createdAt))
+    .limit(limit);
+  return rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() || "" }));
 }
 
 // server/_core/admin-dashboard-router.ts
@@ -33555,6 +38804,34 @@ function createAdminDashboardRouter() {
       res.status(500).json({ error: "Failed to get recent activity" });
     }
   });
+  router2.get("/subscriptions", async (_req, res) => {
+    try {
+      const data = await getSubscriptionData();
+      res.json(data);
+    } catch (error) {
+      logger.error({ error }, "Failed to get subscription data");
+      res.status(500).json({ error: "Failed to get subscription data" });
+    }
+  });
+  router2.get("/organizations", async (_req, res) => {
+    try {
+      const data = await getOrganizationData();
+      res.json(data);
+    } catch (error) {
+      logger.error({ error }, "Failed to get organization data");
+      res.status(500).json({ error: "Failed to get organization data" });
+    }
+  });
+  router2.get("/security-events", async (req, res) => {
+    try {
+      const limit = req.query.limit ? Number(req.query.limit) : 200;
+      const events = await getSecurityEvents(limit);
+      res.json(events);
+    } catch (error) {
+      logger.error({ error }, "Failed to get security events");
+      res.status(500).json({ error: "Failed to get security events" });
+    }
+  });
   return router2;
 }
 
@@ -33570,15 +38847,35 @@ var AUTH_RATE_LIMIT_WINDOW_MS = 6e4;
 var AUTH_PROCEDURES = /* @__PURE__ */ new Set([
   "localAuth.login",
   "localAuth.register",
-  "localAuth.forgotPassword",
+  "localAuth.requestPasswordReset",
   "localAuth.resetPassword",
-  "localAuth.enableMfa",
+  "localAuth.sendOtp",
+  "localAuth.verifyOtp",
+  "localAuth.verifyTotp",
+  "localAuth.confirm2fa",
+  "localAuth.changePassword",
 ]);
 function getClientKey(req) {
-  return getClientIp3(req);
+  return getClientIp4(req);
+}
+var RATE_LIMIT_BYPASS_PATHS = /* @__PURE__ */ new Set([
+  "/api/health",
+  "/api/healthz",
+  "/api/readiness",
+  "/api/readyz",
+  "/health",
+  "/healthz",
+  "/readiness",
+  "/readyz",
+  "/api/webhooks/stripe",
+]);
+function shouldBypassRateLimit(req) {
+  if (!req.path.startsWith("/api/")) return true;
+  const normalized = req.path.toLowerCase().split("?")[0];
+  return RATE_LIMIT_BYPASS_PATHS.has(normalized);
 }
 function apiRateLimit(req, res, next) {
-  if (!req.path.startsWith("/api/") || shouldBypassApiRateLimit(req.path)) {
+  if (shouldBypassRateLimit(req)) {
     next();
     return;
   }
@@ -33601,7 +38898,9 @@ function apiRateLimit(req, res, next) {
       }
       next();
     })
-    .catch(next);
+    .catch(() => {
+      next();
+    });
 }
 function authRateLimit(req, res, next) {
   if (req.method !== "POST" || !req.path.startsWith("/api/trpc/")) {
@@ -33713,17 +39012,86 @@ async function createApp() {
     });
     next();
   });
+  app.use((req, _res, next) => {
+    const host = req.hostname || req.headers.host || "";
+    if (host.startsWith("docs.")) {
+      const raw = req.path || "/";
+      const rewritten = raw.startsWith("/docs") ? raw : `/docs${raw}`;
+      req.url = rewritten;
+    }
+    next();
+  });
   app.use(corsMiddleware);
   app.use(securityHeaders);
   app.use(authRateLimit);
   app.use(apiRateLimit);
   app.post(
     "/api/webhooks/stripe",
-    express3.raw({ type: "application/json" }),
+    express3.raw({ type: "application/json", limit: "5mb" }),
     (req, res) => void stripeWebhookHandler(req, res)
   );
-  app.use(express3.json({ limit: "2mb" }));
-  app.use(express3.urlencoded({ limit: "2mb", extended: true }));
+  app.post(
+    "/api/csp-report",
+    express3.raw({ type: "application/csp-report", limit: "64kb" }),
+    (req, res) => {
+      if (!req.body || req.body.length === 0) {
+        res.status(204).end();
+        return;
+      }
+      try {
+        const payload = JSON.parse(req.body.toString("utf-8"));
+        const report = parseCspReport(payload);
+        const isReportOnly = req.query.ro === "1";
+        if (report && Object.keys(report).length > 0) {
+          const blockedUri = report["blocked-uri"]
+            ? String(report["blocked-uri"])
+            : "unknown";
+          const violatedDirective = report["violated-directive"]
+            ? String(report["violated-directive"])
+            : "unknown";
+          const sourceFile = report["source-file"]
+            ? String(report["source-file"])
+            : "";
+          logger.warn(
+            {
+              category: "security",
+              cspReport: report,
+              reportOnly: isReportOnly,
+            },
+            `CSP violation: ${violatedDirective} blocked ${blockedUri}${sourceFile ? ` in ${sourceFile}` : ""}`
+          );
+        }
+      } catch {
+        logger.debug(
+          { category: "security" },
+          "CSP report payload was not valid JSON"
+        );
+      }
+      res.status(204).end();
+    }
+  );
+  const jsonParser = express3.json({ limit: "2mb" });
+  const urlencodedParser = express3.urlencoded({
+    limit: "2mb",
+    extended: true,
+  });
+  app.use((req, res, next) => {
+    if (typeof req.body === "object" && req.body !== null) {
+      return next();
+    }
+    const ct = req.headers["content-type"] ?? "";
+    if (ct.includes("application/json")) return jsonParser(req, res, next);
+    if (ct.includes("application/x-www-form-urlencoded")) {
+      return urlencodedParser(req, res, next);
+    }
+    return next();
+  });
+  app.use((err, _req, _res, next) => {
+    if (err instanceof Error && err.message === "stream is not readable") {
+      return next();
+    }
+    next(err);
+  });
   const sendHealth = (_req, res) => {
     res.json({
       ok: true,
@@ -33738,7 +39106,8 @@ async function createApp() {
       scaleProfile: {
         databasePoolSize: ENV.databasePoolSize,
         databasePoolStats: getDbPoolStats(),
-        redisConfigured: ENV.redisUrl.trim().length > 0,
+        redisConfigured:
+          typeof ENV.redisUrl === "string" && ENV.redisUrl.trim().length > 0,
         aiQueueMode: ENV.aiQueueMode,
       },
       rateLimiter: getRateLimiterStats(),
@@ -33760,22 +39129,6 @@ async function createApp() {
   app.get("/api/readiness", sendReadiness);
   app.get("/api/readyz", sendReadiness);
   registerOAuthRoutes(app);
-  app.post("/api/csp-report", (req, res) => {
-    const report = parseCspReport(req.body);
-    const isReportOnly = req.query.ro === "1";
-    if (report && Object.keys(report).length > 0) {
-      const blockedUri = String(report["blocked-uri"] ?? "unknown");
-      const violatedDirective = String(
-        report["violated-directive"] ?? "unknown"
-      );
-      const sourceFile = String(report["source-file"] ?? "");
-      logger.warn(
-        { category: "security", cspReport: report, reportOnly: isReportOnly },
-        `CSP violation: ${violatedDirective} blocked ${blockedUri}${sourceFile ? ` in ${sourceFile}` : ""}`
-      );
-    }
-    res.status(204).end();
-  });
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -33798,12 +39151,37 @@ async function createApp() {
   app.use("/api/yalla-admin", createYallaAdminRouter());
   app.use("/api/admin-dashboard", createAdminDashboardRouter());
   app.use(sentryErrorHandler());
+  app.use((err, _req, res, _next) => {
+    logger.error({ err }, "Unhandled Express error");
+    res.status(500).json({
+      error: ENV.isProduction
+        ? "Internal server error"
+        : err instanceof Error
+          ? err.message
+          : "Unknown error",
+    });
+  });
   return app;
 }
+var _stopInteractionRetention = null;
+var _stopTrialReminder = null;
+var _stopDeadlineAlerts = null;
+var _stopReportScheduler = null;
+var _stopOtpCleanup = null;
+var _cleanupAssessmentWs = null;
+var _httpServer = null;
 async function startServer() {
   const app = await createApp();
   const server = createServer(app);
-  void ensureMigrated();
+  _httpServer = server;
+  try {
+    await ensureMigrated();
+  } catch (err) {
+    console.warn(
+      "[Migrate] Migration failed, continuing with startup:",
+      err.message
+    );
+  }
   server.keepAliveTimeout = ENV.httpKeepAliveTimeoutMs;
   server.headersTimeout = Math.max(
     ENV.httpHeadersTimeoutMs,
@@ -33811,17 +39189,19 @@ async function startServer() {
   );
   server.requestTimeout = ENV.httpRequestTimeoutMs;
   server.maxRequestsPerSocket = 1e3;
-  const cleanupAssessmentWs = registerAssessmentWebSocketServer(server);
-  const stopInteractionRetention = startInteractionRetentionScheduler();
-  const stopTrialReminder = startTrialReminderScheduler();
-  const stopDeadlineAlerts = startDeadlineAlertScheduler();
-  const stopReportScheduler = startReportScheduler();
+  _cleanupAssessmentWs = registerAssessmentWebSocketServer(server);
+  _stopInteractionRetention = startInteractionRetentionScheduler();
+  _stopTrialReminder = startTrialReminderScheduler();
+  _stopDeadlineAlerts = startDeadlineAlertScheduler();
+  _stopReportScheduler = startReportScheduler();
+  _stopOtpCleanup = startOtpCleanupScheduler();
   server.on("close", () => {
-    cleanupAssessmentWs();
-    stopInteractionRetention();
-    stopTrialReminder();
-    stopDeadlineAlerts();
-    stopReportScheduler();
+    _cleanupAssessmentWs?.();
+    _stopInteractionRetention?.();
+    _stopTrialReminder?.();
+    _stopDeadlineAlerts?.();
+    _stopReportScheduler?.();
+    _stopOtpCleanup?.();
   });
   if (ENV.isDevelopment) {
     await setupVite(app, server);
@@ -33837,7 +39217,8 @@ async function startServer() {
       process.exit(1);
       return;
     }
-    throw error;
+    console.error("[Server] Fatal server error:", error);
+    shutdown("SERVER_ERROR");
   });
   server.listen(port, () => {
     console.info(`Server running on http://localhost:${port}/`);
@@ -33866,16 +39247,39 @@ var isMainModule =
 if (isMainModule) {
   startServer().catch(console.error);
 }
+var _shuttingDown = false;
 function shutdown(signal) {
+  if (_shuttingDown) {
+    console.warn(
+      "[Server] Shutdown already in progress \u2014 ignoring duplicate signal"
+    );
+    return;
+  }
+  _shuttingDown = true;
   console.info(`[Server] ${signal} received \u2014 shutting down gracefully`);
-  const forcedExit = setTimeout(() => {
+  let forcedExit = setTimeout(() => {
     console.warn("[Server] Forced shutdown after 10s timeout");
     process.exit(1);
   }, 1e4);
   forcedExit.unref();
+  if (_httpServer) {
+    _httpServer.close(() => {
+      console.info("[Server] HTTP server closed.");
+    });
+  }
+  _stopInteractionRetention?.();
+  _stopTrialReminder?.();
+  _stopDeadlineAlerts?.();
+  _stopReportScheduler?.();
+  _stopOtpCleanup?.();
+  _cleanupAssessmentWs?.();
   Promise.all([closeDbPool(), closeRateLimiter(), closeAssessmentQueue()])
     .then(() => {
       console.info("[Server] Resources released \u2014 exiting.");
+      if (forcedExit) {
+        clearTimeout(forcedExit);
+        forcedExit = null;
+      }
       process.exit(0);
     })
     .catch(err => {
@@ -33887,6 +39291,7 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("unhandledRejection", reason => {
   console.error("[Server] Unhandled rejection:", reason);
+  shutdown("UNHANDLED_REJECTION");
 });
 process.on("uncaughtException", err => {
   console.error("[Server] Uncaught exception:", err);
@@ -33999,18 +39404,18 @@ async function handler(req, res) {
       };
       if (dbClient) {
         try {
-          const { sql: sql7 } = await import("drizzle-orm");
+          const { sql: sql8 } = await import("drizzle-orm");
           const userCount = await dbClient.execute(
-            sql7`SELECT COUNT(*)::int as count FROM "localUsers"`
+            sql8`SELECT COUNT(*)::int as count FROM "localUsers"`
           );
           const orgCount = await dbClient.execute(
-            sql7`SELECT COUNT(*)::int as count FROM "organizations"`
+            sql8`SELECT COUNT(*)::int as count FROM "organizations"`
           );
           const fwCount = await dbClient.execute(
-            sql7`SELECT COUNT(*)::int as count FROM "frameworks"`
+            sql8`SELECT COUNT(*)::int as count FROM "frameworks"`
           );
           const vendorCount = await dbClient.execute(
-            sql7`SELECT COUNT(*)::int as count FROM "vendors"`
+            sql8`SELECT COUNT(*)::int as count FROM "vendors"`
           );
           stats.users = userCount.rows[0].count;
           stats.organizations = orgCount.rows[0].count;
@@ -34039,8 +39444,8 @@ async function handler(req, res) {
         res.status(200).json({ ok: false, error: "Database not connected" });
         return;
       }
-      const { sql: sql7 } = await import("drizzle-orm");
-      const tables = await db.execute(sql7`
+      const { sql: sql8 } = await import("drizzle-orm");
+      const tables = await db.execute(sql8`
         SELECT table_name FROM information_schema.tables
         WHERE table_schema = 'public'
         ORDER BY table_name
@@ -34084,11 +39489,11 @@ async function handler(req, res) {
         auditLogs: [],
         otpCodes: [],
       };
-      const { sql: sql7 } = await import("drizzle-orm");
+      const { sql: sql8 } = await import("drizzle-orm");
       for (const [table, cols] of Object.entries(expected)) {
         if (cols.length === 0) continue;
         const result = await db.execute(
-          sql7.raw(
+          sql8.raw(
             `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='${table}'`
           )
         );
@@ -34130,14 +39535,14 @@ async function handler(req, res) {
         )
       );
       const { complianceRelationships: complianceRelationships2 } = mod;
-      const { sql: sql7 } = await import("drizzle-orm");
+      const { sql: sql8 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql7`SELECT "id", "code" FROM "frameworks"`
+        sql8`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql7`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
+        sql8`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
       );
       const batchSize = 30;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -34147,11 +39552,11 @@ async function handler(req, res) {
         const srcId = codeToId.get(rel.sourceFrameworkCode);
         const tgtId = codeToId.get(rel.targetFrameworkCode);
         if (!srcId || !tgtId) continue;
-        const exist = await db.execute(sql7`
+        const exist = await db.execute(sql8`
           SELECT 1 FROM "frameworkRelationships" WHERE "sourceFrameworkId" = ${srcId} AND "targetFrameworkId" = ${tgtId} LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql7`
+        await db.execute(sql8`
           INSERT INTO "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId", "relationshipType", "description", "severity", "riskLevel", "mitigation")
           VALUES (${srcId}, ${tgtId}, ${rel.relationshipType}, ${rel.description ?? null}, ${rel.severity ?? null}, ${rel.riskLevel ?? null}, ${rel.mitigation ?? null})
         `);
@@ -34191,14 +39596,14 @@ async function handler(req, res) {
         )
       );
       const controls = mod.complianceControls;
-      const { sql: sql7 } = await import("drizzle-orm");
+      const { sql: sql8 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql7`SELECT "id", "code" FROM "frameworks"`
+        sql8`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql7`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
+        sql8`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
       );
       const batchSize = 50;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -34207,13 +39612,13 @@ async function handler(req, res) {
       for (const ctrl of batch) {
         const fid = codeToId.get(ctrl.frameworkCode);
         if (!fid) continue;
-        const exist = await db.execute(sql7`
+        const exist = await db.execute(sql8`
           SELECT 1 FROM "complianceControls"
           WHERE "frameworkId" = ${fid} AND "controlCode" = ${ctrl.controlCode}
           LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql7`
+        await db.execute(sql8`
           INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
           VALUES (${fid}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
         `);

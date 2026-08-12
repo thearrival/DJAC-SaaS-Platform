@@ -2,48 +2,149 @@ import dotenv from "dotenv";
 import { resolve } from "node:path";
 import { writeFileSync } from "node:fs";
 
-dotenv.config({ path: resolve(import.meta.dirname, "..", ".env"), override: true });
+dotenv.config({
+  path: resolve(import.meta.dirname, "..", ".env"),
+  override: true,
+});
 
 const TARGET_EMAIL = process.argv[2] || "esmail19980@gmail.com";
 const NOW = new Date().toISOString();
 const STYLE = `<style>body{font-family:Inter,-apple-system,sans-serif;background:#f8fafc;margin:0;padding:0;color:#0f172a}.container{max-width:800px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden}.header{background:linear-gradient(135deg,#0891b2,#7c3aed);padding:32px}.header h1{color:#fff;font-size:24px;font-weight:700;margin:0}.header p{color:rgba(255,255,255,.85);font-size:14px;margin:4px 0 0}.content{padding:32px}h2{font-size:20px;color:#0f172a;margin:28px 0 16px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}h2:first-child{margin-top:0}h3{font-size:16px;color:#334155;margin:20px 0 10px}table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}th{background:#f1f5f9;padding:10px 12px;text-align:left;font-weight:600;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:.05em}td{padding:8px 12px;border-bottom:1px solid #e2e8f0}.summary-cards{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap}.card{flex:1;min-width:140px;padding:16px;border-radius:10px;text-align:center}.card-green{background:#dcfce7;border:1px solid #bbf7d0}.card-blue{background:#dbeafe;border:1px solid #bfdbfe}.card-amber{background:#fef9c3;border:1px solid #fde68a}.card-value{font-size:28px;font-weight:800;line-height:1.2}.card-label{font-size:11px;color:#64748b;text-transform:uppercase;margin-top:4px;letter-spacing:.05em}.footer{padding:16px 32px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b}.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}.badge-pass{background:#dcfce7;color:#166534}.badge-fixed{background:#fef9c3;color:#854d0e}.badge-miss{background:#fef2f2;color:#991b1b}ul{font-size:13px;color:#334155;line-height:1.8;padding-left:20px}.mono{font-family:monospace;font-size:12px}</style>`;
 
 function badge(status: string) {
-  const cls = status === "PASS" ? "badge-pass" : status === "FIXED" ? "badge-fixed" : "badge-miss";
+  const cls =
+    status === "PASS"
+      ? "badge-pass"
+      : status === "FIXED"
+        ? "badge-fixed"
+        : "badge-miss";
   return `<span class="badge ${cls}">${status}</span>`;
 }
 
-function fmtCents(c: number) { return `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`; }
+function fmtCents(c: number) {
+  return `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+}
 
 function html(): string {
   const priceIds = {
-    "STRIPE_PRICE_STARTER_MONTHLY": process.env.STRIPE_PRICE_STARTER_MONTHLY || "",
-    "STRIPE_PRICE_STARTER_QUARTERLY": process.env.STRIPE_PRICE_STARTER_QUARTERLY || "",
-    "STRIPE_PRICE_STARTER_BIANNUAL": process.env.STRIPE_PRICE_STARTER_BIANNUAL || "",
-    "STRIPE_PRICE_STARTER_ANNUAL": process.env.STRIPE_PRICE_STARTER_ANNUAL || "",
-    "STRIPE_PRICE_PRO_MONTHLY": process.env.STRIPE_PRICE_PRO_MONTHLY || "",
-    "STRIPE_PRICE_PRO_QUARTERLY": process.env.STRIPE_PRICE_PRO_QUARTERLY || "",
-    "STRIPE_PRICE_PRO_BIANNUAL": process.env.STRIPE_PRICE_PRO_BIANNUAL || "",
-    "STRIPE_PRICE_PRO_ANNUAL": process.env.STRIPE_PRICE_PRO_ANNUAL || "",
-    "STRIPE_PRICE_ENTERPRISE_MONTHLY": process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || "",
-    "STRIPE_PRICE_ENTERPRISE_QUARTERLY": process.env.STRIPE_PRICE_ENTERPRISE_QUARTERLY || "",
-    "STRIPE_PRICE_ENTERPRISE_BIANNUAL": process.env.STRIPE_PRICE_ENTERPRISE_BIANNUAL || "",
-    "STRIPE_PRICE_ENTERPRISE_ANNUAL": process.env.STRIPE_PRICE_ENTERPRISE_ANNUAL || "",
+    STRIPE_PRICE_STARTER_MONTHLY:
+      process.env.STRIPE_PRICE_STARTER_MONTHLY || "",
+    STRIPE_PRICE_STARTER_QUARTERLY:
+      process.env.STRIPE_PRICE_STARTER_QUARTERLY || "",
+    STRIPE_PRICE_STARTER_BIANNUAL:
+      process.env.STRIPE_PRICE_STARTER_BIANNUAL || "",
+    STRIPE_PRICE_STARTER_ANNUAL: process.env.STRIPE_PRICE_STARTER_ANNUAL || "",
+    STRIPE_PRICE_PRO_MONTHLY: process.env.STRIPE_PRICE_PRO_MONTHLY || "",
+    STRIPE_PRICE_PRO_QUARTERLY: process.env.STRIPE_PRICE_PRO_QUARTERLY || "",
+    STRIPE_PRICE_PRO_BIANNUAL: process.env.STRIPE_PRICE_PRO_BIANNUAL || "",
+    STRIPE_PRICE_PRO_ANNUAL: process.env.STRIPE_PRICE_PRO_ANNUAL || "",
+    STRIPE_PRICE_ENTERPRISE_MONTHLY:
+      process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || "",
+    STRIPE_PRICE_ENTERPRISE_QUARTERLY:
+      process.env.STRIPE_PRICE_ENTERPRISE_QUARTERLY || "",
+    STRIPE_PRICE_ENTERPRISE_BIANNUAL:
+      process.env.STRIPE_PRICE_ENTERPRISE_BIANNUAL || "",
+    STRIPE_PRICE_ENTERPRISE_ANNUAL:
+      process.env.STRIPE_PRICE_ENTERPRISE_ANNUAL || "",
   };
 
   const catalog = [
-    ["Starter","Monthly",2900,"$29 / mo","—","price_1U2RyjKdTEdEkrmmokG40XcE"],
-    ["Starter","Quarterly",7900,"$79 / qtr","Save 9%","price_1U2RypKdTEdEkrmm0A5NfmPo"],
-    ["Starter","6 Months",14900,"$149 / 6mo","Save 14%","price_1U2RytKdTEdEkrmmwyWhQf5g"],
-    ["Starter","Annual",24900,"$249 / yr","Save 29%","price_1U2S04KdTEdEkrmmmiwqlVOP"],
-    ["Professional","Monthly",7900,"$79 / mo","—","price_1U2Rz6KdTEdEkrmmBaFdEAIg"],
-    ["Professional","Quarterly",19900,"$199 / qtr","Save 16%","price_1U2Rz9KdTEdEkrmmEnouAXWx"],
-    ["Professional","6 Months",37900,"$379 / 6mo","Save 20%","price_1U2RzFKdTEdEkrmmdIsINP6F"],
-    ["Professional","Annual",69900,"$699 / yr","Save 26%","price_1U2S0AKdTEdEkrmmRYabyZro"],
-    ["Enterprise","Monthly",19900,"From $199 / mo","—","price_1U2RzNKdTEdEkrmmYnwFVbf4"],
-    ["Enterprise","Quarterly",54900,"From $549 / qtr","Save 8%","price_1U2RzQKdTEdEkrmmUTJAim2x"],
-    ["Enterprise","6 Months",99900,"From $999 / 6mo","Save 16%","price_1U2RzXKdTEdEkrmmQCZWQuhx"],
-    ["Enterprise","Annual",200000,"From $2,000 / yr","Save 16%","price_1U2S0HKdTEdEkrmmg5edaV39"],
+    [
+      "Starter",
+      "Monthly",
+      2900,
+      "$29 / mo",
+      "—",
+      "price_1U2RyjKdTEdEkrmmokG40XcE",
+    ],
+    [
+      "Starter",
+      "Quarterly",
+      7900,
+      "$79 / qtr",
+      "Save 9%",
+      "price_1U2RypKdTEdEkrmm0A5NfmPo",
+    ],
+    [
+      "Starter",
+      "6 Months",
+      14900,
+      "$149 / 6mo",
+      "Save 14%",
+      "price_1U2RytKdTEdEkrmmwyWhQf5g",
+    ],
+    [
+      "Starter",
+      "Annual",
+      24900,
+      "$249 / yr",
+      "Save 29%",
+      "price_1U2S04KdTEdEkrmmmiwqlVOP",
+    ],
+    [
+      "Professional",
+      "Monthly",
+      7900,
+      "$79 / mo",
+      "—",
+      "price_1U2Rz6KdTEdEkrmmBaFdEAIg",
+    ],
+    [
+      "Professional",
+      "Quarterly",
+      19900,
+      "$199 / qtr",
+      "Save 16%",
+      "price_1U2Rz9KdTEdEkrmmEnouAXWx",
+    ],
+    [
+      "Professional",
+      "6 Months",
+      37900,
+      "$379 / 6mo",
+      "Save 20%",
+      "price_1U2RzFKdTEdEkrmmdIsINP6F",
+    ],
+    [
+      "Professional",
+      "Annual",
+      69900,
+      "$699 / yr",
+      "Save 26%",
+      "price_1U2S0AKdTEdEkrmmRYabyZro",
+    ],
+    [
+      "Enterprise",
+      "Monthly",
+      19900,
+      "From $199 / mo",
+      "—",
+      "price_1U2RzNKdTEdEkrmmYnwFVbf4",
+    ],
+    [
+      "Enterprise",
+      "Quarterly",
+      54900,
+      "From $549 / qtr",
+      "Save 8%",
+      "price_1U2RzQKdTEdEkrmmUTJAim2x",
+    ],
+    [
+      "Enterprise",
+      "6 Months",
+      99900,
+      "From $999 / 6mo",
+      "Save 16%",
+      "price_1U2RzXKdTEdEkrmmQCZWQuhx",
+    ],
+    [
+      "Enterprise",
+      "Annual",
+      200000,
+      "From $2,000 / yr",
+      "Save 16%",
+      "price_1U2S0HKdTEdEkrmmg5edaV39",
+    ],
   ];
 
   const pricesConfigured = Object.values(priceIds).filter(v => v.trim()).length;
@@ -76,8 +177,8 @@ function html(): string {
 <h2>Stripe Configuration Status</h2>
 <table>
 <tr><th>Config Key</th><th>Status</th><th>Value</th></tr>
-<tr><td>STRIPE_SECRET_KEY</td><td>${badge(hasSecret?"PASS":"FAIL")}</td><td class="mono">${hasSecret ? "sk_test_51SQPD0K..." : "MISSING"}</td></tr>
-<tr><td>STRIPE_WEBHOOK_SECRET</td><td>${badge(hasWebhook?"PASS":"FAIL")}</td><td class="mono">${hasWebhook ? "whsec_c783b081..." : "MISSING"}</td></tr>
+<tr><td>STRIPE_SECRET_KEY</td><td>${badge(hasSecret ? "PASS" : "FAIL")}</td><td class="mono">${hasSecret ? "sk_test_51SQPD0K..." : "MISSING"}</td></tr>
+<tr><td>STRIPE_WEBHOOK_SECRET</td><td>${badge(hasWebhook ? "PASS" : "FAIL")}</td><td class="mono">${hasWebhook ? "whsec_c783b081..." : "MISSING"}</td></tr>
 <tr><td>API Version</td><td>${badge("PASS")}</td><td>2026-02-25.clover</td></tr>
 <tr><td>Mode</td><td>${badge("PASS")}</td><td>Test Mode</td></tr>
 </table>
@@ -85,14 +186,18 @@ function html(): string {
 <h2>Stripe Price Catalog — All 12 Tiers (Test Mode)</h2>
 <table>
 <tr><th>Plan</th><th>Interval</th><th>Price</th><th>Label</th><th>Savings</th><th>Stripe Price ID</th></tr>
-${catalog.map(r => `<tr>
+${catalog
+  .map(
+    r => `<tr>
 <td style="text-transform:capitalize;font-weight:500">${r[0]}</td>
 <td>${r[1]}</td>
 <td style="font-weight:600;color:#0f172a">${fmtCents(r[2] as number)}</td>
 <td>${r[3]}</td>
 <td style="color:#22c55e;font-weight:500">${r[4]}</td>
 <td class="mono">${r[5]}</td>
-</tr>`).join("")}
+</tr>`
+  )
+  .join("")}
 </table>
 
 <h2>Plan Feature Comparison Matrix</h2>
@@ -204,10 +309,13 @@ const SMTP_PORT = parseInt(process.env.SMTP_PORT || "465", 10);
 const SMTP_USER = process.env.SMTP_USER || "";
 const SMTP_PASS = process.env.SMTP_PASS || "";
 const SMTP_SECURE = process.env.SMTP_SECURE === "true" || SMTP_PORT === 465;
-const SMTP_FROM = process.env.SMTP_FROM || "DJAC by Yalla Hack <hello@yalla-hack.com>";
+const SMTP_FROM =
+  process.env.SMTP_FROM || "DJAC by Yalla Hack <hello@yalla-hack.com>";
 
 if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
-  console.log(`Sending report to ${TARGET_EMAIL} via ${SMTP_HOST}:${SMTP_PORT}...`);
+  console.log(
+    `Sending report to ${TARGET_EMAIL} via ${SMTP_HOST}:${SMTP_PORT}...`
+  );
   const nodemailer = await import("nodemailer");
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,

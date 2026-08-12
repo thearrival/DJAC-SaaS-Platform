@@ -4,7 +4,10 @@
  */
 import "dotenv/config";
 import Stripe from "stripe";
-import { evaluateStripeBillingConfig, STRIPE_PRICE_ENV_KEYS } from "../server/_core/env";
+import {
+  evaluateStripeBillingConfig,
+  STRIPE_PRICE_ENV_KEYS,
+} from "../server/_core/env";
 
 type TestResult = { name: string; passed: boolean; detail: string };
 
@@ -29,16 +32,30 @@ async function run(): Promise<void> {
   const config = evaluateStripeBillingConfig({
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-    ...Object.fromEntries(STRIPE_PRICE_ENV_KEYS.map((k) => [k, process.env[k]])),
+    ...Object.fromEntries(STRIPE_PRICE_ENV_KEYS.map(k => [k, process.env[k]])),
   });
 
   addResult("Stripe billing enabled", config.enabled, "Not enabled");
   addResult("All config ready", config.ready, config.missing.join(", "));
-  addResult("Secret key configured", Boolean(process.env.STRIPE_SECRET_KEY?.trim()), "Missing");
-  addResult("Webhook secret configured", Boolean(process.env.STRIPE_WEBHOOK_SECRET?.trim()), "Missing");
+  addResult(
+    "Secret key configured",
+    Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
+    "Missing"
+  );
+  addResult(
+    "Webhook secret configured",
+    Boolean(process.env.STRIPE_WEBHOOK_SECRET?.trim()),
+    "Missing"
+  );
 
-  const priceCount = STRIPE_PRICE_ENV_KEYS.filter((k) => process.env[k]?.trim()).length;
-  addResult(`Price IDs configured (${priceCount}/12)`, priceCount === 12, `${priceCount}/12 configured`);
+  const priceCount = STRIPE_PRICE_ENV_KEYS.filter(k =>
+    process.env[k]?.trim()
+  ).length;
+  addResult(
+    `Price IDs configured (${priceCount}/12)`,
+    priceCount === 12,
+    `${priceCount}/12 configured`
+  );
 
   // ── 2. Stripe SDK Initialization ────────────────────────────────────
   console.log("\n── 2. Stripe SDK Initialization ──");
@@ -56,7 +73,16 @@ async function run(): Promise<void> {
 
   // ── 3. Price ID Validation ─────────────────────────────────────────
   console.log("\n── 3. Stripe Price ID Validation ──");
-  const priceMap: Record<string, { priceId: string; valid: boolean; amount: number | null; currency: string | null; product: string | null }> = {};
+  const priceMap: Record<
+    string,
+    {
+      priceId: string;
+      valid: boolean;
+      amount: number | null;
+      currency: string | null;
+      product: string | null;
+    }
+  > = {};
 
   for (const key of STRIPE_PRICE_ENV_KEYS) {
     const priceId = process.env[key]?.trim();
@@ -73,10 +99,16 @@ async function run(): Promise<void> {
         valid,
         amount: price.unit_amount,
         currency: price.currency,
-        product: typeof price.product === "string" ? price.product : price.product?.name ?? null,
+        product:
+          typeof price.product === "string"
+            ? price.product
+            : (price.product?.name ?? null),
       };
 
-      const planInterval = key.replace("STRIPE_PRICE_", "").toLowerCase().replace("_", "/");
+      const planInterval = key
+        .replace("STRIPE_PRICE_", "")
+        .toLowerCase()
+        .replace("_", "/");
       addResult(
         `Price: ${planInterval}`,
         valid,
@@ -85,7 +117,11 @@ async function run(): Promise<void> {
           : `Not active or not recurring`
       );
     } catch (err) {
-      addResult(`Price: ${key}`, false, `Stripe API error: ${(err as Error).message}`);
+      addResult(
+        `Price: ${key}`,
+        false,
+        `Stripe API error: ${(err as Error).message}`
+      );
     }
   }
 
@@ -120,7 +156,11 @@ async function run(): Promise<void> {
     }
   }
   if (amountMismatches === 0) {
-    addResult("All 12 price amounts match catalog", true, "All prices verified against PRICE_CATALOG");
+    addResult(
+      "All 12 price amounts match catalog",
+      true,
+      "All prices verified against PRICE_CATALOG"
+    );
   }
 
   // ── 5. Checkout Session Creation Test ───────────────────────────────
@@ -142,14 +182,30 @@ async function run(): Promise<void> {
       customer_email: "test@example.com",
     });
 
-    addResult("Checkout session created", !!session.url, `Session ID: ${session.id}`);
-    addResult("Checkout URL returned", session.url!.startsWith("https://checkout.stripe.com"), session.url ?? "No URL");
-    addResult("Metadata preserved", session.metadata?.plan === "starter", `Plan: ${session.metadata?.plan}`);
+    addResult(
+      "Checkout session created",
+      !!session.url,
+      `Session ID: ${session.id}`
+    );
+    addResult(
+      "Checkout URL returned",
+      session.url!.startsWith("https://checkout.stripe.com"),
+      session.url ?? "No URL"
+    );
+    addResult(
+      "Metadata preserved",
+      session.metadata?.plan === "starter",
+      `Plan: ${session.metadata?.plan}`
+    );
 
     // Clean up: expire the session
     await stripe.checkout.sessions.expire(session.id);
   } catch (err) {
-    addResult("Checkout session creation", false, `API error: ${(err as Error).message}`);
+    addResult(
+      "Checkout session creation",
+      false,
+      `API error: ${(err as Error).message}`
+    );
   }
 
   // ── 6. Customer Portal Test ─────────────────────────────────────────
@@ -167,13 +223,21 @@ async function run(): Promise<void> {
       return_url: "http://localhost:3000/billing",
     });
 
-    addResult("Customer created (test)", !!customer.id, `Customer ID: ${customer.id}`);
+    addResult(
+      "Customer created (test)",
+      !!customer.id,
+      `Customer ID: ${customer.id}`
+    );
     addResult("Portal session created", !!portal.url, `Portal URL returned`);
 
     // Clean up: delete test customer
     await stripe.customers.del(customer.id);
   } catch (err) {
-    addResult("Customer portal test", false, `API error: ${(err as Error).message}`);
+    addResult(
+      "Customer portal test",
+      false,
+      `API error: ${(err as Error).message}`
+    );
   }
 
   // ── 7. Webhook Signature Verification ───────────────────────────────
@@ -183,17 +247,31 @@ async function run(): Promise<void> {
       id: "evt_test_123",
       object: "event",
       type: "checkout.session.completed",
-      data: { object: { id: "cs_test_123", metadata: { organizationId: "1" } } },
+      data: {
+        object: { id: "cs_test_123", metadata: { organizationId: "1" } },
+      },
     });
 
     // This will fail (expected) because we're using a fake signature
     // but it verifies the webhook construction code works
     try {
-      stripe.webhooks.constructEvent(testPayload, "fake_sig", process.env.STRIPE_WEBHOOK_SECRET!);
-      addResult("Webhook signature verification", false, "Should have thrown with fake signature");
+      stripe.webhooks.constructEvent(
+        testPayload,
+        "fake_sig",
+        process.env.STRIPE_WEBHOOK_SECRET!
+      );
+      addResult(
+        "Webhook signature verification",
+        false,
+        "Should have thrown with fake signature"
+      );
     } catch (err) {
       const msg = (err as Error).message;
-      const isExpectedError = msg.includes("No signatures found") || msg.includes("Signature") || msg.includes("timestamp and signatures") || msg.includes("Unable to extract");
+      const isExpectedError =
+        msg.includes("No signatures found") ||
+        msg.includes("Signature") ||
+        msg.includes("timestamp and signatures") ||
+        msg.includes("Unable to extract");
       addResult(
         "Webhook verification correctly rejects invalid signatures",
         isExpectedError,
@@ -207,9 +285,18 @@ async function run(): Promise<void> {
   // ── 8. Product Catalog Completeness ─────────────────────────────────
   console.log("\n── 8. Product Catalog Completeness ──");
   const requiredCombos = [
-    ["starter", "monthly"], ["starter", "quarterly"], ["starter", "biannual"], ["starter", "annual"],
-    ["pro", "monthly"], ["pro", "quarterly"], ["pro", "biannual"], ["pro", "annual"],
-    ["enterprise", "monthly"], ["enterprise", "quarterly"], ["enterprise", "biannual"], ["enterprise", "annual"],
+    ["starter", "monthly"],
+    ["starter", "quarterly"],
+    ["starter", "biannual"],
+    ["starter", "annual"],
+    ["pro", "monthly"],
+    ["pro", "quarterly"],
+    ["pro", "biannual"],
+    ["pro", "annual"],
+    ["enterprise", "monthly"],
+    ["enterprise", "quarterly"],
+    ["enterprise", "biannual"],
+    ["enterprise", "annual"],
   ];
 
   let combosValid = 0;
@@ -236,13 +323,20 @@ async function run(): Promise<void> {
 
   // ── 9. Currency Consistency ─────────────────────────────────────────
   console.log("\n── 9. Currency Consistency ──");
-  const currencies = new Set(Object.values(priceMap).filter(p => p?.valid).map(p => p!.currency));
+  const currencies = new Set(
+    Object.values(priceMap)
+      .filter(p => p?.valid)
+      .map(p => p!.currency)
+  );
   const allUSD = currencies.size === 1 && currencies.has("usd");
-  addResult("All prices in USD", allUSD, `Currencies: ${[...currencies].join(", ")}`);
+  addResult(
+    "All prices in USD",
+    allUSD,
+    `Currencies: ${[...currencies].join(", ")}`
+  );
 
   // ── 10. Pricing Hierarchy ───────────────────────────────────────────
   console.log("\n── 10. Pricing Hierarchy Validation ──");
-  const plans = ["starter", "professional", "enterprise"] as const;
   const intervals = ["monthly", "quarterly", "biannual", "annual"] as const;
 
   let hierarchyOk = true;
@@ -262,7 +356,9 @@ async function run(): Promise<void> {
   addResult(
     "Starter < Professional < Enterprise for all intervals",
     hierarchyOk,
-    hierarchyOk ? "Correct pricing hierarchy" : "Price hierarchy violation detected"
+    hierarchyOk
+      ? "Correct pricing hierarchy"
+      : "Price hierarchy violation detected"
   );
 
   // ── Finish ──────────────────────────────────────────────────────────
@@ -271,11 +367,13 @@ async function run(): Promise<void> {
 
 function finish(results: TestResult[], startTime: number) {
   const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-  const passed = results.filter((r) => r.passed).length;
-  const failed = results.filter((r) => !r.passed).length;
+  const passed = results.filter(r => r.passed).length;
+  const failed = results.filter(r => !r.passed).length;
 
   console.log("\n" + "=".repeat(70));
-  console.log(`  RESULTS: ${passed} passed, ${failed} failed, ${results.length} total`);
+  console.log(
+    `  RESULTS: ${passed} passed, ${failed} failed, ${results.length} total`
+  );
   console.log(`  Duration: ${duration}s`);
   console.log("=".repeat(70));
 
@@ -286,10 +384,12 @@ function finish(results: TestResult[], startTime: number) {
     }
   }
 
-  console.log(`\nIntegration test complete. ${failed === 0 ? "All checks passed!" : `${failed} issue(s) need attention.`}`);
+  console.log(
+    `\nIntegration test complete. ${failed === 0 ? "All checks passed!" : `${failed} issue(s) need attention.`}`
+  );
 }
 
-run().catch((err) => {
+run().catch(err => {
   console.error("Fatal error in integration test:", err);
   process.exit(1);
 });

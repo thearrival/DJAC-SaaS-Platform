@@ -2,7 +2,10 @@ import dotenv from "dotenv";
 import { resolve } from "node:path";
 import { writeFileSync } from "node:fs";
 
-dotenv.config({ path: resolve(import.meta.dirname, "..", ".env"), override: true });
+dotenv.config({
+  path: resolve(import.meta.dirname, "..", ".env"),
+  override: true,
+});
 
 const TARGET_EMAIL = process.argv[2] || "psn.iawad@outlook.com";
 const NOW = new Date().toISOString();
@@ -118,19 +121,27 @@ const SMTP_PORT = parseInt(process.env.SMTP_PORT || "465", 10);
 const SMTP_USER = process.env.SMTP_USER || "";
 const SMTP_PASS = process.env.SMTP_PASS || "";
 const SMTP_SECURE = process.env.SMTP_SECURE === "true" || SMTP_PORT === 465;
-const SMTP_FROM = process.env.SMTP_FROM || "DJAC by Yalla Hack <hello@yalla-hack.com>";
+const SMTP_FROM =
+  process.env.SMTP_FROM || "DJAC by Yalla Hack <hello@yalla-hack.com>";
 
 if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
-  console.log(`Sending report to ${TARGET_EMAIL} via ${SMTP_HOST}:${SMTP_PORT}...`);
+  console.log(
+    `Sending report to ${TARGET_EMAIL} via ${SMTP_HOST}:${SMTP_PORT}...`
+  );
   const nodemailer = await import("nodemailer");
   const transporter = nodemailer.createTransport({
-    host: SMTP_HOST, port: SMTP_PORT, secure: SMTP_SECURE,
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
-    connectionTimeout: 15000, greetingTimeout: 10000, socketTimeout: 15000,
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
   try {
     const info = await transporter.sendMail({
-      from: SMTP_FROM, to: TARGET_EMAIL,
+      from: SMTP_FROM,
+      to: TARGET_EMAIL,
       subject: "DJAC Authentication — Complete Security Fix Report",
       html: html(),
     });
@@ -138,7 +149,9 @@ if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
   } catch (err) {
     console.error("Email failed:", (err as Error).message);
     console.log(`Report available at: ${outPath}`);
-  } finally { transporter.close(); }
+  } finally {
+    transporter.close();
+  }
 } else {
   console.log("SMTP not configured. Report saved to file only.");
 }
