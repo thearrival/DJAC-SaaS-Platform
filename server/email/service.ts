@@ -14,6 +14,12 @@ import { createTransport } from "nodemailer";
 import type { User } from "../../drizzle/schema";
 import type { Organization } from "../../drizzle/schema";
 
+/** Minimal user shape the email templates depend on (name + email only). */
+export type EmailUser = {
+  name: string | null;
+  email: string | null;
+};
+
 const FROM = "DJAC by Yalla Hack <hello@yalla-hack.com>";
 const REPLY_TO = "hello@yalla-hack.com";
 
@@ -83,10 +89,11 @@ function baseTemplate(content: string) {
 }
 
 export const emailService = {
-  async sendWelcome(user: User, org: Organization) {
+  async sendWelcome(user: EmailUser, org?: { name: string } | null) {
+    const orgName = org?.name || "your organization";
     const html = baseTemplate(`
       <h2>Welcome to DJAC, ${user.name || "there"}!</h2>
-      <p>Your organization <strong>${org.name}</strong> is now set up on DJAC — the multi-jurisdiction compliance platform covering 29 jurisdictions across APAC, EMEA, and the Americas.</p>
+      <p>Your organization <strong>${orgName}</strong> is now set up on DJAC — the multi-jurisdiction compliance platform covering 29 jurisdictions across APAC, EMEA, and the Americas.</p>
       <p>Here&rsquo;s what to do next:</p>
       <ol class="steps">
         <li>Complete your onboarding — select frameworks and objectives</li>
@@ -139,7 +146,7 @@ export const emailService = {
   },
 
   async sendSecurityAlert(
-    user: User,
+    user: EmailUser,
     ip: string,
     location: string,
     timestamp: string,
@@ -171,7 +178,7 @@ export const emailService = {
 };
 
 async function send(
-  user: User,
+  user: EmailUser,
   subject: string,
   html: string,
   template: string

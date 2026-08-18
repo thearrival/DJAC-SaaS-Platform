@@ -2,7 +2,7 @@
 
 ## Overview
 
-DJAC uses PostgreSQL 17 managed by Supabase, with Drizzle ORM for schema definition and migrations. The schema has **60+ tables** and **30+ enum types**, organized across these domains:
+DJAC uses PostgreSQL 17 managed by Supabase, with Drizzle ORM for schema definition and migrations. The schema has **62 tables** and **30+ enum types**, organized across these domains:
 
 - **Identity & Auth** — Users, OAuth profiles, sessions, OTP codes
 - **Organization** — Multi-tenant orgs, memberships, RBAC permissions
@@ -230,6 +230,16 @@ frameworks ─────── complianceControls ──── controlMappings
 | Enum     | Values           |
 | -------- | ---------------- |
 | `locale` | `en`, `ar`, `zh` |
+
+## Migration Strategy
+
+The schema evolves through three complementary mechanisms (all idempotent):
+
+1. **Drizzle migrations** (`drizzle/*.sql`) — base schema (46 tables) applied by `drizzle-kit migrate`, `scripts/migrate-production.mjs` (Docker/VPS), or `supabase db push` (linked project).
+2. **Runtime auto-migrate** (`server/_core/auto-migrate.ts`) — on server boot, creates the remaining tables (`otpCodes`, `yallaAdminSessions`, `knowledgeGraphNodes`, `notifications`, etc.) and repairs column drift with `ADD COLUMN IF NOT EXISTS`. This keeps fresh deployments schema-complete without manual steps.
+3. **Seed data** — `pnpm seed:all` loads compliance frameworks, knowledge graph, and demo data; framework reference data is also re-upserted at boot.
+
+The Drizzle journal/snapshot is intentionally not the source of truth for post-0000 tables; always verify a live database with `pnpm db:doctor` (compares all 62 expected tables against the connected database). If `drizzle-kit generate` produces a large diff after schema changes, that is expected drift from the journal — review the generated SQL before applying.
 
 ## Key Design Decisions
 

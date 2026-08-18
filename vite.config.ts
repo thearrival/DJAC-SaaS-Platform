@@ -61,6 +61,9 @@ export default defineConfig(({ mode }) => {
               return;
             }
 
+            // Specific matches first — the broad "react" substring match below
+            // must never capture @radix-ui/react-*, react-markdown, etc.
+
             if (id.includes("recharts")) {
               return "charts";
             }
@@ -76,15 +79,23 @@ export default defineConfig(({ mode }) => {
               return "markdown-render";
             }
 
-            // React core + ALL React-dependent libraries MUST load in order.
-            // Any library calling React.createContext/useState/etc at module-init
-            // time will crash if React isn't loaded first. Merge them all here.
+            // React core ONLY — everything else imports this chunk, it imports
+            // nothing, so it can never participate in a chunk cycle.
             if (
-              id.includes("react") ||
-              id.includes("react-dom") ||
-              id.includes("scheduler") ||
+              /[\\/]node_modules\/(react|react-dom|scheduler)[\\/]/.test(id)
+            ) {
+              return "react-vendor";
+            }
+
+            // React-adjacent libraries that call React APIs at module-init time.
+            // They import react (→ react-vendor) and nothing else, keeping the
+            // chunk free of cycles.
+            if (
               id.includes("wouter") ||
-              id.includes("next-themes")
+              id.includes("next-themes") ||
+              id.includes("use-sync-external-store") ||
+              id.includes("mitt") ||
+              id.includes("regexparam")
             ) {
               return "react-vendor";
             }

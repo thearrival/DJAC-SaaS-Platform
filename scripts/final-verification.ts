@@ -1,14 +1,14 @@
 /**
  * Full Auth Flow Live Test
- * 1. Register test account for psn.iawad@outlook.com
+ * 1. Register test account (TEST_EMAIL, default dev@localhost)
  * 2. Test password reset with distinct purpose
  * 3. Verify email verification flow works
  */
 import "dotenv/config";
 
-const TEST_EMAIL = "psn.iawad@outlook.com";
-const TEST_PASSWORD = "Test@2026Auth";
-const TEST_NAME = "PSN IAWAD";
+const TEST_EMAIL = process.env.TEST_EMAIL || "dev@localhost";
+const TEST_PASSWORD = process.env.TEST_PASSWORD || "DevPass2026!LocalOnly";
+const TEST_NAME = process.env.TEST_NAME || "DJAC Dev Test";
 
 console.log("=".repeat(65));
 console.log("  DJAC Auth — Full Flow Verification");

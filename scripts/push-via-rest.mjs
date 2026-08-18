@@ -128,9 +128,8 @@ function createCommitWithTree(branch, baseSha, treeSha) {
   const msg = sh("git log -1 --format=%s");
   const now = new Date().toISOString();
   const author = {
-    name: "Ismail Ahmed",
-    email: "esmail19980@gmail.com",
-    date: now,
+    name: process.env.GIT_AUTHOR_NAME || "DJAC Bot",
+    email: process.env.GIT_AUTHOR_EMAIL || "dev@localhost",
   };
   const commitPayload = JSON.stringify({
     message: msg,

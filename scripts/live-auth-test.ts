@@ -1,5 +1,6 @@
 /**
- * Live auth test — sends actual password reset OTP to psn.iawad@outlook.com
+ * Live auth test — sends actual password reset OTP to TEST_EMAIL
+ * (set TEST_EMAIL in the environment; defaults to dev@localhost)
  * and verifies the full auth pipeline works end-to-end.
  */
 import "dotenv/config";
@@ -11,7 +12,7 @@ console.log("  DJAC Auth — Live Pipeline Test");
 console.log("=".repeat(70));
 console.log();
 
-const TEST_EMAIL = "psn.iawad@outlook.com";
+const TEST_EMAIL = process.env.TEST_EMAIL || "dev@localhost";
 const SMTP_SET = Boolean(
   process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
 );

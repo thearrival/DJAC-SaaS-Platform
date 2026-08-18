@@ -118,7 +118,7 @@ export function notifyLogin(
     try {
       const sent = await hasFirstLoginBeenSent(table, user.id);
       if (!sent) {
-        await emailService.sendWelcome(user as any, org as any);
+        await emailService.sendWelcome(user, org ?? undefined);
         await markFirstLoginSent(table, user.id);
         console.info(
           `[LoginNotification] Welcome email sent to ${email} (first login)`
@@ -130,7 +130,7 @@ export function notifyLogin(
         const timestamp = new Date().toISOString();
 
         await emailService.sendSecurityAlert(
-          user as any,
+          user,
           ip,
           location,
           timestamp,

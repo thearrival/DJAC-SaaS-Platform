@@ -7,13 +7,14 @@ dotenv.config({
   override: true,
 });
 
-const TARGET_EMAIL = process.argv[2] || "psn.iawad@outlook.com";
+const TARGET_EMAIL =
+  process.argv[2] || process.env.REPORT_TARGET_EMAIL || "dev@localhost";
 const NOW = new Date().toISOString();
 const S = `<style>body{font-family:Inter,-apple-system,sans-serif;background:#f8fafc;margin:0;padding:0;color:#0f172a}.container{max-width:800px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden}.header{background:linear-gradient(135deg,#dc2626,#7c3aed);padding:32px}.header h1{color:#fff;font-size:24px;font-weight:700;margin:0}.header p{color:rgba(255,255,255,.85);font-size:14px;margin:4px 0 0}.content{padding:32px}h2{font-size:20px;color:#0f172a;margin:28px 0 16px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}h2:first-child{margin-top:0}table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}th{background:#f1f5f9;padding:10px 12px;text-align:left;font-weight:600;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:.05em}td{padding:8px 12px;border-bottom:1px solid #e2e8f0}.card-row{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap}.card{flex:1;min-width:130px;padding:16px;border-radius:10px;text-align:center}.c-green{background:#dcfce7;border:1px solid #bbf7d0}.c-blue{background:#dbeafe;border:1px solid #bfdbfe}.c-amber{background:#fef9c3;border:1px solid #fde68a}.c-red{background:#fef2f2;border:1px solid #fecaca}.cv{font-size:28px;font-weight:800;line-height:1.2}.cl{font-size:11px;color:#64748b;text-transform:uppercase;margin-top:4px;letter-spacing:.05em}.footer{padding:16px 32px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b}.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}.bp{background:#dcfce7;color:#166534}.bf{background:#fef9c3;color:#854d0e}.bm{background:#fef2f2;color:#991b1b}ul{font-size:13px;color:#334155;line-height:1.8;padding-left:20px}.mono{font-family:monospace;font-size:12px}</style>`;
 
 function html(): string {
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">${S}</head><body style="padding:24px 0"><div class="container">
-<div class="header"><h1>DJAC Authentication System — Complete Security Audit &amp; Fix Report</h1><p>Generated: ${NOW} | DJAC SaaS Platform | Account: psn.iawad@outlook.com</p></div>
+<div class="header"><h1>DJAC Authentication System — Complete Security Audit &amp; Fix Report</h1><p>Generated: ${NOW} | DJAC SaaS Platform | Account: ${TARGET_EMAIL}</p></div>
 <div class="content">
 
 <h2>Executive Summary</h2>
@@ -52,7 +53,7 @@ function html(): string {
 
 <h2>Authentication Flow — After Fixes</h2>
 
-<h3>Password Reset Flow (psn.iawad@outlook.com)</h3>
+<h3>Password Reset Flow (${TARGET_EMAIL})</h3>
 <ol style="font-size:13px;color:#334155;line-height:1.8;">
 <li>User clicks "Forgot Password" → calls <span class="mono">localAuth.requestPasswordReset</span></li>
 <li>Server sends OTP via email with <strong>purpose: "password-reset"</strong> (NOT "login")</li>

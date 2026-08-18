@@ -21,6 +21,7 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 appuser
 
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/audit ./audit
 COPY --from=build /app/drizzle ./drizzle
 COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/package.json ./package.json

@@ -71,7 +71,7 @@
     "@trpc/server": "^11.8.0",
     "@types/compression": "^1.8.1",
     "@xmldom/xmldom": "^0.8.11",
-    "axios": "^1.15.2",
+    "axios": "^1.18.0",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.71.0",
     "class-variance-authority": "^0.7.1",
@@ -174,7 +174,8 @@
       "tar": ">=7.5.16",
       "picomatch": ">=4.0.4",
       "form-data": ">=4.0.6",
-      "brace-expansion": ">=5.0.6",
+      "brace-expansion": ">=5.0.9",
+      "body-parser": ">=1.20.6",
       "rollup": ">=4.59.0",
       "@babel/core": ">=7.29.6",
       "@opentelemetry/core": ">=2.8.0"

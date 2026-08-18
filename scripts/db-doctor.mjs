@@ -1,6 +1,10 @@
 import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import pg from "pg";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const databaseUrl = (process.env.DATABASE_URL || "").trim();
 const allowInMemoryPersistence = (
   process.env.ALLOW_IN_MEMORY_PERSISTENCE || ""
@@ -8,6 +12,14 @@ const allowInMemoryPersistence = (
 
 function print(line = "") {
   console.log(`[db-doctor] ${line}`);
+}
+
+// Read expected physical table names straight from the Drizzle schema file,
+// so this check never drifts from the ORM definition.
+function readExpectedTables() {
+  const schemaPath = path.resolve(__dirname, "..", "drizzle", "schema.ts");
+  const schema = fs.readFileSync(schemaPath, "utf8");
+  return [...schema.matchAll(/pgTable\(\s*"([^"]+)"/g)].map(m => m[1]);
 }
 
 async function main() {
@@ -50,6 +62,37 @@ async function main() {
     print("1. Run pnpm db:migrate if schema is not current");
     print("2. Run pnpm seed:all for local reference data");
     print("3. Use pnpm smoke:runtime after starting the app");
+
+    // ── Schema drift check: expected tables vs. live database ─────────────
+    const expected = readExpectedTables();
+    const tablesResult = await client.query(
+      `SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'`
+    );
+    const liveTables = new Set(tablesResult.rows.map(r => r.tablename));
+    const missing = expected.filter(t => !liveTables.has(t));
+    const unexpected = [...liveTables].filter(
+      t => !expected.includes(t) && !t.startsWith("_schema_migrations")
+    );
+
+    print(
+      `Schema drift check: ${expected.length - missing.length}/${expected.length} expected tables present.`
+    );
+    if (missing.length === 0) {
+      print("No missing tables — schema is in sync.");
+    } else {
+      print(`MISSING TABLES (${missing.length}):`);
+      for (const t of missing) print(`  - ${t}`);
+      print("Next steps: run `pnpm db:migrate`, then re-run this check.");
+      print(
+        "(Tables created at boot by server/_core/auto-migrate.ts are applied when the app starts.)"
+      );
+      process.exitCode = 1;
+    }
+    if (unexpected.length > 0) {
+      print(
+        `Unexpected tables (${unexpected.length}, informational): ${unexpected.join(", ")}`
+      );
+    }
   } catch (error) {
     print(
       `Connection failed: ${error instanceof Error ? error.message : String(error)}`
