@@ -35,7 +35,16 @@
       "src": "/((?!api/|assets/|\\.well-known/)[^.]*)$",
       "dest": "/index.html?v=3",
       "headers": {
-        "cache-control": "no-store"
+        "cache-control": "no-store",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=(), browsing-topics=(), usb=(), midi=(), sync-xhr=(), magnetometer=(), gyroscope=(), serial=(), fullscreen=(self)",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "Origin-Agent-Cluster": "?1",
+        "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co https://forge.butterfly-effect.dev; frame-src https://js.stripe.com https://hooks.stripe.com; form-action 'self'; frame-ancestors 'none'; report-uri /api/csp-report; script-src 'self' https://js.stripe.com https://forge.butterfly-effect.dev 'strict-dynamic' sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc= sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U= sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k= sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess=; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; upgrade-insecure-requests",
+        "Content-Security-Policy-Report-Only": "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co https://forge.butterfly-effect.dev; frame-src https://js.stripe.com https://hooks.stripe.com; form-action 'self'; frame-ancestors 'none'; report-uri /api/csp-report?ro=1; script-src 'self' 'unsafe-inline' https://js.stripe.com https://forge.butterfly-effect.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com"
       }
     }
   ],

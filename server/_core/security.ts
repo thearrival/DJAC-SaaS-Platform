@@ -71,6 +71,15 @@ function shouldDisableCaching(pathname: string): boolean {
   return normalized.startsWith("/api/") || shouldNoIndex(normalized);
 }
 
+const INLINE_SCRIPT_HASHES = [
+  "sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc=",
+  "sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U=",
+  "sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k=",
+  "sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess=",
+];
+
+const FORGE_HOST = "https://forge.butterfly-effect.dev";
+
 function buildCsp(isProduction: boolean): string[] {
   const parts = [
     "default-src 'self'",
@@ -78,7 +87,7 @@ function buildCsp(isProduction: boolean): string[] {
     "object-src 'none'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://fonts.gstatic.com",
-    "connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co",
+    `connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co ${FORGE_HOST}`,
     "frame-src https://js.stripe.com https://hooks.stripe.com",
     "form-action 'self'",
     "frame-ancestors 'none'",
@@ -86,11 +95,15 @@ function buildCsp(isProduction: boolean): string[] {
   ];
 
   if (isProduction) {
-    parts.push("script-src 'self' https://js.stripe.com 'strict-dynamic'");
+    parts.push(
+      `script-src 'self' https://js.stripe.com ${FORGE_HOST} 'strict-dynamic' ${INLINE_SCRIPT_HASHES.join(" ")}`
+    );
     parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
     parts.push("upgrade-insecure-requests");
   } else {
-    parts.push("script-src 'self' 'unsafe-inline' https://js.stripe.com");
+    parts.push(
+      `script-src 'self' 'unsafe-inline' https://js.stripe.com ${FORGE_HOST}`
+    );
     parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
   }
 
