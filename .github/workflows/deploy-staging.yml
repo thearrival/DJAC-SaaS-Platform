@@ -24,6 +24,9 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
 
+      - name: Generate Vercel handler bundle
+        run: node scripts/prebuild-vercel.mjs
+
       - name: Verify CI Checks
         run: pnpm lint && pnpm check && pnpm test
 
