@@ -280,46 +280,56 @@ export async function createApp() {
   );
 
   // ─── CSP report collector (browsers send application/csp-report, not JSON) ──
-  app.post(
-    "/api/csp-report",
-    express.raw({ type: "application/csp-report", limit: "64kb" }),
-    (req: Request, res: Response) => {
-      if (!req.body || req.body.length === 0) {
+  // On Vercel the serverless bridge may pre-parse JSON bodies (object), leave
+  // them as raw Buffers/strings, or have consumed the stream entirely — so the
+  // body is handled defensively here instead of relying on express.raw().
+  app.post("/api/csp-report", (req: Request, res: Response) => {
+    const raw: unknown = req.body;
+    if (raw === undefined || raw === null || raw === "") {
+      res.status(204).end();
+      return;
+    }
+
+    let payload: unknown;
+    try {
+      if (Buffer.isBuffer(raw)) {
+        payload = JSON.parse(raw.toString("utf-8"));
+      } else if (typeof raw === "string") {
+        payload = JSON.parse(raw);
+      } else if (typeof raw === "object") {
+        payload = raw;
+      } else {
         res.status(204).end();
         return;
       }
-      try {
-        const payload = JSON.parse(req.body.toString("utf-8"));
-        const report = parseCspReport(payload);
-        const isReportOnly = req.query.ro === "1";
-        if (report && Object.keys(report).length > 0) {
-          const blockedUri = report["blocked-uri"]
-            ? String(report["blocked-uri"])
-            : "unknown";
-          const violatedDirective = report["violated-directive"]
-            ? String(report["violated-directive"])
-            : "unknown";
-          const sourceFile = report["source-file"]
-            ? String(report["source-file"])
-            : "";
-          logger.warn(
-            {
-              category: "security",
-              cspReport: report,
-              reportOnly: isReportOnly,
-            },
-            `CSP violation: ${violatedDirective} blocked ${blockedUri}${sourceFile ? ` in ${sourceFile}` : ""}`
-          );
-        }
-      } catch {
-        logger.debug(
-          { category: "security" },
-          "CSP report payload was not valid JSON"
-        );
-      }
+    } catch {
       res.status(204).end();
+      return;
     }
-  );
+
+    const report = parseCspReport(payload);
+    const isReportOnly = req.query.ro === "1";
+    if (report && Object.keys(report).length > 0) {
+      const blockedUri = report["blocked-uri"]
+        ? String(report["blocked-uri"])
+        : "unknown";
+      const violatedDirective = report["violated-directive"]
+        ? String(report["violated-directive"])
+        : "unknown";
+      const sourceFile = report["source-file"]
+        ? String(report["source-file"])
+        : "";
+      logger.warn(
+        {
+          category: "security",
+          cspReport: report,
+          reportOnly: isReportOnly,
+        },
+        `CSP violation: ${violatedDirective} blocked ${blockedUri}${sourceFile ? ` in ${sourceFile}` : ""}`
+      );
+    }
+    res.status(204).end();
+  });
 
   // ─── Body parsing ─────────────────────────────────────────────────────────
   // Vercel's serverless runtime pre-parses application/json and consumes the
