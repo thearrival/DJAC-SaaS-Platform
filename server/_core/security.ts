@@ -72,10 +72,10 @@ function shouldDisableCaching(pathname: string): boolean {
 }
 
 const INLINE_SCRIPT_HASHES = [
-  "sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc=",
-  "sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U=",
-  "sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k=",
-  "sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess=",
+  "'sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc='",
+  "'sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U='",
+  "'sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k='",
+  "'sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess='",
 ];
 
 const FORGE_HOST = "https://forge.butterfly-effect.dev";
@@ -96,7 +96,7 @@ function buildCsp(isProduction: boolean): string[] {
 
   if (isProduction) {
     parts.push(
-      `script-src 'self' https://js.stripe.com ${FORGE_HOST} 'strict-dynamic' ${INLINE_SCRIPT_HASHES.join(" ")}`
+      `script-src 'self' https://js.stripe.com ${FORGE_HOST} ${INLINE_SCRIPT_HASHES.join(" ")}`
     );
     parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
     parts.push("upgrade-insecure-requests");
