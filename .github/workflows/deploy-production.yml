@@ -34,13 +34,23 @@ jobs:
       - name: Install Vercel CLI
         run: pnpm add -g vercel@latest
 
+      - name: Refresh Vercel Auth
+        env:
+          VERCEL_AUTH_JSON: ${{ secrets.VERCEL_AUTH_JSON }}
+        run: |
+          mkdir -p "$HOME/.local/share/com.vercel.cli"
+          echo "$VERCEL_AUTH_JSON" > "$HOME/.local/share/com.vercel.cli/auth.json"
+          vercel whoami >/dev/null 2>&1 || true
+          TOKEN=$(node -e "const a=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.local/share/com.vercel.cli/auth.json','utf8'));console.log(a.token)")
+          echo "VERCEL_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
       - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
 
       - name: Deploy to Production
         id: deploy
         run: |
-          DEPLOY_URL=$(vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_URL=$(vercel deploy --prod --token=$VERCEL_TOKEN)
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "Deployed to: $DEPLOY_URL"
 
