@@ -59,41 +59,6 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  if (path.startsWith("/api/_body-probe")) {
-    try {
-      const raw = (req as any).body;
-      res.status(200).json({
-        ok: true,
-        method: req.method,
-        contentType: req.headers["content-type"] || null,
-        contentLength: req.headers["content-length"] || null,
-        typeofBody: typeof raw,
-        bodyIsNull: raw === null,
-        bodyIsUndefined: raw === undefined,
-        bodyIsBuffer: Buffer.isBuffer(raw),
-        bodyLength:
-          raw === undefined || raw === null ? null : (raw as any).length,
-        bodyKeys:
-          raw !== null && typeof raw === "object" && !Buffer.isBuffer(raw)
-            ? Object.keys(raw as Record<string, unknown>)
-            : null,
-        bodyPreview:
-          typeof raw === "string"
-            ? raw.substring(0, 200)
-            : Buffer.isBuffer(raw)
-              ? raw.toString("utf-8").substring(0, 200)
-              : (JSON.stringify(raw)?.substring(0, 200) ?? null),
-        node: process.version,
-      });
-    } catch (e) {
-      res.status(500).json({
-        ok: false,
-        error: e instanceof Error ? e.message : String(e),
-      });
-    }
-    return;
-  }
-
   if (path.startsWith("/api/_debug")) {
     res.status(200).json({
       ok: true,

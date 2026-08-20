@@ -284,7 +284,13 @@ export async function createApp() {
   // them as raw Buffers/strings, or have consumed the stream entirely — so the
   // body is handled defensively here instead of relying on express.raw().
   app.post("/api/csp-report", (req: Request, res: Response) => {
-    const raw: unknown = req.body;
+    let raw: unknown;
+    try {
+      raw = req.body;
+    } catch {
+      res.status(204).end();
+      return;
+    }
     if (raw === undefined || raw === null || raw === "") {
       res.status(204).end();
       return;
