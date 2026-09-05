@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { trpc } from "@/lib/trpc";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
+import { isAppLocale } from "@/contexts/localeTypes";
 import { APP_LOGO, getLoginUrl } from "@/const";
 import {
   ArrowRight,
@@ -169,8 +170,7 @@ export default function Home() {
       organizationName: accessForm.organizationName,
       organizationType: accessForm.organizationType,
       useCase: accessForm.useCase,
-      preferredLocale:
-        locale === "en" || locale === "ar" || locale === "zh" ? locale : "en",
+      preferredLocale: isAppLocale(locale) ? locale : "en",
     });
   };
 

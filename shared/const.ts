@@ -1,6 +1,40 @@
 export const COOKIE_NAME = "app_session_id";
 export const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
 export const AXIOS_TIMEOUT_MS = 30_000;
+
+// ─── Supported UI Locales ─────────────────────────────────────────────────────
+
+/**
+ * All supported platform locales (9 languages).
+ * "en", "ar" and "zh" are the legacy content-complete packs;
+ * "fr", "es", "de", "ja", "ko" and "pt" are the extended global packs.
+ */
+export const APP_LOCALES = [
+  "en",
+  "ar",
+  "zh",
+  "fr",
+  "es",
+  "de",
+  "ja",
+  "ko",
+  "pt",
+] as const;
+
+export type AppLocale = (typeof APP_LOCALES)[number];
+
+/** BCP 47 tags for Intl formatting per supported locale. */
+export const LOCALE_TAGS: Record<AppLocale, string> = {
+  en: "en-US",
+  ar: "ar-SA",
+  zh: "zh-CN",
+  fr: "fr-FR",
+  es: "es-ES",
+  de: "de-DE",
+  ja: "ja-JP",
+  ko: "ko-KR",
+  pt: "pt-BR",
+};
 export const UNAUTHED_ERR_MSG = "Authentication required (10001)";
 export const NOT_ADMIN_ERR_MSG =
   "You do not have the required permission (10002)";

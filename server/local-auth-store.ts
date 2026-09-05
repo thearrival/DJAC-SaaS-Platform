@@ -4,6 +4,7 @@
 
 import { eq } from "drizzle-orm";
 import { localUsers } from "../drizzle/schema";
+import type { AppLocale } from "../shared/const";
 import { getDb } from "./db";
 import {
   localMemoryUsers,
@@ -158,7 +159,7 @@ export async function insertLocalUser(
       passwordHash: data.passwordHash ?? "",
       userType:
         (data.userType as "visitor" | "professional" | "admin") ?? "visitor",
-      preferredLocale: (data.preferredLocale as "en" | "ar" | "zh") ?? "en",
+      preferredLocale: (data.preferredLocale as AppLocale) ?? "en",
       status: data.status ?? "active",
       companyName: data.companyName ?? null,
       jobTitle: data.jobTitle ?? null,

@@ -4,6 +4,7 @@ import pg from "pg";
 import { InsertUser, User, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { fixSslMode } from "./_core/ssl-helper";
+import type { AppLocale } from "../shared/const";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _pool: pg.Pool | null = null;
@@ -45,7 +46,7 @@ export type UpdateUserProfileInput = {
   organizationName?: string | null;
   organizationType?: string | null;
   jobTitle?: string | null;
-  preferredLocale?: "en" | "ar" | "zh";
+  preferredLocale?: AppLocale;
 };
 
 export function getDatabaseUnavailableMessage() {

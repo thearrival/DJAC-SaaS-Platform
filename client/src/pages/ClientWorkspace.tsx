@@ -3,6 +3,12 @@ import type React from "react";
 import { trpc } from "@/lib/trpc";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
+import {
+  APP_LOCALES,
+  LOCALE_LABELS,
+  type AppLocale,
+  isAppLocale,
+} from "@/contexts/localeTypes";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useAiAssessmentJobs } from "@/hooks/useAiAssessmentJobs";
 import { AIAssessmentJobProgress } from "@/components/AIAssessmentJobProgress";
@@ -110,7 +116,7 @@ type ProfileFormState = {
   organizationName: string;
   organizationType: string;
   jobTitle: string;
-  preferredLocale: Locale;
+  preferredLocale: AppLocale;
 };
 
 type ConsultationFormState = {
@@ -583,7 +589,9 @@ export default function ClientWorkspace() {
       organizationName: user.organizationName ?? "",
       organizationType: user.organizationType ?? "",
       jobTitle: user.jobTitle ?? "",
-      preferredLocale: (user.preferredLocale ?? localeKey) as Locale,
+      preferredLocale: isAppLocale(user.preferredLocale)
+        ? user.preferredLocale
+        : localeKey,
     });
 
     setConsultationForm(prev => ({
@@ -947,24 +955,17 @@ export default function ClientWorkspace() {
                   onChange={value =>
                     setProfileForm(prev => ({
                       ...prev,
-                      preferredLocale: value as Locale,
+                      preferredLocale: value as AppLocale,
                     }))
                   }
                   ariaLabel={t(
                     "client.labelPreferredLocale",
                     "Preferred Locale"
                   )}
-                  options={[
-                    {
-                      value: "en",
-                      label: t("client.localeEnglish", "English"),
-                    },
-                    { value: "ar", label: t("client.localeArabic", "Arabic") },
-                    {
-                      value: "zh",
-                      label: t("client.localeChinese", "Chinese"),
-                    },
-                  ]}
+                  options={APP_LOCALES.map(code => ({
+                    value: code,
+                    label: LOCALE_LABELS[code],
+                  }))}
                 />
               </div>
             </div>

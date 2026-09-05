@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { APP_LOCALES } from "../shared/const";
 import {
   createAccessRequest,
   createConsultationRequest,
@@ -22,7 +23,7 @@ const accessRequestSchema = z.object({
     .max(255),
   organizationType: z.string().trim().max(120).optional(),
   useCase: z.string().trim().max(2000).optional(),
-  preferredLocale: z.enum(["en", "ar", "zh"]).optional(),
+  preferredLocale: z.enum(APP_LOCALES).optional(),
 });
 
 const consultationRequestSchema = z.object({

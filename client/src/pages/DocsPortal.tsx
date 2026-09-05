@@ -8,6 +8,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { useLocale } from "@/contexts/useLocale";
+import { APP_LOCALES, LOCALE_LABELS } from "@/contexts/localeTypes";
 import { useTheme } from "@/contexts/useTheme";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
@@ -2275,11 +2276,10 @@ function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
    Sub-component: SidebarFooter — language switcher + theme toggle
    ────────────────────────────────────────────────────────────────────────── */
 
-const DOC_LANGUAGES = [
-  { code: "en", label: "English" },
-  { code: "ar", label: "العربية" },
-  { code: "zh", label: "中文" },
-] as const;
+const DOC_LANGUAGES = APP_LOCALES.map(code => ({
+  code,
+  label: LOCALE_LABELS[code],
+}));
 
 function SidebarFooter() {
   const { locale, setLocale } = useLocale();

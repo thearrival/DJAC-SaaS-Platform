@@ -1,5 +1,6 @@
 import { parseVendorMultiValue } from "../shared/vendorProfile";
 import { hasMinRole } from "../shared/const";
+import type { AppLocale } from "../shared/const";
 import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import {
   accessRequests,
@@ -38,7 +39,7 @@ export type AccessRequestInput = {
   organizationName: string;
   organizationType?: string;
   useCase?: string;
-  preferredLocale?: "en" | "ar" | "zh";
+  preferredLocale?: AppLocale;
 };
 
 export type ConsultationRequestInput = {

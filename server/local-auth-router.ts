@@ -34,7 +34,7 @@ import { sendEmail } from "./email";
 import { recordAuditEvent } from "./audit-logger";
 import { broadcastSSE } from "./services/sse-bus";
 import { notifyLogin } from "./services/login-notification";
-import { hasMinRole } from "../shared/const";
+import { APP_LOCALES, hasMinRole } from "../shared/const";
 import {
   LOCAL_AUTH_COOKIE,
   cookieOptions,
@@ -122,7 +122,7 @@ const registerSchema = z.discriminatedUnion("userType", [
     email: emailSchema,
     password: passwordSchema,
     phoneNumber: z.string().trim().max(20).optional(),
-    preferredLocale: z.enum(["en", "ar", "zh"]).default("en"),
+    preferredLocale: z.enum(APP_LOCALES).default("en"),
   }),
   z.object({
     userType: z.literal("professional"),
@@ -134,7 +134,7 @@ const registerSchema = z.discriminatedUnion("userType", [
     jobTitle: z.string().trim().min(2).max(120),
     industry: z.string().trim().max(120).optional(),
     complianceResponsibility: z.string().trim().max(1000).optional(),
-    preferredLocale: z.enum(["en", "ar", "zh"]).default("en"),
+    preferredLocale: z.enum(APP_LOCALES).default("en"),
   }),
 ]);
 
@@ -1119,15 +1119,25 @@ export const localAuthRouter = router({
       const normalizedEmail = isPhone
         ? input.identifier
         : input.identifier.toLowerCase();
+      const tempPassword = Math.random().toString(36).slice(-12) + "!Temp";
+      const tempHash = await bcrypt.hash(tempPassword, BCRYPT_ROUNDS);
       const newUser = await insertLocalUser({
         name: input.name ?? "User",
         email: normalizedEmail,
         phoneNumber: isPhone ? input.identifier : null,
-        passwordHash: "",
+        passwordHash: tempHash,
         userType: "visitor",
         preferredLocale: "en",
         status: "active",
         verifiedAt: new Date(),
+      });
+      // Fire-and-forget: send temp password notification (SMTP-dependent)
+      void sendEmail({
+        to: normalizedEmail,
+        subject: "DJAC Account - Temporary Password",
+        html: `<p>Your DJAC account has been created.</p><p>Temporary password: <strong>${tempPassword}</strong></p><p>Please log in and change your password as soon as possible.</p>`,
+      }).catch(() => {
+        /* noop - email may fail in dev/missing SMTP config */
       });
 
       const token = await signJwt({

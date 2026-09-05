@@ -8,8 +8,8 @@ import { publicProcedure, router } from "./_core/trpc";
 import { getSupabaseClient } from "./services/supabase";
 import { upsertUser, getUserByOpenId } from "./db";
 import { ENV } from "./_core/env";
-import { COOKIE_NAME, ONE_YEAR_MS } from "../shared/const";
-import { signJwt, cookieOptions } from "./services/local-jwt";
+import { COOKIE_NAME } from "../shared/const";
+import { signJwt } from "./services/local-jwt";
 import { recordAuditEvent } from "./audit-logger";
 import { broadcastSSE } from "./services/sse-bus";
 
@@ -106,17 +106,17 @@ export const googleAuthRouter = router({
         });
       }
 
-      // Create session JWT and set cookie
       const token = await signJwt({
         sub: user.id,
         type: "oauth",
         userType: user.role ?? "basic_user",
         openId,
       });
-      const sessionCookie = cookieOptions();
       ctx.res.cookie(COOKIE_NAME, token, {
-        ...sessionCookie,
-        maxAge: ONE_YEAR_MS,
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
       });
 
       void recordAuditEvent(ctx, {

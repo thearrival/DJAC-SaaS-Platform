@@ -1,4 +1,4 @@
-import { COOKIE_NAME } from "../shared/const";
+import { APP_LOCALES, COOKIE_NAME } from "../shared/const";
 import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
@@ -27,7 +27,7 @@ export const authRouter = router({
         organizationName: z.string().trim().max(255).optional(),
         organizationType: z.string().trim().max(120).optional(),
         jobTitle: z.string().trim().max(120).optional(),
-        preferredLocale: z.enum(["en", "ar", "zh"]).optional(),
+        preferredLocale: z.enum(APP_LOCALES).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

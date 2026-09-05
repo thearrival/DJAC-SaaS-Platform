@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 import { localUsers } from "../../drizzle/schema";
 import { getDb } from "../db";
 import { ENV } from "../_core/env";
+import type { AppLocale } from "../../shared/const";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 export const LOCAL_AUTH_COOKIE = "djac_local_session";
@@ -96,7 +97,7 @@ export function createLocalMemoryUser(input: {
   phoneNumber?: string | null;
   passwordHash: string;
   userType: "visitor" | "professional" | "admin";
-  preferredLocale: "en" | "ar" | "zh";
+  preferredLocale: AppLocale;
   status?: "active" | "pending" | "suspended";
   companyName?: string | null;
   jobTitle?: string | null;

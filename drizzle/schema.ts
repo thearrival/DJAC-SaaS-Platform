@@ -26,7 +26,17 @@ export const userTypeEnum = pgEnum("userType", [
   "super_admin",
 ]);
 
-export const localeEnum = pgEnum("locale", ["en", "ar", "zh"]);
+export const localeEnum = pgEnum("locale", [
+  "en",
+  "ar",
+  "zh",
+  "fr",
+  "es",
+  "de",
+  "ja",
+  "ko",
+  "pt",
+]);
 
 export const userStatusEnum = pgEnum("userStatus", [
   "active",

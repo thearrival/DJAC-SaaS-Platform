@@ -3,6 +3,11 @@ import type React from "react";
 import { trpc } from "@/lib/trpc";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
+import {
+  APP_LOCALES,
+  LOCALE_LABELS,
+  type AppLocale,
+} from "@/contexts/localeTypes";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -112,9 +117,7 @@ function ProfileTab() {
   const [jobTitle, setJobTitle] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [industry, setIndustry] = useState("");
-  const [preferredLocale, setPreferredLocale] = useState<"en" | "ar" | "zh">(
-    "en"
-  );
+  const [preferredLocale, setPreferredLocale] = useState<AppLocale>("en");
   const [errors, setErrors] = useState<{ name?: string; companyName?: string }>(
     {}
   );
@@ -250,15 +253,17 @@ function ProfileTab() {
               </Label>
               <Select
                 value={preferredLocale}
-                onValueChange={v => setPreferredLocale(v as "en" | "ar" | "zh")}
+                onValueChange={v => setPreferredLocale(v as AppLocale)}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="ar">العربية</SelectItem>
-                  <SelectItem value="zh">中文</SelectItem>
+                  {APP_LOCALES.map(code => (
+                    <SelectItem key={code} value={code}>
+                      {LOCALE_LABELS[code]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

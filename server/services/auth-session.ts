@@ -54,7 +54,7 @@ async function resolveDevBypassUser(): Promise<User> {
 export type ApiKeyResolution = {
   user: User;
   organizationId: number;
-  organizationRole: "admin";
+  organizationRole?: string;
 } | null;
 
 export async function resolveApiKeyAuth(
@@ -79,6 +79,7 @@ export async function resolveApiKeyAuth(
       organizationId: apiKeys.organizationId,
       revokedAt: apiKeys.revokedAt,
       expiresAt: apiKeys.expiresAt,
+      scopes: apiKeys.scopes,
     })
     .from(apiKeys)
     .where(and(eq(apiKeys.keyHash, keyHash), isNull(apiKeys.revokedAt)))
@@ -93,6 +94,11 @@ export async function resolveApiKeyAuth(
     .catch(() => {
       /* noop */
     });
+
+  // Derive organization role from key scopes, fallback to "user"
+  const organizationRole = keyRow.scopes
+    ? keyRow.scopes.split(",")[0].trim()
+    : "user";
 
   const user: User = {
     id: -(10_000 + keyRow.id),
@@ -115,7 +121,7 @@ export async function resolveApiKeyAuth(
   return {
     user,
     organizationId: keyRow.organizationId,
-    organizationRole: "admin",
+    organizationRole,
   };
 }
 

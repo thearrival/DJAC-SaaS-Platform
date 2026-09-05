@@ -234,7 +234,7 @@ function Router() {
       </Route>
       <Route path={"/yalla-admin/login"}>
         <RouteErrorBoundary>
-          <NotFound />
+          <FoundersLogin />
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-admin"}>

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import { APP_LOCALES } from "../../../shared/const";
 
 const ComplianceFrameworkSchema = z.object({
   code: z.string().min(2).max(50),
@@ -13,7 +14,7 @@ const UserRegistrationSchema = z.object({
   email: z.string().email().max(320),
   password: z.string().min(8).max(72),
   name: z.string().min(2).max(255).optional(),
-  preferredLocale: z.enum(["en", "ar", "zh"]).default("en"),
+  preferredLocale: z.enum(APP_LOCALES).default("en"),
 });
 
 describe("Validation - Compliance Framework", () => {

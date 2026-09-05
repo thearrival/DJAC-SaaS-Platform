@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { APP_LOCALES } from "../shared/const";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { requireModulePermissionIfOrgContext } from "./_core/permission-guard";
 import { recordUserInteraction } from "./interaction-logger";
@@ -249,7 +250,7 @@ export const complianceFrameworkRouter = router({
     .input(
       z.object({
         jurisdiction: z.enum(REPORT_JURISDICTIONS),
-        locale: z.enum(["en", "ar", "zh"]).default("en"),
+        locale: z.enum(APP_LOCALES).default("en"),
         reportType: z
           .enum([
             "full_compliance",
@@ -297,7 +298,7 @@ export const complianceFrameworkRouter = router({
     .input(
       z.object({
         jurisdiction: z.enum(REPORT_JURISDICTIONS),
-        locale: z.enum(["en", "ar", "zh"]).default("en"),
+        locale: z.enum(APP_LOCALES).default("en"),
         reportType: z
           .enum([
             "full_compliance",
@@ -346,7 +347,7 @@ export const complianceFrameworkRouter = router({
     .input(
       z.object({
         jurisdiction: z.enum(REPORT_JURISDICTIONS),
-        locale: z.enum(["en", "ar", "zh"]).default("en"),
+        locale: z.enum(APP_LOCALES).default("en"),
         reportType: z
           .enum([
             "full_compliance",
@@ -395,7 +396,7 @@ export const complianceFrameworkRouter = router({
     .input(
       z.object({
         jurisdiction: z.enum(REPORT_JURISDICTIONS),
-        locale: z.enum(["en", "ar", "zh"]).default("en"),
+        locale: z.enum(APP_LOCALES).default("en"),
         reportType: z
           .enum([
             "full_compliance",
@@ -447,7 +448,7 @@ export const complianceFrameworkRouter = router({
     .input(
       z.object({
         jurisdiction: z.enum(REPORT_JURISDICTIONS),
-        locale: z.enum(["en", "ar", "zh"]).default("en"),
+        locale: z.enum(APP_LOCALES).default("en"),
         reportType: z
           .enum([
             "full_compliance",

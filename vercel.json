@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "node scripts/prebuild-vercel.mjs && vite build",
+  "buildCommand": "node scripts/prebuild-vercel.mjs \u0026\u0026 vite build",
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install",
   "devCommand": "pnpm dev",
@@ -10,9 +10,16 @@
     },
     "api/ping.ts": {
       "maxDuration": 30
+    },
+    "api/i18n-job.js": {
+      "maxDuration": 300
     }
   },
   "routes": [
+    {
+      "src": "/i18n-job",
+      "dest": "/api/i18n-job"
+    },
     {
       "src": "/api/ping",
       "dest": "/api/ping"
@@ -43,8 +50,8 @@
         "Cross-Origin-Opener-Policy": "same-origin",
         "Cross-Origin-Resource-Policy": "same-origin",
         "Origin-Agent-Cluster": "?1",
-        "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co https://forge.butterfly-effect.dev; frame-src https://js.stripe.com https://hooks.stripe.com; form-action 'self'; frame-ancestors 'none'; report-uri /api/csp-report; script-src 'self' https://js.stripe.com https://forge.butterfly-effect.dev 'sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc=' 'sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U=' 'sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k=' 'sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; upgrade-insecure-requests",
-        "Content-Security-Policy-Report-Only": "default-src 'self'; base-uri 'self'; object-src 'none'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co https://forge.butterfly-effect.dev; frame-src https://js.stripe.com https://hooks.stripe.com; form-action 'self'; frame-ancestors 'none'; report-uri /api/csp-report?ro=1; script-src 'self' 'unsafe-inline' https://js.stripe.com https://forge.butterfly-effect.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com"
+        "Content-Security-Policy": "default-src \u0027self\u0027; base-uri \u0027self\u0027; object-src \u0027none\u0027; img-src \u0027self\u0027 data: blob: https:; font-src \u0027self\u0027 data: https://fonts.gstatic.com; connect-src \u0027self\u0027 wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co https://forge.butterfly-effect.dev; frame-src https://js.stripe.com https://hooks.stripe.com; form-action \u0027self\u0027; frame-ancestors \u0027none\u0027; report-uri /api/csp-report; script-src \u0027self\u0027 https://js.stripe.com https://forge.butterfly-effect.dev \u0027sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc=\u0027 \u0027sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U=\u0027 \u0027sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k=\u0027 \u0027sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess=\u0027; style-src \u0027self\u0027 \u0027unsafe-inline\u0027 https://fonts.googleapis.com; upgrade-insecure-requests",
+        "Content-Security-Policy-Report-Only": "default-src \u0027self\u0027; base-uri \u0027self\u0027; object-src \u0027none\u0027; img-src \u0027self\u0027 data: blob: https:; font-src \u0027self\u0027 data: https://fonts.gstatic.com; connect-src \u0027self\u0027 wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co https://forge.butterfly-effect.dev; frame-src https://js.stripe.com https://hooks.stripe.com; form-action \u0027self\u0027; frame-ancestors \u0027none\u0027; report-uri /api/csp-report?ro=1; script-src \u0027self\u0027 \u0027unsafe-inline\u0027 https://js.stripe.com https://forge.butterfly-effect.dev; style-src \u0027self\u0027 \u0027unsafe-inline\u0027 https://fonts.googleapis.com"
       }
     }
   ],

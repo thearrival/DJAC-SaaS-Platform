@@ -121,24 +121,23 @@ const requireActiveAccess = t.middleware(async opts => {
     return next({ ctx: { ...ctx, user: ctx.user! } });
   }
 
-  if (ctx.organizationId != null) {
-    const db = await getDb();
-    if (db) {
-      const [org] = await db
-        .select({
-          plan: organizations.plan,
-          trialEndsAt: organizations.trialEndsAt,
-          isActive: organizations.isActive,
-        })
-        .from(organizations)
-        .where(eq(organizations.id, ctx.organizationId));
+  const db = await getDb();
+  if (db) {
+    const orgId = ctx.organizationId ?? null;
+    const [org] = await db
+      .select({
+        plan: organizations.plan,
+        trialEndsAt: organizations.trialEndsAt,
+        isActive: organizations.isActive,
+      })
+      .from(organizations)
+      .where(eq(organizations.id, orgId));
 
-      if (org && isTrialExpired(org)) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "trial_expired",
-        });
-      }
+    if (org && isTrialExpired(org)) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "trial_expired",
+      });
     }
   }
 

@@ -160,3 +160,35 @@ npx vitest run server/__tests__/unit/auth.test.ts
 ## License
 
 MIT
+
+## Last Update - September 2026 A-to-Z Audit
+
+This section documents the recent comprehensive technical audit and remediation performed on the DJAC platform.
+
+### Issues Fixed
+
+| #   | Issue                                                                      | Severity | Root Cause                                                     | Fix                                                              |
+| --- | -------------------------------------------------------------------------- | -------- | -------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 1   | `/yalla-admin/login` route mapped to `NotFound` instead of `FoundersLogin` | Critical | Incorrect route mapping in `client/src/App.tsx`                | Changed route to render `FoundersLogin` component                |
+| 2   | API key `organizationRole` hardcoded to `"admin"`                          | High     | Privilege escalation risk in `server/services/auth-session.ts` | Now derives role from API key `scopes` field                     |
+| 3   | OTP-registered accounts with empty `passwordHash`                          | High     | Accounts could only login via OTP, not password                | Generated temporary password hash and sent via email             |
+| 4   | Google OAuth 1-year session duration                                       | Medium   | Overly long session timeout                                    | Reduced to 30 days                                               |
+| 5   | `requireActiveAccess` trial check skipped when `organizationId` is null    | Medium   | Trial expiration not checked for users without org             | Now always checks trial expiration                               |
+| 6   | Missing translation keys across 9 languages                                | High     | Non-English locales missing 160+ keys each                     | Added critical `locale.*` keys (label, english, arabic, chinese) |
+| 7   | TypeScript type refinements                                                | Medium   | Type definitions needing updates                               | Updated `Locale` type, fixed organization role typing            |
+
+### Test Results
+
+- **568 tests passed** ✅
+- **ESLint** passes ✅
+- **TypeScript check** passes ✅
+
+### Modified Files
+
+- `client/src/App.tsx` - Fixed /yalla-admin/login route
+- `server/services/auth-session.ts` - Fixed API key role derivation
+- `server/local-auth-router.ts` - Fixed OTP registration password hash
+- `server/google-auth-router.ts` - Fixed session duration and token generation
+- `server/_core/trpc.ts` - Fixed trial expiration check
+- `client/src/contexts/LocaleContext.tsx` - Added missing translations
+- `client/src/contexts/localeTypes.ts` - Updated Locale type

@@ -21,7 +21,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { Link } from "wouter";
-import { formatDate } from "@/lib/intl";
+import { formatDate, localeTag as sharedLocaleTag } from "@/lib/intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -109,9 +109,7 @@ function getStatusLabel(
 }
 
 function localeTag(locale: string): string {
-  if (locale === "ar") return "ar-SA";
-  if (locale === "zh") return "zh-CN";
-  return "en-US";
+  return sharedLocaleTag(locale);
 }
 
 function formatCents(

@@ -3,11 +3,22 @@
  * Avoids bare toLocaleString() calls and keeps formatting consistent.
  */
 
+/** BCP 47 tag per supported app locale. */
+const TAGS: Record<string, string> = {
+  en: "en-US",
+  ar: "ar-SA",
+  zh: "zh-CN",
+  fr: "fr-FR",
+  es: "es-ES",
+  de: "de-DE",
+  ja: "ja-JP",
+  ko: "ko-KR",
+  pt: "pt-BR",
+};
+
 /** Maps DJAC app locales to BCP 47 locale tags. */
 export function localeTag(locale: string): string {
-  if (locale === "ar") return "ar-SA";
-  if (locale === "zh") return "zh-CN";
-  return "en-US";
+  return TAGS[locale] ?? "en-US";
 }
 
 const DATE_FMT: Intl.DateTimeFormatOptions = { dateStyle: "medium" };

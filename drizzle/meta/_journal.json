@@ -22,6 +22,13 @@
       "when": 1749486000000,
       "tag": "0002_add_otp_and_phone_google_sso",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787634000087,
+      "tag": "0003_expand_locale_enum_9_languages",
+      "breakpoints": true
     }
   ]
 }
