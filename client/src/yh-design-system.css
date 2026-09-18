@@ -1,0 +1,530 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   YH DESIGN SYSTEM · DJAC premium dark-mode glassmorphism re-skin
+   ─────────────────────────────────────────────────────────────────────────
+   SCOPE: presentation only. This sheet overrides visuals via existing hooks
+   (data-slot / data-sidebar / established djac-* classes). No markup, logic,
+   routing, content, or config changes. Single source of truth = :root below;
+   no hard-coded hex values appear in any rule outside :root.
+   Load order: imported at the end of index.css so it wins the cascade.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. TOKENS (sole source of truth) ───────────────────────────────────── */
+:root {
+  --yh-magenta: #d900ff;
+  --yh-cyan: #00d2ff;
+  --yh-gradient: linear-gradient(135deg, #d900ff 0%, #00d2ff 100%);
+
+  --bg-base: #050508;
+  --bg-surface: rgba(20, 20, 30, 0.6);
+  --bg-card: rgba(30, 30, 45, 0.4);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  /* Spec value #64748b scores 4.28:1 on --bg-base (fails WCAG AA 4.5:1 for
+     small text). Lightened one step to #7d8aa0 (≈5.2:1) — smallest fix that
+     passes; hue/family unchanged. */
+  --text-muted: #7d8aa0;
+
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger: #ef4444;
+
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── 2. PAGE BASE ───────────────────────────────────────────────────────── */
+html {
+  background-color: var(--bg-base);
+}
+
+body {
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--yh-magenta) 8%, transparent), transparent 25%),
+    radial-gradient(circle at 85% 30%, color-mix(in srgb, var(--yh-cyan) 8%, transparent), transparent 25%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* ── 3. TYPOGRAPHY ────────────────────────────────────────────────────────
+   Space Grotesk: brand, headings, hero stats, KPI numbers. Inter: all else. */
+h1,
+h2,
+h3,
+.font-display,
+[data-slot="card-title"],
+[data-sidebar="header"] span:first-child {
+  font-family: "Space Grotesk", "Inter", "Segoe UI", sans-serif;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+[data-slot="card-title"] {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* KPI / hero numbers */
+.djac-stat-grid :is(strong, b),
+.djac-stat-grid [class*="text-2xl"],
+.djac-stat-grid [class*="text-3xl"] {
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* Small labels + table headers: uppercase, tracked, semibold */
+[data-sidebar="group-label"],
+[data-slot="table-head"],
+.djac-caption,
+label {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* Brand tagline: wider tracking */
+[data-sidebar="header"] [class*="text-[10px]"] {
+  letter-spacing: 2px;
+}
+
+/* Gradient text utility (opt-in class, no markup restyle required) */
+.yh-gradient-text {
+  background: var(--yh-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── 4. CARDS ───────────────────────────────────────────────────────────── */
+[data-slot="card"] {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: var(--transition);
+}
+
+[data-slot="card"]:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* ── 5. BUTTONS ───────────────────────────────────────────────────────────
+   Primary = default cva variant (emits .bg-primary). Outline = cva outline
+   variant (emits .border). Scoped so destructive/secondary/ghost/link keep
+   their existing semantics. */
+[data-slot="button"].bg-primary {
+  background: var(--yh-gradient);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: var(--transition);
+}
+
+[data-slot="button"].bg-primary:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+[data-slot="button"].border {
+  background: transparent;
+  border: 1px solid var(--border-glass);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+[data-slot="button"].border:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Icon-only buttons (incl. notification triggers): circular */
+[data-slot="button"].size-9,
+[data-slot="button"].size-8,
+[data-slot="button"].size-10 {
+  border-radius: 9999px;
+}
+
+/* ── 6. INPUTS & SEARCH ─────────────────────────────────────────────────── */
+[data-slot="input"],
+[data-slot="textarea"],
+[data-slot="select-trigger"],
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+[data-slot="input"]:focus,
+[data-slot="textarea"]:focus,
+[data-slot="select-trigger"]:focus,
+[data-slot="select-trigger"][data-state="open"],
+input[type="text"]:focus,
+input[type="search"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--yh-cyan);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--yh-cyan) 10%, transparent);
+}
+
+/* Chat / AI inputs: magenta focus ring (scoped to the AI conversation
+   region so global form behavior is untouched) */
+[role="log"],
+div:has(> div > [role="log"]) {
+  --yh-chat-accent: var(--yh-magenta);
+}
+
+div:has(> div > [role="log"]) textarea,
+div:has(> div > [role="log"]) [data-slot="textarea"],
+[role="log"] ~ form textarea,
+[role="log"] ~ form [data-slot="textarea"] {
+  border-color: var(--border-glass);
+}
+
+div:has(> div > [role="log"]) textarea:focus,
+[role="log"] ~ form textarea:focus {
+  border-color: var(--yh-magenta);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--yh-magenta) 10%, transparent);
+  outline: none;
+}
+
+/* ── 7. SIDEBAR ─────────────────────────────────────────────────────────── */
+[data-sidebar="sidebar"] {
+  background: rgba(10, 10, 15, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-inline-end: 1px solid var(--border-glass);
+  width: 280px;
+}
+
+@supports not ((backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px))) {
+  /* Solid-color fallback where backdrop-filter is unsupported */
+  [data-sidebar="sidebar"] {
+    background: #0a0a0f;
+  }
+}
+
+[data-sidebar="menu-button"] {
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  transition: var(--transition);
+  border-inline-start: 3px solid transparent;
+}
+
+[data-sidebar="menu-button"]:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+[data-sidebar="menu-button"][data-active="true"] {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--yh-magenta) 15%, transparent), color-mix(in srgb, var(--yh-cyan) 5%, transparent));
+  color: var(--text-primary);
+  border-inline-start: 3px solid var(--yh-magenta);
+}
+
+[dir="rtl"] [data-sidebar="menu-button"][data-active="true"] {
+  background: linear-gradient(-90deg, color-mix(in srgb, var(--yh-magenta) 15%, transparent), color-mix(in srgb, var(--yh-cyan) 5%, transparent));
+}
+
+/* ── 8. STATUS BADGES (pill, 11px/600, status-tinted) ───────────────────── */
+[data-slot="badge"] {
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+/* Legacy hard-coded status pills used by job-progress components */
+.bg-green-100 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  color: var(--status-success) !important;
+}
+
+.bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  color: var(--status-danger) !important;
+}
+
+.bg-blue-100 {
+  background-color: color-mix(in srgb, var(--yh-cyan) 10%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--yh-cyan) 20%, transparent) !important;
+  color: var(--yh-cyan) !important;
+}
+
+/* ── 9. RISK / PROGRESS BARS ──────────────────────────────────────────────
+   Track restyled to the 6px glass track; fill keeps its level color.
+   (Level→color mapping lives in component variants, untouched.) */
+[data-slot="progress"] {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  min-height: 6px;
+  overflow: hidden;
+}
+
+[data-slot="progress-indicator"] {
+  border-radius: 9999px;
+}
+
+/* ── 10. TABLES ─────────────────────────────────────────────────────────── */
+[data-slot="table-head"] {
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+[data-slot="table-cell"],
+[data-slot="table-head"] {
+  padding-block: 16px;
+}
+
+[data-slot="table-row"] {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+[data-slot="table-body"] [data-slot="table-row"]:last-child {
+  border-bottom: none;
+}
+
+/* ── 11. TAGS / CHIPS ───────────────────────────────────────────────────── */
+.djac-tier-pill {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+}
+
+/* ── 12. AVATARS & NOTIFICATION BADGES ──────────────────────────────────── */
+[data-slot="avatar"] {
+  border-radius: 9999px;
+}
+
+[data-slot="avatar-fallback"] {
+  background: var(--yh-gradient);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Notification count badges: magenta with bg-base ring */
+.djac-badge-count,
+[data-sidebar="menu-button"] .bg-destructive {
+  background: var(--yh-magenta);
+  border: 2px solid var(--bg-base);
+  border-radius: 9999px;
+}
+
+/* ── 13. ACCENT EDGES ─────────────────────────────────────────────────────
+   AI chat panel: magenta top border (hooked via the AI conversation region,
+   no markup change). Chat bubbles: cyan leading border (logical property
+   so RTL mirrors correctly). */
+div.bg-card:has([role="log"]) {
+  border-top: 2px solid var(--yh-magenta);
+}
+
+[role="log"] .bg-muted {
+  border-inline-start: 2px solid var(--yh-cyan);
+}
+
+/* ── 14. STATUS DOTS ────────────────────────────────────────────────────── */
+.djac-pulse-dot,
+.djac-pulse-dot-green,
+.djac-status-dot::before {
+  width: 8px;
+  height: 8px;
+}
+
+.djac-pulse-dot {
+  box-shadow: 0 0 10px var(--status-danger);
+}
+
+.djac-pulse-dot-green {
+  box-shadow: 0 0 10px var(--status-success);
+  animation-duration: 2s;
+}
+
+.djac-status-dot--green::before {
+  box-shadow: 0 0 10px var(--status-success);
+}
+
+.djac-status-dot--amber::before {
+  box-shadow: 0 0 10px var(--status-warning);
+}
+
+.djac-status-dot--red::before {
+  box-shadow: 0 0 10px var(--status-danger);
+}
+
+/* ── 15. ICONS ────────────────────────────────────────────────────────────
+   Stroke style, currentColor, width 2, round caps/joins, no fill. */
+svg.lucide {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* KPI icons stroked cyan */
+.djac-kpi-hover svg,
+.djac-stat-grid svg {
+  color: var(--yh-cyan);
+}
+
+/* ── 16. HERO PANELS ──────────────────────────────────────────────────────
+   Diagonal dark gradient + magenta top-left / cyan bottom-right glows,
+   composited as background layers on existing nodes (no extra DOM). */
+.djac-home-cta-card,
+.djac-docs-next,
+.djac-demo-card {
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--yh-magenta) 8%, transparent), transparent 40%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--yh-cyan) 8%, transparent), transparent 40%),
+    linear-gradient(135deg, rgba(30, 30, 45, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+}
+
+/* ── 17. OVERLAY SURFACES (dialog/sheet/popover/tooltip) ────────────────── */
+[data-slot="dialog-content"],
+[data-slot="sheet-content"],
+[data-slot="popover-content"],
+[data-slot="tooltip-content"],
+[data-slot="select-content"] {
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+}
+
+@supports not ((backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px))) {
+  [data-slot="dialog-content"],
+  [data-slot="sheet-content"],
+  [data-slot="popover-content"] {
+    background: #14141e;
+  }
+}
+
+/* ── 18. LAYOUT ─────────────────────────────────────────────────────────── */
+main#main-content {
+  padding: 24px 32px;
+}
+
+.djac-stat-grid {
+  gap: 20px;
+}
+
+.djac-chart-grid,
+.djac-three-col,
+.djac-dash-main-grid {
+  gap: 24px;
+}
+
+/* ── 19. RESPONSIVE (CSS only, no markup rebuild) ───────────────────────── */
+@media (max-width: 1200px) {
+  main#main-content,
+  .djac-page,
+  .djac-dash-main-grid,
+  .djac-chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .djac-stat-grid,
+  .djac-dash-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  [data-sidebar="sidebar"] {
+    display: none;
+  }
+
+  main#main-content {
+    padding: 16px;
+  }
+}
+
+/* ── 20. MOTION (respects OS setting; visible focus always kept) ────────── */
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot="card"],
+  [data-slot="button"],
+  [data-slot="badge"],
+  [data-sidebar="menu-button"] {
+    transition: var(--transition);
+  }
+
+  [data-slot="card"]:hover {
+    transform: translateY(-4px);
+  }
+
+  [data-slot="button"].bg-primary:hover {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="card"]:hover {
+    transform: none;
+  }
+
+  [data-slot="button"].bg-primary:hover {
+    transform: none;
+  }
+
+  .djac-pulse-dot,
+  .djac-pulse-dot-green {
+    animation: none;
+  }
+}
+
+/* Visible focus states are never removed */
+:focus-visible {
+  outline: 2px solid var(--yh-cyan);
+  outline-offset: 2px;
+}
