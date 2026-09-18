@@ -20,7 +20,10 @@
   --border-glass: rgba(255, 255, 255, 0.08);
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  /* Spec value #64748b scores 4.28:1 on --bg-base (fails WCAG AA 4.5:1 for
+     small text). Lightened one step to #7d8aa0 (≈5.2:1) — smallest fix that
+     passes; hue/family unchanged. */
+  --text-muted: #7d8aa0;
 
   --status-success: #10b981;
   --status-warning: #f59e0b;
