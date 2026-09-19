@@ -523,7 +523,7 @@ export const localAuthRouter = router({
         companyName: z.string().trim().max(255).optional(),
         industry: z.string().trim().max(120).optional(),
         complianceResponsibility: z.string().trim().max(1000).optional(),
-        preferredLocale: z.enum(["en", "ar", "zh"]).optional(),
+        preferredLocale: z.enum(APP_LOCALES).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {

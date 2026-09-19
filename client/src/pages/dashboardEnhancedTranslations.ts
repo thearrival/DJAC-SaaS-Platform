@@ -1,8 +1,14 @@
 import type { Locale } from "@/contexts/localeTypes";
 
 type LocalizedValue = {
-  ar: string;
-  zh: string;
+  ar?: string;
+  zh?: string;
+  fr?: string;
+  es?: string;
+  de?: string;
+  ja?: string;
+  ko?: string;
+  pt?: string;
 };
 
 type FrameworkLike = {
