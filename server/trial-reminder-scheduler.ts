@@ -105,7 +105,7 @@ function buildSubject(milestone: Milestone): string {
   return "DJAC: 3 days left in your free trial";
 }
 
-async function runReminderCheck(): Promise<void> {
+export async function runReminderCheck(): Promise<void> {
   const db = await getDb();
   if (!db) return; // No DB — skip
 

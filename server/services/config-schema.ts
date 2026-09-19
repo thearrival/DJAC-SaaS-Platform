@@ -40,6 +40,9 @@ export const parsedEnv = {
     (!_isProduction
       ? "djac-dev-local-only-not-for-production-use-set-jwt-secret"
       : ""),
+  // Shared secret that Vercel Cron injects into the Authorization header of
+  // scheduled requests. When unset, cron endpoints refuse to run (safe default).
+  CRON_SECRET: process.env.CRON_SECRET ?? "",
   DATABASE_URL:
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||

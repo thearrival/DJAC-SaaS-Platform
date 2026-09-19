@@ -12,6 +12,7 @@ import {
   requireModulePermissionIfOrgContext,
 } from "../_core/permission-guard";
 import { recordUserInteraction } from "../interaction-logger";
+import { checkRateLimit } from "../_core/rateLimiter";
 import { getVendorProfileById } from "../vendor-store";
 import {
   clearAssessmentHistory,
@@ -33,6 +34,12 @@ const submitAssessmentSchema = z.object({
   persistResult: z.boolean().optional().default(true),
 });
 
+// Per-organization daily cap on AI assessment submissions. AI inference is the
+// dominant variable cost; this prevents accidental/abusive consumption loops.
+// Deliberately generous for real workflows; raise only with a cost model review.
+const AI_SUBMIT_DAILY_LIMIT_PER_ORG = 120;
+const AI_SUBMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 export const aiRouter = router({
   streamConfig: protectedProcedure.query(() => {
     return {
@@ -51,6 +58,19 @@ export const aiRouter = router({
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
           message: "AI orchestrator is disabled by configuration.",
+        });
+      }
+
+      const rl = await checkRateLimit(
+        `ai:submit:org:${ctx.organizationId}`,
+        AI_SUBMIT_DAILY_LIMIT_PER_ORG,
+        AI_SUBMIT_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message:
+            "Daily AI assessment limit reached. Please try again tomorrow or contact support.",
         });
       }
 

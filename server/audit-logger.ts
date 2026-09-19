@@ -6,6 +6,7 @@
  * the application layer (no UPDATE / DELETE exposed through tRPC).
  */
 import { createHash } from "node:crypto";
+import { desc } from "drizzle-orm";
 import { auditLogs, type InsertAuditLog } from "../drizzle/schema";
 import { getDb } from "./db";
 import { ENV } from "./_core/env";
@@ -69,6 +70,45 @@ function getHashedIpFromHeaders(
   return hashIp(first);
 }
 
+// ── Tamper-evidence hash chain ────────────────────────────────────────────────
+// Each audit row stores SHA-256(prevHash + "\n" + canonical event JSON). Edits
+// or deletions of any row break the chain and become detectable by a
+// verification script. Best-effort by design: a failure to compute the hash
+// must never block the business flow, so this always resolves to null on error.
+
+type AnyDb = NonNullable<Awaited<ReturnType<typeof getDb>>>;
+
+function computeChainHash(prevHash: string | null, eventJson: string): string {
+  return createHash("sha256")
+    .update(`${prevHash ?? "genesis"}\n${eventJson}`)
+    .digest("hex");
+}
+
+async function getPrevChainHash(db: AnyDb): Promise<string | null> {
+  try {
+    const [last] = await db
+      .select({ chainHash: auditLogs.chainHash })
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.id))
+      .limit(1);
+    return last?.chainHash ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function buildChainHash(
+  db: AnyDb,
+  event: Record<string, unknown>
+): Promise<string | null> {
+  try {
+    const prev = await getPrevChainHash(db);
+    return computeChainHash(prev, JSON.stringify(event));
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Record a platform audit event.
  * Silently swallows DB errors — audit logging must never break the main flow.
@@ -84,6 +124,18 @@ export async function recordAuditEvent(
     const userAgent =
       ctx.req.headers["user-agent"]?.toString().slice(0, 512) ?? null;
     const ipHash = hashIp(getClientIp(ctx));
+    const chainHash = await buildChainHash(db, {
+      actor: ctx.user?.id ?? null,
+      localUserId: input.localUserId ?? null,
+      org: ctx.organizationId ?? null,
+      role: ctx.user?.role ?? null,
+      category: input.category,
+      action: input.action.slice(0, 120),
+      entityType: input.entityType ?? null,
+      entityId: input.entityId ?? null,
+      outcome: input.outcome ?? "success",
+      payload: input.payload ?? null,
+    });
 
     await db.insert(auditLogs).values({
       userId: ctx.user?.id ?? null,
@@ -99,6 +151,7 @@ export async function recordAuditEvent(
       payload: sanitizePayload(input.payload),
       ipHash,
       userAgent,
+      chainHash,
     });
 
     // Broadcast real-time to the owner portal for all tracked categories
@@ -146,6 +199,18 @@ export async function recordSystemAuditEvent(input: {
   if (!db) return;
 
   try {
+    const chainHash = await buildChainHash(db, {
+      actor: "system",
+      org: input.organizationId ?? null,
+      role: input.actorRole ?? "system",
+      category: input.category,
+      action: input.action.slice(0, 120),
+      entityType: input.entityType ?? null,
+      entityId: input.entityId ?? null,
+      outcome: input.outcome ?? "success",
+      payload: input.payload ?? null,
+    });
+
     await db.insert(auditLogs).values({
       userId: null,
       localUserId: null,
@@ -160,6 +225,7 @@ export async function recordSystemAuditEvent(input: {
       payload: sanitizePayload(input.payload),
       ipHash: null,
       userAgent: null,
+      chainHash,
     });
   } catch (err) {
     console.warn("[AuditLog] Failed to persist system audit event:", err);
@@ -195,6 +261,20 @@ export async function recordTrpcFailureEvent(input: {
       ? "blocked"
       : "failure";
 
+    const chainHash = await buildChainHash(db, {
+      actor: userId,
+      localUserId,
+      org: input.ctx?.organizationId ?? null,
+      role: input.ctx?.user?.role ?? "anonymous",
+      category: "system",
+      action:
+        input.code === "BAD_REQUEST" || input.code === "PARSE_ERROR"
+          ? "trpc.validation_failed"
+          : "trpc.request_failed",
+      target: input.path ?? input.type ?? "unknown",
+      code: input.code,
+    });
+
     await db.insert(auditLogs).values({
       userId,
       localUserId,
@@ -222,6 +302,7 @@ export async function recordTrpcFailureEvent(input: {
         input.ctx?.req.headers["user-agent"]?.toString().slice(0, 512) ??
         input.headers?.["user-agent"]?.toString().slice(0, 512) ??
         null,
+      chainHash,
     });
 
     broadcastSSE("validation_event", {

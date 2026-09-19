@@ -106,6 +106,7 @@ export function evaluateStripeBillingConfig(env: StripeEnvLike) {
 export const ENV = {
   appId: parsedEnv.VITE_APP_ID,
   cookieSecret: parsedEnv.JWT_SECRET,
+  cronSecret: parsedEnv.CRON_SECRET,
   databaseUrl: parsedEnv.DATABASE_URL,
   oAuthServerUrl: parsedEnv.OAUTH_SERVER_URL,
   ownerOpenId: parsedEnv.OWNER_OPEN_ID,

@@ -480,6 +480,12 @@ export async function ensureMigrated(): Promise<void> {
       }
     };
 
+    // Audit-log tamper-evidence column (hash chain) — additive, nullable.
+    await driftExec(
+      "auditLogs.chainHash",
+      `ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text;`
+    );
+
     const driftEnums: Record<string, string[]> = {
       plan: ["free_trial", "starter", "professional", "enterprise"],
       paidPlan: ["starter", "professional", "enterprise"],

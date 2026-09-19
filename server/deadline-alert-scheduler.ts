@@ -103,7 +103,7 @@ function buildEmailText(
   return `Dear ${recipientName},\n\nCompliance deadline due in ${dayLabel}:\n${deadline.title} (${deadline.frameworkCode} · ${deadline.jurisdiction})\n\nView calendar: ${calendarUrl}\n\n— The DJAC / Yalla Hack Team`;
 }
 
-async function runAlertCheck(): Promise<void> {
+export async function runDeadlineAlertCheck(): Promise<void> {
   const db = await getDb();
   if (!db) return;
 
@@ -248,7 +248,7 @@ export function startDeadlineAlertScheduler(): () => void {
     if (running) return;
     running = true;
     try {
-      await runAlertCheck();
+      await runDeadlineAlertCheck();
     } catch (err) {
       console.warn("[DeadlineAlert] Scheduler run failed:", err);
     } finally {

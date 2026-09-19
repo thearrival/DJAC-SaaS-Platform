@@ -15,6 +15,16 @@
       "maxDuration": 300
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/deadlines",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/trials",
+      "schedule": "0 8 * * *"
+    }
+  ],
   "routes": [
     {
       "src": "/i18n-job",

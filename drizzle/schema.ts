@@ -1252,6 +1252,9 @@ export const auditLogs = pgTable("auditLogs", {
   payload: text("payload"),
   ipHash: varchar("ipHash", { length: 64 }),
   userAgent: varchar("userAgent", { length: 512 }),
+  // SHA-256 hash chaining each entry to its predecessor — makes silent edits
+  // or deletions of individual rows detectable by verification scripts.
+  chainHash: text("chainHash"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
