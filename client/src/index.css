@@ -62,148 +62,139 @@
 }
 
 :root {
-  /* ── DJAC Light Theme ── */
+  /* ── DJAC Premium Dark Palette (brand magenta→cyan) ── */
   --radius: 0.65rem;
-  --primary: oklch(0.6 0.22 290);
-  /* #9359EC purple */
-  --primary-foreground: oklch(1 0 0);
-  /* Charts (same accent palette in both modes) */
-  --chart-1: oklch(0.875 0.135 196);
-  /* cyan */
-  --chart-2: oklch(0.6 0.22 290);
-  /* purple */
-  --chart-3: oklch(0.875 0.2 145);
-  /* green */
-  --chart-4: oklch(0.62 0.25 27);
-  /* red */
-  --chart-5: oklch(0.83 0.18 97);
-  /* yellow */
+  --primary: #d900ff;
+  --primary-foreground: #ffffff;
+  /* Charts (brand + status) */
+  --chart-1: #00d2ff;
+  --chart-2: #d900ff;
+  --chart-3: #10b981;
+  --chart-4: #ef4444;
+  --chart-5: #f59e0b;
   /* Background / text */
-  --background: oklch(0.97 0.008 264);
-  /* #F2F5FF near-white */
-  --foreground: oklch(0.115 0.095 264);
-  /* #040F61 deep navy */
-  --card: oklch(1 0 0);
-  /* white */
-  --card-foreground: oklch(0.115 0.095 264);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.115 0.095 264);
-  --secondary: oklch(0.92 0.015 264);
-  --secondary-foreground: oklch(0.22 0.085 264);
-  --muted: oklch(0.93 0.012 264);
-  --muted-foreground: oklch(0.45 0.04 264);
-  --accent: oklch(0.92 0.015 264);
-  --accent-foreground: oklch(0.22 0.085 264);
-  --destructive: oklch(0.62 0.254 27);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.86 0.02 264);
-  --input: oklch(0.86 0.02 264);
-  --ring: oklch(0.6 0.22 290);
+  --background: #050508;
+  --foreground: #ffffff;
+  --card: rgba(30, 30, 45, 0.4);
+  --card-foreground: #ffffff;
+  --popover: rgba(20, 20, 30, 0.6);
+  --popover-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: #94a3b8;
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: #94a3b8;
+  --accent: rgba(255, 255, 255, 0.05);
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #00d2ff;
   /* Sidebar */
-  --sidebar: oklch(0.94 0.015 264);
-  --sidebar-foreground: oklch(0.115 0.095 264);
-  --sidebar-primary: oklch(0.6 0.22 290);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0 0 0 / 5%);
-  --sidebar-accent-foreground: oklch(0.115 0.095 264);
-  --sidebar-border: oklch(0 0 0 / 8%);
-  --sidebar-ring: oklch(0.6 0.22 290);
-  /* ── DJAC inline-style color tokens (light) ── */
-  --djac-bg: #f0f4ff;
-  --djac-bg-deep: #ffffff;
-  --djac-card: rgba(4, 15, 97, 0.04);
-  --djac-card-hi: rgba(4, 15, 97, 0.07);
-  --djac-border: rgba(4, 15, 97, 0.11);
-  --djac-border-hi: rgba(0, 100, 200, 0.35);
-  --djac-text: #020b45;
-  --djac-muted: rgba(2, 11, 69, 0.55);
-  --djac-input-bg: rgba(4, 15, 97, 0.05);
-  --djac-input-border: rgba(4, 15, 97, 0.14);
-  --djac-nav-bg: rgba(240, 244, 255, 0.92);
-  --djac-section-alt: rgba(230, 237, 255, 0.65);
-  /* ── DJAC accent colors (light: semantic / professional palette) ── */
-  --djac-cyan: #0284c7;
-  --djac-green: #16a34a;
-  --djac-red: #dc2626;
-  --djac-orange: #ea580c;
-  --djac-yellow: #d97706;
-  --djac-purple: #7c3aed;
+  --sidebar: rgba(10, 10, 15, 0.8);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #d900ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.05);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #00d2ff;
+  /* ── DJAC inline-style color tokens ── */
+  --djac-bg: #050508;
+  --djac-bg-deep: #050508;
+  --djac-card: rgba(30, 30, 45, 0.4);
+  --djac-card-hi: rgba(255, 255, 255, 0.075);
+  --djac-border: rgba(255, 255, 255, 0.08);
+  --djac-border-hi: rgba(0, 210, 255, 0.45);
+  --djac-text: #ffffff;
+  --djac-muted: #94a3b8;
+  --djac-input-bg: rgba(255, 255, 255, 0.06);
+  --djac-input-border: rgba(255, 255, 255, 0.13);
+  --djac-nav-bg: rgba(10, 10, 15, 0.8);
+  --djac-section-alt: rgba(20, 20, 30, 0.6);
+  /* ── DJAC accent colors (brand + status) ── */
+  --djac-cyan: #00d2ff;
+  --djac-green: #10b981;
+  --djac-red: #ef4444;
+  --djac-orange: #f59e0b;
+  --djac-yellow: #f59e0b;
+  --djac-purple: #d900ff;
   /* ── Semantic HSL channel vars — used as hsl(var(--success)) in animation components ── */
-  --success: 152 100% 41%;
+  --success: 160 84% 39%;
   --success-foreground: 0 0% 100%;
-  --warning: 38 92% 45%;
+  --warning: 38 92% 50%;
   --warning-foreground: 0 0% 100%;
-  --info: 201 96% 40%;
+  --info: 190 100% 50%;
   --info-foreground: 0 0% 100%;
   /* Glow shadows */
-  --glow-cyan: 0 0 20px rgba(0, 247, 255, 0.25);
-  --glow-purple: 0 0 20px rgba(147, 89, 236, 0.25);
+  --glow-cyan: 0 0 20px rgba(0, 210, 255, 0.35);
+  --glow-purple: 0 0 20px rgba(217, 0, 255, 0.35);
 }
 
 .dark {
-  /* ── DJAC Dark Theme ── */
-  --primary: oklch(0.6 0.22 290);
-  --primary-foreground: oklch(1 0 0);
-  --chart-1: oklch(0.875 0.135 196);
-  --chart-2: oklch(0.6 0.22 290);
-  --chart-3: oklch(0.875 0.2 145);
-  --chart-4: oklch(0.62 0.25 27);
-  --chart-5: oklch(0.83 0.18 97);
-  --background: oklch(0.115 0.095 264);
-  --foreground: oklch(1 0 0);
-  --card: oklch(0.138 0.085 264);
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.138 0.085 264);
-  --popover-foreground: oklch(1 0 0);
-  --secondary: oklch(0.16 0.078 264);
-  --secondary-foreground: oklch(0.65 0.015 265);
-  --muted: oklch(0.165 0.072 264);
-  --muted-foreground: oklch(0.65 0.015 265);
-  --accent: oklch(0.16 0.078 264);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.62 0.254 27);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 8%);
-  --ring: oklch(0.6 0.22 290);
-  --sidebar: oklch(0.085 0.065 264);
-  --sidebar-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.6 0.22 290);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(1 0 0 / 8%);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(1 0 0 / 7%);
-  --sidebar-ring: oklch(0.6 0.22 290);
-  /* ── DJAC inline-style color tokens (dark) ── */
-  --djac-bg: #040f61;
-  --djac-bg-deep: #020b45;
-  --djac-card: rgba(255, 255, 255, 0.044);
+  /* ── DJAC Premium Dark Palette (brand magenta→cyan) ── */
+  --primary: #d900ff;
+  --primary-foreground: #ffffff;
+  --chart-1: #00d2ff;
+  --chart-2: #d900ff;
+  --chart-3: #10b981;
+  --chart-4: #ef4444;
+  --chart-5: #f59e0b;
+  --background: #050508;
+  --foreground: #ffffff;
+  --card: rgba(30, 30, 45, 0.4);
+  --card-foreground: #ffffff;
+  --popover: rgba(20, 20, 30, 0.6);
+  --popover-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: #94a3b8;
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: #94a3b8;
+  --accent: rgba(255, 255, 255, 0.05);
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #00d2ff;
+  --sidebar: rgba(10, 10, 15, 0.8);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #d900ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.05);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #00d2ff;
+  /* ── DJAC inline-style color tokens ── */
+  --djac-bg: #050508;
+  --djac-bg-deep: #050508;
+  --djac-card: rgba(30, 30, 45, 0.4);
   --djac-card-hi: rgba(255, 255, 255, 0.075);
-  --djac-border: rgba(255, 255, 255, 0.09);
-  --djac-border-hi: rgba(0, 247, 255, 0.45);
+  --djac-border: rgba(255, 255, 255, 0.08);
+  --djac-border-hi: rgba(0, 210, 255, 0.45);
   --djac-text: #ffffff;
-  --djac-muted: #9ca3af;
+  --djac-muted: #94a3b8;
   --djac-input-bg: rgba(255, 255, 255, 0.06);
   --djac-input-border: rgba(255, 255, 255, 0.13);
-  --djac-nav-bg: rgba(4, 15, 97, 0.9);
-  --djac-section-alt: rgba(2, 11, 69, 0.65);
-  /* ── DJAC accent colors (dark: electric neon palette) ── */
-  --djac-cyan: #00f7ff;
-  --djac-green: #01ff7f;
-  --djac-red: #ff1744;
-  --djac-orange: #ff6b2b;
-  --djac-yellow: #ffd600;
-  --djac-purple: #9359ec;
-  /* ── Semantic HSL channel vars — dark (electric neon) ── */
-  --success: 152 100% 50%;
-  --success-foreground: 230 92% 12%;
+  --djac-nav-bg: rgba(10, 10, 15, 0.8);
+  --djac-section-alt: rgba(20, 20, 30, 0.6);
+  /* ── DJAC accent colors (brand + status) ── */
+  --djac-cyan: #00d2ff;
+  --djac-green: #10b981;
+  --djac-red: #ef4444;
+  --djac-orange: #f59e0b;
+  --djac-yellow: #f59e0b;
+  --djac-purple: #d900ff;
+  /* ── Semantic HSL channel vars ── */
+  --success: 160 84% 39%;
+  --success-foreground: 0 0% 100%;
   --warning: 38 92% 50%;
-  --warning-foreground: 230 92% 12%;
-  --info: 185 100% 49%;
-  --info-foreground: 230 92% 12%;
+  --warning-foreground: 0 0% 100%;
+  --info: 190 100% 50%;
+  --info-foreground: 0 0% 100%;
   /* Glow shadows */
-  --glow-cyan: 0 0 20px rgba(0, 247, 255, 0.35);
-  --glow-purple: 0 0 20px rgba(147, 89, 236, 0.35);
+  --glow-cyan: 0 0 20px rgba(0, 210, 255, 0.35);
+  --glow-purple: 0 0 20px rgba(217, 0, 255, 0.35);
 }
 
 @layer base {
@@ -1650,21 +1641,21 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   }
 
   .djac-tier-pill--high {
-    background: color-mix(in oklch, #f97316 12%, transparent);
-    border-color: color-mix(in oklch, #f97316 35%, transparent);
-    color: #f97316;
+    background: color-mix(in oklch, #f59e0b 12%, transparent);
+    border-color: color-mix(in oklch, #f59e0b 35%, transparent);
+    color: #f59e0b;
   }
 
   .djac-tier-pill--medium {
-    background: color-mix(in oklch, #eab308 12%, transparent);
-    border-color: color-mix(in oklch, #eab308 35%, transparent);
-    color: #eab308;
+    background: color-mix(in oklch, #f59e0b 12%, transparent);
+    border-color: color-mix(in oklch, #f59e0b 35%, transparent);
+    color: #f59e0b;
   }
 
   .djac-tier-pill--low {
-    background: color-mix(in oklch, #22c55e 12%, transparent);
-    border-color: color-mix(in oklch, #22c55e 35%, transparent);
-    color: #22c55e;
+    background: color-mix(in oklch, #10b981 12%, transparent);
+    border-color: color-mix(in oklch, #10b981 35%, transparent);
+    color: #10b981;
   }
 
   /* ── Content width cap for ultra-wide monitors ───────────────────────── */
@@ -1904,7 +1895,7 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   .djac-glass-card,
   [class*="shadow"] {
     box-shadow: none !important;
-    border: 1px solid #cbd5e1 !important;
+    border: 1px solid #ffffff14 !important;
   }
 
   thead {
@@ -2754,7 +2745,7 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
   width: 2.2em;
   text-align: right;
   margin-right: 1.1em;
-  color: #52525b;
+  color: #050508;
   user-select: none;
   -webkit-user-select: none;
 }
