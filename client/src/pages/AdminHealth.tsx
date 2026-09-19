@@ -75,7 +75,7 @@ export default function AdminHealth() {
           gap: 10,
         }}
       >
-        <Activity size={22} style={{ color: "#6366f1" }} />
+        <Activity size={22} style={{ color: "#d900ff" }} />
         System Health
       </h1>
       <p style={{ fontSize: 14, color: "var(--djac-muted)", marginBottom: 28 }}>
@@ -106,13 +106,13 @@ export default function AdminHealth() {
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <s.icon
                 size={18}
-                style={{ color: s.ok ? "#22c55e" : "var(--djac-destructive)" }}
+                style={{ color: s.ok ? "#10b981" : "var(--djac-destructive)" }}
               />
               <span style={{ fontSize: 13, fontWeight: 600 }}>{s.label}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               {s.ok ? (
-                <CheckCircle2 size={14} style={{ color: "#22c55e" }} />
+                <CheckCircle2 size={14} style={{ color: "#10b981" }} />
               ) : (
                 <XCircle
                   size={14}
@@ -122,7 +122,7 @@ export default function AdminHealth() {
               <span
                 style={{
                   fontSize: 12,
-                  color: s.ok ? "#22c55e" : "var(--djac-destructive)",
+                  color: s.ok ? "#10b981" : "var(--djac-destructive)",
                 }}
               >
                 {s.ok ? "OK" : "Down"}
@@ -173,7 +173,7 @@ export default function AdminHealth() {
                   padding: "6px 12px",
                   fontSize: 12,
                   fontWeight: 500,
-                  color: v ? "#22c55e" : "var(--djac-destructive)",
+                  color: v ? "#10b981" : "var(--djac-destructive)",
                 }}
               >
                 {v ? "✓" : "✗"} {k.replace(/_/g, " ")}

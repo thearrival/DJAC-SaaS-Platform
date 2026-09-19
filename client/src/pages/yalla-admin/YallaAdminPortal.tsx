@@ -514,10 +514,10 @@ function UserDetailModal({
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative h-full w-full max-w-xl bg-[#0d1526] border-l border-slate-700/60 overflow-y-auto shadow-2xl"
+        className="relative h-full w-full max-w-xl bg-[#050508] border-l border-slate-700/60 overflow-y-auto shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-[#0d1526] border-b border-slate-800/60 px-6 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-[#050508] border-b border-slate-800/60 px-6 py-4 flex items-center justify-between z-10">
           <h3 className="text-sm font-semibold text-white">User Detail</h3>
           <button
             onClick={onClose}
@@ -795,10 +795,10 @@ function OrganizationDetailModal({
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative h-full w-full max-w-2xl bg-[#0d1526] border-l border-slate-700/60 overflow-y-auto shadow-2xl"
+        className="relative h-full w-full max-w-2xl bg-[#050508] border-l border-slate-700/60 overflow-y-auto shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-[#0d1526] border-b border-slate-800/60 px-6 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-[#050508] border-b border-slate-800/60 px-6 py-4 flex items-center justify-between z-10">
           <h3 className="text-sm font-semibold text-white">
             Organization Detail
           </h3>
@@ -2730,7 +2730,7 @@ export default function YallaAdminPortal() {
 
   if (authenticated === null) {
     return (
-      <div className="min-h-screen bg-[#0a0f1e] flex items-center justify-center">
+      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -2753,7 +2753,7 @@ export default function YallaAdminPortal() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] text-white">
+    <div className="min-h-screen bg-[#050508] text-white">
       {selectedUserId !== null && (
         <UserDetailModal
           userId={selectedUserId}

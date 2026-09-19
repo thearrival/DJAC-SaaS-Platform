@@ -52,8 +52,8 @@ export default function VerifyEmail() {
     <div
       style={{
         minHeight: "100vh",
-        background: "var(--djac-bg, #0a0a0f)",
-        color: "var(--djac-text, #e2e8f0)",
+        background: "var(--djac-bg, #050508)",
+        color: "var(--djac-text, rgba(255,255,255,0.08))",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -83,7 +83,7 @@ export default function VerifyEmail() {
             <Loader2
               size={40}
               style={{
-                color: "#6366f1",
+                color: "#d900ff",
                 marginBottom: 16,
                 animation: "spin 1s linear infinite",
               }}
@@ -116,7 +116,7 @@ export default function VerifyEmail() {
           <>
             <CheckCircle2
               size={48}
-              style={{ color: "#22c55e", marginBottom: 16 }}
+              style={{ color: "#10b981", marginBottom: 16 }}
             />
             <h2
               style={{
@@ -148,7 +148,7 @@ export default function VerifyEmail() {
                   gap: 8,
                   padding: "12px 28px",
                   borderRadius: 10,
-                  background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                  background: "linear-gradient(135deg,#d900ff,#d900ff)",
                   color: "#fff",
                   fontSize: 14,
                   fontWeight: 700,
@@ -228,7 +228,7 @@ export default function VerifyEmail() {
                   style={{
                     padding: "10px 22px",
                     borderRadius: 8,
-                    background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                    background: "linear-gradient(135deg,#d900ff,#d900ff)",
                     color: "#fff",
                     fontSize: 13,
                     fontWeight: 700,

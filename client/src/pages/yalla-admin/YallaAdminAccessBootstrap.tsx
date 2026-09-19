@@ -57,7 +57,7 @@ export default function YallaAdminAccessBootstrap() {
   }, [location, navigate]);
 
   return (
-    <div className="min-h-screen bg-[#0a0f1e] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#050508] flex items-center justify-center px-4">
       <div
         className="fixed inset-0 pointer-events-none"
         style={{

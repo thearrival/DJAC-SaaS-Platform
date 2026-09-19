@@ -283,10 +283,10 @@ function StatTile({
 // ── Threat Level — bar strip + arc ────────────────────────────────────────────
 function ThreatBar({ level, isDark }: { level: ThreatLevel; isDark: boolean }) {
   const levels: { id: ThreatLevel; color: string; pct: number }[] = [
-    { id: "NORMAL", color: isDark ? "#01FF7F" : "#16a34a", pct: 15 },
-    { id: "ELEVATED", color: isDark ? "#FFD600" : "#d97706", pct: 45 },
-    { id: "HIGH", color: isDark ? "#FF6B2B" : "#ea580c", pct: 72 },
-    { id: "CRITICAL", color: isDark ? "#FF1744" : "#dc2626", pct: 100 },
+    { id: "NORMAL", color: isDark ? "#10b981" : "#10b981", pct: 15 },
+    { id: "ELEVATED", color: isDark ? "#f59e0b" : "#f59e0b", pct: 45 },
+    { id: "HIGH", color: isDark ? "#f59e0b" : "#f59e0b", pct: 72 },
+    { id: "CRITICAL", color: isDark ? "#ef4444" : "#ef4444", pct: 100 },
   ];
   const idx = levels.findIndex(l => l.id === level);
   const cur = levels[idx];
@@ -684,7 +684,7 @@ function FrameworkRadar({ C, isDark }: { C: Colors; isDark: boolean }) {
               cy={p.y}
               r={4}
               fill={C.cyan}
-              stroke={isDark ? "#0A0A18" : "#fff"}
+              stroke={isDark ? "#050508" : "#fff"}
               strokeWidth={2}
               style={{
                 filter: isDark ? `drop-shadow(0 0 4px ${C.cyan})` : "none",
@@ -982,12 +982,12 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
 
   const C: Colors = useMemo(
     () => ({
-      cyan: isDark ? "#00F7FF" : "#0284c7",
-      green: isDark ? "#01FF7F" : "#16a34a",
-      orange: isDark ? "#FF6B2B" : "#ea580c",
-      purple: isDark ? "#9359EC" : "#7c3aed",
-      red: isDark ? "#FF1744" : "#dc2626",
-      yellow: isDark ? "#FFD600" : "#d97706",
+      cyan: isDark ? "#00d2ff" : "#00d2ff",
+      green: isDark ? "#10b981" : "#10b981",
+      orange: isDark ? "#f59e0b" : "#f59e0b",
+      purple: isDark ? "#d900ff" : "#d900ff",
+      red: isDark ? "#ef4444" : "#ef4444",
+      yellow: isDark ? "#f59e0b" : "#f59e0b",
     }),
     [isDark]
   );
@@ -1083,7 +1083,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   margin: 0,
                   fontSize: 14,
                   fontWeight: 700,
-                  color: isDark ? "#fecaca" : C.red,
+                  color: isDark ? "#ef4444" : C.red,
                 }}
               >
                 {t("proIntel.errorTitle", "Live intelligence data unavailable")}

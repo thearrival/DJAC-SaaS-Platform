@@ -45,7 +45,7 @@ export default function SuperAdminLogin() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -79,7 +79,7 @@ export default function SuperAdminLogin() {
               background: "rgba(220,38,38,0.12)",
               border: "1px solid rgba(220,38,38,0.3)",
               fontSize: 11,
-              color: "#f87171",
+              color: "#ef4444",
               fontWeight: 600,
               letterSpacing: "0.05em",
               marginBottom: 12,
@@ -157,7 +157,7 @@ export default function SuperAdminLogin() {
                   left: 12,
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: "#64748b",
+                  color: "#7d8aa0",
                 }}
               />
               <input
@@ -190,7 +190,7 @@ export default function SuperAdminLogin() {
                 borderRadius: 8,
                 background: "rgba(239,68,68,0.08)",
                 border: "1px solid rgba(239,68,68,0.25)",
-                color: "#fca5a5",
+                color: "#ef4444",
                 fontSize: 13,
               }}
             >
@@ -207,7 +207,7 @@ export default function SuperAdminLogin() {
               borderRadius: 10,
               background: loading
                 ? "rgba(168,85,247,0.5)"
-                : "linear-gradient(135deg,#dc2626,#7c3aed)",
+                : "linear-gradient(135deg,#ef4444,#d900ff)",
               color: "#fff",
               fontSize: 14,
               fontWeight: 700,
@@ -223,7 +223,7 @@ export default function SuperAdminLogin() {
         <p
           style={{
             fontSize: 11,
-            color: "#64748b",
+            color: "#7d8aa0",
             textAlign: "center",
             marginTop: 20,
             marginBottom: 0,

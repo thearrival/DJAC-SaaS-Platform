@@ -67,9 +67,9 @@ export default function AdminSecurity() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "rgba(255,255,255,0.08)",
       }}
     >
       <header
@@ -132,10 +132,10 @@ export default function AdminSecurity() {
                 fontSize: 12,
                 fontWeight: 600,
                 border: "1px solid",
-                borderColor: filter === f ? "#6366f1" : "rgba(255,255,255,0.1)",
+                borderColor: filter === f ? "#d900ff" : "rgba(255,255,255,0.1)",
                 background:
                   filter === f ? "rgba(99,102,241,0.15)" : "transparent",
-                color: filter === f ? "#a5b4fc" : "#94a3b8",
+                color: filter === f ? "#d900ff" : "#94a3b8",
                 cursor: "pointer",
                 textTransform: "capitalize",
               }}
@@ -222,7 +222,7 @@ export default function AdminSecurity() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     Loading...
@@ -235,7 +235,7 @@ export default function AdminSecurity() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     No events found
@@ -261,10 +261,10 @@ export default function AdminSecurity() {
                             style={{ color: "#f59e0b" }}
                           />
                         ) : e.action?.includes("password") ? (
-                          <Key size={12} style={{ color: "#22d3ee" }} />
+                          <Key size={12} style={{ color: "#00d2ff" }} />
                         ) : e.action?.includes("2fa") ||
                           e.action?.includes("totp") ? (
-                          <Lock size={12} style={{ color: "#a855f7" }} />
+                          <Lock size={12} style={{ color: "#d900ff" }} />
                         ) : null}
                         <span>{e.action}</span>
                       </div>
@@ -281,8 +281,8 @@ export default function AdminSecurity() {
                             e.outcome === "failure"
                               ? "#f59e0b"
                               : e.outcome === "blocked"
-                                ? "#f87171"
-                                : "#4ade80",
+                                ? "#ef4444"
+                                : "#10b981",
                         }}
                       >
                         {e.outcome || "—"}
@@ -291,7 +291,7 @@ export default function AdminSecurity() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#64748b",
+                        color: "#7d8aa0",
                         fontSize: 12,
                         fontFamily: "monospace",
                       }}
@@ -301,7 +301,7 @@ export default function AdminSecurity() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#64748b",
+                        color: "#7d8aa0",
                         fontSize: 12,
                       }}
                     >

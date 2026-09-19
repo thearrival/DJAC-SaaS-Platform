@@ -56,10 +56,10 @@ type UserStatus = "active" | "invited" | "suspended";
 type AccessDraftMap = Record<number, { role: UserRole; status: UserStatus }>;
 
 const riskColors: Record<string, string> = {
-  critical: "#dc2626",
-  high: "#ea580c",
-  medium: "#ca8a04",
-  low: "#16a34a",
+  critical: "#ef4444",
+  high: "#f59e0b",
+  medium: "#f59e0b",
+  low: "#10b981",
 };
 
 type FrameworkNode = {
@@ -126,26 +126,26 @@ const frameworkNodes: FrameworkNode[] = [
 
 function frameworkClusterColor(cluster: FrameworkNode["cluster"]) {
   if (cluster === "china") {
-    return "#1d4ed8";
+    return "#d900ff";
   }
 
   if (cluster === "saudi") {
-    return "#0f766e";
+    return "#10b981";
   }
 
   if (cluster === "eu") {
-    return "#7c3aed";
+    return "#d900ff";
   }
 
   if (cluster === "us") {
-    return "#ea580c";
+    return "#f59e0b";
   }
 
   if (cluster === "global") {
-    return "#4338ca";
+    return "#d900ff";
   }
 
-  return "#7c3aed";
+  return "#d900ff";
 }
 
 function normalizeFrameworkCode(code: string | null | undefined) {
@@ -856,8 +856,8 @@ export default function AdminControlCenter() {
         className="rounded-2xl border border-border p-6 shadow-xl"
         style={{
           background: isDark
-            ? "linear-gradient(90deg, #0f172a, #1e293b, #0f172a)"
-            : "linear-gradient(90deg, #1e3a5f, #1d4ed8, #1e3a5f)",
+            ? "linear-gradient(90deg, #050508, #050508, #050508)"
+            : "linear-gradient(90deg, #050508, #d900ff, #050508)",
           color: "#fff",
         }}
       >
@@ -1170,7 +1170,7 @@ export default function AdminControlCenter() {
                     <svg viewBox="0 0 100 100" className="h-full w-full">
                       <polyline
                         fill="none"
-                        stroke="#2563eb"
+                        stroke="#d900ff"
                         strokeWidth="2"
                         points={activityPolylinePoints}
                       />
@@ -1203,7 +1203,7 @@ export default function AdminControlCenter() {
                         className="h-2 rounded-full"
                         style={{
                           width: `${Math.min(100, row.value * 10)}%`,
-                          backgroundColor: riskColors[row.label] ?? "#2563eb",
+                          backgroundColor: riskColors[row.label] ?? "#d900ff",
                         }}
                       />
                     </div>
@@ -1241,7 +1241,7 @@ export default function AdminControlCenter() {
                             width: `${Math.max(0, Math.min(100, row.complianceScore ?? 0))}%`,
                             backgroundColor:
                               riskColors[row.riskLevel ?? "medium"] ??
-                              "#2563eb",
+                              "#d900ff",
                           }}
                         />
                       </div>
@@ -1457,7 +1457,7 @@ export default function AdminControlCenter() {
                     refY="5"
                     orient="auto"
                   >
-                    <path d="M0,0 L10,5 L0,10 Z" fill="#64748b" />
+                    <path d="M0,0 L10,5 L0,10 Z" fill="#7d8aa0" />
                   </marker>
                 </defs>
 
@@ -1480,7 +1480,7 @@ export default function AdminControlCenter() {
                       <path
                         d={`M ${source.x} ${source.y} Q ${midpointX} ${midpointY} ${target.x} ${target.y}`}
                         fill="none"
-                        stroke="#64748b"
+                        stroke="#7d8aa0"
                         strokeOpacity="0.6"
                         strokeWidth="1.5"
                         markerEnd="url(#frameworkArrow)"

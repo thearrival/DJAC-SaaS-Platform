@@ -63,7 +63,7 @@ export default function NotFound() {
           font-size: clamp(80px, 18vw, 130px);
           font-weight: 900;
           line-height: 1;
-          background: linear-gradient(135deg, var(--djac-cyan, #00F7FF), var(--djac-purple, #9359EC));
+          background: linear-gradient(135deg, var(--djac-cyan, #00d2ff), var(--djac-purple, #d900ff));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -125,7 +125,7 @@ export default function NotFound() {
             onClick={handleHome}
             style={{
               background:
-                "linear-gradient(135deg, var(--djac-purple, #9359EC), var(--djac-cyan, #00F7FF))",
+                "linear-gradient(135deg, var(--djac-purple, #d900ff), var(--djac-cyan, #00d2ff))",
               color: "var(--primary-foreground, #fff)",
               border: "none",
               padding: "0.65rem 1.6rem",

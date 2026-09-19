@@ -55,9 +55,9 @@ export default function AdminOrganizations() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "rgba(255,255,255,0.08)",
       }}
     >
       <header
@@ -85,7 +85,7 @@ export default function AdminOrganizations() {
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
             Organizations
           </h1>
-          <span style={{ fontSize: 12, color: "#64748b" }}>
+          <span style={{ fontSize: 12, color: "#7d8aa0" }}>
             {orgs.length} total
           </span>
         </div>
@@ -113,7 +113,7 @@ export default function AdminOrganizations() {
               left: 12,
               top: "50%",
               transform: "translateY(-50%)",
-              color: "#64748b",
+              color: "#7d8aa0",
             }}
           />
           <input
@@ -200,7 +200,7 @@ export default function AdminOrganizations() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     Loading...
@@ -213,7 +213,7 @@ export default function AdminOrganizations() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     No organizations found
@@ -227,7 +227,7 @@ export default function AdminOrganizations() {
                   >
                     <td style={{ padding: "12px 16px" }}>
                       <div style={{ fontWeight: 500 }}>{o.name}</div>
-                      <div style={{ fontSize: 12, color: "#64748b" }}>
+                      <div style={{ fontSize: 12, color: "#7d8aa0" }}>
                         ID: {o.id}
                       </div>
                     </td>
@@ -245,7 +245,7 @@ export default function AdminOrganizations() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#64748b",
+                        color: "#7d8aa0",
                         fontSize: 12,
                       }}
                     >

@@ -68,30 +68,30 @@ const RISK_COLOR: Record<string, { bg: string; border: string; text: string }> =
     "tier-1-critical": {
       bg: "rgba(255,23,68,0.10)",
       border: "rgba(255,23,68,0.30)",
-      text: "#ff4d6a",
+      text: "#ef4444",
     },
     "tier-2-high": {
       bg: "rgba(255,107,43,0.10)",
       border: "rgba(255,107,43,0.28)",
-      text: "#ff7a38",
+      text: "#f59e0b",
     },
     "tier-3-moderate": {
       bg: "rgba(255,214,0,0.10)",
       border: "rgba(255,214,0,0.28)",
-      text: "#e5c000",
+      text: "#f59e0b",
     },
     "tier-4-low": {
       bg: "rgba(1,255,127,0.08)",
       border: "rgba(1,255,127,0.22)",
-      text: "#00d46a",
+      text: "#10b981",
     },
   };
 
 const CRIT_COLOR: Record<string, { bg: string; text: string }> = {
-  "mission-critical": { bg: "rgba(255,23,68,0.08)", text: "#ff4d6a" },
-  high: { bg: "rgba(255,107,43,0.08)", text: "#ff7a38" },
-  moderate: { bg: "rgba(255,214,0,0.08)", text: "#e5c000" },
-  low: { bg: "rgba(1,255,127,0.07)", text: "#00d46a" },
+  "mission-critical": { bg: "rgba(255,23,68,0.08)", text: "#ef4444" },
+  high: { bg: "rgba(255,107,43,0.08)", text: "#f59e0b" },
+  moderate: { bg: "rgba(255,214,0,0.08)", text: "#f59e0b" },
+  low: { bg: "rgba(1,255,127,0.07)", text: "#10b981" },
 };
 
 function getRiskLabel(value: string, locale: string): string {
@@ -229,7 +229,7 @@ function Chips({ values }: { values: string[] }) {
             fontWeight: 500,
             background: "rgba(99,102,241,0.12)",
             border: "1px solid rgba(99,102,241,0.25)",
-            color: "#a5b4fc",
+            color: "#d900ff",
             whiteSpace: "nowrap",
           }}
         >
@@ -490,7 +490,7 @@ export default function VendorRiskDashboard() {
           padding: "0 0 0 4px",
           display: "inline-flex",
           alignItems: "center",
-          color: active ? "#a855f7" : "var(--djac-muted)",
+          color: active ? "#d900ff" : "var(--djac-muted)",
         }}
       >
         <ArrowUpDown size={12} />
@@ -525,7 +525,7 @@ export default function VendorRiskDashboard() {
               gap: 10,
             }}
           >
-            <ShieldAlert size={22} style={{ color: "#a855f7" }} />
+            <ShieldAlert size={22} style={{ color: "#d900ff" }} />
             {t("vendorRisk.title", "Vendor Risk Dashboard")}
           </h1>
           <p style={{ fontSize: 14, color: "var(--djac-muted)" }}>
@@ -557,7 +557,7 @@ export default function VendorRiskDashboard() {
                   borderRadius: 8,
                   background: "rgba(6,182,212,0.1)",
                   border: "1px solid rgba(6,182,212,0.3)",
-                  color: "#22d3ee",
+                  color: "#00d2ff",
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: "pointer",
@@ -579,7 +579,7 @@ export default function VendorRiskDashboard() {
                   borderRadius: 8,
                   background: "rgba(168,85,247,0.12)",
                   border: "1px solid rgba(168,85,247,0.30)",
-                  color: "#c084fc",
+                  color: "#d900ff",
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: "pointer",
@@ -602,7 +602,7 @@ export default function VendorRiskDashboard() {
                 background:
                   "linear-gradient(135deg,rgba(168,85,247,0.2),rgba(99,102,241,0.2))",
                 border: "1px solid rgba(168,85,247,0.35)",
-                color: "#c084fc",
+                color: "#d900ff",
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: "pointer",
@@ -695,7 +695,7 @@ export default function VendorRiskDashboard() {
               background:
                 filter === "" ? "rgba(168,85,247,0.18)" : "var(--djac-card)",
               border: `1px solid ${filter === "" ? "rgba(168,85,247,0.4)" : "var(--djac-border)"}`,
-              color: filter === "" ? "#c084fc" : "var(--djac-muted)",
+              color: filter === "" ? "#d900ff" : "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -778,7 +778,7 @@ export default function VendorRiskDashboard() {
                     ? "rgba(6,182,212,0.15)"
                     : "var(--djac-card)",
                   border: `1px solid ${active ? "rgba(6,182,212,0.4)" : "var(--djac-border)"}`,
-                  color: active ? "#22d3ee" : "var(--djac-muted)",
+                  color: active ? "#00d2ff" : "var(--djac-muted)",
                   cursor: "pointer",
                 }}
               >
@@ -891,7 +891,7 @@ export default function VendorRiskDashboard() {
               style={{
                 padding: "10px 20px",
                 borderRadius: 8,
-                background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                background: "linear-gradient(135deg,#d900ff,#d900ff)",
                 border: "none",
                 color: "#fff",
                 fontSize: 13,
@@ -932,7 +932,7 @@ export default function VendorRiskDashboard() {
                 style={{
                   padding: "10px 20px",
                   borderRadius: 8,
-                  background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                  background: "linear-gradient(135deg,#d900ff,#d900ff)",
                   border: "none",
                   color: "#fff",
                   fontSize: 13,
@@ -1075,7 +1075,7 @@ export default function VendorRiskDashboard() {
                               justifyContent: "center",
                               fontSize: 12,
                               fontWeight: 700,
-                              color: "#c084fc",
+                              color: "#d900ff",
                               flexShrink: 0,
                             }}
                           >
@@ -1257,7 +1257,7 @@ export default function VendorRiskDashboard() {
             background: "rgba(248,113,113,0.08)",
             border: "1px solid rgba(248,113,113,0.2)",
             fontSize: 13,
-            color: "#f87171",
+            color: "#ef4444",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -1337,7 +1337,7 @@ export default function VendorRiskDashboard() {
             <DialogTitle
               style={{ display: "flex", alignItems: "center", gap: 8 }}
             >
-              <Bot size={18} style={{ color: "#a855f7" }} />
+              <Bot size={18} style={{ color: "#d900ff" }} />
               {t("vendorRisk.batchTitle", "Batch AI Assessment")}
             </DialogTitle>
           </DialogHeader>
@@ -1385,7 +1385,7 @@ export default function VendorRiskDashboard() {
                 }
                 style={{
                   fontSize: 12,
-                  color: "#a855f7",
+                  color: "#d900ff",
                   background: "none",
                   border: "none",
                   cursor: "pointer",
@@ -1446,7 +1446,7 @@ export default function VendorRiskDashboard() {
                     checked={checked}
                     onChange={() => toggleBatchVendor(v.id)}
                     style={{
-                      accentColor: "#a855f7",
+                      accentColor: "#d900ff",
                       width: 14,
                       height: 14,
                       flexShrink: 0,
@@ -1498,13 +1498,13 @@ export default function VendorRiskDashboard() {
                   marginBottom: 4,
                 }}
               >
-                <CheckCircle size={14} style={{ color: "#4ade80" }} />
+                <CheckCircle size={14} style={{ color: "#10b981" }} />
                 {batchResult.queued.length}{" "}
                 {t("vendorRisk.batchQueued", "assessments queued")}
                 {batchResult.errors.length > 0 && (
                   <>
                     <span> · </span>
-                    <XCircle size={14} style={{ color: "#f87171" }} />
+                    <XCircle size={14} style={{ color: "#ef4444" }} />
                     {batchResult.errors.length}{" "}
                     {t("vendorRisk.batchErrorCount", "errors")}
                   </>
@@ -1517,7 +1517,7 @@ export default function VendorRiskDashboard() {
                 return (
                   <div
                     key={e.vendorId}
-                    style={{ fontSize: 12, color: "#f87171", marginTop: 2 }}
+                    style={{ fontSize: 12, color: "#ef4444", marginTop: 2 }}
                   >
                     {name}: {e.error}
                   </div>
@@ -1551,7 +1551,7 @@ export default function VendorRiskDashboard() {
               style={{
                 padding: "8px 20px",
                 borderRadius: 8,
-                background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                background: "linear-gradient(135deg,#d900ff,#d900ff)",
                 border: "none",
                 color: "#fff",
                 fontSize: 13,

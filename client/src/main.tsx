@@ -36,11 +36,11 @@ const renderStartupFallback = (message?: string) => {
 
   const root = getAppRoot();
   root.innerHTML = `
-    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#f3f4f6;color:#111827;font-family:Inter,Arial,sans-serif;">
-      <div style="max-width:560px;background:#ffffff;border:1px solid #d1d5db;border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.08);text-align:center;">
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#050508;color:#ffffff;font-family:Inter,Arial,sans-serif;">
+      <div style="max-width:560px;background:rgba(30,30,45,0.4);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.08);text-align:center;">
         <h1 style="margin:0 0 12px;font-size:24px;font-weight:700;">DJAC is loading safely</h1>
         <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">The app hit a browser compatibility or startup issue.</p>
-        <p style="margin:0;font-size:13px;line-height:1.6;color:#4b5563;">${message ?? "Please refresh the page or open it in a current browser."}</p>
+        <p style="margin:0;font-size:13px;line-height:1.6;color:#94a3b8;">${message ?? "Please refresh the page or open it in a current browser."}</p>
       </div>
     </div>
   `;

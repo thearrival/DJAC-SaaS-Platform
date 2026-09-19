@@ -55,9 +55,9 @@ export default function AdminAudit() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "rgba(255,255,255,0.08)",
       }}
     >
       <header
@@ -95,7 +95,7 @@ export default function AdminAudit() {
                 left: 8,
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#64748b",
+                color: "#7d8aa0",
               }}
             />
             <input
@@ -208,7 +208,7 @@ export default function AdminAudit() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     Loading...
@@ -221,7 +221,7 @@ export default function AdminAudit() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     No audit entries found
@@ -236,7 +236,7 @@ export default function AdminAudit() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#64748b",
+                        color: "#7d8aa0",
                         fontSize: 12,
                         whiteSpace: "nowrap",
                       }}
@@ -255,7 +255,7 @@ export default function AdminAudit() {
                           padding: "2px 6px",
                           borderRadius: 4,
                           background: "rgba(99,102,241,0.1)",
-                          color: "#a5b4fc",
+                          color: "#d900ff",
                         }}
                       >
                         {log.action}
@@ -273,7 +273,7 @@ export default function AdminAudit() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#64748b",
+                        color: "#7d8aa0",
                         fontSize: 12,
                         fontFamily: "monospace",
                       }}

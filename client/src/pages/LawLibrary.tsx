@@ -434,7 +434,7 @@ export default function LawLibrary() {
         <h1
           className="text-3xl font-bold mb-1.5"
           style={{
-            background: "linear-gradient(135deg,#FFD600,#FF6B2B)",
+            background: "linear-gradient(135deg,#f59e0b,#f59e0b)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",

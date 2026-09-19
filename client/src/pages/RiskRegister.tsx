@@ -246,10 +246,10 @@ function HeatMap({ risks }: { risks: RiskRow[] }) {
                     tier === "critical"
                       ? "#ef4444"
                       : tier === "high"
-                        ? "#f97316"
+                        ? "#f59e0b"
                         : tier === "medium"
-                          ? "#eab308"
-                          : "#22c55e",
+                          ? "#f59e0b"
+                          : "#10b981",
                 }}
               />
               {t(

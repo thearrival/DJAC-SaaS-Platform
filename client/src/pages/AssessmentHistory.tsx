@@ -120,11 +120,11 @@ const STATUS_CONFIG: Record<
 > = {
   completed: {
     label: "Completed",
-    color: "#22c55e",
+    color: "#10b981",
     bg: "rgba(34,197,94,0.10)",
     border: "rgba(34,197,94,0.30)",
     icon: ({ size = 13 }) => (
-      <CheckCircle2 size={size} style={{ color: "#22c55e" }} />
+      <CheckCircle2 size={size} style={{ color: "#10b981" }} />
     ),
   },
   failed: {
@@ -138,13 +138,13 @@ const STATUS_CONFIG: Record<
   },
   running: {
     label: "Running",
-    color: "#3b82f6",
+    color: "#00d2ff",
     bg: "rgba(59,130,246,0.10)",
     border: "rgba(59,130,246,0.30)",
     icon: ({ size = 13 }) => (
       <Loader2
         size={size}
-        style={{ color: "#3b82f6", animation: "spin 1s linear infinite" }}
+        style={{ color: "#00d2ff", animation: "spin 1s linear infinite" }}
       />
     ),
   },
@@ -160,9 +160,9 @@ const STATUS_CONFIG: Record<
 };
 
 const RISK_COLOR: Record<string, string> = {
-  low: "#22c55e",
-  medium: "#eab308",
-  high: "#f97316",
+  low: "#10b981",
+  medium: "#f59e0b",
+  high: "#f59e0b",
   critical: "#ef4444",
 };
 
@@ -171,13 +171,13 @@ const SEV_ICON: Record<string, React.FC<{ size?: number }>> = {
     <ShieldX size={size} style={{ color: "#ef4444" }} />
   ),
   high: ({ size = 11 }) => (
-    <ShieldAlert size={size} style={{ color: "#f97316" }} />
+    <ShieldAlert size={size} style={{ color: "#f59e0b" }} />
   ),
   medium: ({ size = 11 }) => (
-    <AlertTriangle size={size} style={{ color: "#eab308" }} />
+    <AlertTriangle size={size} style={{ color: "#f59e0b" }} />
   ),
   low: ({ size = 11 }) => (
-    <ShieldCheck size={size} style={{ color: "#22c55e" }} />
+    <ShieldCheck size={size} style={{ color: "#10b981" }} />
   ),
 };
 
@@ -216,7 +216,7 @@ function sourceBadge(source: string) {
     <span
       style={{
         fontSize: 10,
-        color: "#a78bfa",
+        color: "#d900ff",
         background: "rgba(167,139,250,0.12)",
         border: "1px solid rgba(167,139,250,0.25)",
         padding: "1px 6px",
@@ -229,7 +229,7 @@ function sourceBadge(source: string) {
     <span
       style={{
         fontSize: 10,
-        color: "#60a5fa",
+        color: "#00d2ff",
         background: "rgba(96,165,250,0.12)",
         border: "1px solid rgba(96,165,250,0.25)",
         padding: "1px 6px",
@@ -302,14 +302,14 @@ function EventTimeline({
                   padding: "0 5px",
                   borderRadius: 3,
                   background: "rgba(99,102,241,0.15)",
-                  color: "#818cf8",
+                  color: "#d900ff",
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
                 }}
               >
                 {ev.stage}
               </span>
-              <span style={{ fontSize: 10, color: "#64748b" }}>
+              <span style={{ fontSize: 10, color: "#7d8aa0" }}>
                 {formatTs(ev.timestamp)}
               </span>
             </div>
@@ -335,7 +335,7 @@ function EventTimeline({
             background: "rgba(239,68,68,0.08)",
             border: "1px solid rgba(239,68,68,0.25)",
             fontSize: 12,
-            color: "#fca5a5",
+            color: "#ef4444",
           }}
         >
           {error}
@@ -374,7 +374,7 @@ const ADDITIONAL_SCORE_LABELS: Record<string, string> = {
 };
 
 function ScoreMini({ label, score }: { label: string; score: number }) {
-  const color = score >= 85 ? "#22c55e" : score >= 65 ? "#eab308" : "#ef4444";
+  const color = score >= 85 ? "#10b981" : score >= 65 ? "#f59e0b" : "#ef4444";
   return (
     <div style={{ textAlign: "center" }}>
       <div style={{ fontSize: 16, fontWeight: 700, color, lineHeight: 1 }}>
@@ -383,7 +383,7 @@ function ScoreMini({ label, score }: { label: string; score: number }) {
       <div
         style={{
           fontSize: 9,
-          color: "#64748b",
+          color: "#7d8aa0",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
         }}
@@ -466,7 +466,7 @@ function JobCard({
                   style={{
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "var(--djac-foreground, #f1f5f9)",
+                    color: "var(--djac-foreground, rgba(255,255,255,0.05))",
                     textDecoration: "none",
                     display: "inline-flex",
                     alignItems: "center",
@@ -482,7 +482,7 @@ function JobCard({
                   style={{
                     fontSize: 13,
                     fontWeight: 600,
-                    color: "var(--djac-foreground, #f1f5f9)",
+                    color: "var(--djac-foreground, rgba(255,255,255,0.05))",
                   }}
                 >
                   {vendorName}
@@ -516,13 +516,13 @@ function JobCard({
                 alignItems: "center",
               }}
             >
-              <span style={{ fontSize: 11, color: "#64748b" }}>
+              <span style={{ fontSize: 11, color: "#7d8aa0" }}>
                 Job #{shortId(job.id)}
               </span>
               <span
                 style={{
                   fontSize: 11,
-                  color: "#64748b",
+                  color: "#7d8aa0",
                   display: "flex",
                   alignItems: "center",
                   gap: 3,
@@ -532,7 +532,7 @@ function JobCard({
                 {formatTs(job.createdAt)}
               </span>
               {job.status !== "queued" && job.status !== "running" && (
-                <span style={{ fontSize: 11, color: "#64748b" }}>
+                <span style={{ fontSize: 11, color: "#7d8aa0" }}>
                   Duration: {formatDuration(job.createdAt, job.updatedAt)}
                 </span>
               )}
@@ -633,7 +633,7 @@ function JobCard({
                     {count}
                   </span>
                   <span
-                    style={{ color: "#64748b", textTransform: "capitalize" }}
+                    style={{ color: "#7d8aa0", textTransform: "capitalize" }}
                   >
                     {sev}
                   </span>
@@ -642,7 +642,7 @@ function JobCard({
             })}
             {job.persistence && !job.persistence.skipped && (
               <span
-                style={{ fontSize: 11, color: "#22c55e", marginLeft: "auto" }}
+                style={{ fontSize: 11, color: "#10b981", marginLeft: "auto" }}
               >
                 âœ“ Persisted ({job.persistence.savedAssessments} assessments,{" "}
                 {job.persistence.savedGaps} gaps)
@@ -650,7 +650,7 @@ function JobCard({
             )}
             {job.persistence?.skipped && (
               <span
-                style={{ fontSize: 11, color: "#64748b", marginLeft: "auto" }}
+                style={{ fontSize: 11, color: "#7d8aa0", marginLeft: "auto" }}
               >
                 Not persisted
               </span>
@@ -672,7 +672,7 @@ function JobCard({
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "#64748b",
+                  color: "#7d8aa0",
                   fontSize: 11,
                   fontWeight: 500,
                 }}
@@ -738,7 +738,7 @@ function StatTile({
       <div
         style={{
           fontSize: 11,
-          color: "#64748b",
+          color: "#7d8aa0",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
         }}
@@ -865,7 +865,7 @@ export default function AssessmentHistory() {
             flexShrink: 0,
           }}
         >
-          <Bot size={20} style={{ color: "#818cf8" }} />
+          <Bot size={20} style={{ color: "#d900ff" }} />
         </div>
         <div style={{ flex: 1 }}>
           <h1
@@ -873,7 +873,7 @@ export default function AssessmentHistory() {
               margin: 0,
               fontSize: 21,
               fontWeight: 700,
-              color: "var(--djac-foreground, #f1f5f9)",
+              color: "var(--djac-foreground, rgba(255,255,255,0.05))",
             }}
           >
             {t("assessmentHistory.title", "AI Assessment History")}
@@ -882,7 +882,7 @@ export default function AssessmentHistory() {
             style={{
               margin: "3px 0 0",
               fontSize: 13,
-              color: "#64748b",
+              color: "#7d8aa0",
               maxWidth: 620,
             }}
           >
@@ -930,7 +930,7 @@ export default function AssessmentHistory() {
           <StatTile
             label={t("assessmentHistory.statTotal", "Total Jobs")}
             count={stats.total}
-            color="#818cf8"
+            color="#d900ff"
             icon={({ size, style }) => (
               <ClipboardList size={size} style={style} />
             )}
@@ -938,7 +938,7 @@ export default function AssessmentHistory() {
           <StatTile
             label={t("assessmentHistory.statCompleted", "Completed")}
             count={stats.completed}
-            color="#22c55e"
+            color="#10b981"
             icon={({ size, style }) => (
               <CheckCircle2 size={size} style={style} />
             )}
@@ -954,7 +954,7 @@ export default function AssessmentHistory() {
           <StatTile
             label={t("assessmentHistory.statActive", "In Progress")}
             count={stats.active}
-            color="#3b82f6"
+            color="#00d2ff"
             icon={({ size, style }) => <Loader2 size={size} style={style} />}
           />
         </div>
@@ -974,11 +974,11 @@ export default function AssessmentHistory() {
               fontWeight: 500,
               border:
                 filter === tab.key
-                  ? "1px solid #818cf8"
+                  ? "1px solid #d900ff"
                   : "1px solid var(--djac-border, rgba(148,163,184,0.15))",
               background:
                 filter === tab.key ? "rgba(129,140,248,0.15)" : "transparent",
-              color: filter === tab.key ? "#818cf8" : "#94a3b8",
+              color: filter === tab.key ? "#d900ff" : "#94a3b8",
               cursor: "pointer",
               transition: "all 0.15s",
             }}
@@ -1007,7 +1007,7 @@ export default function AssessmentHistory() {
             alignItems: "center",
             gap: 10,
             padding: 60,
-            color: "#64748b",
+            color: "#7d8aa0",
             fontSize: 14,
             justifyContent: "center",
           }}
@@ -1024,7 +1024,7 @@ export default function AssessmentHistory() {
             borderRadius: 10,
             background: "rgba(239,68,68,0.08)",
             border: "1px solid rgba(239,68,68,0.25)",
-            color: "#fca5a5",
+            color: "#ef4444",
             fontSize: 13,
           }}
         >
@@ -1050,7 +1050,7 @@ export default function AssessmentHistory() {
             alignItems: "center",
             gap: 14,
             padding: "80px 0",
-            color: "#64748b",
+            color: "#7d8aa0",
           }}
         >
           <Bot size={40} style={{ opacity: 0.25 }} />
@@ -1060,7 +1060,7 @@ export default function AssessmentHistory() {
                 margin: "0 0 5px",
                 fontSize: 15,
                 fontWeight: 600,
-                color: "var(--djac-foreground, #f1f5f9)",
+                color: "var(--djac-foreground, rgba(255,255,255,0.05))",
               }}
             >
               {filter === "all"

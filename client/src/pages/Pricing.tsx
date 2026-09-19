@@ -59,7 +59,7 @@ const PLANS: PlanConfig[] = [
     name: "Starter",
     tagline: "Perfect for startups and early-stage compliance.",
     icon: <Zap size={22} />,
-    color: "#22d3ee",
+    color: "#00d2ff",
     borderColor: "border-cyan-500/40",
     bgColor: "from-cyan-500/10 to-transparent",
     prices: {
@@ -91,7 +91,7 @@ const PLANS: PlanConfig[] = [
     name: "Professional",
     tagline: "For growing compliance teams and enterprises.",
     icon: <Shield size={22} />,
-    color: "#a855f7",
+    color: "#d900ff",
     borderColor: "border-purple-500/60",
     bgColor: "from-purple-500/15 to-transparent",
     popular: true,
@@ -243,8 +243,8 @@ export default function Pricing() {
     <div
       className="min-h-screen"
       style={{
-        background: "var(--djac-bg, #0a0a0f)",
-        color: "var(--djac-text, #e2e8f0)",
+        background: "var(--djac-bg, #050508)",
+        color: "var(--djac-text, rgba(255,255,255,0.08))",
         fontFamily: "'Inter', sans-serif",
       }}
     >
@@ -293,7 +293,7 @@ export default function Pricing() {
                     borderRadius: 8,
                     background: "rgba(168,85,247,0.15)",
                     border: "1px solid rgba(168,85,247,0.4)",
-                    color: "#c084fc",
+                    color: "#d900ff",
                     fontSize: 13,
                     cursor: "pointer",
                   }}
@@ -307,7 +307,7 @@ export default function Pricing() {
                   style={{
                     padding: "7px 18px",
                     borderRadius: 8,
-                    background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                    background: "linear-gradient(135deg,#d900ff,#d900ff)",
                     color: "#fff",
                     fontSize: 13,
                     cursor: "pointer",
@@ -338,7 +338,7 @@ export default function Pricing() {
               flexWrap: "wrap",
             }}
           >
-            <span style={{ color: "#fca5a5", fontSize: 14 }}>
+            <span style={{ color: "#ef4444", fontSize: 14 }}>
               {t("billing.loadError", "Failed to load subscription status.")}
             </span>
             <button
@@ -351,7 +351,7 @@ export default function Pricing() {
                 borderRadius: 8,
                 border: "1px solid rgba(248,250,252,0.16)",
                 background: "rgba(15,23,42,0.75)",
-                color: "#f8fafc",
+                color: "rgba(255,255,255,0.05)",
                 fontSize: 13,
                 cursor: "pointer",
               }}
@@ -377,8 +377,8 @@ export default function Pricing() {
               fontSize: 14,
             }}
           >
-            <Clock size={16} style={{ color: "#a855f7" }} />
-            <span style={{ color: "#c4b5fd" }}>
+            <Clock size={16} style={{ color: "#d900ff" }} />
+            <span style={{ color: "#d900ff" }}>
               <strong>
                 {t("pricing.trialDays", "{days} days").replace(
                   "{days}",
@@ -406,7 +406,7 @@ export default function Pricing() {
               background: "rgba(168,85,247,0.12)",
               border: "1px solid rgba(168,85,247,0.35)",
               fontSize: 12,
-              color: "#c084fc",
+              color: "#d900ff",
               marginBottom: 20,
             }}
           >
@@ -424,7 +424,7 @@ export default function Pricing() {
               lineHeight: 1.1,
               marginBottom: 16,
               background:
-                "linear-gradient(135deg, var(--djac-text) 30%, #a855f7)",
+                "linear-gradient(135deg, var(--djac-text) 30%, #d900ff)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -464,7 +464,7 @@ export default function Pricing() {
                   border: "none",
                   background:
                     interval === iv ? "rgba(168,85,247,0.25)" : "transparent",
-                  color: interval === iv ? "#c084fc" : "var(--djac-muted)",
+                  color: interval === iv ? "#d900ff" : "var(--djac-muted)",
                   fontSize: 13,
                   fontWeight: interval === iv ? 600 : 400,
                   cursor: "pointer",
@@ -482,7 +482,7 @@ export default function Pricing() {
                       fontSize: 9,
                       padding: "1px 5px",
                       borderRadius: 6,
-                      background: "linear-gradient(90deg,#a855f7,#6366f1)",
+                      background: "linear-gradient(90deg,#d900ff,#d900ff)",
                       color: "#fff",
                       fontWeight: 700,
                     }}
@@ -534,7 +534,7 @@ export default function Pricing() {
                       transform: "translateX(-50%)",
                       padding: "4px 16px",
                       borderRadius: 20,
-                      background: "linear-gradient(90deg,#a855f7,#6366f1)",
+                      background: "linear-gradient(90deg,#d900ff,#d900ff)",
                       fontSize: 11,
                       fontWeight: 700,
                       color: "#fff",
@@ -617,7 +617,7 @@ export default function Pricing() {
                       style={{
                         marginTop: 4,
                         fontSize: 12,
-                        color: "#4ade80",
+                        color: "#10b981",
                         fontWeight: 600,
                       }}
                     >
@@ -704,7 +704,7 @@ export default function Pricing() {
                       textAlign: "center",
                       background: "rgba(74,222,128,0.1)",
                       border: "1px solid rgba(74,222,128,0.3)",
-                      color: "#4ade80",
+                      color: "#10b981",
                       fontSize: 13,
                       fontWeight: 600,
                     }}
@@ -721,7 +721,7 @@ export default function Pricing() {
                       borderRadius: 10,
                       border: "none",
                       background: plan.popular
-                        ? "linear-gradient(135deg,#a855f7,#6366f1)"
+                        ? "linear-gradient(135deg,#d900ff,#d900ff)"
                         : `linear-gradient(135deg,${plan.color}44,${plan.color}22)`,
                       color: plan.popular ? "#fff" : plan.color,
                       fontSize: 14,
@@ -829,7 +829,7 @@ export default function Pricing() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#c084fc",
+                    color: "#d900ff",
                   }}
                 >
                   {item.icon}
@@ -936,7 +936,7 @@ export default function Pricing() {
           <Crown
             size={32}
             style={{
-              color: "#c084fc",
+              color: "#d900ff",
               marginBottom: 16,
               display: "block",
               margin: "0 auto 16px",
@@ -971,7 +971,7 @@ export default function Pricing() {
                 style={{
                   padding: "13px 28px",
                   borderRadius: 10,
-                  background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                  background: "linear-gradient(135deg,#d900ff,#d900ff)",
                   color: "#fff",
                   fontSize: 15,
                   fontWeight: 700,

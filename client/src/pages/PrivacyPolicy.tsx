@@ -18,13 +18,13 @@ function useC() {
   const { theme } = useTheme();
   const d = theme === "dark";
   return {
-    bg: d ? "#040F61" : "#F0F4FF",
+    bg: d ? "#050508" : "rgba(255,255,255,0.05)",
     card: d ? "rgba(255,255,255,0.035)" : "rgba(255,255,255,0.82)",
     border: d ? "rgba(255,255,255,0.09)" : "rgba(4,15,97,0.11)",
-    text: d ? "#FFFFFF" : "#020B45",
-    muted: d ? "#9CA3AF" : "rgba(2,11,69,0.55)",
-    cyan: d ? "#00F7FF" : "#0284c7",
-    heading: d ? "#E2E8F0" : "#1E293B",
+    text: d ? "#FFFFFF" : "#050508",
+    muted: d ? "#94a3b8" : "rgba(2,11,69,0.55)",
+    cyan: d ? "#00d2ff" : "#00d2ff",
+    heading: d ? "rgba(255,255,255,0.08)" : "#050508",
     gridColor: d ? "rgba(255,255,255,0.04)" : "rgba(4,15,97,0.04)",
   } as const;
 }

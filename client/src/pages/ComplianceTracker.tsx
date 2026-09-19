@@ -787,7 +787,7 @@ export default function ComplianceTracker() {
         <h1
           className="text-3xl font-bold mb-2"
           style={{
-            background: "linear-gradient(135deg,#01FF7F,#9359EC)",
+            background: "linear-gradient(135deg,#10b981,#d900ff)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",

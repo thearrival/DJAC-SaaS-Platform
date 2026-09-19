@@ -74,21 +74,21 @@ const RISK_COLORS: Record<
     text: "text-orange-700 dark:text-orange-300",
     border: "border-l-orange-500",
     gauge: "bg-orange-500",
-    arc: "#f97316",
+    arc: "#f59e0b",
   },
   medium: {
     bg: "bg-yellow-100 dark:bg-yellow-950",
     text: "text-yellow-700 dark:text-yellow-300",
     border: "border-l-yellow-500",
     gauge: "bg-yellow-500",
-    arc: "#eab308",
+    arc: "#f59e0b",
   },
   low: {
     bg: "bg-green-100 dark:bg-green-950",
     text: "text-green-700 dark:text-green-300",
     border: "border-l-green-500",
     gauge: "bg-green-500",
-    arc: "#22c55e",
+    arc: "#10b981",
   },
 };
 

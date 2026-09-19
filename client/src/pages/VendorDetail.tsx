@@ -95,22 +95,22 @@ const RISK_COLOR: Record<
 > = {
   low: {
     bg: "rgba(0,210,110,0.08)",
-    text: "#00d46a",
+    text: "#10b981",
     border: "rgba(0,210,110,0.25)",
   },
   medium: {
     bg: "rgba(255,214,0,0.10)",
-    text: "#e5c000",
+    text: "#f59e0b",
     border: "rgba(255,214,0,0.30)",
   },
   high: {
     bg: "rgba(255,107,43,0.10)",
-    text: "#ff7a38",
+    text: "#f59e0b",
     border: "rgba(255,107,43,0.28)",
   },
   critical: {
     bg: "rgba(255,23,68,0.10)",
-    text: "#ff4d6a",
+    text: "#ef4444",
     border: "rgba(255,23,68,0.30)",
   },
 };
@@ -125,7 +125,7 @@ const SEV_CLASS: Record<Severity, string> = {
 };
 
 const SCORE_COLOR = (s: number) =>
-  s >= 80 ? "#00d46a" : s >= 60 ? "#e5c000" : s >= 40 ? "#ff7a38" : "#ff4d6a";
+  s >= 80 ? "#10b981" : s >= 60 ? "#f59e0b" : s >= 40 ? "#f59e0b" : "#ef4444";
 
 const STATUS_CLASS: Record<string, string> = {
   compliant:
