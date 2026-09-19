@@ -212,7 +212,7 @@ export function ProductTour() {
           maxWidth: "calc(100vw - 48px)",
           zIndex: 10000,
           background: "var(--djac-card, #fff)",
-          border: "1px solid var(--djac-border, #e2e8f0)",
+          border: "1px solid var(--djac-border, rgba(255,255,255,0.08))",
           borderRadius: 14,
           padding: 20,
           boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
@@ -231,7 +231,7 @@ export function ProductTour() {
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: "linear-gradient(135deg, #0891b2, #7c3aed)",
+              background: "linear-gradient(135deg, #00d2ff, #d900ff)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -267,7 +267,7 @@ export function ProductTour() {
         <p
           style={{
             fontSize: 13,
-            color: "var(--djac-muted, #64748b)",
+            color: "var(--djac-muted, #7d8aa0)",
             lineHeight: 1.6,
             marginBottom: 16,
           }}
@@ -286,8 +286,8 @@ export function ProductTour() {
                 borderRadius: 2,
                 background:
                   i <= step
-                    ? "var(--primary, #0891b2)"
-                    : "var(--djac-border, #e2e8f0)",
+                    ? "var(--primary, #00d2ff)"
+                    : "var(--djac-border, rgba(255,255,255,0.08))",
               }}
             />
           ))}

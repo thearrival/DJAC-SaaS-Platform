@@ -31,7 +31,7 @@ export function WelcomeBanner() {
   return (
     <div
       style={{
-        background: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+        background: "linear-gradient(135deg, #d900ff 0%, #d900ff 100%)",
         borderRadius: 14,
         padding: "16px 20px",
         marginBottom: 24,

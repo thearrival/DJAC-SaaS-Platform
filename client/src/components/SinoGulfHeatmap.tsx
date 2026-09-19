@@ -950,13 +950,13 @@ const PIPES: Pipe[] = [
 function pipeColor(status: PipeStatus, isDark: boolean): string {
   switch (status) {
     case "compliant":
-      return isDark ? "#00E676" : "#16a34a";
+      return isDark ? "#10b981" : "#10b981";
     case "approval_required":
-      return isDark ? "#FFD600" : "#d97706";
+      return isDark ? "#f59e0b" : "#f59e0b";
     case "blocked":
-      return isDark ? "#FF1744" : "#dc2626";
+      return isDark ? "#ef4444" : "#ef4444";
     case "simulated_violation":
-      return isDark ? "#FF6B2B" : "#ea580c";
+      return isDark ? "#f59e0b" : "#f59e0b";
   }
 }
 function statusLabel(status: PipeStatus): string {
@@ -984,9 +984,9 @@ function statusIcon(status: PipeStatus) {
   }
 }
 function scoreColor(score: number, isDark: boolean): string {
-  if (score >= 80) return isDark ? "#00E676" : "#16a34a";
-  if (score >= 50) return isDark ? "#FFD600" : "#d97706";
-  return isDark ? "#FF1744" : "#dc2626";
+  if (score >= 80) return isDark ? "#10b981" : "#10b981";
+  if (score >= 50) return isDark ? "#f59e0b" : "#f59e0b";
+  return isDark ? "#ef4444" : "#ef4444";
 }
 
 // ── Bezier path for data corridor ─────────────────────────────────────────────
@@ -1116,15 +1116,15 @@ function RiskKPIBar({
   const riskColor =
     riskScore >= 80
       ? isDark
-        ? "#00E676"
-        : "#16a34a"
+        ? "#10b981"
+        : "#10b981"
       : riskScore >= 55
         ? isDark
-          ? "#FFD600"
-          : "#d97706"
+          ? "#f59e0b"
+          : "#f59e0b"
         : isDark
-          ? "#FF1744"
-          : "#dc2626";
+          ? "#ef4444"
+          : "#ef4444";
   const circ = 2 * Math.PI * 14;
   const dash = `${(riskScore / 100) * circ} ${circ}`;
 
@@ -1133,17 +1133,17 @@ function RiskKPIBar({
     {
       label: "Compliant",
       value: counts.compliant,
-      color: isDark ? "#00E676" : "#16a34a",
+      color: isDark ? "#10b981" : "#10b981",
     },
     {
       label: "CAC Review",
       value: counts.approval_required,
-      color: isDark ? "#FFD600" : "#d97706",
+      color: isDark ? "#f59e0b" : "#f59e0b",
     },
     {
       label: "Blocked",
       value: counts.blocked + counts.simulated_violation,
-      color: isDark ? "#FF1744" : "#dc2626",
+      color: isDark ? "#ef4444" : "#ef4444",
     },
   ];
 
@@ -1300,18 +1300,18 @@ export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
   // ── Theme colour palette ─────────────────────────────────────────────────
   const C = useMemo(
     () => ({
-      ocean: isDark ? "#030c1f" : "#d6e8f8",
-      bg: isDark ? "#040f24" : "#eaf2fb",
-      land: isDark ? "#0c1d3a" : "#c8d8ee",
-      landAlt: isDark ? "#0e2248" : "#bdd0ea",
-      landHigh: isDark ? "#112a52" : "#b2c8e6",
-      landEdge: isDark ? "#1a3068" : "#8aaccd",
-      grid: isDark ? "#0a1830" : "#c0cfe2",
-      seaLabel: isDark ? "#2c4a78" : "#6888a8",
-      text: isDark ? "#dce6ff" : "#1e293b",
-      muted: isDark ? "#5a6fa8" : "#5c6b88",
-      cyan: isDark ? "#00d4ff" : "#0284c7",
-      accent: isDark ? "#00E676" : "#16a34a",
+      ocean: isDark ? "#050508" : "#fff2",
+      bg: isDark ? "#050508" : "#fff1",
+      land: isDark ? "#050508" : "#fff2",
+      landAlt: isDark ? "#050508" : "#fff2",
+      landHigh: isDark ? "#050508" : "#fff2",
+      landEdge: isDark ? "#050508" : "#94a3b8",
+      grid: isDark ? "#050508" : "#fff2",
+      seaLabel: isDark ? "#050508" : "#94a3b8",
+      text: isDark ? "#fff1" : "#050508",
+      muted: isDark ? "#94a3b8" : "#94a3b8",
+      cyan: isDark ? "#00d2ff" : "#00d2ff",
+      accent: isDark ? "#10b981" : "#10b981",
       border: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
       card: isDark ? "rgba(6,14,36,0.96)" : "rgba(248,252,255,0.97)",
     }),
@@ -1581,11 +1581,11 @@ export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
           }}
         >
           <Zap
-            style={{ color: "#FF6B2B", width: 12, height: 12, flexShrink: 0 }}
+            style={{ color: "#f59e0b", width: 12, height: 12, flexShrink: 0 }}
           />
           <p
             style={{
-              color: isDark ? "#FF9B6B" : "#c2410c",
+              color: isDark ? "#f59e0b" : "#f59e0b",
               fontSize: 10.5,
               margin: 0,
             }}
@@ -1695,14 +1695,14 @@ export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
             </filter>
             {/* Ocean depth gradient — lighter at horizon, deeper in foreground */}
             <linearGradient id="sfh-ocean-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={isDark ? "#020a1a" : "#cde3f5"} />
+              <stop offset="0%" stopColor={isDark ? "#050508" : "#fff2"} />
               <stop offset="55%" stopColor={C.ocean} />
-              <stop offset="100%" stopColor={isDark ? "#010714" : "#b8d6ef"} />
+              <stop offset="100%" stopColor={isDark ? "#050508" : "#fff2"} />
             </linearGradient>
             {/* Node body radial gradient — inner glow */}
             <radialGradient id="sfh-node-body" cx="38%" cy="35%" r="65%">
-              <stop offset="0%" stopColor={isDark ? "#1a4070" : "#ffffff"} />
-              <stop offset="100%" stopColor={isDark ? "#06102a" : "#d8eeff"} />
+              <stop offset="0%" stopColor={isDark ? "#050508" : "#ffffff"} />
+              <stop offset="100%" stopColor={isDark ? "#050508" : "#fff2"} />
             </radialGradient>
           </defs>
 
@@ -1855,7 +1855,7 @@ export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
                 key={"lbl-" + c.id}
                 x={p.x}
                 y={p.y}
-                fill={c.h ? (isDark ? "#8fb8e0" : "#2e6a9e") : C.seaLabel}
+                fill={c.h ? (isDark ? "#94a3b8" : "#00d2ff") : C.seaLabel}
                 fontSize={c.h ? 6.5 : 5.5}
                 fontWeight={c.h ? 700 : 400}
                 textAnchor="middle"
@@ -1972,9 +1972,9 @@ export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
             const hubs: [number, number, string, number, number][] = [
               [46.0, 23.5, C.cyan, 62, 46], // Saudi Arabia
               [55.2, 24.8, C.cyan, 20, 14], // UAE
-              [114.2, 22.3, isDark ? "#FFD600" : "#d97706", 22, 15], // Hong Kong (SAR)
+              [114.2, 22.3, isDark ? "#f59e0b" : "#f59e0b", 22, 15], // Hong Kong (SAR)
               [103.8, 1.3, C.cyan, 12, 9], // Singapore
-              [108.0, 35.0, isDark ? "#FF6B2B" : "#ea580c", 105, 80], // China
+              [108.0, 35.0, isDark ? "#f59e0b" : "#f59e0b", 105, 80], // China
             ];
             return (
               <g filter="url(#sfh-hub-blur)" opacity={isDark ? 0.3 : 0.18}>
@@ -2414,13 +2414,13 @@ export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
                       style={{
                         width: 9,
                         height: 9,
-                        color: isDark ? "#FF9B6B" : "#c2410c",
+                        color: isDark ? "#f59e0b" : "#f59e0b",
                         flexShrink: 0,
                       }}
                     />
                     <span
                       style={{
-                        color: isDark ? "#FF9B6B" : "#c2410c",
+                        color: isDark ? "#f59e0b" : "#f59e0b",
                         fontSize: 9,
                         fontWeight: 700,
                       }}
@@ -2479,7 +2479,7 @@ export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
                       <p
                         key={i}
                         style={{
-                          color: isDark ? "#FF9B6B" : "#c2410c",
+                          color: isDark ? "#f59e0b" : "#f59e0b",
                           fontSize: 9.5,
                           margin: i === 0 ? "3px 0 0" : "2px 0 0",
                         }}
@@ -2575,7 +2575,7 @@ export const SinoGulfHeatmap = memo(function SinoGulfHeatmap() {
                 {pipe.articles && (
                   <p
                     style={{
-                      color: isDark ? "#FF9B6B" : "#c2410c",
+                      color: isDark ? "#f59e0b" : "#f59e0b",
                       fontSize: 10.5,
                       margin: 0,
                     }}

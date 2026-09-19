@@ -221,19 +221,19 @@ function MiniGauge({
 function RiskBadge({ level, isDark }: { level: string; isDark: boolean }) {
   const colorMap: Record<string, [string, string]> = {
     low: [
-      isDark ? "#01FF7F" : "#16a34a",
+      isDark ? "#10b981" : "#10b981",
       isDark ? "rgba(1,255,127,0.12)" : "rgba(22,163,74,0.1)",
     ],
     medium: [
-      isDark ? "#FFD600" : "#d97706",
+      isDark ? "#f59e0b" : "#f59e0b",
       isDark ? "rgba(255,214,0,0.12)" : "rgba(217,119,6,0.1)",
     ],
     high: [
-      isDark ? "#FF6B2B" : "#ea580c",
+      isDark ? "#f59e0b" : "#f59e0b",
       isDark ? "rgba(255,107,43,0.12)" : "rgba(234,88,12,0.1)",
     ],
     critical: [
-      isDark ? "#FF1744" : "#dc2626",
+      isDark ? "#ef4444" : "#ef4444",
       isDark ? "rgba(255,23,68,0.12)" : "rgba(220,38,38,0.1)",
     ],
   };
@@ -281,12 +281,12 @@ export const AIOrchestrationFeed = memo(function AIOrchestrationFeed() {
 
   const C = useMemo(
     () => ({
-      cyan: isDark ? "#00F7FF" : "#0284c7",
-      green: isDark ? "#01FF7F" : "#16a34a",
-      red: isDark ? "#FF1744" : "#dc2626",
-      orange: isDark ? "#FF6B2B" : "#ea580c",
-      yellow: isDark ? "#FFD600" : "#d97706",
-      purple: isDark ? "#9359EC" : "#7c3aed",
+      cyan: isDark ? "#00d2ff" : "#00d2ff",
+      green: isDark ? "#10b981" : "#10b981",
+      red: isDark ? "#ef4444" : "#ef4444",
+      orange: isDark ? "#f59e0b" : "#f59e0b",
+      yellow: isDark ? "#f59e0b" : "#f59e0b",
+      purple: isDark ? "#d900ff" : "#d900ff",
     }),
     [isDark]
   );
@@ -534,12 +534,12 @@ export const AIOrchestrationFeed = memo(function AIOrchestrationFeed() {
           />
           <MiniGauge
             value={assessment.jurisdictionScores?.china ?? 0}
-            color={isDark ? "#FF6B2B" : "#ea580c"}
+            color={isDark ? "#f59e0b" : "#f59e0b"}
             label={`${t("assessmentHistory.scoreRegion1", "APAC")} (PIPL)`}
           />
           <MiniGauge
             value={assessment.jurisdictionScores?.saudiArabia ?? 0}
-            color={isDark ? "#FFD600" : "#d97706"}
+            color={isDark ? "#f59e0b" : "#f59e0b"}
             label={`${t("assessmentHistory.scoreRegion2", "EMEA")} (PDPL)`}
           />
           {/* Additional global jurisdiction gauges — up to 4 below-threshold scores */}
@@ -558,9 +558,9 @@ export const AIOrchestrationFeed = memo(function AIOrchestrationFeed() {
                 value={score as number}
                 color={
                   (score as number) >= 85
-                    ? "#22c55e"
+                    ? "#10b981"
                     : (score as number) >= 65
-                      ? "#eab308"
+                      ? "#f59e0b"
                       : "#ef4444"
                 }
                 label={GLOBAL_SCORE_LABELS[key]}

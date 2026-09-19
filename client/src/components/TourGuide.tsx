@@ -597,7 +597,7 @@ export function TourGuide() {
             }}
           >
             {isLast ? (
-              <CheckCircle2 size={12} style={{ color: "#01FF7F" }} />
+              <CheckCircle2 size={12} style={{ color: "#10b981" }} />
             ) : stepIdx === 0 ? (
               <Sparkles size={12} style={{ color: "rgba(0,247,255,0.80)" }} />
             ) : (
@@ -624,7 +624,7 @@ export function TourGuide() {
               style={{
                 height: "100%",
                 width: `${progress}%`,
-                background: isLast ? "#01FF7F" : "rgba(0,247,255,0.80)",
+                background: isLast ? "#10b981" : "rgba(0,247,255,0.80)",
                 borderRadius: 2,
                 transition: "width 0.35s ease",
               }}
@@ -722,12 +722,12 @@ export function TourGuide() {
             }
             style={{
               background: isLast
-                ? "linear-gradient(135deg, #01FF7F, #00C96A)"
+                ? "linear-gradient(135deg, #10b981, #10b981)"
                 : "linear-gradient(135deg, rgba(0,247,255,0.90), rgba(0,180,255,0.90))",
               border: "none",
               borderRadius: 8,
               padding: "8px 16px",
-              color: isLast ? "#020B45" : "#020B45",
+              color: isLast ? "#050508" : "#050508",
               fontSize: 12,
               fontWeight: 700,
               cursor: "pointer",

@@ -36,109 +36,109 @@ const regionPositions: Record<string, RegionPosition> = {
   China: {
     x: 600,
     y: 185,
-    color: "#1d4ed8",
+    color: "#d900ff",
     glow: "rgba(29, 78, 216, 0.35)",
   },
   "Saudi Arabia": {
     x: 490,
     y: 220,
-    color: "#0f766e",
+    color: "#10b981",
     glow: "rgba(15, 118, 110, 0.35)",
   },
   EU: {
     x: 430,
     y: 120,
-    color: "#7c3aed",
+    color: "#d900ff",
     glow: "rgba(124, 58, 237, 0.35)",
   },
   "United Kingdom": {
     x: 395,
     y: 95,
-    color: "#b45309",
+    color: "#f59e0b",
     glow: "rgba(180, 83, 9, 0.35)",
   },
   Canada: {
     x: 235,
     y: 90,
-    color: "#db2777",
+    color: "#d900ff",
     glow: "rgba(219, 39, 119, 0.35)",
   },
   US: {
     x: 285,
     y: 140,
-    color: "#ea580c",
+    color: "#f59e0b",
     glow: "rgba(234, 88, 12, 0.35)",
   },
   "North America": {
     x: 285,
     y: 140,
-    color: "#ea580c",
+    color: "#f59e0b",
     glow: "rgba(234, 88, 12, 0.35)",
   },
   Brazil: {
     x: 345,
     y: 285,
-    color: "#ca8a04",
+    color: "#f59e0b",
     glow: "rgba(202, 138, 4, 0.35)",
   },
   "Latin America": {
     x: 345,
     y: 285,
-    color: "#ca8a04",
+    color: "#f59e0b",
     glow: "rgba(202, 138, 4, 0.35)",
   },
   Africa: {
     x: 510,
     y: 310,
-    color: "#16a34a",
+    color: "#10b981",
     glow: "rgba(22, 163, 74, 0.35)",
   },
   "South Africa": {
     x: 545,
     y: 345,
-    color: "#059669",
+    color: "#10b981",
     glow: "rgba(5, 150, 105, 0.35)",
   },
   APAC: {
     x: 650,
     y: 140,
-    color: "#dc2626",
+    color: "#ef4444",
     glow: "rgba(220, 38, 38, 0.35)",
   },
   Japan: {
     x: 705,
     y: 125,
-    color: "#be185d",
+    color: "#ef4444",
     glow: "rgba(190, 24, 93, 0.35)",
   },
   Singapore: {
     x: 655,
     y: 235,
-    color: "#0284c7",
+    color: "#00d2ff",
     glow: "rgba(2, 132, 199, 0.35)",
   },
   India: {
     x: 560,
     y: 225,
-    color: "#9333ea",
+    color: "#d900ff",
     glow: "rgba(147, 51, 234, 0.35)",
   },
   Australia: {
     x: 700,
     y: 340,
-    color: "#65a30d",
+    color: "#10b981",
     glow: "rgba(101, 163, 13, 0.35)",
   },
   "United Arab Emirates": {
     x: 525,
     y: 195,
-    color: "#c026d3",
+    color: "#d900ff",
     glow: "rgba(192, 38, 211, 0.35)",
   },
   Global: {
     x: 460,
     y: 180,
-    color: "#475569",
+    color: "#050508",
     glow: "rgba(71, 85, 105, 0.35)",
   },
 };
@@ -212,8 +212,8 @@ export function ComplianceRegionMap({
           <svg viewBox="0 0 900 420" className="h-[340px] w-full">
             <defs>
               <linearGradient id="mapBackground" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#f8fafc" />
-                <stop offset="100%" stopColor="#e2e8f0" />
+                <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0.08)" />
               </linearGradient>
               <filter
                 id="regionGlow"
@@ -236,7 +236,7 @@ export function ComplianceRegionMap({
                 refY="6"
                 orient="auto"
               >
-                <path d="M0,0 L12,6 L0,12 Z" fill="#334155" />
+                <path d="M0,0 L12,6 L0,12 Z" fill="#050508" />
               </marker>
             </defs>
 
@@ -273,7 +273,7 @@ export function ComplianceRegionMap({
                   <path
                     d={`M ${sourcePosition.x} ${sourcePosition.y} Q ${midpointX} ${midpointY} ${targetPosition.x} ${targetPosition.y}`}
                     fill="none"
-                    stroke="#334155"
+                    stroke="#050508"
                     strokeOpacity="0.5"
                     strokeWidth={thickness}
                     markerEnd="url(#flowArrow)"
@@ -318,7 +318,7 @@ export function ComplianceRegionMap({
                     r={radius}
                     fill={position.color}
                     fillOpacity={isFocused ? 0.88 : 0.7}
-                    stroke="#0f172a"
+                    stroke="#050508"
                     strokeWidth={isFocused ? 2.5 : 1.5}
                   />
                   <text
