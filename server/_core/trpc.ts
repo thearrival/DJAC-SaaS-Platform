@@ -123,7 +123,13 @@ const requireActiveAccess = t.middleware(async opts => {
 
   const db = await getDb();
   if (db) {
-    const orgId = ctx.organizationId ?? null;
+    // orgProcedure guarantees a non-null organizationId before this middleware
+    // runs; the explicit return below is defensive and preserves the tsc
+    // invariant without changing runtime behavior on any reachable path.
+    const orgId = ctx.organizationId;
+    if (orgId == null) {
+      return next({ ctx: { ...ctx, user: ctx.user! } });
+    }
     const [org] = await db
       .select({
         plan: organizations.plan,

@@ -17,7 +17,7 @@ import {
   listLawKnowledge,
   searchLawKnowledge,
 } from "./legal-knowledge";
-import { generateComplianceReport } from "./report-generator";
+import { generateComplianceReport, toReportLocale } from "./report-generator";
 import {
   emailComplianceReport,
   generateComplianceReportDocx,
@@ -273,7 +273,7 @@ export const complianceFrameworkRouter = router({
       const startedAt = Date.now();
       const report = generateComplianceReport({
         jurisdiction: input.jurisdiction,
-        locale: input.locale,
+        locale: toReportLocale(input.locale),
         reportType: input.reportType,
       });
 
@@ -321,7 +321,7 @@ export const complianceFrameworkRouter = router({
       const startedAt = Date.now();
       const pdf = await generateComplianceReportPdf({
         jurisdiction: input.jurisdiction,
-        locale: input.locale,
+        locale: toReportLocale(input.locale),
         reportType: input.reportType,
       });
 
@@ -370,7 +370,7 @@ export const complianceFrameworkRouter = router({
       const startedAt = Date.now();
       const docx = await generateComplianceReportDocx({
         jurisdiction: input.jurisdiction,
-        locale: input.locale,
+        locale: toReportLocale(input.locale),
         reportType: input.reportType,
       });
 
@@ -420,7 +420,7 @@ export const complianceFrameworkRouter = router({
       const startedAt = Date.now();
       const delivery = await emailComplianceReport({
         jurisdiction: input.jurisdiction,
-        locale: input.locale,
+        locale: toReportLocale(input.locale),
         reportType: input.reportType,
         recipientEmail: input.recipientEmail,
       });
@@ -494,7 +494,7 @@ export const complianceFrameworkRouter = router({
           | "Brazil"
           | "Global"
           | "both",
-        locale: share.locale,
+        locale: toReportLocale(share.locale),
         reportType: share.reportType as Parameters<
           typeof generateComplianceReport
         >[0]["reportType"],

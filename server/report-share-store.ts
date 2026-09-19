@@ -8,13 +8,17 @@ import crypto from "node:crypto";
 import { and, eq, gt, lt } from "drizzle-orm";
 import { getDb } from "./db";
 import { reportShares, type ReportShare } from "../drizzle/schema";
+import type { AppLocale } from "../shared/const";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 export type ReportShareParams = {
   jurisdiction: string;
-  locale: "en" | "ar" | "zh";
+  // Full 9-locale union (matches the reportShares.locale enum column): the
+  // user's actual locale is persisted here and narrowed to a covered report
+  // locale at render time (see toReportLocale in report-generator.ts).
+  locale: AppLocale;
   reportType: string;
   createdByUserId?: number | null;
   /** TTL in seconds — defaults to 7 days */

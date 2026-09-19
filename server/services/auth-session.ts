@@ -15,7 +15,7 @@
 
 import crypto from "crypto";
 import type { IncomingMessage } from "http";
-import type { User } from "../../drizzle/schema";
+import type { OrganizationMember, User } from "../../drizzle/schema";
 import { apiKeys } from "../../drizzle/schema";
 import { and, eq, isNull } from "drizzle-orm";
 import { getDb } from "../db";
@@ -54,7 +54,7 @@ async function resolveDevBypassUser(): Promise<User> {
 export type ApiKeyResolution = {
   user: User;
   organizationId: number;
-  organizationRole?: string;
+  organizationRole: OrganizationMember["role"] | null;
 } | null;
 
 export async function resolveApiKeyAuth(
@@ -95,10 +95,12 @@ export async function resolveApiKeyAuth(
       /* noop */
     });
 
-  // Derive organization role from key scopes, fallback to "user"
-  const organizationRole = keyRow.scopes
-    ? keyRow.scopes.split(",")[0].trim()
-    : "user";
+  // API keys carry capability scopes, not org roles: scopes are stored as a
+  // JSON array (e.g. '["vendor:read"]'), so they must never be interpreted
+  // as an organizationMembers role. API-key sessions therefore get null here,
+  // which role gates treat as "no org admin rights" — identical to before,
+  // since the previous scope-fragment string could never match a real role.
+  const organizationRole: OrganizationMember["role"] | null = null;
 
   const user: User = {
     id: -(10_000 + keyRow.id),

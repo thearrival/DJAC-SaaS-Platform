@@ -20,6 +20,20 @@ import { listLawKnowledge } from "./legal-knowledge";
 import { REPORT_JURISDICTIONS } from "./_core/jurisdictions";
 
 export type ReportLocale = "en" | "ar" | "zh";
+
+/**
+ * Narrow any locale string to a fully-translated report locale.
+ * Locales without report coverage (fr/es/de/ja/ko/pt) fall back to English —
+ * identical to the previous lbl() fallback behavior, and prevents a crash in
+ * buildRecommendations(), which indexes a per-locale record directly.
+ */
+const REPORT_COVERED_LOCALES: readonly ReportLocale[] = ["en", "ar", "zh"];
+
+export function toReportLocale(locale: string): ReportLocale {
+  return (REPORT_COVERED_LOCALES as readonly string[]).includes(locale)
+    ? (locale as ReportLocale)
+    : "en";
+}
 export type ReportJurisdiction = (typeof REPORT_JURISDICTIONS)[number];
 export type ReportType =
   | "full_compliance"
