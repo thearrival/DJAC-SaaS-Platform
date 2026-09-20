@@ -143,12 +143,12 @@ const HOME_FEATURES: Record<
     {
       icon: "zap",
       title: "AI Compliance Engine",
-      desc: "8-stage GPT-4o assessment pipeline with RAG context retrieval",
+      desc: "8-stage Gemini assessment pipeline with RAG context retrieval",
       link: "/docs/ai-engine/ai-overview",
     },
     {
       icon: "shield",
-      title: "29+ Jurisdictions",
+      title: "28 Jurisdictions",
       desc: "PIPL, PDPL, GDPR, NCA-ECC, CSL, DSL and global standards",
       link: "/docs/frameworks/jurisdictions",
     },
@@ -181,12 +181,12 @@ const HOME_FEATURES: Record<
     {
       icon: "zap",
       title: "محرك الامتثال الذكي",
-      desc: "خط أنابيب تقييم GPT-4o من 8 مراحل مع استرجاع سياق RAG",
+      desc: "خط أنابيب تقييم Gemini من 8 مراحل مع استرجاع سياق RAG",
       link: "/docs/ai-engine/ai-overview",
     },
     {
       icon: "shield",
-      title: "29+ ولاية قضائية",
+      title: "28 ولاية قضائية",
       desc: "PIPL وPDPL وGDPR وNCA-ECC وCSL وDSL والمعايير العالمية",
       link: "/docs/frameworks/jurisdictions",
     },
@@ -219,12 +219,12 @@ const HOME_FEATURES: Record<
     {
       icon: "zap",
       title: "AI合规引擎",
-      desc: "基于GPT-4o的8阶段评估流水线，带RAG上下文检索",
+      desc: "基于Gemini的8阶段评估流水线，带RAG上下文检索",
       link: "/docs/ai-engine/ai-overview",
     },
     {
       icon: "shield",
-      title: "29+ 司法管辖区",
+      title: "28 司法管辖区",
       desc: "PIPL、PDPL、GDPR、NCA-ECC、CSL、DSL及全球标准",
       link: "/docs/frameworks/jurisdictions",
     },
@@ -590,15 +590,15 @@ const docsData: Record<string, DocSection[]> = {
           id: "welcome",
           title: "Welcome to DJAC",
           summary:
-            "DJAC is the world's first AI-powered cross-jurisdiction compliance intelligence platform. Deploy in minutes and achieve regulatory compliance across 29+ jurisdictions.",
+            "DJAC is the world's first AI-powered cross-jurisdiction compliance intelligence platform. Deploy in minutes and achieve regulatory compliance across 28 jurisdictions.",
           content: `### What is DJAC?
 DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automates regulatory compliance across jurisdictions — China, Saudi Arabia, the GCC, the EU, North America, and APAC.
 
 > **info** Built for compliance officers, legal teams, enterprise administrators, consultants, and government regulators.
 
 ### Why DJAC?
-- **29+ Jurisdictions** — PIPL, PDPL, CSL, DSL, GDPR, ISO 27001, SOC 2, NIST CSF, HIPAA, and more
-- **AI-Powered Analysis** — GPT-4o driven 8-stage compliance assessment pipeline
+- **28 Jurisdictions** — PIPL, PDPL, CSL, DSL, GDPR, ISO 27001, SOC 2, NIST CSF, HIPAA, and more
+- **AI-Powered Analysis** — Gemini driven 8-stage compliance assessment pipeline
 - **Real-Time Monitoring** — Continuous compliance tracking with automated gap detection
 - **Cross-Border Intelligence** — Data transfer compliance checker and regulatory change monitoring
 - **Vendor Risk Management** — Automated third-party assessments across all selected frameworks
@@ -625,7 +625,7 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 > **faq** How long does an AI vendor assessment take?
 > **answer** Most assessments complete in under 60 seconds, streaming live progress over the WebSocket as each of the 8 pipeline stages finishes.
 > **faq** Which regulations are supported out of the box?
-> **answer** 60+ frameworks across 29 jurisdictions — including GDPR, NIS2, DORA, PIPL, PDPL, ISO 27001, SOC 2, and more. The AI engine auto-recommends the relevant ones for your profile.
+> **answer** 60+ frameworks across 28 jurisdictions — including GDPR, NIS2, DORA, PIPL, PDPL, ISO 27001, SOC 2, and more. The AI engine auto-recommends the relevant ones for your profile.
 > **faq** Can DJAC run on our own infrastructure?
 > **answer** Yes — besides Vercel cloud hosting, self-hosted Docker deployment is supported, and the platform can be extended with custom frameworks.`,
         },
@@ -633,14 +633,14 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
           id: "architecture",
           title: "Platform Architecture",
           summary:
-            "DJAC runs on a cloud-native architecture with React 19, Express + tRPC, PostgreSQL on Supabase, Redis, and OpenAI GPT-4o.",
+            "DJAC runs on a cloud-native architecture with React 19, Express + tRPC, PostgreSQL on Supabase, Redis, and Google Gemini.",
           content: `### System Architecture
 DJAC employs a modern monorepo architecture:
 
 **Frontend**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4 + shadcn/ui  
 **Backend**: Express 4 + tRPC 11 (200+ API procedures) + Drizzle ORM  
 **Database**: PostgreSQL 17 on Supabase (AWS Tokyo, ap-northeast-2)  
-**AI Engine**: OpenAI GPT-4o with 8-stage assessment pipeline  
+**AI Engine**: Google Gemini with 8-stage assessment pipeline  
 **Queue**: In-memory / Redis (BullMQ-ready)  
 **Auth**: Triple-path (Clerk OAuth + Supabase Auth + Local JWT)  
 **Billing**: Stripe (5 plans × 4 intervals)  
@@ -652,12 +652,12 @@ DJAC employs a modern monorepo architecture:
 3. Intake parses documents and normalizes text
 4. Extractor identifies structured facts (key-value-evidence triples)
 5. RAG Context retrieves relevant compliance controls from DB
-6. Judge (GPT-4o) evaluates compliance against controls
+6. Judge (Gemini) evaluates compliance against controls
 7. Synthesizer merges findings into cross-framework report
 8. Validator ensures schema consistency and data integrity
 9. Reporter generates final formatted output (PDF/DOCX/JSON)`,
           diagram:
-            "[User] → [Gatekeeper] → [Intake] → [Extractor] → [RAG] → [Judge (GPT-4o)] → [Synthesizer] → [Validator] → [Reporter] → [PDF / DOCX / JSON]",
+            "[User] → [Gatekeeper] → [Intake] → [Extractor] → [RAG] → [Judge (Gemini)] → [Synthesizer] → [Validator] → [Reporter] → [PDF / DOCX / JSON]",
         },
         {
           id: "roles",
@@ -704,13 +704,13 @@ Each of the 30+ modules has 6 permission flags:
           id: "ai-overview",
           title: "AI Engine Overview",
           summary:
-            "DJAC's 8-stage AI pipeline uses GPT-4o to assess vendor compliance across multiple frameworks simultaneously.",
+            "DJAC's 8-stage AI pipeline uses Gemini to assess vendor compliance across multiple frameworks simultaneously.",
           content: `### The 8-Stage Pipeline
 1. **Gatekeeper** — Input validation, injection detection, data sanitization
 2. **Intake** — Document parsing, text normalization, language detection
 3. **Extractor** — Structured fact extraction into key-value-evidence triples
 4. **RAG Context** — Retrieval-Augmented Generation: pulls relevant compliance controls from PostgreSQL
-5. **Judge (GPT-4o)** — Evaluates each fact against applicable control requirements
+5. **Judge (Gemini)** — Evaluates each fact against applicable control requirements
 6. **Synthesizer** — Merges findings, generates cross-framework comparison
 7. **Validator** — Schema validation, cross-field consistency, retry on failure
 8. **Reporter** — Final formatted output in PDF, DOCX, or JSON
@@ -734,14 +734,14 @@ Each of the 30+ modules has 6 permission flags:
 1. **Document Parsing** — Extracted facts from vendor documents
 2. **Semantic Search** — Matches facts against 1,000+ compliance controls
 3. **Relevance Scoring** — Ranks controls by jurisdictional and topical relevance
-4. **Context Assembly** — Builds a focused context window for GPT-4o
+4. **Context Assembly** — Builds a focused context window for Gemini
 5. **Grounded Response** — AI evaluates based ONLY on retrieved controls (no hallucination)
 
 ### Benefits
 - Eliminates AI hallucinations in compliance advice
 - Ensures framework-specific recommendations
 - Maintains audit trail of control-to-finding mappings
-- Supports 29+ jurisdictions with jurisdiction-specific controls
+- Supports 28 jurisdictions with jurisdiction-specific controls
 
 > **tip** The RAG system is what makes DJAC legally reliable — it never guesses about regulatory requirements.
 
@@ -762,7 +762,7 @@ Each of the 30+ modules has 6 permission flags:
           id: "jurisdictions",
           title: "Supported Jurisdictions",
           summary:
-            "DJAC covers 29+ jurisdictions across APAC, EMEA, North America, and Africa with comprehensive regulatory frameworks.",
+            "DJAC covers 28 jurisdictions across APAC, EMEA, North America, and Africa with comprehensive regulatory frameworks.",
           content: `### APAC Region
 - **China** — PIPL, CSL, DSL, MLPS 2.0
 - **Japan** — APPI
@@ -1435,13 +1435,13 @@ docsData.ar = [
         id: "welcome",
         title: "مرحباً بك في DJAC",
         summary:
-          "DJAC هي أول منصة ذكاء امتثال تنظيمي مدعومة بالذكاء الاصطناعي عبر 29+ ولاية قضائية.",
+          "DJAC هي أول منصة ذكاء امتثال تنظيمي مدعومة بالذكاء الاصطناعي عبر 28 ولاية قضائية.",
         content: `### ما هو DJAC؟
 DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسسية تعمل على أتمتة الامتثال التنظيمي عبر الصين والسعودية ودول الخليج والاتحاد الأوروبي وأمريكا الشمالية وآسيا والمحيط الهادئ.
 
 ### لماذا DJAC؟
-- **29+ ولاية قضائية** — PIPL، PDPL، CSL، DSL، GDPR، ISO 27001، SOC 2 وغيرها
-- **تحليل بالذكاء الاصطناعي** — تقييم امتثال من 8 مراحل مدعوم بـ GPT-4o
+- **28 ولاية قضائية** — PIPL، PDPL، CSL، DSL، GDPR، ISO 27001، SOC 2 وغيرها
+- **تحليل بالذكاء الاصطناعي** — تقييم امتثال من 8 مراحل مدعوم بـ Gemini
 - **مراقبة مستمرة** — تتبع الامتثال مع اكتشاف الفجوات تلقائياً
 - **ذكاء عابر للحدود** — فحص نقل البيانات ومراقبة التغييرات التنظيمية
 - **إدارة مخاطر الموردين** — تقييمات تلقائية عبر جميع الأطر
@@ -1470,7 +1470,7 @@ DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسس�
 **الواجهة**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4
 **الخادم**: Express 4 + tRPC 11 (200+ إجراء API)
 **قاعدة البيانات**: PostgreSQL 17 على Supabase
-**محرك AI**: OpenAI GPT-4o مع 8 مراحل تقييم
+**محرك AI**: Google Gemini مع 8 مراحل تقييم
 **المصادقة**: ثلاثي المسار (Clerk OAuth + Supabase Auth + JWT محلي)
 **الفوترة**: Stripe (5 خطط × 4 فترات)
 **الاستضافة**: Vercel (بدون خادم) + Docker`,
@@ -1486,13 +1486,13 @@ DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسس�
         id: "ai-overview",
         title: "نظرة عامة على محرك AI",
         summary:
-          "يستخدم خط أنابيب AI المكون من 8 مراحل GPT-4o لتقييم امتثال الموردين عبر أطر متعددة في وقت واحد.",
+          "يستخدم خط أنابيب AI المكون من 8 مراحل Gemini لتقييم امتثال الموردين عبر أطر متعددة في وقت واحد.",
         content: `### خط الأنابيب ذو 8 مراحل
 1. **البواب** — التحقق من المدخلات، كشف الحقن
 2. **الاستيعاب** — تحليل المستندات، تطبيع النص
 3. **المستخرج** — استخراج الحقائق المنظمة
 4. **سياق RAG** — استرجاع ضوابط الامتثال ذات الصلة
-5. **الحكم (GPT-4o)** — تقييم الحقائق مقابل الضوابط
+5. **الحكم (Gemini)** — تقييم الحقائق مقابل الضوابط
 6. **المركب** — دمج النتائج عبر الأطر
 7. **المدقق** — التحقق من اتساق المخطط
 8. **المراسل** — إخراج نهائي (PDF/DOCX/JSON)`,
@@ -1720,13 +1720,13 @@ docsData.zh = [
         id: "welcome",
         title: "欢迎使用 DJAC",
         summary:
-          "DJAC 是全球首个AI驱动的跨司法管辖区合规智能平台，覆盖29+个司法管辖区。",
+          "DJAC 是全球首个AI驱动的跨司法管辖区合规智能平台，覆盖28个司法管辖区。",
         content: `### 什么是 DJAC？
 DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理中国、沙特、海湾合作委员会、欧盟、北美和亚太地区的监管合规。
 
 ### 为什么选择 DJAC？
-- **29+ 司法管辖区** — PIPL、PDPL、CSL、DSL、GDPR、ISO 27001、SOC 2等
-- **AI驱动分析** — GPT-4o驱动的8阶段合规评估流程
+- **28 司法管辖区** — PIPL、PDPL、CSL、DSL、GDPR、ISO 27001、SOC 2等
+- **AI驱动分析** — Gemini驱动的8阶段合规评估流程
 - **实时监控** — 持续合规跟踪，自动检测差距
 - **跨境智能** — 数据传输合规检查器和监管变化监控
 - **供应商风险管理** — 跨所有选定框架的自动第三方评估
@@ -1750,12 +1750,12 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
         id: "architecture",
         title: "平台架构",
         summary:
-          "DJAC在云原生架构上运行，使用React 19、Express + tRPC、PostgreSQL（Supabase）、Redis和OpenAI GPT-4o。",
+          "DJAC在云原生架构上运行，使用React 19、Express + tRPC、PostgreSQL（Supabase）、Redis和Google Gemini。",
         content: `### 系统架构
 **前端**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4
 **后端**: Express 4 + tRPC 11（200+ API程序）
 **数据库**: PostgreSQL 17 on Supabase
-**AI引擎**: OpenAI GPT-4o，8阶段评估流程
+**AI引擎**: Google Gemini，8阶段评估流程
 **身份验证**: 三路径（Clerk OAuth + Supabase Auth + 本地JWT）
 **计费**: Stripe（5个计划 × 4个周期）
 **托管**: Vercel（无服务器）+ Docker`,
@@ -1770,13 +1770,13 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
       {
         id: "ai-overview",
         title: "AI引擎概述",
-        summary: "DJAC的8阶段AI流程使用GPT-4o同时评估多个框架的供应商合规性。",
+        summary: "DJAC的8阶段AI流程使用Gemini同时评估多个框架的供应商合规性。",
         content: `### 8阶段流程
 1. **守门人** — 输入验证、注入检测
 2. **摄入** — 文档解析、文本规范化
 3. **提取器** — 结构化事实提取
 4. **RAG上下文** — 检索增强生成：从PostgreSQL提取相关合规控制
-5. **法官（GPT-4o）** — 评估事实与适用控制要求
+5. **法官（Gemini）** — 评估事实与适用控制要求
 6. **合成器** — 合并发现结果，生成跨框架比较
 7. **验证器** — 模式验证、跨字段一致性
 8. **报告器** — 最终格式化输出（PDF/DOCX/JSON）`,
@@ -1792,7 +1792,7 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
         id: "jurisdictions",
         title: "支持的司法管辖区",
         summary:
-          "DJAC覆盖亚太、欧洲、中东、北美和非洲29+个司法管辖区的综合监管框架。",
+          "DJAC覆盖亚太、欧洲、中东、北美和非洲28个司法管辖区的综合监管框架。",
         content: `### 亚太地区
 - **中国** — PIPL、CSL、DSL、MLPS 2.0
 - **日本** — APPI

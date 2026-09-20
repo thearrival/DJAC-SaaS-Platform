@@ -924,7 +924,7 @@ export default function VendorRiskDashboard() {
             >
               {t(
                 "vendorRisk.emptyDesc",
-                "Register your first third-party vendor to begin compliance assessments, gap analysis, and risk scoring across 29 jurisdictions."
+                "Register your first third-party vendor to begin compliance assessments, gap analysis, and risk scoring across 28 jurisdictions."
               )}
             </p>
             <Link href="/client-workspace">

@@ -2689,7 +2689,7 @@ export default function Signup() {
             <ShieldCheck size={11} style={{ flexShrink: 0 }} />
             {t(
               "signup.tagline",
-              "Global Compliance Intelligence · 40+ Jurisdictions"
+              "Global Compliance Intelligence · 28 Jurisdictions"
             )}
           </div>
 
@@ -2737,7 +2737,7 @@ export default function Signup() {
           >
             {t(
               "signup.heroDesc",
-              "The global compliance intelligence platform built for compliance officers, DPOs, and legal teams managing regulatory obligations across 40+ jurisdictions including GDPR, PIPL, PDPL, LGPD, POPIA, and CCPA."
+              "The global compliance intelligence platform built for compliance officers, DPOs, and legal teams managing regulatory obligations across 28 jurisdictions including GDPR, PIPL, PDPL, LGPD, POPIA, and CCPA."
             )}
           </p>
 

@@ -3,7 +3,7 @@
  *
  * Vendor Compliance Gap Tracker — Phase 23
  * Shows aggregated compliance gaps across all registered org vendors,
- * powered by the rule-based multi-jurisdiction assessment engine covering 29 jurisdictions.
+ * powered by the rule-based multi-jurisdiction assessment engine covering 28 jurisdictions.
  *
  * Features:
  *  - Stats header (total / critical / high / medium / low gap counts)
@@ -912,7 +912,7 @@ export default function GapTracker() {
         >
           {t(
             "gapTracker.subtitle",
-            "Rule-based multi-jurisdiction compliance gap analysis across all registered vendors. Identifies gaps across 29 jurisdictions including UK GDPR, PIPEDA, APPI, POPIA, and 40+ frameworks with remediation guidance."
+            "Rule-based multi-jurisdiction compliance gap analysis across all registered vendors. Identifies gaps across 28 jurisdictions including UK GDPR, PIPEDA, APPI, POPIA, and 40+ frameworks with remediation guidance."
           )}
         </p>
       </div>

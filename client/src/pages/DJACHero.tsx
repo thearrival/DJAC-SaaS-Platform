@@ -1114,7 +1114,7 @@ export default function DJACHero() {
               <FeatureCard
                 icon={<Shield size={24} color="#00d2ff" />}
                 title="AI Assessment Engine"
-                description="Multi-model orchestration across GPT-4o, Claude, and Gemini. Parallel framework analysis with automatic gap detection and remediation scoring."
+                description="Multi-model orchestration across Gemini, Claude, and Gemini. Parallel framework analysis with automatic gap detection and remediation scoring."
                 accent="#00d2ff"
                 items={[
                   "GDPR · CCPA · LGPD · PIPL simultaneous scan",
@@ -1127,10 +1127,10 @@ export default function DJACHero() {
               <FeatureCard
                 icon={<Scale size={24} color="#10b981" />}
                 title="Jurisdiction Intelligence"
-                description="Real-time legal knowledge graph covering 40+ jurisdictions. Cross-border transfer risk scoring and proactive regulatory change alerts."
+                description="Real-time legal knowledge graph covering 28 jurisdictions. Cross-border transfer risk scoring and proactive regulatory change alerts."
                 accent="#10b981"
                 items={[
-                  "40+ jurisdictions · live regulatory updates",
+                  "28 jurisdictions · live regulatory updates",
                   "GDPR SCCs / BCRs adequacy checks",
                   "Transfer risk calculator EU→US, EU→SA",
                   "Law library with AI-powered search",

@@ -45,7 +45,7 @@ const TOUR_STEPS: TourStep[] = [
     target: '[data-tour-id="tour-menu-analysis"]',
     title: "Compliance Framework Library",
     description:
-      "Browse 46 frameworks across 29 jurisdictions. Select your frameworks to unlock AI-powered gap analysis and cross-jurisdiction comparisons.",
+      "Browse 46 frameworks across 28 jurisdictions. Select your frameworks to unlock AI-powered gap analysis and cross-jurisdiction comparisons.",
     icon: BookOpen,
     offsetX: 0,
     offsetY: 8,

@@ -82,7 +82,7 @@ export function DeHengFooter() {
           {t("footer.tagline", "Multi-Jurisdiction Compliance Intelligence")}
         </span>
         <span style={{ color: "var(--border)" }}>·</span>
-        <span>{t("footer.regions", "Global · 40+ Jurisdictions")}</span>
+        <span>{t("footer.regions", "Global · 28 Jurisdictions")}</span>
         <span style={{ color: "var(--border)" }}>·</span>
         <a
           href="mailto:sales@yalla-hack.com"
