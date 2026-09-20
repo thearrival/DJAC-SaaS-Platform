@@ -765,9 +765,9 @@ function DashboardLayoutContent({
           disableTransition={isResizing}
         >
           <SidebarHeader className="h-16 justify-center border-b border-sidebar-border/60 bg-gradient-to-r rtl:bg-gradient-to-l from-sidebar via-sidebar to-sidebar-accent/30">
-            <div className="flex items-center gap-3 ps-2 group-data-[collapsible=icon]:px-0 transition-all w-full">
+            <div className="flex items-center gap-3 ps-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center transition-all w-full">
               {isCollapsed ? (
-                <div className="relative h-8 w-16 shrink-0 group rounded-md">
+                <div className="relative h-8 w-8 shrink-0 group rounded-md">
                   <img
                     src={APP_LOGO}
                     className="h-full w-full rounded-md object-contain"
