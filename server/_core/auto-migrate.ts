@@ -486,6 +486,41 @@ export async function ensureMigrated(): Promise<void> {
       `ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text;`
     );
 
+    // Migration 0011: tenant-query indexes ─────────────────────────────────────
+    // Every tenant-scoped table is filtered by organizationId. Ensure each has a
+    // supporting index so tenant queries remain index scans as data grows.
+    // Idempotent (IF NOT EXISTS); safe to run on every boot.
+    const tenantIndexTables = [
+      "complianceReports",
+      "apiKeys",
+      "compliancePolicies",
+      "complianceIncidents",
+      "auditSchedules",
+      "ctemAssets",
+      "continuousComplianceRuns",
+      "rolePermissions",
+      "complianceEvidence",
+      "dsrRequests",
+      "serviceRequests",
+      "assetInventory",
+      "securityMaturityAssessments",
+      "threatIntelItems",
+      "knowledgeGraphNodes",
+      "knowledgeGraphEdges",
+      "regulatoryChanges",
+      "complianceSimulations",
+      "aiAgentRuns",
+      "organization_profiles_custom",
+      "analytics_events",
+      "email_log",
+    ];
+    for (const table of tenantIndexTables) {
+      await driftExec(
+        `index ${table}.organizationId`,
+        `CREATE INDEX IF NOT EXISTS "${table}_organizationId_idx" ON "${table}" ("organizationId");`
+      );
+    }
+
     const driftEnums: Record<string, string[]> = {
       plan: ["free_trial", "starter", "professional", "enterprise"],
       paidPlan: ["starter", "professional", "enterprise"],
