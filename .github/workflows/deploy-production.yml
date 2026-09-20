@@ -1,8 +1,9 @@
 name: Deploy Production
 
 on:
-  push:
-    branches: [main]
+  # Production auto-deploys via the Vercel Git integration on every push to
+  # `main` (see vercel.json + committed api/index.mjs). This workflow is kept as
+  # a manual fallback only — it requires a valid VERCEL_TOKEN repository secret.
   workflow_dispatch:
 
 env:
