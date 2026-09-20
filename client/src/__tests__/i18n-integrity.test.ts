@@ -16,6 +16,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
+import { LOCALE_SUPPLEMENT } from "../contexts/localeSupplement";
 
 const LOCALES = ["en", "ar", "zh", "fr", "es", "de", "ja", "ko", "pt"] as const;
 
@@ -63,6 +64,37 @@ describe("i18n integrity", () => {
           `locale "${locale}" is missing "${key}"`
         ).toBe(true);
       }
+    }
+  });
+});
+
+describe("i18n chrome supplement", () => {
+  const PARTIAL = ["fr", "es", "de", "ja", "ko", "pt"] as const;
+  const REQUIRED = [
+    "layout.groupGlobal",
+    "layout.groupResources",
+    "layout.groupCyberOps",
+    "layout.signOutTitle",
+    "layout.menuAuditLog",
+  ];
+
+  it("covers the chrome keys for every partial locale", () => {
+    for (const locale of PARTIAL) {
+      const pack = LOCALE_SUPPLEMENT[locale];
+      expect(pack, `supplement for "${locale}"`).toBeTruthy();
+      for (const key of REQUIRED) {
+        expect(
+          pack?.[key],
+          `${locale} supplement missing "${key}"`
+        ).toBeTruthy();
+      }
+    }
+  });
+
+  it("provides the group labels that are missing from all locale packs", () => {
+    for (const locale of ["en", "ar", "zh"] as const) {
+      expect(LOCALE_SUPPLEMENT[locale]?.["layout.groupGlobal"]).toBeTruthy();
+      expect(LOCALE_SUPPLEMENT[locale]?.["layout.groupResources"]).toBeTruthy();
     }
   });
 });

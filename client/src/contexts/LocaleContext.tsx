@@ -5,6 +5,7 @@ import {
   type ExtendedLocale,
   type LocaleContextValue,
 } from "./localeTypes";
+import { LOCALE_SUPPLEMENT } from "./localeSupplement";
 
 const messages: Record<string, Record<string, string>> = {
   en: {
@@ -10710,7 +10711,8 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
       locale,
       setLocale: setLocaleState,
       direction,
-      t: (key: string, fallback: string) => messages[locale][key] || fallback,
+      t: (key: string, fallback: string) =>
+        messages[locale][key] || LOCALE_SUPPLEMENT[locale]?.[key] || fallback,
     }),
     [locale, direction]
   );
