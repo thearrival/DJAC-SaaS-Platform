@@ -78,7 +78,10 @@ function getHashedIpFromHeaders(
 
 type AnyDb = NonNullable<Awaited<ReturnType<typeof getDb>>>;
 
-function computeChainHash(prevHash: string | null, eventJson: string): string {
+export function computeChainHash(
+  prevHash: string | null,
+  eventJson: string
+): string {
   return createHash("sha256")
     .update(`${prevHash ?? "genesis"}\n${eventJson}`)
     .digest("hex");

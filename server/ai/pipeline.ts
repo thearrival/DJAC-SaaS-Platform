@@ -84,7 +84,7 @@ const JURISDICTION_FRAMEWORKS: Record<string, string[]> = {
   kenya: ["KENYA-DPA"],
 };
 
-const INJECTION_PATTERNS: RegExp[] = [
+export const INJECTION_PATTERNS: RegExp[] = [
   /ignore\s+all\s+previous\s+instructions/i,
   /system\s+prompt/i,
   /jailbreak/i,
@@ -239,7 +239,7 @@ async function callAgentSwarm<T>(
   }
 }
 
-function runSecurityGatekeeper(payload: string) {
+export function runSecurityGatekeeper(payload: string) {
   const threats = INJECTION_PATTERNS.filter(pattern => pattern.test(payload));
   if (threats.length > 0) {
     throw new Error(

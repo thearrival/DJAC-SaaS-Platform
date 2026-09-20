@@ -14,6 +14,8 @@
 import { describe, it, expect } from "vitest";
 import { createApiKey, listApiKeys, revokeApiKey } from "../../api-keys-store";
 import { createAsset, listAssets, getAsset } from "../../asset-inventory-store";
+import { createRisk, listRisks } from "../../risk-register-store";
+import { createAudit, listAudits } from "../../audit-schedule-store";
 
 describe("tenant isolation — API keys", () => {
   it("createApiKey / listApiKeys scope keys to their own organization", async () => {
@@ -99,5 +101,54 @@ describe("tenant isolation — asset inventory", () => {
     expect(await getAsset(ORG_A, b.id)).toBeNull();
     // The owning tenant can still read it.
     expect((await getAsset(ORG_B, b.id))?.id).toBe(b.id);
+  });
+});
+
+describe("tenant isolation — risk register", () => {
+  const baseRisk = {
+    category: "operational" as const,
+    likelihood: 3,
+    impact: 4,
+    treatment: "mitigate" as const,
+    status: "open" as const,
+  };
+
+  it("createRisk / listRisks scope risks to their own organization", async () => {
+    const ORG_A = 2001;
+    const ORG_B = 2002;
+    const a = await createRisk(ORG_A, { ...baseRisk, title: "A risk" });
+    const b = await createRisk(ORG_B, { ...baseRisk, title: "B risk" });
+
+    const aIds = (await listRisks(ORG_A)).map(r => r.id);
+    const bIds = (await listRisks(ORG_B)).map(r => r.id);
+
+    expect(aIds).toContain(a.id);
+    expect(aIds).not.toContain(b.id);
+    expect(bIds).toContain(b.id);
+    expect(bIds).not.toContain(a.id);
+  });
+});
+
+describe("tenant isolation — audit schedule", () => {
+  const baseAudit = {
+    auditType: "internal" as const,
+    status: "planned" as const,
+    scheduledDate: new Date().toISOString(),
+    recurrence: "none" as const,
+  };
+
+  it("createAudit / listAudits scope audits to their own organization", async () => {
+    const ORG_A = 2003;
+    const ORG_B = 2004;
+    const a = await createAudit(ORG_A, { ...baseAudit, title: "A audit" });
+    const b = await createAudit(ORG_B, { ...baseAudit, title: "B audit" });
+
+    const aIds = (await listAudits(ORG_A)).map(x => x.id);
+    const bIds = (await listAudits(ORG_B)).map(x => x.id);
+
+    expect(aIds).toContain(a.id);
+    expect(aIds).not.toContain(b.id);
+    expect(bIds).toContain(b.id);
+    expect(bIds).not.toContain(a.id);
   });
 });
