@@ -41,7 +41,7 @@ function localeBlock(locale: string): string {
   const start = src.indexOf(marker);
   if (start === -1) return "";
   const rest = src.slice(start + marker.length);
-  const nextMatch = rest.match(/\n  (en|ar|zh|fr|es|de|ja|ko|pt): \{/);
+  const nextMatch = rest.match(/\n {2}(en|ar|zh|fr|es|de|ja|ko|pt): \{/);
   return nextMatch ? rest.slice(0, nextMatch.index) : rest;
 }
 
