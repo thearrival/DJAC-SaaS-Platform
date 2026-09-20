@@ -43,8 +43,16 @@ html {
 body {
   background-color: var(--bg-base);
   background-image:
-    radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--yh-magenta) 8%, transparent), transparent 25%),
-    radial-gradient(circle at 85% 30%, color-mix(in srgb, var(--yh-cyan) 8%, transparent), transparent 25%);
+    radial-gradient(
+      circle at 15% 50%,
+      color-mix(in srgb, var(--yh-magenta) 8%, transparent),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 85% 30%,
+      color-mix(in srgb, var(--yh-cyan) 8%, transparent),
+      transparent 25%
+    );
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
@@ -238,7 +246,9 @@ div:has(> div > [role="log"]) textarea:focus,
   width: 280px;
 }
 
-@supports not ((backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px))) {
+@supports not (
+  (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px))
+) {
   /* Solid-color fallback where backdrop-filter is unsupported */
   [data-sidebar="sidebar"] {
     background: #0a0a0f;
@@ -258,13 +268,21 @@ div:has(> div > [role="log"]) textarea:focus,
 }
 
 [data-sidebar="menu-button"][data-active="true"] {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--yh-magenta) 15%, transparent), color-mix(in srgb, var(--yh-cyan) 5%, transparent));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--yh-magenta) 15%, transparent),
+    color-mix(in srgb, var(--yh-cyan) 5%, transparent)
+  );
   color: var(--text-primary);
   border-inline-start: 3px solid var(--yh-magenta);
 }
 
 [dir="rtl"] [data-sidebar="menu-button"][data-active="true"] {
-  background: linear-gradient(-90deg, color-mix(in srgb, var(--yh-magenta) 15%, transparent), color-mix(in srgb, var(--yh-cyan) 5%, transparent));
+  background: linear-gradient(
+    -90deg,
+    color-mix(in srgb, var(--yh-magenta) 15%, transparent),
+    color-mix(in srgb, var(--yh-cyan) 5%, transparent)
+  );
 }
 
 /* ── 8. STATUS BADGES (pill, 11px/600, status-tinted) ───────────────────── */
@@ -289,7 +307,11 @@ div:has(> div > [role="log"]) textarea:focus,
 }
 
 .bg-blue-100 {
-  background-color: color-mix(in srgb, var(--yh-cyan) 10%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--yh-cyan) 10%,
+    transparent
+  ) !important;
   border: 1px solid color-mix(in srgb, var(--yh-cyan) 20%, transparent) !important;
   color: var(--yh-cyan) !important;
 }
@@ -421,9 +443,21 @@ svg.lucide {
 .djac-docs-next,
 .djac-demo-card {
   background:
-    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--yh-magenta) 8%, transparent), transparent 40%),
-    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--yh-cyan) 8%, transparent), transparent 40%),
-    linear-gradient(135deg, rgba(30, 30, 45, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%);
+    radial-gradient(
+      circle at 0% 0%,
+      color-mix(in srgb, var(--yh-magenta) 8%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      color-mix(in srgb, var(--yh-cyan) 8%, transparent),
+      transparent 40%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(30, 30, 45, 0.8) 0%,
+      rgba(10, 10, 15, 0.9) 100%
+    );
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
 }
@@ -442,7 +476,9 @@ svg.lucide {
   color: var(--text-primary);
 }
 
-@supports not ((backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px))) {
+@supports not (
+  (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px))
+) {
   [data-slot="dialog-content"],
   [data-slot="sheet-content"],
   [data-slot="popover-content"] {

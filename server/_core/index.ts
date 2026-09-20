@@ -20,8 +20,14 @@ import { registerAssessmentWebSocketServer } from "../ai/ws";
 import { getSystemReadiness } from "./readiness";
 import { stripeWebhookHandler } from "../stripe-webhook";
 import { startInteractionRetentionScheduler } from "../interaction-retention";
-import { startTrialReminderScheduler, runReminderCheck } from "../trial-reminder-scheduler";
-import { startDeadlineAlertScheduler, runDeadlineAlertCheck } from "../deadline-alert-scheduler";
+import {
+  startTrialReminderScheduler,
+  runReminderCheck,
+} from "../trial-reminder-scheduler";
+import {
+  startDeadlineAlertScheduler,
+  runDeadlineAlertCheck,
+} from "../deadline-alert-scheduler";
 import { startReportScheduler } from "../report-scheduler";
 import { startOtpCleanupScheduler } from "../services/otp-cleanup";
 import { closeAssessmentQueue } from "../ai/queueFactory";
@@ -284,7 +290,11 @@ export async function createApp() {
   // recycle on cold start), so Vercel Cron invokes these idempotent endpoints on
   // a fixed schedule instead. Vercel injects CRON_SECRET into the Authorization
   // header of every cron request; anything else is rejected.
-  const requireCronSecret = (req: Request, res: Response, next: NextFunction) => {
+  const requireCronSecret = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     const secret = ENV.cronSecret;
     if (!secret) {
       res.status(503).json({ error: "CRON_SECRET is not configured." });
@@ -300,18 +310,17 @@ export async function createApp() {
     next();
   };
 
-  const runCron = (
-    label: string,
-    job: () => Promise<void>
-  ) => async (_req: Request, res: Response) => {
-    try {
-      await job();
-      res.json({ ok: true });
-    } catch (err) {
-      console.warn(`[Cron:${label}] Run failed:`, err);
-      res.status(500).json({ error: "Cron job failed" });
-    }
-  };
+  const runCron =
+    (label: string, job: () => Promise<void>) =>
+    async (_req: Request, res: Response) => {
+      try {
+        await job();
+        res.json({ ok: true });
+      } catch (err) {
+        console.warn(`[Cron:${label}] Run failed:`, err);
+        res.status(500).json({ error: "Cron job failed" });
+      }
+    };
 
   app.post(
     "/api/cron/deadlines",

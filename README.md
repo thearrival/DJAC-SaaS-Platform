@@ -133,17 +133,17 @@ pnpm dev
 
 The platform includes a dedicated founders admin console:
 
-| Route                                | Component                         |
-| ------------------------------------ | --------------------------------- |
-| `/yalla-hack-owners-console/login`   | `FoundersLogin`                   |
-| `/yalla-hack-owners-console/dashboard` | `AdminDashboardPage`              |
-| `/yalla-hack-owners-console/users`   | `AdminUsersPage`                  |
-| `/yalla-hack-owners-console`         | `AdminDashboardPage` (default)    |
+| Route                                      | Component                      |
+| ------------------------------------------ | ------------------------------ |
+| `/yalla-hack-owners-console/login`         | `FoundersLogin`                |
+| `/yalla-hack-owners-console/dashboard`     | `AdminDashboardPage`           |
+| `/yalla-hack-owners-console/users`         | `AdminUsersPage`               |
+| `/yalla-hack-owners-console`               | `AdminDashboardPage` (default) |
 | `/yalla-hack-owners-console/subscriptions` | `AdminSubscriptions`           |
-| `/yalla-hack-owners-console/organizations` | `AdminOrganizations`          |
-| `/yalla-hack-owners-console/security` | `AdminSecurity`                 |
-| `/yalla-hack-owners-console/audit`   | `AdminAudit`                    |
-| `/yalla-hack-owners-console/analytics` | `AdminAnalytics`                |
+| `/yalla-hack-owners-console/organizations` | `AdminOrganizations`           |
+| `/yalla-hack-owners-console/security`      | `AdminSecurity`                |
+| `/yalla-hack-owners-console/audit`         | `AdminAudit`                   |
+| `/yalla-hack-owners-console/analytics`     | `AdminAnalytics`               |
 
 **Note:** Fixed route mapping at `client/src/App.tsx` - `/yalla-admin/login` now correctly maps to `FoundersLogin` instead of `NotFound`.
 

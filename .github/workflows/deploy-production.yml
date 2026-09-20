@@ -36,13 +36,8 @@ jobs:
 
       - name: Refresh Vercel Auth
         env:
-          VERCEL_AUTH_JSON: ${{ secrets.VERCEL_AUTH_JSON }}
-        run: |
-          mkdir -p "$HOME/.local/share/com.vercel.cli"
-          echo "$VERCEL_AUTH_JSON" > "$HOME/.local/share/com.vercel.cli/auth.json"
-          vercel whoami >/dev/null 2>&1 || true
-          TOKEN=$(node -e "const a=JSON.parse(require('fs').readFileSync(process.env.HOME+'/.local/share/com.vercel.cli/auth.json','utf8'));console.log(a.token)")
-          echo "VERCEL_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: echo "VERCEL_TOKEN=$VERCEL_TOKEN" >> "$GITHUB_ENV"
 
       - name: Pull Vercel Environment
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
