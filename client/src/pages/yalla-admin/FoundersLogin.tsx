@@ -97,9 +97,6 @@ export default function FoundersLogin() {
             }}
           >
             <img src={APP_LOGO} alt={APP_TITLE} style={{ height: 40 }} />
-            <span style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>
-              DJAC
-            </span>
           </div>
           <h1
             style={{
