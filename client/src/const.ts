@@ -2,7 +2,7 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "App";
 
-export const APP_LOGO = "/djac-logo-mark.png";
+export const APP_LOGO = "/yalla-hack-logo.png";
 
 // Returns true only when an external (non-same-origin) OAuth portal is configured.
 // Use this to conditionally show SSO buttons/UI that would otherwise loop back.
