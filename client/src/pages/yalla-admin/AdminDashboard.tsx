@@ -191,12 +191,12 @@ function PieChart({ data }: { data: Record<string, number> }) {
   const total = entries.reduce((s, [, v]) => s + v, 0);
   const colors = [
     "hsl(var(--primary))",
-    "#818cf8",
-    "#34d399",
-    "#fbbf24",
-    "#f87171",
-    "#a78bfa",
-    "#2dd4bf",
+    "#d900ff",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#d900ff",
+    "#10b981",
     "#94a3b8",
   ];
   let cumulative = 0;

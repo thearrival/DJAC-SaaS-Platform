@@ -69,9 +69,9 @@ export default function AdminAnalytics() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "rgba(255,255,255,0.08)",
       }}
     >
       <header
@@ -129,13 +129,13 @@ export default function AdminAnalytics() {
             icon={<Users size={18} />}
             label="Total Users"
             value={data?.userStats?.totalUsers ?? 0}
-            color="#6366f1"
+            color="#d900ff"
           />
           <KPI
             icon={<Activity size={18} />}
             label="Active Users"
             value={data?.userStats?.activeUsers ?? 0}
-            color="#4ade80"
+            color="#10b981"
           />
           <KPI
             icon={<TrendingUp size={18} />}
@@ -147,7 +147,7 @@ export default function AdminAnalytics() {
             icon={<CreditCard size={18} />}
             label="Roles"
             value={Object.keys(data?.userStats?.byRole || {}).length}
-            color="#a855f7"
+            color="#d900ff"
           />
         </div>
 
@@ -174,7 +174,7 @@ export default function AdminAnalytics() {
             <BarChart3 size={16} /> Monthly Registrations (12 months)
           </h3>
           {loading ? (
-            <p style={{ fontSize: 13, color: "#64748b" }}>Loading...</p>
+            <p style={{ fontSize: 13, color: "#7d8aa0" }}>Loading...</p>
           ) : (
             <div
               style={{
@@ -199,7 +199,7 @@ export default function AdminAnalytics() {
                     style={{
                       width: "100%",
                       height: `${Math.max((r.count / maxReg) * 140, 4)}px`,
-                      background: "linear-gradient(180deg, #6366f1, #a855f7)",
+                      background: "linear-gradient(180deg, #d900ff, #d900ff)",
                       borderRadius: "4px 4px 0 0",
                       minHeight: 4,
                     }}
@@ -207,7 +207,7 @@ export default function AdminAnalytics() {
                   <span
                     style={{
                       fontSize: 9,
-                      color: "#64748b",
+                      color: "#7d8aa0",
                       transform: "rotate(-45deg)",
                       transformOrigin: "top left",
                       whiteSpace: "nowrap",
@@ -256,7 +256,7 @@ export default function AdminAnalytics() {
                       style={{
                         width: `${Math.max((count / (data?.userStats?.totalUsers || 1)) * 100, 2)}%`,
                         height: "100%",
-                        background: "linear-gradient(90deg, #6366f1, #a855f7)",
+                        background: "linear-gradient(90deg, #d900ff, #d900ff)",
                         borderRadius: 4,
                       }}
                     />
@@ -264,7 +264,7 @@ export default function AdminAnalytics() {
                   <span
                     style={{
                       fontSize: 13,
-                      color: "#e2e8f0",
+                      color: "rgba(255,255,255,0.08)",
                       fontWeight: 600,
                       minWidth: 30,
                       textAlign: "right",

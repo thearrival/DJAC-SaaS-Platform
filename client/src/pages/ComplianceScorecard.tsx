@@ -176,15 +176,15 @@ function fmtDate(iso: string): string {
 }
 
 const RISK_COLORS: Record<string, string> = {
-  low: "#22c55e",
-  medium: "#eab308",
-  high: "#f97316",
+  low: "#10b981",
+  medium: "#f59e0b",
+  high: "#f59e0b",
   critical: "#ef4444",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  compliant: "#22c55e",
-  partial: "#eab308",
+  compliant: "#10b981",
+  partial: "#f59e0b",
   non_compliant: "#ef4444",
 };
 
@@ -260,8 +260,8 @@ export default function ComplianceScorecard() {
     });
 
   const isDark = theme === "dark";
-  const gridColor = isDark ? "#334155" : "#e2e8f0";
-  const tickColor = isDark ? "#94a3b8" : "#64748b";
+  const gridColor = isDark ? "#050508" : "rgba(255,255,255,0.08)";
+  const tickColor = isDark ? "#94a3b8" : "#7d8aa0";
 
   // Risk distribution chart data
   const riskPieData = data

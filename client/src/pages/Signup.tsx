@@ -76,17 +76,17 @@ function useC() {
   const { theme } = useTheme();
   const d = theme === "dark";
   return {
-    bg: d ? "#040F61" : "#F0F4FF",
-    bgDeep: d ? "#020B45" : "#FFFFFF",
+    bg: d ? "#050508" : "rgba(255,255,255,0.05)",
+    bgDeep: d ? "#050508" : "#FFFFFF",
     border: d ? "rgba(255,255,255,0.09)" : "rgba(4,15,97,0.11)",
-    text: d ? "#FFFFFF" : "#020B45",
-    muted: d ? "#9CA3AF" : "rgba(2,11,69,0.55)",
-    cyan: d ? "#00F7FF" : "#0284c7",
-    green: d ? "#01FF7F" : "#16a34a",
-    purple: d ? "#9359EC" : "#7c3aed",
-    orange: d ? "#FF6B2B" : "#ea580c",
-    yellow: d ? "#FFD600" : "#d97706",
-    red: d ? "#FF1744" : "#dc2626",
+    text: d ? "#FFFFFF" : "#050508",
+    muted: d ? "#94a3b8" : "rgba(2,11,69,0.55)",
+    cyan: d ? "#00d2ff" : "#00d2ff",
+    green: d ? "#10b981" : "#10b981",
+    purple: d ? "#d900ff" : "#d900ff",
+    orange: d ? "#f59e0b" : "#f59e0b",
+    yellow: d ? "#f59e0b" : "#f59e0b",
+    red: d ? "#ef4444" : "#ef4444",
     inputBg: d ? "rgba(255,255,255,0.06)" : "rgba(4,15,97,0.05)",
     cardPanel: d ? "rgba(255,255,255,0.035)" : "rgba(255,255,255,0.82)",
     tabBar: d ? "rgba(255,255,255,0.05)" : "rgba(4,15,97,0.05)",
@@ -2160,7 +2160,7 @@ function GoogleSignInButton({
         transition: "all 0.18s",
       }}
     >
-      <Chrome size={15} style={{ color: "#4285F4" }} />
+      <Chrome size={15} style={{ color: "#00d2ff" }} />
       {t("signup.googleSignIn", "Continue with Google")}
     </button>
   );
@@ -2219,8 +2219,8 @@ function IpRegistrationSection({ C }: { C: DesignTokens }) {
             src: "/cnipa-logo.png",
             alt: "China National Intellectual Property Administration",
             fallbackChar: "国",
-            fallbackBg: "linear-gradient(135deg,#C8102E,#8B0000)",
-            fallbackColor: "#C8102E",
+            fallbackBg: "linear-gradient(135deg,#ef4444,rgba(239,68,68,0.12))",
+            fallbackColor: "#ef4444",
             fallbackLabel: "CNIPA",
             fallbackFontSize: 13,
             name: "China National Intellectual",
@@ -2230,8 +2230,8 @@ function IpRegistrationSection({ C }: { C: DesignTokens }) {
             src: "/usco-logo.png",
             alt: "United States Copyright Office",
             fallbackChar: "©",
-            fallbackBg: "linear-gradient(135deg,#336E8D,#1a4a5e)",
-            fallbackColor: "#336E8D",
+            fallbackBg: "linear-gradient(135deg,#00d2ff,#050508)",
+            fallbackColor: "#00d2ff",
             fallbackLabel: "U.S. COPYRIGHT",
             fallbackFontSize: 16,
             name: "United States",

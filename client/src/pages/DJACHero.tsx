@@ -315,7 +315,7 @@ function HexagonOrbit() {
               top: "50%",
               left: "50%",
               transform: `rotate(${deg}deg) translate(128px) translate(-50%,-50%)`,
-              background: "#60a5fa",
+              background: "#00d2ff",
               boxShadow: "0 0 10px 3px rgba(99,157,255,.7)",
               animation: "glow-pulse 2.5s ease-in-out infinite",
               animationDelay: `${deg * 7}ms`,
@@ -340,7 +340,7 @@ function HexagonOrbit() {
               top: "50%",
               left: "50%",
               transform: `rotate(${deg}deg) translate(88px) translate(-50%,-50%)`,
-              background: "#4ade80",
+              background: "#10b981",
               boxShadow: "0 0 8px 2px rgba(74,222,128,.8)",
               animation: "glow-green 2s ease-in-out infinite",
               animationDelay: `${deg * 5}ms`,
@@ -370,7 +370,7 @@ function HexagonOrbit() {
           animation: "glow-pulse 3s ease-in-out infinite",
         }}
       >
-        <Shield size={32} color="#93c5fd" />
+        <Shield size={32} color="#00d2ff" />
       </div>
     </div>
   );
@@ -644,7 +644,7 @@ function DataFeed() {
     });
   }, []);
 
-  const sColor = { ok: "#4ade80", warn: "#fbbf24", err: "#f87171" };
+  const sColor = { ok: "#10b981", warn: "#f59e0b", err: "#ef4444" };
   const sGlyph = { ok: "✓", warn: "⚠", err: "✗" };
 
   return (
@@ -662,7 +662,7 @@ function DataFeed() {
         style={{ borderColor: "hsl(var(--border)/.4)" }}
       >
         <div className="flex gap-1.5">
-          {["#f87171", "#fbbf24", "#4ade80"].map(c => (
+          {["#ef4444", "#f59e0b", "#10b981"].map(c => (
             <div
               key={c}
               className="w-2.5 h-2.5 rounded-full"
@@ -776,7 +776,7 @@ function ScoreGauge({ score = 98.4 }: { score?: number }) {
 
         <defs>
           <linearGradient id="djac-arc" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="0%" stopColor="#00d2ff" />
             <stop offset="100%" stopColor="#10b981" />
           </linearGradient>
         </defs>
@@ -895,7 +895,7 @@ export default function DJACHero() {
             style={{
               background: "rgba(59,130,246,.08)",
               borderColor: "rgba(59,130,246,.28)",
-              color: "#93c5fd",
+              color: "#00d2ff",
               animation: "slide-up .5s ease .1s both",
             }}
           >
@@ -916,7 +916,7 @@ export default function DJACHero() {
             className="mt-8 text-5xl md:text-[4.25rem] font-extrabold tracking-tight leading-[1.1] whitespace-pre-line"
             style={{
               background:
-                "linear-gradient(135deg,#f8fafc 0%,#93c5fd 48%,#4ade80 100%)",
+                "linear-gradient(135deg,rgba(255,255,255,0.05) 0%,#00d2ff 48%,#10b981 100%)",
               backgroundSize: "200% 200%",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -956,7 +956,7 @@ export default function DJACHero() {
             <button
               className="group inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white"
               style={{
-                background: "linear-gradient(135deg,#3b82f6,#10b981)",
+                background: "linear-gradient(135deg,#00d2ff,#10b981)",
                 boxShadow: "0 0 28px rgba(59,130,246,.45)",
                 border: "none",
                 cursor: "pointer",
@@ -1045,7 +1045,7 @@ export default function DJACHero() {
                 Built for Scale.{" "}
                 <span
                   style={{
-                    background: "linear-gradient(90deg,#3b82f6,#10b981)",
+                    background: "linear-gradient(90deg,#00d2ff,#10b981)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
@@ -1061,8 +1061,8 @@ export default function DJACHero() {
                 label="Global Frameworks"
                 value={47}
                 suffix="+"
-                icon={<Globe2 size={20} color="#60a5fa" />}
-                color="#3b82f6"
+                icon={<Globe2 size={20} color="#00d2ff" />}
+                color="#00d2ff"
                 delay={100}
               />
               <StatCard
@@ -1070,7 +1070,7 @@ export default function DJACHero() {
                 value={98.4}
                 suffix="%"
                 decimals={1}
-                icon={<Cpu size={20} color="#4ade80" />}
+                icon={<Cpu size={20} color="#10b981" />}
                 color="#10b981"
                 delay={260}
               />
@@ -1078,15 +1078,15 @@ export default function DJACHero() {
                 label="Vendors Assessed"
                 value={3200}
                 suffix="+"
-                icon={<Building2 size={20} color="#c084fc" />}
-                color="#8b5cf6"
+                icon={<Building2 size={20} color="#d900ff" />}
+                color="#d900ff"
                 delay={420}
               />
               <StatCard
                 label="Data Jurisdictions"
                 value={62}
-                icon={<Network size={20} color="#fb923c" />}
-                color="#f97316"
+                icon={<Network size={20} color="#f59e0b" />}
+                color="#f59e0b"
                 delay={580}
               />
             </div>
@@ -1112,10 +1112,10 @@ export default function DJACHero() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <FeatureCard
-                icon={<Shield size={24} color="#60a5fa" />}
+                icon={<Shield size={24} color="#00d2ff" />}
                 title="AI Assessment Engine"
                 description="Multi-model orchestration across GPT-4o, Claude, and Gemini. Parallel framework analysis with automatic gap detection and remediation scoring."
-                accent="#3b82f6"
+                accent="#00d2ff"
                 items={[
                   "GDPR · CCPA · LGPD · PIPL simultaneous scan",
                   "Automated control gap scoring 0–100",
@@ -1125,7 +1125,7 @@ export default function DJACHero() {
                 delay={100}
               />
               <FeatureCard
-                icon={<Scale size={24} color="#4ade80" />}
+                icon={<Scale size={24} color="#10b981" />}
                 title="Jurisdiction Intelligence"
                 description="Real-time legal knowledge graph covering 40+ jurisdictions. Cross-border transfer risk scoring and proactive regulatory change alerts."
                 accent="#10b981"
@@ -1138,10 +1138,10 @@ export default function DJACHero() {
                 delay={250}
               />
               <FeatureCard
-                icon={<Lock size={24} color="#c084fc" />}
+                icon={<Lock size={24} color="#d900ff" />}
                 title="Enterprise RBAC"
                 description="Multi-layer role architecture with fine-grained per-module permissions, onboarding gates, vendor sharing tokens, and regulator oversight."
-                accent="#8b5cf6"
+                accent="#d900ff"
                 items={[
                   "7 platform roles · 4 org roles",
                   "Per-module permission overrides",
@@ -1169,7 +1169,7 @@ export default function DJACHero() {
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
                 Always-on compliance
                 <br />
-                <span style={{ color: "#4ade80" }}>monitoring engine</span>
+                <span style={{ color: "#10b981" }}>monitoring engine</span>
               </h2>
               <p
                 className="text-sm leading-relaxed mb-7"
@@ -1188,13 +1188,13 @@ export default function DJACHero() {
 
               <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
                 {[
-                  { label: "Frameworks Active", value: "47", color: "#3b82f6" },
-                  { label: "Risk Posture", value: "Low", color: "#4ade80" },
-                  { label: "Open Gaps", value: "3", color: "#fbbf24" },
+                  { label: "Frameworks Active", value: "47", color: "#00d2ff" },
+                  { label: "Risk Posture", value: "Low", color: "#10b981" },
+                  { label: "Open Gaps", value: "3", color: "#f59e0b" },
                   {
                     label: "Vendors Reviewed",
                     value: "12/12",
-                    color: "#c084fc",
+                    color: "#d900ff",
                   },
                 ].map(({ label, value, color }) => (
                   <div
@@ -1257,7 +1257,7 @@ export default function DJACHero() {
                 <span
                   style={{
                     background:
-                      "linear-gradient(90deg,#60a5fa,#34d399,#a78bfa)",
+                      "linear-gradient(90deg,#00d2ff,#10b981,#d900ff)",
                     backgroundSize: "200%",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
@@ -1280,18 +1280,18 @@ export default function DJACHero() {
 
               <div className="flex flex-wrap justify-center gap-3">
                 {[
-                  { label: "React 19", color: "#61dafb" },
-                  { label: "TypeScript", color: "#3178c6" },
-                  { label: "tRPC 11", color: "#398ccb" },
-                  { label: "Drizzle ORM", color: "#c5f74f" },
-                  { label: "Tailwind v4", color: "#38bdf8" },
-                  { label: "Express 4", color: "#68a063" },
-                  { label: "shadcn/ui", color: "#a78bfa" },
-                  { label: "Wouter", color: "#f97316" },
+                  { label: "React 19", color: "#00d2ff" },
+                  { label: "TypeScript", color: "#00d2ff" },
+                  { label: "tRPC 11", color: "#00d2ff" },
+                  { label: "Drizzle ORM", color: "#10b981" },
+                  { label: "Tailwind v4", color: "#00d2ff" },
+                  { label: "Express 4", color: "#10b981" },
+                  { label: "shadcn/ui", color: "#d900ff" },
+                  { label: "Wouter", color: "#f59e0b" },
                   { label: "Sonner", color: "#f59e0b" },
-                  { label: "MariaDB", color: "#4e9ad4" },
-                  { label: "Lucide React", color: "#e879f9" },
-                  { label: "Recharts", color: "#8884d8" },
+                  { label: "MariaDB", color: "#00d2ff" },
+                  { label: "Lucide React", color: "#d900ff" },
+                  { label: "Recharts", color: "#d900ff" },
                 ].map(({ label, color }) => (
                   <span
                     key={label}
@@ -1321,7 +1321,7 @@ export default function DJACHero() {
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center"
                 style={{
-                  background: "linear-gradient(135deg,#3b82f6,#10b981)",
+                  background: "linear-gradient(135deg,#00d2ff,#10b981)",
                   boxShadow: "0 0 18px rgba(59,130,246,.45)",
                 }}
               >

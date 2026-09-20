@@ -311,11 +311,11 @@ export default function FrameworkAnalysis() {
               <div
                 className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
                 style={{
-                  background: "linear-gradient(135deg,#00F7FF22,#9359EC22)",
-                  border: "1px solid #9359EC40",
+                  background: "linear-gradient(135deg,#00d2ff22,#d900ff22)",
+                  border: "1px solid #d900ff40",
                 }}
               >
-                <AlertCircle className="h-7 w-7" style={{ color: "#9359EC" }} />
+                <AlertCircle className="h-7 w-7" style={{ color: "#d900ff" }} />
               </div>
               <h3 className="text-lg font-semibold mb-2">
                 {t("analysis.guidanceTitle", "Select a Framework to Begin")}

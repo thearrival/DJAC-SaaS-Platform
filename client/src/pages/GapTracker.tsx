@@ -139,27 +139,27 @@ const SEVERITY_CONFIG: Record<
     ),
   },
   high: {
-    color: "#f97316",
+    color: "#f59e0b",
     bg: "rgba(249,115,22,0.10)",
     border: "rgba(249,115,22,0.30)",
     icon: ({ size = 14 }) => (
-      <ShieldAlert size={size} style={{ color: "#f97316" }} />
+      <ShieldAlert size={size} style={{ color: "#f59e0b" }} />
     ),
   },
   medium: {
-    color: "#eab308",
+    color: "#f59e0b",
     bg: "rgba(234,179,8,0.10)",
     border: "rgba(234,179,8,0.30)",
     icon: ({ size = 14 }) => (
-      <AlertTriangle size={size} style={{ color: "#eab308" }} />
+      <AlertTriangle size={size} style={{ color: "#f59e0b" }} />
     ),
   },
   low: {
-    color: "#22c55e",
+    color: "#10b981",
     bg: "rgba(34,197,94,0.10)",
     border: "rgba(34,197,94,0.30)",
     icon: ({ size = 14 }) => (
-      <ShieldCheck size={size} style={{ color: "#22c55e" }} />
+      <ShieldCheck size={size} style={{ color: "#10b981" }} />
     ),
   },
 };
@@ -198,36 +198,36 @@ const JURISDICTION_LABEL: Record<GapJurisdiction, string> = {
 };
 
 const JURISDICTION_COLOR: Record<GapJurisdiction, string> = {
-  china: "#3b82f6",
+  china: "#00d2ff",
   saudi: "#10b981",
-  eu: "#8b5cf6",
+  eu: "#d900ff",
   us: "#f59e0b",
-  brazil: "#eab308",
-  cross_border: "#8b5cf6",
-  global: "#64748b",
-  uk: "#1d4ed8",
-  canada: "#db2777",
-  australia: "#65a30d",
-  japan: "#be185d",
-  southKorea: "#9333ea",
-  singapore: "#0284c7",
-  india: "#7c3aed",
-  southAfrica: "#059669",
-  mexico: "#ca8a04",
-  uae: "#c026d3",
-  qatar: "#0891b2",
-  kuwait: "#64748b",
-  bahrain: "#14b8a6",
+  brazil: "#f59e0b",
+  cross_border: "#d900ff",
+  global: "#7d8aa0",
+  uk: "#d900ff",
+  canada: "#d900ff",
+  australia: "#10b981",
+  japan: "#ef4444",
+  southKorea: "#d900ff",
+  singapore: "#00d2ff",
+  india: "#d900ff",
+  southAfrica: "#10b981",
+  mexico: "#f59e0b",
+  uae: "#d900ff",
+  qatar: "#00d2ff",
+  kuwait: "#7d8aa0",
+  bahrain: "#10b981",
   oman: "#f59e0b",
-  jordan: "#dc2626",
-  egypt: "#d97706",
-  indonesia: "#16a34a",
-  thailand: "#6366f1",
-  vietnam: "#e11d48",
-  philippines: "#0ea5e9",
-  malaysia: "#84cc16",
-  nigeria: "#22c55e",
-  kenya: "#a16207",
+  jordan: "#ef4444",
+  egypt: "#f59e0b",
+  indonesia: "#10b981",
+  thailand: "#d900ff",
+  vietnam: "#ef4444",
+  philippines: "#00d2ff",
+  malaysia: "#10b981",
+  nigeria: "#10b981",
+  kenya: "#f59e0b",
 };
 
 function jurisdictionTagLabel(jurisdiction: GapJurisdiction): string {
@@ -235,7 +235,7 @@ function jurisdictionTagLabel(jurisdiction: GapJurisdiction): string {
 }
 
 function jurisdictionTagColor(jurisdiction: GapJurisdiction): string {
-  return JURISDICTION_COLOR[jurisdiction] ?? "#64748b";
+  return JURISDICTION_COLOR[jurisdiction] ?? "#7d8aa0";
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -308,7 +308,7 @@ function FrameworkTag({ code }: { code: string }) {
 }
 
 function ScorePill({ label, score }: { label: string; score: number }) {
-  const color = score >= 85 ? "#22c55e" : score >= 65 ? "#eab308" : "#ef4444";
+  const color = score >= 85 ? "#10b981" : score >= 65 ? "#f59e0b" : "#ef4444";
   return (
     <div
       style={{
@@ -374,7 +374,7 @@ function GapItem({
               flex: 1,
               fontSize: 13,
               fontWeight: 500,
-              color: "var(--djac-foreground, #f1f5f9)",
+              color: "var(--djac-foreground, #ffffff0d)",
             }}
           >
             [{gap.code}] {gap.title}
@@ -427,7 +427,7 @@ function GapItem({
               style={{
                 margin: "4px 0 0",
                 fontSize: 13,
-                color: "var(--djac-foreground, #f1f5f9)",
+                color: "var(--djac-foreground, #ffffff0d)",
                 lineHeight: 1.6,
               }}
             >
@@ -441,7 +441,7 @@ function GapItem({
                 margin: 0,
                 fontSize: 12,
                 fontWeight: 600,
-                color: "#22c55e",
+                color: "#10b981",
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
                 display: "flex",
@@ -456,7 +456,7 @@ function GapItem({
               style={{
                 margin: "4px 0 0",
                 fontSize: 13,
-                color: "var(--djac-foreground, #f1f5f9)",
+                color: "var(--djac-foreground, #ffffff0d)",
                 lineHeight: 1.6,
               }}
             >
@@ -478,7 +478,7 @@ function GapItem({
                   style={{
                     margin: 0,
                     fontSize: 12,
-                    color: "#fca5a5",
+                    color: "#ef4444",
                     lineHeight: 1.5,
                   }}
                 >
@@ -508,7 +508,7 @@ function GapItem({
                 borderRadius: 6,
                 background: "rgba(129,140,248,0.10)",
                 border: "1px solid rgba(129,140,248,0.25)",
-                color: "#818cf8",
+                color: "#d900ff",
                 fontSize: 11,
                 fontWeight: 600,
                 cursor: "pointer",
@@ -530,9 +530,9 @@ function VendorCard({ entry }: { entry: GapEntry }) {
 
   const statusColor =
     assessment.status === "compliant"
-      ? "#22c55e"
+      ? "#10b981"
       : assessment.status === "partial"
-        ? "#eab308"
+        ? "#f59e0b"
         : "#ef4444";
 
   return (
@@ -564,14 +564,14 @@ function VendorCard({ entry }: { entry: GapEntry }) {
               flexShrink: 0,
             }}
           >
-            <Building2 size={18} style={{ color: "#818cf8" }} />
+            <Building2 size={18} style={{ color: "#d900ff" }} />
           </div>
           <div style={{ flex: 1 }}>
             <CardTitle
               style={{
                 fontSize: 15,
                 fontWeight: 600,
-                color: "var(--djac-foreground, #f1f5f9)",
+                color: "var(--djac-foreground, #ffffff0d)",
               }}
             >
               <Link
@@ -660,7 +660,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
               alignItems: "center",
               gap: 8,
               padding: "12px 0",
-              color: "#22c55e",
+              color: "#10b981",
               fontSize: 13,
             }}
           >
@@ -723,7 +723,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.06em",
-                      color: "#818cf8",
+                      color: "#d900ff",
                     }}
                   >
                     Top Recommendations
@@ -742,7 +742,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
                         key={`rec-${i}`}
                         style={{
                           fontSize: 12,
-                          color: "var(--djac-foreground, #f1f5f9)",
+                          color: "var(--djac-foreground, #ffffff0d)",
                           lineHeight: 1.5,
                         }}
                       >
@@ -890,13 +890,13 @@ export default function GapTracker() {
       {/* ── Page Header ──────────────────────────────────────── */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <ClipboardList size={22} style={{ color: "#818cf8" }} />
+          <ClipboardList size={22} style={{ color: "#d900ff" }} />
           <h1
             style={{
               margin: 0,
               fontSize: 22,
               fontWeight: 700,
-              color: "var(--djac-foreground, #f1f5f9)",
+              color: "var(--djac-foreground, #ffffff0d)",
             }}
           >
             {t("gapTracker.title", "Vendor Compliance Gap Tracker")}
@@ -923,7 +923,7 @@ export default function GapTracker() {
           <StatCard
             label={t("gapTracker.statTotal", "Total Gaps")}
             count={stats.total}
-            color="#818cf8"
+            color="#d900ff"
             icon={({ size, style }) => (
               <ClipboardList size={size} style={style} />
             )}
@@ -937,7 +937,7 @@ export default function GapTracker() {
           <StatCard
             label={t("gapTracker.statHigh", "High")}
             count={stats.high}
-            color="#f97316"
+            color="#f59e0b"
             icon={({ size, style }) => (
               <ShieldAlert size={size} style={style} />
             )}
@@ -945,7 +945,7 @@ export default function GapTracker() {
           <StatCard
             label={t("gapTracker.statMedium", "Medium")}
             count={stats.medium}
-            color="#eab308"
+            color="#f59e0b"
             icon={({ size, style }) => (
               <AlertTriangle size={size} style={style} />
             )}
@@ -953,7 +953,7 @@ export default function GapTracker() {
           <StatCard
             label={t("gapTracker.statLow", "Low")}
             count={stats.low}
-            color="#22c55e"
+            color="#10b981"
             icon={({ size, style }) => (
               <ShieldCheck size={size} style={style} />
             )}
@@ -995,7 +995,7 @@ export default function GapTracker() {
                 fontWeight: 500,
                 border:
                   severityFilter === sev
-                    ? "1px solid #818cf8"
+                    ? "1px solid #d900ff"
                     : "1px solid var(--djac-border, rgba(148,163,184,0.15))",
                 background:
                   severityFilter === sev
@@ -1003,7 +1003,7 @@ export default function GapTracker() {
                     : "transparent",
                 color:
                   severityFilter === sev
-                    ? "#818cf8"
+                    ? "#d900ff"
                     : "var(--djac-muted-foreground, #94a3b8)",
                 cursor: "pointer",
                 transition: "all 0.15s",
@@ -1040,7 +1040,7 @@ export default function GapTracker() {
                 fontWeight: 500,
                 border:
                   jurisFilter === jur
-                    ? "1px solid #818cf8"
+                    ? "1px solid #d900ff"
                     : "1px solid var(--djac-border, rgba(148,163,184,0.15))",
                 background:
                   jurisFilter === jur
@@ -1048,7 +1048,7 @@ export default function GapTracker() {
                     : "transparent",
                 color:
                   jurisFilter === jur
-                    ? "#818cf8"
+                    ? "#d900ff"
                     : "var(--djac-muted-foreground, #94a3b8)",
                 cursor: "pointer",
                 transition: "all 0.15s",
@@ -1102,7 +1102,7 @@ export default function GapTracker() {
             borderRadius: 12,
             background: "rgba(239,68,68,0.08)",
             border: "1px solid rgba(239,68,68,0.25)",
-            color: "#fca5a5",
+            color: "#ef4444",
             fontSize: 14,
           }}
         >
@@ -1146,7 +1146,7 @@ export default function GapTracker() {
                 margin: "0 0 6px",
                 fontSize: 16,
                 fontWeight: 600,
-                color: "var(--djac-foreground, #f1f5f9)",
+                color: "var(--djac-foreground, #ffffff0d)",
               }}
             >
               {t("gapTracker.emptyTitle", "No vendors registered yet")}
@@ -1213,7 +1213,7 @@ export default function GapTracker() {
               fontSize: 13,
             }}
           >
-            <ShieldCheck size={18} style={{ color: "#22c55e" }} />
+            <ShieldCheck size={18} style={{ color: "#10b981" }} />
             {t(
               "gapTracker.noGapsForFilter",
               "No gaps match the active filters — all vendors are within threshold for this selection."

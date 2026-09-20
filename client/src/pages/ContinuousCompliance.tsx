@@ -112,9 +112,9 @@ interface LastRunShape {
 
 const TIER_COLOURS: Record<Tier, string> = {
   critical: "#ef4444",
-  high: "#f97316",
-  medium: "#eab308",
-  low: "#22c55e",
+  high: "#f59e0b",
+  medium: "#f59e0b",
+  low: "#10b981",
 };
 
 const TIER_BG: Record<Tier, string> = {
@@ -625,7 +625,7 @@ export default function ContinuousCompliance() {
                   <Line
                     type="monotone"
                     dataKey="score"
-                    stroke="#6366f1"
+                    stroke="#d900ff"
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     activeDot={{ r: 5 }}

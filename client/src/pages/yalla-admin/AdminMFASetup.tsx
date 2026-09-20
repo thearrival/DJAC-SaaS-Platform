@@ -72,9 +72,9 @@ export default function AdminMFASetup() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "rgba(255,255,255,0.08)",
         padding: 24,
       }}
     >
@@ -113,7 +113,7 @@ export default function AdminMFASetup() {
               borderRadius: 8,
               background: "rgba(239,68,68,0.08)",
               border: "1px solid rgba(239,68,68,0.25)",
-              color: "#fca5a5",
+              color: "#ef4444",
               fontSize: 13,
               marginBottom: 16,
             }}
@@ -132,7 +132,7 @@ export default function AdminMFASetup() {
               border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
-            <Shield size={48} style={{ color: "#6366f1", marginBottom: 16 }} />
+            <Shield size={48} style={{ color: "#d900ff", marginBottom: 16 }} />
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
               Secure Your Account
             </h2>
@@ -144,7 +144,7 @@ export default function AdminMFASetup() {
               style={{
                 padding: "12px 28px",
                 borderRadius: 10,
-                background: "linear-gradient(135deg,#6366f1,#a855f7)",
+                background: "linear-gradient(135deg,#d900ff,#d900ff)",
                 color: "#fff",
                 fontSize: 14,
                 fontWeight: 700,
@@ -178,11 +178,11 @@ export default function AdminMFASetup() {
                 background: "#fff",
               }}
             />
-            <p style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}>
+            <p style={{ fontSize: 12, color: "#7d8aa0", marginBottom: 8 }}>
               Or enter manually:
             </p>
             <code
-              style={{ fontSize: 11, color: "#a855f7", wordBreak: "break-all" }}
+              style={{ fontSize: 11, color: "#d900ff", wordBreak: "break-all" }}
             >
               {secret}
             </code>
@@ -220,7 +220,7 @@ export default function AdminMFASetup() {
                 borderRadius: 10,
                 background:
                   code.length === 6
-                    ? "linear-gradient(135deg,#6366f1,#a855f7)"
+                    ? "linear-gradient(135deg,#d900ff,#d900ff)"
                     : "rgba(99,102,241,0.3)",
                 color: "#fff",
                 fontSize: 14,
@@ -245,7 +245,7 @@ export default function AdminMFASetup() {
           >
             <CheckCircle2
               size={48}
-              style={{ color: "#4ade80", marginBottom: 16 }}
+              style={{ color: "#10b981", marginBottom: 16 }}
             />
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
               MFA Enabled
@@ -273,7 +273,7 @@ export default function AdminMFASetup() {
                     border: "1px solid rgba(255,255,255,0.08)",
                     fontSize: 12,
                     fontFamily: "monospace",
-                    color: "#e2e8f0",
+                    color: "rgba(255,255,255,0.08)",
                   }}
                 >
                   {c}
@@ -286,7 +286,7 @@ export default function AdminMFASetup() {
                 marginTop: 24,
                 padding: "12px 28px",
                 borderRadius: 10,
-                background: "linear-gradient(135deg,#6366f1,#a855f7)",
+                background: "linear-gradient(135deg,#d900ff,#d900ff)",
                 color: "#fff",
                 fontSize: 14,
                 fontWeight: 700,

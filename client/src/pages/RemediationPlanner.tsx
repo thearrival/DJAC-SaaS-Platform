@@ -117,13 +117,13 @@ const KANBAN_COLUMNS: {
   },
   {
     status: "in_progress",
-    color: "#3b82f6",
+    color: "#00d2ff",
     bg: "rgba(59,130,246,0.08)",
     border: "rgba(59,130,246,0.25)",
   },
   {
     status: "resolved",
-    color: "#22c55e",
+    color: "#10b981",
     bg: "rgba(34,197,94,0.08)",
     border: "rgba(34,197,94,0.25)",
   },
@@ -137,9 +137,9 @@ const KANBAN_COLUMNS: {
 
 const SEVERITY_COLOR: Record<TaskSeverity, string> = {
   critical: "#ef4444",
-  high: "#f97316",
-  medium: "#eab308",
-  low: "#22c55e",
+  high: "#f59e0b",
+  medium: "#f59e0b",
+  low: "#10b981",
 };
 
 const SEVERITY_BG: Record<TaskSeverity, string> = {
@@ -256,7 +256,7 @@ function TaskCard({
                 padding: "1px 6px",
                 borderRadius: 4,
                 background: "rgba(129,140,248,0.15)",
-                color: "#818cf8",
+                color: "#d900ff",
                 border: "1px solid rgba(129,140,248,0.25)",
                 marginBottom: 4,
               }}
@@ -269,7 +269,7 @@ function TaskCard({
               margin: 0,
               fontSize: 13,
               fontWeight: 600,
-              color: "var(--djac-foreground, #f1f5f9)",
+              color: "var(--djac-foreground, rgba(255,255,255,0.05))",
               lineHeight: 1.4,
             }}
           >
@@ -302,7 +302,7 @@ function TaskCard({
               background: "transparent",
               border: "1px solid rgba(239,68,68,0.20)",
               cursor: "pointer",
-              color: "#f87171",
+              color: "#ef4444",
             }}
           >
             <Trash2 size={11} />
@@ -347,7 +347,7 @@ function TaskCard({
             style={{
               fontSize: 10,
               fontWeight: 500,
-              color: isOverdue ? "#f87171" : "#94a3b8",
+              color: isOverdue ? "#ef4444" : "#94a3b8",
             }}
           >
             {isOverdue ? `⚠ ${t("remediation.overdue", "Overdue")} ` : ""}
@@ -953,13 +953,13 @@ export default function RemediationPlanner() {
       >
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Wrench size={22} style={{ color: "#818cf8" }} />
+            <Wrench size={22} style={{ color: "#d900ff" }} />
             <h1
               style={{
                 margin: 0,
                 fontSize: 22,
                 fontWeight: 700,
-                color: "var(--djac-foreground, #f1f5f9)",
+                color: "var(--djac-foreground, rgba(255,255,255,0.05))",
               }}
             >
               {t("remediation.title", "Remediation Planner")}
@@ -1011,7 +1011,7 @@ export default function RemediationPlanner() {
                 margin: 0,
                 fontSize: 13,
                 fontWeight: 600,
-                color: "var(--djac-foreground, #f1f5f9)",
+                color: "var(--djac-foreground, rgba(255,255,255,0.05))",
               }}
             >
               {t(
@@ -1046,7 +1046,7 @@ export default function RemediationPlanner() {
           <StatCard
             label={t("remediation.totalTasks", "Total")}
             count={stats.total}
-            color="#818cf8"
+            color="#d900ff"
             icon={({ size, style }) => <Wrench size={size} style={style} />}
           />
           <StatCard
@@ -1058,13 +1058,13 @@ export default function RemediationPlanner() {
           <StatCard
             label={t("remediation.colInProgress", "In Progress")}
             count={stats.in_progress}
-            color="#3b82f6"
+            color="#00d2ff"
             icon={({ size, style }) => <Loader2 size={size} style={style} />}
           />
           <StatCard
             label={t("remediation.colResolved", "Resolved")}
             count={stats.resolved}
-            color="#22c55e"
+            color="#10b981"
             icon={({ size, style }) => (
               <CheckCircle2 size={size} style={style} />
             )}
@@ -1093,7 +1093,7 @@ export default function RemediationPlanner() {
             color: "#94a3b8",
           }}
         >
-          <Wrench size={32} style={{ color: "#334155", opacity: 0.6 }} />
+          <Wrench size={32} style={{ color: "#050508", opacity: 0.6 }} />
           <p style={{ margin: 0, fontSize: 14 }}>
             {t("remediation.loadError", "Failed to load remediation tasks.")}
           </p>
@@ -1141,14 +1141,14 @@ export default function RemediationPlanner() {
             textAlign: "center",
           }}
         >
-          <Wrench size={32} style={{ color: "#334155", opacity: 0.6 }} />
+          <Wrench size={32} style={{ color: "#050508", opacity: 0.6 }} />
           <div>
             <p
               style={{
                 margin: 0,
                 fontSize: 15,
                 fontWeight: 600,
-                color: "var(--djac-foreground, #f1f5f9)",
+                color: "var(--djac-foreground, rgba(255,255,255,0.05))",
               }}
             >
               {t("remediation.emptyTitle", "No remediation tasks yet")}
@@ -1243,7 +1243,7 @@ export default function RemediationPlanner() {
                     style={{
                       padding: "20px 0",
                       textAlign: "center",
-                      color: "#475569",
+                      color: "#050508",
                       fontSize: 12,
                     }}
                   >

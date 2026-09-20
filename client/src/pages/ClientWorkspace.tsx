@@ -151,10 +151,10 @@ type DraftAssessmentResult = {
 };
 
 const riskPalette: Record<string, string> = {
-  low: "#16a34a",
-  medium: "#ca8a04",
-  high: "#ea580c",
-  critical: "#dc2626",
+  low: "#10b981",
+  medium: "#f59e0b",
+  high: "#f59e0b",
+  critical: "#ef4444",
 };
 
 const initialTechStackRow: EnterpriseTechStackComponentInput = {
@@ -768,9 +768,9 @@ export default function ClientWorkspace() {
         className="rounded-2xl border p-6 shadow-xl"
         style={{
           background: isDark
-            ? "linear-gradient(135deg, #0a0f2e 0%, #0d1b4e 40%, #1a0a3e 100%)"
-            : "linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 40%, #F5F3FF 100%)",
-          borderColor: "#9359EC40",
+            ? "linear-gradient(135deg, #050508 0%, #050508 40%, #050508 100%)"
+            : "linear-gradient(135deg, #ffffff0d 0%, #ffffff0d 40%, #ffffff0d 100%)",
+          borderColor: "#d900ff40",
         }}
       >
         <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
@@ -779,9 +779,9 @@ export default function ClientWorkspace() {
               <span
                 className="rounded-full px-3 py-0.5 text-xs font-bold uppercase tracking-widest"
                 style={{
-                  background: "#9359EC22",
-                  border: "1px solid #9359EC50",
-                  color: "#C084FC",
+                  background: "#d900ff22",
+                  border: "1px solid #d900ff50",
+                  color: "#d900ff",
                 }}
               >
                 {t("client.heroBadge", "Client Workspace")}
@@ -790,9 +790,9 @@ export default function ClientWorkspace() {
                 className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
                 style={{
                   background:
-                    connectionState === "open" ? "#01FF7F18" : "#FF174418",
-                  border: `1px solid ${connectionState === "open" ? "#01FF7F40" : "#FF174440"}`,
-                  color: connectionState === "open" ? "#01FF7F" : "#FF7777",
+                    connectionState === "open" ? "#10b98118" : "#ef444418",
+                  border: `1px solid ${connectionState === "open" ? "#10b98140" : "#ef444440"}`,
+                  color: connectionState === "open" ? "#10b981" : "#ef4444",
                 }}
               >
                 {connectionState === "open"
@@ -803,7 +803,7 @@ export default function ClientWorkspace() {
             <h1
               className="text-3xl font-bold"
               style={{
-                background: "linear-gradient(135deg,#C084FC,#00F7FF)",
+                background: "linear-gradient(135deg,#d900ff,#00d2ff)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -813,7 +813,7 @@ export default function ClientWorkspace() {
             </h1>
             <p
               className="mt-2 max-w-2xl text-sm"
-              style={{ color: isDark ? "#CBD5E1" : "var(--djac-muted)" }}
+              style={{ color: isDark ? "#ffffff14" : "var(--djac-muted)" }}
             >
               {t(
                 "client.heroDesc",
@@ -827,22 +827,22 @@ export default function ClientWorkspace() {
             {
               step: "01",
               label: t("client.step1", "Set Organization Profile"),
-              color: "#00F7FF",
+              color: "#00d2ff",
             },
             {
               step: "02",
               label: t("client.step2", "Register Vendor Stack"),
-              color: "#9359EC",
+              color: "#d900ff",
             },
             {
               step: "03",
               label: t("client.step3", "Trigger AI Assessment"),
-              color: "#01FF7F",
+              color: "#10b981",
             },
             {
               step: "04",
               label: t("client.step4", "Request Consultation"),
-              color: "#FFD600",
+              color: "#f59e0b",
             },
           ].map(s => (
             <div
@@ -858,7 +858,7 @@ export default function ClientWorkspace() {
               </span>
               <span
                 className="text-xs"
-                style={{ color: isDark ? "#CBD5E1" : "var(--djac-muted)" }}
+                style={{ color: isDark ? "#ffffff14" : "var(--djac-muted)" }}
               >
                 {s.label}
               </span>
@@ -1636,8 +1636,8 @@ export default function ClientWorkspace() {
                   className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 text-2xl font-bold"
                   style={{
                     borderColor:
-                      riskPalette[previewResult.riskLevel] ?? "#64748b",
-                    color: riskPalette[previewResult.riskLevel] ?? "#64748b",
+                      riskPalette[previewResult.riskLevel] ?? "#7d8aa0",
+                    color: riskPalette[previewResult.riskLevel] ?? "#7d8aa0",
                   }}
                 >
                   {previewResult.overallScore}
@@ -1650,7 +1650,7 @@ export default function ClientWorkspace() {
                     <Badge
                       style={{
                         backgroundColor:
-                          riskPalette[previewResult.riskLevel] ?? "#64748b",
+                          riskPalette[previewResult.riskLevel] ?? "#7d8aa0",
                         color: "#fff",
                       }}
                     >
@@ -1718,8 +1718,8 @@ export default function ClientWorkspace() {
                             className="mt-0.5 shrink-0 text-xs"
                             style={{
                               borderColor:
-                                riskPalette[gap.severity] ?? "#64748b",
-                              color: riskPalette[gap.severity] ?? "#64748b",
+                                riskPalette[gap.severity] ?? "#7d8aa0",
+                              color: riskPalette[gap.severity] ?? "#7d8aa0",
                             }}
                           >
                             {gap.severity}
@@ -2195,7 +2195,7 @@ export default function ClientWorkspace() {
                           style={{
                             width: `${Math.max(0, Math.min(100, entry.score))}%`,
                             backgroundColor:
-                              riskPalette[entry.riskLevel] ?? "#2563eb",
+                              riskPalette[entry.riskLevel] ?? "#d900ff",
                           }}
                         />
                       </div>

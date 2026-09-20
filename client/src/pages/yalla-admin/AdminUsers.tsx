@@ -82,9 +82,9 @@ export default function AdminUsers() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "rgba(255,255,255,0.08)",
       }}
     >
       {/* Header */}
@@ -111,7 +111,7 @@ export default function AdminUsers() {
             <ChevronLeft size={18} />
           </button>
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Users</h1>
-          <span style={{ fontSize: 12, color: "#64748b" }}>
+          <span style={{ fontSize: 12, color: "#7d8aa0" }}>
             {total.toLocaleString()} total
           </span>
         </div>
@@ -148,7 +148,7 @@ export default function AdminUsers() {
                 left: 12,
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#64748b",
+                color: "#7d8aa0",
               }}
             />
             <input
@@ -289,7 +289,7 @@ export default function AdminUsers() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     Loading...
@@ -302,7 +302,7 @@ export default function AdminUsers() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     No users found
@@ -316,7 +316,7 @@ export default function AdminUsers() {
                   >
                     <td style={{ padding: "12px 16px" }}>
                       <div style={{ fontWeight: 500 }}>{user.name || "—"}</div>
-                      <div style={{ fontSize: 12, color: "#64748b" }}>
+                      <div style={{ fontSize: 12, color: "#7d8aa0" }}>
                         {user.email || "—"}
                       </div>
                     </td>
@@ -332,7 +332,7 @@ export default function AdminUsers() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#64748b",
+                        color: "#7d8aa0",
                         fontSize: 12,
                       }}
                     >
@@ -418,7 +418,7 @@ function StatusBadge({ status }: { status: string }) {
     active: {
       bg: "rgba(74,222,128,0.1)",
       border: "rgba(74,222,128,0.25)",
-      text: "#4ade80",
+      text: "#10b981",
     },
     pending: {
       bg: "rgba(245,158,11,0.1)",
@@ -428,7 +428,7 @@ function StatusBadge({ status }: { status: string }) {
     suspended: {
       bg: "rgba(248,113,113,0.1)",
       border: "rgba(248,113,113,0.25)",
-      text: "#f87171",
+      text: "#ef4444",
     },
   };
   const c = colors[status] || colors.pending;

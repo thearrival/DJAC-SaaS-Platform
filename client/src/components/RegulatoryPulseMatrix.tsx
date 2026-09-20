@@ -154,19 +154,19 @@ function buildRiskTrend(hasPersonalData: boolean, revenue: number) {
 function SeverityBadge({ level, isDark }: { level: string; isDark: boolean }) {
   const map: Record<string, [string, string]> = {
     critical: [
-      isDark ? "#FF1744" : "#dc2626",
+      isDark ? "#ef4444" : "#ef4444",
       isDark ? "rgba(255,23,68,0.12)" : "rgba(220,38,38,0.08)",
     ],
     high: [
-      isDark ? "#FF6B2B" : "#ea580c",
+      isDark ? "#f59e0b" : "#f59e0b",
       isDark ? "rgba(255,107,43,0.12)" : "rgba(234,88,12,0.08)",
     ],
     medium: [
-      isDark ? "#FFD600" : "#d97706",
+      isDark ? "#f59e0b" : "#f59e0b",
       isDark ? "rgba(255,214,0,0.12)" : "rgba(217,119,6,0.08)",
     ],
     low: [
-      isDark ? "#01FF7F" : "#16a34a",
+      isDark ? "#10b981" : "#10b981",
       isDark ? "rgba(1,255,127,0.12)" : "rgba(22,163,74,0.08)",
     ],
   };
@@ -229,12 +229,12 @@ export function RegulatoryPulseMatrix() {
 
   const C = useMemo(
     () => ({
-      cyan: isDark ? "#00F7FF" : "#0284c7",
-      green: isDark ? "#01FF7F" : "#16a34a",
-      red: isDark ? "#FF1744" : "#dc2626",
-      orange: isDark ? "#FF6B2B" : "#ea580c",
-      yellow: isDark ? "#FFD600" : "#d97706",
-      purple: isDark ? "#9359EC" : "#7c3aed",
+      cyan: isDark ? "#00d2ff" : "#00d2ff",
+      green: isDark ? "#10b981" : "#10b981",
+      red: isDark ? "#ef4444" : "#ef4444",
+      orange: isDark ? "#f59e0b" : "#f59e0b",
+      yellow: isDark ? "#f59e0b" : "#f59e0b",
+      purple: isDark ? "#d900ff" : "#d900ff",
     }),
     [isDark]
   );
@@ -246,7 +246,7 @@ export function RegulatoryPulseMatrix() {
 
   const TOOLTIP_STYLE = useMemo<React.CSSProperties>(
     () => ({
-      background: isDark ? "#0D1B6E" : "#f8faff",
+      background: isDark ? "#050508" : "rgba(255,255,255,0.05)",
       border: `1px solid ${C.cyan}40`,
       borderRadius: 8,
       color: "var(--djac-text)",

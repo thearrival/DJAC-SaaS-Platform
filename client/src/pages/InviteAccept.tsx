@@ -307,14 +307,14 @@ function InviteLayout({ children }: { children: React.ReactNode }) {
     ? "radial-gradient(ellipse 80% 60% at 50% -10%,rgba(147,89,236,0.18) 0%,transparent 60%)"
     : "radial-gradient(ellipse 80% 60% at 50% -10%,rgba(2,132,199,0.08) 0%,transparent 60%)";
   const borderColor = d ? "rgba(255,255,255,0.09)" : "rgba(4,15,97,0.11)";
-  const mutedColor = d ? "#9CA3AF" : "rgba(2,11,69,0.55)";
+  const mutedColor = d ? "#94a3b8" : "rgba(2,11,69,0.55)";
 
   return (
     <div
       style={{
         minHeight: "100vh",
         background: radial,
-        backgroundColor: d ? "#040F61" : "#F0F4FF",
+        backgroundColor: d ? "#050508" : "rgba(255,255,255,0.05)",
         fontFamily: "Inter,system-ui,sans-serif",
         display: "flex",
         flexDirection: "column",
@@ -428,7 +428,7 @@ function InviteLayout({ children }: { children: React.ReactNode }) {
             fontSize: 10.5,
           }}
         >
-          <ShieldCheck size={11} style={{ color: d ? "#00F7FF" : "#0284c7" }} />
+          <ShieldCheck size={11} style={{ color: d ? "#00d2ff" : "#00d2ff" }} />
           <span style={{ color: mutedColor }}>
             {t(
               "invite.layout.notice",

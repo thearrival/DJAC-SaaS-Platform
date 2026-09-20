@@ -103,12 +103,12 @@ export default function SuperAdminDashboard() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          background: "#0a0a0f",
+          background: "#050508",
         }}
       >
         <RefreshCw
           size={24}
-          style={{ color: "#6366f1", animation: "spin 1s linear infinite" }}
+          style={{ color: "#d900ff", animation: "spin 1s linear infinite" }}
         />
       </div>
     );
@@ -118,9 +118,9 @@ export default function SuperAdminDashboard() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "#ffffff14",
       }}
     >
       {/* Header */}
@@ -142,7 +142,7 @@ export default function SuperAdminDashboard() {
               border: "1px solid rgba(220,38,38,0.3)",
               fontSize: 10,
               fontWeight: 700,
-              color: "#f87171",
+              color: "#ef4444",
               letterSpacing: "0.05em",
             }}
           >
@@ -174,7 +174,7 @@ export default function SuperAdminDashboard() {
               border: "1px solid rgba(239,68,68,0.25)",
               borderRadius: 6,
               padding: "6px 14px",
-              color: "#fca5a5",
+              color: "#ef4444",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
@@ -199,19 +199,19 @@ export default function SuperAdminDashboard() {
             icon={<Users size={18} />}
             label="Total Users"
             value={stats?.totalUsers ?? 0}
-            color="#6366f1"
+            color="#d900ff"
           />
           <KPICard
             icon={<Building2 size={18} />}
             label="Organizations"
             value={stats?.totalOrgs ?? 0}
-            color="#22d3ee"
+            color="#00d2ff"
           />
           <KPICard
             icon={<CreditCard size={18} />}
             label="Paid Orgs"
             value={stats?.paidOrgs ?? 0}
-            color="#4ade80"
+            color="#10b981"
           />
           <KPICard
             icon={<Activity size={18} />}
@@ -223,13 +223,13 @@ export default function SuperAdminDashboard() {
             icon={<Shield size={18} />}
             label="Active Sessions"
             value={stats?.activeSessions ?? 0}
-            color="#a855f7"
+            color="#d900ff"
           />
           <KPICard
             icon={<TrendingUp size={18} />}
             label="Today's Signups"
             value={stats?.todaySignups ?? 0}
-            color="#ec4899"
+            color="#d900ff"
           />
         </div>
 
@@ -286,7 +286,7 @@ export default function SuperAdminDashboard() {
                 />
               </div>
             ) : (
-              <p style={{ fontSize: 13, color: "#64748b" }}>
+              <p style={{ fontSize: 13, color: "#7d8aa0" }}>
                 System info unavailable
               </p>
             )}
@@ -433,7 +433,7 @@ function HealthRow({
           display: "flex",
           alignItems: "center",
           gap: 6,
-          color: isHealthy ? "#4ade80" : isError ? "#f87171" : "#e2e8f0",
+          color: isHealthy ? "#10b981" : isError ? "#ef4444" : "#ffffff14",
         }}
       >
         {isHealthy ? (
@@ -468,7 +468,7 @@ function QuickLink({
         borderRadius: 8,
         background: "rgba(255,255,255,0.02)",
         border: "1px solid rgba(255,255,255,0.06)",
-        color: "#e2e8f0",
+        color: "#ffffff14",
         fontSize: 13,
         cursor: "pointer",
         textAlign: "left",
@@ -478,7 +478,7 @@ function QuickLink({
       <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {icon} {label}
       </span>
-      <ChevronRight size={14} style={{ color: "#64748b" }} />
+      <ChevronRight size={14} style={{ color: "#7d8aa0" }} />
     </button>
   );
 }

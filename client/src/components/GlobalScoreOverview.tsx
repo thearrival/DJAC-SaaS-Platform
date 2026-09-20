@@ -37,8 +37,8 @@ const SCORE_TILES: Array<{ key: string; label: string }> = [
 
 function scoreColor(score: number | undefined) {
   if (typeof score !== "number") return "var(--djac-muted)";
-  if (score >= 85) return "#22c55e";
-  if (score >= 65) return "#eab308";
+  if (score >= 85) return "#10b981";
+  if (score >= 65) return "#f59e0b";
   return "#ef4444";
 }
 

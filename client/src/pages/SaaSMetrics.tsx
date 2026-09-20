@@ -564,13 +564,13 @@ export default function SaaSMetrics() {
   const isDark = theme === "dark";
 
   const C = {
-    cyan: isDark ? "#00F7FF" : "#0284c7",
-    green: isDark ? "#01FF7F" : "#16a34a",
-    red: isDark ? "#FF1744" : "#dc2626",
-    orange: isDark ? "#FF6B2B" : "#ea580c",
-    yellow: isDark ? "#FFD600" : "#d97706",
-    purple: isDark ? "#9359EC" : "#7c3aed",
-    blue: isDark ? "#60A5FA" : "#2563eb",
+    cyan: isDark ? "#00d2ff" : "#00d2ff",
+    green: isDark ? "#10b981" : "#10b981",
+    red: isDark ? "#ef4444" : "#ef4444",
+    orange: isDark ? "#f59e0b" : "#f59e0b",
+    yellow: isDark ? "#f59e0b" : "#f59e0b",
+    purple: isDark ? "#d900ff" : "#d900ff",
+    blue: isDark ? "#00d2ff" : "#d900ff",
   } as const;
 
   // Live compliance data

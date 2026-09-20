@@ -234,12 +234,12 @@ export default function Home() {
     borderHi: "var(--djac-border-hi)",
     text: "var(--djac-text)",
     muted: "var(--djac-muted)",
-    cyan: "#00F7FF",
-    green: "#01FF7F",
-    red: "#FF1744",
-    orange: "#FF6B2B",
-    yellow: "#FFD600",
-    purple: "#9359EC",
+    cyan: "#00d2ff",
+    green: "#10b981",
+    red: "#ef4444",
+    orange: "#f59e0b",
+    yellow: "#f59e0b",
+    purple: "#d900ff",
   } as const;
 
   const inp: React.CSSProperties = {

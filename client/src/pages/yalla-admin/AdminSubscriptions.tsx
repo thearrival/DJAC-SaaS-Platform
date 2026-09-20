@@ -79,9 +79,9 @@ export default function AdminSubscriptions() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "rgba(255,255,255,0.08)",
       }}
     >
       <header
@@ -145,9 +145,9 @@ export default function AdminSubscriptions() {
           >
             <DollarSign
               size={18}
-              style={{ color: "#4ade80", marginBottom: 8 }}
+              style={{ color: "#10b981", marginBottom: 8 }}
             />
-            <div style={{ fontSize: 24, fontWeight: 800, color: "#4ade80" }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#10b981" }}>
               ${(totalMRR / 100).toLocaleString()}
             </div>
             <div style={{ fontSize: 12, color: "#94a3b8" }}>
@@ -162,8 +162,8 @@ export default function AdminSubscriptions() {
               background: "rgba(15,15,25,0.8)",
             }}
           >
-            <Users size={18} style={{ color: "#6366f1", marginBottom: 8 }} />
-            <div style={{ fontSize: 24, fontWeight: 800, color: "#6366f1" }}>
+            <Users size={18} style={{ color: "#d900ff", marginBottom: 8 }} />
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#d900ff" }}>
               {data?.subscriptions?.length || 0}
             </div>
             <div style={{ fontSize: 12, color: "#94a3b8" }}>
@@ -289,7 +289,7 @@ export default function AdminSubscriptions() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     Loading...
@@ -302,7 +302,7 @@ export default function AdminSubscriptions() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#64748b",
+                      color: "#7d8aa0",
                     }}
                   >
                     No subscriptions found
@@ -318,7 +318,7 @@ export default function AdminSubscriptions() {
                       <div style={{ fontWeight: 500 }}>
                         {s.organizationName}
                       </div>
-                      <div style={{ fontSize: 12, color: "#64748b" }}>
+                      <div style={{ fontSize: 12, color: "#7d8aa0" }}>
                         {s.billingEmail}
                       </div>
                     </td>
@@ -339,7 +339,7 @@ export default function AdminSubscriptions() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#64748b",
+                        color: "#7d8aa0",
                         fontSize: 12,
                       }}
                     >
@@ -360,10 +360,10 @@ export default function AdminSubscriptions() {
 
 function SubStatus({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    active: "#4ade80",
-    trialing: "#22d3ee",
+    active: "#10b981",
+    trialing: "#00d2ff",
     past_due: "#f59e0b",
-    canceled: "#f87171",
+    canceled: "#ef4444",
     incomplete: "#94a3b8",
   };
   return (

@@ -38,19 +38,19 @@ type Translate = (key: string, fallback: string) => string;
 
 const PLAN_META = {
   free_trial: {
-    color: "#22d3ee",
+    color: "#00d2ff",
     icon: Clock,
     bg: "rgba(34,211,238,0.1)",
     border: "rgba(34,211,238,0.25)",
   },
   starter: {
-    color: "#22d3ee",
+    color: "#00d2ff",
     icon: Zap,
     bg: "rgba(34,211,238,0.1)",
     border: "rgba(34,211,238,0.25)",
   },
   professional: {
-    color: "#a855f7",
+    color: "#d900ff",
     icon: Shield,
     bg: "rgba(168,85,247,0.12)",
     border: "rgba(168,85,247,0.35)",
@@ -64,10 +64,10 @@ const PLAN_META = {
 };
 
 const STATUS_META: Record<string, { color: string }> = {
-  active: { color: "#4ade80" },
-  trialing: { color: "#22d3ee" },
+  active: { color: "#10b981" },
+  trialing: { color: "#00d2ff" },
   past_due: { color: "#f59e0b" },
-  canceled: { color: "#f87171" },
+  canceled: { color: "#ef4444" },
   incomplete: { color: "#94a3b8" },
   paused: { color: "#94a3b8" },
 };
@@ -162,7 +162,7 @@ function OrgSetupForm({ onSuccess }: { onSuccess: () => void }) {
         margin: "0 auto",
       }}
     >
-      <Crown size={28} style={{ color: "#c084fc", marginBottom: 16 }} />
+      <Crown size={28} style={{ color: "#d900ff", marginBottom: 16 }} />
       <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
         {t("billing.setupTitle", "Set Up Your Organization")}
       </h2>
@@ -363,7 +363,7 @@ function OrgSetupForm({ onSuccess }: { onSuccess: () => void }) {
           style={{
             padding: "13px",
             borderRadius: 10,
-            background: "linear-gradient(135deg,#a855f7,#6366f1)",
+            background: "linear-gradient(135deg,#d900ff,#d900ff)",
             color: "#fff",
             fontSize: 14,
             fontWeight: 700,
@@ -395,7 +395,7 @@ function OrgSetupForm({ onSuccess }: { onSuccess: () => void }) {
             role="alert"
             style={{
               fontSize: 13,
-              color: "#f87171",
+              color: "#ef4444",
               padding: "8px 12px",
               background: "rgba(248,113,113,0.1)",
               borderRadius: 6,
@@ -471,7 +471,7 @@ export default function BillingAccount() {
               padding: "10px 24px",
               borderRadius: 8,
               background: "rgba(168,85,247,0.2)",
-              color: "#c084fc",
+              color: "#d900ff",
               border: "1px solid rgba(168,85,247,0.4)",
               cursor: "pointer",
             }}
@@ -596,7 +596,7 @@ export default function BillingAccount() {
               borderRadius: 8,
               background: "rgba(168,85,247,0.12)",
               border: "1px solid rgba(168,85,247,0.3)",
-              color: "#c084fc",
+              color: "#d900ff",
               fontSize: 13,
               cursor: "pointer",
             }}
@@ -717,7 +717,7 @@ export default function BillingAccount() {
                   gap: 6,
                   padding: "10px 18px",
                   borderRadius: 8,
-                  background: "linear-gradient(135deg,#a855f7,#6366f1)",
+                  background: "linear-gradient(135deg,#d900ff,#d900ff)",
                   color: "#fff",
                   fontSize: 13,
                   fontWeight: 700,
@@ -789,7 +789,7 @@ export default function BillingAccount() {
               ).replace("{days}", String(trialDays))}{" "}
               <Link
                 href="/pricing"
-                style={{ color: "#c084fc", textDecoration: "none" }}
+                style={{ color: "#d900ff", textDecoration: "none" }}
               >
                 {t("billing.upgradeToKeep", "Upgrade to keep access ->")}
               </Link>
@@ -813,9 +813,9 @@ export default function BillingAccount() {
             marginBottom: 24,
           }}
         >
-          <XCircle size={16} style={{ color: "#f87171", flexShrink: 0 }} />
+          <XCircle size={16} style={{ color: "#ef4444", flexShrink: 0 }} />
           <div>
-            <strong style={{ color: "#f87171" }}>
+            <strong style={{ color: "#ef4444" }}>
               {t("billing.trialExpired", "Trial expired")}
             </strong>
             <span style={{ color: "var(--djac-muted)" }}>
@@ -827,7 +827,7 @@ export default function BillingAccount() {
               )}{" "}
               <Link
                 href="/pricing"
-                style={{ color: "#c084fc", textDecoration: "none" }}
+                style={{ color: "#d900ff", textDecoration: "none" }}
               >
                 {t("billing.viewPlansCta", "View plans ->")}
               </Link>
@@ -1042,7 +1042,7 @@ export default function BillingAccount() {
           {t("billing.supportPrompt", "Questions about billing? Contact us at")}{" "}
           <a
             href="mailto:support@yalla-hack.net"
-            style={{ color: "#c084fc", textDecoration: "none" }}
+            style={{ color: "#d900ff", textDecoration: "none" }}
           >
             support@yalla-hack.net
           </a>

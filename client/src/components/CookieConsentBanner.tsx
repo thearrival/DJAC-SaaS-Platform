@@ -71,7 +71,7 @@ export function CookieConsentBanner() {
         <Cookie
           size={20}
           style={{
-            color: "var(--djac-cyan, #00F7FF)",
+            color: "var(--djac-cyan, #00d2ff)",
             flexShrink: 0,
             marginTop: 2,
           }}
@@ -81,7 +81,7 @@ export function CookieConsentBanner() {
             margin: 0,
             fontSize: 13,
             lineHeight: 1.6,
-            color: "var(--djac-muted, #9CA3AF)",
+            color: "var(--djac-muted, #94a3b8)",
           }}
         >
           DJAC uses strictly-necessary session cookies for authentication. No
@@ -90,7 +90,7 @@ export function CookieConsentBanner() {
           <a
             href="/privacy"
             style={{
-              color: "var(--djac-cyan, #00F7FF)",
+              color: "var(--djac-cyan, #00d2ff)",
               textDecoration: "underline",
             }}
           >
@@ -100,7 +100,7 @@ export function CookieConsentBanner() {
           <a
             href="/terms"
             style={{
-              color: "var(--djac-cyan, #00F7FF)",
+              color: "var(--djac-cyan, #00d2ff)",
               textDecoration: "underline",
             }}
           >
@@ -126,7 +126,7 @@ export function CookieConsentBanner() {
             background: "transparent",
             border: "1px solid var(--djac-border, rgba(255,255,255,0.12))",
             borderRadius: 8,
-            color: "var(--djac-muted, #9CA3AF)",
+            color: "var(--djac-muted, #94a3b8)",
             fontSize: 12,
             fontWeight: 500,
             cursor: "pointer",
@@ -141,10 +141,10 @@ export function CookieConsentBanner() {
           onClick={accept}
           style={{
             background:
-              "linear-gradient(135deg, var(--djac-cyan, #00F7FF), var(--djac-purple, #9359EC))",
+              "linear-gradient(135deg, var(--djac-cyan, #00d2ff), var(--djac-purple, #d900ff))",
             border: "none",
             borderRadius: 8,
-            color: "#040F61",
+            color: "#050508",
             fontSize: 12,
             fontWeight: 700,
             cursor: "pointer",

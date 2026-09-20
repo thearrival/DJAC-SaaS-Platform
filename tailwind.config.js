@@ -5,12 +5,12 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#2563eb", // blue-600
-          light: "#3b82f6", // blue-500
-          dark: "#1e40af", // blue-800
+          DEFAULT: "#d900ff", // brand magenta
+          light: "#00d2ff", // brand cyan
+          dark: "#d900ff", // brand magenta
         },
         accent: {
-          DEFAULT: "#f59e42", // orange-400
+          DEFAULT: "#00d2ff", // brand cyan
         },
         slate: require("tailwindcss/colors").slate,
         zinc: require("tailwindcss/colors").zinc,

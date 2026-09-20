@@ -604,42 +604,42 @@ const RISK_CONFIG: Record<
 > = {
   clear: {
     label: "Likely Compliant",
-    color: "#16a34a",
+    color: "#10b981",
     bg: "rgba(22,163,74,0.10)",
     Icon: CheckCircle2,
   },
   restricted: {
     label: "Minor Requirements",
-    color: "#0ea5e9",
+    color: "#00d2ff",
     bg: "rgba(14,165,233,0.10)",
     Icon: Info,
   },
   review: {
     label: "Review Required",
-    color: "#d97706",
+    color: "#f59e0b",
     bg: "rgba(217,119,6,0.10)",
     Icon: Clock,
   },
   approval: {
     label: "Regulatory Approval Needed",
-    color: "#ea580c",
+    color: "#f59e0b",
     bg: "rgba(234,88,12,0.11)",
     Icon: AlertTriangle,
   },
   blocked: {
     label: "Transfer Blocked",
-    color: "#dc2626",
+    color: "#ef4444",
     bg: "rgba(220,38,38,0.11)",
     Icon: X,
   },
 };
 
 const STEP_COLORS: Record<ComplianceStep["level"], string> = {
-  blocked: "#dc2626",
-  critical: "#ea580c",
-  high: "#d97706",
-  medium: "#0ea5e9",
-  low: "#16a34a",
+  blocked: "#ef4444",
+  critical: "#f59e0b",
+  high: "#f59e0b",
+  medium: "#00d2ff",
+  low: "#10b981",
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -668,12 +668,12 @@ export default function TransferChecker() {
 
   const C = useMemo(
     () => ({
-      bg: isDark ? "#040f24" : "#f0f6ff",
+      bg: isDark ? "#050508" : "rgba(255,255,255,0.05)",
       card: isDark ? "rgba(6,14,36,0.97)" : "rgba(248,252,255,0.98)",
       border: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
-      text: isDark ? "#dce6ff" : "#1e293b",
-      muted: isDark ? "#5a6fa8" : "#64748b",
-      accent: isDark ? "#00d4ff" : "#0284c7",
+      text: isDark ? "rgba(255,255,255,0.05)" : "#050508",
+      muted: isDark ? "#94a3b8" : "#7d8aa0",
+      accent: isDark ? "#00d2ff" : "#00d2ff",
       inputBg: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
       hover: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
     }),
@@ -827,7 +827,7 @@ export default function TransferChecker() {
                   borderRadius: "50%",
                   fontSize: 11,
                   fontWeight: 800,
-                  background: step > 1 ? "#16a34a" : C.accent,
+                  background: step > 1 ? "#10b981" : C.accent,
                   color: "#fff",
                   display: "flex",
                   alignItems: "center",
@@ -1088,7 +1088,7 @@ export default function TransferChecker() {
                     borderRadius: "50%",
                     fontSize: 11,
                     fontWeight: 800,
-                    background: step > 2 ? "#16a34a" : C.accent,
+                    background: step > 2 ? "#10b981" : C.accent,
                     color: "#fff",
                     display: "flex",
                     alignItems: "center",
@@ -1166,7 +1166,7 @@ export default function TransferChecker() {
                     size="sm"
                     style={{
                       gap: 6,
-                      background: "#16a34a",
+                      background: "#10b981",
                       color: "#fff",
                       border: "none",
                     }}
@@ -1496,7 +1496,7 @@ export default function TransferChecker() {
                   }}
                 >
                   <FileWarning
-                    style={{ width: 13, height: 13, color: "#dc2626" }}
+                    style={{ width: 13, height: 13, color: "#ef4444" }}
                   />
                   <span
                     style={{ color: C.text, fontSize: 12, fontWeight: 700 }}
@@ -1511,7 +1511,7 @@ export default function TransferChecker() {
                   <p
                     key={`penalty-${i}`}
                     style={{
-                      color: isDark ? "#fca5a5" : "#7f1d1d",
+                      color: isDark ? "#ef4444" : "rgba(239,68,68,0.12)",
                       fontSize: 10.5,
                       margin: i > 0 ? "3px 0 0" : 0,
                     }}
@@ -1543,7 +1543,7 @@ export default function TransferChecker() {
                   }}
                 >
                   <ShieldAlert
-                    style={{ width: 13, height: 13, color: "#d97706" }}
+                    style={{ width: 13, height: 13, color: "#f59e0b" }}
                   />
                   <span
                     style={{ color: C.text, fontSize: 12, fontWeight: 700 }}
@@ -1558,7 +1558,7 @@ export default function TransferChecker() {
                   <p
                     key={`note-${i}`}
                     style={{
-                      color: isDark ? "#fde68a" : "#78350f",
+                      color: isDark ? "#f59e0b" : "rgba(245,158,11,0.12)",
                       fontSize: 10.5,
                       margin: i > 0 ? "5px 0 0" : 0,
                       lineHeight: 1.45,

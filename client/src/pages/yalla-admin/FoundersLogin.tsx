@@ -57,7 +57,7 @@ export default function FoundersLogin() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#0a0a0f",
+        background: "#050508",
         fontFamily: "'Inter', sans-serif",
         display: "flex",
       }}
@@ -71,7 +71,7 @@ export default function FoundersLogin() {
           justifyContent: "center",
           padding: "60px",
           background:
-            "linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 50%, #0a0a0f 100%)",
+            "linear-gradient(135deg, #050508 0%, #050508 50%, #050508 100%)",
           position: "relative",
           overflow: "hidden",
         }}
@@ -114,7 +114,7 @@ export default function FoundersLogin() {
             <br />
             <span
               style={{
-                background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                background: "linear-gradient(135deg, #d900ff, #d900ff)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -179,7 +179,7 @@ export default function FoundersLogin() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#a5b4fc",
+                    color: "#d900ff",
                     flexShrink: 0,
                   }}
                 >
@@ -187,11 +187,11 @@ export default function FoundersLogin() {
                 </div>
                 <div>
                   <div
-                    style={{ fontSize: 13, fontWeight: 600, color: "#e2e8f0" }}
+                    style={{ fontSize: 13, fontWeight: 600, color: "#fff2" }}
                   >
                     {item.label}
                   </div>
-                  <div style={{ fontSize: 11, color: "#64748b" }}>
+                  <div style={{ fontSize: 11, color: "#7d8aa0" }}>
                     {item.desc}
                   </div>
                 </div>
@@ -223,7 +223,7 @@ export default function FoundersLogin() {
                 background: "rgba(99,102,241,0.12)",
                 border: "1px solid rgba(99,102,241,0.25)",
                 fontSize: 11,
-                color: "#a5b4fc",
+                color: "#d900ff",
                 fontWeight: 600,
                 letterSpacing: "0.05em",
                 marginBottom: 16,
@@ -302,7 +302,7 @@ export default function FoundersLogin() {
                     left: 14,
                     top: "50%",
                     transform: "translateY(-50%)",
-                    color: "#64748b",
+                    color: "#7d8aa0",
                   }}
                 />
                 <input
@@ -333,7 +333,7 @@ export default function FoundersLogin() {
                     transform: "translateY(-50%)",
                     background: "none",
                     border: "none",
-                    color: "#64748b",
+                    color: "#7d8aa0",
                     cursor: "pointer",
                     padding: 4,
                   }}
@@ -353,7 +353,7 @@ export default function FoundersLogin() {
                   borderRadius: 8,
                   background: "rgba(239,68,68,0.08)",
                   border: "1px solid rgba(239,68,68,0.25)",
-                  color: "#fca5a5",
+                  color: "#ef4444",
                   fontSize: 13,
                 }}
               >
@@ -370,7 +370,7 @@ export default function FoundersLogin() {
                 borderRadius: 10,
                 background: loading
                   ? "rgba(99,102,241,0.5)"
-                  : "linear-gradient(135deg, #6366f1, #a855f7)",
+                  : "linear-gradient(135deg, #d900ff, #d900ff)",
                 color: "#fff",
                 fontSize: 15,
                 fontWeight: 700,
@@ -387,7 +387,7 @@ export default function FoundersLogin() {
           <p
             style={{
               fontSize: 11,
-              color: "#64748b",
+              color: "#7d8aa0",
               textAlign: "center",
               marginTop: 32,
               marginBottom: 0,
