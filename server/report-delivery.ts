@@ -709,7 +709,7 @@ async function loadLogoBytes() {
     process.cwd(),
     "client",
     "public",
-    "djac-logo.png"
+    "yalla-hack-logo.png"
   );
   try {
     return await fs.readFile(logoPath);

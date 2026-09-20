@@ -23,6 +23,12 @@ export type EmailUser = {
 const FROM = "DJAC by Yalla Hack <hello@yalla-hack.com>";
 const REPLY_TO = "hello@yalla-hack.com";
 
+// Absolute URL of the brand logo for email clients (images must be absolute).
+const APP_BASE_URL = (
+  process.env.APP_URL || "https://app.yalla-hack.ae"
+).replace(/\/$/, "");
+const LOGO_URL = `${APP_BASE_URL}/yalla-hack-logo.png`;
+
 let transporter: ReturnType<typeof createTransport> | null = null;
 
 function getTransporter() {
@@ -56,24 +62,25 @@ function baseTemplate(content: string) {
 <style>
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f8fafc; margin: 0; padding: 0; }
   .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; }
-  .header { background: linear-gradient(135deg, #0891b2, #7c3aed); padding: 32px; }
-  .header-logo { color: #fff; font-size: 24px; font-weight: 700; margin: 0; }
-  .header-sub { color: rgba(255,255,255,0.85); font-size: 14px; margin: 4px 0 0; }
+  .header { background: linear-gradient(135deg, #d900ff, #00d2ff); padding: 32px; text-align: center; }
+  .header-logo-box { display: inline-block; background: #ffffff; border-radius: 12px; padding: 10px 18px; }
+  .header-logo-img { display: block; height: 34px; width: auto; }
+  .header-sub { color: rgba(255,255,255,0.9); font-size: 14px; margin: 12px 0 0; }
   .content { padding: 32px; }
   .content h2 { font-size: 20px; color: #0f172a; margin: 0 0 16px; }
   .content p { font-size: 14px; color: #334155; line-height: 1.6; margin: 0 0 12px; }
-  .btn { display: inline-block; background: #0891b2; color: #fff !important; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0; }
+  .btn { display: inline-block; background: #d900ff; color: #fff !important; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0; }
   .footer { padding: 16px 32px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }
   .footer p { margin: 0 0 4px; }
   .steps { margin: 16px 0; padding: 0; list-style: none; }
   .steps li { padding: 6px 0; font-size: 14px; color: #334155; }
-  .steps li::before { content: "✓ "; color: #22c55e; font-weight: 700; }
+  .steps li::before { content: "✓ "; color: #10b981; font-weight: 700; }
 </style>
 </head>
 <body style="padding: 24px 0;">
 <div class="container">
   <div class="header">
-    <h1 class="header-logo">Yalla Hack</h1>
+    <span class="header-logo-box"><img class="header-logo-img" src="${LOGO_URL}" alt="Yalla Hack" /></span>
     <p class="header-sub">DJAC Compliance Platform</p>
   </div>
   <div class="content">
