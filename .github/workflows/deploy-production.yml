@@ -39,11 +39,10 @@ jobs:
           VERCEL_AUTH_JSON: ${{ secrets.VERCEL_AUTH_JSON }}
           VERCEL_TOKEN_SECRET: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          TOKEN=""
-          if [ -n "$VERCEL_AUTH_JSON" ]; then
+          TOKEN="$VERCEL_TOKEN_SECRET"
+          if [ -z "$TOKEN" ] && [ -n "$VERCEL_AUTH_JSON" ]; then
             TOKEN=$(node -e "try{const a=JSON.parse(process.env.VERCEL_AUTH_JSON);process.stdout.write(a.token||a.accessToken||'')}catch(e){}")
           fi
-          if [ -z "$TOKEN" ]; then TOKEN="$VERCEL_TOKEN_SECRET"; fi
           if [ -z "$TOKEN" ]; then echo "No Vercel token available in secrets"; exit 1; fi
           echo "VERCEL_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
