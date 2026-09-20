@@ -43,7 +43,13 @@ describe("tenant isolation — API keys", () => {
   it("revokeApiKey cannot revoke another organization's key", async () => {
     const ORG_A = 1004;
     const ORG_B = 1005;
-    const a = await createApiKey(ORG_A, null, "A key 2", '["vendor:read"]', null);
+    const a = await createApiKey(
+      ORG_A,
+      null,
+      "A key 2",
+      '["vendor:read"]',
+      null
+    );
 
     // Org B tries to revoke Org A's key by id — must be rejected.
     expect(await revokeApiKey(ORG_B, a.id)).toBe(false);
