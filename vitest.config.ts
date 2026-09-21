@@ -12,6 +12,12 @@ export default defineConfig({
       "client/src/**/*.spec.ts",
     ],
     pool: "forks",
+    // Bound worker forks. Vitest 4 defaults to (CPU cores - 1) workers; on a
+    // 24-core host that spawns ~23 V8 isolates which collectively exhaust the
+    // heap and intermittently fail the pre-commit hook with
+    // "FATAL ERROR: ... JavaScript heap out of memory".
+    minWorkers: 1,
+    maxWorkers: 6,
     coverage: {
       provider: "v8",
       reporter: ["text", "text-summary", "lcov"],

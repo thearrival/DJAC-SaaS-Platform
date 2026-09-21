@@ -23,9 +23,18 @@ export default tseslint.config(
   {
     ignores: [
       "dist/",
+      "build/",
       "node_modules/",
       ".pnpm-store/",
+      ".vercel/",
       "coverage/",
+      "public/",
+      "client/public/",
+      "audit/",
+      // Generated serverless bundle (esbuild output, ~1.3 MB) — linting it
+      // exhausts the V8 heap and crashes the pre-commit hook.
+      "api/index.mjs",
+      "**/*.min.js",
       "tailwind.config.js",
     ],
   },
