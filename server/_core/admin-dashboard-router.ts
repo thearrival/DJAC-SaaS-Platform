@@ -26,6 +26,14 @@ import {
   getOrganizationData,
   getSecurityEvents,
 } from "./admin-dashboard-store";
+import {
+  getPlatformOverview,
+  getTrafficMetrics,
+  getRevenueMetrics,
+  getAiJobMetrics,
+  getEmailMetrics,
+  getSecurityMetrics,
+} from "./platform-monitor-store";
 
 export type AdminSessionUser = { username: string; sessionId: string };
 
@@ -258,6 +266,69 @@ export function createAdminDashboardRouter(): Router {
     } catch (error) {
       logger.error({ error }, "Failed to get security events");
       res.status(500).json({ error: "Failed to get security events" });
+    }
+  });
+
+  // ── Platform monitoring ─────────────────────────────────────────────────
+  // Founder-facing analytics over traffic, revenue, AI workload, email
+  // deliverability and security posture.
+
+  const monitorDays = (req: Request): number => {
+    const raw = Number(req.query.days);
+    return Number.isFinite(raw) && raw > 0 && raw <= 180 ? Math.floor(raw) : 30;
+  };
+
+  router.get("/platform/overview", async (req, res) => {
+    try {
+      res.json(await getPlatformOverview(monitorDays(req)));
+    } catch (error) {
+      logger.error({ error }, "Failed to get platform overview");
+      res.status(500).json({ error: "Failed to get platform overview" });
+    }
+  });
+
+  router.get("/platform/traffic", async (req, res) => {
+    try {
+      res.json(await getTrafficMetrics(monitorDays(req)));
+    } catch (error) {
+      logger.error({ error }, "Failed to get traffic metrics");
+      res.status(500).json({ error: "Failed to get traffic metrics" });
+    }
+  });
+
+  router.get("/platform/revenue", async (_req, res) => {
+    try {
+      res.json(await getRevenueMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get revenue metrics");
+      res.status(500).json({ error: "Failed to get revenue metrics" });
+    }
+  });
+
+  router.get("/platform/ai-jobs", async (_req, res) => {
+    try {
+      res.json(await getAiJobMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get AI job metrics");
+      res.status(500).json({ error: "Failed to get AI job metrics" });
+    }
+  });
+
+  router.get("/platform/email", async (_req, res) => {
+    try {
+      res.json(await getEmailMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get email metrics");
+      res.status(500).json({ error: "Failed to get email metrics" });
+    }
+  });
+
+  router.get("/platform/security", async (_req, res) => {
+    try {
+      res.json(await getSecurityMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get security metrics");
+      res.status(500).json({ error: "Failed to get security metrics" });
     }
   });
 

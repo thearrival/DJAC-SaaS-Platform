@@ -109,6 +109,9 @@ const AdminOrganizations = lazy(
 const AdminSecurity = lazy(() => import("./pages/yalla-admin/AdminSecurity"));
 const AdminAudit = lazy(() => import("./pages/yalla-admin/AdminAudit"));
 const AdminAnalytics = lazy(() => import("./pages/yalla-admin/AdminAnalytics"));
+const AdminPlatformMonitor = lazy(
+  () => import("./pages/yalla-admin/AdminPlatformMonitor")
+);
 const GlobalRegistry = lazy(() => import("./pages/GlobalRegistry"));
 const GlobalKnowledgeGraph = lazy(() => import("./pages/GlobalKnowledgeGraph"));
 const GlobalIndustryEditions = lazy(
@@ -286,6 +289,11 @@ function Router() {
       <Route path={"/yalla-hack-owners-console/analytics"}>
         <RouteErrorBoundary>
           <AdminAnalytics />
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/monitor"}>
+        <RouteErrorBoundary>
+          <AdminPlatformMonitor />
         </RouteErrorBoundary>
       </Route>
       {/* All app routes share the DashboardLayout sidebar */}

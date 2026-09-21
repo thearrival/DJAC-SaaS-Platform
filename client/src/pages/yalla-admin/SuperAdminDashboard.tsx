@@ -19,6 +19,7 @@ import {
   Eye,
   ChevronRight,
   Clock,
+  Gauge,
 } from "lucide-react";
 
 const ADMIN_API = "/api/yalla-admin";
@@ -343,6 +344,11 @@ export default function SuperAdminDashboard() {
                 label="Platform Analytics"
                 icon={<Activity size={14} />}
                 path="/yalla-hack-owners-console/analytics"
+              />
+              <QuickLink
+                label="Platform Monitor"
+                icon={<Gauge size={14} />}
+                path="/yalla-hack-owners-console/monitor"
               />
             </div>
           </div>
