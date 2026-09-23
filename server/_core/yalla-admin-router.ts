@@ -812,7 +812,7 @@ async function handleReactLogin(req: Request, res: Response): Promise<void> {
     if (db) {
       await db.execute(sql`
                 INSERT INTO yallaAdminSessions (id, adminUsername, ipAddress, userAgent, expiresAt)
-                VALUES ($${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
+                VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
             `);
     }
   } catch {

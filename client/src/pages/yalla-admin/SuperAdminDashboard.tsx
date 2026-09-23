@@ -121,7 +121,7 @@ export default function SuperAdminDashboard() {
         minHeight: "100vh",
         background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "#ffffff14",
+        color: "#e2e8f0",
       }}
     >
       {/* Header */}
@@ -439,7 +439,7 @@ function HealthRow({
           display: "flex",
           alignItems: "center",
           gap: 6,
-          color: isHealthy ? "#10b981" : isError ? "#ef4444" : "#ffffff14",
+          color: isHealthy ? "#10b981" : isError ? "#ef4444" : "#e2e8f0",
         }}
       >
         {isHealthy ? (
@@ -474,7 +474,7 @@ function QuickLink({
         borderRadius: 8,
         background: "rgba(255,255,255,0.02)",
         border: "1px solid rgba(255,255,255,0.06)",
-        color: "#ffffff14",
+        color: "#e2e8f0",
         fontSize: 13,
         cursor: "pointer",
         textAlign: "left",

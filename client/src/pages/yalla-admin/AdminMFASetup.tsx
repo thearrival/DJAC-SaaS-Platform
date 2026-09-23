@@ -74,7 +74,7 @@ export default function AdminMFASetup() {
         minHeight: "100vh",
         background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "rgba(255,255,255,0.08)",
+        color: "#e2e8f0",
         padding: 24,
       }}
     >
@@ -273,7 +273,7 @@ export default function AdminMFASetup() {
                     border: "1px solid rgba(255,255,255,0.08)",
                     fontSize: 12,
                     fontFamily: "monospace",
-                    color: "rgba(255,255,255,0.08)",
+                    color: "#e2e8f0",
                   }}
                 >
                   {c}

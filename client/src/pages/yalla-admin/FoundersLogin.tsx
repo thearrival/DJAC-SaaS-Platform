@@ -40,9 +40,9 @@ export default function FoundersLogin() {
         credentials: "include",
         body: JSON.stringify({ username, password }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data.error || "Login failed.");
+        setError(data?.error || `Login failed (${res.status}).`);
         return;
       }
       window.location.href = "/yalla-hack-owners-console/dashboard";
@@ -62,8 +62,15 @@ export default function FoundersLogin() {
         display: "flex",
       }}
     >
+      <style>{`
+        @media (max-width: 960px) {
+          .founders-brand-panel { display: none; }
+          .founders-form-panel { flex: 1 1 100% !important; padding: 32px 24px !important; }
+        }
+      `}</style>
       {/* Left Panel — Branding */}
       <div
+        className="founders-brand-panel"
         style={{
           flex: "1 1 45%",
           display: "flex",
@@ -183,9 +190,7 @@ export default function FoundersLogin() {
                   {item.icon}
                 </div>
                 <div>
-                  <div
-                    style={{ fontSize: 13, fontWeight: 600, color: "#fff2" }}
-                  >
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>
                     {item.label}
                   </div>
                   <div style={{ fontSize: 11, color: "#7d8aa0" }}>
@@ -200,6 +205,7 @@ export default function FoundersLogin() {
 
       {/* Right Panel — Login Form */}
       <div
+        className="founders-form-panel"
         style={{
           flex: "1 1 55%",
           display: "flex",
@@ -265,6 +271,7 @@ export default function FoundersLogin() {
                 onChange={e => setUsername(e.target.value)}
                 required
                 autoFocus
+                autoComplete="username"
                 placeholder="Enter your username"
                 style={{
                   width: "100%",
@@ -307,6 +314,7 @@ export default function FoundersLogin() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                   placeholder="Enter your password"
                   style={{
                     width: "100%",
@@ -323,6 +331,7 @@ export default function FoundersLogin() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   style={{
                     position: "absolute",
                     right: 12,

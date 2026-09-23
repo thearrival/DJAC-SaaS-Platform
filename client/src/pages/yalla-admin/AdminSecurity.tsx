@@ -69,7 +69,7 @@ export default function AdminSecurity() {
         minHeight: "100vh",
         background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "rgba(255,255,255,0.08)",
+        color: "#e2e8f0",
       }}
     >
       <header

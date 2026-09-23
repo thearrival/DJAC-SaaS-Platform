@@ -71,7 +71,7 @@ export default function AdminAnalytics() {
         minHeight: "100vh",
         background: "#050508",
         fontFamily: "'Inter', sans-serif",
-        color: "rgba(255,255,255,0.08)",
+        color: "#e2e8f0",
       }}
     >
       <header
@@ -264,7 +264,7 @@ export default function AdminAnalytics() {
                   <span
                     style={{
                       fontSize: 13,
-                      color: "rgba(255,255,255,0.08)",
+                      color: "#e2e8f0",
                       fontWeight: 600,
                       minWidth: 30,
                       textAlign: "right",
