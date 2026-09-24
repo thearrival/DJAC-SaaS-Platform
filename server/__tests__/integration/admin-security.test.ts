@@ -102,6 +102,33 @@ describe.runIf(!SKIP)(
       const res = await fetch(`${BASE}/api/admin-dashboard/summary`);
       expect(res.status).toBe(401);
     });
+
+    it("insights endpoints require a session", async () => {
+      const paths = [
+        "/api/admin-dashboard/engagement",
+        "/api/admin-dashboard/alerts",
+        "/api/admin-dashboard/live",
+        "/api/admin-dashboard/reports/growth",
+        "/api/admin-dashboard/users/1/timeline",
+        "/api/admin-dashboard/users/1/auth-history",
+      ];
+      for (const path of paths) {
+        const res = await fetch(`${BASE}${path}`);
+        expect(res.status, path).toBe(401);
+      }
+    });
+
+    it("forged session cookie is rejected on insights endpoints", async () => {
+      const forged = await new SignJWT({ sub: "yalla_admin", sid: "forged" })
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
+        .setExpirationTime("8h")
+        .sign(new TextEncoder().encode("wrong-secret-for-forgery"));
+      const res = await fetch(`${BASE}/api/admin-dashboard/live`, {
+        headers: { Cookie: `yalla_admin_session=${forged}` },
+      });
+      expect([401, 403]).toContain(res.status);
+    });
   }
 );
 
