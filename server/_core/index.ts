@@ -224,6 +224,16 @@ export async function createApp() {
   // ─── Core middleware ────────────────────────────────────────────────────────
   app.disable("x-powered-by");
 
+  // Abort requests that exceed the configured timeout.
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setTimeout(ENV.httpRequestTimeoutMs ?? 30_000, () => {
+      if (!res.headersSent) {
+        res.status(408).json({ error: "Request timeout" });
+      }
+    });
+    next();
+  });
+
   app.use(
     compression({
       threshold: 1024,

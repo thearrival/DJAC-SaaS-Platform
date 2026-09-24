@@ -7,6 +7,10 @@ import {
 import { getDb } from "./db";
 import { protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
+import { checkRateLimit } from "./_core/rateLimiter";
+
+const ONBOARD_LIMIT = 20;
+const ONBOARD_WINDOW_MS = 60_000;
 
 const onboardingResponsesSchema = z.object({
   frameworks: z.array(z.string().min(1)).max(20).optional(),
@@ -111,6 +115,17 @@ export const onboardingRouter = router({
     }),
 
   skip: protectedProcedure.mutation(async ({ ctx }) => {
+    const rl = await checkRateLimit(
+      `onboard:skip:${ctx.user.id}`,
+      ONBOARD_LIMIT,
+      ONBOARD_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded.",
+      });
+    }
     const db = await getDb();
     if (!db)
       throw new TRPCError({

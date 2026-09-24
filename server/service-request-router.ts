@@ -86,8 +86,8 @@ export const serviceRequestRouter = router({
 
       if (ENV.smtpHost) {
         const body = `A new service request has been submitted by organization ${orgId}.\n\nService Type: ${input.serviceType}\nPriority: ${input.priority}\n\nDescription:\n${input.description}`;
-        sendEmail({
-          to: ENV.smtpFrom ?? "admin@yalla-hack.net",
+        void sendEmail({
+          to: ENV.smtpFrom ?? "hello@yalla-hack.com",
           subject: `[DJAC] New Service Request: ${input.title}`,
           html: `<pre>${body}</pre>`,
           text: body,

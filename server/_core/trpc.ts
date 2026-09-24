@@ -37,7 +37,40 @@ const requireUser = t.middleware(async opts => {
   });
 });
 
-export const protectedProcedure = t.procedure.use(requireUser);
+// ─── Global rate-limiting middleware ────────────────────────────
+// Applied to all protected tRPC procedures as a safety net.
+let _rateLimitInitialized = false;
+let _rateLimiter: typeof import("./rateLimiter").checkRateLimit;
+async function getRateLimiter() {
+  if (!_rateLimitInitialized) {
+    const mod = await import("./rateLimiter");
+    _rateLimiter = mod.checkRateLimit;
+    _rateLimitInitialized = true;
+  }
+  return _rateLimiter!;
+}
+const baseRateLimitMs = 60_000;
+const rateLimitMiddleware = t.middleware(async opts => {
+  const { ctx, next } = opts;
+  try {
+    const rl = await getRateLimiter();
+    const key = `tRPC:${ctx.user?.id ?? "anon"}:${opts.path}`;
+    const result = await rl(key, 60, baseRateLimitMs);
+    if (!result.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please wait before retrying.",
+      });
+    }
+  } catch (err) {
+    if (err instanceof TRPCError && err.code === "TOO_MANY_REQUESTS") throw err;
+  }
+  return next();
+});
+
+export const protectedProcedure = t.procedure
+  .use(requireUser)
+  .use(rateLimitMiddleware);
 
 const requireOrganization = t.middleware(async opts => {
   const { ctx, next } = opts;

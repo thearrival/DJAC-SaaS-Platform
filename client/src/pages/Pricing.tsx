@@ -983,7 +983,7 @@ export default function Pricing() {
               </button>
             </Link>
             <a
-              href="mailto:sales@yalla-hack.com?subject=DJAC Demo Request"
+              href="mailto:hello@yalla-hack.com?subject=DJAC Demo Request"
               style={{ textDecoration: "none" }}
             >
               <button

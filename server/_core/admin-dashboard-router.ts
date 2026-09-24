@@ -139,6 +139,15 @@ export function createAdminDashboardRouter(): Router {
   // Body parsing for POST routes
   router.use(express.json({ limit: "2mb" }));
 
+  // Request ID tracking
+  router.use((req, res, next) => {
+    const requestId = req.headers["x-request-id"] as string | undefined;
+    req.headers["x-request-id"] =
+      requestId ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    res.setHeader("X-Request-ID", req.headers["x-request-id"]);
+    next();
+  });
+
   // Request logging
   router.use((req, res, next) => {
     const start = Date.now();
@@ -146,6 +155,7 @@ export function createAdminDashboardRouter(): Router {
       const duration = Date.now() - start;
       logger.info(
         {
+          requestId: req.headers["x-request-id"],
           method: req.method,
           path: req.path,
           status: res.statusCode,
@@ -155,6 +165,21 @@ export function createAdminDashboardRouter(): Router {
         `[admin-dashboard] ${req.method} ${req.path} ${res.statusCode} ${duration}ms`
       );
     });
+    next();
+  });
+
+  // Query param sanitization for GET routes
+  router.use((req, _res, next) => {
+    if (req.method === "GET") {
+      for (const key of Object.keys(req.query)) {
+        const val = req.query[key];
+        if (typeof val === "string") {
+          req.query[key] = sanitizeString(val, 200);
+        } else if (Array.isArray(val)) {
+          req.query[key] = val.map(v => sanitizeString(String(v), 200));
+        }
+      }
+    }
     next();
   });
 

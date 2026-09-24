@@ -4,6 +4,10 @@ import { notifications } from "../drizzle/schema";
 import { getDb } from "./db";
 import { protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
+import { checkRateLimit } from "./_core/rateLimiter";
+
+const NOTIF_LIMIT = 30;
+const NOTIF_WINDOW_MS = 60_000;
 
 export const notificationsRouter = router({
   list: protectedProcedure
@@ -65,6 +69,17 @@ export const notificationsRouter = router({
   markRead: protectedProcedure
     .input(z.object({ id: z.number().int() }))
     .mutation(async ({ ctx, input }) => {
+      const rl = await checkRateLimit(
+        `notif:read:${ctx.user.id}`,
+        NOTIF_LIMIT,
+        NOTIF_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded. Please try again shortly.",
+        });
+      }
       const db = await getDb();
       if (!db)
         throw new TRPCError({
@@ -86,6 +101,17 @@ export const notificationsRouter = router({
     }),
 
   markAllRead: protectedProcedure.mutation(async ({ ctx }) => {
+    const rl = await checkRateLimit(
+      `notif:allread:${ctx.user.id}`,
+      NOTIF_LIMIT,
+      NOTIF_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please try again shortly.",
+      });
+    }
     const db = await getDb();
     if (!db)
       throw new TRPCError({

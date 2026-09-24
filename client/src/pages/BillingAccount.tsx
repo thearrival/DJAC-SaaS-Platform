@@ -1041,10 +1041,10 @@ export default function BillingAccount() {
         <span>
           {t("billing.supportPrompt", "Questions about billing? Contact us at")}{" "}
           <a
-            href="mailto:support@yalla-hack.net"
+            href="mailto:hello@yalla-hack.com"
             style={{ color: "#d900ff", textDecoration: "none" }}
           >
-            support@yalla-hack.net
+            hello@yalla-hack.com
           </a>
         </span>
         <div style={{ display: "flex", gap: 16 }}>

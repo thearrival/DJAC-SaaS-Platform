@@ -25,6 +25,12 @@ import {
   resetAllAgents,
 } from "./orchestrator";
 
+// Rate limit non-submission AI endpoints to prevent abuse of read/reset paths.
+const AI_READ_LIMIT = 30;
+const AI_READ_WINDOW_MS = 60_000;
+const AI_ADMIN_LIMIT = 10;
+const AI_ADMIN_WINDOW_MS = 60_000;
+
 const submitAssessmentSchema = z.object({
   vendorId: z.number().int().positive(),
   rawDocumentText: z.string().max(100_000).optional().default(""),
@@ -248,11 +254,27 @@ export const aiRouter = router({
       } as const;
     }),
 
-  agentStatus: protectedProcedure.query(() => {
+  agentStatus: protectedProcedure.query(async ({ ctx }) => {
+    const key = `ai:status:org:${ctx.organizationId}`;
+    const rl = await checkRateLimit(key, AI_READ_LIMIT, AI_READ_WINDOW_MS);
+    if (!rl.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please wait before retrying.",
+      });
+    }
     return getAgentPoolStatus();
   }),
 
-  resetAgents: adminProcedure.mutation(() => {
+  resetAgents: adminProcedure.mutation(async () => {
+    const key = "ai:reset:global";
+    const rl = await checkRateLimit(key, AI_ADMIN_LIMIT, AI_ADMIN_WINDOW_MS);
+    if (!rl.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded for agent reset.",
+      });
+    }
     return resetAllAgents();
   }),
 });

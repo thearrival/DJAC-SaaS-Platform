@@ -104,6 +104,7 @@ export async function getDb() {
       max: connectionLimit,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
+      statement_timeout: 30_000,
     });
 
     _pool.on("error", (err: Error) => {

@@ -4,6 +4,10 @@ import { users, analyticsEvents, userActivitySummary } from "../drizzle/schema";
 import { getDb } from "./db";
 import { adminProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
+import { checkRateLimit } from "./_core/rateLimiter";
+
+const C360_LIMIT = 20;
+const C360_WINDOW_MS = 60_000;
 
 export const customer360Router = router({
   list: adminProcedure
@@ -13,7 +17,18 @@ export const customer360Router = router({
         offset: z.number().int().min(0).default(0),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      const rl = await checkRateLimit(
+        `c360:list:${ctx.user.id}`,
+        C360_LIMIT,
+        C360_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded.",
+        });
+      }
       const db = await getDb();
       if (!db)
         throw new TRPCError({

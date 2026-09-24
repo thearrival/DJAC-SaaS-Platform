@@ -41,6 +41,21 @@ export function DeHengFooter() {
         >
           {t("footer.partnerPrefix", "In partnership with")}
         </span>
+        <a
+          href="mailto:hello@yalla-hack.com"
+          style={{ color: "var(--muted-foreground)", textDecoration: "none" }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              color: "var(--muted-foreground)",
+              fontWeight: 500,
+              letterSpacing: "0.03em",
+            }}
+          >
+            hello@yalla-hack.com
+          </span>
+        </a>
         <img
           src="/deheng-logo.png"
           alt="DeHeng Law Offices"

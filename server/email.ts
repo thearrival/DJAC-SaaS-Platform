@@ -13,6 +13,26 @@ export interface EmailPayload {
   subject: string;
   html: string;
   text?: string;
+  from?: string;
+  replyTo?: string;
+}
+
+/** Log delivery using the full payload shape (used by alert digest). */
+export async function logEmailDelivery(
+  payload: EmailPayload & { template?: string; recipient?: string },
+  status: "sent" | "failed",
+  errorMessage?: string
+): Promise<void> {
+  await logDelivery(
+    {
+      to: payload.recipient ?? payload.to,
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+    },
+    status,
+    errorMessage
+  );
 }
 
 /** Fire-and-forget delivery log for the founders Platform Monitor. */
@@ -62,11 +82,12 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
     });
 
     await transporter.sendMail({
-      from,
+      from: payload.from ?? from,
       to: payload.to,
       subject: payload.subject,
       html: payload.html,
       text: payload.text,
+      ...(payload.replyTo ? { replyTo: payload.replyTo } : {}),
     });
     transporter.close();
     console.info(`[EMAIL] Sent to ${payload.to}: "${payload.subject}"`);

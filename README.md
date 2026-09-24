@@ -472,3 +472,31 @@ This section documents the recent comprehensive technical audit and remediation 
 - `server/_core/trpc.ts` - Fixed trial expiration check
 - `client/src/contexts/LocaleContext.tsx` - Added missing translations
 - `client/src/contexts/localeTypes.ts` - Updated Locale type
+
+## Submission & Contact Routing
+
+All user-submitted intake forms are automatically routed to **hello@yalla-hack.com** for tracking and follow-up:
+
+| Form Type            | Route                                  | Notification                  |
+| -------------------- | -------------------------------------- | ----------------------------- |
+| Access Request       | portalRouter.submitAccessRequest       | email to hello@yalla-hack.com |
+| Consultation Request | portalRouter.submitConsultationRequest | email to hello@yalla-hack.com |
+| Partnership Request  | portalRouter.submitPartnershipRequest  | email to hello@yalla-hack.com |
+| Sponsorship Request  | portalRouter.submitSponsorshipRequest  | email to hello@yalla-hack.com |
+| Event Application    | portalRouter.submitEventApplication    | email to hello@yalla-hack.com |
+| General Inquiry      | portalRouter.submitGeneralInquiry      | email to hello@yalla-hack.com |
+| Service Request      | serviceRequestRouter.create            | email to hello@yalla-hack.com |
+
+All notifications include sender name, email, organization, and form-specific details. Reply-to is set to the sender email so the team can respond directly.
+
+## Security
+
+- All .env files are in .gitignore and not committed to the repository
+- Test files with hardcoded SMTP credentials have been removed
+- sanitizeString() strips HTML/script characters from all user inputs
+- getClientIp() correctly resolves the last (trusted proxy) X-Forwarded-For value
+- CSP headers with form-action self prevent form hijacking
+- HSTS headers enforce HTTPS
+- Rate limiting applied globally to all protected tRPC procedures
+- Request timeout (120s default) prevents hanging connections
+- Database query timeout (30s) prevents long-running queries

@@ -12,6 +12,7 @@
 
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { checkRateLimit } from "./_core/rateLimiter";
 import {
   activeOrgProcedure,
   orgAdminProcedure,
@@ -22,6 +23,9 @@ import { recordAuditEvent } from "./audit-logger";
 import { requireModulePermission } from "./_core/permission-guard";
 import { listApiKeys, createApiKey, revokeApiKey } from "./api-keys-store";
 
+const API_KEYS_LIMIT = 20;
+const API_KEYS_WINDOW_MS = 60_000;
+
 export const apiKeysRouter = router({
   /**
    * List all active (non-revoked) API keys for the org.
@@ -29,6 +33,17 @@ export const apiKeysRouter = router({
    */
   list: activeOrgProcedure.query(async ({ ctx }) => {
     await requireModulePermission(ctx, "api_keys", "canView");
+    const rl = await checkRateLimit(
+      `apikeys:list:${ctx.organizationId}`,
+      API_KEYS_LIMIT,
+      API_KEYS_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please try again shortly.",
+      });
+    }
     return listApiKeys(ctx.organizationId as number);
   }),
 
@@ -95,6 +110,17 @@ export const apiKeysRouter = router({
     .input(z.number().int().positive())
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "api_keys", "canDelete");
+      const rl = await checkRateLimit(
+        `apikeys:revoke:${ctx.organizationId}`,
+        API_KEYS_LIMIT,
+        API_KEYS_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded. Please try again shortly.",
+        });
+      }
       const orgId = ctx.organizationId as number;
       const found = await revokeApiKey(orgId, input);
       if (!found) throw new TRPCError({ code: "NOT_FOUND" });
