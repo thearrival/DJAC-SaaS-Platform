@@ -415,6 +415,21 @@ export default function SuperAdminDashboard() {
                 icon={<Gauge size={14} />}
                 path="/yalla-hack-owners-console/monitor"
               />
+              <QuickLink
+                label="Engagement Insights"
+                icon={<TrendingUp size={14} />}
+                path="/yalla-hack-owners-console/insights"
+              />
+              <QuickLink
+                label="Reports"
+                icon={<Inbox size={14} />}
+                path="/yalla-hack-owners-console/reports"
+              />
+              <QuickLink
+                label="Live & Alerts"
+                icon={<AlertTriangle size={14} />}
+                path="/yalla-hack-owners-console/live"
+              />
             </div>
           </div>
         </div>

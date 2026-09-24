@@ -14,6 +14,7 @@ import {
   userInteractionLogs,
 } from "../../drizzle/schema";
 import { getDb } from "../db";
+import { logger } from "./logger";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -940,13 +941,14 @@ export async function getOperationalAlerts(): Promise<OperationalAlert[]> {
       .from(subscriptions)
       .where(eq(subscriptions.status, "past_due"));
     if ((pastDue[0]?.c ?? 0) > 0) {
+      const pastDueCount = Number(pastDue[0].c);
       alerts.push({
         id: "subs-past-due",
         severity: "warning",
         category: "billing",
         title: "Subscriptions past due",
-        detail: `${pastDue[0].c} subscription(s) require payment attention.`,
-        count: pastDue[0].c,
+        detail: `${pastDueCount} subscription(s) require payment attention.`,
+        count: pastDueCount,
         createdAt: now.toISOString(),
       });
     }
@@ -957,7 +959,7 @@ export async function getOperationalAlerts(): Promise<OperationalAlert[]> {
   try {
     const openSr = await db.execute(sql`
       SELECT COUNT(*) AS c FROM "serviceRequests"
-      WHERE status NOT IN ('completed','cancelled','canceled')
+      WHERE status NOT IN ('completed','cancelled')
     `);
     const open = Number((openSr.rows as any[])[0]?.c ?? 0);
     if (open >= 5) {
@@ -1107,7 +1109,7 @@ export async function getLiveMetrics(): Promise<LiveMetrics> {
 
     const openSrResult = await db.execute(sql`
       SELECT COUNT(*) AS c FROM "serviceRequests"
-      WHERE status NOT IN ('completed','cancelled','canceled')
+      WHERE status NOT IN ('completed','cancelled')
     `);
 
     const unreadResult = await db.execute(sql`
@@ -1153,7 +1155,8 @@ export async function getLiveMetrics(): Promise<LiveMetrics> {
         at: r.createdAt?.toISOString() ?? "",
       })),
     };
-  } catch {
+  } catch (error) {
+    logger.error({ error }, "getLiveMetrics failed");
     return empty;
   }
 }
