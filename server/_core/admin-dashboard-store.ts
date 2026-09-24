@@ -82,6 +82,7 @@ export async function getUnifiedUsers(options: {
     const memFallback = isLocalMemoryFallbackEnabled() ? localMemoryUsers : [];
     const filtered = memFallback
       .filter(u => !options.status || u.status === options.status)
+      .filter(u => !options.role || (u.userType ?? "visitor") === options.role)
       .map(u => ({
         id: u.id,
         source: "local" as const,
@@ -109,6 +110,11 @@ export async function getUnifiedUsers(options: {
 
   const conditions: ReturnType<typeof and>[] = [];
 
+  // The unified query reads localUsers only — an oauth filter can never match.
+  if (options.source === "oauth") {
+    return { users: [], total: 0 };
+  }
+
   if (options.search) {
     const term = `%${options.search}%`;
     conditions.push(
@@ -128,6 +134,10 @@ export async function getUnifiedUsers(options: {
         options.status as "active" | "pending" | "suspended"
       )
     );
+  }
+
+  if (options.role) {
+    conditions.push(sql`${localUsers.userType} = ${options.role}::"userType"`);
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -504,6 +514,7 @@ export async function getSecurityEvents(limit = 200): Promise<
     ipAddress: string | null;
     createdAt: string;
     targetEntity: string | null;
+    source: "platform" | "admin";
   }>
 > {
   const db = await getDb();
@@ -530,5 +541,69 @@ export async function getSecurityEvents(limit = 200): Promise<
     .orderBy(desc(auditLogs.createdAt))
     .limit(limit);
 
-  return rows.map(r => ({ ...r, createdAt: r.createdAt?.toISOString() || "" }));
+  type SecurityEvent = {
+    id: number;
+    action: string;
+    category: string;
+    outcome: string;
+    ipAddress: string | null;
+    createdAt: string;
+    targetEntity: string | null;
+    source: "platform" | "admin";
+  };
+
+  const platformEvents: SecurityEvent[] = rows.map(r => ({
+    ...r,
+    createdAt: r.createdAt?.toISOString() || "",
+    source: "platform" as const,
+  }));
+
+  // Union in founders-portal auth events (login failures, gate rejections …)
+  // which live in the separate yallaAdminAuditLogs table.
+  let adminEvents: SecurityEvent[] = [];
+  try {
+    const adminResult = await db.execute(sql`
+            SELECT id, action, "ipAddress", "createdAt", "target",
+                   CASE
+                       WHEN action IN ('login.failed', 'login.link_denied',
+                                       'access_link.rejected', 'login.mfa_failed',
+                                       'password.change_failed')
+                           THEN 'failure'
+                       ELSE 'success'
+                   END AS outcome
+            FROM "yallaAdminAuditLogs"
+            WHERE action LIKE 'login.%' OR action LIKE 'access_link.%'
+               OR action LIKE 'password.%' OR action LIKE '2fa.%'
+               OR action LIKE 'session.%'
+            ORDER BY "createdAt" DESC
+            LIMIT ${limit}
+        `);
+    type AdminRow = {
+      id: number;
+      action: string;
+      ipAddress: string;
+      createdAt: Date | string;
+      target: string | null;
+      outcome: string;
+    };
+    adminEvents = ((adminResult.rows ?? []) as AdminRow[]).map(r => ({
+      id: r.id,
+      action: r.action,
+      category: "auth",
+      outcome: r.outcome,
+      ipAddress: r.ipAddress ?? null,
+      createdAt:
+        r.createdAt instanceof Date
+          ? r.createdAt.toISOString()
+          : String(r.createdAt ?? ""),
+      targetEntity: r.target ?? null,
+      source: "admin" as const,
+    }));
+  } catch {
+    // yallaAdminAuditLogs may not exist on very old databases
+  }
+
+  return [...platformEvents, ...adminEvents]
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+    .slice(0, limit);
 }

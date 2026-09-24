@@ -4,7 +4,7 @@
  * Founders can suspend/reactivate, change roles, delete users, and
  * inspect full user details (profile, memberships, recent activity).
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   Trash2,
   UserCog,
+  Download,
+  AlertTriangle,
 } from "lucide-react";
 
 const ADMIN_API = "/api/admin-dashboard";
@@ -72,8 +74,11 @@ export default function AdminUsers() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [roleFilter, setRoleFilter] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [busyIds, setBusyIds] = useState<Set<number>>(new Set());
   const [notice, setNotice] = useState<{
     kind: "ok" | "error";
@@ -83,6 +88,7 @@ export default function AdminUsers() {
   const [detail, setDetail] = useState<UserDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const limit = 25;
 
@@ -91,6 +97,18 @@ export default function AdminUsers() {
     window.setTimeout(() => setNotice(null), 4000);
   }, []);
 
+  // Debounce search input before querying the API
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(0);
+    }, 300);
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, [search]);
+
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -98,8 +116,9 @@ export default function AdminUsers() {
         limit: String(limit),
         offset: String(page * limit),
       });
-      if (search) params.set("search", search);
+      if (debouncedSearch) params.set("search", debouncedSearch);
       if (statusFilter) params.set("status", statusFilter);
+      if (roleFilter) params.set("role", roleFilter);
 
       const res = await fetch(`${ADMIN_API}/users?${params}`, {
         credentials: "include",
@@ -108,15 +127,17 @@ export default function AdminUsers() {
         navigate("/yalla-hack-owners-console/login");
         return;
       }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setUsers(data.users || []);
       setTotal(data.total || 0);
-    } catch {
-      // silent
+      setLoadError("");
+    } catch (e) {
+      setLoadError(`Could not load users: ${(e as Error).message}`);
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, navigate]);
+  }, [page, debouncedSearch, statusFilter, roleFilter, navigate]);
 
   useEffect(() => {
     loadUsers();
@@ -237,6 +258,46 @@ export default function AdminUsers() {
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
+  function exportCsv() {
+    const header = [
+      "id",
+      "name",
+      "email",
+      "role",
+      "status",
+      "company",
+      "orgs",
+      "last_login",
+      "created",
+    ];
+    const rows = users.map(u =>
+      [
+        u.id,
+        u.name ?? "",
+        u.email ?? "",
+        u.role,
+        u.status,
+        u.companyName ?? "",
+        u.orgCount,
+        u.lastSignedIn ? new Date(u.lastSignedIn).toISOString() : "",
+        u.createdAt ? new Date(u.createdAt).toISOString() : "",
+      ]
+        .map(v => {
+          const s = String(v ?? "");
+          return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        })
+        .join(",")
+    );
+    const csv = [header.join(","), ...rows].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `users-page${page + 1}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div
       style={{
@@ -274,22 +335,58 @@ export default function AdminUsers() {
             {total.toLocaleString()} total
           </span>
         </div>
-        <button
-          onClick={loadUsers}
-          style={{
-            background: "none",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 6,
-            padding: "6px 10px",
-            color: "#94a3b8",
-            cursor: "pointer",
-          }}
-        >
-          <RefreshCw size={14} />
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={exportCsv}
+            disabled={users.length === 0}
+            title="Export current page as CSV"
+            style={{
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 6,
+              padding: "6px 10px",
+              color: users.length === 0 ? "#475569" : "#94a3b8",
+              cursor: users.length === 0 ? "not-allowed" : "pointer",
+            }}
+          >
+            <Download size={14} />
+          </button>
+          <button
+            onClick={loadUsers}
+            style={{
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 6,
+              padding: "6px 10px",
+              color: "#94a3b8",
+              cursor: "pointer",
+            }}
+          >
+            <RefreshCw size={14} />
+          </button>
+        </div>
       </header>
 
       <main style={{ padding: "24px", maxWidth: 1400, margin: "0 auto" }}>
+        {loadError && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 14px",
+              borderRadius: 8,
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.25)",
+              color: "#ef4444",
+              fontSize: 13,
+              marginBottom: 16,
+            }}
+          >
+            <AlertTriangle size={14} />
+            {loadError}
+          </div>
+        )}
         {notice && (
           <div
             style={{
@@ -380,6 +477,29 @@ export default function AdminUsers() {
             <option value="active">Active</option>
             <option value="pending">Pending</option>
             <option value="suspended">Suspended</option>
+          </select>
+          <select
+            value={roleFilter}
+            onChange={e => {
+              setRoleFilter(e.target.value);
+              setPage(0);
+            }}
+            style={{
+              padding: "10px 14px",
+              borderRadius: 8,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#fff",
+              fontSize: 13,
+              outline: "none",
+            }}
+          >
+            <option value="">All Roles</option>
+            {ROLES.map(r => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
           </select>
         </div>
 

@@ -2,7 +2,7 @@
  * Yalla Hack Super Admin — Platform Analytics
  * Registration trends, login frequency, feature usage, revenue metrics.
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
@@ -12,8 +12,19 @@ import {
   TrendingUp,
   Users,
   Activity,
-  CreditCard,
+  AlertTriangle,
 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "@/lib/recharts-compat";
 
 const ADMIN_API = "/api/admin-dashboard";
 
@@ -27,11 +38,33 @@ interface AnalyticsData {
   };
 }
 
+const ROLE_COLORS = [
+  "#d900ff",
+  "#00d2ff",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#ef4444",
+  "#14b8a6",
+  "#f472b6",
+  "#60a5fa",
+  "#a3e635",
+];
+
+const cardStyle: React.CSSProperties = {
+  padding: 20,
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.06)",
+  background: "rgba(15,15,25,0.8)",
+};
+
 export default function AdminAnalytics() {
   usePageTitle("Analytics — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -45,12 +78,16 @@ export default function AdminAnalytics() {
         navigate("/yalla-hack-owners-console/login");
         return;
       }
+      if (!regRes.ok) throw new Error(`registrations: HTTP ${regRes.status}`);
+      if (!statsRes.ok) throw new Error(`stats: HTTP ${statsRes.status}`);
       setData({
         monthlyRegistrations: await regRes.json(),
         userStats: await statsRes.json(),
       });
-    } catch {
-      /* silent */
+      setError("");
+      setUpdatedAt(new Date().toLocaleTimeString());
+    } catch (e) {
+      setError(`Could not load analytics: ${(e as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -60,10 +97,20 @@ export default function AdminAnalytics() {
     loadData();
   }, [loadData]);
 
-  const maxReg = Math.max(
-    ...(data?.monthlyRegistrations?.map(r => r.count) || [1]),
-    1
-  );
+  const totalUsers = data?.userStats?.totalUsers ?? 0;
+  const activeUsers = data?.userStats?.activeUsers ?? 0;
+  const newThisMonth = data?.userStats?.newThisMonth ?? 0;
+  const activationRate =
+    totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0;
+
+  const rolePie = useMemo(() => {
+    const entries = Object.entries(data?.userStats?.byRole || {});
+    return entries.map(([name, value], i) => ({
+      name,
+      value,
+      color: ROLE_COLORS[i % ROLE_COLORS.length],
+    }));
+  }, [data]);
 
   return (
     <div
@@ -99,6 +146,11 @@ export default function AdminAnalytics() {
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
             Platform Analytics
           </h1>
+          {updatedAt && (
+            <span style={{ fontSize: 11, color: "#64748b" }}>
+              updated {updatedAt}
+            </span>
+          )}
         </div>
         <button
           onClick={loadData}
@@ -116,6 +168,26 @@ export default function AdminAnalytics() {
       </header>
 
       <main style={{ padding: 24, maxWidth: 1400, margin: "0 auto" }}>
+        {error && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 14px",
+              borderRadius: 8,
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.25)",
+              color: "#ef4444",
+              fontSize: 13,
+              marginBottom: 16,
+            }}
+          >
+            <AlertTriangle size={14} />
+            {error}
+          </div>
+        )}
+
         {/* KPIs */}
         <div
           style={{
@@ -128,152 +200,215 @@ export default function AdminAnalytics() {
           <KPI
             icon={<Users size={18} />}
             label="Total Users"
-            value={data?.userStats?.totalUsers ?? 0}
+            value={totalUsers}
             color="#d900ff"
           />
           <KPI
             icon={<Activity size={18} />}
             label="Active Users"
-            value={data?.userStats?.activeUsers ?? 0}
+            value={activeUsers}
             color="#10b981"
+            sub={`${activationRate}% activation rate`}
           />
           <KPI
             icon={<TrendingUp size={18} />}
             label="New This Month"
-            value={data?.userStats?.newThisMonth ?? 0}
+            value={newThisMonth}
             color="#f59e0b"
           />
           <KPI
-            icon={<CreditCard size={18} />}
-            label="Roles"
-            value={Object.keys(data?.userStats?.byRole || {}).length}
-            color="#d900ff"
+            icon={<BarChart3 size={18} />}
+            label="Inactive"
+            value={Math.max(totalUsers - activeUsers, 0)}
+            color="#64748b"
+            sub="registered, not yet active"
           />
         </div>
 
-        {/* Registration Chart */}
         <div
           style={{
-            padding: 20,
-            borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(15,15,25,0.8)",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 16,
             marginBottom: 24,
           }}
         >
-          <h3
-            style={{
-              fontSize: 14,
-              fontWeight: 600,
-              margin: "0 0 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <BarChart3 size={16} /> Monthly Registrations (12 months)
-          </h3>
-          {loading ? (
-            <p style={{ fontSize: 13, color: "#7d8aa0" }}>Loading...</p>
-          ) : (
-            <div
+          {/* Registration Chart */}
+          <div style={cardStyle}>
+            <h3
               style={{
+                fontSize: 14,
+                fontWeight: 600,
+                margin: "0 0 20px",
                 display: "flex",
-                alignItems: "flex-end",
+                alignItems: "center",
                 gap: 8,
-                height: 160,
               }}
             >
-              {data?.monthlyRegistrations?.map(r => (
-                <div
-                  key={r.month}
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
+              <BarChart3 size={16} /> Monthly Registrations (12 months)
+            </h3>
+            {loading ? (
+              <p style={{ fontSize: 13, color: "#7d8aa0" }}>Loading...</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart
+                  data={data?.monthlyRegistrations ?? []}
+                  margin={{ top: 4, right: 8, left: -18, bottom: 0 }}
                 >
-                  <div
-                    style={{
-                      width: "100%",
-                      height: `${Math.max((r.count / maxReg) * 140, 4)}px`,
-                      background: "linear-gradient(180deg, #d900ff, #d900ff)",
-                      borderRadius: "4px 4px 0 0",
-                      minHeight: 4,
-                    }}
+                  <defs>
+                    <linearGradient id="regFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#d900ff" stopOpacity={0.5} />
+                      <stop
+                        offset="100%"
+                        stopColor="#d900ff"
+                        stopOpacity={0.02}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="month"
+                    tick={{ fill: "#64748b", fontSize: 10 }}
+                    axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                    tickLine={false}
+                    interval={0}
+                    angle={-35}
+                    textAnchor="end"
+                    height={50}
                   />
-                  <span
-                    style={{
-                      fontSize: 9,
-                      color: "#7d8aa0",
-                      transform: "rotate(-45deg)",
-                      transformOrigin: "top left",
-                      whiteSpace: "nowrap",
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fill: "#64748b", fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={36}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#0f0f17",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: 8,
+                      fontSize: 12,
                     }}
-                  >
-                    {r.month}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                    labelStyle={{ color: "#cbd5e1" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    name="Registrations"
+                    stroke="#d900ff"
+                    strokeWidth={2}
+                    fill="url(#regFill)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
 
-        {/* Role Distribution */}
-        <div
-          style={{
-            padding: 20,
-            borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(15,15,25,0.8)",
-          }}
-        >
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 16px" }}>
-            User Distribution by Role
-          </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {Object.entries(data?.userStats?.byRole || {}).map(
-              ([role, count]) => (
-                <div
-                  key={role}
-                  style={{ display: "flex", alignItems: "center", gap: 12 }}
-                >
-                  <span style={{ fontSize: 13, color: "#94a3b8", width: 120 }}>
-                    {role}
-                  </span>
-                  <div
-                    style={{
-                      flex: 1,
-                      height: 20,
-                      borderRadius: 4,
-                      background: "rgba(255,255,255,0.04)",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${Math.max((count / (data?.userStats?.totalUsers || 1)) * 100, 2)}%`,
-                        height: "100%",
-                        background: "linear-gradient(90deg, #d900ff, #d900ff)",
-                        borderRadius: 4,
+          {/* Role Distribution */}
+          <div style={cardStyle}>
+            <h3
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                margin: "0 0 16px",
+              }}
+            >
+              User Distribution by Role
+            </h3>
+            {loading ? (
+              <p style={{ fontSize: 13, color: "#7d8aa0" }}>Loading...</p>
+            ) : rolePie.length === 0 ? (
+              <p style={{ fontSize: 13, color: "#64748b" }}>No role data</p>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 20,
+                  flexWrap: "wrap",
+                }}
+              >
+                <ResponsiveContainer width={150} height={160}>
+                  <PieChart>
+                    <Pie
+                      data={rolePie}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={42}
+                      outerRadius={68}
+                      paddingAngle={2}
+                      stroke="none"
+                    >
+                      {rolePie.map(r => (
+                        <Cell key={r.name} fill={r.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        background: "#0f0f17",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        borderRadius: 8,
+                        fontSize: 12,
                       }}
                     />
-                  </div>
-                  <span
-                    style={{
-                      fontSize: 13,
-                      color: "#e2e8f0",
-                      fontWeight: 600,
-                      minWidth: 30,
-                      textAlign: "right",
-                    }}
-                  >
-                    {count}
-                  </span>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 7,
+                    flex: 1,
+                    minWidth: 150,
+                  }}
+                >
+                  {rolePie
+                    .slice()
+                    .sort((a, b) => b.value - a.value)
+                    .map(r => (
+                      <div
+                        key={r.name}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          fontSize: 12,
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: 3,
+                            background: r.color,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span
+                          style={{
+                            color: "#94a3b8",
+                            flex: 1,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            textTransform: "capitalize",
+                          }}
+                        >
+                          {r.name.replace(/_/g, " ")}
+                        </span>
+                        <span style={{ color: "#e2e8f0", fontWeight: 700 }}>
+                          {r.value}
+                        </span>
+                        <span style={{ color: "#64748b", fontSize: 11 }}>
+                          {totalUsers > 0
+                            ? Math.round((r.value / totalUsers) * 100)
+                            : 0}
+                          %
+                        </span>
+                      </div>
+                    ))}
                 </div>
-              )
+              </div>
             )}
           </div>
         </div>
@@ -287,21 +422,16 @@ function KPI({
   label,
   value,
   color,
+  sub,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
   color: string;
+  sub?: string;
 }) {
   return (
-    <div
-      style={{
-        padding: 20,
-        borderRadius: 12,
-        border: "1px solid rgba(255,255,255,0.06)",
-        background: "rgba(15,15,25,0.8)",
-      }}
-    >
+    <div style={cardStyle}>
       <div
         style={{
           width: 36,
@@ -324,6 +454,11 @@ function KPI({
       <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
         {label}
       </div>
+      {sub && (
+        <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
+          {sub}
+        </div>
+      )}
     </div>
   );
 }

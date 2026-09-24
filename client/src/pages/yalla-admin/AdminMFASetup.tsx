@@ -1,11 +1,11 @@
 /**
  * Yalla Hack Super Admin — MFA Setup
- * Enable TOTP two-factor authentication for admin accounts.
+ * Enable or disable TOTP two-factor authentication for the founders account.
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Shield, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Shield, CheckCircle2, AlertTriangle, ShieldOff } from "lucide-react";
 
 const ADMIN_API = "/api/yalla-admin";
 
@@ -18,15 +18,23 @@ export default function AdminMFASetup() {
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [step, setStep] = useState<"setup" | "confirm" | "done">("setup");
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [disablePassword, setDisablePassword] = useState("");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     fetch(`${ADMIN_API}/me`, { credentials: "include" }).then(res => {
       if (res.status === 401) navigate("/yalla-hack-owners-console/login");
     });
+    fetch(`${ADMIN_API}/2fa/status`, { credentials: "include" })
+      .then(res => (res.ok ? res.json() : { enabled: false }))
+      .then(data => setEnabled(Boolean(data.enabled)))
+      .catch(() => setEnabled(false));
   }, [navigate]);
 
   async function handleSetup() {
     setError("");
+    setBusy(true);
     try {
       const res = await fetch(`${ADMIN_API}/2fa/setup`, {
         method: "POST",
@@ -43,11 +51,14 @@ export default function AdminMFASetup() {
       setStep("confirm");
     } catch {
       setError("Network error");
+    } finally {
+      setBusy(false);
     }
   }
 
   async function handleConfirm() {
     setError("");
+    setBusy(true);
     try {
       const res = await fetch(`${ADMIN_API}/2fa/confirm`, {
         method: "POST",
@@ -62,11 +73,51 @@ export default function AdminMFASetup() {
       }
       const data = await res.json();
       setBackupCodes(data.backupCodes || []);
+      setEnabled(true);
       setStep("done");
     } catch {
       setError("Network error");
+    } finally {
+      setBusy(false);
     }
   }
+
+  async function handleDisable() {
+    setError("");
+    setBusy(true);
+    try {
+      const res = await fetch(`${ADMIN_API}/2fa/disable`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ password: disablePassword }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setError(d.error || "Could not disable 2FA");
+        return;
+      }
+      setEnabled(false);
+      setDisablePassword("");
+      setStep("setup");
+    } catch {
+      setError("Network error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "12px 14px",
+    borderRadius: 8,
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    color: "#fff",
+    fontSize: 14,
+    outline: "none",
+    boxSizing: "border-box",
+  };
 
   return (
     <div
@@ -87,7 +138,7 @@ export default function AdminMFASetup() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button
-            onClick={() => navigate("/yalla-hack-owners-console/dashboard")}
+            onClick={() => navigate("/yalla-hack-owners-console/security")}
             style={{
               background: "none",
               border: "none",
@@ -100,6 +151,36 @@ export default function AdminMFASetup() {
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
             Two-Factor Authentication
           </h1>
+          {enabled === true && (
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#10b981",
+                background: "rgba(16,185,129,0.12)",
+                border: "1px solid rgba(16,185,129,0.35)",
+                borderRadius: 20,
+                padding: "3px 10px",
+              }}
+            >
+              ENABLED
+            </span>
+          )}
+          {enabled === false && (
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#f59e0b",
+                background: "rgba(245,158,11,0.10)",
+                border: "1px solid rgba(245,158,11,0.35)",
+                borderRadius: 20,
+                padding: "3px 10px",
+              }}
+            >
+              DISABLED
+            </span>
+          )}
         </div>
       </header>
       <main style={{ maxWidth: 480, margin: "0 auto" }}>
@@ -123,7 +204,83 @@ export default function AdminMFASetup() {
           </div>
         )}
 
-        {step === "setup" && (
+        {enabled === true && step !== "done" && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: 32,
+              borderRadius: 12,
+              border: "1px solid rgba(16,185,129,0.25)",
+              background: "rgba(16,185,129,0.04)",
+            }}
+          >
+            <Shield size={48} style={{ color: "#10b981", marginBottom: 16 }} />
+            <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
+              2FA Is Protecting Your Account
+            </h2>
+            <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 24px" }}>
+              Sign-in requires a time-based code from your authenticator app.
+              Keep your backup codes somewhere safe.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                maxWidth: 320,
+                margin: "0 auto",
+                textAlign: "left",
+              }}
+            >
+              <label
+                style={{
+                  fontSize: 12,
+                  color: "#94a3b8",
+                  fontWeight: 600,
+                }}
+              >
+                Confirm your password to disable 2FA
+              </label>
+              <input
+                type="password"
+                value={disablePassword}
+                onChange={e => setDisablePassword(e.target.value)}
+                placeholder="Current password"
+                autoComplete="current-password"
+                style={inputStyle}
+              />
+              <button
+                onClick={handleDisable}
+                disabled={busy || disablePassword.length === 0}
+                style={{
+                  padding: "12px 28px",
+                  borderRadius: 10,
+                  background:
+                    busy || disablePassword.length === 0
+                      ? "rgba(148,163,184,0.2)"
+                      : "rgba(239,68,68,0.15)",
+                  border: "1px solid rgba(239,68,68,0.4)",
+                  color: "#f87171",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  cursor:
+                    busy || disablePassword.length === 0
+                      ? "not-allowed"
+                      : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                <ShieldOff size={15} />
+                {busy ? "Disabling…" : "Disable 2FA"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {enabled === false && step === "setup" && (
           <div
             style={{
               textAlign: "center",
@@ -141,6 +298,7 @@ export default function AdminMFASetup() {
             </p>
             <button
               onClick={handleSetup}
+              disabled={busy}
               style={{
                 padding: "12px 28px",
                 borderRadius: 10,
@@ -149,15 +307,16 @@ export default function AdminMFASetup() {
                 fontSize: 14,
                 fontWeight: 700,
                 border: "none",
-                cursor: "pointer",
+                cursor: busy ? "not-allowed" : "pointer",
+                opacity: busy ? 0.7 : 1,
               }}
             >
-              Begin Setup
+              {busy ? "Starting…" : "Begin Setup"}
             </button>
           </div>
         )}
 
-        {step === "confirm" && (
+        {enabled === false && step === "confirm" && (
           <div
             style={{
               textAlign: "center",

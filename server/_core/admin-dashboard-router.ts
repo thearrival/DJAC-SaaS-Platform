@@ -13,8 +13,10 @@ import {
   verifySession,
   isAdminSessionRevoked,
   auditAdminAction,
+  isIpAllowed,
+  getClientIp,
+  touchAdminSession,
 } from "./yalla-admin-router";
-import { getClientIp } from "./security";
 import {
   getUnifiedUsers,
   getUserStats,
@@ -81,6 +83,7 @@ async function requireAdminSession(
   }
 
   (req as Request & { adminSession?: AdminSessionUser }).adminSession = parsed;
+  touchAdminSession(parsed.sessionId);
   next();
 }
 
@@ -101,6 +104,15 @@ export function createAdminDashboardRouter(): Router {
     corsHeaders(res);
     if (req.method === "OPTIONS") {
       res.status(204).end();
+      return;
+    }
+    next();
+  });
+
+  // Same IP allowlist as the /api/yalla-admin router (shared founders policy)
+  router.use((req, res, next) => {
+    if (!isIpAllowed(getClientIp(req))) {
+      res.status(403).json({ error: "Access denied from this IP address." });
       return;
     }
     next();
@@ -359,6 +371,18 @@ export function createAdminDashboardRouter(): Router {
     } catch (error) {
       logger.error({ error }, "Failed to get security metrics");
       res.status(500).json({ error: "Failed to get security metrics" });
+    }
+  });
+
+  // Live AI agent-pool status from the in-process orchestrator (dynamic import
+  // keeps the AI stack out of the cold-start path of this router).
+  router.get("/platform/ai-pool", async (_req, res) => {
+    try {
+      const { getAgentPoolStatus } = await import("../ai/orchestrator");
+      res.json(getAgentPoolStatus());
+    } catch (error) {
+      logger.warn({ error }, "AI pool status unavailable");
+      res.json({ agents: [], stats: {}, capabilities: [] });
     }
   });
 

@@ -14,6 +14,11 @@
  *   GET  /api/yalla-admin/bootstrap      — validate owner access token and set gate cookie
  *   POST /api/yalla-admin/login          — authenticate with username + password
  *   POST /api/yalla-admin/logout         — revoke session
+ *   POST /api/yalla-admin/password/change — rotate founders password (DB override)
+ *   GET  /api/yalla-admin/2fa/status     — is TOTP 2FA enabled?
+ *   POST /api/yalla-admin/2fa/setup|confirm|disable|verify — TOTP 2FA lifecycle
+ *   GET  /api/yalla-admin/stats/sessions — list active founder sessions
+ *   POST /api/yalla-admin/sessions/:id/revoke — revoke a session
  *   POST /api/yalla-admin/access-links/generate — generate one-time signed owner access links
  *   GET  /api/yalla-admin/me             — current session info
  *   GET  /api/yalla-admin/stats/overview — platform-wide KPIs
@@ -27,7 +32,7 @@
  *   YALLA_ADMIN_SECRET      — URL access token (required in prod)
  *   YALLA_ADMIN_USERNAME    — admin username (default: yalla_admin)
  *   YALLA_ADMIN_PASSWORD    — bcrypt hash of admin password (required in prod)
- *   YALLA_ADMIN_IP_ALLOWLIST — optional CSV of allowed IPs (e.g. "1.2.3.4,5.6.7.0/24")
+ *   YALLA_ADMIN_IP_ALLOWLIST — optional CSV of allowed IPs/CIDRs (e.g. "1.2.3.4,5.6.7.0/24")
  *   YALLA_ADMIN_JWT_SECRET  — signing secret for admin sessions (falls back to JWT_SECRET)
  *   YALLA_ADMIN_SESSION_TTL_HOURS — session TTL in hours (default: 8)
  */
@@ -43,6 +48,12 @@ import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { nanoid } from "nanoid";
 import { parse as parseCookieHeader } from "cookie";
+import {
+  generateSecret as otpGenerateSecret,
+  generateURI,
+  verifySync as otpVerifySync,
+} from "otplib";
+import qrcode from "qrcode";
 import { getDb } from "../db";
 import {
   listAccessRequests,
@@ -51,6 +62,11 @@ import {
 import { ENV } from "./env";
 import { logger } from "./logger";
 import { sql } from "drizzle-orm";
+import {
+  checkRateLimit,
+  getRateLimitCount,
+  resetRateLimit,
+} from "./rateLimiter";
 import {
   broadcastSSE,
   addSSEClient,
@@ -94,10 +110,11 @@ const GATE_COOKIE_VALUE = ADMIN_SECRET
       .digest("hex")
   : "";
 
-// Login lockout state (in-memory; survives restarts for dev simplicity)
-const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
+// Login lockout — Redis-backed via rateLimiter (shared across replicas,
+// survives restarts) with a transparent in-memory fallback.
 const MAX_ATTEMPTS = 5;
-const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+const LOCKOUT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const loginFailKey = (ip: string): string => `admin-login-fail:${ip}`;
 const usedOwnerLinkNonces = new Map<string, number>();
 
 // In-memory session revocation set (sessionId -> revokedAt). Works even when
@@ -110,6 +127,9 @@ function pruneRevokedSessions(): void {
   for (const [id, revokedAt] of revokedSessions) {
     if (revokedAt < cutoff) revokedSessions.delete(id);
   }
+  for (const [id, touched] of sessionLastTouch) {
+    if (touched < cutoff) sessionLastTouch.delete(id);
+  }
 }
 
 /** Mark a session revoked in memory (used alongside the DB revocation) */
@@ -120,6 +140,28 @@ export function revokeAdminSession(sessionId: string): void {
 /** True when the session id is revoked in memory */
 export function isAdminSessionRevoked(sessionId: string): boolean {
   return revokedSessions.has(sessionId);
+}
+
+// Session activity tracking (throttled lastSeenAt updates, max 1 write/min)
+const sessionLastTouch = new Map<string, number>();
+
+/** Refresh `lastSeenAt` for a session — at most once per 60s per session. */
+export function touchAdminSession(sessionId: string): void {
+  const now = Date.now();
+  const last = sessionLastTouch.get(sessionId) ?? 0;
+  if (now - last < 60_000) return;
+  sessionLastTouch.set(sessionId, now);
+  void (async () => {
+    try {
+      const db = await getDb();
+      if (!db) return;
+      await db.execute(
+        sql`UPDATE "yallaAdminSessions" SET "lastSeenAt" = NOW() WHERE id = ${sessionId}`
+      );
+    } catch {
+      // Activity tracking must never break requests
+    }
+  })();
 }
 
 // General endpoint rate limiter (DoS protection for all admin routes)
@@ -134,7 +176,7 @@ const ENDPOINT_RATE_MAX = 300; // 300 requests per window per IP
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getClientIp(req: Request): string {
+export function getClientIp(req: Request): string {
   // Behind Traefik, the proxy APPENDS the real client IP to X-Forwarded-For.
   // Always use the LAST entry (set by the trusted proxy), never the first
   // (which can be freely injected by the client to bypass rate limiting / IP allowlist).
@@ -145,6 +187,136 @@ function getClientIp(req: Request): string {
   }
   if (Array.isArray(hdr)) return hdr[hdr.length - 1].trim();
   return req.socket.remoteAddress ?? "unknown";
+}
+
+// ─── Login lockout helpers (Redis-backed via rateLimiter) ────────────────────
+
+/** Returns true (and sends 429) when the IP has exhausted its failure budget. */
+async function isLoginLocked(ip: string, res: Response): Promise<boolean> {
+  const count = await getRateLimitCount(loginFailKey(ip), LOCKOUT_WINDOW_MS);
+  if (count >= MAX_ATTEMPTS) {
+    const windowIndex = Math.floor(Date.now() / LOCKOUT_WINDOW_MS);
+    const retryAfterSec = Math.max(
+      1,
+      Math.ceil(((windowIndex + 1) * LOCKOUT_WINDOW_MS - Date.now()) / 1000)
+    );
+    res.setHeader("Retry-After", String(retryAfterSec));
+    res.status(429).json({
+      error: `Too many failed attempts. Locked for ${Math.ceil(retryAfterSec / 60)} more minute(s).`,
+      retryAfterSec,
+    });
+    return true;
+  }
+  return false;
+}
+
+/** Count one failed attempt against the IP's budget. */
+async function recordLoginFailure(ip: string): Promise<void> {
+  await checkRateLimit(loginFailKey(ip), MAX_ATTEMPTS, LOCKOUT_WINDOW_MS);
+}
+
+/** Clear the failure budget after a successful authentication. */
+async function clearLoginFailures(ip: string): Promise<void> {
+  await resetRateLimit(loginFailKey(ip), LOCKOUT_WINDOW_MS);
+}
+
+// ─── Founders-portal settings store (yallaAdminSettings table) ───────────────
+
+async function getAdminSetting(key: string): Promise<string | null> {
+  try {
+    const db = await getDb();
+    if (!db) return null;
+    const result = await db.execute(
+      sql`SELECT "value" FROM "yallaAdminSettings" WHERE "key" = ${key}`
+    );
+    const rows = result.rows as { value: string }[] | undefined;
+    return rows?.[0]?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function setAdminSetting(key: string, value: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.execute(sql`
+            INSERT INTO "yallaAdminSettings" ("key", "value", "updatedAt")
+            VALUES (${key}, ${value}, NOW())
+            ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = NOW()
+        `);
+}
+
+async function deleteAdminSetting(key: string): Promise<void> {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    await db.execute(
+      sql`DELETE FROM "yallaAdminSettings" WHERE "key" = ${key}`
+    );
+  } catch {
+    // best-effort
+  }
+}
+
+/** Verify a password against the DB-rotated hash first, then the env hash. */
+async function verifyAdminPassword(password: string): Promise<boolean> {
+  const overrideHash = await getAdminSetting("passwordHash");
+  if (overrideHash) return bcrypt.compare(password, overrideHash);
+  if (ADMIN_PASSWORD_HASH) return bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+  if (ENV.isDevelopment) {
+    const devPassword = process.env["YALLA_ADMIN_DEV_PASSWORD"] || "";
+    return devPassword.length > 0 && password === devPassword;
+  }
+  return false;
+}
+
+async function isFounderMfaEnabled(): Promise<boolean> {
+  return (await getAdminSetting("mfaEnabled")) === "1";
+}
+
+// ─── Session creation (shared by password login, MFA verify) ─────────────────
+
+async function createAdminSession(
+  req: Request,
+  res: Response,
+  ip: string,
+  opts: { setGateCookie?: boolean; mfaVia?: "totp" | "backup" } = {}
+): Promise<void> {
+  const sessionId = nanoid(32);
+  const expiresAt = new Date(Date.now() + SESSION_TTL_H * 3600 * 1000);
+  const token = await signSession(sessionId, ADMIN_USERNAME);
+
+  try {
+    const db = await getDb();
+    if (db) {
+      await db.execute(sql`
+                INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
+                VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
+            `);
+    }
+  } catch {
+    logger.warn(
+      "[YallaAdmin] Failed to persist session — login proceeds without DB"
+    );
+  }
+
+  await auditLog(
+    sessionId,
+    ADMIN_USERNAME,
+    "login.success",
+    ip,
+    undefined,
+    opts.mfaVia ? { mfa: opts.mfaVia } : undefined
+  );
+  broadcastSSE("admin_login", {
+    ip,
+    mfa: opts.mfaVia ?? false,
+    ts: new Date().toISOString(),
+  });
+
+  res.cookie(COOKIE_NAME, token, cookieOptions(req));
+  if (opts.setGateCookie) setGateCookie(req, res);
+  res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
 }
 
 function hashOwnerLinkNonce(nonce: string): string {
@@ -427,7 +599,8 @@ function tokenGate(req: Request, res: Response, next: NextFunction): void {
     req.path === "/bootstrap" ||
     req.path === "/login" ||
     req.path === "/react-login" ||
-    req.path === "/me"
+    req.path === "/me" ||
+    req.path === "/2fa/verify"
   ) {
     next();
     return;
@@ -455,17 +628,50 @@ function tokenGate(req: Request, res: Response, next: NextFunction): void {
   res.status(401).json({ error: "Unauthorized" });
 }
 
-/** Optional IP allowlist */
+/** Optional IP allowlist — exact match or proper IPv4 CIDR (no prefix bugs). */
+function ipv4ToInt(ip: string): number | null {
+  const parts = ip.split(".");
+  if (parts.length !== 4) return null;
+  let n = 0;
+  for (const p of parts) {
+    if (!/^\d{1,3}$/.test(p)) return null;
+    const v = parseInt(p, 10);
+    if (v < 0 || v > 255) return null;
+    n = ((n << 8) | v) >>> 0;
+  }
+  return n >>> 0;
+}
+
+function ipMatchesEntry(ip: string, entry: string): boolean {
+  // Normalise IPv4-mapped IPv6 (::ffff:1.2.3.4) to plain IPv4
+  const normalisedIp = ip.startsWith("::ffff:") ? ip.slice(7) : ip;
+  if (normalisedIp === entry) return true;
+  if (!entry.includes("/")) return false;
+
+  const [rangeRaw, bitsRaw] = entry.split("/");
+  const bits = parseInt(bitsRaw, 10);
+  if (Number.isNaN(bits) || bits < 0 || bits > 32) return false;
+  const range = rangeRaw.startsWith("::ffff:") ? rangeRaw.slice(7) : rangeRaw;
+  const ipNum = ipv4ToInt(normalisedIp);
+  const rangeNum = ipv4ToInt(range);
+  if (ipNum === null || rangeNum === null) return false;
+  if (bits === 0) return true;
+  const mask = ~((1 << (32 - bits)) - 1) >>> 0;
+  return (ipNum & mask) === (rangeNum & mask);
+}
+
+/** True when the IP passes the configured allowlist (empty list = allow all). */
+export function isIpAllowed(ip: string): boolean {
+  if (IP_ALLOWLIST.length === 0) return true;
+  return IP_ALLOWLIST.some(entry => ipMatchesEntry(ip, entry));
+}
+
 function ipAllowlist(req: Request, res: Response, next: NextFunction): void {
   if (IP_ALLOWLIST.length === 0) {
     next();
     return;
   }
-  const ip = getClientIp(req);
-  const allowed = IP_ALLOWLIST.some(
-    entry => ip === entry || ip.startsWith(entry.split("/")[0])
-  );
-  if (!allowed) {
+  if (!isIpAllowed(getClientIp(req))) {
     res.status(403).json({ error: "Access denied from this IP address." });
     return;
   }
@@ -555,7 +761,8 @@ async function requireSession(
     req.path === "/bootstrap" ||
     req.path === "/login" ||
     req.path === "/react-login" ||
-    req.path === "/me"
+    req.path === "/me" ||
+    req.path === "/2fa/verify"
   ) {
     next();
     return;
@@ -599,6 +806,7 @@ async function requireSession(
   }
 
   (req as Request & { adminSession?: typeof parsed }).adminSession = parsed;
+  touchAdminSession(parsed.sessionId);
   next();
 }
 
@@ -695,66 +903,35 @@ async function handleLogin(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // Check lockout
-  const lockState = loginAttempts.get(ip);
-  if (lockState && lockState.lockedUntil > Date.now()) {
-    const remainingMs = lockState.lockedUntil - Date.now();
-    const retryAfterSec = Math.ceil(remainingMs / 1000);
-    res.setHeader("Retry-After", String(retryAfterSec));
-    res.status(429).json({
-      error: `Too many failed attempts. Locked for ${Math.ceil(remainingMs / 60000)} more minute(s).`,
-      retryAfterSec,
-    });
-    return;
-  }
+  if (await isLoginLocked(ip, res)) return;
 
   const usernameOk = username === ADMIN_USERNAME;
-  let passwordOk = false;
-
-  if (ADMIN_PASSWORD_HASH) {
-    passwordOk = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
-  } else if (ENV.isDevelopment) {
-    const devPassword = process.env["YALLA_ADMIN_DEV_PASSWORD"] || "";
-    passwordOk = devPassword.length > 0 && password === devPassword;
-  }
+  const passwordOk = usernameOk && (await verifyAdminPassword(password));
 
   if (!usernameOk || !passwordOk) {
-    const current = loginAttempts.get(ip) ?? { count: 0, lockedUntil: 0 };
-    const newCount = current.count + 1;
-    const lockedUntil = newCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
-    loginAttempts.set(ip, { count: newCount, lockedUntil });
+    await recordLoginFailure(ip);
     await auditLog(null, username, "login.failed", ip);
     res.status(401).json({ error: "Invalid credentials." });
     return;
   }
 
-  // Clear lockout on success
-  loginAttempts.delete(ip);
+  await clearLoginFailures(ip);
 
-  const sessionId = nanoid(32);
-  const expiresAt = new Date(Date.now() + SESSION_TTL_H * 3600 * 1000);
-  const token = await signSession(sessionId, ADMIN_USERNAME);
-
-  try {
-    const db = await getDb();
-    if (db) {
-      await db.execute(sql`
-                INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
-                VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
-            `);
-    }
-  } catch {
-    logger.warn(
-      "[YallaAdmin] Failed to persist session — login proceeds without DB"
-    );
+  if (await isFounderMfaEnabled()) {
+    const pendingToken = await new SignJWT({
+      sub: ADMIN_USERNAME,
+      purpose: "yalla-totp-challenge",
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(ADMIN_JWT_SECRET);
+    await auditLog(null, ADMIN_USERNAME, "login.mfa_challenge", ip);
+    res.json({ ok: false, mfaRequired: true, pendingToken });
+    return;
   }
 
-  await auditLog(sessionId, ADMIN_USERNAME, "login.success", ip);
-  broadcastSSE("admin_login", { ip, ts: new Date().toISOString() });
-
-  res.cookie(COOKIE_NAME, token, cookieOptions(req));
-  setGateCookie(req, res);
-  res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
+  await createAdminSession(req, res, ip, { setGateCookie: true });
 }
 
 /**
@@ -779,65 +956,35 @@ async function handleReactLogin(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // Check lockout
-  const lockState = loginAttempts.get(ip);
-  if (lockState && lockState.lockedUntil > Date.now()) {
-    const remainingMs = lockState.lockedUntil - Date.now();
-    const retryAfterSec = Math.ceil(remainingMs / 1000);
-    res.setHeader("Retry-After", String(retryAfterSec));
-    res.status(429).json({
-      error: `Too many failed attempts. Locked for ${Math.ceil(remainingMs / 60000)} more minute(s).`,
-      retryAfterSec,
-    });
-    return;
-  }
+  if (await isLoginLocked(ip, res)) return;
 
   const usernameOk = username === ADMIN_USERNAME;
-  let passwordOk = false;
-
-  if (ADMIN_PASSWORD_HASH) {
-    passwordOk = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
-  } else if (ENV.isDevelopment) {
-    const devPassword = process.env["YALLA_ADMIN_DEV_PASSWORD"] || "";
-    passwordOk = devPassword.length > 0 && password === devPassword;
-  }
+  const passwordOk = usernameOk && (await verifyAdminPassword(password));
 
   if (!usernameOk || !passwordOk) {
-    const current = loginAttempts.get(ip) ?? { count: 0, lockedUntil: 0 };
-    const newCount = current.count + 1;
-    const lockedUntil = newCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
-    loginAttempts.set(ip, { count: newCount, lockedUntil });
+    await recordLoginFailure(ip);
     await auditLog(null, username, "login.failed", ip);
     res.status(401).json({ error: "Invalid credentials." });
     return;
   }
 
-  // Clear lockout on success
-  loginAttempts.delete(ip);
+  await clearLoginFailures(ip);
 
-  const sessionId = nanoid(32);
-  const expiresAt = new Date(Date.now() + SESSION_TTL_H * 3600 * 1000);
-  const token = await signSession(sessionId, ADMIN_USERNAME);
-
-  try {
-    const db = await getDb();
-    if (db) {
-      await db.execute(sql`
-                INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
-                VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
-            `);
-    }
-  } catch {
-    logger.warn(
-      "[YallaAdmin] Failed to persist session — login proceeds without DB"
-    );
+  if (await isFounderMfaEnabled()) {
+    const pendingToken = await new SignJWT({
+      sub: ADMIN_USERNAME,
+      purpose: "yalla-totp-challenge",
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(ADMIN_JWT_SECRET);
+    await auditLog(null, ADMIN_USERNAME, "login.mfa_challenge", ip);
+    res.json({ ok: false, mfaRequired: true, pendingToken });
+    return;
   }
 
-  await auditLog(sessionId, ADMIN_USERNAME, "login.success", ip);
-  broadcastSSE("admin_login", { ip, ts: new Date().toISOString() });
-
-  res.cookie(COOKIE_NAME, token, cookieOptions(req));
-  res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
+  await createAdminSession(req, res, ip);
 }
 
 async function handleLogout(req: Request, res: Response): Promise<void> {
@@ -950,11 +1097,16 @@ async function handleOverview(_req: Request, res: Response): Promise<void> {
             SELECT COUNT(*) as total FROM "organizations" WHERE plan IN ('professional','enterprise') AND "isActive" = 1
         `);
     const revenueRow = revenueResult.rows as { total: number }[];
+    const activeSessionsResult = await db.execute(sql`
+            SELECT COUNT(*) as total FROM "yallaAdminSessions"
+            WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
+        `);
+    const activeSessionsRow = activeSessionsResult.rows as { total: number }[];
 
     res.json({
       totalUsers: usersRow?.[0]?.total ?? 0,
       totalOrgs: orgsRow?.[0]?.total ?? 0,
-      activeSessions: 0,
+      activeSessions: activeSessionsRow?.[0]?.total ?? 0,
       todayLogins: todayLoginsRow?.[0]?.total ?? 0,
       openServiceRequests: serviceRequestsRow?.[0]?.total ?? 0,
       totalAssets: assetsRow?.[0]?.total ?? 0,
@@ -1902,6 +2054,417 @@ async function handleGenerateAccessLink(
   });
 }
 
+// ─── Session management ──────────────────────────────────────────────────────
+
+async function handleSessions(req: Request, res: Response): Promise<void> {
+  try {
+    const current = (req as Request & { adminSession?: { sessionId: string } })
+      .adminSession?.sessionId;
+    const db = await getDb();
+    if (!db) {
+      res.json([]);
+      return;
+    }
+    const result = await db.execute(sql`
+            SELECT id, "adminUsername", "ipAddress", "userAgent", "createdAt", "expiresAt", "lastSeenAt"
+            FROM "yallaAdminSessions"
+            WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
+            ORDER BY "lastSeenAt" DESC
+            LIMIT 50
+        `);
+    type SessionRow = {
+      id: string;
+      adminUsername: string;
+      ipAddress: string;
+      userAgent: string | null;
+      createdAt: Date | string;
+      expiresAt: Date | string;
+      lastSeenAt: Date | string | null;
+    };
+    const rows = (result.rows ?? []) as SessionRow[];
+    res.json(
+      rows.map(r => ({
+        id: r.id,
+        adminUsername: r.adminUsername,
+        ipAddress: r.ipAddress,
+        userAgent: r.userAgent,
+        createdAt:
+          r.createdAt instanceof Date
+            ? r.createdAt.toISOString()
+            : String(r.createdAt ?? ""),
+        expiresAt:
+          r.expiresAt instanceof Date
+            ? r.expiresAt.toISOString()
+            : String(r.expiresAt ?? ""),
+        lastSeenAt:
+          r.lastSeenAt instanceof Date
+            ? r.lastSeenAt.toISOString()
+            : r.lastSeenAt
+              ? String(r.lastSeenAt)
+              : null,
+        isCurrent: r.id === current,
+      }))
+    );
+  } catch {
+    res.status(500).json({ error: "Failed to list sessions" });
+  }
+}
+
+async function handleRevokeAdminSession(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const session = (
+    req as Request & { adminSession?: { username: string; sessionId: string } }
+  ).adminSession;
+  const targetId = String(req.params.id ?? "");
+  const ip = getClientIp(req);
+
+  if (!/^[A-Za-z0-9_-]{10,64}$/.test(targetId)) {
+    res.status(400).json({ error: "Invalid session id" });
+    return;
+  }
+
+  try {
+    const db = await getDb();
+    if (!db) {
+      res.status(503).json({ error: "Database unavailable" });
+      return;
+    }
+    const result = await db.execute(sql`
+            UPDATE "yallaAdminSessions" SET "isRevoked" = 1
+            WHERE id = ${targetId} AND "isRevoked" = 0
+            RETURNING id
+        `);
+    const rows = result.rows as { id: string }[] | undefined;
+    if (!rows || rows.length === 0) {
+      // Session may already be revoked — treat as success (idempotent)
+      res.json({ ok: true, alreadyRevoked: true });
+      return;
+    }
+    revokeAdminSession(targetId);
+    const isCurrent = session?.sessionId === targetId;
+    await auditLog(
+      session?.sessionId ?? null,
+      session?.username ?? "unknown",
+      "session.revoke",
+      ip,
+      targetId.slice(0, 12)
+    );
+    if (isCurrent) {
+      res.clearCookie(COOKIE_NAME, { path: ADMIN_COOKIE_PATH });
+    }
+    res.json({ ok: true, isCurrent });
+  } catch {
+    res.status(500).json({ error: "Failed to revoke session" });
+  }
+}
+
+// ─── Password change ─────────────────────────────────────────────────────────
+
+async function handlePasswordChange(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const session = (
+    req as Request & { adminSession?: { username: string; sessionId: string } }
+  ).adminSession;
+  const ip = getClientIp(req);
+  const { currentPassword, newPassword } = req.body ?? {};
+
+  if (typeof currentPassword !== "string" || typeof newPassword !== "string") {
+    res.status(400).json({ error: "Current and new password are required." });
+    return;
+  }
+  if (currentPassword.length > 256 || newPassword.length > 256) {
+    res.status(400).json({ error: "Invalid credentials format." });
+    return;
+  }
+  if (newPassword.length < 12) {
+    res
+      .status(400)
+      .json({ error: "New password must be at least 12 characters." });
+    return;
+  }
+  if (!/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+    res.status(400).json({
+      error: "New password must contain at least one letter and one number.",
+    });
+    return;
+  }
+  if (newPassword === currentPassword) {
+    res
+      .status(400)
+      .json({ error: "New password must differ from the current password." });
+    return;
+  }
+  if (await isLoginLocked(ip, res)) return;
+
+  const currentOk = await verifyAdminPassword(currentPassword);
+  if (!currentOk) {
+    await recordLoginFailure(ip);
+    await auditLog(
+      session?.sessionId ?? null,
+      session?.username ?? "unknown",
+      "password.change_failed",
+      ip
+    );
+    res.status(401).json({ error: "Current password is incorrect." });
+    return;
+  }
+  await clearLoginFailures(ip);
+
+  try {
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await setAdminSetting("passwordHash", newHash);
+  } catch {
+    res.status(503).json({ error: "Could not persist new password." });
+    return;
+  }
+
+  // Revoke every OTHER session (password change invalidates other devices)
+  try {
+    const db = await getDb();
+    if (db && session) {
+      const others = await db.execute(sql`
+                SELECT id FROM "yallaAdminSessions"
+                WHERE "isRevoked" = 0 AND id != ${session.sessionId}
+            `);
+      const otherIds = (others.rows as { id: string }[] | undefined) ?? [];
+      for (const row of otherIds) revokeAdminSession(row.id);
+      await db.execute(sql`
+                UPDATE "yallaAdminSessions" SET "isRevoked" = 1
+                WHERE "isRevoked" = 0 AND id != ${session.sessionId}
+            `);
+    }
+  } catch {
+    logger.warn(
+      "[YallaAdmin] Could not revoke other sessions on password change"
+    );
+  }
+
+  await auditLog(
+    session?.sessionId ?? null,
+    session?.username ?? "unknown",
+    "password.change",
+    ip
+  );
+  res.json({ ok: true, otherSessionsRevoked: true });
+}
+
+// ─── Two-factor authentication (TOTP) ────────────────────────────────────────
+
+async function handle2faStatus(_req: Request, res: Response): Promise<void> {
+  res.json({ enabled: await isFounderMfaEnabled() });
+}
+
+async function handle2faSetup(req: Request, res: Response): Promise<void> {
+  const session = (
+    req as Request & { adminSession?: { username: string; sessionId: string } }
+  ).adminSession;
+  const ip = getClientIp(req);
+  try {
+    const secret = otpGenerateSecret();
+    await setAdminSetting("totpSecretPending", secret);
+    const uri = generateURI({
+      issuer: "Yalla Hack Founders",
+      label: session?.username ?? ADMIN_USERNAME,
+      secret,
+    });
+    const qrDataUrl = await qrcode.toDataURL(uri);
+    await auditLog(
+      session?.sessionId ?? null,
+      session?.username ?? "unknown",
+      "2fa.setup_started",
+      ip
+    );
+    res.json({ secret, qrDataUrl });
+  } catch {
+    res.status(500).json({ error: "Failed to start 2FA setup" });
+  }
+}
+
+async function handle2faConfirm(req: Request, res: Response): Promise<void> {
+  const session = (
+    req as Request & { adminSession?: { username: string; sessionId: string } }
+  ).adminSession;
+  const ip = getClientIp(req);
+  const { code } = req.body ?? {};
+
+  if (typeof code !== "string" || !/^\d{6}$/.test(code)) {
+    res.status(400).json({ error: "Enter the 6-digit code from your app." });
+    return;
+  }
+
+  const pendingSecret = await getAdminSetting("totpSecretPending");
+  if (!pendingSecret) {
+    res.status(400).json({ error: "No pending 2FA setup. Start setup again." });
+    return;
+  }
+
+  let valid: boolean;
+  try {
+    valid = otpVerifySync({ token: code, secret: pendingSecret }).valid;
+  } catch {
+    valid = false;
+  }
+  if (!valid) {
+    await auditLog(
+      session?.sessionId ?? null,
+      session?.username ?? "unknown",
+      "2fa.confirm_failed",
+      ip
+    );
+    res.status(400).json({ error: "Invalid authenticator code." });
+    return;
+  }
+
+  const backupCodes = Array.from({ length: 8 }, () =>
+    createHash("sha256")
+      .update(`${ADMIN_USERNAME}-${Date.now()}-${Math.random()}`)
+      .digest("hex")
+      .slice(0, 10)
+      .toUpperCase()
+  );
+  const hashedCodes = backupCodes.map(c =>
+    createHash("sha256").update(c).digest("hex")
+  );
+
+  try {
+    await setAdminSetting("totpSecret", pendingSecret);
+    await setAdminSetting("mfaEnabled", "1");
+    await setAdminSetting("mfaBackupCodes", JSON.stringify(hashedCodes));
+    await deleteAdminSetting("totpSecretPending");
+  } catch {
+    res.status(503).json({ error: "Could not enable 2FA." });
+    return;
+  }
+
+  await auditLog(
+    session?.sessionId ?? null,
+    session?.username ?? "unknown",
+    "2fa.enable",
+    ip
+  );
+  broadcastSSE("platform_event", {
+    action: "admin_2fa_enabled",
+    ts: new Date().toISOString(),
+  });
+  res.json({ backupCodes });
+}
+
+async function handle2faDisable(req: Request, res: Response): Promise<void> {
+  const session = (
+    req as Request & { adminSession?: { username: string; sessionId: string } }
+  ).adminSession;
+  const ip = getClientIp(req);
+  const { password } = req.body ?? {};
+
+  if (typeof password !== "string" || password.length === 0) {
+    res.status(400).json({ error: "Password is required to disable 2FA." });
+    return;
+  }
+  if (await isLoginLocked(ip, res)) return;
+  if (!(await verifyAdminPassword(password))) {
+    await recordLoginFailure(ip);
+    res.status(401).json({ error: "Incorrect password." });
+    return;
+  }
+  await clearLoginFailures(ip);
+
+  await deleteAdminSetting("mfaEnabled");
+  await deleteAdminSetting("totpSecret");
+  await deleteAdminSetting("totpSecretPending");
+  await deleteAdminSetting("mfaBackupCodes");
+
+  await auditLog(
+    session?.sessionId ?? null,
+    session?.username ?? "unknown",
+    "2fa.disable",
+    ip
+  );
+  res.json({ ok: true });
+}
+
+async function handle2faVerify(req: Request, res: Response): Promise<void> {
+  const { pendingToken, code } = req.body ?? {};
+  const ip = getClientIp(req);
+
+  if (typeof pendingToken !== "string" || typeof code !== "string") {
+    res.status(400).json({ error: "Challenge token and code are required." });
+    return;
+  }
+  if (await isLoginLocked(ip, res)) return;
+
+  let payload: { sub?: unknown; purpose?: unknown } | null;
+  try {
+    const verified = await jwtVerify(pendingToken, ADMIN_JWT_SECRET);
+    payload = verified.payload as { sub?: unknown; purpose?: unknown };
+  } catch {
+    payload = null;
+  }
+  if (!payload || payload.purpose !== "yalla-totp-challenge") {
+    res.status(401).json({ error: "Invalid or expired challenge." });
+    return;
+  }
+
+  if (!(await isFounderMfaEnabled())) {
+    res.status(400).json({ error: "2FA is not enabled." });
+    return;
+  }
+  const totpSecret = await getAdminSetting("totpSecret");
+  if (!totpSecret) {
+    res.status(500).json({ error: "2FA misconfigured." });
+    return;
+  }
+
+  const normalised = code.trim().toUpperCase();
+  let via: "totp" | "backup" | null = null;
+
+  if (/^\d{6}$/.test(normalised)) {
+    try {
+      if (otpVerifySync({ token: normalised, secret: totpSecret }).valid) {
+        via = "totp";
+      }
+    } catch {
+      via = null;
+    }
+  }
+
+  if (!via && normalised.length >= 8) {
+    const hashed = createHash("sha256").update(normalised).digest("hex");
+    const stored = await getAdminSetting("mfaBackupCodes");
+    if (stored) {
+      try {
+        const codes = JSON.parse(stored) as string[];
+        const idx = codes.indexOf(hashed);
+        if (idx !== -1) {
+          codes.splice(idx, 1);
+          await setAdminSetting("mfaBackupCodes", JSON.stringify(codes));
+          via = "backup";
+        }
+      } catch {
+        // corrupted list — treat as invalid
+      }
+    }
+  }
+
+  if (!via) {
+    await recordLoginFailure(ip);
+    await auditLog(
+      null,
+      String(payload.sub ?? ADMIN_USERNAME),
+      "login.mfa_failed",
+      ip
+    );
+    res.status(401).json({ error: "Invalid authentication code." });
+    return;
+  }
+
+  await clearLoginFailures(ip);
+  await createAdminSession(req, res, ip, { mfaVia: via });
+}
+
 async function handleExportCsv(req: Request, res: Response): Promise<void> {
   const session = (
     req as Request & { adminSession?: { username: string; sessionId: string } }
@@ -2071,6 +2634,27 @@ export function createYallaAdminRouter(): Router {
 
   router.post("/logout", (req, res) => void handleLogout(req, res));
   router.get("/me", (req, res) => void handleMe(req, res));
+
+  // Two-factor authentication
+  router.get("/2fa/status", (req, res) => void handle2faStatus(req, res));
+  router.post("/2fa/setup", (req, res) => void handle2faSetup(req, res));
+  router.post("/2fa/confirm", (req, res) => void handle2faConfirm(req, res));
+  router.post("/2fa/disable", (req, res) => void handle2faDisable(req, res));
+  // Public (pre-session): exchanges the short-lived MFA challenge for a session
+  router.post("/2fa/verify", (req, res) => void handle2faVerify(req, res));
+
+  // Password rotation (DB-stored hash overrides the env hash)
+  router.post(
+    "/password/change",
+    (req, res) => void handlePasswordChange(req, res)
+  );
+
+  // Session management
+  router.get("/stats/sessions", (req, res) => void handleSessions(req, res));
+  router.post(
+    "/sessions/:id/revoke",
+    (req, res) => void handleRevokeAdminSession(req, res)
+  );
 
   router.get("/stats/overview", (req, res) => void handleOverview(req, res));
   router.get("/stats/users", (req, res) => void handleUsers(req, res));

@@ -5,6 +5,7 @@
  */
 import { useState } from "react";
 import type React from "react";
+import { useLocation } from "wouter";
 import { APP_TITLE, APP_LOGO } from "@/const";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
@@ -17,17 +18,23 @@ import {
   BarChart3,
   CreditCard,
   Building2,
+  KeyRound,
 } from "lucide-react";
 
 const ADMIN_API = "/api/yalla-admin";
 
 export default function FoundersLogin() {
   usePageTitle("Yalla Hack Founders — DJAC Admin");
+  const [, navigate] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // MFA (TOTP) second step — set when the server responds mfaRequired
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaLoading, setMfaLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -45,11 +52,45 @@ export default function FoundersLogin() {
         setError(data?.error || `Login failed (${res.status}).`);
         return;
       }
-      window.location.href = "/yalla-hack-owners-console/dashboard";
+      if (data?.mfaRequired && data?.pendingToken) {
+        setPendingToken(data.pendingToken);
+        setMfaCode("");
+        return;
+      }
+      if (data?.ok) {
+        navigate("/yalla-hack-owners-console/dashboard", { replace: true });
+        return;
+      }
+      setError(data?.error || "Login failed.");
     } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleMfaVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!pendingToken) return;
+    setError("");
+    setMfaLoading(true);
+    try {
+      const res = await fetch(`${ADMIN_API}/2fa/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ pendingToken, code: mfaCode }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setError(data?.error || `Verification failed (${res.status}).`);
+        return;
+      }
+      navigate("/yalla-hack-owners-console/dashboard", { replace: true });
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setMfaLoading(false);
     }
   }
 
@@ -243,82 +284,170 @@ export default function FoundersLogin() {
                 margin: "0 0 8px",
               }}
             >
-              Welcome Back
+              {pendingToken ? "Two-Factor Check" : "Welcome Back"}
             </h2>
             <p style={{ fontSize: 14, color: "#94a3b8", margin: 0 }}>
-              Sign in to the Yalla Hack Founders Portal
+              {pendingToken
+                ? "Enter the 6-digit code from your authenticator app"
+                : "Sign in to the Yalla Hack Founders Portal"}
             </p>
           </div>
 
-          <form
-            onSubmit={handleLogin}
-            style={{ display: "flex", flexDirection: "column", gap: 16 }}
-          >
-            <div>
-              <label
-                style={{
-                  fontSize: 12,
-                  color: "#94a3b8",
-                  fontWeight: 600,
-                  display: "block",
-                  marginBottom: 6,
-                }}
-              >
-                Username
-              </label>
-              <input
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                required
-                autoFocus
-                autoComplete="username"
-                placeholder="Enter your username"
-                style={{
-                  width: "100%",
-                  padding: "12px 14px",
-                  borderRadius: 10,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "#fff",
-                  fontSize: 14,
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-            <div>
-              <label
-                style={{
-                  fontSize: 12,
-                  color: "#94a3b8",
-                  fontWeight: 600,
-                  display: "block",
-                  marginBottom: 6,
-                }}
-              >
-                Password
-              </label>
-              <div style={{ position: "relative" }}>
-                <Lock
-                  size={13}
+          {pendingToken ? (
+            <form
+              onSubmit={handleMfaVerify}
+              style={{ display: "flex", flexDirection: "column", gap: 16 }}
+            >
+              <div>
+                <label
                   style={{
-                    position: "absolute",
-                    left: 14,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#7d8aa0",
+                    fontSize: 12,
+                    color: "#94a3b8",
+                    fontWeight: 600,
+                    display: "block",
+                    marginBottom: 6,
                   }}
-                />
+                >
+                  Authentication code
+                </label>
+                <div style={{ position: "relative" }}>
+                  <KeyRound
+                    size={13}
+                    style={{
+                      position: "absolute",
+                      left: 14,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: "#7d8aa0",
+                    }}
+                  />
+                  <input
+                    value={mfaCode}
+                    onChange={e =>
+                      setMfaCode(
+                        e.target.value.replace(/[^0-9A-Za-z]/g, "").slice(0, 10)
+                      )
+                    }
+                    required
+                    autoFocus
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
+                    placeholder="000000"
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px 12px 40px",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "#fff",
+                      fontSize: 18,
+                      letterSpacing: 6,
+                      textAlign: "center",
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: "#64748b",
+                    margin: "6px 0 0",
+                  }}
+                >
+                  A 6-digit TOTP code, or one of your backup codes.
+                </p>
+              </div>
+
+              {error && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.25)",
+                    color: "#ef4444",
+                    fontSize: 13,
+                  }}
+                >
+                  <AlertTriangle size={14} />
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={mfaLoading || mfaCode.length < 6}
+                style={{
+                  padding: "14px",
+                  borderRadius: 10,
+                  background:
+                    mfaLoading || mfaCode.length < 6
+                      ? "rgba(99,102,241,0.5)"
+                      : "linear-gradient(135deg, #d900ff, #d900ff)",
+                  color: "#fff",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  border: "none",
+                  cursor:
+                    mfaLoading || mfaCode.length < 6
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity: mfaLoading || mfaCode.length < 6 ? 0.7 : 1,
+                  marginTop: 8,
+                }}
+              >
+                {mfaLoading ? "Verifying..." : "Verify & Enter Portal"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingToken(null);
+                  setMfaCode("");
+                  setError("");
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#94a3b8",
+                  fontSize: 12.5,
+                  cursor: "pointer",
+                  padding: 4,
+                }}
+              >
+                ← Back to password sign-in
+              </button>
+            </form>
+          ) : (
+            <form
+              onSubmit={handleLogin}
+              style={{ display: "flex", flexDirection: "column", gap: 16 }}
+            >
+              <div>
+                <label
+                  style={{
+                    fontSize: 12,
+                    color: "#94a3b8",
+                    fontWeight: 600,
+                    display: "block",
+                    marginBottom: 6,
+                  }}
+                >
+                  Username
+                </label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
                   required
-                  autoComplete="current-password"
-                  placeholder="Enter your password"
+                  autoFocus
+                  autoComplete="username"
+                  placeholder="Enter your username"
                   style={{
                     width: "100%",
-                    padding: "12px 14px 12px 40px",
+                    padding: "12px 14px",
                     borderRadius: 10,
                     background: "rgba(255,255,255,0.04)",
                     border: "1px solid rgba(255,255,255,0.1)",
@@ -328,67 +457,113 @@ export default function FoundersLogin() {
                     boxSizing: "border-box",
                   }}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+              </div>
+              <div>
+                <label
                   style={{
-                    position: "absolute",
-                    right: 12,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    color: "#7d8aa0",
-                    cursor: "pointer",
-                    padding: 4,
+                    fontSize: 12,
+                    color: "#94a3b8",
+                    fontWeight: 600,
+                    display: "block",
+                    marginBottom: 6,
                   }}
                 >
-                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
+                  Password
+                </label>
+                <div style={{ position: "relative" }}>
+                  <Lock
+                    size={13}
+                    style={{
+                      position: "absolute",
+                      left: 14,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: "#7d8aa0",
+                    }}
+                  />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px 12px 40px",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "#fff",
+                      fontSize: 14,
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    style={{
+                      position: "absolute",
+                      right: 12,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      color: "#7d8aa0",
+                      cursor: "pointer",
+                      padding: 4,
+                    }}
+                  >
+                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {error && (
-              <div
+              {error && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.25)",
+                    color: "#ef4444",
+                    fontSize: 13,
+                  }}
+                >
+                  <AlertTriangle size={14} />
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "10px 14px",
-                  borderRadius: 8,
-                  background: "rgba(239,68,68,0.08)",
-                  border: "1px solid rgba(239,68,68,0.25)",
-                  color: "#ef4444",
-                  fontSize: 13,
+                  padding: "14px",
+                  borderRadius: 10,
+                  background: loading
+                    ? "rgba(99,102,241,0.5)"
+                    : "linear-gradient(135deg, #d900ff, #d900ff)",
+                  color: "#fff",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  border: "none",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.7 : 1,
+                  marginTop: 8,
                 }}
               >
-                <AlertTriangle size={14} />
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: "14px",
-                borderRadius: 10,
-                background: loading
-                  ? "rgba(99,102,241,0.5)"
-                  : "linear-gradient(135deg, #d900ff, #d900ff)",
-                color: "#fff",
-                fontSize: 15,
-                fontWeight: 700,
-                border: "none",
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.7 : 1,
-                marginTop: 8,
-              }}
-            >
-              {loading ? "Authenticating..." : "Sign In to Founders Portal"}
-            </button>
-          </form>
+                {loading ? "Authenticating..." : "Sign In to Founders Portal"}
+              </button>
+            </form>
+          )}
 
           <p
             style={{

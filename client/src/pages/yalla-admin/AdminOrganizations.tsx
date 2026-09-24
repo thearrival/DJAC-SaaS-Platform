@@ -8,9 +8,12 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   RefreshCw,
   ChevronLeft,
+  ChevronRight,
   Search,
   Ban,
   CheckCircle2,
+  Download,
+  AlertTriangle,
 } from "lucide-react";
 
 const ADMIN_API = "/api/admin-dashboard";
@@ -31,12 +34,16 @@ export default function AdminOrganizations() {
   const [, navigate] = useLocation();
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [busyIds, setBusyIds] = useState<Set<number>>(new Set());
   const [notice, setNotice] = useState<{
     kind: "ok" | "error";
     text: string;
   } | null>(null);
+
+  const pageSize = 25;
 
   const flash = useCallback((kind: "ok" | "error", text: string) => {
     setNotice({ kind, text });
@@ -52,9 +59,11 @@ export default function AdminOrganizations() {
         navigate("/yalla-hack-owners-console/login");
         return;
       }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setOrgs(await res.json());
-    } catch {
-      /* silent */
+      setLoadError("");
+    } catch (e) {
+      setLoadError(`Could not load organizations: ${(e as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -106,6 +115,36 @@ export default function AdminOrganizations() {
     o => !search || o.name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const pageFiltered = filtered.slice(page * pageSize, (page + 1) * pageSize);
+
+  function exportCsv() {
+    const header = ["id", "name", "plan", "status", "members", "created"];
+    const rows = filtered.map(o =>
+      [
+        o.id,
+        o.name,
+        o.plan,
+        o.status,
+        o.memberCount,
+        o.createdAt ? new Date(o.createdAt).toISOString() : "",
+      ]
+        .map(v => {
+          const s = String(v ?? "");
+          return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        })
+        .join(",")
+    );
+    const csv = [header.join(","), ...rows].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `organizations-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div
       style={{
@@ -144,22 +183,58 @@ export default function AdminOrganizations() {
             {orgs.length} total
           </span>
         </div>
-        <button
-          onClick={loadData}
-          style={{
-            background: "none",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 6,
-            padding: "6px 10px",
-            color: "#94a3b8",
-            cursor: "pointer",
-          }}
-        >
-          <RefreshCw size={14} />
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={exportCsv}
+            disabled={filtered.length === 0}
+            title="Export CSV"
+            style={{
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 6,
+              padding: "6px 10px",
+              color: filtered.length === 0 ? "#475569" : "#94a3b8",
+              cursor: filtered.length === 0 ? "not-allowed" : "pointer",
+            }}
+          >
+            <Download size={14} />
+          </button>
+          <button
+            onClick={loadData}
+            style={{
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 6,
+              padding: "6px 10px",
+              color: "#94a3b8",
+              cursor: "pointer",
+            }}
+          >
+            <RefreshCw size={14} />
+          </button>
+        </div>
       </header>
 
       <main style={{ padding: 24, maxWidth: 1400, margin: "0 auto" }}>
+        {loadError && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 14px",
+              borderRadius: 8,
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.25)",
+              color: "#ef4444",
+              fontSize: 13,
+              marginBottom: 16,
+            }}
+          >
+            <AlertTriangle size={14} />
+            {loadError}
+          </div>
+        )}
         {notice && (
           <div
             style={{
@@ -202,7 +277,10 @@ export default function AdminOrganizations() {
           />
           <input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
             placeholder="Search organizations..."
             style={{
               width: "100%",
@@ -312,7 +390,7 @@ export default function AdminOrganizations() {
                     Loading...
                   </td>
                 </tr>
-              ) : filtered.length === 0 ? (
+              ) : pageFiltered.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -326,7 +404,7 @@ export default function AdminOrganizations() {
                   </td>
                 </tr>
               ) : (
-                filtered.map(o => (
+                pageFiltered.map(o => (
                   <tr
                     key={o.id}
                     style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
@@ -410,6 +488,53 @@ export default function AdminOrganizations() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              marginTop: 20,
+            }}
+          >
+            <button
+              onClick={() => setPage(Math.max(0, page - 1))}
+              disabled={page === 0}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 6,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: "#94a3b8",
+                cursor: page === 0 ? "not-allowed" : "pointer",
+                opacity: page === 0 ? 0.5 : 1,
+              }}
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <span style={{ fontSize: 13, color: "#94a3b8" }}>
+              Page {page + 1} of {totalPages} · {filtered.length} orgs
+            </span>
+            <button
+              onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+              disabled={page >= totalPages - 1}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 6,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: "#94a3b8",
+                cursor: page >= totalPages - 1 ? "not-allowed" : "pointer",
+                opacity: page >= totalPages - 1 ? 0.5 : 1,
+              }}
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

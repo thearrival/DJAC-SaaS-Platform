@@ -17,6 +17,7 @@ import {
   billingEvents,
   emailLog,
   localUsers,
+  organizations,
   subscriptions,
   userActivitySummary,
 } from "../../drizzle/schema";
@@ -360,10 +361,11 @@ export async function getRevenueMetrics(): Promise<RevenueMetrics> {
       status: billingEvents.status,
       amountCents: billingEvents.amountCents,
       currency: billingEvents.currency,
-      organizationName: sql<string | null>`NULL`,
+      organizationName: organizations.name,
       createdAt: billingEvents.createdAt,
     })
     .from(billingEvents)
+    .leftJoin(organizations, eq(organizations.id, billingEvents.organizationId))
     .orderBy(desc(billingEvents.createdAt))
     .limit(20);
 

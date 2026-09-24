@@ -112,6 +112,8 @@ const AdminAnalytics = lazy(() => import("./pages/yalla-admin/AdminAnalytics"));
 const AdminPlatformMonitor = lazy(
   () => import("./pages/yalla-admin/AdminPlatformMonitor")
 );
+const FoundersLayout = lazy(() => import("./pages/yalla-admin/FoundersLayout"));
+const AdminMFASetup = lazy(() => import("./pages/yalla-admin/AdminMFASetup"));
 const GlobalRegistry = lazy(() => import("./pages/GlobalRegistry"));
 const GlobalKnowledgeGraph = lazy(() => import("./pages/GlobalKnowledgeGraph"));
 const GlobalIndustryEditions = lazy(
@@ -253,47 +255,72 @@ function Router() {
       </Route>
       <Route path={"/yalla-hack-owners-console/dashboard"}>
         <RouteErrorBoundary>
-          <AdminDashboardPage />
+          <FoundersLayout>
+            <AdminDashboardPage />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/users"}>
         <RouteErrorBoundary>
-          <AdminUsersPage />
+          <FoundersLayout>
+            <AdminUsersPage />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console"}>
         <RouteErrorBoundary>
-          <AdminDashboardPage />
+          <FoundersLayout>
+            <AdminDashboardPage />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/subscriptions"}>
         <RouteErrorBoundary>
-          <AdminSubscriptions />
+          <FoundersLayout>
+            <AdminSubscriptions />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/organizations"}>
         <RouteErrorBoundary>
-          <AdminOrganizations />
+          <FoundersLayout>
+            <AdminOrganizations />
+          </FoundersLayout>
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/security/mfa"}>
+        <RouteErrorBoundary>
+          <FoundersLayout>
+            <AdminMFASetup />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/security"}>
         <RouteErrorBoundary>
-          <AdminSecurity />
+          <FoundersLayout>
+            <AdminSecurity />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/audit"}>
         <RouteErrorBoundary>
-          <AdminAudit />
+          <FoundersLayout>
+            <AdminAudit />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/analytics"}>
         <RouteErrorBoundary>
-          <AdminAnalytics />
+          <FoundersLayout>
+            <AdminAnalytics />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       <Route path={"/yalla-hack-owners-console/monitor"}>
         <RouteErrorBoundary>
-          <AdminPlatformMonitor />
+          <FoundersLayout>
+            <AdminPlatformMonitor />
+          </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
       {/* All app routes share the DashboardLayout sidebar */}

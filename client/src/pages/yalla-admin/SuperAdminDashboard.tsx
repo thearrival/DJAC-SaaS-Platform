@@ -20,6 +20,10 @@ import {
   ChevronRight,
   Clock,
   Gauge,
+  AlertTriangle,
+  Inbox,
+  Boxes,
+  UserPlus,
 } from "lucide-react";
 
 const ADMIN_API = "/api/yalla-admin";
@@ -52,6 +56,7 @@ export default function SuperAdminDashboard() {
   const [system, setSystem] = useState<SystemInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
   const loadData = useCallback(async () => {
     try {
@@ -64,13 +69,16 @@ export default function SuperAdminDashboard() {
         navigate("/yalla-hack-owners-console/login");
         return;
       }
+      if (!statsRes.ok) throw new Error(`overview: HTTP ${statsRes.status}`);
+      if (!sysRes.ok) throw new Error(`system: HTTP ${sysRes.status}`);
 
       const statsData = await statsRes.json();
       const sysData = await sysRes.json();
       setStats(statsData);
       setSystem(sysData);
-    } catch {
-      // silent
+      setError("");
+    } catch (e) {
+      setError(`Could not load dashboard: ${(e as Error).message}`);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -189,13 +197,33 @@ export default function SuperAdminDashboard() {
       </header>
 
       <main style={{ padding: "24px", maxWidth: 1400, margin: "0 auto" }}>
+        {error && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 14px",
+              borderRadius: 8,
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.25)",
+              color: "#ef4444",
+              fontSize: 13,
+              marginBottom: 16,
+            }}
+          >
+            <AlertTriangle size={14} />
+            {error}
+          </div>
+        )}
+
         {/* KPI Cards */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: 16,
-            marginBottom: 24,
+            marginBottom: 16,
           }}
         >
           <KPICard
@@ -233,6 +261,41 @@ export default function SuperAdminDashboard() {
             label="Today's Signups"
             value={stats?.todaySignups ?? 0}
             color="#d900ff"
+          />
+        </div>
+
+        {/* Secondary KPI strip */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gap: 12,
+            marginBottom: 24,
+          }}
+        >
+          <MiniKPI
+            icon={<Inbox size={14} />}
+            label="Open Service Requests"
+            value={stats?.openServiceRequests ?? 0}
+            color={stats?.openServiceRequests ? "#f59e0b" : "#10b981"}
+          />
+          <MiniKPI
+            icon={<Boxes size={14} />}
+            label="Total Assets"
+            value={stats?.totalAssets ?? 0}
+            color="#00d2ff"
+          />
+          <MiniKPI
+            icon={<UserPlus size={14} />}
+            label="New Orgs Today"
+            value={stats?.newOrgsToday ?? 0}
+            color="#10b981"
+          />
+          <MiniKPI
+            icon={<Server size={14} />}
+            label="DB Version"
+            text={system?.db?.version || "—"}
+            color="#8b5cf6"
           />
         </div>
 
@@ -409,6 +472,74 @@ function KPICard({
       </div>
       <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
         {label}
+      </div>
+    </div>
+  );
+}
+
+function MiniKPI({
+  icon,
+  label,
+  value,
+  text,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value?: number;
+  text?: string;
+  color: string;
+}) {
+  return (
+    <div
+      style={{
+        padding: "14px 16px",
+        borderRadius: 10,
+        border: "1px solid rgba(255,255,255,0.06)",
+        background: "rgba(15,15,25,0.8)",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+      }}
+    >
+      <div
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 8,
+          background: `${color}18`,
+          border: `1px solid ${color}30`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color,
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 17,
+            fontWeight: 800,
+            color,
+            lineHeight: 1.2,
+          }}
+        >
+          {text ?? value?.toLocaleString()}
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: "#94a3b8",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {label}
+        </div>
       </div>
     </div>
   );

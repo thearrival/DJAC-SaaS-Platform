@@ -135,6 +135,55 @@ export async function checkRateLimit(
   };
 }
 
+/**
+ * Read-only peek at the current window count for `key` (does NOT increment).
+ * Used for lockout pre-checks where only failures should consume budget.
+ */
+export async function getRateLimitCount(
+  key: string,
+  windowMs: number
+): Promise<number> {
+  const windowIndex = Math.floor(Date.now() / windowMs);
+  const redis = getRedis();
+
+  if (redis) {
+    try {
+      const val = await redis.get(`rl:${windowIndex}:${key}`);
+      return val ? parseInt(val, 10) || 0 : 0;
+    } catch (cause) {
+      console.warn(
+        "[RateLimiter] Redis unavailable for peek, falling back to in-memory:",
+        (cause as Error).message
+      );
+    }
+  }
+
+  const existing = _memStore.get(key);
+  if (!existing || Date.now() > existing.resetAt) return 0;
+  return existing.count;
+}
+
+/**
+ * Clear the counter for `key` in the current window
+ * (e.g. after a successful login so the lockout budget resets).
+ */
+export async function resetRateLimit(
+  key: string,
+  windowMs: number
+): Promise<void> {
+  const windowIndex = Math.floor(Date.now() / windowMs);
+  const redis = getRedis();
+
+  if (redis) {
+    try {
+      await redis.del(`rl:${windowIndex}:${key}`);
+    } catch {
+      // Best-effort — memory fallback below still clears local state.
+    }
+  }
+  _memStore.delete(key);
+}
+
 export interface RateLimiterStats {
   mode: "redis" | "memory";
   redisConnected: boolean;

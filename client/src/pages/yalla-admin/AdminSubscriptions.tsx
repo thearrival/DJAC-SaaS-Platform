@@ -2,7 +2,7 @@
  * Yalla Hack Super Admin — Subscription Management
  * View and manage platform subscriptions, billing events, and revenue.
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
@@ -11,7 +11,15 @@ import {
   DollarSign,
   TrendingUp,
   Users,
+  AlertTriangle,
 } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+} from "@/lib/recharts-compat";
 
 const ADMIN_API = "/api/admin-dashboard";
 
@@ -32,12 +40,31 @@ interface SubSummary {
   subscriptions: Subscription[];
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  active: "#10b981",
+  trialing: "#00d2ff",
+  past_due: "#f59e0b",
+  canceled: "#ef4444",
+  incomplete: "#94a3b8",
+};
+
+const PLAN_COLORS = ["#d900ff", "#00d2ff", "#10b981", "#f59e0b", "#8b5cf6"];
+
+const cardStyle: React.CSSProperties = {
+  padding: 20,
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.06)",
+  background: "rgba(15,15,25,0.8)",
+};
+
 export default function AdminSubscriptions() {
   usePageTitle("Subscriptions — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [data, setData] = useState<SubSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [error, setError] = useState("");
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -48,9 +75,12 @@ export default function AdminSubscriptions() {
         navigate("/yalla-hack-owners-console/login");
         return;
       }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setData(await res.json());
-    } catch {
-      /* silent */
+      setError("");
+      setUpdatedAt(new Date().toLocaleTimeString());
+    } catch (e) {
+      setError(`Could not load subscriptions: ${(e as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -79,6 +109,37 @@ export default function AdminSubscriptions() {
       ?.filter(s => s.status === "active")
       .map(s => `${s.plan}/${s.billingInterval}`) || []
   ).size;
+  const cancelingCount =
+    data?.subscriptions?.filter(
+      s => s.status === "active" && s.cancelAtPeriodEnd
+    ).length || 0;
+
+  const statusPie = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of data?.subscriptions ?? []) {
+      counts.set(s.status, (counts.get(s.status) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([name, value]) => ({
+      name,
+      value,
+      color: STATUS_COLORS[name] ?? "#94a3b8",
+    }));
+  }, [data]);
+
+  const planPie = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of data?.subscriptions ?? []) {
+      if (s.status !== "active" && s.status !== "trialing") continue;
+      counts.set(s.plan, (counts.get(s.plan) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, value], i) => ({
+        name,
+        value,
+        color: PLAN_COLORS[i % PLAN_COLORS.length],
+      }));
+  }, [data]);
 
   return (
     <div
@@ -114,6 +175,11 @@ export default function AdminSubscriptions() {
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
             Subscriptions
           </h1>
+          {updatedAt && (
+            <span style={{ fontSize: 11, color: "#64748b" }}>
+              updated {updatedAt}
+            </span>
+          )}
         </div>
         <button
           onClick={loadData}
@@ -131,6 +197,26 @@ export default function AdminSubscriptions() {
       </header>
 
       <main style={{ padding: 24, maxWidth: 1400, margin: "0 auto" }}>
+        {error && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 14px",
+              borderRadius: 8,
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.25)",
+              color: "#ef4444",
+              fontSize: 13,
+              marginBottom: 16,
+            }}
+          >
+            <AlertTriangle size={14} />
+            {error}
+          </div>
+        )}
+
         {/* Revenue Cards */}
         <div
           style={{
@@ -140,14 +226,7 @@ export default function AdminSubscriptions() {
             marginBottom: 24,
           }}
         >
-          <div
-            style={{
-              padding: 20,
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
-              background: "rgba(15,15,25,0.8)",
-            }}
-          >
+          <div style={cardStyle}>
             <DollarSign
               size={18}
               style={{ color: "#10b981", marginBottom: 8 }}
@@ -159,14 +238,7 @@ export default function AdminSubscriptions() {
               Est. Monthly Revenue
             </div>
           </div>
-          <div
-            style={{
-              padding: 20,
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
-              background: "rgba(15,15,25,0.8)",
-            }}
-          >
+          <div style={cardStyle}>
             <Users size={18} style={{ color: "#d900ff", marginBottom: 8 }} />
             <div style={{ fontSize: 24, fontWeight: 800, color: "#d900ff" }}>
               {data?.subscriptions?.length || 0}
@@ -175,14 +247,7 @@ export default function AdminSubscriptions() {
               Total Subscriptions
             </div>
           </div>
-          <div
-            style={{
-              padding: 20,
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
-              background: "rgba(15,15,25,0.8)",
-            }}
-          >
+          <div style={cardStyle}>
             <TrendingUp
               size={18}
               style={{ color: "#f59e0b", marginBottom: 8 }}
@@ -191,6 +256,210 @@ export default function AdminSubscriptions() {
               {activePlanCount}
             </div>
             <div style={{ fontSize: 12, color: "#94a3b8" }}>Active Plans</div>
+          </div>
+          <div style={cardStyle}>
+            <AlertTriangle
+              size={18}
+              style={{
+                color: cancelingCount > 0 ? "#ef4444" : "#10b981",
+                marginBottom: 8,
+              }}
+            />
+            <div
+              style={{
+                fontSize: 24,
+                fontWeight: 800,
+                color: cancelingCount > 0 ? "#ef4444" : "#10b981",
+              }}
+            >
+              {cancelingCount}
+            </div>
+            <div style={{ fontSize: 12, color: "#94a3b8" }}>
+              Canceling at Period End
+            </div>
+          </div>
+        </div>
+
+        {/* Charts */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: 16,
+            marginBottom: 24,
+          }}
+        >
+          <div style={cardStyle}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                marginBottom: 12,
+              }}
+            >
+              Status breakdown
+            </div>
+            {statusPie.length === 0 ? (
+              <div
+                style={{
+                  color: "#64748b",
+                  fontSize: 13,
+                  textAlign: "center",
+                  padding: "30px 0",
+                }}
+              >
+                No data
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <ResponsiveContainer width="50%" height={150}>
+                  <PieChart>
+                    <Pie
+                      data={statusPie}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={40}
+                      outerRadius={64}
+                      paddingAngle={2}
+                      stroke="none"
+                    >
+                      {statusPie.map(s => (
+                        <Cell key={s.name} fill={s.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        background: "#0f0f17",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}
+                >
+                  {statusPie.map(s => (
+                    <div
+                      key={s.name}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        fontSize: 12,
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 3,
+                          background: s.color,
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span style={{ color: "#94a3b8" }}>{s.name}</span>
+                      <span style={{ fontWeight: 700 }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={cardStyle}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                marginBottom: 12,
+              }}
+            >
+              Active plan mix
+            </div>
+            {planPie.length === 0 ? (
+              <div
+                style={{
+                  color: "#64748b",
+                  fontSize: 13,
+                  textAlign: "center",
+                  padding: "30px 0",
+                }}
+              >
+                No active subscriptions
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <ResponsiveContainer width="50%" height={150}>
+                  <PieChart>
+                    <Pie
+                      data={planPie}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={40}
+                      outerRadius={64}
+                      paddingAngle={2}
+                      stroke="none"
+                    >
+                      {planPie.map(s => (
+                        <Cell key={s.name} fill={s.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        background: "#0f0f17",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}
+                >
+                  {planPie.map(s => (
+                    <div
+                      key={s.name}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        fontSize: 12,
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 3,
+                          background: s.color,
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span
+                        style={{
+                          color: "#94a3b8",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {s.name}
+                      </span>
+                      <span style={{ fontWeight: 700 }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -229,61 +498,11 @@ export default function AdminSubscriptions() {
           >
             <thead>
               <tr style={{ background: "rgba(255,255,255,0.02)" }}>
-                <th
-                  style={{
-                    padding: "12px 16px",
-                    textAlign: "left",
-                    color: "#94a3b8",
-                    fontSize: 11,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Organization
-                </th>
-                <th
-                  style={{
-                    padding: "12px 16px",
-                    textAlign: "left",
-                    color: "#94a3b8",
-                    fontSize: 11,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Plan
-                </th>
-                <th
-                  style={{
-                    padding: "12px 16px",
-                    textAlign: "left",
-                    color: "#94a3b8",
-                    fontSize: 11,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Status
-                </th>
-                <th
-                  style={{
-                    padding: "12px 16px",
-                    textAlign: "left",
-                    color: "#94a3b8",
-                    fontSize: 11,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Amount
-                </th>
-                <th
-                  style={{
-                    padding: "12px 16px",
-                    textAlign: "left",
-                    color: "#94a3b8",
-                    fontSize: 11,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Period End
-                </th>
+                <th style={thStyle}>Organization</th>
+                <th style={thStyle}>Plan</th>
+                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Amount</th>
+                <th style={thStyle}>Period End</th>
               </tr>
             </thead>
             <tbody>
@@ -321,7 +540,7 @@ export default function AdminSubscriptions() {
                   >
                     <td style={{ padding: "12px 16px" }}>
                       <div style={{ fontWeight: 500 }}>
-                        {s.organizationName}
+                        {s.organizationName || "—"}
                       </div>
                       <div style={{ fontSize: 12, color: "#7d8aa0" }}>
                         {s.billingEmail}
@@ -336,10 +555,44 @@ export default function AdminSubscriptions() {
                       {s.plan} / {s.billingInterval}
                     </td>
                     <td style={{ padding: "12px 16px" }}>
-                      <SubStatus status={s.status} />
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <SubStatus status={s.status} />
+                        {s.cancelAtPeriodEnd ? (
+                          <span
+                            title="Cancels at end of current period"
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              color: "#f59e0b",
+                              background: "rgba(245,158,11,0.10)",
+                              border: "1px solid rgba(245,158,11,0.35)",
+                              borderRadius: 20,
+                              padding: "1px 8px",
+                            }}
+                          >
+                            ENDS{" "}
+                            {s.currentPeriodEnd
+                              ? new Date(
+                                  s.currentPeriodEnd
+                                ).toLocaleDateString()
+                              : ""}
+                          </span>
+                        ) : null}
+                      </div>
                     </td>
                     <td style={{ padding: "12px 16px" }}>
                       ${(s.amountCents / 100).toFixed(2)}
+                      <span style={{ color: "#64748b", fontSize: 11 }}>
+                        {" "}
+                        /{s.billingInterval === "annual" ? "yr" : "mo"}
+                      </span>
                     </td>
                     <td
                       style={{
@@ -363,20 +616,26 @@ export default function AdminSubscriptions() {
   );
 }
 
+const thStyle: React.CSSProperties = {
+  padding: "12px 16px",
+  textAlign: "left",
+  color: "#94a3b8",
+  fontSize: 11,
+  textTransform: "uppercase",
+};
+
 function SubStatus({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    active: "#10b981",
-    trialing: "#00d2ff",
-    past_due: "#f59e0b",
-    canceled: "#ef4444",
-    incomplete: "#94a3b8",
-  };
+  const color = STATUS_COLORS[status] || "#94a3b8";
   return (
     <span
       style={{
         fontSize: 11,
         fontWeight: 600,
-        color: colors[status] || "#94a3b8",
+        color,
+        background: `${color}14`,
+        border: `1px solid ${color}40`,
+        borderRadius: 20,
+        padding: "2px 8px",
       }}
     >
       {status}

@@ -11,14 +11,38 @@
  */
 
 import { createTransport } from "nodemailer";
+import { sql } from "drizzle-orm";
 import type { User } from "../../drizzle/schema";
 import type { Organization } from "../../drizzle/schema";
+import { getDb } from "../db";
 
 /** Minimal user shape the email templates depend on (name + email only). */
 export type EmailUser = {
   name: string | null;
   email: string | null;
 };
+
+/** Fire-and-forget delivery log so the founders Platform Monitor can see it. */
+async function logEmailDelivery(opts: {
+  template: string;
+  recipient: string;
+  subject: string;
+  status: "sent" | "failed";
+  errorMessage?: string;
+}): Promise<void> {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    await db.execute(sql`
+            INSERT INTO "email_log" ("template", "recipient", "subject", "status", "sent_at", "error_message")
+            VALUES (${opts.template}, ${opts.recipient}, ${opts.subject}, ${opts.status},
+                    ${opts.status === "sent" ? sql`NOW()` : sql`NULL`},
+                    ${opts.errorMessage ?? null})
+        `);
+  } catch {
+    // Delivery logging must never break email sending
+  }
+}
 
 const FROM = "DJAC by Yalla Hack <hello@yalla-hack.com>";
 const REPLY_TO = "hello@yalla-hack.com";
@@ -195,6 +219,13 @@ async function send(
   const t = getTransporter();
   if (!t) {
     console.info(`[Email] ${template} to ${email}: ${subject}`);
+    await logEmailDelivery({
+      template,
+      recipient: email,
+      subject,
+      status: "failed",
+      errorMessage: "SMTP not configured",
+    });
     return;
   }
   try {
@@ -205,8 +236,21 @@ async function send(
       subject,
       html,
     });
+    await logEmailDelivery({
+      template,
+      recipient: email,
+      subject,
+      status: "sent",
+    });
   } catch (e) {
     console.error(`[Email] Failed to send ${template}:`, e);
+    await logEmailDelivery({
+      template,
+      recipient: email,
+      subject,
+      status: "failed",
+      errorMessage: (e as Error)?.message?.slice(0, 500) ?? "send failed",
+    });
   }
 }
 
@@ -219,6 +263,13 @@ async function sendTo(
   const t = getTransporter();
   if (!t) {
     console.info(`[Email] ${template} to ${email}: ${subject}`);
+    await logEmailDelivery({
+      template,
+      recipient: email,
+      subject,
+      status: "failed",
+      errorMessage: "SMTP not configured",
+    });
     return;
   }
   try {
@@ -229,7 +280,20 @@ async function sendTo(
       subject,
       html,
     });
+    await logEmailDelivery({
+      template,
+      recipient: email,
+      subject,
+      status: "sent",
+    });
   } catch (e) {
     console.error(`[Email] Failed to send ${template}:`, e);
+    await logEmailDelivery({
+      template,
+      recipient: email,
+      subject,
+      status: "failed",
+      errorMessage: (e as Error)?.message?.slice(0, 500) ?? "send failed",
+    });
   }
 }

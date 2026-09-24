@@ -725,6 +725,15 @@ export async function ensureMigrated(): Promise<void> {
     // Seed compliance reference data into DB (idempotent upserts)
     await seedComplianceFrameworks(db);
 
+    // Migration 0012: founders-portal settings (rotated password hash, TOTP 2FA)
+    await db.execute(sql`
+            CREATE TABLE IF NOT EXISTS "yallaAdminSettings" (
+                "key"       varchar(64) NOT NULL PRIMARY KEY,
+                "value"     text        NOT NULL,
+                "updatedAt" timestamp   NOT NULL DEFAULT now()
+            )
+        `);
+
     migrationApplied = true;
     if (!ENV.isProduction) {
       console.info("[Migrate] Schema auto-migration complete.");
