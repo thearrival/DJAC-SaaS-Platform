@@ -201,7 +201,10 @@ export const parsedEnv = {
   REPORT_NATIVE_PDF_CONVERSION:
     process.env.REPORT_NATIVE_PDF_CONVERSION !== "false",
 
-  // ── Server ────────────────────────────────────────────────────────────────
+  // ── Cron / scheduled tasks ──────────────────────────────────
+  // (CRON_SECRET is defined in the App section above)
+
+  // ── Server ────────────────────────────────────────────────────────
   PORT: intEnv(process.env.PORT, 3000, 1, 65_535),
 
   // ── Sentry ────────────────────────────────────────────────────────────────

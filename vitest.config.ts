@@ -23,6 +23,7 @@ export default defineConfig({
       reporter: ["text", "text-summary", "lcov"],
       include: ["server/**/*.ts", "client/src/**/*.{ts,tsx}"],
       exclude: ["**/*.test.*", "**/*.spec.*", "**/node_modules/**"],
+      thresholds: { lines: 10, statements: 10, functions: 10, branches: 10 },
     },
   },
 });

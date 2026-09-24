@@ -16,7 +16,7 @@ export interface EmailPayload {
 }
 
 /** Fire-and-forget delivery log for the founders Platform Monitor. */
-async function logDelivery(
+export async function logDelivery(
   payload: EmailPayload,
   status: "sent" | "failed",
   errorMessage?: string

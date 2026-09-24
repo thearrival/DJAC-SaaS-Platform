@@ -8,6 +8,7 @@ import { sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { ENV } from "./env";
 import { logger } from "./logger";
+import { checkRateLimit } from "./rateLimiter";
 import {
   getAdminCookie,
   verifySession,
@@ -109,6 +110,30 @@ function corsHeaders(res: Response) {
 
 export function createAdminDashboardRouter(): Router {
   const router = Router();
+
+  // Rate limiting: 30 requests / 1 min per IP (generous but abusive traffic is capped).
+  router.use((req, res, next) => {
+    const key = `admin-dashboard:${getClientIp(req)}`;
+    checkRateLimit(key, 30, 60_000)
+      .then(result => {
+        res.setHeader("X-RateLimit-Limit", String(result.limit));
+        res.setHeader("X-RateLimit-Remaining", String(result.remaining));
+        res.setHeader("X-RateLimit-Reset", String(result.resetAt));
+        if (!result.allowed) {
+          const retryAfter = Math.max(
+            1,
+            result.resetAt - Math.floor(Date.now() / 1000)
+          );
+          res.setHeader("Retry-After", String(retryAfter));
+          res
+            .status(429)
+            .json({ error: "Too many requests. Please retry shortly." });
+          return;
+        }
+        next();
+      })
+      .catch(() => next());
+  });
 
   router.use((req, res, next) => {
     corsHeaders(res);
@@ -474,6 +499,19 @@ export function createAdminDashboardRouter(): Router {
           `attachment; filename="${type}-report-${stamp}.csv"`
         );
         res.send(csv);
+        return;
+      }
+      if (req.query.format === "pdf") {
+        const pdfBytes = await (
+          await import("./admin-insights-store")
+        ).reportToPdf(report);
+        const stamp = new Date().toISOString().slice(0, 10);
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${type}-report-${stamp}.pdf"`
+        );
+        res.send(Buffer.from(pdfBytes));
         return;
       }
       res.json(report);
