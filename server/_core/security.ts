@@ -1,5 +1,14 @@
-import type { Request } from "express";
+import { Request } from "express";
 import { ENV } from "./env";
+
+/** Strip potentially dangerous characters from user-supplied strings. */
+export function sanitizeString(input: string, maxLen = 500): string {
+  return input
+    .replace(/[<>"'`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLen);
+}
 
 interface SecurityHeaderOptions {
   pathname: string;
@@ -188,7 +197,7 @@ export function getClientIp(req: Request): string {
     ? forwardedFor[0]
     : forwardedFor;
   if (forwardedValue && typeof forwardedValue === "string") {
-    return forwardedValue.split(",")[0].trim();
+    return forwardedValue.trim().split(",").pop()!.trim();
   }
 
   return req.ip || req.socket.remoteAddress || "unknown";

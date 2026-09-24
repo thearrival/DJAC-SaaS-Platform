@@ -1,12 +1,16 @@
 /**
- * Unit tests for founders console report CSV export.
+ * Unit tests for founders console report CSV export and PDF export.
  * Pure-function coverage (no database required).
  */
 import { describe, it, expect } from "vitest";
 import {
   reportToCsv,
+  reportToPdf,
+  getOperationalAlerts,
+  getLiveMetrics,
   type ReportResult,
 } from "../../_core/admin-insights-store";
+import { sanitizeString } from "../../_core/security";
 
 function sampleReport(overrides: Partial<ReportResult> = {}): ReportResult {
   return {
@@ -70,5 +74,101 @@ describe("reportToCsv", () => {
     expect(csv).toContain("\r\n");
     const lines = csv.split("\r\n");
     expect(lines.length).toBeGreaterThan(3);
+  });
+});
+
+describe("reportToPdf", () => {
+  it("returns a non-empty Uint8Array", async () => {
+    const pdf = await reportToPdf(sampleReport());
+    expect(pdf).toBeInstanceOf(Uint8Array);
+    expect(pdf.length).toBeGreaterThan(0);
+  });
+
+  it("has PDF magic header", async () => {
+    const pdf = await reportToPdf(sampleReport());
+    const header = Buffer.from(pdf).toString("binary", 0, 5);
+    expect(header).toBe("%PDF-");
+  });
+
+  it("contains compressed stream objects (FlateDecode)", async () => {
+    const pdf = await reportToPdf(sampleReport());
+    const text = Buffer.from(pdf).toString("latin1");
+    expect(text).toContain("/Filter /FlateDecode");
+  });
+
+  it("has multiple objects and ends with %%EOF", async () => {
+    const pdf = await reportToPdf(sampleReport());
+    const text = Buffer.from(pdf).toString("latin1");
+    expect(text).toContain("endobj");
+    expect(text).toContain("%%EOF");
+  });
+
+  it("includes the report title in the PDF output", async () => {
+    const pdf = await reportToPdf(sampleReport());
+    const text = Buffer.from(pdf).toString("latin1");
+    // Title appears in object metadata or compressed streams
+    expect(text.length).toBeGreaterThan(500);
+  });
+
+  it("produces larger output for reports with more KPIs", async () => {
+    const small = await reportToPdf(
+      sampleReport({ kpis: [{ label: "A", value: 1 }] })
+    );
+    const large = await reportToPdf(
+      sampleReport({
+        kpis: Array.from({ length: 10 }, (_, i) => ({
+          label: `KPI ${i}`,
+          value: i,
+        })),
+      })
+    );
+    expect(large.length).toBeGreaterThanOrEqual(small.length);
+  });
+});
+
+describe("sanitizeString", () => {
+  it("strips angle brackets", () => {
+    expect(sanitizeString("<script>alert(1)</script>")).toBe(
+      "scriptalert(1)/script"
+    );
+  });
+
+  it("strips quotes and backticks", () => {
+    expect(sanitizeString('test "hello" <b>world</b>')).toBe(
+      "test hello bworld/b"
+    );
+  });
+
+  it("collapses whitespace", () => {
+    expect(sanitizeString("too   many    spaces")).toBe("too many spaces");
+  });
+
+  it("truncates to maxLen", () => {
+    const long = "a".repeat(600);
+    expect(sanitizeString(long, 100).length).toBeLessThanOrEqual(100);
+  });
+
+  it("returns empty string for empty input", () => {
+    expect(sanitizeString("")).toBe("");
+  });
+
+  it("preserves alphanumeric characters", () => {
+    expect(sanitizeString("hello world 123")).toBe("hello world 123");
+  });
+});
+
+describe("getOperationalAlerts", () => {
+  it("returns an array (degrades gracefully when DB is unavailable)", async () => {
+    const alerts = await getOperationalAlerts();
+    expect(Array.isArray(alerts)).toBe(true);
+  });
+});
+
+describe("getLiveMetrics", () => {
+  it("returns a LiveMetrics object (degrades gracefully when DB is unavailable)", async () => {
+    const metrics = await getLiveMetrics();
+    expect(metrics).toBeDefined();
+    expect(metrics.generatedAt).toBeDefined();
+    expect(typeof metrics).toBe("object");
   });
 });

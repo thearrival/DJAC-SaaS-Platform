@@ -1,4 +1,4 @@
-import {
+import express, {
   Router,
   type Request,
   type Response,
@@ -49,6 +49,7 @@ import {
   getEmailMetrics,
   getSecurityMetrics,
 } from "./platform-monitor-store";
+import { sanitizeString } from "./security";
 
 export type AdminSessionUser = { username: string; sessionId: string };
 
@@ -133,6 +134,28 @@ export function createAdminDashboardRouter(): Router {
         next();
       })
       .catch(() => next());
+  });
+
+  // Body parsing for POST routes
+  router.use(express.json({ limit: "2mb" }));
+
+  // Request logging
+  router.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      logger.info(
+        {
+          method: req.method,
+          path: req.path,
+          status: res.statusCode,
+          durationMs: duration,
+          ip: getClientIp(req),
+        },
+        `[admin-dashboard] ${req.method} ${req.path} ${res.statusCode} ${duration}ms`
+      );
+    });
+    next();
   });
 
   router.use((req, res, next) => {
@@ -249,9 +272,14 @@ export function createAdminDashboardRouter(): Router {
         res.status(400).json({ error: "Invalid user ID" });
         return;
       }
-      const { role } = req.body;
-      if (!role || typeof role !== "string") {
+      const rawRole = req.body?.role;
+      if (!rawRole || typeof rawRole !== "string") {
         res.status(400).json({ error: "Role is required" });
+        return;
+      }
+      const role = sanitizeString(rawRole, 64);
+      if (!role) {
+        res.status(400).json({ error: "Role is invalid" });
         return;
       }
       const success = await updateUserRole(userId, role);
@@ -537,6 +565,19 @@ export function createAdminDashboardRouter(): Router {
     } catch (error) {
       logger.error({ error }, "Failed to get live metrics");
       res.status(500).json({ error: "Failed to get live metrics" });
+    }
+  });
+
+  // Trigger alert digest email to founders
+  router.post("/alerts/digest", async (_req, res) => {
+    try {
+      const result = await (
+        await import("./admin-insights-store")
+      ).sendAlertDigest();
+      res.json(result);
+    } catch (error) {
+      logger.error({ error }, "Failed to send alert digest");
+      res.status(500).json({ error: "Failed to send alert digest" });
     }
   });
 
