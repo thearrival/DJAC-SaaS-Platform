@@ -91,6 +91,7 @@ export default function SuperAdminDashboard() {
   async function handleLogout() {
     await fetch(`${ADMIN_API}/logout`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
     navigate("/yalla-hack-owners-console/login");
@@ -109,7 +110,8 @@ export default function SuperAdminDashboard() {
       >
         <RefreshCw
           size={24}
-          style={{ color: "#d900ff", animation: "spin 1s linear infinite" }}
+          className="animate-spin"
+          style={{ color: "#d900ff" }}
         />
       </div>
     );
@@ -166,7 +168,7 @@ export default function SuperAdminDashboard() {
               cursor: "pointer",
             }}
           >
-            <RefreshCw size={14} className={refreshing ? "spin" : ""} />
+            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
           </button>
           <button
             onClick={handleLogout}

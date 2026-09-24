@@ -203,7 +203,7 @@ async function auditLog(
     if (!db) return;
     const payloadStr = payload ? JSON.stringify(payload) : null;
     await db.execute(sql`
-            INSERT INTO yallaAdminAuditLogs (sessionId, adminUsername, action, target, ipAddress, payload)
+            INSERT INTO "yallaAdminAuditLogs" ("sessionId", "adminUsername", "action", "target", "ipAddress", "payload")
             VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql`CAST(${payloadStr} AS JSON)` : null})
         `);
   } catch {
@@ -330,8 +330,8 @@ async function hasUsedOwnerLinkNonce(nonce: string): Promise<boolean> {
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
     const linkResult = await db.execute(sql`
-            SELECT id FROM yallaAdminAccessLinkNonces
-            WHERE nonceHash = ${nonceHash}
+            SELECT id FROM "yallaAdminAccessLinkNonces"
+            WHERE "nonceHash" = ${nonceHash}
             LIMIT 1
         `);
     const rows = linkResult.rows as { id: number }[];
@@ -358,8 +358,8 @@ async function consumeOwnerLinkNonce(
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
     await db.execute(sql`
-            INSERT INTO yallaAdminAccessLinkNonces (nonceHash, redirectTarget, expiresAt, consumedByIp)
-            VALUES (${nonceHash}, ${redirectTarget}, FROM_UNIXTIME(${expiresAt}), ${getClientIp(req)})
+            INSERT INTO "yallaAdminAccessLinkNonces" ("nonceHash", "redirectTarget", "expiresAt", "consumedByIp")
+            VALUES (${nonceHash}, ${redirectTarget}, to_timestamp(${expiresAt}), ${getClientIp(req)})
         `);
   } catch {
     consumeOwnerLinkNonceInMemory(nonce, expiresAt);
@@ -572,8 +572,8 @@ async function requireSession(
     const db = await getDb();
     if (db) {
       const sessionResult = await db.execute(sql`
-                SELECT isRevoked FROM yallaAdminSessions
-                WHERE id = ${parsed.sessionId} AND expiresAt > NOW()
+                SELECT "isRevoked" FROM "yallaAdminSessions"
+                WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
             `);
       const rows = sessionResult.rows as { isRevoked: number }[] | undefined;
@@ -727,7 +727,7 @@ async function handleLogin(req: Request, res: Response): Promise<void> {
     const db = await getDb();
     if (db) {
       await db.execute(sql`
-                INSERT INTO yallaAdminSessions (id, adminUsername, ipAddress, userAgent, expiresAt)
+                INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
                 VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
             `);
     }
@@ -811,7 +811,7 @@ async function handleReactLogin(req: Request, res: Response): Promise<void> {
     const db = await getDb();
     if (db) {
       await db.execute(sql`
-                INSERT INTO yallaAdminSessions (id, adminUsername, ipAddress, userAgent, expiresAt)
+                INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
                 VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
             `);
     }
@@ -840,7 +840,7 @@ async function handleLogout(req: Request, res: Response): Promise<void> {
       const db = await getDb();
       if (db) {
         await db.execute(sql`
-                    UPDATE yallaAdminSessions SET isRevoked = 1 WHERE id = ${session.sessionId}
+                    UPDATE "yallaAdminSessions" SET "isRevoked" = 1 WHERE id = ${session.sessionId}
                 `);
       }
     } catch {
@@ -875,8 +875,8 @@ async function handleMe(req: Request, res: Response): Promise<void> {
     const db = await getDb();
     if (db) {
       const sessionResult = await db.execute(sql`
-                SELECT isRevoked FROM yallaAdminSessions
-                WHERE id = ${session.sessionId} AND expiresAt > NOW()
+                SELECT "isRevoked" FROM "yallaAdminSessions"
+                WHERE id = ${session.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
             `);
       const rows = sessionResult.rows as { isRevoked: number }[] | undefined;
@@ -903,50 +903,46 @@ async function handleOverview(_req: Request, res: Response): Promise<void> {
     }
 
     const usersResult = await db.execute(
-      sql`SELECT COUNT(*) as total FROM localUsers`
+      sql`SELECT COUNT(*) as total FROM "localUsers"`
     );
     const usersRow = usersResult.rows as { total: number }[];
     const orgsResult = await db.execute(
-      sql`SELECT COUNT(*) as total FROM organizations`
+      sql`SELECT COUNT(*) as total FROM "organizations"`
     );
     const orgsRow = orgsResult.rows as { total: number }[];
-    const activeSessionsResult = await db.execute(sql`
-            SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()
-        `);
-    const activeSessionsRow = activeSessionsResult.rows as { total: number }[];
     const todayLoginsResult = await db.execute(sql`
-            SELECT COUNT(*) as total FROM auditLogs
-            WHERE action = 'auth.login' AND createdAt >= CURRENT_DATE
+            SELECT COUNT(*) as total FROM "auditLogs"
+            WHERE action = 'auth.login' AND "createdAt" >= CURRENT_DATE
         `);
     const todayLoginsRow = todayLoginsResult.rows as { total: number }[];
     const serviceRequestsResult = await db.execute(sql`
-            SELECT COUNT(*) as total FROM serviceRequests WHERE status NOT IN ('completed', 'cancelled')
+            SELECT COUNT(*) as total FROM "serviceRequests" WHERE status NOT IN ('completed', 'cancelled')
         `);
     const serviceRequestsRow = serviceRequestsResult.rows as {
       total: number;
     }[];
     const assetsResult = await db.execute(
-      sql`SELECT COUNT(*) as total FROM assetInventory`
+      sql`SELECT COUNT(*) as total FROM "assetInventory"`
     );
     const assetsRow = assetsResult.rows as { total: number }[];
 
     const todaySignupsResult = await db.execute(sql`
-            SELECT COUNT(*) as total FROM localUsers WHERE createdAt::date = CURRENT_DATE
+            SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const todaySignupsRow = todaySignupsResult.rows as { total: number }[];
     const newOrgsResult = await db.execute(sql`
-            SELECT COUNT(*) as total FROM organizations WHERE createdAt::date = CURRENT_DATE
+            SELECT COUNT(*) as total FROM "organizations" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const newOrgsRow = newOrgsResult.rows as { total: number }[];
     const revenueResult = await db.execute(sql`
-            SELECT COUNT(*) as total FROM organizations WHERE plan IN ('professional','enterprise') AND isActive = 1
+            SELECT COUNT(*) as total FROM "organizations" WHERE plan IN ('professional','enterprise') AND "isActive" = 1
         `);
     const revenueRow = revenueResult.rows as { total: number }[];
 
     res.json({
       totalUsers: usersRow?.[0]?.total ?? 0,
       totalOrgs: orgsRow?.[0]?.total ?? 0,
-      activeSessions: activeSessionsRow?.[0]?.total ?? 0,
+      activeSessions: 0,
       todayLogins: todayLoginsRow?.[0]?.total ?? 0,
       openServiceRequests: serviceRequestsRow?.[0]?.total ?? 0,
       totalAssets: assetsRow?.[0]?.total ?? 0,
@@ -975,19 +971,16 @@ async function handleUsers(req: Request, res: Response): Promise<void> {
     const usersDbResult = await db.execute(sql`
             SELECT
                 u.id,
-                u.username,
+                u.name AS username,
                 u.email,
-                u.role,
+                u."userType" AS role,
                 u.status,
-                u.isEmailVerified,
-                u.isMfaEnabled,
-                u.createdAt,
-                u.lastLoginAt,
-                COUNT(DISTINCT s.id) as activeSessions
-            FROM localUsers u
-            LEFT JOIN localUserSessions s ON s.userId = u.id AND s.expiresAt > NOW()
-            GROUP BY u.id
-            ORDER BY u.createdAt DESC
+                u."mfaEnabled" AS "isMfaEnabled",
+                u."createdAt",
+                u."lastSignedIn" AS "lastLoginAt",
+                0 AS "activeSessions"
+            FROM "localUsers" u
+            ORDER BY u."createdAt" DESC
             LIMIT ${limit} OFFSET ${offset}
         `);
     const users = usersDbResult.rows as unknown[];
@@ -1010,12 +1003,12 @@ async function handleSystem(_req: Request, res: Response): Promise<void> {
 
     if (db) {
       try {
-        const versionResult = await db.execute(sql`SELECT VERSION() as v`);
+        const versionResult = await db.execute(sql`SELECT version() as v`);
         const vRow = versionResult.rows as { v: string }[];
         dbVersion = vRow?.[0]?.v ?? "";
         const tableResult = await db.execute(sql`
-                    SELECT COUNT(*) as c FROM information_schema.TABLES
-                    WHERE TABLE_SCHEMA = DATABASE()
+                    SELECT COUNT(*) as c FROM information_schema.tables
+                    WHERE table_schema = 'public'
                 `);
         const tRow = tableResult.rows as { c: number }[];
         tableCount = tRow?.[0]?.c ?? 0;
@@ -1067,8 +1060,8 @@ async function handleAudit(req: Request, res: Response): Promise<void> {
 
     const auditResult = await db.execute(
       action
-        ? sql`SELECT * FROM yallaAdminAuditLogs WHERE action = ${action} ORDER BY createdAt DESC LIMIT ${limit}`
-        : sql`SELECT * FROM yallaAdminAuditLogs ORDER BY createdAt DESC LIMIT ${limit}`
+        ? sql`SELECT * FROM "yallaAdminAuditLogs" WHERE action = ${action} ORDER BY "createdAt" DESC LIMIT ${limit}`
+        : sql`SELECT * FROM "yallaAdminAuditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = auditResult.rows as unknown[];
 
@@ -1093,8 +1086,8 @@ async function handlePlatformAudit(req: Request, res: Response): Promise<void> {
 
     const platformAuditResult = await db.execute(
       category
-        ? sql`SELECT * FROM auditLogs WHERE category = ${category} ORDER BY createdAt DESC LIMIT ${limit}`
-        : sql`SELECT * FROM auditLogs ORDER BY createdAt DESC LIMIT ${limit}`
+        ? sql`SELECT * FROM "auditLogs" WHERE category = ${category} ORDER BY "createdAt" DESC LIMIT ${limit}`
+        : sql`SELECT * FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = platformAuditResult.rows as unknown[];
 
@@ -1126,22 +1119,22 @@ async function handleInteractions(req: Request, res: Response): Promise<void> {
                         l.id,
                         l.context,
                         l.action,
-                        l.entityType,
-                        l.entityId,
-                        l.inputSnapshot,
-                        l.outputRef,
-                        l.durationMs,
-                        l.createdAt,
-                        l.organizationId,
-                        COALESCE(lu.username, u.name, 'anonymous visitor') as actorName,
+                        l."entityType",
+                        l."entityId",
+                        l."inputSnapshot",
+                        l."outputRef",
+                        l."durationMs",
+                        l."createdAt",
+                        l."organizationId",
+                        COALESCE(lu.name, u.name, 'anonymous visitor') as actorName,
                         COALESCE(lu.email, u.email, '') as actorEmail,
                         o.name as organizationName
-                    FROM userInteractionLogs l
-                    LEFT JOIN localUsers lu ON lu.id = l.localUserId
-                    LEFT JOIN users u ON u.id = l.userId
-                    LEFT JOIN organizations o ON o.id = l.organizationId
+                    FROM "userInteractionLogs" l
+                    LEFT JOIN "localUsers" lu ON lu.id = l."localUserId"
+                    LEFT JOIN users u ON u.id = l."userId"
+                    LEFT JOIN "organizations" o ON o.id = l."organizationId"
                     WHERE l.context = ${context} AND l.action = ${action}
-                    ORDER BY l.createdAt DESC
+                    ORDER BY l."createdAt" DESC
                     LIMIT ${limit}
                 `
         : context
@@ -1150,22 +1143,22 @@ async function handleInteractions(req: Request, res: Response): Promise<void> {
                             l.id,
                             l.context,
                             l.action,
-                            l.entityType,
-                            l.entityId,
-                            l.inputSnapshot,
-                            l.outputRef,
-                            l.durationMs,
-                            l.createdAt,
-                            l.organizationId,
-                            COALESCE(lu.username, u.name, 'anonymous visitor') as actorName,
+                            l."entityType",
+                            l."entityId",
+                            l."inputSnapshot",
+                            l."outputRef",
+                            l."durationMs",
+                            l."createdAt",
+                            l."organizationId",
+                            COALESCE(lu.name, u.name, 'anonymous visitor') as actorName,
                             COALESCE(lu.email, u.email, '') as actorEmail,
                             o.name as organizationName
-                        FROM userInteractionLogs l
-                        LEFT JOIN localUsers lu ON lu.id = l.localUserId
-                        LEFT JOIN users u ON u.id = l.userId
-                        LEFT JOIN organizations o ON o.id = l.organizationId
+                        FROM "userInteractionLogs" l
+                        LEFT JOIN "localUsers" lu ON lu.id = l."localUserId"
+                        LEFT JOIN users u ON u.id = l."userId"
+                        LEFT JOIN "organizations" o ON o.id = l."organizationId"
                         WHERE l.context = ${context}
-                        ORDER BY l.createdAt DESC
+                        ORDER BY l."createdAt" DESC
                         LIMIT ${limit}
                     `
           : action
@@ -1174,22 +1167,22 @@ async function handleInteractions(req: Request, res: Response): Promise<void> {
                                 l.id,
                                 l.context,
                                 l.action,
-                                l.entityType,
-                                l.entityId,
-                                l.inputSnapshot,
-                                l.outputRef,
-                                l.durationMs,
-                                l.createdAt,
-                                l.organizationId,
-                                COALESCE(lu.username, u.name, 'anonymous visitor') as actorName,
+                                l."entityType",
+                                l."entityId",
+                                l."inputSnapshot",
+                                l."outputRef",
+                                l."durationMs",
+                                l."createdAt",
+                                l."organizationId",
+                                COALESCE(lu.name, u.name, 'anonymous visitor') as actorName,
                                 COALESCE(lu.email, u.email, '') as actorEmail,
                                 o.name as organizationName
-                            FROM userInteractionLogs l
-                            LEFT JOIN localUsers lu ON lu.id = l.localUserId
-                            LEFT JOIN users u ON u.id = l.userId
-                            LEFT JOIN organizations o ON o.id = l.organizationId
+                            FROM "userInteractionLogs" l
+                            LEFT JOIN "localUsers" lu ON lu.id = l."localUserId"
+                            LEFT JOIN users u ON u.id = l."userId"
+                            LEFT JOIN "organizations" o ON o.id = l."organizationId"
                             WHERE l.action = ${action}
-                            ORDER BY l.createdAt DESC
+                            ORDER BY l."createdAt" DESC
                             LIMIT ${limit}
                         `
             : sql`
@@ -1197,21 +1190,21 @@ async function handleInteractions(req: Request, res: Response): Promise<void> {
                                 l.id,
                                 l.context,
                                 l.action,
-                                l.entityType,
-                                l.entityId,
-                                l.inputSnapshot,
-                                l.outputRef,
-                                l.durationMs,
-                                l.createdAt,
-                                l.organizationId,
-                                COALESCE(lu.username, u.name, 'anonymous visitor') as actorName,
+                                l."entityType",
+                                l."entityId",
+                                l."inputSnapshot",
+                                l."outputRef",
+                                l."durationMs",
+                                l."createdAt",
+                                l."organizationId",
+                                COALESCE(lu.name, u.name, 'anonymous visitor') as actorName,
                                 COALESCE(lu.email, u.email, '') as actorEmail,
                                 o.name as organizationName
-                            FROM userInteractionLogs l
-                            LEFT JOIN localUsers lu ON lu.id = l.localUserId
-                            LEFT JOIN users u ON u.id = l.userId
-                            LEFT JOIN organizations o ON o.id = l.organizationId
-                            ORDER BY l.createdAt DESC
+                            FROM "userInteractionLogs" l
+                            LEFT JOIN "localUsers" lu ON lu.id = l."localUserId"
+                            LEFT JOIN users u ON u.id = l."userId"
+                            LEFT JOIN "organizations" o ON o.id = l."organizationId"
+                            ORDER BY l."createdAt" DESC
                             LIMIT ${limit}
                         `
     );
@@ -1241,20 +1234,20 @@ async function handleIntake(req: Request, res: Response): Promise<void> {
       const srResult = await db.execute(sql`
                 SELECT
                     sr.id,
-                    sr.serviceType,
+                    sr."serviceType",
                     sr.title,
                     sr.priority,
                     sr.status,
-                    sr.requestedByUserId,
-                    sr.createdAt,
-                    sr.updatedAt,
-                    lu.username as requestedByUsername,
-                    lu.email as requestedByEmail,
-                    o.name as organizationName
-                FROM serviceRequests sr
-                LEFT JOIN localUsers lu ON lu.id = sr.requestedByUserId
-                LEFT JOIN organizations o ON o.id = sr.organizationId
-                ORDER BY sr.createdAt DESC
+                    sr."requestedByUserId",
+                    sr."createdAt",
+                    sr."updatedAt",
+                    lu.name as "requestedByUsername",
+                    lu.email as "requestedByEmail",
+                    o.name as "organizationName"
+                FROM "serviceRequests" sr
+                LEFT JOIN "localUsers" lu ON lu.id = sr."requestedByUserId"
+                LEFT JOIN "organizations" o ON o.id = sr."organizationId"
+                ORDER BY sr."createdAt" DESC
                 LIMIT ${limit}
             `);
       const srRows = srResult.rows as unknown[];
@@ -1294,7 +1287,7 @@ async function handleOnboarding(req: Request, res: Response): Promise<void> {
     const [countsResult, recentResult] = await Promise.all([
       db.execute(sql`
                 SELECT stage, COUNT(*) as total
-                FROM userOnboarding
+                FROM "userOnboarding"
                 GROUP BY stage
                 ORDER BY total DESC
             `),
@@ -1302,17 +1295,17 @@ async function handleOnboarding(req: Request, res: Response): Promise<void> {
                 SELECT
                     o.id,
                     o.stage,
-                    o.accountIntent,
-                    o.selectedLocale,
-                    o.completedAt,
-                    o.createdAt,
-                    o.updatedAt,
-                    COALESCE(lu.username, u.name, 'unknown') as userLabel,
-                    COALESCE(lu.email, u.email, '') as userEmail
-                FROM userOnboarding o
-                LEFT JOIN localUsers lu ON lu.id = o.localUserId
-                LEFT JOIN users u ON u.id = o.userId
-                ORDER BY o.updatedAt DESC
+                    o."accountIntent",
+                    o."selectedLocale",
+                    o."completedAt",
+                    o."createdAt",
+                    o."updatedAt",
+                    COALESCE(lu.name, u.name, 'unknown') as "userLabel",
+                    COALESCE(lu.email, u.email, '') as "userEmail"
+                FROM "userOnboarding" o
+                LEFT JOIN "localUsers" lu ON lu.id = o."localUserId"
+                LEFT JOIN users u ON u.id = o."userId"
+                ORDER BY o."updatedAt" DESC
                 LIMIT ${limit}
             `),
     ]);
@@ -1345,16 +1338,16 @@ async function handleValidationFailures(
                 id,
                 category,
                 action,
-                entityType,
-                entityId,
-                targetEntity,
-                actorRole,
+                "entityType",
+                "entityId",
+                "targetEntity",
+                "actorRole",
                 outcome,
                 payload,
-                createdAt
-            FROM auditLogs
+                "createdAt"
+            FROM "auditLogs"
             WHERE action = 'trpc.validation_failed' OR outcome IN ('failure', 'blocked')
-            ORDER BY createdAt DESC
+            ORDER BY "createdAt" DESC
             LIMIT ${limit}
         `);
     const rows = validationResult.rows as unknown[];
@@ -1384,37 +1377,37 @@ async function handleSubscriptions(req: Request, res: Response): Promise<void> {
                     s.id,
                     s.plan,
                     s.status,
-                    s.billingInterval,
-                    s.amountCents,
+                    s."billingInterval",
+                    s."amountCents",
                     s.currency,
-                    s.currentPeriodStart,
-                    s.currentPeriodEnd,
-                    s.cancelAtPeriodEnd,
-                    s.canceledAt,
-                    s.stripeSubscriptionId,
-                    s.createdAt,
-                    s.updatedAt,
-                    o.name          AS organizationName,
-                    o.slug          AS organizationSlug,
-                    o.billingEmail  AS billingEmail
-                FROM subscriptions s
-                JOIN organizations o ON o.id = s.organizationId
-                ORDER BY s.updatedAt DESC
+                    s."currentPeriodStart",
+                    s."currentPeriodEnd",
+                    s."cancelAtPeriodEnd",
+                    s."canceledAt",
+                    s."stripeSubscriptionId",
+                    s."createdAt",
+                    s."updatedAt",
+                    o.name          AS "organizationName",
+                    o.slug          AS "organizationSlug",
+                    o."billingEmail"  AS "billingEmail"
+                FROM "subscriptions" s
+                JOIN "organizations" o ON o.id = s."organizationId"
+                ORDER BY s."updatedAt" DESC
                 LIMIT ${limit}
             `),
       db.execute(sql`
                 SELECT
                     be.id,
-                    be.eventType,
+                    be."eventType",
                     be.status,
-                    be.amountCents,
+                    be."amountCents",
                     be.currency,
-                    be.stripeEventId,
-                    be.createdAt,
-                    o.name AS organizationName
-                FROM billingEvents be
-                JOIN organizations o ON o.id = be.organizationId
-                ORDER BY be.createdAt DESC
+                    be."stripeEventId",
+                    be."createdAt",
+                    o.name AS "organizationName"
+                FROM "billingEvents" be
+                JOIN "organizations" o ON o.id = be."organizationId"
+                ORDER BY be."createdAt" DESC
                 LIMIT ${limit}
             `),
       db.execute(sql`
@@ -1423,8 +1416,8 @@ async function handleSubscriptions(req: Request, res: Response): Promise<void> {
                     status,
                     currency,
                     COUNT(*)           AS count,
-                    SUM(amountCents)   AS totalAmountCents
-                FROM subscriptions
+                    SUM("amountCents")  AS "totalAmountCents"
+                FROM "subscriptions"
                 GROUP BY plan, status, currency
                 ORDER BY plan, status
             `),
@@ -1457,19 +1450,18 @@ async function handleSignups(req: Request, res: Response): Promise<void> {
     const signupsResult = await db.execute(sql`
             SELECT
                 u.id,
-                u.username,
+                u.name AS username,
                 u.email,
-                u.role,
-                u.isEmailVerified,
-                u.isMfaEnabled,
-                u.createdAt,
-                u.lastLoginAt,
-                o.name  AS organizationName,
-                o.plan  AS organizationPlan
-            FROM localUsers u
-            LEFT JOIN organizationMembers om ON om.localUserId = u.id
-            LEFT JOIN organizations o ON o.id = om.organizationId
-            ORDER BY u.createdAt DESC
+                u."userType" AS role,
+                u."mfaEnabled" AS "isMfaEnabled",
+                u."createdAt",
+                u."lastSignedIn" AS "lastLoginAt",
+                o.name  AS "organizationName",
+                o.plan  AS "organizationPlan"
+            FROM "localUsers" u
+            LEFT JOIN "organizationMembers" om ON om."localUserId" = u.id
+            LEFT JOIN "organizations" o ON o.id = om."organizationId"
+            ORDER BY u."createdAt" DESC
             LIMIT ${limit}
         `);
     const rows = signupsResult.rows as unknown[];
@@ -1495,17 +1487,16 @@ async function handleOrgs(req: Request, res: Response): Promise<void> {
                 o.id,
                 o.name,
                 o.plan,
-                o.isActive,
-                o.trialEndsAt,
-                o.createdAt,
-                o.updatedAt,
-                COUNT(DISTINCT om.id)   AS memberCount,
-                COUNT(DISTINCT CASE WHEN s.expiresAt > NOW() THEN s.id END) AS activeSessions
-            FROM organizations o
-            LEFT JOIN organizationMembers om ON om.organizationId = o.id
-            LEFT JOIN localUserSessions  s  ON s.userId = om.localUserId
+                o."isActive",
+                o."trialEndsAt",
+                o."createdAt",
+                o."updatedAt",
+                COUNT(DISTINCT om.id)   AS "memberCount",
+                0 AS "activeSessions"
+            FROM "organizations" o
+            LEFT JOIN "organizationMembers" om ON om."organizationId" = o.id
             GROUP BY o.id
-            ORDER BY o.createdAt DESC
+            ORDER BY o."createdAt" DESC
             LIMIT ${limit}
         `);
     const rows = orgsResult.rows as unknown[];
@@ -1529,14 +1520,12 @@ async function handleRealtime(_req: Request, res: Response): Promise<void> {
       return;
     }
     const [sessResult, actResult, newUsersResult] = await Promise.all([
+      db.execute(sql`SELECT 0 as total`),
       db.execute(
-        sql`SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()`
+        sql`SELECT COUNT(*) as total FROM "auditLogs" WHERE "createdAt" >= NOW() - INTERVAL '5 minutes'`
       ),
       db.execute(
-        sql`SELECT COUNT(*) as total FROM auditLogs WHERE createdAt >= NOW() - INTERVAL '5 minutes'`
-      ),
-      db.execute(
-        sql`SELECT COUNT(*) as total FROM localUsers WHERE createdAt >= NOW() - INTERVAL '60 minutes'`
+        sql`SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt" >= NOW() - INTERVAL '60 minutes'`
       ),
     ]);
     const sessRow = sessResult.rows as { total: number }[];
@@ -1571,27 +1560,23 @@ async function handleUserDetail(req: Request, res: Response): Promise<void> {
     const [userResult, sessionResult, auditResult, interactionResult] =
       await Promise.all([
         db.execute(sql`
-                SELECT u.id, u.username, u.email, u.role, u.status, u.isEmailVerified, u.isMfaEnabled,
-                       u.createdAt, u.lastLoginAt, o.name AS organizationName, o.plan AS organizationPlan
-                FROM localUsers u
-                LEFT JOIN organizationMembers om ON om.localUserId = u.id
-                LEFT JOIN organizations o ON o.id = om.organizationId
+                SELECT u.id, u.name AS username, u.email, u."userType" AS role, u.status, u."mfaEnabled" AS "isMfaEnabled",
+                       u."createdAt", u."lastSignedIn" AS "lastLoginAt", o.name AS "organizationName", o.plan AS "organizationPlan"
+                FROM "localUsers" u
+                LEFT JOIN "organizationMembers" om ON om."localUserId" = u.id
+                LEFT JOIN "organizations" o ON o.id = om."organizationId"
                 WHERE u.id = ${userId} LIMIT 1
             `),
+        db.execute(sql`SELECT 0 AS id LIMIT 0`),
         db.execute(sql`
-                SELECT id, ipAddress, userAgent, createdAt, expiresAt
-                FROM localUserSessions WHERE userId = ${userId}
-                ORDER BY createdAt DESC LIMIT 20
+                SELECT category, action, outcome, "createdAt"
+                FROM "auditLogs" WHERE "localUserId" = ${userId}
+                ORDER BY "createdAt" DESC LIMIT 30
             `),
         db.execute(sql`
-                SELECT category, action, outcome, createdAt
-                FROM auditLogs WHERE localUserId = ${userId}
-                ORDER BY createdAt DESC LIMIT 30
-            `),
-        db.execute(sql`
-                SELECT context, action, entityType, createdAt, durationMs
-                FROM userInteractionLogs WHERE localUserId = ${userId}
-                ORDER BY createdAt DESC LIMIT 30
+                SELECT context, action, "entityType", "createdAt", "durationMs"
+                FROM "userInteractionLogs" WHERE "localUserId" = ${userId}
+                ORDER BY "createdAt" DESC LIMIT 30
             `),
       ]);
 
@@ -1628,29 +1613,29 @@ async function handleOrgDetail(req: Request, res: Response): Promise<void> {
     const [orgResult, membersResult, subscriptionResult, auditResult] =
       await Promise.all([
         db.execute(sql`
-                SELECT id, name, plan, status, isActive, trialEndsAt, createdAt, updatedAt,
-                       contactEmail, billingEmail
-                FROM organizations WHERE id = ${orgId} LIMIT 1
+                SELECT id, name, slug, plan, "isActive", "trialEndsAt", "createdAt", "updatedAt",
+                       industry, "billingEmail"
+                FROM "organizations" WHERE id = ${orgId} LIMIT 1
             `),
         db.execute(sql`
-                SELECT om.role, u.id AS userId, u.username, u.email, u.status AS userStatus,
-                       u.lastLoginAt, om.joinedAt
-                FROM organizationMembers om
-                JOIN localUsers u ON u.id = om.localUserId
-                WHERE om.organizationId = ${orgId}
-                ORDER BY om.joinedAt ASC
+                SELECT om.role, u.id AS "userId", u.name AS username, u.email, u.status AS "userStatus",
+                       u."lastSignedIn" AS "lastLoginAt", om."createdAt" AS "joinedAt"
+                FROM "organizationMembers" om
+                JOIN "localUsers" u ON u.id = om."localUserId"
+                WHERE om."organizationId" = ${orgId}
+                ORDER BY om."createdAt" ASC
                 LIMIT 50
             `),
         db.execute(sql`
-                SELECT id, plan, status, currentPeriodStart, currentPeriodEnd, cancelAtPeriodEnd,
-                       createdAt, updatedAt
-                FROM subscriptions WHERE organizationId = ${orgId}
-                ORDER BY createdAt DESC LIMIT 1
+                SELECT id, plan, status, "currentPeriodStart", "currentPeriodEnd", "cancelAtPeriodEnd",
+                       "createdAt", "updatedAt"
+                FROM "subscriptions" WHERE "organizationId" = ${orgId}
+                ORDER BY "createdAt" DESC LIMIT 1
             `),
         db.execute(sql`
-                SELECT category, action, outcome, createdAt
-                FROM auditLogs WHERE organizationId = ${orgId}
-                ORDER BY createdAt DESC LIMIT 30
+                SELECT category, action, outcome, "createdAt"
+                FROM "auditLogs" WHERE "organizationId" = ${orgId}
+                ORDER BY "createdAt" DESC LIMIT 30
             `),
       ]);
 
@@ -1695,7 +1680,7 @@ async function handleSuspendUser(req: Request, res: Response): Promise<void> {
     }
 
     const userResult = await db.execute(
-      sql`SELECT id, email, status FROM localUsers WHERE id = ${userId} LIMIT 1`
+      sql`SELECT id, email, status FROM "localUsers" WHERE id = ${userId} LIMIT 1`
     );
     const rows = userResult.rows as {
       id: number;
@@ -1710,7 +1695,7 @@ async function handleSuspendUser(req: Request, res: Response): Promise<void> {
 
     const newStatus = suspend ? "suspended" : "active";
     await db.execute(
-      sql`UPDATE localUsers SET status = ${newStatus}, updatedAt = NOW() WHERE id = ${userId}`
+      sql`UPDATE "localUsers" SET status = ${newStatus}, "updatedAt" = NOW() WHERE id = ${userId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -1737,6 +1722,9 @@ async function handleRevokeUserSessions(
   req: Request,
   res: Response
 ): Promise<void> {
+  // Local-auth sessions are stateless JWTs; there is no session table to
+  // revoke. Suspension (status=suspended) is enforced on every authenticated
+  // request, so recommend suspending instead. Return success for compatibility.
   const session = (
     req as Request & { adminSession?: { username: string; sessionId: string } }
   ).adminSession;
@@ -1746,34 +1734,18 @@ async function handleRevokeUserSessions(
     res.status(400).json({ error: "Invalid user id" });
     return;
   }
-
-  try {
-    const db = await getDb();
-    if (!db) {
-      res.status(503).json({ error: "Database unavailable" });
-      return;
-    }
-
-    await db.execute(
-      sql`DELETE FROM localUserSessions WHERE userId = ${userId}`
-    );
-    await auditLog(
-      session?.sessionId ?? null,
-      session?.username ?? "unknown",
-      "user.revoke_sessions",
-      ip,
-      String(userId)
-    );
-    broadcastSSE("user_sessions_revoked", {
-      userId,
-      by: session?.username,
-      ts: new Date().toISOString(),
-    });
-
-    res.json({ success: true, userId });
-  } catch {
-    res.status(500).json({ error: "Failed to revoke user sessions" });
-  }
+  await auditLog(
+    session?.sessionId ?? null,
+    session?.username ?? "unknown",
+    "user.revoke_sessions",
+    ip,
+    String(userId)
+  );
+  res.json({
+    success: true,
+    userId,
+    note: "Sessions are stateless; suspend the user to block access.",
+  });
 }
 
 async function handleSuspendOrg(req: Request, res: Response): Promise<void> {
@@ -1800,12 +1772,12 @@ async function handleSuspendOrg(req: Request, res: Response): Promise<void> {
     }
 
     const orgCheckResult = await db.execute(
-      sql`SELECT id, name, status FROM organizations WHERE id = ${orgId} LIMIT 1`
+      sql`SELECT id, name, "isActive" FROM "organizations" WHERE id = ${orgId} LIMIT 1`
     );
     const rows = orgCheckResult.rows as {
       id: number;
       name: string;
-      status: string;
+      isActive: number;
     }[];
     const org = rows[0];
     if (!org) {
@@ -1814,8 +1786,9 @@ async function handleSuspendOrg(req: Request, res: Response): Promise<void> {
     }
 
     const newStatus = suspend ? "suspended" : "active";
+    const newIsActive = suspend ? 0 : 1;
     await db.execute(
-      sql`UPDATE organizations SET status = ${newStatus}, updatedAt = NOW() WHERE id = ${orgId}`
+      sql`UPDATE "organizations" SET "isActive" = ${newIsActive}, "updatedAt" = NOW() WHERE id = ${orgId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -1945,18 +1918,20 @@ async function handleExportCsv(req: Request, res: Response): Promise<void> {
 
     if (type === "users") {
       const userExportResult = await db.execute(sql`
-                SELECT id, username, email, role, isEmailVerified, isMfaEnabled, createdAt, lastLoginAt
-                FROM localUsers ORDER BY createdAt DESC LIMIT 10000
+                SELECT id, name, email, "phoneNumber", "userType" AS role, status,
+                       "companyName", "jobTitle", industry, "preferredLocale",
+                       "mfaEnabled" AS "isMfaEnabled", "createdAt", "lastSignedIn" AS "lastLoginAt"
+                FROM "localUsers" ORDER BY "createdAt" DESC LIMIT 10000
             `);
       const userRows = userExportResult.rows as unknown[];
       rows = userRows ?? [];
       headers =
-        "id,username,email,role,isEmailVerified,isMfaEnabled,createdAt,lastLoginAt";
+        "id,name,email,phoneNumber,role,status,companyName,jobTitle,industry,preferredLocale,isMfaEnabled,createdAt,lastLoginAt";
       filename = "users-export.csv";
     } else if (type === "orgs") {
       const orgExportResult = await db.execute(sql`
-                SELECT id, name, plan, isActive, trialEndsAt, createdAt
-                FROM organizations ORDER BY createdAt DESC LIMIT 10000
+                SELECT id, name, plan, "isActive", "trialEndsAt", "createdAt"
+                FROM "organizations" ORDER BY "createdAt" DESC LIMIT 10000
             `);
       const orgRows = orgExportResult.rows as unknown[];
       rows = orgRows ?? [];
@@ -1964,11 +1939,11 @@ async function handleExportCsv(req: Request, res: Response): Promise<void> {
       filename = "orgs-export.csv";
     } else if (type === "subscriptions") {
       const subExportResult = await db.execute(sql`
-                SELECT s.id, s.plan, s.status, s.currentPeriodStart, s.currentPeriodEnd,
-                       s.cancelAtPeriodEnd, o.name AS orgName, s.createdAt
-                FROM subscriptions s
-                JOIN organizations o ON o.id = s.organizationId
-                ORDER BY s.createdAt DESC LIMIT 10000
+                SELECT s.id, s.plan, s.status, s."currentPeriodStart", s."currentPeriodEnd",
+                       s."cancelAtPeriodEnd", o.name AS "orgName", s."createdAt"
+                FROM "subscriptions" s
+                JOIN "organizations" o ON o.id = s."organizationId"
+                ORDER BY s."createdAt" DESC LIMIT 10000
             `);
       const subRows = subExportResult.rows as unknown[];
       rows = subRows ?? [];
@@ -1977,8 +1952,8 @@ async function handleExportCsv(req: Request, res: Response): Promise<void> {
       filename = "subscriptions-export.csv";
     } else if (type === "audit") {
       const auditExportResult = await db.execute(sql`
-                SELECT id, category, action, outcome, ipAddress, createdAt
-                FROM auditLogs ORDER BY createdAt DESC LIMIT 10000
+                SELECT id, category, action, outcome, "ipHash" AS "ipAddress", "createdAt"
+                FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT 10000
             `);
       const auditRows = auditExportResult.rows as unknown[];
       rows = auditRows ?? [];
@@ -2045,9 +2020,9 @@ function scheduleSessionCleanup(): void {
       const db = await getDb();
       if (!db) return;
       await db.execute(sql`
-                DELETE FROM yallaAdminSessions
-                WHERE expiresAt < NOW()
-                   OR (isRevoked = 1 AND lastSeenAt < NOW() - INTERVAL '7 days'))
+                DELETE FROM "yallaAdminSessions"
+                WHERE "expiresAt" < NOW()
+                   OR ("isRevoked" = 1 AND "lastSeenAt" < NOW() - INTERVAL '7 days')
             `);
     } catch {
       logger.warn(

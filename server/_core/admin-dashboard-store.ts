@@ -474,7 +474,7 @@ export async function getOrganizationData(): Promise<
       id: organizations.id,
       name: organizations.name,
       plan: organizations.plan,
-      status: sql<string>`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'inactive' END`,
+      status: sql<string>`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'suspended' END`,
       memberCount: sql<number>`COUNT(DISTINCT ${organizationMembers.id})`,
       createdAt: organizations.createdAt,
       lastActivity: sql<string | null>`MAX(${organizationMembers.createdAt})`,

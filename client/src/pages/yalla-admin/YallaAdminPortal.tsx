@@ -2723,6 +2723,7 @@ export default function YallaAdminPortal() {
   async function handleLogout() {
     await fetch("/api/yalla-admin/logout", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
     navigate(loginPath);

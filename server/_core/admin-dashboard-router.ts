@@ -64,8 +64,8 @@ async function requireAdminSession(
     const db = await getDb();
     if (db) {
       const sessionResult = await db.execute(sql`
-                SELECT isRevoked FROM yallaAdminSessions
-                WHERE id = ${parsed.sessionId} AND expiresAt > NOW()
+                SELECT "isRevoked" FROM "yallaAdminSessions"
+                WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
             `);
       const rows = sessionResult.rows as { isRevoked: number }[] | undefined;

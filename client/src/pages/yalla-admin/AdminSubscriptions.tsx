@@ -30,12 +30,6 @@ interface Subscription {
 
 interface SubSummary {
   subscriptions: Subscription[];
-  summary: Array<{
-    plan: string;
-    status: string;
-    count: number;
-    totalAmountCents: number;
-  }>;
 }
 
 export default function AdminSubscriptions() {
@@ -69,11 +63,22 @@ export default function AdminSubscriptions() {
   const filtered =
     data?.subscriptions?.filter(s => filter === "all" || s.status === filter) ||
     [];
+
+  // Monthly-normalized revenue from active subscriptions:
+  // annual tiers are divided by 12, everything else counts as-is.
   const totalMRR =
-    data?.summary?.reduce(
-      (sum, s) => sum + (s.status === "active" ? s.totalAmountCents : 0),
-      0
-    ) || 0;
+    data?.subscriptions
+      ?.filter(s => s.status === "active" || s.status === "trialing")
+      .reduce((sum, s) => {
+        const monthly =
+          s.billingInterval === "annual" ? s.amountCents / 12 : s.amountCents;
+        return sum + monthly;
+      }, 0) || 0;
+  const activePlanCount = new Set(
+    data?.subscriptions
+      ?.filter(s => s.status === "active")
+      .map(s => `${s.plan}/${s.billingInterval}`) || []
+  ).size;
 
   return (
     <div
@@ -151,7 +156,7 @@ export default function AdminSubscriptions() {
               ${(totalMRR / 100).toLocaleString()}
             </div>
             <div style={{ fontSize: 12, color: "#94a3b8" }}>
-              Monthly Revenue
+              Est. Monthly Revenue
             </div>
           </div>
           <div
@@ -183,7 +188,7 @@ export default function AdminSubscriptions() {
               style={{ color: "#f59e0b", marginBottom: 8 }}
             />
             <div style={{ fontSize: 24, fontWeight: 800, color: "#f59e0b" }}>
-              {data?.summary?.filter(s => s.status === "active").length || 0}
+              {activePlanCount}
             </div>
             <div style={{ fontSize: 12, color: "#94a3b8" }}>Active Plans</div>
           </div>
