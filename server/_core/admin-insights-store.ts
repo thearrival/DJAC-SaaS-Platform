@@ -295,13 +295,15 @@ export async function getEngagementMetrics(
   `);
   const ac = (activeCounts.rows as Record<string, number>[])[0] ?? {};
 
-  const [totals] = await db
+  const totals = await db
     .select({
       total: count(),
       newInWindow: sql<number>`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
       dormant: sql<number>`COUNT(*) FILTER (WHERE "lastSignedIn" IS NULL OR "lastSignedIn" < ${monthAgo})`,
     })
     .from(localUsers);
+  const totalsRow = totals[0];
+  const totalUsers = Number(totalsRow?.total ?? 0);
 
   const [newWindow] = await db
     .select({ c: count() })
@@ -386,20 +388,20 @@ export async function getEngagementMetrics(
     orgRows.rows as { id: number; name: string; eventCount: number }[]
   ).map(r => ({ id: r.id, name: r.name, eventCount: Number(r.eventCount) }));
 
-  const totalUsers = totals?.total ?? 0;
+  const totalUsersChecked = totalUsers;
   return {
     generatedAt: now.toISOString(),
     windowDays,
     dau: Number(ac.dau ?? 0),
     wau: Number(ac.wau ?? 0),
     mau: Number(ac.mau ?? 0),
-    newUsersInWindow: newWindow?.c ?? 0,
-    dormantUsers: totals?.dormant ?? 0,
+    newUsersInWindow: Number(newWindow?.c ?? 0),
+    dormantUsers: Number(totalsRow?.dormant ?? 0),
     retention: {
       active1d: Number(ac.dau ?? 0),
       active7d: Number(ac.wau ?? 0),
       active30d: Number(ac.mau ?? 0),
-      total: totalUsers,
+      total: totalUsersChecked,
     },
     dailyActive,
     topUsers,
@@ -507,13 +509,16 @@ async function buildGrowthReport(
     ...base,
     title: titleFor("growth"),
     kpis: [
-      { label: "Total users", value: stats?.total ?? 0 },
-      { label: `New (${base.windowDays}d)`, value: stats?.newInWindow ?? 0 },
-      { label: "Active", value: stats?.active ?? 0 },
-      { label: "Pending verification", value: stats?.pending ?? 0 },
-      { label: "Suspended", value: stats?.suspended ?? 0 },
-      { label: "MFA enabled", value: stats?.mfa ?? 0 },
-      { label: "Organizations", value: orgStats[0]?.c ?? 0 },
+      { label: "Total users", value: Number(stats?.total ?? 0) },
+      {
+        label: `New (${base.windowDays}d)`,
+        value: Number(stats?.newInWindow ?? 0),
+      },
+      { label: "Active", value: Number(stats?.active ?? 0) },
+      { label: "Pending verification", value: Number(stats?.pending ?? 0) },
+      { label: "Suspended", value: Number(stats?.suspended ?? 0) },
+      { label: "MFA enabled", value: Number(stats?.mfa ?? 0) },
+      { label: "Organizations", value: Number(orgStats[0]?.c ?? 0) },
     ],
     series: [
       {
@@ -526,7 +531,7 @@ async function buildGrowthReport(
     ],
     table: {
       columns: ["Role", "Users"],
-      rows: byRole.map(r => [r.role ?? "visitor", r.c]),
+      rows: byRole.map(r => [r.role ?? "visitor", Number(r.c)]),
     },
     notes: [
       "Growth counts local (email/OTP) accounts; OAuth accounts are separate.",
@@ -660,7 +665,10 @@ async function buildRevenueReport(
       { label: "Total subs", value: subs.length },
       { label: "Canceling", value: canceling },
       { label: "Past due", value: pastDue },
-      { label: `New orgs (${base.windowDays}d)`, value: newOrgs[0]?.c ?? 0 },
+      {
+        label: `New orgs (${base.windowDays}d)`,
+        value: Number(newOrgs[0]?.c ?? 0),
+      },
     ],
     series: [
       {
@@ -738,15 +746,17 @@ async function buildSecurityReport(
     )
     .catch(() => ({ rows: [{ c: 0 }] }));
 
-  const byOutcome = Object.fromEntries(outcomeRows.map(r => [r.outcome, r.c]));
+  const byOutcome = Object.fromEntries(
+    outcomeRows.map(r => [r.outcome, Number(r.c)])
+  );
 
   return {
     ...base,
     title: titleFor("security"),
     kpis: [
-      { label: "Success events", value: byOutcome.success ?? 0 },
-      { label: "Failures", value: byOutcome.failure ?? 0 },
-      { label: "Blocked", value: byOutcome.blocked ?? 0 },
+      { label: "Success events", value: Number(byOutcome.success ?? 0) },
+      { label: "Failures", value: Number(byOutcome.failure ?? 0) },
+      { label: "Blocked", value: Number(byOutcome.blocked ?? 0) },
       {
         label: "Role changes",
         value: Number((roleChanges.rows as any[])[0]?.c ?? 0),
@@ -816,13 +826,13 @@ async function buildOperationsReport(
 
   const openSr = srByStatus
     .filter(r => r.status !== "completed" && r.status !== "cancelled")
-    .reduce((s, r) => s + r.c, 0);
+    .reduce((s, r) => s + Number(r.c), 0);
 
   return {
     ...base,
     title: titleFor("operations"),
     kpis: [
-      { label: "Open service requests", value: openSr },
+      { label: "Open service requests", value: Number(openSr) },
       {
         label: `New SRs (${base.windowDays}d)`,
         value: Number((srOpen.rows as any[])[0]?.c ?? 0),
@@ -833,20 +843,20 @@ async function buildOperationsReport(
       },
       ...srByStatus.slice(0, 4).map(r => ({
         label: `SR: ${r.status}`,
-        value: r.c,
+        value: Number(r.c),
       })),
     ],
     series: [
       {
         name: "Signups / day",
-        points: (dailyRegs.rows as any[]).map(r => ({
+        points: (dailyRegs.rows as { day: string; count: number }[]).map(r => ({
           x: r.day,
           y: Number(r.count),
         })),
       },
       {
         name: "Emails by status",
-        points: (emails.rows as any[]).map(r => ({
+        points: (emails.rows as { status: string; c: number }[]).map(r => ({
           x: String(r.status),
           y: Number(r.c),
         })),
@@ -854,7 +864,7 @@ async function buildOperationsReport(
     ],
     table: {
       columns: ["Service request status", "Count"],
-      rows: srByStatus.map(r => [r.status, r.c]),
+      rows: srByStatus.map(r => [r.status, Number(r.c)]),
     },
     notes: [
       "Service request pipeline health; email metrics depend on email_log being populated.",
@@ -1121,11 +1131,11 @@ export async function getLiveMetrics(): Promise<LiveMetrics> {
     return {
       generatedAt: now.toISOString(),
       sseClients: getSSEClientCount(),
-      onlineRecently: online?.c ?? 0,
+      onlineRecently: Number(online?.c ?? 0),
       activeFoundersSessions: Number(
         (sessionsResult.rows as { c: number }[])[0]?.c ?? 0
       ),
-      signupsToday: signups?.c ?? 0,
+      signupsToday: Number(signups?.c ?? 0),
       loginsToday: Number((loginsResult.rows as { c: number }[])[0]?.c ?? 0),
       failedLogins24h: Number((failsResult.rows as { c: number }[])[0]?.c ?? 0),
       openServiceRequests: Number(
