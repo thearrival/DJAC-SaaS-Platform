@@ -592,10 +592,20 @@ export default function AdminUsers() {
                         }}
                       >
                         <ActionButton
-                          title="View details"
-                          onClick={() => setSelectedUser(user)}
+                          title="Open full timeline"
+                          onClick={() =>
+                            navigate(
+                              `/yalla-hack-owners-console/users/${user.id}`
+                            )
+                          }
                         >
                           <Eye size={14} />
+                        </ActionButton>
+                        <ActionButton
+                          title="Quick profile"
+                          onClick={() => setSelectedUser(user)}
+                        >
+                          <UserCog size={14} />
                         </ActionButton>
                         <ActionButton
                           title={

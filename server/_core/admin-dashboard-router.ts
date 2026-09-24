@@ -31,6 +31,16 @@ import {
   getSecurityEvents,
 } from "./admin-dashboard-store";
 import {
+  getUserTimeline,
+  getUserAuthHistory,
+  getEngagementMetrics,
+  buildReport,
+  reportToCsv,
+  getOperationalAlerts,
+  getLiveMetrics,
+  type ReportType,
+} from "./admin-insights-store";
+import {
   getPlatformOverview,
   getTrafficMetrics,
   getRevenueMetrics,
@@ -383,6 +393,112 @@ export function createAdminDashboardRouter(): Router {
     } catch (error) {
       logger.warn({ error }, "AI pool status unavailable");
       res.json({ agents: [], stats: {}, capabilities: [] });
+    }
+  });
+
+  // ── End-user monitoring, insights & reporting ────────────────────────────
+
+  router.get("/users/:id/timeline", async (req, res) => {
+    try {
+      const userId = Number(req.params.id);
+      if (Number.isNaN(userId)) {
+        res.status(400).json({ error: "Invalid user ID" });
+        return;
+      }
+      const limit = req.query.limit ? Number(req.query.limit) : 100;
+      res.json(await getUserTimeline(userId, limit));
+    } catch (error) {
+      logger.error({ error }, "Failed to get user timeline");
+      res.status(500).json({ error: "Failed to get user timeline" });
+    }
+  });
+
+  router.get("/users/:id/auth-history", async (req, res) => {
+    try {
+      const userId = Number(req.params.id);
+      if (Number.isNaN(userId)) {
+        res.status(400).json({ error: "Invalid user ID" });
+        return;
+      }
+      const limit = req.query.limit ? Number(req.query.limit) : 50;
+      res.json(await getUserAuthHistory(userId, limit));
+    } catch (error) {
+      logger.error({ error }, "Failed to get user auth history");
+      res.status(500).json({ error: "Failed to get user auth history" });
+    }
+  });
+
+  router.get("/engagement", async (req, res) => {
+    try {
+      const days = req.query.days ? Number(req.query.days) : 30;
+      res.json(
+        await getEngagementMetrics(
+          Number.isFinite(days) && days > 0 && days <= 365 ? days : 30
+        )
+      );
+    } catch (error) {
+      logger.error({ error }, "Failed to get engagement metrics");
+      res.status(500).json({ error: "Failed to get engagement metrics" });
+    }
+  });
+
+  const REPORT_TYPES: ReportType[] = [
+    "growth",
+    "engagement",
+    "revenue",
+    "security",
+    "operations",
+  ];
+
+  router.get("/reports/:type", async (req, res) => {
+    try {
+      const type = req.params.type as ReportType;
+      if (!REPORT_TYPES.includes(type)) {
+        res.status(400).json({
+          error: "Invalid report type",
+          supported: REPORT_TYPES,
+        });
+        return;
+      }
+      const days = req.query.days ? Number(req.query.days) : 30;
+      const report = await buildReport(
+        type,
+        Number.isFinite(days) && days > 0 && days <= 365 ? days : 30
+      );
+      if (req.query.format === "csv") {
+        const csv = reportToCsv(report);
+        const stamp = new Date().toISOString().slice(0, 10);
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${type}-report-${stamp}.csv"`
+        );
+        res.send(csv);
+        return;
+      }
+      res.json(report);
+    } catch (error) {
+      logger.error({ error }, "Failed to build report");
+      res.status(500).json({ error: "Failed to build report" });
+    }
+  });
+
+  router.get("/alerts", async (_req, res) => {
+    try {
+      res.json(await getOperationalAlerts());
+    } catch (error) {
+      logger.error({ error }, "Failed to get operational alerts");
+      res.status(500).json({ error: "Failed to get operational alerts" });
+    }
+  });
+
+  router.get("/live", async (_req, res) => {
+    try {
+      res.setHeader("Cache-Control", "no-store");
+      res.json(await getLiveMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get live metrics");
+      res.status(500).json({ error: "Failed to get live metrics" });
     }
   });
 

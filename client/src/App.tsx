@@ -109,6 +109,12 @@ const AdminOrganizations = lazy(
 const AdminSecurity = lazy(() => import("./pages/yalla-admin/AdminSecurity"));
 const AdminAudit = lazy(() => import("./pages/yalla-admin/AdminAudit"));
 const AdminAnalytics = lazy(() => import("./pages/yalla-admin/AdminAnalytics"));
+const AdminInsights = lazy(() => import("./pages/yalla-admin/AdminInsights"));
+const AdminReports = lazy(() => import("./pages/yalla-admin/AdminReports"));
+const AdminUserDetail = lazy(
+  () => import("./pages/yalla-admin/AdminUserDetail")
+);
+const AdminLive = lazy(() => import("./pages/yalla-admin/AdminLive"));
 const AdminPlatformMonitor = lazy(
   () => import("./pages/yalla-admin/AdminPlatformMonitor")
 );
@@ -267,6 +273,13 @@ function Router() {
           </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
+      <Route path={"/yalla-hack-owners-console/users/:id"}>
+        <RouteErrorBoundary>
+          <FoundersLayout>
+            <AdminUserDetail />
+          </FoundersLayout>
+        </RouteErrorBoundary>
+      </Route>
       <Route path={"/yalla-hack-owners-console"}>
         <RouteErrorBoundary>
           <FoundersLayout>
@@ -313,6 +326,27 @@ function Router() {
         <RouteErrorBoundary>
           <FoundersLayout>
             <AdminAnalytics />
+          </FoundersLayout>
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/insights"}>
+        <RouteErrorBoundary>
+          <FoundersLayout>
+            <AdminInsights />
+          </FoundersLayout>
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/reports"}>
+        <RouteErrorBoundary>
+          <FoundersLayout>
+            <AdminReports />
+          </FoundersLayout>
+        </RouteErrorBoundary>
+      </Route>
+      <Route path={"/yalla-hack-owners-console/live"}>
+        <RouteErrorBoundary>
+          <FoundersLayout>
+            <AdminLive />
           </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
