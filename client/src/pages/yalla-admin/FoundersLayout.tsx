@@ -42,6 +42,7 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
   const [location, navigate] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [alertCount, setAlertCount] = useState(0);
 
   // Session guard: bounce to login when the cookie is missing/expired
   useEffect(() => {
@@ -63,6 +64,28 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [navigate]);
+
+  // Poll operational alert count for the Live & Alerts badge
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => {
+      fetch("/api/admin-dashboard/alerts", { credentials: "include" })
+        .then(res => (res.ok ? res.json() : []))
+        .then((data: unknown) => {
+          if (cancelled) return;
+          setAlertCount(Array.isArray(data) ? data.length : 0);
+        })
+        .catch(() => {
+          /* ignore network blips */
+        });
+    };
+    load();
+    const timer = setInterval(load, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, []);
 
   // Close the mobile drawer on navigation
   useEffect(() => {
@@ -168,6 +191,28 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
             >
               <Icon size={16} style={{ flexShrink: 0 }} />
               {item.label}
+              {item.path === `${BASE}/live` && alertCount > 0 && (
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    minWidth: 18,
+                    height: 18,
+                    padding: "0 5px",
+                    borderRadius: 9,
+                    background: "#ef4444",
+                    color: "#fff",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    lineHeight: 1,
+                  }}
+                  aria-label={`${alertCount} active alerts`}
+                >
+                  {alertCount > 99 ? "99+" : alertCount}
+                </span>
+              )}
             </button>
           );
         })}
