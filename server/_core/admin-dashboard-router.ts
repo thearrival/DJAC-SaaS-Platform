@@ -12,7 +12,9 @@ import {
   getAdminCookie,
   verifySession,
   isAdminSessionRevoked,
+  auditAdminAction,
 } from "./yalla-admin-router";
+import { getClientIp } from "./security";
 import {
   getUnifiedUsers,
   getUserStats,
@@ -177,6 +179,15 @@ export function createAdminDashboardRouter(): Router {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      const session = (req as Request & { adminSession?: AdminSessionUser })
+        .adminSession;
+      await auditAdminAction(
+        session?.sessionId ?? null,
+        session?.username ?? "unknown",
+        suspend ? "user.suspend" : "user.unsuspend",
+        getClientIp(req),
+        String(userId)
+      );
       res.json({ success: true, status: suspend ? "suspended" : "active" });
     } catch (error) {
       logger.error({ error }, "Failed to toggle user suspension");
@@ -201,6 +212,16 @@ export function createAdminDashboardRouter(): Router {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      const session = (req as Request & { adminSession?: AdminSessionUser })
+        .adminSession;
+      await auditAdminAction(
+        session?.sessionId ?? null,
+        session?.username ?? "unknown",
+        "user.role_change",
+        getClientIp(req),
+        String(userId),
+        { role }
+      );
       res.json({ success: true, role });
     } catch (error) {
       logger.error({ error }, "Failed to update user role");
@@ -220,6 +241,15 @@ export function createAdminDashboardRouter(): Router {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      const session = (req as Request & { adminSession?: AdminSessionUser })
+        .adminSession;
+      await auditAdminAction(
+        session?.sessionId ?? null,
+        session?.username ?? "unknown",
+        "user.delete",
+        getClientIp(req),
+        String(userId)
+      );
       res.json({ success: true });
     } catch (error) {
       logger.error({ error }, "Failed to delete user");

@@ -211,6 +211,18 @@ async function auditLog(
   }
 }
 
+/** Public wrapper so other routers (e.g. admin-dashboard) can write admin audit entries. */
+export async function auditAdminAction(
+  sessionId: string | null,
+  adminUsername: string,
+  action: string,
+  ip: string,
+  target?: string,
+  payload?: unknown
+): Promise<void> {
+  await auditLog(sessionId, adminUsername, action, ip, target, payload);
+}
+
 // broadcastSSE is imported from ../services/sse-bus
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
