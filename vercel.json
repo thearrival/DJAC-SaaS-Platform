@@ -25,6 +25,26 @@
       "schedule": "0 8 * * *"
     }
   ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "docs.app.yalla-hack.ae" }],
+      "destination": "/docs",
+      "permanent": true
+    },
+    {
+      "source": "/:section(getting-started|ai-engine|api-integration|billing-plans|case-studies|deployment-operations|developer-guide|frameworks|operations|security-compliance|vendor-risk)",
+      "has": [{ "type": "host", "value": "docs.app.yalla-hack.ae" }],
+      "destination": "/docs/:section",
+      "permanent": true
+    },
+    {
+      "source": "/:section(getting-started|ai-engine|api-integration|billing-plans|case-studies|deployment-operations|developer-guide|frameworks|operations|security-compliance|vendor-risk)/:path*",
+      "has": [{ "type": "host", "value": "docs.app.yalla-hack.ae" }],
+      "destination": "/docs/:section/:path",
+      "permanent": true
+    }
+  ],
   "routes": [
     {
       "src": "/i18n-job",
