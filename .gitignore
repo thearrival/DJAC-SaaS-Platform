@@ -119,9 +119,13 @@ temp/
 !CHANGELOG.md
 !CONTRIBUTING.md
 !SECURITY.md
+!CODE_OF_CONDUCT.md
+!DEVELOPMENT.md
 !LICENSE
 !docs/*.md
 !docs/global-platform/*.md
+!.github/*.md
+!.github/ISSUE_TEMPLATE/*.md
 !DJAC-CODEBASE-REPORT.md
 
 # Database

@@ -3,6 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { activeOrgProcedure, router } from "./_core/trpc";
 import { recordAuditEvent } from "./audit-logger";
 import { requireModulePermission } from "./_core/permission-guard";
+import { GLOBAL_FRAMEWORK_PACKS } from "./global-compliance-registry";
+import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
 import {
   listSimulationScenarios,
   getSimulationScenarioById,
@@ -14,6 +16,8 @@ import {
   archiveSimulation,
   compareSimulations,
 } from "./compliance-simulation-store";
+
+const knownFrameworkCodes = GLOBAL_FRAMEWORK_PACKS.map(p => p.code);
 
 const simulationTypeEnum = z.enum([
   "readiness",
@@ -27,8 +31,26 @@ const runEngineSchema = z.object({
   name: z.string().trim().min(1).max(255),
   description: z.string().trim().max(2000).optional(),
   simulationType: simulationTypeEnum,
-  jurisdiction: z.string().trim().min(1).max(200),
-  frameworks: z.array(z.string().trim().min(1)).min(1).max(50),
+  jurisdiction: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .refine(
+      v =>
+        GLOBAL_JURISDICTIONS.includes(
+          v as (typeof GLOBAL_JURISDICTIONS)[number]
+        ),
+      { message: "Invalid jurisdiction" }
+    ),
+  frameworks: z
+    .array(z.string().trim().min(1))
+    .min(1)
+    .max(50)
+    .refine(
+      frameworks => frameworks.every(f => knownFrameworkCodes.includes(f)),
+      { message: "One or more frameworks are not valid" }
+    ),
   industry: z.string().trim().max(200).optional(),
   organizationSize: z.enum(["startup", "sme", "enterprise"]).optional(),
 });

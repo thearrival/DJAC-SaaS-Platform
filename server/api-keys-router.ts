@@ -1,10 +1,10 @@
-/**
- * API Keys Router — programmatic access token management.
+﻿/**
+ * API Keys Router â€” programmatic access token management.
  *
  * Procedures:
- *   apiKeys.list     — list all keys for current org (hashes never returned)
- *   apiKeys.create   — generate a new key; raw value returned ONCE
- *   apiKeys.revoke   — soft-delete a key by id
+ *   apiKeys.list     â€” list all keys for current org (hashes never returned)
+ *   apiKeys.create   â€” generate a new key; raw value returned ONCE
+ *   apiKeys.revoke   â€” soft-delete a key by id
  *
  * Key format:  djac_<32 random hex chars>
  * Stored as:   SHA-256(raw) in keyHash column; first 8 chars as keyPrefix
@@ -29,26 +29,34 @@ const API_KEYS_WINDOW_MS = 60_000;
 export const apiKeysRouter = router({
   /**
    * List all active (non-revoked) API keys for the org.
-   * Raw key is never returned — only id, name, prefix, scopes, dates.
+   * Raw key is never returned â€” only id, name, prefix, scopes, dates.
    */
   list: activeOrgProcedure.query(async ({ ctx }) => {
-    await requireModulePermission(ctx, "api_keys", "canView");
-    const rl = await checkRateLimit(
-      `apikeys:list:${ctx.organizationId}`,
-      API_KEYS_LIMIT,
-      API_KEYS_WINDOW_MS
-    );
-    if (!rl.allowed) {
+    try {
+      await requireModulePermission(ctx, "api_keys", "canView");
+      const rl = await checkRateLimit(
+        `apikeys:list:${ctx.organizationId}`,
+        API_KEYS_LIMIT,
+        API_KEYS_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded. Please try again shortly.",
+        });
+      }
+      return listApiKeys(ctx.organizationId as number);
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
       throw new TRPCError({
-        code: "TOO_MANY_REQUESTS",
-        message: "Rate limit exceeded. Please try again shortly.",
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to list API keys",
       });
     }
-    return listApiKeys(ctx.organizationId as number);
   }),
 
   /**
-   * Create a new API key. Returns the raw key ONCE — not stored.
+   * Create a new API key. Returns the raw key ONCE â€” not stored.
    * Only org admins can create keys.
    */
   create: orgAdminProcedure

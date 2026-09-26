@@ -266,7 +266,7 @@ const intervalSchema = z.enum(["monthly", "quarterly", "biannual", "annual"]);
 
 export const billingRouter = router({
   /** Return the public price catalog — no auth required */
-  getPriceCatalog: publicProcedure.query(() => {
+  getPriceCatalog: publicProcedure.input(z.object({})).query(() => {
     return PRICE_CATALOG.map(
       ({ plan, interval, amountCents, label, savingsLabel }) => ({
         plan,

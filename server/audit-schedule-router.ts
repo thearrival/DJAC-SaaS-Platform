@@ -1,16 +1,16 @@
-/**
- * Audit Schedule Router � Phase 33
+﻿/**
+ * Audit Schedule Router ï¿½ Phase 33
  *
  * CRUD + lifecycle for scheduled compliance audits (internal, external,
  * regulatory, certification). Supports recurrence so completing an audit
  * auto-computes the next scheduled occurrence date.
  *
  * Procedures:
- *   auditSchedule.list     � list all audits ordered by scheduledDate ASC
- *   auditSchedule.create   � schedule a new audit
- *   auditSchedule.patch    � partial update of any editable field
- *   auditSchedule.complete � mark completed + persist findings + set nextOccurrence
- *   auditSchedule.remove   � delete
+ *   auditSchedule.list     ï¿½ list all audits ordered by scheduledDate ASC
+ *   auditSchedule.create   ï¿½ schedule a new audit
+ *   auditSchedule.patch    ï¿½ partial update of any editable field
+ *   auditSchedule.complete ï¿½ mark completed + persist findings + set nextOccurrence
+ *   auditSchedule.remove   ï¿½ delete
  */
 
 import { z } from "zod";
@@ -71,8 +71,16 @@ const patchSchema = createSchema.partial().extend({
 
 export const auditScheduleRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
-    await requireModulePermission(ctx, "audit_schedule", "canView");
-    return listAudits(ctx.organizationId as number);
+    try {
+      await requireModulePermission(ctx, "audit_schedule", "canView");
+      return listAudits(ctx.organizationId as number);
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to list audits",
+      });
+    }
   }),
 
   create: activeOrgProcedure

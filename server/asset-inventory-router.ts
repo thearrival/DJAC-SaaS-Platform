@@ -1,5 +1,5 @@
-/**
- * Asset Inventory Router � refactored to use asset-inventory-store.ts
+﻿/**
+ * Asset Inventory Router ï¿½ refactored to use asset-inventory-store.ts
  */
 
 import { z } from "zod";
@@ -48,17 +48,33 @@ const patchSchema = createSchema.partial().extend({
 
 export const assetInventoryRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
-    await requireModulePermission(ctx, "asset_inventory", "canView");
-    return listAssets(ctx.organizationId as number);
+    try {
+      await requireModulePermission(ctx, "asset_inventory", "canView");
+      return listAssets(ctx.organizationId as number);
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to list assets",
+      });
+    }
   }),
 
   get: activeOrgProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
-      await requireModulePermission(ctx, "asset_inventory", "canView");
-      const asset = await getAsset(ctx.organizationId as number, input.id);
-      if (!asset) throw new TRPCError({ code: "NOT_FOUND" });
-      return asset;
+      try {
+        await requireModulePermission(ctx, "asset_inventory", "canView");
+        const asset = await getAsset(ctx.organizationId as number, input.id);
+        if (!asset) throw new TRPCError({ code: "NOT_FOUND" });
+        return asset;
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch asset",
+        });
+      }
     }),
 
   create: activeOrgProcedure
@@ -137,30 +153,38 @@ export const assetInventoryRouter = router({
     }),
 
   summary: activeOrgProcedure.query(async ({ ctx }) => {
-    await requireModulePermission(ctx, "asset_inventory", "canView");
-    const assets = await getAllOrgAssets(ctx.organizationId as number);
-    let totalVulns = 0;
-    let criticalAssets = 0;
-    let internetFacingCount = 0;
-    let totalRisk = 0;
+    try {
+      await requireModulePermission(ctx, "asset_inventory", "canView");
+      const assets = await getAllOrgAssets(ctx.organizationId as number);
+      let totalVulns = 0;
+      let criticalAssets = 0;
+      let internetFacingCount = 0;
+      let totalRisk = 0;
 
-    for (const a of assets) {
-      totalVulns += a.openVulnCount ?? 0;
-      totalRisk += a.riskScore ?? 0;
-      if (a.criticality === "critical") criticalAssets++;
-      if (a.exposure === "internet_facing") internetFacingCount++;
+      for (const a of assets) {
+        totalVulns += a.openVulnCount ?? 0;
+        totalRisk += a.riskScore ?? 0;
+        if (a.criticality === "critical") criticalAssets++;
+        if (a.exposure === "internet_facing") internetFacingCount++;
+      }
+
+      const avgRisk =
+        assets.length > 0 ? Math.round(totalRisk / assets.length) : 0;
+
+      return {
+        total: assets.length,
+        criticalCount: criticalAssets,
+        criticalAssets,
+        internetFacingCount,
+        avgRisk,
+        totalOpenVulnerabilities: totalVulns,
+      };
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch asset summary",
+      });
     }
-
-    const avgRisk =
-      assets.length > 0 ? Math.round(totalRisk / assets.length) : 0;
-
-    return {
-      total: assets.length,
-      criticalCount: criticalAssets,
-      criticalAssets,
-      internetFacingCount,
-      avgRisk,
-      totalOpenVulnerabilities: totalVulns,
-    };
   }),
 });

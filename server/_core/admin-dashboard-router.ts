@@ -1,3 +1,4 @@
+import { z } from "zod";
 import express, {
   Router,
   type Request,
@@ -50,6 +51,15 @@ import {
   getSecurityMetrics,
 } from "./platform-monitor-store";
 import { sanitizeString } from "./security";
+
+const usersQuerySchema = z.object({
+  search: z.string().optional(),
+  status: z.string().optional(),
+  role: z.string().optional(),
+  source: z.enum(["local", "oauth"]).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  offset: z.number().int().min(0).optional(),
+});
 
 export type AdminSessionUser = { username: string; sessionId: string };
 
@@ -205,14 +215,22 @@ export function createAdminDashboardRouter(): Router {
 
   router.get("/users", async (req, res) => {
     try {
-      const { search, status, role, source, limit, offset } = req.query;
+      const parseResult = usersQuerySchema.safeParse(req.query);
+      if (!parseResult.success) {
+        res.status(400).json({
+          error: "Invalid query parameters",
+          details: parseResult.error.flatten(),
+        });
+        return;
+      }
+      const { search, status, role, source, limit, offset } = parseResult.data;
       const result = await getUnifiedUsers({
-        search: search as string | undefined,
-        status: status as string | undefined,
-        role: role as string | undefined,
-        source: source as "local" | "oauth" | undefined,
-        limit: limit ? Number(limit) : 50,
-        offset: offset ? Number(offset) : 0,
+        search,
+        status,
+        role,
+        source,
+        limit,
+        offset,
       });
       res.json(result);
     } catch (error) {

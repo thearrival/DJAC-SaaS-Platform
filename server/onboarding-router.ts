@@ -114,44 +114,52 @@ export const onboardingRouter = router({
       return { ok: true };
     }),
 
-  skip: protectedProcedure.mutation(async ({ ctx }) => {
-    const rl = await checkRateLimit(
-      `onboard:skip:${ctx.user.id}`,
-      ONBOARD_LIMIT,
-      ONBOARD_WINDOW_MS
-    );
-    if (!rl.allowed) {
-      throw new TRPCError({
-        code: "TOO_MANY_REQUESTS",
-        message: "Rate limit exceeded.",
-      });
-    }
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Database unavailable",
-      });
+  skip: protectedProcedure
+    .input(z.object({}))
+    .mutation(async ({ ctx, input: _input }) => {
+      const rl = await checkRateLimit(
+        `onboard:skip:${ctx.user.id}`,
+        ONBOARD_LIMIT,
+        ONBOARD_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded.",
+        });
+      }
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
 
-    const existing = await db
-      .select()
-      .from(onboardingProgress)
-      .where(eq(onboardingProgress.userId, ctx.user.id));
-
-    if (existing[0]) {
-      await db
-        .update(onboardingProgress)
-        .set({ skipped: true, updatedAt: new Date() })
+      const existing = await db
+        .select()
+        .from(onboardingProgress)
         .where(eq(onboardingProgress.userId, ctx.user.id));
-    } else {
-      await db.insert(onboardingProgress).values({
-        userId: ctx.user.id,
-        skipped: true,
-      });
-    }
 
-    return { ok: true };
-  }),
+      if (existing[0]) {
+        if (existing[0].skipped) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Onboarding already skipped.",
+          });
+        }
+        await db
+          .update(onboardingProgress)
+          .set({ skipped: true, updatedAt: new Date() })
+          .where(eq(onboardingProgress.userId, ctx.user.id));
+      } else {
+        await db.insert(onboardingProgress).values({
+          userId: ctx.user.id,
+          skipped: true,
+        });
+      }
+
+      return { ok: true };
+    }),
 
   complete: protectedProcedure.mutation(async ({ ctx }) => {
     const db = await getDb();

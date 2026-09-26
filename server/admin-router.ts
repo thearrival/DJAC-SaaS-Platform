@@ -1,3 +1,4 @@
+﻿import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   deleteInteractionLogsBySubject,
@@ -27,10 +28,25 @@ const limitSchema = z.object({
   limit: z.number().int().min(1).max(200).optional(),
 });
 
+const searchLimitSchema = z.object({
+  search: z.string().optional(),
+  limit: z.number().int().min(1).max(200).optional(),
+});
+
 export const adminRouter = router({
-  overview: adminProcedure.query(() => {
-    return getAdminOverview();
-  }),
+  overview: adminProcedure
+    .input(searchLimitSchema.optional())
+    .query(async () => {
+      try {
+        const result = await getAdminOverview();
+        return result;
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch overview",
+        });
+      }
+    }),
 
   interactionHeatmap: adminProcedure
     .input(
@@ -41,11 +57,18 @@ export const adminRouter = router({
         })
         .optional()
     )
-    .query(({ input }) => {
-      return getAdminInteractionHeatmap(
-        input?.windowDays ?? 14,
-        input?.limit ?? 2000
-      );
+    .query(async ({ input }) => {
+      try {
+        return getAdminInteractionHeatmap(
+          input?.windowDays ?? 14,
+          input?.limit ?? 2000
+        );
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch interaction heatmap",
+        });
+      }
     }),
 
   interactionPrivacyStats: adminProcedure
@@ -56,8 +79,15 @@ export const adminRouter = router({
         })
         .optional()
     )
-    .query(({ input }) => {
-      return getInteractionPrivacyStats(input?.retentionDays ?? 90);
+    .query(async ({ input }) => {
+      try {
+        return getInteractionPrivacyStats(input?.retentionDays ?? 90);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch interaction privacy stats",
+        });
+      }
     }),
 
   enforceInteractionRetention: adminProcedure
@@ -95,41 +125,96 @@ export const adminRouter = router({
       });
     }),
 
-  users: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listUsersForAdmin(input?.limit ?? 100);
-  }),
+  users: adminProcedure
+    .input(limitSchema.optional())
+    .query(async ({ input }) => {
+      try {
+        return listUsersForAdmin(input?.limit ?? 100);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch users",
+        });
+      }
+    }),
 
   accessRequests: adminProcedure
     .input(limitSchema.optional())
-    .query(({ input }) => {
-      return listAccessRequests(input?.limit ?? 100);
+    .query(async ({ input }) => {
+      try {
+        return listAccessRequests(input?.limit ?? 100);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch access requests",
+        });
+      }
     }),
 
   consultations: adminProcedure
     .input(limitSchema.optional())
-    .query(({ input }) => {
-      return listConsultationSummaries(input?.limit ?? 100);
+    .query(async ({ input }) => {
+      try {
+        return listConsultationSummaries(input?.limit ?? 100);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch consultations",
+        });
+      }
     }),
 
   notifications: adminProcedure
     .input(limitSchema.optional())
-    .query(({ input }) => {
-      return listAdminNotifications(input?.limit ?? 50);
+    .query(async ({ input }) => {
+      try {
+        return listAdminNotifications(input?.limit ?? 50);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch notifications",
+        });
+      }
     }),
 
-  vendors: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listAdminVendorSummaries(input?.limit ?? 100);
-  }),
+  vendors: adminProcedure
+    .input(limitSchema.optional())
+    .query(async ({ input }) => {
+      try {
+        return listAdminVendorSummaries(input?.limit ?? 100);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch vendors",
+        });
+      }
+    }),
 
   assessments: adminProcedure
     .input(limitSchema.optional())
-    .query(({ input }) => {
-      return listAssessmentSummaries(input?.limit ?? 100);
+    .query(async ({ input }) => {
+      try {
+        return listAssessmentSummaries(input?.limit ?? 100);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch assessments",
+        });
+      }
     }),
 
-  activity: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listActivityFeed(input?.limit ?? 100);
-  }),
+  activity: adminProcedure
+    .input(limitSchema.optional())
+    .query(async ({ input }) => {
+      try {
+        return listActivityFeed(input?.limit ?? 100);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch activity",
+        });
+      }
+    }),
 
   markNotificationRead: adminProcedure
     .input(z.object({ notificationId: z.number().int().positive() }))
@@ -261,7 +346,7 @@ export const adminRouter = router({
         // Newest-first, capped at limit
         return filtered.reverse().slice(0, limit);
       } catch (err: unknown) {
-        // File not found or unreadable — return empty
+        // File not found or unreadable â€” return empty
         if ((err as NodeJS.ErrnoException).code === "ENOENT") {
           return [];
         }
@@ -270,5 +355,16 @@ export const adminRouter = router({
       }
     }),
 
-  conversionStats: adminProcedure.query(() => getConversionStats()),
+  conversionStats: adminProcedure
+    .input(searchLimitSchema.optional())
+    .query(async () => {
+      try {
+        return await getConversionStats();
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch conversion stats",
+        });
+      }
+    }),
 });

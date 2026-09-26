@@ -9,6 +9,12 @@ import { checkRateLimit } from "./_core/rateLimiter";
 const NOTIF_LIMIT = 30;
 const NOTIF_WINDOW_MS = 60_000;
 
+const unreadCountSchema = z.object({
+  limit: z.number().int().min(1).max(100).default(20),
+});
+
+const markAllReadSchema = z.object({});
+
 export const notificationsRouter = router({
   list: protectedProcedure
     .input(
@@ -45,26 +51,28 @@ export const notificationsRouter = router({
       return await query;
     }),
 
-  unreadCount: protectedProcedure.query(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Database unavailable",
-      });
+  unreadCount: protectedProcedure
+    .input(unreadCountSchema)
+    .query(async ({ ctx, input: _input }) => {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
 
-    const rows = await db
-      .select()
-      .from(notifications)
-      .where(
-        and(
-          eq(notifications.userId, ctx.user.id),
-          eq(notifications.isRead, false)
-        )
-      );
+      const rows = await db
+        .select()
+        .from(notifications)
+        .where(
+          and(
+            eq(notifications.userId, ctx.user.id),
+            eq(notifications.isRead, false)
+          )
+        );
 
-    return rows.length;
-  }),
+      return rows.length;
+    }),
 
   markRead: protectedProcedure
     .input(z.object({ id: z.number().int() }))
@@ -100,37 +108,39 @@ export const notificationsRouter = router({
       return { ok: true };
     }),
 
-  markAllRead: protectedProcedure.mutation(async ({ ctx }) => {
-    const rl = await checkRateLimit(
-      `notif:allread:${ctx.user.id}`,
-      NOTIF_LIMIT,
-      NOTIF_WINDOW_MS
-    );
-    if (!rl.allowed) {
-      throw new TRPCError({
-        code: "TOO_MANY_REQUESTS",
-        message: "Rate limit exceeded. Please try again shortly.",
-      });
-    }
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Database unavailable",
-      });
-
-    await db
-      .update(notifications)
-      .set({ isRead: true, readAt: new Date() })
-      .where(
-        and(
-          eq(notifications.userId, ctx.user.id),
-          eq(notifications.isRead, false)
-        )
+  markAllRead: protectedProcedure
+    .input(markAllReadSchema)
+    .mutation(async ({ ctx, input: _input }) => {
+      const rl = await checkRateLimit(
+        `notif:allread:${ctx.user.id}`,
+        NOTIF_LIMIT,
+        NOTIF_WINDOW_MS
       );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded. Please try again shortly.",
+        });
+      }
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable",
+        });
 
-    return { ok: true };
-  }),
+      await db
+        .update(notifications)
+        .set({ isRead: true, readAt: new Date() })
+        .where(
+          and(
+            eq(notifications.userId, ctx.user.id),
+            eq(notifications.isRead, false)
+          )
+        );
+
+      return { ok: true };
+    }),
 });
 
 export async function createNotification(
