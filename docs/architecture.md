@@ -2,7 +2,7 @@
 
 ## Overview
 
-DJAC is a multi-tenant compliance management SaaS platform with an AI-powered assessment pipeline, supporting cross-border compliance workflows across 25+ jurisdictions.
+DJAC is a multi-tenant compliance management SaaS platform with an AI-powered assessment pipeline, supporting cross-border compliance workflows across 28 jurisdictions.
 
 ## High-Level Architecture
 

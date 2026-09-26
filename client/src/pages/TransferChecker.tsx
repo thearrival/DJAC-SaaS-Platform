@@ -80,6 +80,12 @@ const JURISDICTIONS = [
     frameworks: ["PIPEDA / Q-25"],
   },
   {
+    value: "br",
+    label: "Brazil",
+    flag: "🇧🇷",
+    frameworks: ["LGPD"],
+  },
+  {
     value: "au",
     label: "Australia",
     flag: "🇦🇺",
@@ -238,6 +244,7 @@ function runAssessment(
   const sgInv = from === "sg" || to === "sg";
   const euInv = from === "eu" || to === "eu";
   const inInv = from === "in" || to === "in";
+  const brInv = from === "br" || to === "br";
 
   if (chn) {
     frameworks.add("PIPL");
@@ -262,6 +269,19 @@ function runAssessment(
   }
   if (inInv) {
     frameworks.add("DPDP Act 2023");
+  }
+  if (brInv) {
+    frameworks.add("LGPD");
+    steps.push({
+      id: "br-lgpd-transfer",
+      level: "medium",
+      text: "LGPD Art. 33 cross-border transfer safeguards apply",
+      detail:
+        "International transfers of personal data from Brazil are permitted only under ANPD-recognised mechanisms: standard contractual clauses, binding corporate rules, specific consent, or other approved safeguards.",
+      framework: "LGPD",
+      article: "Art. 33",
+      timeline: "Contractual safeguards required",
+    });
   }
 
   const hasSpd = types.some(t => ["spd", "health", "bio", "fin"].includes(t));

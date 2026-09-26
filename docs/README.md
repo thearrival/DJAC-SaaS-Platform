@@ -23,7 +23,7 @@ Welcome to the DJAC platform documentation hub. This directory contains comprehe
 | [Global Platform Vision](./global-platform/README.md)                       | Expansion roadmap and architecture specification for the global compliance intelligence platform   |
 | [01 — Vision](./global-platform/01-vision.md)                               | Target evolution from cross-border compliance dashboard to global regulatory intelligence platform |
 | [02 — Architecture](./global-platform/02-architecture.md)                   | Target architecture for global scaling, multi-region deployment, and regulatory intelligence       |
-| [03 — Regulatory Frameworks](./global-platform/03-regulatory-frameworks.md) | Regulatory frameworks across 25+ jurisdictions and industry verticals                              |
+| [03 — Regulatory Frameworks](./global-platform/03-regulatory-frameworks.md) | Regulatory frameworks across 28 jurisdictions and industry verticals                               |
 | [04 — AI Agents](./global-platform/04-ai-agents.md)                         | AI agent specifications, autonomous compliance monitoring, and intelligent assessment pipelines    |
 | [05 — Industry Editions](./global-platform/05-industry-editions.md)         | Industry-specific editions and compliance packages                                                 |
 | [06 — Roadmap](./global-platform/06-roadmap.md)                             | Product roadmap, milestones, and timeline for global platform expansion                            |

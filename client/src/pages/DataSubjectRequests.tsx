@@ -20,6 +20,7 @@ import type React from "react";
 import { trpc } from "@/lib/trpc";
 import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { DSR_JURISDICTIONS } from "@shared/jurisdictions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,29 +78,7 @@ type RequestType =
   | "objection"
   | "explanation";
 
-type Jurisdiction =
-  | "China"
-  | "Saudi Arabia"
-  | "EU"
-  | "US"
-  | "Brazil"
-  | "Other"
-  | "United Kingdom"
-  | "Canada"
-  | "Australia"
-  | "Japan"
-  | "South Korea"
-  | "Singapore"
-  | "India"
-  | "South Africa"
-  | "Mexico"
-  | "United Arab Emirates"
-  | "Qatar"
-  | "Kuwait"
-  | "Bahrain"
-  | "Oman"
-  | "Jordan"
-  | "Egypt";
+type Jurisdiction = (typeof DSR_JURISDICTIONS)[number];
 
 type Status =
   | "received"
@@ -181,6 +160,13 @@ const JURISDICTION_COLOURS: Record<Jurisdiction, string> = {
   India: "bg-orange-500/10 text-orange-500 border-orange-500/30",
   "South Africa": "bg-green-500/10 text-green-500 border-green-500/30",
   Mexico: "bg-lime-500/10 text-lime-500 border-lime-500/30",
+  Thailand: "bg-amber-500/10 text-amber-500 border-amber-500/30",
+  Indonesia: "bg-red-500/10 text-red-400 border-red-500/30",
+  Malaysia: "bg-green-500/10 text-green-500 border-green-500/30",
+  Philippines: "bg-blue-500/10 text-blue-500 border-blue-500/30",
+  Vietnam: "bg-rose-500/10 text-rose-500 border-rose-500/30",
+  Nigeria: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
+  Kenya: "bg-teal-500/10 text-teal-500 border-teal-500/30",
   "United Arab Emirates": "bg-green-500/10 text-green-500 border-green-500/30",
   Qatar: "bg-teal-500/10 text-teal-500 border-teal-500/30",
   Kuwait: "bg-teal-500/10 text-teal-500 border-teal-500/30",
@@ -209,30 +195,7 @@ const STATUSES: Status[] = [
   "withdrawn",
 ];
 
-const JURISDICTIONS: Jurisdiction[] = [
-  "China",
-  "Saudi Arabia",
-  "EU",
-  "US",
-  "Brazil",
-  "Other",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Japan",
-  "South Korea",
-  "Singapore",
-  "India",
-  "South Africa",
-  "Mexico",
-  "United Arab Emirates",
-  "Qatar",
-  "Kuwait",
-  "Bahrain",
-  "Oman",
-  "Jordan",
-  "Egypt",
-];
+const JURISDICTIONS: Jurisdiction[] = [...DSR_JURISDICTIONS];
 const PRIORITIES: Priority[] = ["normal", "high", "urgent"];
 
 const OPEN_STATUSES: Status[] = ["received", "in_review", "pending_info"];

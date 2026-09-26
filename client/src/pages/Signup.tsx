@@ -1,7 +1,7 @@
 ﻿/**
  * DJAC Signup / Login page - standalone (no DashboardLayout).
  * Routes: /signup  /login
- * Supports: 3 languages (EN / AR / ZH) + dark & light themes.
+ * Supports: 9 languages (full UI dictionary via useLocale) + dark & light themes.
  */
 import { useEffect, useState } from "react";
 import type React from "react";
@@ -1129,36 +1129,36 @@ function RoleRegisterForm({
     </button>
   );
 
-  const JURISDICTIONS = [
-    "Global",
-    "EU / GDPR",
-    "United States",
-    "China",
-    "Saudi Arabia",
-    "UAE",
-    "Brazil",
-    "India",
-    "Singapore",
-    "United Kingdom",
-    "Canada",
-    "Australia",
-    "Japan",
-    "South Korea",
-    "South Africa",
-    "Mexico",
-    "Qatar",
-    "Kuwait",
-    "Bahrain",
-    "Oman",
-    "Jordan",
-    "Egypt",
-    "Indonesia",
-    "Thailand",
-    "Vietnam",
-    "Philippines",
-    "Malaysia",
-    "Nigeria",
-    "Kenya",
+  const JURISDICTIONS: { value: string; label: string }[] = [
+    { value: "Global", label: "Global" },
+    { value: "EU", label: "EU / GDPR" },
+    { value: "US", label: "United States" },
+    { value: "China", label: "China" },
+    { value: "Saudi Arabia", label: "Saudi Arabia" },
+    { value: "United Arab Emirates", label: "UAE" },
+    { value: "Brazil", label: "Brazil" },
+    { value: "India", label: "India" },
+    { value: "Singapore", label: "Singapore" },
+    { value: "United Kingdom", label: "United Kingdom" },
+    { value: "Canada", label: "Canada" },
+    { value: "Australia", label: "Australia" },
+    { value: "Japan", label: "Japan" },
+    { value: "South Korea", label: "South Korea" },
+    { value: "South Africa", label: "South Africa" },
+    { value: "Mexico", label: "Mexico" },
+    { value: "Qatar", label: "Qatar" },
+    { value: "Kuwait", label: "Kuwait" },
+    { value: "Bahrain", label: "Bahrain" },
+    { value: "Oman", label: "Oman" },
+    { value: "Jordan", label: "Jordan" },
+    { value: "Egypt", label: "Egypt" },
+    { value: "Indonesia", label: "Indonesia" },
+    { value: "Thailand", label: "Thailand" },
+    { value: "Vietnam", label: "Vietnam" },
+    { value: "Philippines", label: "Philippines" },
+    { value: "Malaysia", label: "Malaysia" },
+    { value: "Nigeria", label: "Nigeria" },
+    { value: "Kenya", label: "Kenya" },
   ];
   const PRACTICE_AREAS = [
     "Privacy Law",
@@ -1625,12 +1625,12 @@ function RoleRegisterForm({
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {JURISDICTIONS.map(j => (
                       <TagButton
-                        key={j}
-                        label={j}
+                        key={j.value}
+                        label={j.label}
                         tagAccent={accent}
-                        active={selectedTags.includes(j)}
+                        active={selectedTags.includes(j.value)}
                         onToggle={() =>
-                          toggleTag(selectedTags, setSelectedTags, j)
+                          toggleTag(selectedTags, setSelectedTags, j.value)
                         }
                       />
                     ))}

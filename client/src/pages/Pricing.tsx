@@ -173,7 +173,7 @@ const FAQ = [
   },
   {
     q: "Which compliance frameworks are covered?",
-    a: "DJAC covers 140+ global frameworks including GDPR, CCPA, LGPD, PIPL, PDPL, NCA, and more. Enterprise customers can request additional framework integrations.",
+    a: "DJAC covers 120+ global frameworks including GDPR, CCPA, LGPD, PIPL, PDPL, NCA, and more. Enterprise customers can request additional framework integrations.",
   },
   {
     q: "Is our data secure?",

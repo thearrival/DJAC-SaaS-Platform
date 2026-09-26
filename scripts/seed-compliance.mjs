@@ -5,7 +5,7 @@
  * Usage: node scripts/seed-compliance.mjs
  *
  * This script runs outside the Vercel function timeout (60s) so it can
- * handle the full 400+ control definitions in a single batch INSERT.
+ * handle all 46 frameworks and 97 control definitions in a single batch.
  *
  * Prerequisites: DATABASE_URL environment variable must be set.
  */

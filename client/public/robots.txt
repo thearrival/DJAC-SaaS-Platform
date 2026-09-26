@@ -21,3 +21,5 @@ Allow: /privacy
 Allow: /terms
 Allow: /docs
 Allow: /docs/
+
+Sitemap: https://app.yalla-hack.ae/sitemap.xml

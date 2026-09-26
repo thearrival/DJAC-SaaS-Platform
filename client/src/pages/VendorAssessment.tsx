@@ -966,7 +966,7 @@ function localizeAssessmentText(text: string, locale: Locale): string {
     return `أولوية قصوى: عالج ${count} من مشكلات الامتثال/البنية التحتية الحرجة قبل دخول السوق.`;
   }
 
-  const translated = ASSESSMENT_TEXT_TRANSLATIONS[locale][text];
+  const translated = ASSESSMENT_TEXT_TRANSLATIONS[locale]?.[text];
   return translated || text;
 }
 
@@ -1399,7 +1399,9 @@ export default function VendorAssessment() {
   const { locale = "en", direction = "ltr" } = useLocale();
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const localeKey = locale as Locale;
+  const localeKey = (
+    locale === "zh" || locale === "ar" ? locale : "en"
+  ) as Locale;
   const copy = COPY[localeKey];
   const uiText = UI_TEXT[localeKey];
   const dataLocationLabels = DATA_LOCATION_LABELS[localeKey];

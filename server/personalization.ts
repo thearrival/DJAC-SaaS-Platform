@@ -143,7 +143,7 @@ export async function generateRecommendations(
     actionRecs.push({
       title: "Explore the Compliance Framework Library",
       description:
-        "Browse 46 frameworks across 29 jurisdictions to understand your obligations.",
+        "Browse 46 frameworks across 28 jurisdictions to understand your obligations.",
       category: "assessment",
       urgency: "this-week",
     });

@@ -157,7 +157,7 @@ export function DataFlowVisualization() {
                   fontWeight: 600,
                 }}
               >
-                {NODE_LABELS[node.id][locale]}
+                {NODE_LABELS[node.id][locale] ?? NODE_LABELS[node.id].en}
               </span>
             </motion.div>
 

@@ -929,9 +929,10 @@ Access remains available while trialing or while the subscription is `active` / 
 
 ### 18.3 Localization
 
-- **9 languages:** English, العربية (Arabic, full RTL), 中文 (Chinese), Français, Español, Deutsch, 日本語, 한국어, Português
+- **UI dictionary — 9 full languages:** English, العربية (Arabic, full RTL), 中文 (Chinese), Français, Español, Deutsch, 日本語, 한국어, Português — 2,935 keys per locale at 100% parity, switched from the top-bar language switcher and persisted per user
 - All UI strings use `t(key, fallback)`; locale is persisted
-- Report **content** is fully localized in **en / ar / zh**; other UI locales fall back to English
+- **Documentation portal content** (`/docs`) and **report content** (PDF/DOCX) are published in **en / ar / zh**; other UI locales see English content with an in-page notice
+- **Graceful fallback:** pages with partial content (assessment analysis text, data-flow diagram labels) fall back to English rather than crashing
 - Dark / light themes with per-path default theme policies
 
 ---

@@ -604,7 +604,7 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 - **Vendor Risk Management** — Automated third-party assessments across all selected frameworks
 - **Enterprise-Grade Security** — AES-256 encryption, RBAC, audit trails, SOC 2 ready
 
-> **tip** DJAC supports 3 languages — English, Arabic, and Chinese — switch anytime from the header locale menu.
+> **tip** The DJAC interface is available in 9 languages — switch anytime from the header locale menu. This documentation is published in English, Arabic, and Chinese; other interface languages see the English version here.
 
 ### Quick Start (5 minutes)
 1. **Create your organization** — Set up your company profile and billing
@@ -625,7 +625,7 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 > **faq** How long does an AI vendor assessment take?
 > **answer** Most assessments complete in under 60 seconds, streaming live progress over the WebSocket as each of the 8 pipeline stages finishes.
 > **faq** Which regulations are supported out of the box?
-> **answer** 60+ frameworks across 28 jurisdictions — including GDPR, NIS2, DORA, PIPL, PDPL, ISO 27001, SOC 2, and more. The AI engine auto-recommends the relevant ones for your profile.
+> **answer** 46 frameworks with full control-level detail, plus 107 curated framework packs, across 28 jurisdictions — including GDPR, NIS2, DORA, PIPL, PDPL, ISO 27001, SOC 2, and more. The AI engine auto-recommends the relevant ones for your profile.
 > **faq** Can DJAC run on our own infrastructure?
 > **answer** Yes — besides Vercel cloud hosting, self-hosted Docker deployment is supported, and the platform can be extended with custom frameworks.`,
         },
@@ -2422,6 +2422,28 @@ function Admonition({ type, children }: { type: string; children: string }) {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
+   Docs content availability notice — docs content exists in en/ar/zh only;
+   other UI locales (fr/es/de/ja/ko/pt) are shown the English version and
+   this explains why. Nothing renders for locales with full content.
+   ────────────────────────────────────────────────────────────────────────── */
+
+const DOCS_CONTENT_NOTICE: Record<string, string> = {
+  fr: "Cette documentation est publiée en anglais, en arabe et en chinois. La version anglaise est affichée.",
+  es: "Esta documentación se publica en inglés, árabe y chino. Se muestra la versión en inglés.",
+  de: "Diese Dokumentation ist in Englisch, Arabisch und Chinesisch veröffentlicht. Die englische Version wird angezeigt.",
+  ja: "このドキュメントは英語・アラビア語・中国語で公開されています。英語版を表示しています。",
+  ko: "이 문서는 영어·아랍어·중국어로 게시됩니다. 영어 버전이 표시됩니다.",
+  pt: "Esta documentação é publicada em inglês, árabe e chinês. A versão em inglês está sendo exibida.",
+};
+
+function DocsContentNotice() {
+  const { locale } = useLocale();
+  const notice = DOCS_CONTENT_NOTICE[locale];
+  if (!notice) return null;
+  return <Admonition type="info">{notice}</Admonition>;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
    Sub-component: BreadcrumbNav
    ────────────────────────────────────────────────────────────────────────── */
 
@@ -3344,6 +3366,7 @@ export default function DocsPortal() {
           {/* Home Content */}
           <main className="djac-docs-content">
             <div className="max-w-4xl">
+              <DocsContentNotice />
               {/* Hero */}
               <div className="mb-12">
                 <div className="flex items-center gap-3 mb-4">
@@ -3392,7 +3415,7 @@ export default function DocsPortal() {
                       <Globe className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <span className="font-bold text-foreground">3</span>{" "}
+                      <span className="font-bold text-foreground">9</span>{" "}
                       <span className="text-muted-foreground">
                         {ui.stat_languages}
                       </span>
@@ -3719,6 +3742,7 @@ export default function DocsPortal() {
           <article className="djac-docs-page-wrapper">
             {/* Breadcrumbs */}
             <BreadcrumbNav section={currentSection} page={currentPage} />
+            <DocsContentNotice />
 
             {/* Header */}
             <div className="djac-docs-section-header">
