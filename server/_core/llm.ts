@@ -278,6 +278,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     tools,
     toolChoice,
     tool_choice,
+    maxTokens,
+    max_tokens,
     outputSchema,
     output_schema,
     responseFormat,
@@ -301,7 +303,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768;
+  const requestedMaxTokens = maxTokens ?? max_tokens;
+  payload.max_tokens =
+    typeof requestedMaxTokens === "number" &&
+    Number.isFinite(requestedMaxTokens) &&
+    requestedMaxTokens > 0
+      ? Math.min(Math.floor(requestedMaxTokens), 32768)
+      : 32768;
   payload.thinking = {
     budget_tokens: 128,
   };

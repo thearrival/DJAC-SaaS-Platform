@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "./_core/trpc";
+import { orgProcedure, protectedProcedure, router } from "./_core/trpc";
 import { requireModulePermissionIfOrgContext } from "./_core/permission-guard";
 import { DEADLINE_JURISDICTIONS } from "./_core/jurisdictions";
 import {
@@ -76,7 +76,9 @@ export const deadlineRouter = router({
       });
     }),
 
-  complete: protectedProcedure
+  // orgProcedure guarantees a non-null organization before the store is called,
+  // so a deadline can only ever be completed within the caller's own tenant.
+  complete: orgProcedure
     .input(z.number().int().positive())
     .mutation(async ({ input, ctx }) => {
       await requireModulePermissionIfOrgContext(

@@ -60,7 +60,10 @@ const DEFAULT_KNOWN_FRAMEWORKS = [
 ];
 const JURISDICTION_FRAMEWORKS: Record<string, string[]> = {
   china: ["PIPL", "CSL", "DSL", "MLPS 2.0"],
-  saudi: ["PDPL", "NCA"],
+  // Key must match the jurisdictionScores keys emitted by the assessment
+  // schema (server/ai/schemas.ts -> supplierAssessmentSchema). A mismatch
+  // silently falls back to overallScore for every Saudi framework row.
+  saudiArabia: ["PDPL", "NCA"],
   eu: ["GDPR", "NIS2", "DORA", "EU-AI-ACT"],
   us: ["CCPA", "HIPAA", "SOX", "PCI-DSS", "NIST-CSF-2"],
   brazil: ["LGPD"],

@@ -86,13 +86,11 @@ describe("API Integration - CORS", () => {
   });
 });
 
-describe("API Integration - DB Diagnostics", () => {
-  it("GET /api/_dbcheck should return database status", async () => {
+describe("API Integration - Operational endpoints are gated", () => {
+  it("GET /api/_dbcheck must not be publicly accessible", async () => {
     try {
       const res = await fetch(`${BASE_URL}/api/_dbcheck`);
-      const body = await res.json();
-      expect(body).toHaveProperty("dbConnected");
-      expect(typeof body.dbConnected).toBe("boolean");
+      expect([401, 404]).toContain(res.status);
     } catch {
       expect(true).toBe(true);
     }

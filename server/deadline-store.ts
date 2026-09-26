@@ -966,16 +966,14 @@ export async function createDeadline(
 // ---------------------------------------------------------------------------
 export async function completeDeadline(
   id: number,
-  organizationId: number | null
+  organizationId: number
 ): Promise<ComplianceDeadline | null> {
   const db = await getDb();
   const now = new Date();
 
   if (!db) {
     const idx = memoryDeadlines.findIndex(
-      d =>
-        d.id === id &&
-        (d.organizationId === organizationId || d.organizationId === null)
+      d => d.id === id && d.organizationId === organizationId
     );
     if (idx < 0) return null;
     memoryDeadlines[idx] = {
@@ -987,13 +985,12 @@ export async function completeDeadline(
     return memoryDeadlines[idx]!;
   }
 
-  const whereClause =
-    organizationId != null
-      ? and(
-          eq(complianceDeadlines.id, id),
-          eq(complianceDeadlines.organizationId, organizationId)
-        )
-      : eq(complianceDeadlines.id, id);
+  // Strictly scoped to the caller's organization — a missing organization must
+  // never be able to complete another tenant's deadline (cross-tenant write).
+  const whereClause = and(
+    eq(complianceDeadlines.id, id),
+    eq(complianceDeadlines.organizationId, organizationId)
+  );
 
   await db
     .update(complianceDeadlines)

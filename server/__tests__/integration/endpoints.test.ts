@@ -45,43 +45,24 @@ describe.runIf(!SKIP)("API — Endpoint Availability", () => {
     expect(body.message).toBe("pong");
   });
 
-  it("GET /api/_dbcheck returns db status", async () => {
-    const res = await fetch(`${BASE}/api/_dbcheck`);
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ok).toBe(true);
-  });
+  // Operational endpoints under /api/_* must never be anonymously reachable.
+  // They require CRON_SECRET or an authenticated platform-admin session.
+  const GATED = [
+    "/api/_dbcheck",
+    "/api/_stats",
+    "/api/_preflight",
+    "/api/_schema-check",
+    "/api/_db-tables",
+    "/api/_debug",
+    "/api/_init",
+  ];
 
-  it("GET /api/_stats returns stats", async () => {
-    const res = await fetch(`${BASE}/api/_stats`);
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ok).toBe(true);
-  });
-
-  it("GET /api/_preflight returns config check", async () => {
-    const res = await fetch(`${BASE}/api/_preflight`);
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.checks).toBeDefined();
-  });
-
-  it("GET /api/_schema-check returns schema status", async () => {
-    const res = await fetch(`${BASE}/api/_schema-check`);
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ok).toBe(true);
-    expect(body.message).toBeDefined();
-  });
-
-  it("GET /api/_db-tables returns table list", async () => {
-    const res = await fetch(`${BASE}/api/_db-tables`);
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ok).toBe(true);
-    expect(Array.isArray(body.tables)).toBe(true);
-    expect(body.tables.length).toBeGreaterThan(10);
-  });
+  for (const path of GATED) {
+    it(`GET ${path} is not publicly accessible`, async () => {
+      const res = await fetch(`${BASE}${path}`);
+      expect([401, 404]).toContain(res.status);
+    });
+  }
 });
 
 describe.runIf(!SKIP)("API — SPA Pages", () => {

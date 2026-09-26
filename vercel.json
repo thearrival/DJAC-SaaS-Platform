@@ -10,9 +10,6 @@
     },
     "api/ping.ts": {
       "maxDuration": 30
-    },
-    "api/i18n-job.js": {
-      "maxDuration": 300
     }
   },
   "crons": [
@@ -26,10 +23,6 @@
     }
   ],
   "routes": [
-    {
-      "src": "/i18n-job",
-      "dest": "/api/i18n-job"
-    },
     {
       "src": "/api/ping",
       "dest": "/api/ping"

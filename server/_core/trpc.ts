@@ -126,7 +126,7 @@ const requireOrgAdmin = t.middleware(async opts => {
 
 export const orgAdminProcedure = protectedProcedure.use(requireOrgAdmin);
 
-export const adminProcedure = t.procedure.use(
+export const adminProcedure = t.procedure.use(rateLimitMiddleware).use(
   t.middleware(async opts => {
     const { ctx, next } = opts;
 

@@ -9,6 +9,10 @@ var __export = (target, all) => {
 };
 
 // server/services/config-schema.ts
+var config_schema_exports = {};
+__export(config_schema_exports, {
+  parsedEnv: () => parsedEnv
+});
 function intEnv(raw, fallback, min, max) {
   if (!raw) return fallback;
   const n = Number.parseInt(raw, 10);
@@ -163,7 +167,9 @@ var init_config_schema = __esm({
       OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "",
       // ── Report generation ─────────────────────────────────────────────────────
       REPORT_NATIVE_PDF_CONVERSION: process.env.REPORT_NATIVE_PDF_CONVERSION !== "false",
-      // ── Server ────────────────────────────────────────────────────────────────
+      // ── Cron / scheduled tasks ──────────────────────────────────
+      // (CRON_SECRET is defined in the App section above)
+      // ── Server ────────────────────────────────────────────────────────
       PORT: intEnv(process.env.PORT, 3e3, 1, 65535),
       // ── Sentry ────────────────────────────────────────────────────────────────
       SENTRY_DSN: strEnv(process.env.SENTRY_DSN),
@@ -373,6 +379,221 @@ var init_env = __esm({
       supabaseUrl: parsedEnv.SUPABASE_URL,
       supabaseAnonKey: parsedEnv.SUPABASE_ANON_KEY,
       supabaseServiceRoleKey: parsedEnv.SUPABASE_SERVICE_ROLE_KEY
+    };
+  }
+});
+
+// shared/const.ts
+function hasMinRole(actorRole, required) {
+  const actorLevel = ROLE_LEVEL[actorRole] ?? 0;
+  return actorLevel >= ROLE_LEVEL[required];
+}
+var COOKIE_NAME, ONE_YEAR_MS, AXIOS_TIMEOUT_MS, APP_LOCALES, UNAUTHED_ERR_MSG, NOT_ADMIN_ERR_MSG, NOT_PLATFORM_ADMIN_ERR_MSG, NOT_SUPER_ADMIN_ERR_MSG, NOT_COMPANY_ADMIN_ERR_MSG, ROLE_LEVEL, MODULE_SLUGS, VIEW_ONLY, STANDARD, FULL, DEFAULT_ORG_ROLE_PERMISSIONS;
+var init_const = __esm({
+  "shared/const.ts"() {
+    "use strict";
+    COOKIE_NAME = "app_session_id";
+    ONE_YEAR_MS = 1e3 * 60 * 60 * 24 * 365;
+    AXIOS_TIMEOUT_MS = 3e4;
+    APP_LOCALES = [
+      "en",
+      "ar",
+      "zh",
+      "fr",
+      "es",
+      "de",
+      "ja",
+      "ko",
+      "pt"
+    ];
+    UNAUTHED_ERR_MSG = "Authentication required (10001)";
+    NOT_ADMIN_ERR_MSG = "You do not have the required permission (10002)";
+    NOT_PLATFORM_ADMIN_ERR_MSG = "Platform administrator access required (10003)";
+    NOT_SUPER_ADMIN_ERR_MSG = "Super administrator access required (10004)";
+    NOT_COMPANY_ADMIN_ERR_MSG = "Company administrator access required (10005)";
+    ROLE_LEVEL = {
+      basic_user: 10,
+      user: 10,
+      professional_user: 20,
+      company_admin: 30,
+      platform_admin: 40,
+      yalla_hack_employee: 45,
+      admin: 40,
+      super_admin: 100
+    };
+    MODULE_SLUGS = [
+      "asset_inventory",
+      "vendor_assessment",
+      "gap_tracker",
+      "remediation_planner",
+      "risk_register",
+      "policy_manager",
+      "incident_register",
+      "audit_schedule",
+      "dsr_management",
+      "evidence_repository",
+      "security_maturity",
+      "compliance_tracker",
+      "compliance_reports",
+      "report_center",
+      "compliance_heatmap",
+      "compliance_calendar",
+      "compliance_simulation",
+      "vendor_compliance_profiles",
+      "assessment_history",
+      "service_requests",
+      "api_keys",
+      "team_members",
+      "org_settings",
+      "audit_log",
+      "pro_intelligence",
+      "transfer_checker",
+      "law_library",
+      "framework_analysis",
+      "regulatory_changes",
+      "billing",
+      "admin_control_center",
+      "saas_metrics"
+    ];
+    VIEW_ONLY = {
+      canView: true,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canExport: false,
+      canInvite: false
+    };
+    STANDARD = {
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: false,
+      canExport: true,
+      canInvite: false
+    };
+    FULL = {
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canInvite: true
+    };
+    DEFAULT_ORG_ROLE_PERMISSIONS = {
+      analyst: {
+        asset_inventory: VIEW_ONLY,
+        vendor_assessment: VIEW_ONLY,
+        gap_tracker: VIEW_ONLY,
+        remediation_planner: VIEW_ONLY,
+        risk_register: VIEW_ONLY,
+        policy_manager: VIEW_ONLY,
+        incident_register: VIEW_ONLY,
+        audit_schedule: VIEW_ONLY,
+        dsr_management: VIEW_ONLY,
+        evidence_repository: VIEW_ONLY,
+        security_maturity: VIEW_ONLY,
+        compliance_tracker: VIEW_ONLY,
+        compliance_reports: VIEW_ONLY,
+        report_center: VIEW_ONLY,
+        compliance_heatmap: VIEW_ONLY,
+        compliance_calendar: VIEW_ONLY,
+        vendor_compliance_profiles: VIEW_ONLY,
+        assessment_history: VIEW_ONLY,
+        service_requests: STANDARD,
+        pro_intelligence: VIEW_ONLY,
+        transfer_checker: VIEW_ONLY,
+        law_library: VIEW_ONLY,
+        framework_analysis: VIEW_ONLY,
+        regulatory_changes: VIEW_ONLY
+      },
+      compliance_officer: {
+        asset_inventory: STANDARD,
+        vendor_assessment: STANDARD,
+        gap_tracker: STANDARD,
+        remediation_planner: STANDARD,
+        risk_register: STANDARD,
+        policy_manager: STANDARD,
+        incident_register: STANDARD,
+        audit_schedule: STANDARD,
+        dsr_management: STANDARD,
+        evidence_repository: STANDARD,
+        security_maturity: STANDARD,
+        compliance_tracker: STANDARD,
+        compliance_reports: STANDARD,
+        report_center: STANDARD,
+        compliance_heatmap: STANDARD,
+        compliance_calendar: STANDARD,
+        vendor_compliance_profiles: STANDARD,
+        assessment_history: STANDARD,
+        service_requests: STANDARD,
+        pro_intelligence: STANDARD,
+        transfer_checker: STANDARD,
+        law_library: VIEW_ONLY,
+        framework_analysis: VIEW_ONLY,
+        regulatory_changes: STANDARD
+      },
+      admin: {
+        asset_inventory: FULL,
+        vendor_assessment: FULL,
+        gap_tracker: FULL,
+        remediation_planner: FULL,
+        risk_register: FULL,
+        policy_manager: FULL,
+        incident_register: FULL,
+        audit_schedule: FULL,
+        dsr_management: FULL,
+        evidence_repository: FULL,
+        security_maturity: FULL,
+        compliance_tracker: FULL,
+        compliance_reports: FULL,
+        report_center: FULL,
+        compliance_heatmap: FULL,
+        compliance_calendar: FULL,
+        vendor_compliance_profiles: FULL,
+        assessment_history: FULL,
+        service_requests: FULL,
+        api_keys: STANDARD,
+        team_members: STANDARD,
+        org_settings: STANDARD,
+        audit_log: VIEW_ONLY,
+        pro_intelligence: FULL,
+        transfer_checker: FULL,
+        law_library: VIEW_ONLY,
+        framework_analysis: VIEW_ONLY,
+        regulatory_changes: FULL,
+        billing: VIEW_ONLY
+      },
+      owner: {
+        asset_inventory: FULL,
+        vendor_assessment: FULL,
+        gap_tracker: FULL,
+        remediation_planner: FULL,
+        risk_register: FULL,
+        policy_manager: FULL,
+        incident_register: FULL,
+        audit_schedule: FULL,
+        dsr_management: FULL,
+        evidence_repository: FULL,
+        security_maturity: FULL,
+        compliance_tracker: FULL,
+        compliance_reports: FULL,
+        report_center: FULL,
+        compliance_heatmap: FULL,
+        compliance_calendar: FULL,
+        vendor_compliance_profiles: FULL,
+        assessment_history: FULL,
+        service_requests: FULL,
+        api_keys: FULL,
+        team_members: FULL,
+        org_settings: FULL,
+        audit_log: FULL,
+        pro_intelligence: FULL,
+        transfer_checker: FULL,
+        law_library: FULL,
+        framework_analysis: FULL,
+        regulatory_changes: FULL,
+        billing: FULL
+      }
     };
   }
 });
@@ -2128,7 +2349,8 @@ async function getDb() {
       connectionString: sslUrl,
       max: connectionLimit,
       idleTimeoutMillis: 3e4,
-      connectionTimeoutMillis: 5e3
+      connectionTimeoutMillis: 5e3,
+      statement_timeout: 3e4
     });
     _pool.on("error", (err) => {
       console.error("[Database] Pool error:", err.message);
@@ -2339,6 +2561,487 @@ var init_db = __esm({
     DB_RETRY_BACKOFF_MIN_MS = 1e3;
     DB_RETRY_BACKOFF_MAX_MS = 6e4;
     devUserOverride = {};
+  }
+});
+
+// shared/_core/errors.ts
+var HttpError, ForbiddenError;
+var init_errors = __esm({
+  "shared/_core/errors.ts"() {
+    "use strict";
+    HttpError = class extends Error {
+      constructor(statusCode, message) {
+        super(message);
+        this.statusCode = statusCode;
+        this.name = "HttpError";
+      }
+    };
+    ForbiddenError = (msg) => new HttpError(403, msg);
+  }
+});
+
+// server/_core/sdk.ts
+var sdk_exports = {};
+__export(sdk_exports, {
+  sdk: () => sdk
+});
+import axios from "axios";
+import { parse as parseCookieHeader } from "cookie";
+import { SignJWT, jwtVerify } from "jose";
+var isNonEmptyString, EXCHANGE_TOKEN_PATH, GET_USER_INFO_PATH, GET_USER_INFO_WITH_JWT_PATH, OAuthService, createOAuthHttpClient, SDKServer, sdk;
+var init_sdk = __esm({
+  "server/_core/sdk.ts"() {
+    "use strict";
+    init_const();
+    init_errors();
+    init_db();
+    init_env();
+    isNonEmptyString = (value) => typeof value === "string" && value.length > 0;
+    EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
+    GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
+    GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
+    OAuthService = class {
+      constructor(client) {
+        this.client = client;
+        console.info("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
+        if (!ENV.oAuthServerUrl) {
+          console.error(
+            "[OAuth] ERROR: OAUTH_SERVER_URL is not configured! Set OAUTH_SERVER_URL environment variable."
+          );
+        }
+      }
+      decodeState(state) {
+        const redirectUri = atob(state);
+        return redirectUri;
+      }
+      async getTokenByCode(code, state) {
+        const payload = {
+          clientId: ENV.appId,
+          grantType: "authorization_code",
+          code,
+          redirectUri: this.decodeState(state)
+        };
+        const { data } = await this.client.post(
+          EXCHANGE_TOKEN_PATH,
+          payload
+        );
+        return data;
+      }
+      async getUserInfoByToken(token) {
+        const { data } = await this.client.post(
+          GET_USER_INFO_PATH,
+          {
+            accessToken: token.accessToken
+          }
+        );
+        return data;
+      }
+    };
+    createOAuthHttpClient = () => axios.create({
+      baseURL: ENV.oAuthServerUrl,
+      timeout: AXIOS_TIMEOUT_MS
+    });
+    SDKServer = class {
+      constructor(client = createOAuthHttpClient()) {
+        this.client = client;
+        this.oauthService = new OAuthService(this.client);
+      }
+      deriveLoginMethod(platforms, fallback) {
+        if (fallback && fallback.length > 0) return fallback;
+        if (!Array.isArray(platforms) || platforms.length === 0) return null;
+        const set = new Set(
+          platforms.filter((p) => typeof p === "string")
+        );
+        if (set.has("REGISTERED_PLATFORM_EMAIL")) return "email";
+        if (set.has("REGISTERED_PLATFORM_GOOGLE")) return "google";
+        if (set.has("REGISTERED_PLATFORM_APPLE")) return "apple";
+        if (set.has("REGISTERED_PLATFORM_MICROSOFT") || set.has("REGISTERED_PLATFORM_AZURE"))
+          return "microsoft";
+        if (set.has("REGISTERED_PLATFORM_GITHUB")) return "github";
+        const first = Array.from(set)[0];
+        return first ? first.toLowerCase() : null;
+      }
+      /**
+       * Exchange OAuth authorization code for access token
+       * @example
+       * const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+       */
+      async exchangeCodeForToken(code, state) {
+        return this.oauthService.getTokenByCode(code, state);
+      }
+      /**
+       * Get user information using access token
+       * @example
+       * const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+       */
+      async getUserInfo(accessToken) {
+        const data = await this.oauthService.getUserInfoByToken({
+          accessToken
+        });
+        const loginMethod = this.deriveLoginMethod(
+          data?.platforms,
+          data?.platform ?? data.platform ?? null
+        );
+        return {
+          ...data,
+          platform: loginMethod,
+          loginMethod
+        };
+      }
+      parseCookies(cookieHeader) {
+        if (!cookieHeader) {
+          return /* @__PURE__ */ new Map();
+        }
+        const parsed = parseCookieHeader(cookieHeader);
+        return new Map(Object.entries(parsed));
+      }
+      getSessionSecret() {
+        const secret = ENV.cookieSecret;
+        return new TextEncoder().encode(secret);
+      }
+      /**
+       * Create a session token for a Manus user openId
+       * @example
+       * const sessionToken = await sdk.createSessionToken(userInfo.openId);
+       */
+      async createSessionToken(openId, options = {}) {
+        return this.signSession(
+          {
+            openId,
+            appId: ENV.appId,
+            name: options.name || ""
+          },
+          options
+        );
+      }
+      async signSession(payload, options = {}) {
+        const issuedAt = Date.now();
+        const expiresInMs = options.expiresInMs ?? ONE_YEAR_MS;
+        const expirationSeconds = Math.floor((issuedAt + expiresInMs) / 1e3);
+        const secretKey = this.getSessionSecret();
+        return new SignJWT({
+          openId: payload.openId,
+          appId: payload.appId,
+          name: payload.name
+        }).setProtectedHeader({ alg: "HS256", typ: "JWT" }).setExpirationTime(expirationSeconds).sign(secretKey);
+      }
+      async verifySession(cookieValue) {
+        if (!cookieValue) {
+          console.warn("[Auth] Missing session cookie");
+          return null;
+        }
+        try {
+          const secretKey = this.getSessionSecret();
+          const { payload } = await jwtVerify(cookieValue, secretKey, {
+            algorithms: ["HS256"]
+          });
+          const { openId, appId, name } = payload;
+          if (!isNonEmptyString(openId) || !isNonEmptyString(appId) || !isNonEmptyString(name)) {
+            console.warn("[Auth] Session payload missing required fields");
+            return null;
+          }
+          return {
+            openId,
+            appId,
+            name
+          };
+        } catch (error) {
+          console.warn("[Auth] Session verification failed", String(error));
+          return null;
+        }
+      }
+      async getUserInfoWithJwt(jwtToken) {
+        const payload = {
+          jwtToken,
+          projectId: ENV.appId
+        };
+        const { data } = await this.client.post(
+          GET_USER_INFO_WITH_JWT_PATH,
+          payload
+        );
+        const loginMethod = this.deriveLoginMethod(
+          data?.platforms,
+          data?.platform ?? data.platform ?? null
+        );
+        return {
+          ...data,
+          platform: loginMethod,
+          loginMethod
+        };
+      }
+      async authenticateRequest(req) {
+        const cookies = this.parseCookies(req.headers.cookie);
+        const sessionCookie = cookies.get(COOKIE_NAME);
+        const session = await this.verifySession(sessionCookie);
+        if (!session) {
+          throw ForbiddenError("Invalid session cookie");
+        }
+        const sessionUserId = session.openId;
+        const signedInAt = /* @__PURE__ */ new Date();
+        let user = await getUserByOpenId(sessionUserId);
+        if (!user) {
+          try {
+            const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
+            await upsertUser({
+              openId: userInfo.openId,
+              name: userInfo.name || null,
+              email: userInfo.email ?? null,
+              loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
+              lastSignedIn: signedInAt,
+              lastActivityAt: signedInAt
+            });
+            user = await getUserByOpenId(userInfo.openId);
+          } catch (error) {
+            console.error("[Auth] Failed to sync user from OAuth:", error);
+            throw ForbiddenError("Failed to sync user info");
+          }
+        }
+        if (!user) {
+          throw ForbiddenError("User not found");
+        }
+        await upsertUser({
+          openId: user.openId,
+          lastSignedIn: signedInAt,
+          lastActivityAt: signedInAt
+        });
+        return user;
+      }
+    };
+    sdk = new SDKServer();
+  }
+});
+
+// server/_core/logger.ts
+import pino from "pino";
+function logEvent(category, action, data, level = "info") {
+  logger[level]({ category, action, ...data }, action);
+}
+var isDev, transport, logger;
+var init_logger = __esm({
+  "server/_core/logger.ts"() {
+    "use strict";
+    init_env();
+    isDev = ENV.isDevelopment;
+    transport = isDev ? {
+      target: "pino-pretty",
+      options: {
+        colorize: true,
+        translateTime: "SYS:HH:MM:ss.l",
+        ignore: "pid,hostname",
+        messageFormat: "{msg}",
+        singleLine: false
+      }
+    } : void 0;
+    logger = pino(
+      {
+        level: isDev ? "debug" : "info",
+        base: {
+          service: "djac-tool",
+          env: ENV.isProduction ? "production" : ENV.isDevelopment ? "development" : "test"
+        },
+        // Redact secrets from any log line regardless of caller
+        redact: {
+          paths: [
+            "*.password",
+            "*.passwordHash",
+            "*.token",
+            "*.secret",
+            "*.apiKey",
+            "*.api_key",
+            "*.jwt",
+            "*.authorization",
+            "req.headers.authorization",
+            "req.headers.cookie"
+          ],
+          censor: "[REDACTED]"
+        },
+        timestamp: pino.stdTimeFunctions.isoTime,
+        serializers: {
+          err: pino.stdSerializers.err,
+          error: pino.stdSerializers.err,
+          req: pino.stdSerializers.req,
+          res: pino.stdSerializers.res
+        }
+      },
+      transport ? pino.transport(transport) : void 0
+    );
+  }
+});
+
+// server/_core/rateLimiter.ts
+var rateLimiter_exports = {};
+__export(rateLimiter_exports, {
+  checkRateLimit: () => checkRateLimit,
+  closeRateLimiter: () => closeRateLimiter,
+  getRateLimitCount: () => getRateLimitCount,
+  getRateLimiterStats: () => getRateLimiterStats,
+  resetRateLimit: () => resetRateLimit
+});
+import Redis from "ioredis";
+function getRedis() {
+  if (_redisInitialised) return _redis;
+  _redisInitialised = true;
+  const url = ENV.redisUrl.trim();
+  if (!url) return null;
+  try {
+    _redis = new Redis(url, {
+      lazyConnect: false,
+      // Don't let offline-queue pile up; fail immediately on transient errors.
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
+      commandTimeout: 500
+    });
+    _redis.on("error", (err) => {
+      if (err.code !== "ECONNREFUSED") {
+        console.warn("[RateLimiter] Redis error:", err.message);
+      }
+    });
+    return _redis;
+  } catch {
+    console.warn("[RateLimiter] Failed to create Redis connection");
+    return null;
+  }
+}
+async function checkRateLimit(key, limit, windowMs) {
+  const windowIndex = Math.floor(Date.now() / windowMs);
+  const windowResetMs = (windowIndex + 1) * windowMs;
+  const resetAt = Math.ceil(windowResetMs / 1e3);
+  const redis = getRedis();
+  if (redis) {
+    try {
+      const redisKey = `rl:${windowIndex}:${key}`;
+      const count3 = await redis.incr(redisKey);
+      if (count3 === 1) {
+        const ttlMs = windowResetMs - Date.now();
+        await redis.pexpire(redisKey, Math.max(ttlMs, 1));
+      }
+      return {
+        allowed: count3 <= limit,
+        remaining: Math.max(0, limit - count3),
+        resetAt,
+        limit
+      };
+    } catch (cause) {
+      console.warn(
+        "[RateLimiter] Redis unavailable, falling back to in-memory:",
+        cause.message
+      );
+    }
+  }
+  const now = Date.now();
+  const existing = _memStore.get(key);
+  if (!existing || now > existing.resetAt) {
+    _memStore.set(key, { count: 1, resetAt: windowResetMs });
+    return { allowed: true, remaining: limit - 1, resetAt, limit };
+  }
+  existing.count += 1;
+  return {
+    allowed: existing.count <= limit,
+    remaining: Math.max(0, limit - existing.count),
+    resetAt: Math.ceil(existing.resetAt / 1e3),
+    limit
+  };
+}
+async function getRateLimitCount(key, windowMs) {
+  const windowIndex = Math.floor(Date.now() / windowMs);
+  const redis = getRedis();
+  if (redis) {
+    try {
+      const val = await redis.get(`rl:${windowIndex}:${key}`);
+      return val ? parseInt(val, 10) || 0 : 0;
+    } catch (cause) {
+      console.warn(
+        "[RateLimiter] Redis unavailable for peek, falling back to in-memory:",
+        cause.message
+      );
+    }
+  }
+  const existing = _memStore.get(key);
+  if (!existing || Date.now() > existing.resetAt) return 0;
+  return existing.count;
+}
+async function resetRateLimit(key, windowMs) {
+  const windowIndex = Math.floor(Date.now() / windowMs);
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.del(`rl:${windowIndex}:${key}`);
+    } catch {
+    }
+  }
+  _memStore.delete(key);
+}
+function getRateLimiterStats() {
+  return {
+    mode: _redis ? "redis" : "memory",
+    redisConnected: _redis !== null,
+    inMemoryEntries: _memStore.size
+  };
+}
+async function closeRateLimiter() {
+  if (_pruneInterval) {
+    clearInterval(_pruneInterval);
+    _pruneInterval = null;
+  }
+  if (_redis) {
+    await _redis.quit();
+    _redis = null;
+  }
+}
+var _redis, _redisInitialised, _memStore, _pruneInterval;
+var init_rateLimiter = __esm({
+  "server/_core/rateLimiter.ts"() {
+    "use strict";
+    init_env();
+    _redis = null;
+    _redisInitialised = false;
+    _memStore = /* @__PURE__ */ new Map();
+    _pruneInterval = null;
+    _pruneInterval = setInterval(() => {
+      const now = Date.now();
+      for (const [key, entry] of _memStore) {
+        if (now > entry.resetAt) _memStore.delete(key);
+      }
+    }, 5 * 6e4);
+    _pruneInterval.unref();
+  }
+});
+
+// server/services/sse-bus.ts
+var sse_bus_exports = {};
+__export(sse_bus_exports, {
+  addSSEClient: () => addSSEClient,
+  broadcastSSE: () => broadcastSSE,
+  getSSEClientCount: () => getSSEClientCount,
+  removeSSEClient: () => removeSSEClient
+});
+function addSSEClient(res) {
+  sseClients.add(res);
+}
+function removeSSEClient(res) {
+  sseClients.delete(res);
+}
+function getSSEClientCount() {
+  return sseClients.size;
+}
+function broadcastSSE(event, data) {
+  const msg = `event: ${event}
+data: ${JSON.stringify(data)}
+
+`;
+  for (const client of sseClients) {
+    try {
+      client.write(msg);
+    } catch {
+      sseClients.delete(client);
+    }
+  }
+}
+var sseClients;
+var init_sse_bus = __esm({
+  "server/services/sse-bus.ts"() {
+    "use strict";
+    sseClients = /* @__PURE__ */ new Set();
   }
 });
 
@@ -3166,12 +3869,1856 @@ var init_supplier_assessment = __esm({
   }
 });
 
+// server/ai/schemas.ts
+import { z as z2 } from "zod";
+var jurisdictionScoreShape, aiJobStatusSchema, aiJobStageSchema, assessmentSeveritySchema, supplierGapSchema, supplierAssessmentSchema, extractedFactSchema, ragControlSchema, dbAssessmentPayloadSchema, dbGapPayloadSchema, aiAssessmentReportSchema, aiJobEventSchema, aiJobSnapshotSchema;
+var init_schemas = __esm({
+  "server/ai/schemas.ts"() {
+    "use strict";
+    init_supplier_assessment();
+    jurisdictionScoreShape = Object.fromEntries(
+      JURISDICTION_SCORE_KEYS.map((key) => [key, z2.number().int().min(0).max(100)])
+    );
+    aiJobStatusSchema = z2.enum([
+      "queued",
+      "running",
+      "completed",
+      "failed"
+    ]);
+    aiJobStageSchema = z2.enum([
+      "queued",
+      "gatekeeper",
+      "intake",
+      "extractor",
+      "rag_context",
+      "judge",
+      "synthesizer",
+      "validator",
+      "reporter",
+      "persistence",
+      "completed",
+      "failed"
+    ]);
+    assessmentSeveritySchema = z2.enum([
+      "critical",
+      "high",
+      "medium",
+      "low"
+    ]);
+    supplierGapSchema = z2.object({
+      code: z2.string().trim().min(1).max(120),
+      jurisdiction: z2.enum([
+        "china",
+        "saudi",
+        "eu",
+        "us",
+        "brazil",
+        "cross_border",
+        "global",
+        "uk",
+        "canada",
+        "australia",
+        "japan",
+        "southKorea",
+        "singapore",
+        "india",
+        "southAfrica",
+        "mexico",
+        "uae",
+        "qatar",
+        "kuwait",
+        "bahrain",
+        "oman",
+        "jordan",
+        "egypt",
+        "indonesia",
+        "thailand",
+        "vietnam",
+        "philippines",
+        "malaysia",
+        "nigeria",
+        "kenya"
+      ]),
+      frameworks: z2.array(z2.string().trim().min(1).max(32)).min(1).max(8),
+      severity: assessmentSeveritySchema,
+      title: z2.string().trim().min(1).max(240),
+      description: z2.string().trim().min(1).max(3e3),
+      mitigation: z2.string().trim().min(1).max(3e3),
+      penaltyContext: z2.string().trim().max(2e3)
+    });
+    supplierAssessmentSchema = z2.object({
+      vendorId: z2.number().int(),
+      generatedAt: z2.string().datetime({ offset: true }),
+      overallScore: z2.number().int().min(0).max(100),
+      jurisdictionScores: z2.object({
+        china: z2.number().int().min(0).max(100),
+        saudiArabia: z2.number().int().min(0).max(100),
+        eu: z2.number().int().min(0).max(100),
+        us: z2.number().int().min(0).max(100),
+        brazil: z2.number().int().min(0).max(100),
+        global: z2.number().int().min(0).max(100),
+        ...jurisdictionScoreShape
+      }),
+      status: z2.enum(["compliant", "partial", "non_compliant"]),
+      riskLevel: z2.enum(["low", "medium", "high", "critical"]),
+      gaps: z2.array(supplierGapSchema),
+      recommendations: z2.array(z2.string().trim().min(1).max(3e3)).max(120)
+    });
+    extractedFactSchema = z2.object({
+      key: z2.string().trim().min(1).max(120),
+      value: z2.string().trim().min(1).max(4e3),
+      evidence: z2.string().trim().max(4e3).optional().default(""),
+      mappedControlBuckets: z2.array(z2.string().trim().min(1).max(120)).max(12).default([])
+    });
+    ragControlSchema = z2.object({
+      controlId: z2.number().int().positive(),
+      frameworkCode: z2.string().trim().min(1).max(32),
+      controlCode: z2.string().trim().min(1).max(120),
+      category: z2.string().trim().max(120).optional().nullable(),
+      controlName: z2.string().trim().max(512).optional().nullable(),
+      requirement: z2.string().trim().max(4e3).optional().nullable(),
+      relevanceScore: z2.number().min(0).max(1)
+    });
+    dbAssessmentPayloadSchema = z2.object({
+      frameworkCode: z2.string().trim().min(1).max(32),
+      complianceScore: z2.number().int().min(0).max(100),
+      riskLevel: z2.enum(["low", "medium", "high", "critical"]),
+      status: z2.enum(["compliant", "partial", "non_compliant"]),
+      findings: z2.array(z2.string().trim().min(1).max(1200)).max(120),
+      recommendations: z2.array(z2.string().trim().min(1).max(3e3)).max(120)
+    });
+    dbGapPayloadSchema = z2.object({
+      frameworkCode: z2.string().trim().min(1).max(32),
+      controlCode: z2.string().trim().max(120).optional().default(""),
+      gapCode: z2.string().trim().min(1).max(120),
+      gapDescription: z2.string().trim().min(1).max(3e3),
+      severity: assessmentSeveritySchema,
+      remediation: z2.string().trim().min(1).max(3e3)
+    });
+    aiAssessmentReportSchema = z2.object({
+      version: z2.literal("1.0"),
+      generatedAt: z2.string().datetime({ offset: true }),
+      inputSummary: z2.object({
+        vendorId: z2.number().int(),
+        source: z2.enum(["vendor_profile", "document_upload"]),
+        documentType: z2.string().trim().max(120),
+        tags: z2.array(z2.string().trim().min(1).max(60)).max(20)
+      }),
+      extractedFacts: z2.array(extractedFactSchema).max(200),
+      ragControls: z2.array(ragControlSchema).max(200),
+      assessment: supplierAssessmentSchema,
+      remediationPlan: z2.array(z2.string().trim().min(1).max(3e3)).max(120),
+      validator: z2.object({
+        passed: z2.boolean(),
+        attempts: z2.number().int().min(1).max(10),
+        notes: z2.array(z2.string().trim().min(1).max(1200)).max(60)
+      }),
+      dbPayload: z2.object({
+        vendorAssessments: z2.array(dbAssessmentPayloadSchema).max(20),
+        assessmentGaps: z2.array(dbGapPayloadSchema).max(400)
+      })
+    });
+    aiJobEventSchema = z2.object({
+      stage: aiJobStageSchema,
+      message: z2.string().trim().min(1).max(500),
+      timestamp: z2.string().datetime({ offset: true })
+    });
+    aiJobSnapshotSchema = z2.object({
+      id: z2.string().trim().min(1),
+      userId: z2.number().int(),
+      status: aiJobStatusSchema,
+      stage: aiJobStageSchema,
+      createdAt: z2.string().datetime({ offset: true }),
+      updatedAt: z2.string().datetime({ offset: true }),
+      events: z2.array(aiJobEventSchema).max(500),
+      error: z2.string().trim().max(3e3).optional(),
+      result: aiAssessmentReportSchema.optional(),
+      persistence: z2.object({
+        savedAssessments: z2.number().int().min(0),
+        savedGaps: z2.number().int().min(0),
+        skipped: z2.boolean()
+      }).optional()
+    });
+  }
+});
+
+// server/ai/pipeline.ts
+function clampScore2(value) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+function scoreToStatus2(score) {
+  if (score >= 85) return "compliant";
+  if (score >= 65) return "partial";
+  return "non_compliant";
+}
+function inferRiskLevel2(assessment) {
+  const criticalCount = assessment.gaps.filter(
+    (g) => g.severity === "critical"
+  ).length;
+  const highCount = assessment.gaps.filter((g) => g.severity === "high").length;
+  if (criticalCount > 0) return "critical";
+  if (assessment.overallScore < 60 || highCount >= 2) return "high";
+  if (assessment.overallScore < 80 || highCount > 0) return "medium";
+  return "low";
+}
+function toTokens(value) {
+  return value.toLowerCase().replace(/[^a-z0-9\s-]/g, " ").split(/\s+/).map((token) => token.trim()).filter((token) => token.length >= 3);
+}
+function mapControlBuckets(text2) {
+  const normalized = text2.toLowerCase();
+  const buckets = [];
+  for (const [bucket, keywords] of Object.entries(CONTROL_BUCKET_KEYWORDS)) {
+    if (keywords.some((keyword) => normalized.includes(keyword))) {
+      buckets.push(bucket);
+    }
+  }
+  return Array.from(new Set(buckets));
+}
+function addFact(facts, key, value, evidence = "") {
+  const normalized = value.trim();
+  if (!normalized) return;
+  facts.push({
+    key,
+    value: normalized,
+    evidence: evidence.trim(),
+    mappedControlBuckets: mapControlBuckets(`${key} ${normalized} ${evidence}`)
+  });
+}
+async function callAgentSwarm(stagePath, payload) {
+  const baseUrl = ENV.agentSwarmBaseUrl;
+  if (!baseUrl) return null;
+  const endpoint = `${baseUrl.replace(/\/$/, "")}/${stagePath.replace(/^\//, "")}`;
+  const abortController = new AbortController();
+  const timeout = setTimeout(() => abortController.abort(), 15e3);
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(payload),
+      signal: abortController.signal
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return await response.json();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+function runSecurityGatekeeper(payload) {
+  const threats = INJECTION_PATTERNS.filter((pattern) => pattern.test(payload));
+  if (threats.length > 0) {
+    throw new Error(
+      "Security Gatekeeper blocked potentially malicious assessment payload."
+    );
+  }
+}
+function runIntake(vendor, rawDocumentText) {
+  const combinedText = [
+    vendor.vendorName,
+    vendor.vendorDescription || "",
+    vendor.industry || "",
+    vendor.businessRegistrationNumber || "",
+    vendor.headquartersLocation || "",
+    vendor.primaryContactName || "",
+    vendor.primaryContactEmail || "",
+    vendor.primaryContactRole || "",
+    vendor.primaryContactPhone || "",
+    vendor.serviceType || "",
+    vendor.serviceScope || "",
+    vendor.hostingEnvironment || "",
+    vendor.operatingCountries || "",
+    vendor.cloudProvider || "",
+    vendor.dataLocations || "",
+    vendor.regulatoryJurisdictions || "",
+    vendor.certifications || "",
+    vendor.dataProcessingActivities || "",
+    vendor.criticalityLevel || "",
+    vendor.riskTier || "",
+    vendor.thirdPartyDependencies || "",
+    vendor.fourthPartyDependencies || "",
+    rawDocumentText || ""
+  ].filter(Boolean).join("\n").trim();
+  const lower = combinedText.toLowerCase();
+  const documentType = lower.includes("policy") || lower.includes("procedure") ? "policy_document" : lower.includes("questionnaire") ? "questionnaire" : rawDocumentText.trim().length > 0 ? "uploaded_text" : "vendor_profile";
+  const tags = Array.from(
+    new Set(
+      [
+        vendor.industry,
+        vendor.businessRegistrationNumber,
+        vendor.serviceType,
+        vendor.hostingEnvironment,
+        vendor.cloudProvider,
+        vendor.operatingCountries,
+        vendor.dataLocations,
+        vendor.regulatoryJurisdictions,
+        vendor.dataProcessingActivities,
+        vendor.criticalityLevel,
+        vendor.riskTier,
+        documentType
+      ].filter(Boolean).flatMap(
+        (value) => String(value).split(/[;,|]/).map((v) => v.trim().toLowerCase()).filter(Boolean)
+      )
+    )
+  ).slice(0, 20);
+  return {
+    documentType,
+    tags,
+    normalizedText: combinedText
+  };
+}
+function runExtractor(vendor, intake) {
+  const facts = [];
+  addFact(facts, "vendor_name", vendor.vendorName);
+  addFact(facts, "industry", vendor.industry || "");
+  addFact(
+    facts,
+    "business_registration_number",
+    vendor.businessRegistrationNumber || ""
+  );
+  addFact(facts, "headquarters_location", vendor.headquartersLocation || "");
+  addFact(facts, "primary_contact_name", vendor.primaryContactName || "");
+  addFact(facts, "primary_contact_email", vendor.primaryContactEmail || "");
+  addFact(facts, "primary_contact_role", vendor.primaryContactRole || "");
+  addFact(facts, "primary_contact_phone", vendor.primaryContactPhone || "");
+  addFact(facts, "service_type", vendor.serviceType || "");
+  addFact(facts, "service_scope", vendor.serviceScope || "");
+  addFact(facts, "hosting_environment", vendor.hostingEnvironment || "");
+  addFact(facts, "cloud_provider", vendor.cloudProvider || "");
+  addFact(facts, "operating_countries", vendor.operatingCountries || "");
+  addFact(facts, "data_locations", vendor.dataLocations || "");
+  addFact(
+    facts,
+    "regulatory_jurisdictions",
+    vendor.regulatoryJurisdictions || ""
+  );
+  addFact(facts, "certifications", vendor.certifications || "");
+  addFact(
+    facts,
+    "data_processing_activities",
+    vendor.dataProcessingActivities || ""
+  );
+  addFact(facts, "criticality_level", vendor.criticalityLevel || "");
+  addFact(facts, "risk_tier", vendor.riskTier || "");
+  addFact(
+    facts,
+    "third_party_dependencies",
+    vendor.thirdPartyDependencies || ""
+  );
+  addFact(
+    facts,
+    "fourth_party_dependencies",
+    vendor.fourthPartyDependencies || ""
+  );
+  const encryptionRegex = /(rsa|aes)[\s-]?(\d{3,4})/gi;
+  let match;
+  while (match = encryptionRegex.exec(intake.normalizedText)) {
+    addFact(
+      facts,
+      "encryption_claim",
+      `${match[1].toUpperCase()} ${match[2]}`,
+      `Found in submission text: ${match[0]}`
+    );
+  }
+  addFact(
+    facts,
+    "intake_document_type",
+    intake.documentType,
+    "Classified by Intake & Tagging Clerk"
+  );
+  return facts.slice(0, 200);
+}
+async function buildRagContext(facts) {
+  const db = await getDb();
+  if (!db) return [];
+  const frameworkRows = await db.select().from(frameworks);
+  const controls = await db.select().from(complianceControls);
+  const frameworkCodeById = new Map(
+    frameworkRows.map((row) => [row.id, row.code])
+  );
+  const tokenSet = new Set(
+    facts.flatMap(
+      (fact) => toTokens(`${fact.key} ${fact.value} ${fact.evidence}`)
+    )
+  );
+  const scored = controls.map((control) => {
+    const haystack = `${control.controlCode} ${control.controlName || ""} ${control.category || ""} ${control.requirement || ""} ${control.description || ""}`.toLowerCase();
+    if (tokenSet.size === 0) {
+      return {
+        row: control,
+        score: 0
+      };
+    }
+    let hits = 0;
+    tokenSet.forEach((token) => {
+      if (haystack.includes(token)) hits += 1;
+    });
+    return {
+      row: control,
+      score: hits / tokenSet.size
+    };
+  }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).slice(0, ENV.aiRagTopK);
+  return scored.map((item) => ({
+    controlId: item.row.id,
+    frameworkCode: frameworkCodeById.get(item.row.frameworkId) || "UNKNOWN",
+    controlCode: item.row.controlCode,
+    category: item.row.category,
+    controlName: item.row.controlName,
+    requirement: item.row.requirement,
+    relevanceScore: Number(item.score.toFixed(4))
+  }));
+}
+function findWeakEncryptionFact(facts) {
+  for (const fact of facts) {
+    if (fact.key !== "encryption_claim") continue;
+    const match = fact.value.match(/(RSA|AES)\s*(\d{3,4})/i);
+    if (!match) continue;
+    const algorithm = match[1].toUpperCase();
+    const bits = Number(match[2]);
+    if (algorithm === "RSA" && bits < 2048 || algorithm === "AES" && bits < 128) {
+      return fact;
+    }
+  }
+  return null;
+}
+function ensureWeakEncryptionGap(assessment, weakFact) {
+  if (assessment.gaps.some((gap) => gap.code === WEAK_ENCRYPTION_CODE)) {
+    return;
+  }
+  const newGap = {
+    code: WEAK_ENCRYPTION_CODE,
+    jurisdiction: "cross_border",
+    frameworks: ["PIPL", "PDPL", "GDPR", "CCPA", "LGPD"],
+    severity: "critical",
+    title: "Weak encryption claim detected",
+    description: `Extracted evidence indicates weak encryption posture (${weakFact.value}).`,
+    mitigation: "Upgrade cryptographic controls to modern baseline (RSA 2048+ or AES-128+), rotate keys, and re-validate data protection controls.",
+    penaltyContext: "Weak encryption can materially increase enforcement risk under PIPL, PDPL, and NCA security control expectations."
+  };
+  assessment.gaps = [newGap, ...assessment.gaps];
+  for (const key of Object.keys(assessment.jurisdictionScores)) {
+    const k = key;
+    assessment.jurisdictionScores[k] = clampScore2(
+      assessment.jurisdictionScores[k] - 10
+    );
+  }
+  const vals = Object.values(assessment.jurisdictionScores);
+  assessment.overallScore = clampScore2(
+    vals.reduce((sum, v) => sum + v, 0) / vals.length
+  );
+  assessment.status = scoreToStatus2(assessment.overallScore);
+  assessment.riskLevel = inferRiskLevel2(assessment);
+}
+function runJudge(vendor, facts) {
+  const assessment = runDualJurisdictionAssessment(vendor);
+  const weakFact = findWeakEncryptionFact(facts);
+  if (weakFact) {
+    ensureWeakEncryptionGap(assessment, weakFact);
+  }
+  const recommendationSet = new Set(assessment.recommendations);
+  if (weakFact) {
+    recommendationSet.add(
+      "Execute emergency cryptography remediation and document validated key-management controls before production onboarding."
+    );
+  }
+  assessment.recommendations = Array.from(recommendationSet);
+  return assessment;
+}
+function severityRank(severity) {
+  if (severity === "critical") return 4;
+  if (severity === "high") return 3;
+  if (severity === "medium") return 2;
+  return 1;
+}
+function runSynthesizer(assessment) {
+  const plan = [...assessment.gaps].sort((a, b) => severityRank(b.severity) - severityRank(a.severity)).slice(0, 10).map(
+    (gap) => `[${gap.severity.toUpperCase()}] ${gap.title}: ${gap.mitigation} (Frameworks: ${gap.frameworks.join(", ")})`
+  );
+  plan.push(
+    "Build a jurisdiction-specific evidence register for applicable regulators (e.g., CAC, SDAIA, EDPB, ANPD) review cycles.",
+    "Introduce quarterly control re-validation against framework updates and supplier architecture changes.",
+    "Require legal sign-off for all critical and high findings prior to vendor onboarding approval."
+  );
+  return Array.from(new Set(plan));
+}
+function runValidator(assessment, remediationPlan, ragControls) {
+  const knownFrameworks = new Set(
+    [
+      ...DEFAULT_KNOWN_FRAMEWORKS,
+      ...ragControls.map((control) => control.frameworkCode)
+    ].map((code) => code.toUpperCase())
+  );
+  const notes = [];
+  for (const gap of assessment.gaps) {
+    for (const code of gap.frameworks) {
+      if (!knownFrameworks.has(code.toUpperCase())) {
+        notes.push(`Unknown framework code in gap ${gap.code}: ${code}.`);
+      }
+    }
+  }
+  if (remediationPlan.length === 0) {
+    notes.push("Remediation plan is empty.");
+  }
+  if (assessment.gaps.length > 0 && remediationPlan.length < 2) {
+    notes.push("Remediation plan is too short for identified gap volume.");
+  }
+  return {
+    passed: notes.length === 0,
+    notes
+  };
+}
+function buildDbPayload(assessment, remediationPlan, ragControls) {
+  const frameworkAssessmentRows = Object.entries(
+    JURISDICTION_FRAMEWORKS
+  ).flatMap(
+    ([jurisdiction, codes]) => codes.map((code) => ({
+      frameworkCode: code,
+      complianceScore: assessment.jurisdictionScores[jurisdiction] ?? assessment.overallScore,
+      riskLevel: assessment.riskLevel,
+      status: assessment.status,
+      findings: assessment.gaps.filter((gap) => gap.frameworks.includes(code)).map((gap) => `${gap.code}: ${gap.title}`),
+      recommendations: remediationPlan
+    }))
+  );
+  const firstControlByFramework = /* @__PURE__ */ new Map();
+  for (const control of ragControls) {
+    if (!firstControlByFramework.has(control.frameworkCode)) {
+      firstControlByFramework.set(control.frameworkCode, control.controlCode);
+    }
+  }
+  const gapRows = assessment.gaps.flatMap(
+    (gap) => gap.frameworks.map((frameworkCode) => ({
+      frameworkCode,
+      controlCode: firstControlByFramework.get(frameworkCode) || "",
+      gapCode: gap.code,
+      gapDescription: gap.description,
+      severity: gap.severity,
+      remediation: gap.mitigation
+    }))
+  );
+  return {
+    vendorAssessments: frameworkAssessmentRows,
+    assessmentGaps: gapRows
+  };
+}
+async function executeAssessmentPipeline(input, reportStage) {
+  const rawDocumentText = input.rawDocumentText?.trim() || "";
+  const _requestedEngine = input.engine ?? ENV.aiAssessmentEngineDefault;
+  reportStage("gatekeeper", "Security Gatekeeper scanning payload.");
+  runSecurityGatekeeper(rawDocumentText);
+  reportStage("intake", "Intake Clerk classifying submission.");
+  const intake = runIntake(input.vendor, rawDocumentText);
+  reportStage("extractor", "Extraction agent mapping facts to controls.");
+  const externalFacts = await callAgentSwarm(
+    "frontline/extractor",
+    {
+      vendor: input.vendor,
+      intake,
+      rawDocumentText
+    }
+  );
+  const extractedFacts = externalFacts && externalFacts.length > 0 ? externalFacts.slice(0, 200) : runExtractor(input.vendor, intake);
+  reportStage("rag_context", "RAG context assembler retrieving controls.");
+  const ragControls = await buildRagContext(extractedFacts);
+  reportStage("judge", "Compliance reviewer evaluating mapped facts.");
+  const externalAssessment = await callAgentSwarm(
+    "backend/judge",
+    {
+      vendor: input.vendor,
+      extractedFacts,
+      ragControls
+    }
+  );
+  const assessment = externalAssessment || runJudge(input.vendor, extractedFacts);
+  for (const key of JURISDICTION_SCORE_KEYS) {
+    const score = assessment.jurisdictionScores[key];
+    if (typeof score !== "number" || !Number.isFinite(score)) {
+      assessment.jurisdictionScores[key] = assessment.overallScore;
+    }
+  }
+  reportStage(
+    "synthesizer",
+    "Strategic synthesizer drafting remediation plan."
+  );
+  let remediationPlan = await callAgentSwarm("backend/synthesizer", {
+    assessment,
+    ragControls
+  }) || runSynthesizer(assessment);
+  let validatorNotes = [];
+  let validatorPassed = false;
+  let attempts = 0;
+  const maxAttempts = Math.max(1, ENV.aiValidatorMaxRetries + 1);
+  while (!validatorPassed && attempts < maxAttempts) {
+    attempts += 1;
+    reportStage("validator", `Validator pass ${attempts} running.`);
+    const externalValidation = await callAgentSwarm(
+      "backend/validator",
+      {
+        assessment,
+        remediationPlan,
+        ragControls
+      }
+    );
+    const validation = externalValidation || runValidator(assessment, remediationPlan, ragControls);
+    validatorPassed = validation.passed;
+    validatorNotes = validation.notes;
+    if (!validatorPassed && attempts < maxAttempts) {
+      remediationPlan = runSynthesizer(assessment);
+    }
+  }
+  if (!validatorPassed) {
+    throw new Error(
+      `Validator rejected report payload after ${attempts} attempt(s): ${validatorNotes.join(
+        " "
+      )}`
+    );
+  }
+  reportStage("reporter", "Reporter formatting strict JSON output.");
+  const reportPayload = {
+    version: "1.0",
+    generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    inputSummary: {
+      vendorId: input.vendor.id,
+      source: input.source,
+      documentType: intake.documentType,
+      tags: intake.tags
+    },
+    extractedFacts,
+    ragControls,
+    assessment,
+    remediationPlan,
+    validator: {
+      passed: validatorPassed,
+      attempts,
+      notes: validatorNotes
+    },
+    dbPayload: buildDbPayload(assessment, remediationPlan, ragControls)
+  };
+  return aiAssessmentReportSchema.parse(reportPayload);
+}
+var WEAK_ENCRYPTION_CODE, DEFAULT_KNOWN_FRAMEWORKS, JURISDICTION_FRAMEWORKS, INJECTION_PATTERNS, CONTROL_BUCKET_KEYWORDS;
+var init_pipeline = __esm({
+  "server/ai/pipeline.ts"() {
+    "use strict";
+    init_schema();
+    init_db();
+    init_supplier_assessment();
+    init_env();
+    init_schemas();
+    WEAK_ENCRYPTION_CODE = "CRYPTO-WEAK-001";
+    DEFAULT_KNOWN_FRAMEWORKS = [
+      "PIPL",
+      "CSL",
+      "DSL",
+      "MLPS 2.0",
+      "PDPL",
+      "NCA",
+      "GDPR",
+      "CCPA",
+      "LGPD",
+      "ISO 27001",
+      "ISO 27701",
+      "SOC 2",
+      "NIST CSF",
+      "HIPAA",
+      "PCI DSS",
+      "NIS2",
+      "SOX"
+    ];
+    JURISDICTION_FRAMEWORKS = {
+      china: ["PIPL", "CSL", "DSL", "MLPS 2.0"],
+      // Key must match the jurisdictionScores keys emitted by the assessment
+      // schema (server/ai/schemas.ts -> supplierAssessmentSchema). A mismatch
+      // silently falls back to overallScore for every Saudi framework row.
+      saudiArabia: ["PDPL", "NCA"],
+      eu: ["GDPR", "NIS2", "DORA", "EU-AI-ACT"],
+      us: ["CCPA", "HIPAA", "SOX", "PCI-DSS", "NIST-CSF-2"],
+      brazil: ["LGPD"],
+      global: ["ISO 27001", "ISO 27701", "SOC 2", "NIST CSF", "PCI-DSS"],
+      uk: ["UK-GDPR"],
+      canada: ["PIPEDA"],
+      australia: ["PRIVACY-ACT-AU"],
+      japan: ["APPI"],
+      southKorea: ["PIPA-KR"],
+      singapore: ["PDPA-SG"],
+      india: ["DPDP-IN"],
+      southAfrica: ["POPIA"],
+      mexico: ["MEXICO-DPA"],
+      uae: ["ISO 27701", "ISO 27001"],
+      thailand: ["TH-PDPA"],
+      indonesia: ["ID-PDP"],
+      malaysia: ["MY-PDPA"],
+      philippines: ["PH-DPA"],
+      vietnam: ["VN-PDPD"],
+      nigeria: ["NDPA-NG"],
+      kenya: ["KENYA-DPA"]
+    };
+    INJECTION_PATTERNS = [
+      /ignore\s+all\s+previous\s+instructions/i,
+      /system\s+prompt/i,
+      /jailbreak/i,
+      /<script[\s>]/i,
+      /rm\s+-rf\s+\//i,
+      /drop\s+table/i,
+      /shutdown\s+-h/i
+    ];
+    CONTROL_BUCKET_KEYWORDS = {
+      "Data Processing & Encryption": [
+        "encrypt",
+        "encryption",
+        "aes",
+        "rsa",
+        "key"
+      ],
+      "Data Localization": [
+        "china",
+        "saudi",
+        "eu",
+        "us",
+        "brazil",
+        "riyadh",
+        "beijing",
+        "shanghai",
+        "london",
+        "tokyo",
+        "singapore",
+        "toronto",
+        "sydney",
+        "mumbai",
+        "johannesburg",
+        "dubai",
+        "abu dhabi",
+        "doha",
+        "mexico city",
+        "nairobi",
+        "lagos",
+        "bangkok",
+        "jakarta",
+        "kuala lumpur",
+        "localization"
+      ],
+      "Access Control": ["access", "identity", "iam", "mfa", "privilege"],
+      "Incident Response": ["incident", "breach", "response", "monitor"],
+      "Transfer & Consent": [
+        "consent",
+        "transfer",
+        "cross-border",
+        "cross border",
+        "subject"
+      ],
+      Governance: ["audit", "policy", "governance", "compliance", "legal"]
+    };
+  }
+});
+
+// server/ai/persistence.ts
+import { and as and4, desc as desc4, eq as eq6 } from "drizzle-orm";
+async function persistAssessmentReport(report, shouldPersist) {
+  if (!shouldPersist) {
+    return {
+      savedAssessments: 0,
+      savedGaps: 0,
+      skipped: true
+    };
+  }
+  if (report.assessment.vendorId <= 0) {
+    return {
+      savedAssessments: 0,
+      savedGaps: 0,
+      skipped: true
+    };
+  }
+  const db = await getDb();
+  if (!db) {
+    return {
+      savedAssessments: 0,
+      savedGaps: 0,
+      skipped: true
+    };
+  }
+  const frameworkRows = await db.select().from(frameworks);
+  const frameworkIdByCode = new Map(
+    frameworkRows.map((row) => [row.code.toUpperCase(), row.id])
+  );
+  const assessmentIdByFramework = /* @__PURE__ */ new Map();
+  const insertedFrameworks = /* @__PURE__ */ new Set();
+  let savedAssessments = 0;
+  for (const row of report.dbPayload.vendorAssessments) {
+    const frameworkCode = row.frameworkCode.toUpperCase();
+    const frameworkId = frameworkIdByCode.get(frameworkCode);
+    if (!frameworkId) continue;
+    const findingsJson = JSON.stringify(row.findings);
+    const recommendationsJson = JSON.stringify(row.recommendations);
+    const latestExisting = await db.select().from(vendorAssessments).where(
+      and4(
+        eq6(vendorAssessments.vendorId, report.assessment.vendorId),
+        eq6(vendorAssessments.frameworkId, frameworkId)
+      )
+    ).orderBy(
+      desc4(vendorAssessments.assessmentDate),
+      desc4(vendorAssessments.id)
+    ).limit(1);
+    const existing = latestExisting[0];
+    if (existing && existing.complianceScore === row.complianceScore && existing.riskLevel === row.riskLevel && existing.status === row.status && (existing.findings ?? "") === findingsJson && (existing.recommendations ?? "") === recommendationsJson) {
+      assessmentIdByFramework.set(frameworkCode, existing.id);
+      continue;
+    }
+    const [inserted] = await db.insert(vendorAssessments).values({
+      vendorId: report.assessment.vendorId,
+      frameworkId,
+      complianceScore: row.complianceScore,
+      riskLevel: row.riskLevel,
+      status: row.status,
+      findings: findingsJson,
+      recommendations: recommendationsJson
+    }).returning({ id: vendorAssessments.id });
+    const assessmentId = inserted?.id ?? 0;
+    if (assessmentId > 0) {
+      assessmentIdByFramework.set(frameworkCode, assessmentId);
+      insertedFrameworks.add(frameworkCode);
+    }
+    savedAssessments += 1;
+  }
+  const controlCache = /* @__PURE__ */ new Map();
+  let savedGaps = 0;
+  for (const gap of report.dbPayload.assessmentGaps) {
+    const frameworkCode = gap.frameworkCode.toUpperCase();
+    const frameworkId = frameworkIdByCode.get(frameworkCode);
+    const assessmentId = assessmentIdByFramework.get(frameworkCode);
+    if (!frameworkId || !assessmentId || !insertedFrameworks.has(frameworkCode)) {
+      continue;
+    }
+    let controls = controlCache.get(frameworkId);
+    if (!controls) {
+      const rows = await db.select({
+        id: complianceControls.id,
+        controlCode: complianceControls.controlCode
+      }).from(complianceControls).where(eq6(complianceControls.frameworkId, frameworkId));
+      controls = rows;
+      controlCache.set(frameworkId, controls);
+    }
+    if (!controls || controls.length === 0) {
+      continue;
+    }
+    const matchedControl = controls.find(
+      (control) => control.controlCode.toLowerCase() === gap.controlCode.toLowerCase() && gap.controlCode.trim().length > 0
+    ) || controls[0];
+    await db.insert(assessmentGaps).values({
+      assessmentId,
+      controlId: matchedControl.id,
+      gapDescription: `${gap.gapCode}: ${gap.gapDescription}`,
+      severity: gap.severity,
+      remediation: gap.remediation,
+      estimatedRemediationCost: null
+    });
+    savedGaps += 1;
+  }
+  return {
+    savedAssessments,
+    savedGaps,
+    skipped: false
+  };
+}
+var init_persistence = __esm({
+  "server/ai/persistence.ts"() {
+    "use strict";
+    init_schema();
+    init_db();
+  }
+});
+
+// server/ai/agent-registry.ts
+function getAgentPool() {
+  return Array.from(agentPool.values());
+}
+function getAgentPoolStats() {
+  const stats = {};
+  for (const agent of agentPool.values()) {
+    if (!stats[agent.type])
+      stats[agent.type] = { total: 0, idle: 0, busy: 0, error: 0 };
+    stats[agent.type].total++;
+    stats[agent.type][agent.status]++;
+  }
+  return stats;
+}
+function acquireAgent(type, jobId) {
+  const available = Array.from(agentPool.values()).find(
+    (a) => a.type === type && a.status === "idle"
+  );
+  if (!available) return null;
+  available.status = "busy";
+  available.currentJobId = jobId;
+  available.startedAt = Date.now();
+  return available;
+}
+function releaseAgent(agentId) {
+  const agent = agentPool.get(agentId);
+  if (!agent) return;
+  agent.status = "idle";
+  agent.currentJobId = null;
+  agent.startedAt = null;
+}
+function markAgentError(agentId) {
+  const agent = agentPool.get(agentId);
+  if (!agent) return;
+  agent.status = "error";
+  agent.errorCount++;
+  agent.currentJobId = null;
+  agent.startedAt = null;
+}
+async function dispatchPipeline(input, onProgress) {
+  const route = [
+    "gatekeeper",
+    "intake",
+    "extractor",
+    "rag_context",
+    "judge",
+    "synthesizer",
+    "validator",
+    "reporter"
+  ];
+  const timing = {};
+  const jobId = `dispatch-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const acquired = [];
+  try {
+    for (const stageType of route) {
+      const agent = acquireAgent(stageType, jobId);
+      if (agent) {
+        acquired.push(agent.id);
+      }
+    }
+    const startTotal = Date.now();
+    const report = await executeAssessmentPipeline(
+      {
+        source: input.source,
+        engine: input.engine,
+        vendor: input.vendor,
+        rawDocumentText: input.rawDocumentText
+      },
+      (stage, message) => {
+        onProgress(stage, message);
+        const elapsed = Date.now() - startTotal;
+        timing[stage] = elapsed;
+      }
+    );
+    timing["total"] = Date.now() - startTotal;
+    for (const id of acquired) releaseAgent(id);
+    return { report, agentRoute: route, timing };
+  } catch (err) {
+    for (const id of acquired) markAgentError(id);
+    throw err;
+  }
+}
+function resetAgentPool() {
+  for (const agent of agentPool.values()) {
+    agent.status = "idle";
+    agent.currentJobId = null;
+    agent.startedAt = null;
+  }
+}
+function getAgentCapabilities() {
+  return AGENT_CAPABILITIES;
+}
+var AGENT_CAPABILITIES, nextAgentId, agentPool;
+var init_agent_registry = __esm({
+  "server/ai/agent-registry.ts"() {
+    "use strict";
+    init_pipeline();
+    AGENT_CAPABILITIES = [
+      {
+        type: "gatekeeper",
+        label: "Security Gatekeeper",
+        description: "Scans payload for prompt injection and malicious patterns",
+        maxConcurrency: 10
+      },
+      {
+        type: "intake",
+        label: "Intake Clerk",
+        description: "Classifies submission type and normalizes text",
+        maxConcurrency: 8
+      },
+      {
+        type: "extractor",
+        label: "Extraction Agent",
+        description: "Maps vendor data to extracted facts",
+        maxConcurrency: 6
+      },
+      {
+        type: "rag_context",
+        label: "RAG Context Assembler",
+        description: "Retrieves relevant compliance controls from vector store",
+        maxConcurrency: 4
+      },
+      {
+        type: "judge",
+        label: "Compliance Reviewer",
+        description: "Evaluates mapped facts against frameworks",
+        maxConcurrency: 4
+      },
+      {
+        type: "synthesizer",
+        label: "Strategic Synthesizer",
+        description: "Drafts remediation plans from gaps",
+        maxConcurrency: 5
+      },
+      {
+        type: "validator",
+        label: "Output Validator",
+        description: "Validates report quality and completeness",
+        maxConcurrency: 5
+      },
+      {
+        type: "reporter",
+        label: "Report Formatter",
+        description: "Formats final JSON output and DB payload",
+        maxConcurrency: 10
+      }
+    ];
+    nextAgentId = 1;
+    agentPool = /* @__PURE__ */ new Map();
+    for (const cap of AGENT_CAPABILITIES) {
+      for (let i = 0; i < cap.maxConcurrency; i++) {
+        const id = `${cap.type}-${nextAgentId++}`;
+        agentPool.set(id, {
+          id,
+          type: cap.type,
+          status: "idle",
+          currentJobId: null,
+          startedAt: null,
+          errorCount: 0
+        });
+      }
+    }
+  }
+});
+
+// server/ai/queue.ts
+import { randomUUID } from "crypto";
+import { mkdir, readFile, rm, writeFile } from "fs/promises";
+import path2 from "path";
+function nowIso() {
+  return (/* @__PURE__ */ new Date()).toISOString();
+}
+function sortByCreatedDesc(a, b) {
+  return a.createdAt < b.createdAt ? 1 : -1;
+}
+function toSnapshot(job) {
+  return {
+    id: job.id,
+    userId: job.userId,
+    status: job.status,
+    stage: job.stage,
+    createdAt: job.createdAt,
+    updatedAt: job.updatedAt,
+    events: job.events,
+    ...job.error ? { error: job.error } : {},
+    ...job.result ? { result: job.result } : {},
+    ...job.persistence ? { persistence: job.persistence } : {}
+  };
+}
+var QUEUE_IDLE_DELAY_MS, JOB_WAIT_POLL_MS, EVENT_RETENTION, HISTORY_RETENTION, InMemoryAssessmentQueue;
+var init_queue = __esm({
+  "server/ai/queue.ts"() {
+    "use strict";
+    init_schemas();
+    QUEUE_IDLE_DELAY_MS = 20;
+    JOB_WAIT_POLL_MS = 120;
+    EVENT_RETENTION = 300;
+    HISTORY_RETENTION = 500;
+    InMemoryAssessmentQueue = class {
+      constructor(options = {}) {
+        this.jobs = /* @__PURE__ */ new Map();
+        this.persistedSnapshots = /* @__PURE__ */ new Map();
+        this.queue = [];
+        this.listeners = /* @__PURE__ */ new Set();
+        this.worker = null;
+        this.running = false;
+        this.historyWriteTask = Promise.resolve();
+        this.historyFilePath = options.historyFilePath?.trim() ?? "";
+        this.historyReady = this.loadHistory();
+      }
+      setWorker(worker) {
+        this.worker = worker;
+      }
+      async enqueue(input) {
+        await this.historyReady;
+        const createdAt = nowIso();
+        const id = randomUUID();
+        const record = {
+          id,
+          userId: input.userId,
+          status: "queued",
+          stage: "queued",
+          input,
+          createdAt,
+          updatedAt: createdAt,
+          events: [
+            {
+              stage: "queued",
+              message: "Job queued for orchestration.",
+              timestamp: createdAt
+            }
+          ]
+        };
+        this.jobs.set(id, record);
+        this.queue.push(id);
+        this.schedule();
+        this.emitSnapshot(record);
+        return toSnapshot(record);
+      }
+      async get(jobId) {
+        await this.historyReady;
+        const job = this.jobs.get(jobId);
+        if (job) {
+          return toSnapshot(job);
+        }
+        return this.persistedSnapshots.get(jobId) || null;
+      }
+      async listByUser(userId, limit = 20) {
+        await this.historyReady;
+        const latestById = /* @__PURE__ */ new Map();
+        Array.from(this.jobs.values()).filter((job) => job.userId === userId).map(toSnapshot).forEach((snapshot) => {
+          latestById.set(snapshot.id, snapshot);
+        });
+        Array.from(this.persistedSnapshots.values()).filter((snapshot) => snapshot.userId === userId).forEach((snapshot) => {
+          if (!latestById.has(snapshot.id)) {
+            latestById.set(snapshot.id, snapshot);
+          }
+        });
+        return Array.from(latestById.values()).sort(sortByCreatedDesc).slice(0, limit);
+      }
+      async waitForCompletion(jobId, timeoutMs) {
+        const started = Date.now();
+        while (Date.now() - started < timeoutMs) {
+          const snapshot2 = await this.get(jobId);
+          if (!snapshot2) return null;
+          if (snapshot2.status === "completed" || snapshot2.status === "failed") {
+            await this.historyWriteTask;
+            return snapshot2;
+          }
+          await new Promise((resolve) => setTimeout(resolve, JOB_WAIT_POLL_MS));
+        }
+        const snapshot = await this.get(jobId);
+        if (snapshot?.status === "completed" || snapshot?.status === "failed") {
+          await this.historyWriteTask;
+        }
+        return snapshot;
+      }
+      async getHistoryDiagnostics(userId) {
+        await this.historyReady;
+        const historyPath = this.resolveHistoryPath();
+        const persistedSnapshots = Array.from(
+          this.persistedSnapshots.values()
+        ).filter((snapshot) => snapshot.userId === userId);
+        const queuedJobCount = Array.from(this.jobs.values()).filter(
+          (job) => job.userId === userId && job.status === "queued"
+        ).length;
+        const activeJobCount = Array.from(this.jobs.values()).filter(
+          (job) => job.userId === userId && (job.status === "queued" || job.status === "running")
+        ).length;
+        return {
+          queueMode: "in_memory",
+          storageType: historyPath ? "file" : "memory_only",
+          storageEnabled: Boolean(historyPath),
+          supportsClear: Boolean(historyPath),
+          historyEntryCount: persistedSnapshots.length,
+          activeJobCount,
+          queuedJobCount,
+          historyRetentionLimit: HISTORY_RETENTION,
+          ...historyPath ? { storagePath: historyPath } : {},
+          ...this.historyLastSavedAt ? { lastUpdatedAt: this.historyLastSavedAt } : {},
+          details: historyPath ? "File-backed history is enabled for in-memory queue mode." : "In-memory queue history is ephemeral because AI_JOB_HISTORY_FILE is not configured."
+        };
+      }
+      async clearHistory(userId) {
+        await this.historyReady;
+        const historyPath = this.resolveHistoryPath();
+        if (!historyPath) {
+          const currentUserEntries2 = Array.from(
+            this.persistedSnapshots.values()
+          ).filter((snapshot) => snapshot.userId === userId);
+          return {
+            queueMode: "in_memory",
+            storageType: "memory_only",
+            supportsClear: false,
+            clearedCount: 0,
+            remainingCount: currentUserEntries2.length,
+            details: "Clear history is unavailable because AI_JOB_HISTORY_FILE is not configured."
+          };
+        }
+        await this.historyWriteTask;
+        const currentUserEntries = Array.from(
+          this.persistedSnapshots.values()
+        ).filter((snapshot) => snapshot.userId === userId);
+        let clearedCount = 0;
+        for (const snapshot of currentUserEntries) {
+          if (this.persistedSnapshots.delete(snapshot.id)) {
+            clearedCount += 1;
+          }
+        }
+        await this.persistHistory(historyPath);
+        const remainingCount = Array.from(this.persistedSnapshots.values()).filter(
+          (snapshot) => snapshot.userId === userId
+        ).length;
+        return {
+          queueMode: "in_memory",
+          storageType: "file",
+          supportsClear: true,
+          clearedCount,
+          remainingCount,
+          storagePath: historyPath,
+          details: clearedCount > 0 ? "Persisted history cleared for the current user. Active jobs were not interrupted." : "No persisted history entries were found for the current user."
+        };
+      }
+      subscribe(listener) {
+        this.listeners.add(listener);
+        return () => {
+          this.listeners.delete(listener);
+        };
+      }
+      async close() {
+        this.jobs.clear();
+        this.persistedSnapshots.clear();
+        this.listeners.clear();
+        this.queue.length = 0;
+      }
+      schedule() {
+        if (this.running) return;
+        this.running = true;
+        setTimeout(() => {
+          void this.runLoop().finally(() => {
+            this.running = false;
+            if (this.queue.length > 0) {
+              this.schedule();
+            }
+          });
+        }, QUEUE_IDLE_DELAY_MS);
+      }
+      pushEvent(job, stage, message) {
+        const timestamp2 = nowIso();
+        job.stage = stage;
+        job.updatedAt = timestamp2;
+        job.events.push({ stage, message, timestamp: timestamp2 });
+        if (job.events.length > EVENT_RETENTION) {
+          job.events.splice(0, job.events.length - EVENT_RETENTION);
+        }
+        this.emitSnapshot(job);
+      }
+      emitSnapshot(job) {
+        const snapshot = toSnapshot(job);
+        this.upsertPersistedSnapshot(snapshot);
+        this.queueHistoryWrite();
+        for (const listener of Array.from(this.listeners)) {
+          try {
+            listener(snapshot);
+          } catch {
+          }
+        }
+      }
+      resolveHistoryPath() {
+        if (!this.historyFilePath) {
+          return "";
+        }
+        return path2.isAbsolute(this.historyFilePath) ? this.historyFilePath : path2.resolve(process.cwd(), this.historyFilePath);
+      }
+      async loadHistory() {
+        const historyPath = this.resolveHistoryPath();
+        if (!historyPath) {
+          return;
+        }
+        try {
+          const raw = await readFile(historyPath, "utf-8");
+          const parsed = JSON.parse(raw);
+          const snapshots = Array.isArray(parsed) ? parsed : parsed && typeof parsed === "object" && Array.isArray(parsed.snapshots) ? parsed.snapshots : [];
+          for (const candidate of snapshots) {
+            const validated = aiJobSnapshotSchema.safeParse(candidate);
+            if (!validated.success) {
+              continue;
+            }
+            this.upsertPersistedSnapshot(validated.data);
+          }
+          const latestSnapshot = Array.from(this.persistedSnapshots.values()).sort(
+            (a, b) => a.updatedAt < b.updatedAt ? 1 : -1
+          )[0];
+          this.historyLastSavedAt = latestSnapshot?.updatedAt;
+        } catch (error) {
+          const maybeCode = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+          if (maybeCode !== "ENOENT") {
+            console.warn(
+              "[AI Orchestrator] Failed to load in-memory queue history:",
+              error
+            );
+          }
+        }
+      }
+      upsertPersistedSnapshot(snapshot) {
+        const current = this.persistedSnapshots.get(snapshot.id);
+        if (!current || current.updatedAt <= snapshot.updatedAt) {
+          this.persistedSnapshots.set(snapshot.id, snapshot);
+        }
+        this.trimPersistedSnapshots();
+      }
+      trimPersistedSnapshots() {
+        if (this.persistedSnapshots.size <= HISTORY_RETENTION) {
+          return;
+        }
+        const ordered = Array.from(this.persistedSnapshots.values()).sort(
+          (a, b) => a.updatedAt < b.updatedAt ? -1 : 1
+        );
+        const overflow = ordered.length - HISTORY_RETENTION;
+        for (let index = 0; index < overflow; index += 1) {
+          this.persistedSnapshots.delete(ordered[index].id);
+        }
+      }
+      queueHistoryWrite() {
+        const historyPath = this.resolveHistoryPath();
+        if (!historyPath) {
+          return;
+        }
+        this.historyWriteTask = this.historyWriteTask.then(() => this.persistHistory(historyPath)).catch((error) => {
+          console.warn(
+            "[AI Orchestrator] Failed to persist in-memory queue history:",
+            error
+          );
+        });
+      }
+      async persistHistory(historyPath) {
+        const snapshots = Array.from(this.persistedSnapshots.values()).sort(sortByCreatedDesc).slice(0, HISTORY_RETENTION);
+        if (snapshots.length === 0) {
+          await rm(historyPath, { force: true });
+          this.historyLastSavedAt = void 0;
+          return;
+        }
+        const payload = {
+          version: 1,
+          snapshots
+        };
+        await mkdir(path2.dirname(historyPath), { recursive: true });
+        await writeFile(historyPath, JSON.stringify(payload, null, 2), "utf-8");
+        this.historyLastSavedAt = nowIso();
+      }
+      async runLoop() {
+        if (!this.worker) return;
+        while (this.queue.length > 0) {
+          const jobId = this.queue.shift();
+          if (!jobId) continue;
+          const job = this.jobs.get(jobId);
+          if (!job) continue;
+          job.status = "running";
+          this.pushEvent(job, "gatekeeper", "Worker started processing job.");
+          try {
+            const workerResult = await this.worker(job.input, (progress) => {
+              this.pushEvent(job, progress.stage, progress.message);
+            });
+            job.status = "completed";
+            job.result = workerResult.report;
+            job.persistence = workerResult.persistence;
+            this.pushEvent(job, "completed", "Assessment orchestration completed.");
+          } catch (error) {
+            job.status = "failed";
+            job.error = error instanceof Error ? error.message : String(error);
+            this.pushEvent(job, "failed", "Assessment orchestration failed.");
+          }
+        }
+      }
+    };
+  }
+});
+
+// server/ai/redisQueue.ts
+import { Queue, Worker } from "bullmq";
+function nowIso2() {
+  return (/* @__PURE__ */ new Date()).toISOString();
+}
+function toSnapshot2(job) {
+  return {
+    id: job.id,
+    userId: job.userId,
+    status: job.status,
+    stage: job.stage,
+    createdAt: job.createdAt,
+    updatedAt: job.updatedAt,
+    events: job.events,
+    ...job.error ? { error: job.error } : {},
+    ...job.result ? { result: job.result } : {},
+    ...job.persistence ? { persistence: job.persistence } : {}
+  };
+}
+function stateToStatus(state) {
+  if (state === "completed") return "completed";
+  if (state === "failed") return "failed";
+  if (state === "active") return "running";
+  return "queued";
+}
+function parseBullProgress(value) {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+  const progress = value;
+  const stage = typeof progress.stage === "string" ? progress.stage : void 0;
+  const message = typeof progress.message === "string" ? progress.message : void 0;
+  const timestamp2 = typeof progress.timestamp === "string" ? progress.timestamp : void 0;
+  return {
+    stage,
+    message,
+    timestamp: timestamp2
+  };
+}
+var QUEUE_NAME, JOB_NAME, EVENT_RETENTION2, JOB_WAIT_POLL_MS2, RedisAssessmentQueue;
+var init_redisQueue = __esm({
+  "server/ai/redisQueue.ts"() {
+    "use strict";
+    QUEUE_NAME = "djac-ai-assessment";
+    JOB_NAME = "assessment";
+    EVENT_RETENTION2 = 300;
+    JOB_WAIT_POLL_MS2 = 120;
+    RedisAssessmentQueue = class {
+      constructor(redisUrl) {
+        this.records = /* @__PURE__ */ new Map();
+        this.listeners = /* @__PURE__ */ new Set();
+        this.workerFn = null;
+        this.worker = null;
+        this.queue = new Queue(QUEUE_NAME, {
+          connection: {
+            url: redisUrl
+          },
+          defaultJobOptions: {
+            removeOnComplete: false,
+            removeOnFail: false
+          }
+        });
+      }
+      setWorker(worker) {
+        this.workerFn = worker;
+        if (this.worker) return;
+        this.worker = new Worker(
+          QUEUE_NAME,
+          async (job) => {
+            if (!this.workerFn) {
+              throw new Error("No worker callback registered for Redis queue.");
+            }
+            const id = String(job.id ?? "");
+            if (!id) {
+              throw new Error("Redis queue job is missing id.");
+            }
+            const jobData = job.data;
+            const record = this.records.get(id) || this.createRecordFromData(id, jobData, "queued", "queued");
+            record.status = "running";
+            this.pushEvent(record, "gatekeeper", "Worker started processing job.");
+            const result = await this.workerFn(jobData, (progress) => {
+              this.pushEvent(record, progress.stage, progress.message);
+              void job.updateProgress({
+                stage: progress.stage,
+                message: progress.message,
+                timestamp: nowIso2()
+              });
+            });
+            record.status = "completed";
+            record.result = result.report;
+            record.persistence = result.persistence;
+            this.pushEvent(
+              record,
+              "completed",
+              "Assessment orchestration completed."
+            );
+            return result;
+          },
+          {
+            connection: {
+              url: this.queue.opts.connection && typeof this.queue.opts.connection === "object" && "url" in this.queue.opts.connection ? this.queue.opts.connection.url : void 0
+            },
+            concurrency: 1
+          }
+        );
+        this.worker.on("failed", (job, error) => {
+          if (!job) return;
+          const id = String(job.id ?? "");
+          if (!id) return;
+          const record = this.records.get(id) || this.createRecordFromData(
+            id,
+            job.data,
+            "failed",
+            "failed"
+          );
+          record.status = "failed";
+          record.error = error?.message || job.failedReason || "Unknown queue failure.";
+          this.pushEvent(record, "failed", "Assessment orchestration failed.");
+        });
+      }
+      async enqueue(input) {
+        const job = await this.queue.add(
+          JOB_NAME,
+          input
+        );
+        const id = String(job.id ?? "");
+        if (!id) {
+          throw new Error("Redis queue did not return a job id.");
+        }
+        const record = this.createRecordFromData(id, input, "queued", "queued");
+        this.pushEvent(record, "queued", "Job queued for orchestration.");
+        return toSnapshot2(record);
+      }
+      async get(jobId) {
+        const existing = this.records.get(jobId);
+        if (existing) {
+          return toSnapshot2(existing);
+        }
+        const job = await this.queue.getJob(jobId);
+        if (!job) return null;
+        const state = await job.getState();
+        const status = stateToStatus(state);
+        const progress = parseBullProgress(job.progress);
+        const stage = progress.stage || (status === "completed" ? "completed" : status === "failed" ? "failed" : "queued");
+        const record = this.createRecordFromData(
+          jobId,
+          job.data,
+          status,
+          stage
+        );
+        if (progress.message) {
+          record.events.push({
+            stage,
+            message: progress.message,
+            timestamp: progress.timestamp || nowIso2()
+          });
+        }
+        if (status === "failed") {
+          record.error = job.failedReason || "Assessment orchestration failed.";
+        }
+        if (status === "completed" && job.returnvalue) {
+          const result = job.returnvalue;
+          if (result.report) {
+            record.result = result.report;
+          }
+          if (result.persistence) {
+            record.persistence = result.persistence;
+          }
+        }
+        this.records.set(jobId, record);
+        return toSnapshot2(record);
+      }
+      async listByUser(userId, limit = 20) {
+        const inMemory = Array.from(this.records.values()).filter((record) => record.userId === userId).sort((a, b) => a.createdAt < b.createdAt ? 1 : -1).slice(0, limit).map(toSnapshot2);
+        if (inMemory.length > 0) {
+          return inMemory;
+        }
+        const jobs = await this.queue.getJobs(
+          ["wait", "active", "completed", "failed", "delayed"],
+          0,
+          Math.max(limit * 5, 50)
+        );
+        const snapshots = [];
+        for (const job of jobs) {
+          const id = String(job.id ?? "");
+          if (!id) continue;
+          const data = job.data;
+          if (data.userId !== userId) continue;
+          const snapshot = await this.get(id);
+          if (snapshot) snapshots.push(snapshot);
+          if (snapshots.length >= limit) break;
+        }
+        return snapshots.sort((a, b) => a.createdAt < b.createdAt ? 1 : -1).slice(0, limit);
+      }
+      async waitForCompletion(jobId, timeoutMs) {
+        const started = Date.now();
+        while (Date.now() - started < timeoutMs) {
+          const snapshot = await this.get(jobId);
+          if (!snapshot) return null;
+          if (snapshot.status === "completed" || snapshot.status === "failed") {
+            return snapshot;
+          }
+          await new Promise((resolve) => setTimeout(resolve, JOB_WAIT_POLL_MS2));
+        }
+        return this.get(jobId);
+      }
+      async getHistoryDiagnostics(userId) {
+        const snapshots = await this.listByUser(userId, 100);
+        const queuedJobCount = snapshots.filter(
+          (snapshot) => snapshot.status === "queued"
+        ).length;
+        const activeJobCount = snapshots.filter(
+          (snapshot) => snapshot.status === "queued" || snapshot.status === "running"
+        ).length;
+        return {
+          queueMode: "redis",
+          storageType: "redis",
+          storageEnabled: true,
+          supportsClear: false,
+          historyEntryCount: snapshots.length,
+          activeJobCount,
+          queuedJobCount,
+          ...snapshots[0]?.updatedAt ? { lastUpdatedAt: snapshots[0].updatedAt } : {},
+          details: "Redis-backed queue history is available from BullMQ storage. Diagnostics are sampled from recent jobs and clear history is disabled to avoid deleting shared queue records."
+        };
+      }
+      async clearHistory(userId) {
+        const snapshots = await this.listByUser(userId, 100);
+        return {
+          queueMode: "redis",
+          storageType: "redis",
+          supportsClear: false,
+          clearedCount: 0,
+          remainingCount: snapshots.length,
+          details: "Clear history is not supported in Redis queue mode because queue records may be shared with active workers."
+        };
+      }
+      subscribe(listener) {
+        this.listeners.add(listener);
+        return () => {
+          this.listeners.delete(listener);
+        };
+      }
+      createRecordFromData(id, input, status, stage) {
+        const createdAt = nowIso2();
+        const record = {
+          id,
+          userId: input.userId,
+          status,
+          stage,
+          input,
+          createdAt,
+          updatedAt: createdAt,
+          events: []
+        };
+        this.records.set(id, record);
+        return record;
+      }
+      pushEvent(record, stage, message) {
+        const timestamp2 = nowIso2();
+        record.stage = stage;
+        record.updatedAt = timestamp2;
+        record.events.push({ stage, message, timestamp: timestamp2 });
+        if (record.events.length > EVENT_RETENTION2) {
+          record.events.splice(0, record.events.length - EVENT_RETENTION2);
+        }
+        this.emitSnapshot(record);
+      }
+      emitSnapshot(record) {
+        const snapshot = toSnapshot2(record);
+        for (const listener of Array.from(this.listeners)) {
+          try {
+            listener(snapshot);
+          } catch {
+          }
+        }
+      }
+      async close() {
+        if (this.worker) {
+          await this.worker.close();
+        }
+        await this.queue.close();
+        this.records.clear();
+        this.listeners.clear();
+      }
+    };
+  }
+});
+
+// server/ai/queueFactory.ts
+function getAssessmentQueue() {
+  if (queueSingleton) {
+    return queueSingleton;
+  }
+  if (ENV.aiQueueMode === "redis") {
+    const redisUrl = ENV.redisUrl.trim();
+    if (!redisUrl) {
+      console.warn(
+        "[AI Orchestrator] AI_QUEUE_MODE=redis but REDIS_URL is empty. Falling back to in-memory queue."
+      );
+    } else {
+      try {
+        queueSingleton = new RedisAssessmentQueue(redisUrl);
+        console.info("[AI Orchestrator] Redis queue mode enabled.");
+        return queueSingleton;
+      } catch (error) {
+        console.warn(
+          "[AI Orchestrator] Failed to initialize Redis queue. Falling back to in-memory queue:",
+          error
+        );
+      }
+    }
+  }
+  queueSingleton = new InMemoryAssessmentQueue({
+    historyFilePath: ENV.aiJobHistoryFile
+  });
+  console.info("[AI Orchestrator] In-memory queue mode enabled.");
+  return queueSingleton;
+}
+async function closeAssessmentQueue() {
+  if (queueSingleton) {
+    try {
+      await queueSingleton.close();
+      console.info("[AI Orchestrator] Queue closed.");
+    } catch (err) {
+      console.warn("[AI Orchestrator] Error closing queue:", err);
+    }
+    queueSingleton = null;
+  }
+}
+var queueSingleton;
+var init_queueFactory = __esm({
+  "server/ai/queueFactory.ts"() {
+    "use strict";
+    init_env();
+    init_queue();
+    init_redisQueue();
+    queueSingleton = null;
+  }
+});
+
+// server/ai/orchestrator.ts
+var orchestrator_exports = {};
+__export(orchestrator_exports, {
+  clearAssessmentHistory: () => clearAssessmentHistory,
+  enqueueAssessmentJob: () => enqueueAssessmentJob,
+  getAgentPoolStatus: () => getAgentPoolStatus,
+  getAssessmentHistoryDiagnostics: () => getAssessmentHistoryDiagnostics,
+  getAssessmentJob: () => getAssessmentJob,
+  listAssessmentJobsForUser: () => listAssessmentJobsForUser,
+  resetAllAgents: () => resetAllAgents,
+  runAssessmentSync: () => runAssessmentSync,
+  subscribeAssessmentJobSnapshots: () => subscribeAssessmentJobSnapshots,
+  waitForAssessmentJob: () => waitForAssessmentJob
+});
+function enqueueAssessmentJob(input) {
+  return queue.enqueue(input);
+}
+function getAssessmentJob(jobId) {
+  return queue.get(jobId);
+}
+function listAssessmentJobsForUser(userId, limit = 20) {
+  return queue.listByUser(userId, limit);
+}
+function getAssessmentHistoryDiagnostics(userId) {
+  return queue.getHistoryDiagnostics(userId);
+}
+function clearAssessmentHistory(userId) {
+  return queue.clearHistory(userId);
+}
+async function waitForAssessmentJob(jobId, timeoutMs) {
+  return queue.waitForCompletion(jobId, timeoutMs ?? ENV.aiJobTimeoutMs);
+}
+function subscribeAssessmentJobSnapshots(listener) {
+  return queue.subscribe(listener);
+}
+async function runAssessmentSync(input) {
+  const queued = await enqueueAssessmentJob(input);
+  const finished = await waitForAssessmentJob(queued.id, ENV.aiJobTimeoutMs);
+  if (!finished) {
+    throw new Error("Assessment job could not be retrieved after enqueue.");
+  }
+  if (finished.status === "failed") {
+    throw new Error(
+      finished.error || "Assessment orchestration failed without details."
+    );
+  }
+  if (finished.status !== "completed" || !finished.result) {
+    throw new Error("Assessment orchestration timed out before completion.");
+  }
+  return {
+    job: finished,
+    report: finished.result
+  };
+}
+function getAgentPoolStatus() {
+  return {
+    agents: getAgentPool(),
+    stats: getAgentPoolStats(),
+    capabilities: getAgentCapabilities()
+  };
+}
+function resetAllAgents() {
+  resetAgentPool();
+  return { ok: true };
+}
+var queue;
+var init_orchestrator = __esm({
+  "server/ai/orchestrator.ts"() {
+    "use strict";
+    init_env();
+    init_pipeline();
+    init_persistence();
+    init_agent_registry();
+    init_queueFactory();
+    queue = getAssessmentQueue();
+    queue.setWorker(async (job, onProgress) => {
+      const useDispatch = job.source === "vendor_profile" && !job.rawDocumentText;
+      let report;
+      if (useDispatch) {
+        const result = await dispatchPipeline(
+          {
+            source: job.source,
+            vendor: job.vendor,
+            rawDocumentText: job.rawDocumentText
+          },
+          (stage, message) => onProgress({ stage, message })
+        );
+        report = result.report;
+      } else {
+        report = await executeAssessmentPipeline(
+          {
+            source: job.source,
+            engine: job.engine,
+            vendor: job.vendor,
+            rawDocumentText: job.rawDocumentText
+          },
+          (stage, message) => onProgress({ stage, message })
+        );
+      }
+      onProgress({
+        stage: "persistence",
+        message: "Persisting report payload to compliance tables."
+      });
+      const persistence = await persistAssessmentReport(
+        report,
+        Boolean(job.persistResult)
+      );
+      return {
+        report,
+        persistence
+      };
+    });
+  }
+});
+
 // server/email.ts
 var email_exports = {};
 __export(email_exports, {
+  logDelivery: () => logDelivery,
+  logEmailDelivery: () => logEmailDelivery,
   sendEmail: () => sendEmail
 });
 import nodemailer from "nodemailer";
+import { sql as sql2 } from "drizzle-orm";
+async function logEmailDelivery(payload, status, errorMessage) {
+  await logDelivery(
+    {
+      to: payload.recipient ?? payload.to,
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text
+    },
+    status,
+    errorMessage
+  );
+}
+async function logDelivery(payload, status, errorMessage) {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    await db.execute(sql2`
+            INSERT INTO "email_log" ("template", "recipient", "subject", "status", "sent_at", "error_message")
+            VALUES ('transactional', ${payload.to}, ${payload.subject}, ${status},
+                    ${status === "sent" ? sql2`NOW()` : sql2`NULL`},
+                    ${errorMessage ?? null})
+        `);
+  } catch {
+  }
+}
 async function sendEmail(payload) {
   const { smtpHost, smtpPort, smtpUser, smtpPass, smtpFrom, isDevelopment } = ENV;
   const from = smtpFrom || "DJAC by Yalla Hack <hello@yalla-hack.com>";
@@ -3186,6 +5733,7 @@ ${payload.text ?? payload.html}
 `
       );
     }
+    await logDelivery(payload, "failed", "SMTP not configured");
     return false;
   }
   try {
@@ -3199,14 +5747,16 @@ ${payload.text ?? payload.html}
       socketTimeout: 1e4
     });
     await transporter2.sendMail({
-      from,
+      from: payload.from ?? from,
       to: payload.to,
       subject: payload.subject,
       html: payload.html,
-      text: payload.text
+      text: payload.text,
+      ...payload.replyTo ? { replyTo: payload.replyTo } : {}
     });
     transporter2.close();
     console.info(`[EMAIL] Sent to ${payload.to}: "${payload.subject}"`);
+    await logDelivery(payload, "sent");
     return true;
   } catch (err) {
     console.error(
@@ -3219,6 +5769,7 @@ ${payload.text ?? payload.html}
         300
       )
     );
+    await logDelivery(payload, "failed", err.message.slice(0, 500));
     return false;
   }
 }
@@ -3226,6 +5777,127 @@ var init_email = __esm({
   "server/email.ts"() {
     "use strict";
     init_env();
+    init_db();
+  }
+});
+
+// server/services/local-jwt.ts
+var local_jwt_exports = {};
+__export(local_jwt_exports, {
+  COOKIE_MAX_AGE_S: () => COOKIE_MAX_AGE_S,
+  LOCAL_AUTH_COOKIE: () => LOCAL_AUTH_COOKIE,
+  cookieOptions: () => cookieOptions,
+  createLocalMemoryUser: () => createLocalMemoryUser,
+  getSessionTokenFromRequest: () => getSessionTokenFromRequest,
+  isLocalMemoryFallbackEnabled: () => isLocalMemoryFallbackEnabled,
+  localMemoryUsers: () => localMemoryUsers,
+  parseJwtUserId: () => parseJwtUserId,
+  resolveLocalSession: () => resolveLocalSession,
+  signJwt: () => signJwt,
+  verifyJwt: () => verifyJwt
+});
+import * as jose from "jose";
+import { parse as parseCookieHeader2 } from "cookie";
+import { eq as eq9 } from "drizzle-orm";
+function cookieOptions() {
+  const isSecure = !ENV.isDevelopment;
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: isSecure,
+    maxAge: COOKIE_MAX_AGE_S * 1e3,
+    path: "/"
+  };
+}
+async function signJwt(payload, ttl) {
+  const secret = new TextEncoder().encode(ENV.cookieSecret);
+  return new jose.SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime(ttl ?? `${COOKIE_MAX_AGE_S}s`).sign(secret);
+}
+async function verifyJwt(token) {
+  try {
+    const secret = new TextEncoder().encode(ENV.cookieSecret);
+    const { payload } = await jose.jwtVerify(token, secret);
+    return payload;
+  } catch {
+    return null;
+  }
+}
+function parseJwtUserId(sub) {
+  if (typeof sub === "number" && Number.isFinite(sub)) return sub;
+  if (typeof sub === "string" && sub.trim().length > 0) {
+    const parsed = Number.parseInt(sub, 10);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+}
+function getSessionTokenFromRequest(req) {
+  const fromParsedCookie = req.cookies?.[LOCAL_AUTH_COOKIE];
+  if (fromParsedCookie) return fromParsedCookie;
+  const rawCookieHeader = req.headers?.cookie;
+  if (typeof rawCookieHeader !== "string" || rawCookieHeader.length === 0)
+    return null;
+  const parsed = parseCookieHeader2(rawCookieHeader);
+  return parsed[LOCAL_AUTH_COOKIE] ?? null;
+}
+function isLocalMemoryFallbackEnabled() {
+  return ENV.isDevelopment && ENV.allowInMemoryPersistenceFallback;
+}
+function createLocalMemoryUser(input) {
+  const now = /* @__PURE__ */ new Date();
+  const row = {
+    id: _localMemoryUserId++,
+    name: input.name,
+    email: input.email,
+    passwordHash: input.passwordHash,
+    userType: input.userType,
+    companyName: input.companyName ?? null,
+    jobTitle: input.jobTitle ?? null,
+    industry: input.industry ?? null,
+    complianceResponsibility: input.complianceResponsibility ?? null,
+    preferredLocale: input.preferredLocale,
+    status: input.status ?? "active",
+    lastSignedIn: now,
+    totpSecret: null,
+    mfaEnabled: 0,
+    mfaBackupCodes: null,
+    phoneNumber: null,
+    verifiedAt: null,
+    lastMfaVerifiedAt: null,
+    firstLoginEmailSent: 0,
+    createdAt: now,
+    updatedAt: now
+  };
+  localMemoryUsers.unshift(row);
+  return row;
+}
+async function resolveLocalSession(req) {
+  const token = getSessionTokenFromRequest(req);
+  if (!token) return null;
+  const payload = await verifyJwt(token);
+  if (!payload) return null;
+  const userId = parseJwtUserId(payload.sub);
+  if (!userId) return null;
+  const db = await getDb();
+  if (db) {
+    const [row] = await db.select().from(localUsers).where(eq9(localUsers.id, userId)).limit(1);
+    return row ?? null;
+  }
+  if (isLocalMemoryFallbackEnabled()) {
+    return localMemoryUsers.find((u) => u.id === userId) ?? null;
+  }
+  return null;
+}
+var LOCAL_AUTH_COOKIE, COOKIE_MAX_AGE_S, _localMemoryUserId, localMemoryUsers;
+var init_local_jwt = __esm({
+  "server/services/local-jwt.ts"() {
+    "use strict";
+    init_schema();
+    init_db();
+    init_env();
+    LOCAL_AUTH_COOKIE = "djac_local_session";
+    COOKIE_MAX_AGE_S = 60 * 60 * 24 * 7;
+    _localMemoryUserId = 1;
+    localMemoryUsers = [];
   }
 });
 
@@ -5551,6 +8223,969 @@ var init_compliance_reference_data = __esm({
   }
 });
 
+// server/_core/admin-insights-store.ts
+var admin_insights_store_exports = {};
+__export(admin_insights_store_exports, {
+  buildReport: () => buildReport,
+  getEngagementMetrics: () => getEngagementMetrics,
+  getLiveMetrics: () => getLiveMetrics,
+  getOperationalAlerts: () => getOperationalAlerts,
+  getUserAuthHistory: () => getUserAuthHistory,
+  getUserTimeline: () => getUserTimeline,
+  reportToCsv: () => reportToCsv,
+  reportToPdf: () => reportToPdf,
+  sendAlertDigest: () => sendAlertDigest
+});
+import { readFileSync } from "node:fs";
+import { and as and34, count as count2, desc as desc26, eq as eq49, gte as gte3, sql as sql10 } from "drizzle-orm";
+async function getUserTimeline(userId, limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  const [auditRows, activityRows, interactionRows] = await Promise.all([
+    db.select({
+      id: auditLogs.id,
+      action: auditLogs.action,
+      category: auditLogs.category,
+      outcome: auditLogs.outcome,
+      entityType: auditLogs.entityType,
+      ipAddress: auditLogs.ipHash,
+      userAgent: auditLogs.userAgent,
+      createdAt: auditLogs.createdAt
+    }).from(auditLogs).where(eq49(auditLogs.localUserId, userId)).orderBy(desc26(auditLogs.createdAt)).limit(limit),
+    db.select({
+      id: activityEvents.id,
+      action: activityEvents.action,
+      entityType: activityEvents.entityType,
+      ipAddress: activityEvents.ipHash,
+      createdAt: activityEvents.createdAt
+    }).from(activityEvents).where(eq49(activityEvents.localUserId, userId)).orderBy(desc26(activityEvents.createdAt)).limit(limit),
+    db.select({
+      id: userInteractionLogs.id,
+      action: userInteractionLogs.action,
+      context: userInteractionLogs.context,
+      entityType: userInteractionLogs.entityType,
+      ipAddress: userInteractionLogs.ipHash,
+      userAgent: userInteractionLogs.userAgent,
+      createdAt: userInteractionLogs.createdAt
+    }).from(userInteractionLogs).where(eq49(userInteractionLogs.localUserId, userId)).orderBy(desc26(userInteractionLogs.createdAt)).limit(limit)
+  ]);
+  const merged = [
+    ...auditRows.map((r) => ({
+      id: `audit-${r.id}`,
+      source: "audit",
+      action: r.action,
+      category: r.category,
+      outcome: r.outcome,
+      entityType: r.entityType,
+      ipAddress: r.ipAddress,
+      userAgent: r.userAgent,
+      createdAt: r.createdAt?.toISOString() ?? ""
+    })),
+    ...activityRows.map((r) => ({
+      id: `activity-${r.id}`,
+      source: "activity",
+      action: r.action,
+      category: "activity",
+      outcome: null,
+      entityType: r.entityType,
+      ipAddress: r.ipAddress,
+      userAgent: null,
+      createdAt: r.createdAt?.toISOString() ?? ""
+    })),
+    ...interactionRows.map((r) => ({
+      id: `interaction-${r.id}`,
+      source: "interaction",
+      action: r.action,
+      category: r.context,
+      outcome: null,
+      entityType: r.entityType,
+      ipAddress: r.ipAddress,
+      userAgent: r.userAgent,
+      createdAt: r.createdAt?.toISOString() ?? ""
+    }))
+  ];
+  return merged.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit);
+}
+async function getUserAuthHistory(userId, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({
+    id: auditLogs.id,
+    action: auditLogs.action,
+    outcome: auditLogs.outcome,
+    ipAddress: auditLogs.ipHash,
+    userAgent: auditLogs.userAgent,
+    createdAt: auditLogs.createdAt
+  }).from(auditLogs).where(
+    and34(eq49(auditLogs.localUserId, userId), eq49(auditLogs.category, "auth"))
+  ).orderBy(desc26(auditLogs.createdAt)).limit(limit);
+  return rows.map((r) => ({
+    id: r.id,
+    action: r.action,
+    outcome: r.outcome,
+    ipAddress: r.ipAddress,
+    userAgent: r.userAgent,
+    createdAt: r.createdAt?.toISOString() ?? ""
+  }));
+}
+async function getEngagementMetrics(windowDays = 30) {
+  const db = await getDb();
+  const now = /* @__PURE__ */ new Date();
+  const empty = {
+    generatedAt: now.toISOString(),
+    windowDays,
+    dau: 0,
+    wau: 0,
+    mau: 0,
+    newUsersInWindow: 0,
+    dormantUsers: 0,
+    retention: { active1d: 0, active7d: 0, active30d: 0, total: 0 },
+    dailyActive: [],
+    topUsers: [],
+    topFeatures: [],
+    topOrgs: []
+  };
+  if (!db) return empty;
+  const dayAgo = new Date(now.getTime() - 24 * 3600 * 1e3);
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1e3);
+  const monthAgo = new Date(now.getTime() - 30 * 24 * 3600 * 1e3);
+  const windowStart = new Date(
+    now.getTime() - Math.max(windowDays, 1) * 24 * 3600 * 1e3
+  );
+  const activeCounts = await db.execute(sql10`
+    WITH actors AS (
+      SELECT "localUserId" AS uid, MAX("createdAt") AS last_at
+      FROM "auditLogs"
+      WHERE "localUserId" IS NOT NULL AND "createdAt" >= ${monthAgo}
+      GROUP BY 1
+      UNION
+      SELECT "localUserId" AS uid, MAX("createdAt") AS last_at
+      FROM "userInteractionLogs"
+      WHERE "localUserId" IS NOT NULL AND "createdAt" >= ${monthAgo}
+      GROUP BY 1
+    ),
+    rolled AS (
+      SELECT uid, MAX(last_at) AS last_at FROM actors GROUP BY uid
+    )
+    SELECT
+      COUNT(*) FILTER (WHERE last_at >= ${dayAgo}) AS dau,
+      COUNT(*) FILTER (WHERE last_at >= ${weekAgo}) AS wau,
+      COUNT(*) FILTER (WHERE last_at >= ${monthAgo}) AS mau,
+      COUNT(*) AS total_with_activity
+    FROM rolled
+  `);
+  const ac = activeCounts.rows[0] ?? {};
+  const totals = await db.select({
+    total: count2(),
+    newInWindow: sql10`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
+    dormant: sql10`COUNT(*) FILTER (WHERE "lastSignedIn" IS NULL OR "lastSignedIn" < ${monthAgo})`
+  }).from(localUsers);
+  const totalsRow = totals[0];
+  const totalUsers = Number(totalsRow?.total ?? 0);
+  const [newWindow] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.createdAt, windowStart));
+  const dailyRows = await db.execute(sql10`
+    SELECT to_char(d, 'YYYY-MM-DD') AS date, COUNT(DISTINCT uid) AS count
+    FROM (
+      SELECT date_trunc('day', "createdAt") AS d, "localUserId" AS uid
+      FROM "auditLogs"
+      WHERE "localUserId" IS NOT NULL AND "createdAt" >= ${windowStart}
+      UNION ALL
+      SELECT date_trunc('day', "createdAt") AS d, "localUserId" AS uid
+      FROM "userInteractionLogs"
+      WHERE "localUserId" IS NOT NULL AND "createdAt" >= ${windowStart}
+    ) src
+    GROUP BY d
+    ORDER BY d
+  `);
+  const dailyActive = dailyRows.rows.map((r) => ({ date: r.date, count: Number(r.count) })).slice(-90);
+  const topUserRows = await db.execute(sql10`
+    SELECT u.id, u.name, u.email,
+           COUNT(*) AS "eventCount",
+           MAX(a."createdAt") AS "lastActiveAt"
+    FROM "auditLogs" a
+    JOIN "localUsers" u ON u.id = a."localUserId"
+    WHERE a."localUserId" IS NOT NULL AND a."createdAt" >= ${windowStart}
+    GROUP BY u.id, u.name, u.email
+    ORDER BY COUNT(*) DESC
+    LIMIT 15
+  `);
+  const topUsers = topUserRows.rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    eventCount: Number(r.eventCount),
+    lastActiveAt: r.lastActiveAt instanceof Date ? r.lastActiveAt.toISOString() : r.lastActiveAt ?? null
+  }));
+  const featureRows = await db.execute(sql10`
+    SELECT action, COUNT(*) AS count
+    FROM "userInteractionLogs"
+    WHERE "createdAt" >= ${windowStart}
+    GROUP BY action
+    ORDER BY count DESC
+    LIMIT 12
+  `);
+  const topFeatures = featureRows.rows.map((r) => ({ action: r.action, count: Number(r.count) }));
+  const orgRows = await db.execute(sql10`
+    SELECT o.id, o.name, COUNT(*) AS "eventCount"
+    FROM "auditLogs" a
+    JOIN "organizationMembers" m ON m."localUserId" = a."localUserId"
+    JOIN "organizations" o ON o.id = m."organizationId"
+    WHERE a."localUserId" IS NOT NULL AND a."createdAt" >= ${windowStart}
+    GROUP BY o.id, o.name
+    ORDER BY COUNT(*) DESC
+    LIMIT 10
+  `);
+  const topOrgs = orgRows.rows.map((r) => ({ id: r.id, name: r.name, eventCount: Number(r.eventCount) }));
+  const totalUsersChecked = totalUsers;
+  return {
+    generatedAt: now.toISOString(),
+    windowDays,
+    dau: Number(ac.dau ?? 0),
+    wau: Number(ac.wau ?? 0),
+    mau: Number(ac.mau ?? 0),
+    newUsersInWindow: Number(newWindow?.c ?? 0),
+    dormantUsers: Number(totalsRow?.dormant ?? 0),
+    retention: {
+      active1d: Number(ac.dau ?? 0),
+      active7d: Number(ac.wau ?? 0),
+      active30d: Number(ac.mau ?? 0),
+      total: totalUsersChecked
+    },
+    dailyActive,
+    topUsers,
+    topFeatures,
+    topOrgs
+  };
+}
+async function buildReport(type, windowDays = 30) {
+  const db = await getDb();
+  const generatedAt = (/* @__PURE__ */ new Date()).toISOString();
+  const windowStart = new Date(
+    Date.now() - Math.max(windowDays, 1) * 24 * 3600 * 1e3
+  );
+  const base = {
+    type,
+    generatedAt,
+    windowDays,
+    notes: []
+  };
+  if (!db) {
+    return {
+      ...base,
+      title: titleFor(type),
+      kpis: [],
+      series: [],
+      table: { columns: [], rows: [] },
+      notes: ["Database unavailable \u2014 report is empty."]
+    };
+  }
+  switch (type) {
+    case "growth":
+      return buildGrowthReport(db, base, windowStart);
+    case "engagement":
+      return buildEngagementReport(db, base, windowStart);
+    case "revenue":
+      return buildRevenueReport(db, base, windowStart);
+    case "security":
+      return buildSecurityReport(db, base, windowStart);
+    case "operations":
+      return buildOperationsReport(db, base, windowStart);
+    default:
+      throw new Error(`Unknown report type: ${type}`);
+  }
+}
+function titleFor(type) {
+  const titles = {
+    growth: "User Growth Report",
+    engagement: "Engagement & Retention Report",
+    revenue: "Revenue & Subscriptions Report",
+    security: "Security Posture Report",
+    operations: "Operations & Support Report"
+  };
+  return titles[type];
+}
+async function buildGrowthReport(db, base, windowStart) {
+  const [stats] = await db.select({
+    total: count2(),
+    newInWindow: sql10`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
+    verified: sql10`COUNT(*) FILTER (WHERE "verifiedAt" IS NOT NULL)`,
+    mfa: sql10`COUNT(*) FILTER (WHERE "mfaEnabled" = 1)`,
+    active: sql10`COUNT(*) FILTER (WHERE "status" = 'active')`,
+    pending: sql10`COUNT(*) FILTER (WHERE "status" = 'pending')`,
+    suspended: sql10`COUNT(*) FILTER (WHERE "status" = 'suspended')`
+  }).from(localUsers);
+  const byRole = await db.select({ role: localUsers.userType, c: count2() }).from(localUsers).groupBy(localUsers.userType);
+  const byDay = await db.execute(sql10`
+    SELECT to_char("createdAt", 'YYYY-MM-DD') AS day, COUNT(*) AS count
+    FROM "localUsers"
+    WHERE "createdAt" >= ${windowStart}
+    GROUP BY 1 ORDER BY 1
+  `);
+  const orgStats = await db.select({ c: count2() }).from(organizations);
+  return {
+    ...base,
+    title: titleFor("growth"),
+    kpis: [
+      { label: "Total users", value: Number(stats?.total ?? 0) },
+      {
+        label: `New (${base.windowDays}d)`,
+        value: Number(stats?.newInWindow ?? 0)
+      },
+      { label: "Active", value: Number(stats?.active ?? 0) },
+      { label: "Pending verification", value: Number(stats?.pending ?? 0) },
+      { label: "Suspended", value: Number(stats?.suspended ?? 0) },
+      { label: "MFA enabled", value: Number(stats?.mfa ?? 0) },
+      { label: "Organizations", value: Number(orgStats[0]?.c ?? 0) }
+    ],
+    series: [
+      {
+        name: "Daily signups",
+        points: byDay.rows.map((r) => ({
+          x: r.day,
+          y: Number(r.count)
+        }))
+      }
+    ],
+    table: {
+      columns: ["Role", "Users"],
+      rows: byRole.map((r) => [r.role ?? "visitor", Number(r.c)])
+    },
+    notes: [
+      "Growth counts local (email/OTP) accounts; OAuth accounts are separate."
+    ]
+  };
+}
+async function buildEngagementReport(db, base, windowStart) {
+  const eng = await getEngagementMetrics(base.windowDays);
+  const loginRows = await db.execute(sql10`
+    SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
+           COUNT(*) AS logins
+    FROM "auditLogs"
+    WHERE action = 'user.login' AND "createdAt" >= ${windowStart}
+    GROUP BY 1 ORDER BY 1
+  `);
+  const featureRows = await db.execute(sql10`
+    SELECT action, COUNT(*) AS count
+    FROM "userInteractionLogs"
+    WHERE "createdAt" >= ${windowStart}
+    GROUP BY 1 ORDER BY count DESC LIMIT 20
+  `);
+  return {
+    ...base,
+    title: titleFor("engagement"),
+    kpis: [
+      { label: "DAU", value: eng.dau },
+      { label: "WAU", value: eng.wau },
+      { label: "MAU", value: eng.mau },
+      {
+        label: "7d retention",
+        value: eng.retention.total > 0 ? `${Math.round(eng.retention.active7d / eng.retention.total * 100)}%` : "\u2014"
+      },
+      { label: "Dormant 30d+", value: eng.dormantUsers },
+      { label: `New (${base.windowDays}d)`, value: eng.newUsersInWindow }
+    ],
+    series: [
+      {
+        name: "Logins / day",
+        points: loginRows.rows.map((r) => ({
+          x: r.day,
+          y: Number(r.logins)
+        }))
+      },
+      {
+        name: "Active users / day",
+        points: eng.dailyActive.map((d2) => ({ x: d2.date, y: d2.count }))
+      }
+    ],
+    table: {
+      columns: ["Feature action", "Events"],
+      rows: featureRows.rows.map((r) => [r.action, Number(r.count)])
+    },
+    notes: [
+      "Engagement is derived from audit + interaction logs (no dedicated session table for end users).",
+      `Top users: ${eng.topUsers.slice(0, 3).map((u) => u.name ?? u.email).join(", ") || "none"}.`
+    ]
+  };
+}
+async function buildRevenueReport(db, base, windowStart) {
+  const subs = await db.select({
+    id: subscriptions.id,
+    plan: subscriptions.plan,
+    status: subscriptions.status,
+    interval: subscriptions.billingInterval,
+    amount: subscriptions.amountCents,
+    cancelAtEnd: subscriptions.cancelAtPeriodEnd,
+    orgName: organizations.name,
+    periodEnd: subscriptions.currentPeriodEnd
+  }).from(subscriptions).innerJoin(
+    organizations,
+    eq49(subscriptions.organizationId, organizations.id)
+  ).orderBy(desc26(subscriptions.updatedAt)).limit(500);
+  const active = subs.filter(
+    (s) => s.status === "active" || s.status === "trialing"
+  );
+  const mrr = active.reduce((sum, s) => {
+    const monthly = s.interval === "annual" ? s.amount / 12 : s.interval === "biannual" ? s.amount / 6 : s.amount;
+    return sum + monthly;
+  }, 0);
+  const canceling = active.filter((s) => s.cancelAtEnd).length;
+  const pastDue = subs.filter((s) => s.status === "past_due").length;
+  const newOrgs = await db.select({ c: count2() }).from(organizations).where(gte3(organizations.createdAt, windowStart));
+  const planMix = /* @__PURE__ */ new Map();
+  for (const s of active) {
+    planMix.set(s.plan, (planMix.get(s.plan) ?? 0) + 1);
+  }
+  return {
+    ...base,
+    title: titleFor("revenue"),
+    kpis: [
+      { label: "Est. MRR", value: `$${(mrr / 100).toFixed(2)}` },
+      { label: "Active subs", value: active.length },
+      { label: "Total subs", value: subs.length },
+      { label: "Canceling", value: canceling },
+      { label: "Past due", value: pastDue },
+      {
+        label: `New orgs (${base.windowDays}d)`,
+        value: Number(newOrgs[0]?.c ?? 0)
+      }
+    ],
+    series: [
+      {
+        name: "Active by plan",
+        points: [...planMix.entries()].map(([plan, n]) => ({
+          x: plan,
+          y: n
+        }))
+      }
+    ],
+    table: {
+      columns: [
+        "Org",
+        "Plan",
+        "Interval",
+        "Status",
+        "Amount",
+        "Period end",
+        "Cancel at end"
+      ],
+      rows: subs.map((s) => [
+        s.orgName,
+        s.plan,
+        s.interval,
+        s.status,
+        `$${(s.amount / 100).toFixed(2)}`,
+        s.periodEnd ? new Date(s.periodEnd).toISOString().slice(0, 10) : "\u2014",
+        s.cancelAtEnd ? "yes" : "no"
+      ])
+    },
+    notes: ["MRR normalizes annual/biannual tiers to a monthly figure."]
+  };
+}
+async function buildSecurityReport(db, base, windowStart) {
+  const outcomeRows = await db.select({ outcome: auditLogs.outcome, c: count2() }).from(auditLogs).where(gte3(auditLogs.createdAt, windowStart)).groupBy(auditLogs.outcome);
+  const actionRows = await db.execute(sql10`
+    SELECT action, COUNT(*) AS count
+    FROM "auditLogs"
+    WHERE "createdAt" >= ${windowStart}
+      AND (category = 'auth' OR outcome IN ('failure','blocked')
+           OR action LIKE '%role%' OR action LIKE '%password%')
+    GROUP BY action ORDER BY count DESC LIMIT 25
+  `);
+  const dailyFailures = await db.execute(sql10`
+    SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
+           COUNT(*) AS count
+    FROM "auditLogs"
+    WHERE outcome = 'failure' AND "createdAt" >= ${windowStart}
+    GROUP BY 1 ORDER BY 1
+  `);
+  const roleChanges = await db.execute(sql10`
+    SELECT COUNT(*) AS c FROM "auditLogs"
+    WHERE action LIKE '%role%' AND "createdAt" >= ${windowStart}
+  `);
+  const founderFails = await db.execute(
+    sql10`
+    SELECT COUNT(*) AS c FROM "yallaAdminAuditLogs"
+    WHERE action IN ('login.failed','login.mfa_failed')
+      AND "createdAt" >= ${windowStart}
+  `
+  ).catch(() => ({ rows: [{ c: 0 }] }));
+  const byOutcome = Object.fromEntries(
+    outcomeRows.map((r) => [r.outcome, Number(r.c)])
+  );
+  return {
+    ...base,
+    title: titleFor("security"),
+    kpis: [
+      { label: "Success events", value: Number(byOutcome.success ?? 0) },
+      { label: "Failures", value: Number(byOutcome.failure ?? 0) },
+      { label: "Blocked", value: Number(byOutcome.blocked ?? 0) },
+      {
+        label: "Role changes",
+        value: Number(roleChanges.rows[0]?.c ?? 0)
+      },
+      {
+        label: "Founder login fails",
+        value: Number(founderFails.rows[0]?.c ?? 0)
+      }
+    ],
+    series: [
+      {
+        name: "Failed events / day",
+        points: dailyFailures.rows.map((r) => ({
+          x: r.day,
+          y: Number(r.count)
+        }))
+      }
+    ],
+    table: {
+      columns: ["Action", "Count"],
+      rows: actionRows.rows.map((r) => [r.action, Number(r.count)])
+    },
+    notes: [
+      "IP addresses are hashed at rest; raw IPs appear only in founders-portal audit rows.",
+      "Includes platform auditLogs + founders-portal login failures."
+    ]
+  };
+}
+async function buildOperationsReport(db, base, windowStart) {
+  const srByStatus = await db.select({ status: serviceRequests.status, c: count2() }).from(serviceRequests).groupBy(serviceRequests.status);
+  const srOpen = await db.execute(sql10`
+    SELECT COUNT(*) AS c FROM "serviceRequests"
+    WHERE status NOT IN ('completed','cancelled') AND "createdAt" >= ${windowStart}
+  `);
+  const adminNotes = await db.execute(sql10`
+    SELECT COUNT(*) AS c FROM "adminNotifications"
+    WHERE "isRead" = 0
+  `);
+  const emails = await db.execute(
+    sql10`
+    SELECT status, COUNT(*) AS c FROM "email_log"
+    WHERE "createdAt" >= ${windowStart}
+    GROUP BY status
+  `
+  ).catch(() => ({ rows: [] }));
+  const dailyRegs = await db.execute(sql10`
+    SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
+           COUNT(*) AS count
+    FROM "localUsers"
+    WHERE "createdAt" >= ${windowStart}
+    GROUP BY 1 ORDER BY 1
+  `);
+  const openSr = srByStatus.filter((r) => r.status !== "completed" && r.status !== "cancelled").reduce((s, r) => s + Number(r.c), 0);
+  return {
+    ...base,
+    title: titleFor("operations"),
+    kpis: [
+      { label: "Open service requests", value: Number(openSr) },
+      {
+        label: `New SRs (${base.windowDays}d)`,
+        value: Number(srOpen.rows[0]?.c ?? 0)
+      },
+      {
+        label: "Unread admin notes",
+        value: Number(adminNotes.rows[0]?.c ?? 0)
+      },
+      ...srByStatus.slice(0, 4).map((r) => ({
+        label: `SR: ${r.status}`,
+        value: Number(r.c)
+      }))
+    ],
+    series: [
+      {
+        name: "Signups / day",
+        points: dailyRegs.rows.map((r) => ({
+          x: r.day,
+          y: Number(r.count)
+        }))
+      },
+      {
+        name: "Emails by status",
+        points: emails.rows.map((r) => ({
+          x: String(r.status),
+          y: Number(r.c)
+        }))
+      }
+    ],
+    table: {
+      columns: ["Service request status", "Count"],
+      rows: srByStatus.map((r) => [r.status, Number(r.c)])
+    },
+    notes: [
+      "Service request pipeline health; email metrics depend on email_log being populated."
+    ]
+  };
+}
+function csvEscape2(v) {
+  const s = v == null ? "" : String(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+function reportToCsv(report) {
+  const lines = [];
+  lines.push(`# ${report.title}`);
+  lines.push(`# Generated,${report.generatedAt}`);
+  lines.push(`# Window days,${report.windowDays}`);
+  lines.push("");
+  lines.push("KPI,Value");
+  for (const k of report.kpis) {
+    lines.push(`${csvEscape2(k.label)},${csvEscape2(k.value)}`);
+  }
+  lines.push("");
+  lines.push(report.table.columns.map(csvEscape2).join(","));
+  for (const row of report.table.rows) {
+    lines.push(row.map(csvEscape2).join(","));
+  }
+  if (report.notes.length) {
+    lines.push("");
+    lines.push("Notes");
+    for (const n of report.notes) lines.push(csvEscape2(n));
+  }
+  return lines.join("\r\n");
+}
+async function loadFont(pdfDoc, p) {
+  try {
+    const bytes = readFileSync(p);
+    return await pdfDoc.embedFont(bytes);
+  } catch {
+    return null;
+  }
+}
+async function reportToPdf(report) {
+  const { PDFDocument: PDFDocument2, StandardFonts: StandardFonts2 } = await import("pdf-lib");
+  const pdfDoc = await PDFDocument2.create();
+  const page = pdfDoc.addPage([600, 800]);
+  const { height } = page.getSize();
+  const dejavuPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+  const boldPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+  const normal = await loadFont(pdfDoc, dejavuPath) ?? await pdfDoc.embedFont(StandardFonts2.Helvetica);
+  const bold = await loadFont(pdfDoc, boldPath) ?? await pdfDoc.embedFont(StandardFonts2.HelveticaBold);
+  const FONT_SIZE = 10;
+  const MARGIN = 40;
+  let y = height - MARGIN - 20;
+  page.drawText(report.title, { x: MARGIN, y, size: 18, font: bold });
+  y -= 30;
+  page.drawText(
+    `Generated: ${report.generatedAt}  |  Window: ${report.windowDays}d`,
+    { x: MARGIN, y, size: FONT_SIZE, font: normal }
+  );
+  y -= 20;
+  for (const kp of report.kpis) {
+    if (y < MARGIN + 20) {
+      pdfDoc.addPage();
+      y = height - MARGIN - 20;
+    }
+    page.drawText(`${kp.label}: ${kp.value}`, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZE,
+      font: normal
+    });
+    y -= 16;
+  }
+  if (report.table.columns.length) {
+    y -= 8;
+    page.drawText(report.table.columns.join(" | "), {
+      x: MARGIN,
+      y,
+      size: FONT_SIZE - 2,
+      font: bold
+    });
+    y -= 14;
+    for (const row of report.table.rows) {
+      if (y < MARGIN + 20) {
+        pdfDoc.addPage();
+        y = height - MARGIN - 20;
+      }
+      page.drawText(row.join(" | "), {
+        x: MARGIN,
+        y,
+        size: FONT_SIZE - 2,
+        font: normal
+      });
+      y -= 14;
+    }
+  }
+  if (report.notes.length) {
+    y -= 8;
+    page.drawText("Notes", { x: MARGIN, y, size: FONT_SIZE, font: bold });
+    y -= 14;
+    for (const n of report.notes) {
+      if (y < MARGIN + 20) {
+        pdfDoc.addPage();
+        y = height - MARGIN - 20;
+      }
+      page.drawText(n, { x: MARGIN, y, size: FONT_SIZE, font: normal });
+      y -= 14;
+    }
+  }
+  return await pdfDoc.save();
+}
+async function sendAlertDigest() {
+  const db = await getDb();
+  if (!db) return { sent: 0, skipped: 1 };
+  try {
+    const alerts = await getOperationalAlerts();
+    const critical = alerts.filter((a) => a.severity === "critical");
+    const warnings = alerts.filter((a) => a.severity === "warning");
+    if (critical.length === 0 && warnings.length === 0) {
+      return { sent: 0, skipped: 0 };
+    }
+    const { createTransport: createTransport2 } = await import("nodemailer");
+    const { parsedEnv: parsedEnv2 } = await Promise.resolve().then(() => (init_config_schema(), config_schema_exports));
+    const { logDelivery: logDelivery2 } = await Promise.resolve().then(() => (init_email(), email_exports));
+    const transport2 = createTransport2({
+      host: parsedEnv2.SMTP_HOST || "localhost",
+      port: parsedEnv2.SMTP_PORT,
+      secure: parsedEnv2.SMTP_SECURE,
+      auth: parsedEnv2.SMTP_USER ? { user: parsedEnv2.SMTP_USER, pass: parsedEnv2.SMTP_PASS } : void 0
+    });
+    const text2 = [
+      "DJAC Operational Alert Digest",
+      "",
+      critical.length ? `\u{1F534} CRITICAL (${critical.length}):` : "",
+      ...critical.map((a) => `  [${a.category}] ${a.title}: ${a.detail}`),
+      warnings.length ? `\u{1F7E1} WARNINGS (${warnings.length}):` : "",
+      ...warnings.map((a) => `  [${a.category}] ${a.title}: ${a.detail}`),
+      "",
+      "Generated by the founders console."
+    ].filter(Boolean).join("\n");
+    const info = await transport2.sendMail({
+      from: parsedEnv2.SMTP_FROM || "DJAC <noreply@yalla-hack.com>",
+      to: parsedEnv2.DEFAULT_BILLING_EMAIL,
+      subject: `[${critical.length ? "CRITICAL" : "WARNING"}] DJAC Operational Alerts`,
+      text: text2
+    });
+    await logDelivery2(
+      {
+        to: parsedEnv2.DEFAULT_BILLING_EMAIL,
+        subject: info.messageId ?? "alert-digest",
+        html: text2
+      },
+      "sent"
+    );
+    return { sent: alerts.length, skipped: 0 };
+  } catch (err) {
+    logger.error({ error: err }, "sendAlertDigest failed");
+    return { sent: 0, skipped: 1 };
+  }
+}
+async function getOperationalAlerts() {
+  const db = await getDb();
+  if (!db) return [];
+  const alerts = [];
+  const now = /* @__PURE__ */ new Date();
+  const dayAgo = new Date(now.getTime() - 24 * 3600 * 1e3);
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1e3);
+  try {
+    const failRow = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "auditLogs"
+      WHERE outcome = 'failure' AND "createdAt" >= ${dayAgo}
+    `);
+    const fails = Number(failRow.rows[0]?.c ?? 0);
+    if (fails >= 10) {
+      alerts.push({
+        id: "auth-fail-spike",
+        severity: fails >= 50 ? "critical" : "warning",
+        category: "security",
+        title: "Elevated authentication failures",
+        detail: `${fails} failed auth events in the last 24 hours.`,
+        count: fails,
+        createdAt: now.toISOString()
+      });
+    }
+  } catch {
+  }
+  try {
+    const pastDue = await db.select({ c: count2() }).from(subscriptions).where(eq49(subscriptions.status, "past_due"));
+    if ((pastDue[0]?.c ?? 0) > 0) {
+      const pastDueCount = Number(pastDue[0].c);
+      alerts.push({
+        id: "subs-past-due",
+        severity: "warning",
+        category: "billing",
+        title: "Subscriptions past due",
+        detail: `${pastDueCount} subscription(s) require payment attention.`,
+        count: pastDueCount,
+        createdAt: now.toISOString()
+      });
+    }
+  } catch {
+  }
+  try {
+    const openSr = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "serviceRequests"
+      WHERE status NOT IN ('completed','cancelled')
+    `);
+    const open = Number(openSr.rows[0]?.c ?? 0);
+    if (open >= 5) {
+      alerts.push({
+        id: "sr-backlog",
+        severity: "info",
+        category: "support",
+        title: "Service request backlog",
+        detail: `${open} open service requests in the queue.`,
+        count: open,
+        createdAt: now.toISOString()
+      });
+    } else if (open > 0) {
+      alerts.push({
+        id: "sr-open",
+        severity: "info",
+        category: "support",
+        title: "Open service requests",
+        detail: `${open} request(s) awaiting action.`,
+        count: open,
+        createdAt: now.toISOString()
+      });
+    }
+  } catch {
+  }
+  try {
+    const dormant = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "localUsers"
+      WHERE "status" = 'active'
+        AND ("lastSignedIn" IS NULL OR "lastSignedIn" < ${weekAgo})
+    `);
+    const n = Number(dormant.rows[0]?.c ?? 0);
+    if (n >= 10) {
+      alerts.push({
+        id: "dormant-users",
+        severity: "info",
+        category: "growth",
+        title: "Many dormant active users",
+        detail: `${n} active users have not signed in for 7+ days.`,
+        count: n,
+        createdAt: now.toISOString()
+      });
+    }
+  } catch {
+  }
+  try {
+    const unread = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "adminNotifications" WHERE "isRead" = 0
+    `);
+    const n = Number(unread.rows[0]?.c ?? 0);
+    if (n >= 5) {
+      alerts.push({
+        id: "admin-notes",
+        severity: "info",
+        category: "system",
+        title: "Unread admin notifications",
+        detail: `${n} admin notification(s) have not been reviewed.`,
+        count: n,
+        createdAt: now.toISOString()
+      });
+    }
+  } catch {
+  }
+  try {
+    const canceling = await db.select({ c: count2() }).from(subscriptions).where(eq49(subscriptions.cancelAtPeriodEnd, 1));
+    if ((canceling[0]?.c ?? 0) > 0) {
+      alerts.push({
+        id: "canceling",
+        severity: "warning",
+        category: "billing",
+        title: "Subscriptions canceling",
+        detail: `${canceling[0].c} subscription(s) cancel at period end.`,
+        count: canceling[0].c,
+        createdAt: now.toISOString()
+      });
+    }
+  } catch {
+  }
+  const severityOrder = { critical: 0, warning: 1, info: 2 };
+  return alerts.sort(
+    (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
+  );
+}
+async function getLiveMetrics() {
+  const { getSSEClientCount: getSSEClientCount2 } = await Promise.resolve().then(() => (init_sse_bus(), sse_bus_exports));
+  const db = await getDb();
+  const now = /* @__PURE__ */ new Date();
+  const dayStart = new Date(now);
+  dayStart.setUTCHours(0, 0, 0, 0);
+  const fiveMinAgo = new Date(now.getTime() - 5 * 60 * 1e3);
+  const dayAgo = new Date(now.getTime() - 24 * 3600 * 1e3);
+  const empty = {
+    generatedAt: now.toISOString(),
+    sseClients: getSSEClientCount2(),
+    onlineRecently: 0,
+    activeFoundersSessions: 0,
+    signupsToday: 0,
+    loginsToday: 0,
+    failedLogins24h: 0,
+    openServiceRequests: 0,
+    unreadAdminNotifications: 0,
+    recentEvents: []
+  };
+  if (!db) return empty;
+  try {
+    const [online] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.lastSignedIn, fiveMinAgo));
+    const sessionsResult = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "yallaAdminSessions"
+      WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
+    `);
+    const [signups] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.createdAt, dayStart));
+    const loginsResult = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "auditLogs"
+      WHERE action = 'user.login' AND "createdAt" >= ${dayStart}
+    `);
+    const failsResult = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "auditLogs"
+      WHERE outcome = 'failure' AND "createdAt" >= ${dayAgo}
+    `);
+    const openSrResult = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "serviceRequests"
+      WHERE status NOT IN ('completed','cancelled')
+    `);
+    const unreadResult = await db.execute(sql10`
+      SELECT COUNT(*) AS c FROM "adminNotifications" WHERE "isRead" = 0
+    `);
+    const recent = await db.select({
+      id: auditLogs.id,
+      action: auditLogs.action,
+      category: auditLogs.category,
+      outcome: auditLogs.outcome,
+      userName: localUsers.name,
+      createdAt: auditLogs.createdAt
+    }).from(auditLogs).leftJoin(localUsers, eq49(auditLogs.localUserId, localUsers.id)).orderBy(desc26(auditLogs.createdAt)).limit(25);
+    return {
+      generatedAt: now.toISOString(),
+      sseClients: getSSEClientCount2(),
+      onlineRecently: Number(online?.c ?? 0),
+      activeFoundersSessions: Number(
+        sessionsResult.rows[0]?.c ?? 0
+      ),
+      signupsToday: Number(signups?.c ?? 0),
+      loginsToday: Number(loginsResult.rows[0]?.c ?? 0),
+      failedLogins24h: Number(failsResult.rows[0]?.c ?? 0),
+      openServiceRequests: Number(
+        openSrResult.rows[0]?.c ?? 0
+      ),
+      unreadAdminNotifications: Number(
+        unreadResult.rows[0]?.c ?? 0
+      ),
+      recentEvents: recent.map((r) => ({
+        id: String(r.id),
+        type: r.category,
+        label: `${r.userName ?? "system"} \xB7 ${r.action}${r.outcome === "failure" ? " (failed)" : ""}`,
+        at: r.createdAt?.toISOString() ?? ""
+      }))
+    };
+  } catch (error) {
+    logger.error({ error }, "getLiveMetrics failed");
+    return empty;
+  }
+}
+var init_admin_insights_store = __esm({
+  "server/_core/admin-insights-store.ts"() {
+    "use strict";
+    init_schema();
+    init_db();
+    init_logger();
+  }
+});
+
 // server/_core/index.ts
 import "dotenv/config";
 
@@ -5576,220 +9211,12 @@ function sentryErrorHandler() {
 
 // server/_core/index.ts
 import compression from "compression";
-import express3 from "express";
+import express4 from "express";
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 
-// shared/const.ts
-var COOKIE_NAME = "app_session_id";
-var ONE_YEAR_MS = 1e3 * 60 * 60 * 24 * 365;
-var AXIOS_TIMEOUT_MS = 3e4;
-var APP_LOCALES = [
-  "en",
-  "ar",
-  "zh",
-  "fr",
-  "es",
-  "de",
-  "ja",
-  "ko",
-  "pt"
-];
-var UNAUTHED_ERR_MSG = "Authentication required (10001)";
-var NOT_ADMIN_ERR_MSG = "You do not have the required permission (10002)";
-var NOT_PLATFORM_ADMIN_ERR_MSG = "Platform administrator access required (10003)";
-var NOT_SUPER_ADMIN_ERR_MSG = "Super administrator access required (10004)";
-var NOT_COMPANY_ADMIN_ERR_MSG = "Company administrator access required (10005)";
-var ROLE_LEVEL = {
-  basic_user: 10,
-  user: 10,
-  professional_user: 20,
-  company_admin: 30,
-  platform_admin: 40,
-  yalla_hack_employee: 45,
-  admin: 40,
-  super_admin: 100
-};
-function hasMinRole(actorRole, required) {
-  const actorLevel = ROLE_LEVEL[actorRole] ?? 0;
-  return actorLevel >= ROLE_LEVEL[required];
-}
-var MODULE_SLUGS = [
-  "asset_inventory",
-  "vendor_assessment",
-  "gap_tracker",
-  "remediation_planner",
-  "risk_register",
-  "policy_manager",
-  "incident_register",
-  "audit_schedule",
-  "dsr_management",
-  "evidence_repository",
-  "security_maturity",
-  "compliance_tracker",
-  "compliance_reports",
-  "report_center",
-  "compliance_heatmap",
-  "compliance_calendar",
-  "compliance_simulation",
-  "vendor_compliance_profiles",
-  "assessment_history",
-  "service_requests",
-  "api_keys",
-  "team_members",
-  "org_settings",
-  "audit_log",
-  "pro_intelligence",
-  "transfer_checker",
-  "law_library",
-  "framework_analysis",
-  "regulatory_changes",
-  "billing",
-  "admin_control_center",
-  "saas_metrics"
-];
-var VIEW_ONLY = {
-  canView: true,
-  canCreate: false,
-  canEdit: false,
-  canDelete: false,
-  canExport: false,
-  canInvite: false
-};
-var STANDARD = {
-  canView: true,
-  canCreate: true,
-  canEdit: true,
-  canDelete: false,
-  canExport: true,
-  canInvite: false
-};
-var FULL = {
-  canView: true,
-  canCreate: true,
-  canEdit: true,
-  canDelete: true,
-  canExport: true,
-  canInvite: true
-};
-var DEFAULT_ORG_ROLE_PERMISSIONS = {
-  analyst: {
-    asset_inventory: VIEW_ONLY,
-    vendor_assessment: VIEW_ONLY,
-    gap_tracker: VIEW_ONLY,
-    remediation_planner: VIEW_ONLY,
-    risk_register: VIEW_ONLY,
-    policy_manager: VIEW_ONLY,
-    incident_register: VIEW_ONLY,
-    audit_schedule: VIEW_ONLY,
-    dsr_management: VIEW_ONLY,
-    evidence_repository: VIEW_ONLY,
-    security_maturity: VIEW_ONLY,
-    compliance_tracker: VIEW_ONLY,
-    compliance_reports: VIEW_ONLY,
-    report_center: VIEW_ONLY,
-    compliance_heatmap: VIEW_ONLY,
-    compliance_calendar: VIEW_ONLY,
-    vendor_compliance_profiles: VIEW_ONLY,
-    assessment_history: VIEW_ONLY,
-    service_requests: STANDARD,
-    pro_intelligence: VIEW_ONLY,
-    transfer_checker: VIEW_ONLY,
-    law_library: VIEW_ONLY,
-    framework_analysis: VIEW_ONLY,
-    regulatory_changes: VIEW_ONLY
-  },
-  compliance_officer: {
-    asset_inventory: STANDARD,
-    vendor_assessment: STANDARD,
-    gap_tracker: STANDARD,
-    remediation_planner: STANDARD,
-    risk_register: STANDARD,
-    policy_manager: STANDARD,
-    incident_register: STANDARD,
-    audit_schedule: STANDARD,
-    dsr_management: STANDARD,
-    evidence_repository: STANDARD,
-    security_maturity: STANDARD,
-    compliance_tracker: STANDARD,
-    compliance_reports: STANDARD,
-    report_center: STANDARD,
-    compliance_heatmap: STANDARD,
-    compliance_calendar: STANDARD,
-    vendor_compliance_profiles: STANDARD,
-    assessment_history: STANDARD,
-    service_requests: STANDARD,
-    pro_intelligence: STANDARD,
-    transfer_checker: STANDARD,
-    law_library: VIEW_ONLY,
-    framework_analysis: VIEW_ONLY,
-    regulatory_changes: STANDARD
-  },
-  admin: {
-    asset_inventory: FULL,
-    vendor_assessment: FULL,
-    gap_tracker: FULL,
-    remediation_planner: FULL,
-    risk_register: FULL,
-    policy_manager: FULL,
-    incident_register: FULL,
-    audit_schedule: FULL,
-    dsr_management: FULL,
-    evidence_repository: FULL,
-    security_maturity: FULL,
-    compliance_tracker: FULL,
-    compliance_reports: FULL,
-    report_center: FULL,
-    compliance_heatmap: FULL,
-    compliance_calendar: FULL,
-    vendor_compliance_profiles: FULL,
-    assessment_history: FULL,
-    service_requests: FULL,
-    api_keys: STANDARD,
-    team_members: STANDARD,
-    org_settings: STANDARD,
-    audit_log: VIEW_ONLY,
-    pro_intelligence: FULL,
-    transfer_checker: FULL,
-    law_library: VIEW_ONLY,
-    framework_analysis: VIEW_ONLY,
-    regulatory_changes: FULL,
-    billing: VIEW_ONLY
-  },
-  owner: {
-    asset_inventory: FULL,
-    vendor_assessment: FULL,
-    gap_tracker: FULL,
-    remediation_planner: FULL,
-    risk_register: FULL,
-    policy_manager: FULL,
-    incident_register: FULL,
-    audit_schedule: FULL,
-    dsr_management: FULL,
-    evidence_repository: FULL,
-    security_maturity: FULL,
-    compliance_tracker: FULL,
-    compliance_reports: FULL,
-    report_center: FULL,
-    compliance_heatmap: FULL,
-    compliance_calendar: FULL,
-    vendor_compliance_profiles: FULL,
-    assessment_history: FULL,
-    service_requests: FULL,
-    api_keys: FULL,
-    team_members: FULL,
-    org_settings: FULL,
-    audit_log: FULL,
-    pro_intelligence: FULL,
-    transfer_checker: FULL,
-    law_library: FULL,
-    framework_analysis: FULL,
-    regulatory_changes: FULL,
-    billing: FULL
-  }
-};
-
 // server/_core/oauth.ts
+init_const();
 init_db();
 
 // server/_core/cookies.ts
@@ -5811,287 +9238,9 @@ function getSessionCookieOptions(req) {
   };
 }
 
-// shared/_core/errors.ts
-var HttpError = class extends Error {
-  constructor(statusCode, message) {
-    super(message);
-    this.statusCode = statusCode;
-    this.name = "HttpError";
-  }
-};
-var ForbiddenError = (msg) => new HttpError(403, msg);
-
-// server/_core/sdk.ts
-init_db();
-init_env();
-import axios from "axios";
-import { parse as parseCookieHeader } from "cookie";
-import { SignJWT, jwtVerify } from "jose";
-var isNonEmptyString = (value) => typeof value === "string" && value.length > 0;
-var EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
-var GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
-var GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
-var OAuthService = class {
-  constructor(client) {
-    this.client = client;
-    console.info("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
-    if (!ENV.oAuthServerUrl) {
-      console.error(
-        "[OAuth] ERROR: OAUTH_SERVER_URL is not configured! Set OAUTH_SERVER_URL environment variable."
-      );
-    }
-  }
-  decodeState(state) {
-    const redirectUri = atob(state);
-    return redirectUri;
-  }
-  async getTokenByCode(code, state) {
-    const payload = {
-      clientId: ENV.appId,
-      grantType: "authorization_code",
-      code,
-      redirectUri: this.decodeState(state)
-    };
-    const { data } = await this.client.post(
-      EXCHANGE_TOKEN_PATH,
-      payload
-    );
-    return data;
-  }
-  async getUserInfoByToken(token) {
-    const { data } = await this.client.post(
-      GET_USER_INFO_PATH,
-      {
-        accessToken: token.accessToken
-      }
-    );
-    return data;
-  }
-};
-var createOAuthHttpClient = () => axios.create({
-  baseURL: ENV.oAuthServerUrl,
-  timeout: AXIOS_TIMEOUT_MS
-});
-var SDKServer = class {
-  constructor(client = createOAuthHttpClient()) {
-    this.client = client;
-    this.oauthService = new OAuthService(this.client);
-  }
-  deriveLoginMethod(platforms, fallback) {
-    if (fallback && fallback.length > 0) return fallback;
-    if (!Array.isArray(platforms) || platforms.length === 0) return null;
-    const set = new Set(
-      platforms.filter((p) => typeof p === "string")
-    );
-    if (set.has("REGISTERED_PLATFORM_EMAIL")) return "email";
-    if (set.has("REGISTERED_PLATFORM_GOOGLE")) return "google";
-    if (set.has("REGISTERED_PLATFORM_APPLE")) return "apple";
-    if (set.has("REGISTERED_PLATFORM_MICROSOFT") || set.has("REGISTERED_PLATFORM_AZURE"))
-      return "microsoft";
-    if (set.has("REGISTERED_PLATFORM_GITHUB")) return "github";
-    const first = Array.from(set)[0];
-    return first ? first.toLowerCase() : null;
-  }
-  /**
-   * Exchange OAuth authorization code for access token
-   * @example
-   * const tokenResponse = await sdk.exchangeCodeForToken(code, state);
-   */
-  async exchangeCodeForToken(code, state) {
-    return this.oauthService.getTokenByCode(code, state);
-  }
-  /**
-   * Get user information using access token
-   * @example
-   * const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
-   */
-  async getUserInfo(accessToken) {
-    const data = await this.oauthService.getUserInfoByToken({
-      accessToken
-    });
-    const loginMethod = this.deriveLoginMethod(
-      data?.platforms,
-      data?.platform ?? data.platform ?? null
-    );
-    return {
-      ...data,
-      platform: loginMethod,
-      loginMethod
-    };
-  }
-  parseCookies(cookieHeader) {
-    if (!cookieHeader) {
-      return /* @__PURE__ */ new Map();
-    }
-    const parsed = parseCookieHeader(cookieHeader);
-    return new Map(Object.entries(parsed));
-  }
-  getSessionSecret() {
-    const secret = ENV.cookieSecret;
-    return new TextEncoder().encode(secret);
-  }
-  /**
-   * Create a session token for a Manus user openId
-   * @example
-   * const sessionToken = await sdk.createSessionToken(userInfo.openId);
-   */
-  async createSessionToken(openId, options = {}) {
-    return this.signSession(
-      {
-        openId,
-        appId: ENV.appId,
-        name: options.name || ""
-      },
-      options
-    );
-  }
-  async signSession(payload, options = {}) {
-    const issuedAt = Date.now();
-    const expiresInMs = options.expiresInMs ?? ONE_YEAR_MS;
-    const expirationSeconds = Math.floor((issuedAt + expiresInMs) / 1e3);
-    const secretKey = this.getSessionSecret();
-    return new SignJWT({
-      openId: payload.openId,
-      appId: payload.appId,
-      name: payload.name
-    }).setProtectedHeader({ alg: "HS256", typ: "JWT" }).setExpirationTime(expirationSeconds).sign(secretKey);
-  }
-  async verifySession(cookieValue) {
-    if (!cookieValue) {
-      console.warn("[Auth] Missing session cookie");
-      return null;
-    }
-    try {
-      const secretKey = this.getSessionSecret();
-      const { payload } = await jwtVerify(cookieValue, secretKey, {
-        algorithms: ["HS256"]
-      });
-      const { openId, appId, name } = payload;
-      if (!isNonEmptyString(openId) || !isNonEmptyString(appId) || !isNonEmptyString(name)) {
-        console.warn("[Auth] Session payload missing required fields");
-        return null;
-      }
-      return {
-        openId,
-        appId,
-        name
-      };
-    } catch (error) {
-      console.warn("[Auth] Session verification failed", String(error));
-      return null;
-    }
-  }
-  async getUserInfoWithJwt(jwtToken) {
-    const payload = {
-      jwtToken,
-      projectId: ENV.appId
-    };
-    const { data } = await this.client.post(
-      GET_USER_INFO_WITH_JWT_PATH,
-      payload
-    );
-    const loginMethod = this.deriveLoginMethod(
-      data?.platforms,
-      data?.platform ?? data.platform ?? null
-    );
-    return {
-      ...data,
-      platform: loginMethod,
-      loginMethod
-    };
-  }
-  async authenticateRequest(req) {
-    const cookies = this.parseCookies(req.headers.cookie);
-    const sessionCookie = cookies.get(COOKIE_NAME);
-    const session = await this.verifySession(sessionCookie);
-    if (!session) {
-      throw ForbiddenError("Invalid session cookie");
-    }
-    const sessionUserId = session.openId;
-    const signedInAt = /* @__PURE__ */ new Date();
-    let user = await getUserByOpenId(sessionUserId);
-    if (!user) {
-      try {
-        const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
-        await upsertUser({
-          openId: userInfo.openId,
-          name: userInfo.name || null,
-          email: userInfo.email ?? null,
-          loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-          lastSignedIn: signedInAt,
-          lastActivityAt: signedInAt
-        });
-        user = await getUserByOpenId(userInfo.openId);
-      } catch (error) {
-        console.error("[Auth] Failed to sync user from OAuth:", error);
-        throw ForbiddenError("Failed to sync user info");
-      }
-    }
-    if (!user) {
-      throw ForbiddenError("User not found");
-    }
-    await upsertUser({
-      openId: user.openId,
-      lastSignedIn: signedInAt,
-      lastActivityAt: signedInAt
-    });
-    return user;
-  }
-};
-var sdk = new SDKServer();
-
-// server/_core/logger.ts
-init_env();
-import pino from "pino";
-var isDev = ENV.isDevelopment;
-var transport = isDev ? {
-  target: "pino-pretty",
-  options: {
-    colorize: true,
-    translateTime: "SYS:HH:MM:ss.l",
-    ignore: "pid,hostname",
-    messageFormat: "{msg}",
-    singleLine: false
-  }
-} : void 0;
-var logger = pino(
-  {
-    level: isDev ? "debug" : "info",
-    base: {
-      service: "djac-tool",
-      env: ENV.isProduction ? "production" : ENV.isDevelopment ? "development" : "test"
-    },
-    // Redact secrets from any log line regardless of caller
-    redact: {
-      paths: [
-        "*.password",
-        "*.passwordHash",
-        "*.token",
-        "*.secret",
-        "*.apiKey",
-        "*.api_key",
-        "*.jwt",
-        "*.authorization",
-        "req.headers.authorization",
-        "req.headers.cookie"
-      ],
-      censor: "[REDACTED]"
-    },
-    timestamp: pino.stdTimeFunctions.isoTime,
-    serializers: {
-      err: pino.stdSerializers.err,
-      error: pino.stdSerializers.err,
-      req: pino.stdSerializers.req,
-      res: pino.stdSerializers.res
-    }
-  },
-  transport ? pino.transport(transport) : void 0
-);
-function logEvent(category, action, data, level = "info") {
-  logger[level]({ category, action, ...data }, action);
-}
-
 // server/_core/oauth.ts
+init_sdk();
+init_logger();
 function getQueryParam(req, key) {
   const value = req.query[key];
   return typeof value === "string" ? value : void 0;
@@ -6138,6 +9287,7 @@ function registerOAuthRoutes(app) {
 }
 
 // server/admin-router.ts
+import { TRPCError as TRPCError2 } from "@trpc/server";
 import { z } from "zod";
 
 // shared/vendorProfile.ts
@@ -6313,6 +9463,7 @@ function serializeVendorMultiValue(values) {
 }
 
 // server/control-center-store.ts
+init_const();
 init_schema();
 init_db();
 init_env();
@@ -7445,6 +10596,7 @@ async function getAdminOverview() {
 init_db();
 
 // server/_core/trpc.ts
+init_const();
 init_schema();
 init_db();
 import { initTRPC, TRPCError } from "@trpc/server";
@@ -7493,7 +10645,35 @@ var requireUser = t.middleware(async (opts) => {
     }
   });
 });
-var protectedProcedure = t.procedure.use(requireUser);
+var _rateLimitInitialized = false;
+var _rateLimiter;
+async function getRateLimiter() {
+  if (!_rateLimitInitialized) {
+    const mod = await Promise.resolve().then(() => (init_rateLimiter(), rateLimiter_exports));
+    _rateLimiter = mod.checkRateLimit;
+    _rateLimitInitialized = true;
+  }
+  return _rateLimiter;
+}
+var baseRateLimitMs = 6e4;
+var rateLimitMiddleware = t.middleware(async (opts) => {
+  const { ctx, next } = opts;
+  try {
+    const rl = await getRateLimiter();
+    const key = `tRPC:${ctx.user?.id ?? "anon"}:${opts.path}`;
+    const result = await rl(key, 60, baseRateLimitMs);
+    if (!result.allowed) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please wait before retrying."
+      });
+    }
+  } catch (err) {
+    if (err instanceof TRPCError && err.code === "TOO_MANY_REQUESTS") throw err;
+  }
+  return next();
+});
+var protectedProcedure = t.procedure.use(requireUser).use(rateLimitMiddleware);
 var requireOrganization = t.middleware(async (opts) => {
   const { ctx, next } = opts;
   if (ctx.organizationId == null) {
@@ -7536,7 +10716,7 @@ var requireOrgAdmin = t.middleware(async (opts) => {
   });
 });
 var orgAdminProcedure = protectedProcedure.use(requireOrgAdmin);
-var adminProcedure = t.procedure.use(
+var adminProcedure = t.procedure.use(rateLimitMiddleware).use(
   t.middleware(async (opts) => {
     const { ctx, next } = opts;
     if (!ctx.user || !hasMinRole(ctx.user.role, "admin")) {
@@ -7756,9 +10936,9 @@ async function getConversionStats() {
   orgs.forEach((o) => {
     planCounts[o.plan] = (planCounts[o.plan] ?? 0) + 1;
   });
-  const planBreakdown = Object.entries(planCounts).map(([plan, count2]) => ({
+  const planBreakdown = Object.entries(planCounts).map(([plan, count3]) => ({
     plan,
-    count: count2
+    count: count3
   }));
   return {
     trialOrgs,
@@ -7776,27 +10956,53 @@ import path from "path";
 var limitSchema = z.object({
   limit: z.number().int().min(1).max(200).optional()
 });
+var searchLimitSchema = z.object({
+  search: z.string().optional(),
+  limit: z.number().int().min(1).max(200).optional()
+});
 var adminRouter = router({
-  overview: adminProcedure.query(() => {
-    return getAdminOverview();
+  overview: adminProcedure.input(searchLimitSchema.optional()).query(async () => {
+    try {
+      const result = await getAdminOverview();
+      return result;
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch overview"
+      });
+    }
   }),
   interactionHeatmap: adminProcedure.input(
     z.object({
       windowDays: z.number().int().min(1).max(90).optional(),
       limit: z.number().int().min(100).max(5e3).optional()
     }).optional()
-  ).query(({ input }) => {
-    return getAdminInteractionHeatmap(
-      input?.windowDays ?? 14,
-      input?.limit ?? 2e3
-    );
+  ).query(async ({ input }) => {
+    try {
+      return getAdminInteractionHeatmap(
+        input?.windowDays ?? 14,
+        input?.limit ?? 2e3
+      );
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch interaction heatmap"
+      });
+    }
   }),
   interactionPrivacyStats: adminProcedure.input(
     z.object({
       retentionDays: z.number().int().min(7).max(365).optional()
     }).optional()
-  ).query(({ input }) => {
-    return getInteractionPrivacyStats(input?.retentionDays ?? 90);
+  ).query(async ({ input }) => {
+    try {
+      return getInteractionPrivacyStats(input?.retentionDays ?? 90);
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch interaction privacy stats"
+      });
+    }
   }),
   enforceInteractionRetention: adminProcedure.input(
     z.object({
@@ -7824,26 +11030,75 @@ var adminRouter = router({
       actorUserId: ctx.user.id
     });
   }),
-  users: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listUsersForAdmin(input?.limit ?? 100);
+  users: adminProcedure.input(limitSchema.optional()).query(async ({ input }) => {
+    try {
+      return listUsersForAdmin(input?.limit ?? 100);
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch users"
+      });
+    }
   }),
-  accessRequests: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listAccessRequests(input?.limit ?? 100);
+  accessRequests: adminProcedure.input(limitSchema.optional()).query(async ({ input }) => {
+    try {
+      return listAccessRequests(input?.limit ?? 100);
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch access requests"
+      });
+    }
   }),
-  consultations: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listConsultationSummaries(input?.limit ?? 100);
+  consultations: adminProcedure.input(limitSchema.optional()).query(async ({ input }) => {
+    try {
+      return listConsultationSummaries(input?.limit ?? 100);
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch consultations"
+      });
+    }
   }),
-  notifications: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listAdminNotifications(input?.limit ?? 50);
+  notifications: adminProcedure.input(limitSchema.optional()).query(async ({ input }) => {
+    try {
+      return listAdminNotifications(input?.limit ?? 50);
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch notifications"
+      });
+    }
   }),
-  vendors: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listAdminVendorSummaries(input?.limit ?? 100);
+  vendors: adminProcedure.input(limitSchema.optional()).query(async ({ input }) => {
+    try {
+      return listAdminVendorSummaries(input?.limit ?? 100);
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch vendors"
+      });
+    }
   }),
-  assessments: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listAssessmentSummaries(input?.limit ?? 100);
+  assessments: adminProcedure.input(limitSchema.optional()).query(async ({ input }) => {
+    try {
+      return listAssessmentSummaries(input?.limit ?? 100);
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch assessments"
+      });
+    }
   }),
-  activity: adminProcedure.input(limitSchema.optional()).query(({ input }) => {
-    return listActivityFeed(input?.limit ?? 100);
+  activity: adminProcedure.input(limitSchema.optional()).query(async ({ input }) => {
+    try {
+      return listActivityFeed(input?.limit ?? 100);
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch activity"
+      });
+    }
   }),
   markNotificationRead: adminProcedure.input(z.object({ notificationId: z.number().int().positive() })).mutation(({ input }) => {
     return markAdminNotificationRead(input.notificationId);
@@ -7946,20 +11201,30 @@ var adminRouter = router({
       return [];
     }
   }),
-  conversionStats: adminProcedure.query(() => getConversionStats())
+  conversionStats: adminProcedure.input(searchLimitSchema.optional()).query(async () => {
+    try {
+      return await getConversionStats();
+    } catch {
+      throw new TRPCError2({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch conversion stats"
+      });
+    }
+  })
 });
 
 // server/ai/router.ts
 init_env();
-import { TRPCError as TRPCError3 } from "@trpc/server";
+import { TRPCError as TRPCError4 } from "@trpc/server";
 import { z as z3 } from "zod";
 
 // server/_core/permission-guard.ts
-import { TRPCError as TRPCError2 } from "@trpc/server";
+import { TRPCError as TRPCError3 } from "@trpc/server";
 
 // server/rbac.ts
 init_schema();
 init_db();
+init_const();
 import { eq as eq5, and as and3, or as or2 } from "drizzle-orm";
 var FULL_DENY = {
   canView: false,
@@ -8032,35 +11297,9 @@ async function isOnboardingComplete(userId, localUserId) {
 init_schema();
 init_db();
 init_env();
+init_sse_bus();
 import { createHash } from "node:crypto";
 import { desc as desc3 } from "drizzle-orm";
-
-// server/services/sse-bus.ts
-var sseClients = /* @__PURE__ */ new Set();
-function addSSEClient(res) {
-  sseClients.add(res);
-}
-function removeSSEClient(res) {
-  sseClients.delete(res);
-}
-function getSSEClientCount() {
-  return sseClients.size;
-}
-function broadcastSSE(event, data) {
-  const msg = `event: ${event}
-data: ${JSON.stringify(data)}
-
-`;
-  for (const client of sseClients) {
-    try {
-      client.write(msg);
-    } catch {
-      sseClients.delete(client);
-    }
-  }
-}
-
-// server/audit-logger.ts
 function sanitizePayload(value) {
   if (value == null) return null;
   try {
@@ -8246,7 +11485,7 @@ async function requireModulePermission(ctx, module, action) {
       isOverride: perms.isOverride
     }
   });
-  throw new TRPCError2({
+  throw new TRPCError3({
     code: "FORBIDDEN",
     message: `Insufficient permissions for ${module} (${action}).`
   });
@@ -8262,6 +11501,7 @@ async function requireModulePermissionIfOrgContext(ctx, module, action) {
 init_schema();
 init_db();
 init_env();
+init_sse_bus();
 import { createHash as createHash2 } from "node:crypto";
 var SENSITIVE_KEY_REGEX = /(password|secret|token|authorization|cookie|api[_-]?key|access[_-]?key|private[_-]?key)/i;
 function sanitizeForStorage(value, depth = 0) {
@@ -8346,1853 +11586,13 @@ async function recordUserInteraction(ctx, input) {
   }
 }
 
-// server/_core/rateLimiter.ts
-init_env();
-import Redis from "ioredis";
-var _redis = null;
-var _redisInitialised = false;
-function getRedis() {
-  if (_redisInitialised) return _redis;
-  _redisInitialised = true;
-  const url = ENV.redisUrl.trim();
-  if (!url) return null;
-  try {
-    _redis = new Redis(url, {
-      lazyConnect: false,
-      // Don't let offline-queue pile up; fail immediately on transient errors.
-      enableOfflineQueue: false,
-      maxRetriesPerRequest: 1,
-      commandTimeout: 500
-    });
-    _redis.on("error", (err) => {
-      if (err.code !== "ECONNREFUSED") {
-        console.warn("[RateLimiter] Redis error:", err.message);
-      }
-    });
-    return _redis;
-  } catch {
-    console.warn("[RateLimiter] Failed to create Redis connection");
-    return null;
-  }
-}
-var _memStore = /* @__PURE__ */ new Map();
-var _pruneInterval = null;
-_pruneInterval = setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of _memStore) {
-    if (now > entry.resetAt) _memStore.delete(key);
-  }
-}, 5 * 6e4);
-_pruneInterval.unref();
-async function checkRateLimit(key, limit, windowMs) {
-  const windowIndex = Math.floor(Date.now() / windowMs);
-  const windowResetMs = (windowIndex + 1) * windowMs;
-  const resetAt = Math.ceil(windowResetMs / 1e3);
-  const redis = getRedis();
-  if (redis) {
-    try {
-      const redisKey = `rl:${windowIndex}:${key}`;
-      const count2 = await redis.incr(redisKey);
-      if (count2 === 1) {
-        const ttlMs = windowResetMs - Date.now();
-        await redis.pexpire(redisKey, Math.max(ttlMs, 1));
-      }
-      return {
-        allowed: count2 <= limit,
-        remaining: Math.max(0, limit - count2),
-        resetAt,
-        limit
-      };
-    } catch (cause) {
-      console.warn(
-        "[RateLimiter] Redis unavailable, falling back to in-memory:",
-        cause.message
-      );
-    }
-  }
-  const now = Date.now();
-  const existing = _memStore.get(key);
-  if (!existing || now > existing.resetAt) {
-    _memStore.set(key, { count: 1, resetAt: windowResetMs });
-    return { allowed: true, remaining: limit - 1, resetAt, limit };
-  }
-  existing.count += 1;
-  return {
-    allowed: existing.count <= limit,
-    remaining: Math.max(0, limit - existing.count),
-    resetAt: Math.ceil(existing.resetAt / 1e3),
-    limit
-  };
-}
-function getRateLimiterStats() {
-  return {
-    mode: _redis ? "redis" : "memory",
-    redisConnected: _redis !== null,
-    inMemoryEntries: _memStore.size
-  };
-}
-async function closeRateLimiter() {
-  if (_pruneInterval) {
-    clearInterval(_pruneInterval);
-    _pruneInterval = null;
-  }
-  if (_redis) {
-    await _redis.quit();
-    _redis = null;
-  }
-}
-
-// server/ai/orchestrator.ts
-init_env();
-
-// server/ai/pipeline.ts
-init_schema();
-init_db();
-init_supplier_assessment();
-init_env();
-
-// server/ai/schemas.ts
-init_supplier_assessment();
-import { z as z2 } from "zod";
-var jurisdictionScoreShape = Object.fromEntries(
-  JURISDICTION_SCORE_KEYS.map((key) => [key, z2.number().int().min(0).max(100)])
-);
-var aiJobStatusSchema = z2.enum([
-  "queued",
-  "running",
-  "completed",
-  "failed"
-]);
-var aiJobStageSchema = z2.enum([
-  "queued",
-  "gatekeeper",
-  "intake",
-  "extractor",
-  "rag_context",
-  "judge",
-  "synthesizer",
-  "validator",
-  "reporter",
-  "persistence",
-  "completed",
-  "failed"
-]);
-var assessmentSeveritySchema = z2.enum([
-  "critical",
-  "high",
-  "medium",
-  "low"
-]);
-var supplierGapSchema = z2.object({
-  code: z2.string().trim().min(1).max(120),
-  jurisdiction: z2.enum([
-    "china",
-    "saudi",
-    "eu",
-    "us",
-    "brazil",
-    "cross_border",
-    "global",
-    "uk",
-    "canada",
-    "australia",
-    "japan",
-    "southKorea",
-    "singapore",
-    "india",
-    "southAfrica",
-    "mexico",
-    "uae",
-    "qatar",
-    "kuwait",
-    "bahrain",
-    "oman",
-    "jordan",
-    "egypt",
-    "indonesia",
-    "thailand",
-    "vietnam",
-    "philippines",
-    "malaysia",
-    "nigeria",
-    "kenya"
-  ]),
-  frameworks: z2.array(z2.string().trim().min(1).max(32)).min(1).max(8),
-  severity: assessmentSeveritySchema,
-  title: z2.string().trim().min(1).max(240),
-  description: z2.string().trim().min(1).max(3e3),
-  mitigation: z2.string().trim().min(1).max(3e3),
-  penaltyContext: z2.string().trim().max(2e3)
-});
-var supplierAssessmentSchema = z2.object({
-  vendorId: z2.number().int(),
-  generatedAt: z2.string().datetime({ offset: true }),
-  overallScore: z2.number().int().min(0).max(100),
-  jurisdictionScores: z2.object({
-    china: z2.number().int().min(0).max(100),
-    saudiArabia: z2.number().int().min(0).max(100),
-    eu: z2.number().int().min(0).max(100),
-    us: z2.number().int().min(0).max(100),
-    brazil: z2.number().int().min(0).max(100),
-    global: z2.number().int().min(0).max(100),
-    ...jurisdictionScoreShape
-  }),
-  status: z2.enum(["compliant", "partial", "non_compliant"]),
-  riskLevel: z2.enum(["low", "medium", "high", "critical"]),
-  gaps: z2.array(supplierGapSchema),
-  recommendations: z2.array(z2.string().trim().min(1).max(3e3)).max(120)
-});
-var extractedFactSchema = z2.object({
-  key: z2.string().trim().min(1).max(120),
-  value: z2.string().trim().min(1).max(4e3),
-  evidence: z2.string().trim().max(4e3).optional().default(""),
-  mappedControlBuckets: z2.array(z2.string().trim().min(1).max(120)).max(12).default([])
-});
-var ragControlSchema = z2.object({
-  controlId: z2.number().int().positive(),
-  frameworkCode: z2.string().trim().min(1).max(32),
-  controlCode: z2.string().trim().min(1).max(120),
-  category: z2.string().trim().max(120).optional().nullable(),
-  controlName: z2.string().trim().max(512).optional().nullable(),
-  requirement: z2.string().trim().max(4e3).optional().nullable(),
-  relevanceScore: z2.number().min(0).max(1)
-});
-var dbAssessmentPayloadSchema = z2.object({
-  frameworkCode: z2.string().trim().min(1).max(32),
-  complianceScore: z2.number().int().min(0).max(100),
-  riskLevel: z2.enum(["low", "medium", "high", "critical"]),
-  status: z2.enum(["compliant", "partial", "non_compliant"]),
-  findings: z2.array(z2.string().trim().min(1).max(1200)).max(120),
-  recommendations: z2.array(z2.string().trim().min(1).max(3e3)).max(120)
-});
-var dbGapPayloadSchema = z2.object({
-  frameworkCode: z2.string().trim().min(1).max(32),
-  controlCode: z2.string().trim().max(120).optional().default(""),
-  gapCode: z2.string().trim().min(1).max(120),
-  gapDescription: z2.string().trim().min(1).max(3e3),
-  severity: assessmentSeveritySchema,
-  remediation: z2.string().trim().min(1).max(3e3)
-});
-var aiAssessmentReportSchema = z2.object({
-  version: z2.literal("1.0"),
-  generatedAt: z2.string().datetime({ offset: true }),
-  inputSummary: z2.object({
-    vendorId: z2.number().int(),
-    source: z2.enum(["vendor_profile", "document_upload"]),
-    documentType: z2.string().trim().max(120),
-    tags: z2.array(z2.string().trim().min(1).max(60)).max(20)
-  }),
-  extractedFacts: z2.array(extractedFactSchema).max(200),
-  ragControls: z2.array(ragControlSchema).max(200),
-  assessment: supplierAssessmentSchema,
-  remediationPlan: z2.array(z2.string().trim().min(1).max(3e3)).max(120),
-  validator: z2.object({
-    passed: z2.boolean(),
-    attempts: z2.number().int().min(1).max(10),
-    notes: z2.array(z2.string().trim().min(1).max(1200)).max(60)
-  }),
-  dbPayload: z2.object({
-    vendorAssessments: z2.array(dbAssessmentPayloadSchema).max(20),
-    assessmentGaps: z2.array(dbGapPayloadSchema).max(400)
-  })
-});
-var aiJobEventSchema = z2.object({
-  stage: aiJobStageSchema,
-  message: z2.string().trim().min(1).max(500),
-  timestamp: z2.string().datetime({ offset: true })
-});
-var aiJobSnapshotSchema = z2.object({
-  id: z2.string().trim().min(1),
-  userId: z2.number().int(),
-  status: aiJobStatusSchema,
-  stage: aiJobStageSchema,
-  createdAt: z2.string().datetime({ offset: true }),
-  updatedAt: z2.string().datetime({ offset: true }),
-  events: z2.array(aiJobEventSchema).max(500),
-  error: z2.string().trim().max(3e3).optional(),
-  result: aiAssessmentReportSchema.optional(),
-  persistence: z2.object({
-    savedAssessments: z2.number().int().min(0),
-    savedGaps: z2.number().int().min(0),
-    skipped: z2.boolean()
-  }).optional()
-});
-
-// server/ai/pipeline.ts
-var WEAK_ENCRYPTION_CODE = "CRYPTO-WEAK-001";
-var DEFAULT_KNOWN_FRAMEWORKS = [
-  "PIPL",
-  "CSL",
-  "DSL",
-  "MLPS 2.0",
-  "PDPL",
-  "NCA",
-  "GDPR",
-  "CCPA",
-  "LGPD",
-  "ISO 27001",
-  "ISO 27701",
-  "SOC 2",
-  "NIST CSF",
-  "HIPAA",
-  "PCI DSS",
-  "NIS2",
-  "SOX"
-];
-var JURISDICTION_FRAMEWORKS = {
-  china: ["PIPL", "CSL", "DSL", "MLPS 2.0"],
-  saudi: ["PDPL", "NCA"],
-  eu: ["GDPR", "NIS2", "DORA", "EU-AI-ACT"],
-  us: ["CCPA", "HIPAA", "SOX", "PCI-DSS", "NIST-CSF-2"],
-  brazil: ["LGPD"],
-  global: ["ISO 27001", "ISO 27701", "SOC 2", "NIST CSF", "PCI-DSS"],
-  uk: ["UK-GDPR"],
-  canada: ["PIPEDA"],
-  australia: ["PRIVACY-ACT-AU"],
-  japan: ["APPI"],
-  southKorea: ["PIPA-KR"],
-  singapore: ["PDPA-SG"],
-  india: ["DPDP-IN"],
-  southAfrica: ["POPIA"],
-  mexico: ["MEXICO-DPA"],
-  uae: ["ISO 27701", "ISO 27001"],
-  thailand: ["TH-PDPA"],
-  indonesia: ["ID-PDP"],
-  malaysia: ["MY-PDPA"],
-  philippines: ["PH-DPA"],
-  vietnam: ["VN-PDPD"],
-  nigeria: ["NDPA-NG"],
-  kenya: ["KENYA-DPA"]
-};
-var INJECTION_PATTERNS = [
-  /ignore\s+all\s+previous\s+instructions/i,
-  /system\s+prompt/i,
-  /jailbreak/i,
-  /<script[\s>]/i,
-  /rm\s+-rf\s+\//i,
-  /drop\s+table/i,
-  /shutdown\s+-h/i
-];
-var CONTROL_BUCKET_KEYWORDS = {
-  "Data Processing & Encryption": [
-    "encrypt",
-    "encryption",
-    "aes",
-    "rsa",
-    "key"
-  ],
-  "Data Localization": [
-    "china",
-    "saudi",
-    "eu",
-    "us",
-    "brazil",
-    "riyadh",
-    "beijing",
-    "shanghai",
-    "london",
-    "tokyo",
-    "singapore",
-    "toronto",
-    "sydney",
-    "mumbai",
-    "johannesburg",
-    "dubai",
-    "abu dhabi",
-    "doha",
-    "mexico city",
-    "nairobi",
-    "lagos",
-    "bangkok",
-    "jakarta",
-    "kuala lumpur",
-    "localization"
-  ],
-  "Access Control": ["access", "identity", "iam", "mfa", "privilege"],
-  "Incident Response": ["incident", "breach", "response", "monitor"],
-  "Transfer & Consent": [
-    "consent",
-    "transfer",
-    "cross-border",
-    "cross border",
-    "subject"
-  ],
-  Governance: ["audit", "policy", "governance", "compliance", "legal"]
-};
-function clampScore2(value) {
-  return Math.max(0, Math.min(100, Math.round(value)));
-}
-function scoreToStatus2(score) {
-  if (score >= 85) return "compliant";
-  if (score >= 65) return "partial";
-  return "non_compliant";
-}
-function inferRiskLevel2(assessment) {
-  const criticalCount = assessment.gaps.filter(
-    (g) => g.severity === "critical"
-  ).length;
-  const highCount = assessment.gaps.filter((g) => g.severity === "high").length;
-  if (criticalCount > 0) return "critical";
-  if (assessment.overallScore < 60 || highCount >= 2) return "high";
-  if (assessment.overallScore < 80 || highCount > 0) return "medium";
-  return "low";
-}
-function toTokens(value) {
-  return value.toLowerCase().replace(/[^a-z0-9\s-]/g, " ").split(/\s+/).map((token) => token.trim()).filter((token) => token.length >= 3);
-}
-function mapControlBuckets(text2) {
-  const normalized = text2.toLowerCase();
-  const buckets = [];
-  for (const [bucket, keywords] of Object.entries(CONTROL_BUCKET_KEYWORDS)) {
-    if (keywords.some((keyword) => normalized.includes(keyword))) {
-      buckets.push(bucket);
-    }
-  }
-  return Array.from(new Set(buckets));
-}
-function addFact(facts, key, value, evidence = "") {
-  const normalized = value.trim();
-  if (!normalized) return;
-  facts.push({
-    key,
-    value: normalized,
-    evidence: evidence.trim(),
-    mappedControlBuckets: mapControlBuckets(`${key} ${normalized} ${evidence}`)
-  });
-}
-async function callAgentSwarm(stagePath, payload) {
-  const baseUrl = ENV.agentSwarmBaseUrl;
-  if (!baseUrl) return null;
-  const endpoint = `${baseUrl.replace(/\/$/, "")}/${stagePath.replace(/^\//, "")}`;
-  const abortController = new AbortController();
-  const timeout = setTimeout(() => abortController.abort(), 15e3);
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify(payload),
-      signal: abortController.signal
-    });
-    if (!response.ok) {
-      return null;
-    }
-    return await response.json();
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-function runSecurityGatekeeper(payload) {
-  const threats = INJECTION_PATTERNS.filter((pattern) => pattern.test(payload));
-  if (threats.length > 0) {
-    throw new Error(
-      "Security Gatekeeper blocked potentially malicious assessment payload."
-    );
-  }
-}
-function runIntake(vendor, rawDocumentText) {
-  const combinedText = [
-    vendor.vendorName,
-    vendor.vendorDescription || "",
-    vendor.industry || "",
-    vendor.businessRegistrationNumber || "",
-    vendor.headquartersLocation || "",
-    vendor.primaryContactName || "",
-    vendor.primaryContactEmail || "",
-    vendor.primaryContactRole || "",
-    vendor.primaryContactPhone || "",
-    vendor.serviceType || "",
-    vendor.serviceScope || "",
-    vendor.hostingEnvironment || "",
-    vendor.operatingCountries || "",
-    vendor.cloudProvider || "",
-    vendor.dataLocations || "",
-    vendor.regulatoryJurisdictions || "",
-    vendor.certifications || "",
-    vendor.dataProcessingActivities || "",
-    vendor.criticalityLevel || "",
-    vendor.riskTier || "",
-    vendor.thirdPartyDependencies || "",
-    vendor.fourthPartyDependencies || "",
-    rawDocumentText || ""
-  ].filter(Boolean).join("\n").trim();
-  const lower = combinedText.toLowerCase();
-  const documentType = lower.includes("policy") || lower.includes("procedure") ? "policy_document" : lower.includes("questionnaire") ? "questionnaire" : rawDocumentText.trim().length > 0 ? "uploaded_text" : "vendor_profile";
-  const tags = Array.from(
-    new Set(
-      [
-        vendor.industry,
-        vendor.businessRegistrationNumber,
-        vendor.serviceType,
-        vendor.hostingEnvironment,
-        vendor.cloudProvider,
-        vendor.operatingCountries,
-        vendor.dataLocations,
-        vendor.regulatoryJurisdictions,
-        vendor.dataProcessingActivities,
-        vendor.criticalityLevel,
-        vendor.riskTier,
-        documentType
-      ].filter(Boolean).flatMap(
-        (value) => String(value).split(/[;,|]/).map((v) => v.trim().toLowerCase()).filter(Boolean)
-      )
-    )
-  ).slice(0, 20);
-  return {
-    documentType,
-    tags,
-    normalizedText: combinedText
-  };
-}
-function runExtractor(vendor, intake) {
-  const facts = [];
-  addFact(facts, "vendor_name", vendor.vendorName);
-  addFact(facts, "industry", vendor.industry || "");
-  addFact(
-    facts,
-    "business_registration_number",
-    vendor.businessRegistrationNumber || ""
-  );
-  addFact(facts, "headquarters_location", vendor.headquartersLocation || "");
-  addFact(facts, "primary_contact_name", vendor.primaryContactName || "");
-  addFact(facts, "primary_contact_email", vendor.primaryContactEmail || "");
-  addFact(facts, "primary_contact_role", vendor.primaryContactRole || "");
-  addFact(facts, "primary_contact_phone", vendor.primaryContactPhone || "");
-  addFact(facts, "service_type", vendor.serviceType || "");
-  addFact(facts, "service_scope", vendor.serviceScope || "");
-  addFact(facts, "hosting_environment", vendor.hostingEnvironment || "");
-  addFact(facts, "cloud_provider", vendor.cloudProvider || "");
-  addFact(facts, "operating_countries", vendor.operatingCountries || "");
-  addFact(facts, "data_locations", vendor.dataLocations || "");
-  addFact(
-    facts,
-    "regulatory_jurisdictions",
-    vendor.regulatoryJurisdictions || ""
-  );
-  addFact(facts, "certifications", vendor.certifications || "");
-  addFact(
-    facts,
-    "data_processing_activities",
-    vendor.dataProcessingActivities || ""
-  );
-  addFact(facts, "criticality_level", vendor.criticalityLevel || "");
-  addFact(facts, "risk_tier", vendor.riskTier || "");
-  addFact(
-    facts,
-    "third_party_dependencies",
-    vendor.thirdPartyDependencies || ""
-  );
-  addFact(
-    facts,
-    "fourth_party_dependencies",
-    vendor.fourthPartyDependencies || ""
-  );
-  const encryptionRegex = /(rsa|aes)[\s-]?(\d{3,4})/gi;
-  let match;
-  while (match = encryptionRegex.exec(intake.normalizedText)) {
-    addFact(
-      facts,
-      "encryption_claim",
-      `${match[1].toUpperCase()} ${match[2]}`,
-      `Found in submission text: ${match[0]}`
-    );
-  }
-  addFact(
-    facts,
-    "intake_document_type",
-    intake.documentType,
-    "Classified by Intake & Tagging Clerk"
-  );
-  return facts.slice(0, 200);
-}
-async function buildRagContext(facts) {
-  const db = await getDb();
-  if (!db) return [];
-  const frameworkRows = await db.select().from(frameworks);
-  const controls = await db.select().from(complianceControls);
-  const frameworkCodeById = new Map(
-    frameworkRows.map((row) => [row.id, row.code])
-  );
-  const tokenSet = new Set(
-    facts.flatMap(
-      (fact) => toTokens(`${fact.key} ${fact.value} ${fact.evidence}`)
-    )
-  );
-  const scored = controls.map((control) => {
-    const haystack = `${control.controlCode} ${control.controlName || ""} ${control.category || ""} ${control.requirement || ""} ${control.description || ""}`.toLowerCase();
-    if (tokenSet.size === 0) {
-      return {
-        row: control,
-        score: 0
-      };
-    }
-    let hits = 0;
-    tokenSet.forEach((token) => {
-      if (haystack.includes(token)) hits += 1;
-    });
-    return {
-      row: control,
-      score: hits / tokenSet.size
-    };
-  }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).slice(0, ENV.aiRagTopK);
-  return scored.map((item) => ({
-    controlId: item.row.id,
-    frameworkCode: frameworkCodeById.get(item.row.frameworkId) || "UNKNOWN",
-    controlCode: item.row.controlCode,
-    category: item.row.category,
-    controlName: item.row.controlName,
-    requirement: item.row.requirement,
-    relevanceScore: Number(item.score.toFixed(4))
-  }));
-}
-function findWeakEncryptionFact(facts) {
-  for (const fact of facts) {
-    if (fact.key !== "encryption_claim") continue;
-    const match = fact.value.match(/(RSA|AES)\s*(\d{3,4})/i);
-    if (!match) continue;
-    const algorithm = match[1].toUpperCase();
-    const bits = Number(match[2]);
-    if (algorithm === "RSA" && bits < 2048 || algorithm === "AES" && bits < 128) {
-      return fact;
-    }
-  }
-  return null;
-}
-function ensureWeakEncryptionGap(assessment, weakFact) {
-  if (assessment.gaps.some((gap) => gap.code === WEAK_ENCRYPTION_CODE)) {
-    return;
-  }
-  const newGap = {
-    code: WEAK_ENCRYPTION_CODE,
-    jurisdiction: "cross_border",
-    frameworks: ["PIPL", "PDPL", "GDPR", "CCPA", "LGPD"],
-    severity: "critical",
-    title: "Weak encryption claim detected",
-    description: `Extracted evidence indicates weak encryption posture (${weakFact.value}).`,
-    mitigation: "Upgrade cryptographic controls to modern baseline (RSA 2048+ or AES-128+), rotate keys, and re-validate data protection controls.",
-    penaltyContext: "Weak encryption can materially increase enforcement risk under PIPL, PDPL, and NCA security control expectations."
-  };
-  assessment.gaps = [newGap, ...assessment.gaps];
-  for (const key of Object.keys(assessment.jurisdictionScores)) {
-    const k = key;
-    assessment.jurisdictionScores[k] = clampScore2(
-      assessment.jurisdictionScores[k] - 10
-    );
-  }
-  const vals = Object.values(assessment.jurisdictionScores);
-  assessment.overallScore = clampScore2(
-    vals.reduce((sum, v) => sum + v, 0) / vals.length
-  );
-  assessment.status = scoreToStatus2(assessment.overallScore);
-  assessment.riskLevel = inferRiskLevel2(assessment);
-}
-function runJudge(vendor, facts) {
-  const assessment = runDualJurisdictionAssessment(vendor);
-  const weakFact = findWeakEncryptionFact(facts);
-  if (weakFact) {
-    ensureWeakEncryptionGap(assessment, weakFact);
-  }
-  const recommendationSet = new Set(assessment.recommendations);
-  if (weakFact) {
-    recommendationSet.add(
-      "Execute emergency cryptography remediation and document validated key-management controls before production onboarding."
-    );
-  }
-  assessment.recommendations = Array.from(recommendationSet);
-  return assessment;
-}
-function severityRank(severity) {
-  if (severity === "critical") return 4;
-  if (severity === "high") return 3;
-  if (severity === "medium") return 2;
-  return 1;
-}
-function runSynthesizer(assessment) {
-  const plan = [...assessment.gaps].sort((a, b) => severityRank(b.severity) - severityRank(a.severity)).slice(0, 10).map(
-    (gap) => `[${gap.severity.toUpperCase()}] ${gap.title}: ${gap.mitigation} (Frameworks: ${gap.frameworks.join(", ")})`
-  );
-  plan.push(
-    "Build a jurisdiction-specific evidence register for applicable regulators (e.g., CAC, SDAIA, EDPB, ANPD) review cycles.",
-    "Introduce quarterly control re-validation against framework updates and supplier architecture changes.",
-    "Require legal sign-off for all critical and high findings prior to vendor onboarding approval."
-  );
-  return Array.from(new Set(plan));
-}
-function runValidator(assessment, remediationPlan, ragControls) {
-  const knownFrameworks = new Set(
-    [
-      ...DEFAULT_KNOWN_FRAMEWORKS,
-      ...ragControls.map((control) => control.frameworkCode)
-    ].map((code) => code.toUpperCase())
-  );
-  const notes = [];
-  for (const gap of assessment.gaps) {
-    for (const code of gap.frameworks) {
-      if (!knownFrameworks.has(code.toUpperCase())) {
-        notes.push(`Unknown framework code in gap ${gap.code}: ${code}.`);
-      }
-    }
-  }
-  if (remediationPlan.length === 0) {
-    notes.push("Remediation plan is empty.");
-  }
-  if (assessment.gaps.length > 0 && remediationPlan.length < 2) {
-    notes.push("Remediation plan is too short for identified gap volume.");
-  }
-  return {
-    passed: notes.length === 0,
-    notes
-  };
-}
-function buildDbPayload(assessment, remediationPlan, ragControls) {
-  const frameworkAssessmentRows = Object.entries(
-    JURISDICTION_FRAMEWORKS
-  ).flatMap(
-    ([jurisdiction, codes]) => codes.map((code) => ({
-      frameworkCode: code,
-      complianceScore: assessment.jurisdictionScores[jurisdiction] ?? assessment.overallScore,
-      riskLevel: assessment.riskLevel,
-      status: assessment.status,
-      findings: assessment.gaps.filter((gap) => gap.frameworks.includes(code)).map((gap) => `${gap.code}: ${gap.title}`),
-      recommendations: remediationPlan
-    }))
-  );
-  const firstControlByFramework = /* @__PURE__ */ new Map();
-  for (const control of ragControls) {
-    if (!firstControlByFramework.has(control.frameworkCode)) {
-      firstControlByFramework.set(control.frameworkCode, control.controlCode);
-    }
-  }
-  const gapRows = assessment.gaps.flatMap(
-    (gap) => gap.frameworks.map((frameworkCode) => ({
-      frameworkCode,
-      controlCode: firstControlByFramework.get(frameworkCode) || "",
-      gapCode: gap.code,
-      gapDescription: gap.description,
-      severity: gap.severity,
-      remediation: gap.mitigation
-    }))
-  );
-  return {
-    vendorAssessments: frameworkAssessmentRows,
-    assessmentGaps: gapRows
-  };
-}
-async function executeAssessmentPipeline(input, reportStage) {
-  const rawDocumentText = input.rawDocumentText?.trim() || "";
-  const _requestedEngine = input.engine ?? ENV.aiAssessmentEngineDefault;
-  reportStage("gatekeeper", "Security Gatekeeper scanning payload.");
-  runSecurityGatekeeper(rawDocumentText);
-  reportStage("intake", "Intake Clerk classifying submission.");
-  const intake = runIntake(input.vendor, rawDocumentText);
-  reportStage("extractor", "Extraction agent mapping facts to controls.");
-  const externalFacts = await callAgentSwarm(
-    "frontline/extractor",
-    {
-      vendor: input.vendor,
-      intake,
-      rawDocumentText
-    }
-  );
-  const extractedFacts = externalFacts && externalFacts.length > 0 ? externalFacts.slice(0, 200) : runExtractor(input.vendor, intake);
-  reportStage("rag_context", "RAG context assembler retrieving controls.");
-  const ragControls = await buildRagContext(extractedFacts);
-  reportStage("judge", "Compliance reviewer evaluating mapped facts.");
-  const externalAssessment = await callAgentSwarm(
-    "backend/judge",
-    {
-      vendor: input.vendor,
-      extractedFacts,
-      ragControls
-    }
-  );
-  const assessment = externalAssessment || runJudge(input.vendor, extractedFacts);
-  for (const key of JURISDICTION_SCORE_KEYS) {
-    const score = assessment.jurisdictionScores[key];
-    if (typeof score !== "number" || !Number.isFinite(score)) {
-      assessment.jurisdictionScores[key] = assessment.overallScore;
-    }
-  }
-  reportStage(
-    "synthesizer",
-    "Strategic synthesizer drafting remediation plan."
-  );
-  let remediationPlan = await callAgentSwarm("backend/synthesizer", {
-    assessment,
-    ragControls
-  }) || runSynthesizer(assessment);
-  let validatorNotes = [];
-  let validatorPassed = false;
-  let attempts = 0;
-  const maxAttempts = Math.max(1, ENV.aiValidatorMaxRetries + 1);
-  while (!validatorPassed && attempts < maxAttempts) {
-    attempts += 1;
-    reportStage("validator", `Validator pass ${attempts} running.`);
-    const externalValidation = await callAgentSwarm(
-      "backend/validator",
-      {
-        assessment,
-        remediationPlan,
-        ragControls
-      }
-    );
-    const validation = externalValidation || runValidator(assessment, remediationPlan, ragControls);
-    validatorPassed = validation.passed;
-    validatorNotes = validation.notes;
-    if (!validatorPassed && attempts < maxAttempts) {
-      remediationPlan = runSynthesizer(assessment);
-    }
-  }
-  if (!validatorPassed) {
-    throw new Error(
-      `Validator rejected report payload after ${attempts} attempt(s): ${validatorNotes.join(
-        " "
-      )}`
-    );
-  }
-  reportStage("reporter", "Reporter formatting strict JSON output.");
-  const reportPayload = {
-    version: "1.0",
-    generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
-    inputSummary: {
-      vendorId: input.vendor.id,
-      source: input.source,
-      documentType: intake.documentType,
-      tags: intake.tags
-    },
-    extractedFacts,
-    ragControls,
-    assessment,
-    remediationPlan,
-    validator: {
-      passed: validatorPassed,
-      attempts,
-      notes: validatorNotes
-    },
-    dbPayload: buildDbPayload(assessment, remediationPlan, ragControls)
-  };
-  return aiAssessmentReportSchema.parse(reportPayload);
-}
-
-// server/ai/persistence.ts
-init_schema();
-init_db();
-import { and as and4, desc as desc4, eq as eq6 } from "drizzle-orm";
-async function persistAssessmentReport(report, shouldPersist) {
-  if (!shouldPersist) {
-    return {
-      savedAssessments: 0,
-      savedGaps: 0,
-      skipped: true
-    };
-  }
-  if (report.assessment.vendorId <= 0) {
-    return {
-      savedAssessments: 0,
-      savedGaps: 0,
-      skipped: true
-    };
-  }
-  const db = await getDb();
-  if (!db) {
-    return {
-      savedAssessments: 0,
-      savedGaps: 0,
-      skipped: true
-    };
-  }
-  const frameworkRows = await db.select().from(frameworks);
-  const frameworkIdByCode = new Map(
-    frameworkRows.map((row) => [row.code.toUpperCase(), row.id])
-  );
-  const assessmentIdByFramework = /* @__PURE__ */ new Map();
-  const insertedFrameworks = /* @__PURE__ */ new Set();
-  let savedAssessments = 0;
-  for (const row of report.dbPayload.vendorAssessments) {
-    const frameworkCode = row.frameworkCode.toUpperCase();
-    const frameworkId = frameworkIdByCode.get(frameworkCode);
-    if (!frameworkId) continue;
-    const findingsJson = JSON.stringify(row.findings);
-    const recommendationsJson = JSON.stringify(row.recommendations);
-    const latestExisting = await db.select().from(vendorAssessments).where(
-      and4(
-        eq6(vendorAssessments.vendorId, report.assessment.vendorId),
-        eq6(vendorAssessments.frameworkId, frameworkId)
-      )
-    ).orderBy(
-      desc4(vendorAssessments.assessmentDate),
-      desc4(vendorAssessments.id)
-    ).limit(1);
-    const existing = latestExisting[0];
-    if (existing && existing.complianceScore === row.complianceScore && existing.riskLevel === row.riskLevel && existing.status === row.status && (existing.findings ?? "") === findingsJson && (existing.recommendations ?? "") === recommendationsJson) {
-      assessmentIdByFramework.set(frameworkCode, existing.id);
-      continue;
-    }
-    const [inserted] = await db.insert(vendorAssessments).values({
-      vendorId: report.assessment.vendorId,
-      frameworkId,
-      complianceScore: row.complianceScore,
-      riskLevel: row.riskLevel,
-      status: row.status,
-      findings: findingsJson,
-      recommendations: recommendationsJson
-    }).returning({ id: vendorAssessments.id });
-    const assessmentId = inserted?.id ?? 0;
-    if (assessmentId > 0) {
-      assessmentIdByFramework.set(frameworkCode, assessmentId);
-      insertedFrameworks.add(frameworkCode);
-    }
-    savedAssessments += 1;
-  }
-  const controlCache = /* @__PURE__ */ new Map();
-  let savedGaps = 0;
-  for (const gap of report.dbPayload.assessmentGaps) {
-    const frameworkCode = gap.frameworkCode.toUpperCase();
-    const frameworkId = frameworkIdByCode.get(frameworkCode);
-    const assessmentId = assessmentIdByFramework.get(frameworkCode);
-    if (!frameworkId || !assessmentId || !insertedFrameworks.has(frameworkCode)) {
-      continue;
-    }
-    let controls = controlCache.get(frameworkId);
-    if (!controls) {
-      const rows = await db.select({
-        id: complianceControls.id,
-        controlCode: complianceControls.controlCode
-      }).from(complianceControls).where(eq6(complianceControls.frameworkId, frameworkId));
-      controls = rows;
-      controlCache.set(frameworkId, controls);
-    }
-    if (!controls || controls.length === 0) {
-      continue;
-    }
-    const matchedControl = controls.find(
-      (control) => control.controlCode.toLowerCase() === gap.controlCode.toLowerCase() && gap.controlCode.trim().length > 0
-    ) || controls[0];
-    await db.insert(assessmentGaps).values({
-      assessmentId,
-      controlId: matchedControl.id,
-      gapDescription: `${gap.gapCode}: ${gap.gapDescription}`,
-      severity: gap.severity,
-      remediation: gap.remediation,
-      estimatedRemediationCost: null
-    });
-    savedGaps += 1;
-  }
-  return {
-    savedAssessments,
-    savedGaps,
-    skipped: false
-  };
-}
-
-// server/ai/agent-registry.ts
-var AGENT_CAPABILITIES = [
-  {
-    type: "gatekeeper",
-    label: "Security Gatekeeper",
-    description: "Scans payload for prompt injection and malicious patterns",
-    maxConcurrency: 10
-  },
-  {
-    type: "intake",
-    label: "Intake Clerk",
-    description: "Classifies submission type and normalizes text",
-    maxConcurrency: 8
-  },
-  {
-    type: "extractor",
-    label: "Extraction Agent",
-    description: "Maps vendor data to extracted facts",
-    maxConcurrency: 6
-  },
-  {
-    type: "rag_context",
-    label: "RAG Context Assembler",
-    description: "Retrieves relevant compliance controls from vector store",
-    maxConcurrency: 4
-  },
-  {
-    type: "judge",
-    label: "Compliance Reviewer",
-    description: "Evaluates mapped facts against frameworks",
-    maxConcurrency: 4
-  },
-  {
-    type: "synthesizer",
-    label: "Strategic Synthesizer",
-    description: "Drafts remediation plans from gaps",
-    maxConcurrency: 5
-  },
-  {
-    type: "validator",
-    label: "Output Validator",
-    description: "Validates report quality and completeness",
-    maxConcurrency: 5
-  },
-  {
-    type: "reporter",
-    label: "Report Formatter",
-    description: "Formats final JSON output and DB payload",
-    maxConcurrency: 10
-  }
-];
-var nextAgentId = 1;
-var agentPool = /* @__PURE__ */ new Map();
-for (const cap of AGENT_CAPABILITIES) {
-  for (let i = 0; i < cap.maxConcurrency; i++) {
-    const id = `${cap.type}-${nextAgentId++}`;
-    agentPool.set(id, {
-      id,
-      type: cap.type,
-      status: "idle",
-      currentJobId: null,
-      startedAt: null,
-      errorCount: 0
-    });
-  }
-}
-function getAgentPool() {
-  return Array.from(agentPool.values());
-}
-function getAgentPoolStats() {
-  const stats = {};
-  for (const agent of agentPool.values()) {
-    if (!stats[agent.type])
-      stats[agent.type] = { total: 0, idle: 0, busy: 0, error: 0 };
-    stats[agent.type].total++;
-    stats[agent.type][agent.status]++;
-  }
-  return stats;
-}
-function acquireAgent(type, jobId) {
-  const available = Array.from(agentPool.values()).find(
-    (a) => a.type === type && a.status === "idle"
-  );
-  if (!available) return null;
-  available.status = "busy";
-  available.currentJobId = jobId;
-  available.startedAt = Date.now();
-  return available;
-}
-function releaseAgent(agentId) {
-  const agent = agentPool.get(agentId);
-  if (!agent) return;
-  agent.status = "idle";
-  agent.currentJobId = null;
-  agent.startedAt = null;
-}
-function markAgentError(agentId) {
-  const agent = agentPool.get(agentId);
-  if (!agent) return;
-  agent.status = "error";
-  agent.errorCount++;
-  agent.currentJobId = null;
-  agent.startedAt = null;
-}
-async function dispatchPipeline(input, onProgress) {
-  const route = [
-    "gatekeeper",
-    "intake",
-    "extractor",
-    "rag_context",
-    "judge",
-    "synthesizer",
-    "validator",
-    "reporter"
-  ];
-  const timing = {};
-  const jobId = `dispatch-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const acquired = [];
-  try {
-    for (const stageType of route) {
-      const agent = acquireAgent(stageType, jobId);
-      if (agent) {
-        acquired.push(agent.id);
-      }
-    }
-    const startTotal = Date.now();
-    const report = await executeAssessmentPipeline(
-      {
-        source: input.source,
-        engine: input.engine,
-        vendor: input.vendor,
-        rawDocumentText: input.rawDocumentText
-      },
-      (stage, message) => {
-        onProgress(stage, message);
-        const elapsed = Date.now() - startTotal;
-        timing[stage] = elapsed;
-      }
-    );
-    timing["total"] = Date.now() - startTotal;
-    for (const id of acquired) releaseAgent(id);
-    return { report, agentRoute: route, timing };
-  } catch (err) {
-    for (const id of acquired) markAgentError(id);
-    throw err;
-  }
-}
-function resetAgentPool() {
-  for (const agent of agentPool.values()) {
-    agent.status = "idle";
-    agent.currentJobId = null;
-    agent.startedAt = null;
-  }
-}
-function getAgentCapabilities() {
-  return AGENT_CAPABILITIES;
-}
-
-// server/ai/queueFactory.ts
-init_env();
-
-// server/ai/queue.ts
-import { randomUUID } from "crypto";
-import { mkdir, readFile, rm, writeFile } from "fs/promises";
-import path2 from "path";
-var QUEUE_IDLE_DELAY_MS = 20;
-var JOB_WAIT_POLL_MS = 120;
-var EVENT_RETENTION = 300;
-var HISTORY_RETENTION = 500;
-function nowIso() {
-  return (/* @__PURE__ */ new Date()).toISOString();
-}
-function sortByCreatedDesc(a, b) {
-  return a.createdAt < b.createdAt ? 1 : -1;
-}
-function toSnapshot(job) {
-  return {
-    id: job.id,
-    userId: job.userId,
-    status: job.status,
-    stage: job.stage,
-    createdAt: job.createdAt,
-    updatedAt: job.updatedAt,
-    events: job.events,
-    ...job.error ? { error: job.error } : {},
-    ...job.result ? { result: job.result } : {},
-    ...job.persistence ? { persistence: job.persistence } : {}
-  };
-}
-var InMemoryAssessmentQueue = class {
-  constructor(options = {}) {
-    this.jobs = /* @__PURE__ */ new Map();
-    this.persistedSnapshots = /* @__PURE__ */ new Map();
-    this.queue = [];
-    this.listeners = /* @__PURE__ */ new Set();
-    this.worker = null;
-    this.running = false;
-    this.historyWriteTask = Promise.resolve();
-    this.historyFilePath = options.historyFilePath?.trim() ?? "";
-    this.historyReady = this.loadHistory();
-  }
-  setWorker(worker) {
-    this.worker = worker;
-  }
-  async enqueue(input) {
-    await this.historyReady;
-    const createdAt = nowIso();
-    const id = randomUUID();
-    const record = {
-      id,
-      userId: input.userId,
-      status: "queued",
-      stage: "queued",
-      input,
-      createdAt,
-      updatedAt: createdAt,
-      events: [
-        {
-          stage: "queued",
-          message: "Job queued for orchestration.",
-          timestamp: createdAt
-        }
-      ]
-    };
-    this.jobs.set(id, record);
-    this.queue.push(id);
-    this.schedule();
-    this.emitSnapshot(record);
-    return toSnapshot(record);
-  }
-  async get(jobId) {
-    await this.historyReady;
-    const job = this.jobs.get(jobId);
-    if (job) {
-      return toSnapshot(job);
-    }
-    return this.persistedSnapshots.get(jobId) || null;
-  }
-  async listByUser(userId, limit = 20) {
-    await this.historyReady;
-    const latestById = /* @__PURE__ */ new Map();
-    Array.from(this.jobs.values()).filter((job) => job.userId === userId).map(toSnapshot).forEach((snapshot) => {
-      latestById.set(snapshot.id, snapshot);
-    });
-    Array.from(this.persistedSnapshots.values()).filter((snapshot) => snapshot.userId === userId).forEach((snapshot) => {
-      if (!latestById.has(snapshot.id)) {
-        latestById.set(snapshot.id, snapshot);
-      }
-    });
-    return Array.from(latestById.values()).sort(sortByCreatedDesc).slice(0, limit);
-  }
-  async waitForCompletion(jobId, timeoutMs) {
-    const started = Date.now();
-    while (Date.now() - started < timeoutMs) {
-      const snapshot2 = await this.get(jobId);
-      if (!snapshot2) return null;
-      if (snapshot2.status === "completed" || snapshot2.status === "failed") {
-        await this.historyWriteTask;
-        return snapshot2;
-      }
-      await new Promise((resolve) => setTimeout(resolve, JOB_WAIT_POLL_MS));
-    }
-    const snapshot = await this.get(jobId);
-    if (snapshot?.status === "completed" || snapshot?.status === "failed") {
-      await this.historyWriteTask;
-    }
-    return snapshot;
-  }
-  async getHistoryDiagnostics(userId) {
-    await this.historyReady;
-    const historyPath = this.resolveHistoryPath();
-    const persistedSnapshots = Array.from(
-      this.persistedSnapshots.values()
-    ).filter((snapshot) => snapshot.userId === userId);
-    const queuedJobCount = Array.from(this.jobs.values()).filter(
-      (job) => job.userId === userId && job.status === "queued"
-    ).length;
-    const activeJobCount = Array.from(this.jobs.values()).filter(
-      (job) => job.userId === userId && (job.status === "queued" || job.status === "running")
-    ).length;
-    return {
-      queueMode: "in_memory",
-      storageType: historyPath ? "file" : "memory_only",
-      storageEnabled: Boolean(historyPath),
-      supportsClear: Boolean(historyPath),
-      historyEntryCount: persistedSnapshots.length,
-      activeJobCount,
-      queuedJobCount,
-      historyRetentionLimit: HISTORY_RETENTION,
-      ...historyPath ? { storagePath: historyPath } : {},
-      ...this.historyLastSavedAt ? { lastUpdatedAt: this.historyLastSavedAt } : {},
-      details: historyPath ? "File-backed history is enabled for in-memory queue mode." : "In-memory queue history is ephemeral because AI_JOB_HISTORY_FILE is not configured."
-    };
-  }
-  async clearHistory(userId) {
-    await this.historyReady;
-    const historyPath = this.resolveHistoryPath();
-    if (!historyPath) {
-      const currentUserEntries2 = Array.from(
-        this.persistedSnapshots.values()
-      ).filter((snapshot) => snapshot.userId === userId);
-      return {
-        queueMode: "in_memory",
-        storageType: "memory_only",
-        supportsClear: false,
-        clearedCount: 0,
-        remainingCount: currentUserEntries2.length,
-        details: "Clear history is unavailable because AI_JOB_HISTORY_FILE is not configured."
-      };
-    }
-    await this.historyWriteTask;
-    const currentUserEntries = Array.from(
-      this.persistedSnapshots.values()
-    ).filter((snapshot) => snapshot.userId === userId);
-    let clearedCount = 0;
-    for (const snapshot of currentUserEntries) {
-      if (this.persistedSnapshots.delete(snapshot.id)) {
-        clearedCount += 1;
-      }
-    }
-    await this.persistHistory(historyPath);
-    const remainingCount = Array.from(this.persistedSnapshots.values()).filter(
-      (snapshot) => snapshot.userId === userId
-    ).length;
-    return {
-      queueMode: "in_memory",
-      storageType: "file",
-      supportsClear: true,
-      clearedCount,
-      remainingCount,
-      storagePath: historyPath,
-      details: clearedCount > 0 ? "Persisted history cleared for the current user. Active jobs were not interrupted." : "No persisted history entries were found for the current user."
-    };
-  }
-  subscribe(listener) {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
-  }
-  async close() {
-    this.jobs.clear();
-    this.persistedSnapshots.clear();
-    this.listeners.clear();
-    this.queue.length = 0;
-  }
-  schedule() {
-    if (this.running) return;
-    this.running = true;
-    setTimeout(() => {
-      void this.runLoop().finally(() => {
-        this.running = false;
-        if (this.queue.length > 0) {
-          this.schedule();
-        }
-      });
-    }, QUEUE_IDLE_DELAY_MS);
-  }
-  pushEvent(job, stage, message) {
-    const timestamp2 = nowIso();
-    job.stage = stage;
-    job.updatedAt = timestamp2;
-    job.events.push({ stage, message, timestamp: timestamp2 });
-    if (job.events.length > EVENT_RETENTION) {
-      job.events.splice(0, job.events.length - EVENT_RETENTION);
-    }
-    this.emitSnapshot(job);
-  }
-  emitSnapshot(job) {
-    const snapshot = toSnapshot(job);
-    this.upsertPersistedSnapshot(snapshot);
-    this.queueHistoryWrite();
-    for (const listener of Array.from(this.listeners)) {
-      try {
-        listener(snapshot);
-      } catch {
-      }
-    }
-  }
-  resolveHistoryPath() {
-    if (!this.historyFilePath) {
-      return "";
-    }
-    return path2.isAbsolute(this.historyFilePath) ? this.historyFilePath : path2.resolve(process.cwd(), this.historyFilePath);
-  }
-  async loadHistory() {
-    const historyPath = this.resolveHistoryPath();
-    if (!historyPath) {
-      return;
-    }
-    try {
-      const raw = await readFile(historyPath, "utf-8");
-      const parsed = JSON.parse(raw);
-      const snapshots = Array.isArray(parsed) ? parsed : parsed && typeof parsed === "object" && Array.isArray(parsed.snapshots) ? parsed.snapshots : [];
-      for (const candidate of snapshots) {
-        const validated = aiJobSnapshotSchema.safeParse(candidate);
-        if (!validated.success) {
-          continue;
-        }
-        this.upsertPersistedSnapshot(validated.data);
-      }
-      const latestSnapshot = Array.from(this.persistedSnapshots.values()).sort(
-        (a, b) => a.updatedAt < b.updatedAt ? 1 : -1
-      )[0];
-      this.historyLastSavedAt = latestSnapshot?.updatedAt;
-    } catch (error) {
-      const maybeCode = typeof error === "object" && error && "code" in error ? String(error.code) : "";
-      if (maybeCode !== "ENOENT") {
-        console.warn(
-          "[AI Orchestrator] Failed to load in-memory queue history:",
-          error
-        );
-      }
-    }
-  }
-  upsertPersistedSnapshot(snapshot) {
-    const current = this.persistedSnapshots.get(snapshot.id);
-    if (!current || current.updatedAt <= snapshot.updatedAt) {
-      this.persistedSnapshots.set(snapshot.id, snapshot);
-    }
-    this.trimPersistedSnapshots();
-  }
-  trimPersistedSnapshots() {
-    if (this.persistedSnapshots.size <= HISTORY_RETENTION) {
-      return;
-    }
-    const ordered = Array.from(this.persistedSnapshots.values()).sort(
-      (a, b) => a.updatedAt < b.updatedAt ? -1 : 1
-    );
-    const overflow = ordered.length - HISTORY_RETENTION;
-    for (let index = 0; index < overflow; index += 1) {
-      this.persistedSnapshots.delete(ordered[index].id);
-    }
-  }
-  queueHistoryWrite() {
-    const historyPath = this.resolveHistoryPath();
-    if (!historyPath) {
-      return;
-    }
-    this.historyWriteTask = this.historyWriteTask.then(() => this.persistHistory(historyPath)).catch((error) => {
-      console.warn(
-        "[AI Orchestrator] Failed to persist in-memory queue history:",
-        error
-      );
-    });
-  }
-  async persistHistory(historyPath) {
-    const snapshots = Array.from(this.persistedSnapshots.values()).sort(sortByCreatedDesc).slice(0, HISTORY_RETENTION);
-    if (snapshots.length === 0) {
-      await rm(historyPath, { force: true });
-      this.historyLastSavedAt = void 0;
-      return;
-    }
-    const payload = {
-      version: 1,
-      snapshots
-    };
-    await mkdir(path2.dirname(historyPath), { recursive: true });
-    await writeFile(historyPath, JSON.stringify(payload, null, 2), "utf-8");
-    this.historyLastSavedAt = nowIso();
-  }
-  async runLoop() {
-    if (!this.worker) return;
-    while (this.queue.length > 0) {
-      const jobId = this.queue.shift();
-      if (!jobId) continue;
-      const job = this.jobs.get(jobId);
-      if (!job) continue;
-      job.status = "running";
-      this.pushEvent(job, "gatekeeper", "Worker started processing job.");
-      try {
-        const workerResult = await this.worker(job.input, (progress) => {
-          this.pushEvent(job, progress.stage, progress.message);
-        });
-        job.status = "completed";
-        job.result = workerResult.report;
-        job.persistence = workerResult.persistence;
-        this.pushEvent(job, "completed", "Assessment orchestration completed.");
-      } catch (error) {
-        job.status = "failed";
-        job.error = error instanceof Error ? error.message : String(error);
-        this.pushEvent(job, "failed", "Assessment orchestration failed.");
-      }
-    }
-  }
-};
-
-// server/ai/redisQueue.ts
-import { Queue, Worker } from "bullmq";
-var QUEUE_NAME = "djac-ai-assessment";
-var JOB_NAME = "assessment";
-var EVENT_RETENTION2 = 300;
-var JOB_WAIT_POLL_MS2 = 120;
-function nowIso2() {
-  return (/* @__PURE__ */ new Date()).toISOString();
-}
-function toSnapshot2(job) {
-  return {
-    id: job.id,
-    userId: job.userId,
-    status: job.status,
-    stage: job.stage,
-    createdAt: job.createdAt,
-    updatedAt: job.updatedAt,
-    events: job.events,
-    ...job.error ? { error: job.error } : {},
-    ...job.result ? { result: job.result } : {},
-    ...job.persistence ? { persistence: job.persistence } : {}
-  };
-}
-function stateToStatus(state) {
-  if (state === "completed") return "completed";
-  if (state === "failed") return "failed";
-  if (state === "active") return "running";
-  return "queued";
-}
-function parseBullProgress(value) {
-  if (!value || typeof value !== "object") {
-    return {};
-  }
-  const progress = value;
-  const stage = typeof progress.stage === "string" ? progress.stage : void 0;
-  const message = typeof progress.message === "string" ? progress.message : void 0;
-  const timestamp2 = typeof progress.timestamp === "string" ? progress.timestamp : void 0;
-  return {
-    stage,
-    message,
-    timestamp: timestamp2
-  };
-}
-var RedisAssessmentQueue = class {
-  constructor(redisUrl) {
-    this.records = /* @__PURE__ */ new Map();
-    this.listeners = /* @__PURE__ */ new Set();
-    this.workerFn = null;
-    this.worker = null;
-    this.queue = new Queue(QUEUE_NAME, {
-      connection: {
-        url: redisUrl
-      },
-      defaultJobOptions: {
-        removeOnComplete: false,
-        removeOnFail: false
-      }
-    });
-  }
-  setWorker(worker) {
-    this.workerFn = worker;
-    if (this.worker) return;
-    this.worker = new Worker(
-      QUEUE_NAME,
-      async (job) => {
-        if (!this.workerFn) {
-          throw new Error("No worker callback registered for Redis queue.");
-        }
-        const id = String(job.id ?? "");
-        if (!id) {
-          throw new Error("Redis queue job is missing id.");
-        }
-        const jobData = job.data;
-        const record = this.records.get(id) || this.createRecordFromData(id, jobData, "queued", "queued");
-        record.status = "running";
-        this.pushEvent(record, "gatekeeper", "Worker started processing job.");
-        const result = await this.workerFn(jobData, (progress) => {
-          this.pushEvent(record, progress.stage, progress.message);
-          void job.updateProgress({
-            stage: progress.stage,
-            message: progress.message,
-            timestamp: nowIso2()
-          });
-        });
-        record.status = "completed";
-        record.result = result.report;
-        record.persistence = result.persistence;
-        this.pushEvent(
-          record,
-          "completed",
-          "Assessment orchestration completed."
-        );
-        return result;
-      },
-      {
-        connection: {
-          url: this.queue.opts.connection && typeof this.queue.opts.connection === "object" && "url" in this.queue.opts.connection ? this.queue.opts.connection.url : void 0
-        },
-        concurrency: 1
-      }
-    );
-    this.worker.on("failed", (job, error) => {
-      if (!job) return;
-      const id = String(job.id ?? "");
-      if (!id) return;
-      const record = this.records.get(id) || this.createRecordFromData(
-        id,
-        job.data,
-        "failed",
-        "failed"
-      );
-      record.status = "failed";
-      record.error = error?.message || job.failedReason || "Unknown queue failure.";
-      this.pushEvent(record, "failed", "Assessment orchestration failed.");
-    });
-  }
-  async enqueue(input) {
-    const job = await this.queue.add(
-      JOB_NAME,
-      input
-    );
-    const id = String(job.id ?? "");
-    if (!id) {
-      throw new Error("Redis queue did not return a job id.");
-    }
-    const record = this.createRecordFromData(id, input, "queued", "queued");
-    this.pushEvent(record, "queued", "Job queued for orchestration.");
-    return toSnapshot2(record);
-  }
-  async get(jobId) {
-    const existing = this.records.get(jobId);
-    if (existing) {
-      return toSnapshot2(existing);
-    }
-    const job = await this.queue.getJob(jobId);
-    if (!job) return null;
-    const state = await job.getState();
-    const status = stateToStatus(state);
-    const progress = parseBullProgress(job.progress);
-    const stage = progress.stage || (status === "completed" ? "completed" : status === "failed" ? "failed" : "queued");
-    const record = this.createRecordFromData(
-      jobId,
-      job.data,
-      status,
-      stage
-    );
-    if (progress.message) {
-      record.events.push({
-        stage,
-        message: progress.message,
-        timestamp: progress.timestamp || nowIso2()
-      });
-    }
-    if (status === "failed") {
-      record.error = job.failedReason || "Assessment orchestration failed.";
-    }
-    if (status === "completed" && job.returnvalue) {
-      const result = job.returnvalue;
-      if (result.report) {
-        record.result = result.report;
-      }
-      if (result.persistence) {
-        record.persistence = result.persistence;
-      }
-    }
-    this.records.set(jobId, record);
-    return toSnapshot2(record);
-  }
-  async listByUser(userId, limit = 20) {
-    const inMemory = Array.from(this.records.values()).filter((record) => record.userId === userId).sort((a, b) => a.createdAt < b.createdAt ? 1 : -1).slice(0, limit).map(toSnapshot2);
-    if (inMemory.length > 0) {
-      return inMemory;
-    }
-    const jobs = await this.queue.getJobs(
-      ["wait", "active", "completed", "failed", "delayed"],
-      0,
-      Math.max(limit * 5, 50)
-    );
-    const snapshots = [];
-    for (const job of jobs) {
-      const id = String(job.id ?? "");
-      if (!id) continue;
-      const data = job.data;
-      if (data.userId !== userId) continue;
-      const snapshot = await this.get(id);
-      if (snapshot) snapshots.push(snapshot);
-      if (snapshots.length >= limit) break;
-    }
-    return snapshots.sort((a, b) => a.createdAt < b.createdAt ? 1 : -1).slice(0, limit);
-  }
-  async waitForCompletion(jobId, timeoutMs) {
-    const started = Date.now();
-    while (Date.now() - started < timeoutMs) {
-      const snapshot = await this.get(jobId);
-      if (!snapshot) return null;
-      if (snapshot.status === "completed" || snapshot.status === "failed") {
-        return snapshot;
-      }
-      await new Promise((resolve) => setTimeout(resolve, JOB_WAIT_POLL_MS2));
-    }
-    return this.get(jobId);
-  }
-  async getHistoryDiagnostics(userId) {
-    const snapshots = await this.listByUser(userId, 100);
-    const queuedJobCount = snapshots.filter(
-      (snapshot) => snapshot.status === "queued"
-    ).length;
-    const activeJobCount = snapshots.filter(
-      (snapshot) => snapshot.status === "queued" || snapshot.status === "running"
-    ).length;
-    return {
-      queueMode: "redis",
-      storageType: "redis",
-      storageEnabled: true,
-      supportsClear: false,
-      historyEntryCount: snapshots.length,
-      activeJobCount,
-      queuedJobCount,
-      ...snapshots[0]?.updatedAt ? { lastUpdatedAt: snapshots[0].updatedAt } : {},
-      details: "Redis-backed queue history is available from BullMQ storage. Diagnostics are sampled from recent jobs and clear history is disabled to avoid deleting shared queue records."
-    };
-  }
-  async clearHistory(userId) {
-    const snapshots = await this.listByUser(userId, 100);
-    return {
-      queueMode: "redis",
-      storageType: "redis",
-      supportsClear: false,
-      clearedCount: 0,
-      remainingCount: snapshots.length,
-      details: "Clear history is not supported in Redis queue mode because queue records may be shared with active workers."
-    };
-  }
-  subscribe(listener) {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
-  }
-  createRecordFromData(id, input, status, stage) {
-    const createdAt = nowIso2();
-    const record = {
-      id,
-      userId: input.userId,
-      status,
-      stage,
-      input,
-      createdAt,
-      updatedAt: createdAt,
-      events: []
-    };
-    this.records.set(id, record);
-    return record;
-  }
-  pushEvent(record, stage, message) {
-    const timestamp2 = nowIso2();
-    record.stage = stage;
-    record.updatedAt = timestamp2;
-    record.events.push({ stage, message, timestamp: timestamp2 });
-    if (record.events.length > EVENT_RETENTION2) {
-      record.events.splice(0, record.events.length - EVENT_RETENTION2);
-    }
-    this.emitSnapshot(record);
-  }
-  emitSnapshot(record) {
-    const snapshot = toSnapshot2(record);
-    for (const listener of Array.from(this.listeners)) {
-      try {
-        listener(snapshot);
-      } catch {
-      }
-    }
-  }
-  async close() {
-    if (this.worker) {
-      await this.worker.close();
-    }
-    await this.queue.close();
-    this.records.clear();
-    this.listeners.clear();
-  }
-};
-
-// server/ai/queueFactory.ts
-var queueSingleton = null;
-function getAssessmentQueue() {
-  if (queueSingleton) {
-    return queueSingleton;
-  }
-  if (ENV.aiQueueMode === "redis") {
-    const redisUrl = ENV.redisUrl.trim();
-    if (!redisUrl) {
-      console.warn(
-        "[AI Orchestrator] AI_QUEUE_MODE=redis but REDIS_URL is empty. Falling back to in-memory queue."
-      );
-    } else {
-      try {
-        queueSingleton = new RedisAssessmentQueue(redisUrl);
-        console.info("[AI Orchestrator] Redis queue mode enabled.");
-        return queueSingleton;
-      } catch (error) {
-        console.warn(
-          "[AI Orchestrator] Failed to initialize Redis queue. Falling back to in-memory queue:",
-          error
-        );
-      }
-    }
-  }
-  queueSingleton = new InMemoryAssessmentQueue({
-    historyFilePath: ENV.aiJobHistoryFile
-  });
-  console.info("[AI Orchestrator] In-memory queue mode enabled.");
-  return queueSingleton;
-}
-async function closeAssessmentQueue() {
-  if (queueSingleton) {
-    try {
-      await queueSingleton.close();
-      console.info("[AI Orchestrator] Queue closed.");
-    } catch (err) {
-      console.warn("[AI Orchestrator] Error closing queue:", err);
-    }
-    queueSingleton = null;
-  }
-}
-
-// server/ai/orchestrator.ts
-var queue = getAssessmentQueue();
-queue.setWorker(async (job, onProgress) => {
-  const useDispatch = job.source === "vendor_profile" && !job.rawDocumentText;
-  let report;
-  if (useDispatch) {
-    const result = await dispatchPipeline(
-      {
-        source: job.source,
-        vendor: job.vendor,
-        rawDocumentText: job.rawDocumentText
-      },
-      (stage, message) => onProgress({ stage, message })
-    );
-    report = result.report;
-  } else {
-    report = await executeAssessmentPipeline(
-      {
-        source: job.source,
-        engine: job.engine,
-        vendor: job.vendor,
-        rawDocumentText: job.rawDocumentText
-      },
-      (stage, message) => onProgress({ stage, message })
-    );
-  }
-  onProgress({
-    stage: "persistence",
-    message: "Persisting report payload to compliance tables."
-  });
-  const persistence = await persistAssessmentReport(
-    report,
-    Boolean(job.persistResult)
-  );
-  return {
-    report,
-    persistence
-  };
-});
-function enqueueAssessmentJob(input) {
-  return queue.enqueue(input);
-}
-function getAssessmentJob(jobId) {
-  return queue.get(jobId);
-}
-function listAssessmentJobsForUser(userId, limit = 20) {
-  return queue.listByUser(userId, limit);
-}
-function getAssessmentHistoryDiagnostics(userId) {
-  return queue.getHistoryDiagnostics(userId);
-}
-function clearAssessmentHistory(userId) {
-  return queue.clearHistory(userId);
-}
-async function waitForAssessmentJob(jobId, timeoutMs) {
-  return queue.waitForCompletion(jobId, timeoutMs ?? ENV.aiJobTimeoutMs);
-}
-function subscribeAssessmentJobSnapshots(listener) {
-  return queue.subscribe(listener);
-}
-async function runAssessmentSync(input) {
-  const queued = await enqueueAssessmentJob(input);
-  const finished = await waitForAssessmentJob(queued.id, ENV.aiJobTimeoutMs);
-  if (!finished) {
-    throw new Error("Assessment job could not be retrieved after enqueue.");
-  }
-  if (finished.status === "failed") {
-    throw new Error(
-      finished.error || "Assessment orchestration failed without details."
-    );
-  }
-  if (finished.status !== "completed" || !finished.result) {
-    throw new Error("Assessment orchestration timed out before completion.");
-  }
-  return {
-    job: finished,
-    report: finished.result
-  };
-}
-function getAgentPoolStatus() {
-  return {
-    agents: getAgentPool(),
-    stats: getAgentPoolStats(),
-    capabilities: getAgentCapabilities()
-  };
-}
-function resetAllAgents() {
-  resetAgentPool();
-  return { ok: true };
-}
-
 // server/ai/router.ts
+init_rateLimiter();
+init_orchestrator();
+var AI_READ_LIMIT = 30;
+var AI_READ_WINDOW_MS = 6e4;
+var AI_ADMIN_LIMIT = 10;
+var AI_ADMIN_WINDOW_MS = 6e4;
 var submitAssessmentSchema = z3.object({
   vendorId: z3.number().int().positive(),
   rawDocumentText: z3.string().max(1e5).optional().default(""),
@@ -10215,7 +11615,7 @@ var aiRouter = router({
     await requireModulePermission(ctx, "vendor_assessment", "canCreate");
     const startedAt = Date.now();
     if (!ENV.aiOrchestratorEnabled) {
-      throw new TRPCError3({
+      throw new TRPCError4({
         code: "PRECONDITION_FAILED",
         message: "AI orchestrator is disabled by configuration."
       });
@@ -10226,7 +11626,7 @@ var aiRouter = router({
       AI_SUBMIT_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError3({
+      throw new TRPCError4({
         code: "TOO_MANY_REQUESTS",
         message: "Daily AI assessment limit reached. Please try again tomorrow or contact support."
       });
@@ -10237,7 +11637,7 @@ var aiRouter = router({
       ctx.organizationId
     );
     if (!vendor) {
-      throw new TRPCError3({
+      throw new TRPCError4({
         code: "NOT_FOUND",
         message: "Vendor not found."
       });
@@ -10276,7 +11676,7 @@ var aiRouter = router({
     const timeoutMs = input.timeoutMs ?? ENV.aiJobTimeoutMs;
     const completed = await waitForAssessmentJob(queued.id, timeoutMs);
     if (!completed) {
-      throw new TRPCError3({
+      throw new TRPCError4({
         code: "INTERNAL_SERVER_ERROR",
         message: "Queued job could not be loaded."
       });
@@ -10312,7 +11712,7 @@ var aiRouter = router({
     );
     const snapshot = await getAssessmentJob(input.jobId);
     if (!snapshot || snapshot.userId !== ctx.user.id) {
-      throw new TRPCError3({
+      throw new TRPCError4({
         code: "NOT_FOUND",
         message: "Assessment job not found."
       });
@@ -10359,7 +11759,7 @@ var aiRouter = router({
       (job) => job.status === "completed" && job.result?.inputSummary.vendorId === input.vendorId
     );
     if (!hit) {
-      throw new TRPCError3({
+      throw new TRPCError4({
         code: "NOT_FOUND",
         message: "No completed assessment report found for this vendor."
       });
@@ -10370,20 +11770,36 @@ var aiRouter = router({
       persisted: hit.persistence
     };
   }),
-  agentStatus: protectedProcedure.query(() => {
+  agentStatus: protectedProcedure.query(async ({ ctx }) => {
+    const key = `ai:status:org:${ctx.organizationId}`;
+    const rl = await checkRateLimit(key, AI_READ_LIMIT, AI_READ_WINDOW_MS);
+    if (!rl.allowed) {
+      throw new TRPCError4({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please wait before retrying."
+      });
+    }
     return getAgentPoolStatus();
   }),
-  resetAgents: adminProcedure.mutation(() => {
+  resetAgents: adminProcedure.mutation(async () => {
+    const key = "ai:reset:global";
+    const rl = await checkRateLimit(key, AI_ADMIN_LIMIT, AI_ADMIN_WINDOW_MS);
+    if (!rl.allowed) {
+      throw new TRPCError4({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded for agent reset."
+      });
+    }
     return resetAllAgents();
   })
 });
 
 // server/billing.ts
 import { z as z4 } from "zod";
-import { TRPCError as TRPCError4 } from "@trpc/server";
+import { TRPCError as TRPCError5 } from "@trpc/server";
 init_env();
 
-// server/_core/jurisdictions.ts
+// shared/jurisdictions.ts
 var NEW_GLOBAL_JURISDICTIONS = [
   "United Kingdom",
   "Canada",
@@ -10446,6 +11862,15 @@ var DEADLINE_JURISDICTIONS = [
   "Brazil",
   "Global",
   "Both",
+  ...NEW_GLOBAL_JURISDICTIONS
+];
+var DSR_JURISDICTIONS = [
+  "China",
+  "Saudi Arabia",
+  "EU",
+  "US",
+  "Brazil",
+  "Other",
   ...NEW_GLOBAL_JURISDICTIONS
 ];
 
@@ -10559,7 +11984,7 @@ var _stripe = null;
 async function getStripe() {
   if (_stripe) return _stripe;
   if (!ENV.stripeSecretKey) {
-    throw new TRPCError4({
+    throw new TRPCError5({
       code: "INTERNAL_SERVER_ERROR",
       message: "Stripe is not configured. Set STRIPE_SECRET_KEY in your environment."
     });
@@ -10573,7 +11998,7 @@ async function getStripe() {
 async function createOrganizationForUser(params) {
   const db = await getDb();
   if (!db)
-    throw new TRPCError4({
+    throw new TRPCError5({
       code: "INTERNAL_SERVER_ERROR",
       message: "Database unavailable"
     });
@@ -10606,7 +12031,7 @@ var planSchema = z4.enum(["starter", "professional", "enterprise"]);
 var intervalSchema = z4.enum(["monthly", "quarterly", "biannual", "annual"]);
 var billingRouter = router({
   /** Return the public price catalog — no auth required */
-  getPriceCatalog: publicProcedure.query(() => {
+  getPriceCatalog: publicProcedure.input(z4.object({})).query(() => {
     return PRICE_CATALOG.map(
       ({ plan, interval, amountCents, label, savingsLabel }) => ({
         plan,
@@ -10656,7 +12081,7 @@ var billingRouter = router({
     })
   ).mutation(async ({ ctx, input }) => {
     if (input.organizationId !== ctx.organizationId) {
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "FORBIDDEN",
         message: "Cannot manage billing for a different organization."
       });
@@ -10664,25 +12089,25 @@ var billingRouter = router({
     const stripe = await getStripe();
     const tier = getPriceTier(input.plan, input.interval);
     if (!tier)
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "BAD_REQUEST",
         message: "Invalid plan/interval combination"
       });
     if (!tier.stripePriceId) {
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "INTERNAL_SERVER_ERROR",
         message: `Stripe Price ID not configured for ${input.plan}/${input.interval}. Set the STRIPE_PRICE_* env variables.`
       });
     }
     const db = await getDb();
     if (!db)
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     const [org] = await db.select().from(organizations).where(eq7(organizations.id, input.organizationId));
     if (!org)
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "NOT_FOUND",
         message: "Organization not found"
       });
@@ -10729,7 +12154,7 @@ var billingRouter = router({
   /** Open Stripe Customer Portal (manage / cancel subscription) */
   createPortalSession: orgAdminProcedure.use(requireMfa).input(z4.object({ organizationId: z4.number().int().positive() })).mutation(async ({ ctx, input }) => {
     if (input.organizationId !== ctx.organizationId) {
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "FORBIDDEN",
         message: "Cannot manage billing for a different organization."
       });
@@ -10737,13 +12162,13 @@ var billingRouter = router({
     const stripe = await getStripe();
     const db = await getDb();
     if (!db)
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     const [org] = await db.select().from(organizations).where(eq7(organizations.id, input.organizationId));
     if (!org?.stripeCustomerId) {
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "BAD_REQUEST",
         message: "No billing account found. Please subscribe first."
       });
@@ -10758,7 +12183,7 @@ var billingRouter = router({
   /** Get billing history for an organization */
   getBillingHistory: orgProcedure.input(z4.object({ organizationId: z4.number().int().positive() })).query(async ({ ctx, input }) => {
     if (input.organizationId !== ctx.organizationId) {
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "FORBIDDEN",
         message: "Cannot read billing for a different organization."
       });
@@ -10787,7 +12212,7 @@ var billingRouter = router({
   ).mutation(async ({ ctx, input }) => {
     const startedAt = Date.now();
     if (ctx.organizationId) {
-      throw new TRPCError4({
+      throw new TRPCError5({
         code: "CONFLICT",
         message: "This account already belongs to an organization."
       });
@@ -10837,7 +12262,7 @@ import { z as z5 } from "zod";
 
 // server/_core/notification.ts
 init_env();
-import { TRPCError as TRPCError5 } from "@trpc/server";
+import { TRPCError as TRPCError6 } from "@trpc/server";
 var TITLE_MAX_LENGTH = 1200;
 var CONTENT_MAX_LENGTH = 2e4;
 var trimValue = (value) => value.trim();
@@ -10851,13 +12276,13 @@ var buildEndpointUrl = (baseUrl) => {
 };
 var validatePayload = (input) => {
   if (!isNonEmptyString2(input.title)) {
-    throw new TRPCError5({
+    throw new TRPCError6({
       code: "BAD_REQUEST",
       message: "Notification title is required."
     });
   }
   if (!isNonEmptyString2(input.content)) {
-    throw new TRPCError5({
+    throw new TRPCError6({
       code: "BAD_REQUEST",
       message: "Notification content is required."
     });
@@ -10865,13 +12290,13 @@ var validatePayload = (input) => {
   const title = trimValue(input.title);
   const content = trimValue(input.content);
   if (title.length > TITLE_MAX_LENGTH) {
-    throw new TRPCError5({
+    throw new TRPCError6({
       code: "BAD_REQUEST",
       message: `Notification title must be at most ${TITLE_MAX_LENGTH} characters.`
     });
   }
   if (content.length > CONTENT_MAX_LENGTH) {
-    throw new TRPCError5({
+    throw new TRPCError6({
       code: "BAD_REQUEST",
       message: `Notification content must be at most ${CONTENT_MAX_LENGTH} characters.`
     });
@@ -10881,13 +12306,13 @@ var validatePayload = (input) => {
 async function notifyOwner(payload) {
   const { title, content } = validatePayload(payload);
   if (!ENV.forgeApiUrl) {
-    throw new TRPCError5({
+    throw new TRPCError6({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service URL is not configured."
     });
   }
   if (!ENV.forgeApiKey) {
-    throw new TRPCError5({
+    throw new TRPCError6({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service API key is not configured."
     });
@@ -11122,7 +12547,269 @@ var systemRouter = router({
 });
 
 // server/portal-router.ts
+init_const();
 import { z as z6 } from "zod";
+init_sse_bus();
+
+// server/services/submission-email.ts
+init_email();
+
+// server/_core/security.ts
+init_env();
+function sanitizeString(input, maxLen = 500) {
+  return input.replace(/[<>"'`]/g, "").replace(/\s+/g, " ").trim().slice(0, maxLen);
+}
+var NO_INDEX_PATH_PREFIXES = [
+  "/api/",
+  "/dashboard",
+  "/vendor-assessment",
+  "/vendor-risk",
+  "/market-entry",
+  "/client-workspace",
+  "/admin-control-center",
+  "/operations",
+  "/laws",
+  "/compliance-tracker",
+  "/report-center",
+  "/billing",
+  "/compliance-calendar",
+  "/onboarding-wizard",
+  "/saas-metrics",
+  "/heatmap",
+  "/notifications",
+  "/company/dashboard",
+  "/superadmin/dashboard",
+  "/pro-intelligence",
+  "/account-settings",
+  "/team-members",
+  "/org-settings",
+  "/invite-accept",
+  "/audit-log",
+  "/compliance-scorecard",
+  "/api-keys",
+  "/gap-tracker",
+  "/assessment-history",
+  "/vendor/",
+  "/remediation-planner",
+  "/risk-register",
+  "/policy-manager",
+  "/incident-register",
+  "/audit-schedule",
+  "/vendor-compliance",
+  "/compliance-reports",
+  "/continuous-compliance",
+  "/evidence-locker",
+  "/dsr-tracker",
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password"
+];
+function normalizePath(pathname) {
+  const [withoutQuery] = pathname.split(/[?#]/, 1);
+  const normalized = withoutQuery.trim().toLowerCase();
+  return normalized || "/";
+}
+function shouldNoIndex(pathname) {
+  const normalized = normalizePath(pathname);
+  return NO_INDEX_PATH_PREFIXES.some(
+    (prefix) => normalized === prefix || normalized.startsWith(prefix)
+  );
+}
+function shouldDisableCaching(pathname) {
+  const normalized = normalizePath(pathname);
+  return normalized.startsWith("/api/") || shouldNoIndex(normalized);
+}
+var INLINE_SCRIPT_HASHES = [
+  "'sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc='",
+  "'sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U='",
+  "'sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k='",
+  "'sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess='"
+];
+var FORGE_HOST = "https://forge.butterfly-effect.dev";
+function buildCsp(isProduction) {
+  const parts = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    `connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co ${FORGE_HOST}`,
+    "frame-src https://js.stripe.com https://hooks.stripe.com",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "report-uri /api/csp-report"
+  ];
+  if (isProduction) {
+    parts.push(
+      `script-src 'self' https://js.stripe.com ${FORGE_HOST} ${INLINE_SCRIPT_HASHES.join(" ")}`
+    );
+    parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
+    parts.push("upgrade-insecure-requests");
+  } else {
+    parts.push(
+      `script-src 'self' 'unsafe-inline' https://js.stripe.com ${FORGE_HOST}`
+    );
+    parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
+  }
+  return parts;
+}
+function getSecurityHeadersForRequest({
+  pathname,
+  isHttps
+}) {
+  const normalized = normalizePath(pathname);
+  const isProduction = ENV.isProduction;
+  const cspParts = buildCsp(isProduction);
+  const roCspParts = buildCsp(false).map(
+    (p) => p.startsWith("report-uri") ? "report-uri /api/csp-report?ro=1" : p
+  );
+  const headers = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), browsing-topics=(), usb=(), midi=(), sync-xhr=(), magnetometer=(), gyroscope=(), serial=(), fullscreen=(self)",
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Resource-Policy": "same-origin",
+    "Origin-Agent-Cluster": "?1",
+    // Omitting Timing-Allow-Origin is the correct way to block cross-origin
+    // pages from reading Resource Timing data (header absent = no access).
+    // Do NOT set it to "'none'" — that is a malformed value that browsers
+    // may handle inconsistently.
+    "Content-Security-Policy": cspParts.join("; "),
+    "Content-Security-Policy-Report-Only": roCspParts.join("; ")
+  };
+  if (shouldNoIndex(normalized)) {
+    headers["X-Robots-Tag"] = "noindex, nofollow, noarchive, nosnippet";
+  }
+  if (shouldDisableCaching(normalized)) {
+    headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private";
+    headers.Pragma = "no-cache";
+    headers.Expires = "0";
+  }
+  if (isHttps) {
+    headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload";
+  }
+  return headers;
+}
+function parseCspReport(body) {
+  if (!body || typeof body !== "object") return {};
+  const report = body["csp-report"];
+  if (!report || typeof report !== "object") return {};
+  return report;
+}
+function getClientIp3(req) {
+  const cfConnectingIp = req.headers["cf-connecting-ip"];
+  if (typeof cfConnectingIp === "string" && cfConnectingIp.trim()) {
+    return cfConnectingIp.trim();
+  }
+  const realIp = req.headers["x-real-ip"];
+  if (typeof realIp === "string" && realIp.trim()) {
+    return realIp.trim();
+  }
+  const forwardedFor = req.headers["x-forwarded-for"];
+  const forwardedValue = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
+  if (forwardedValue && typeof forwardedValue === "string") {
+    return forwardedValue.trim().split(",").pop().trim();
+  }
+  return req.ip || req.socket.remoteAddress || "unknown";
+}
+
+// server/services/submission-email.ts
+init_env();
+var SUBMISSION_TO = "hello@yalla-hack.com";
+var SUBJECT_PREFIX = "[DJAC Intake]";
+function buildHtmlTable(fields) {
+  return fields.map(
+    ([label, value]) => `<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;width:30%;">${sanitizeString(label)}</td><td style="padding:8px 12px;border-bottom:1px solid #eee;">${sanitizeString(value)}</td></tr>`
+  ).join("");
+}
+function buildHtml(fields) {
+  const rows = [
+    ["Submission Type", sanitizeString(fields.type)],
+    ["Sender Name", sanitizeString(fields.senderName)],
+    ["Sender Email", sanitizeString(fields.senderEmail)],
+    ["Organization", sanitizeString(fields.organizationName)]
+  ];
+  const extraFields = Object.entries(fields).filter(
+    ([key]) => !["type", "senderName", "senderEmail", "organizationName"].includes(key)
+  ).filter(([, value]) => value !== void 0 && value !== "").map(
+    ([key, value]) => [
+      key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase()),
+      String(value)
+    ]
+  );
+  rows.push(...extraFields);
+  return `<!DOCTYPE html><html><body style="margin:0;padding:20px;font-family:Arial,sans-serif;background:#f9f9f9;"><div style="max-width:600px;margin:0 auto;background:#fff;padding:24px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);"><h2 style="color:#1a1a2e;margin-bottom:16px;border-bottom:2px solid #e94560;padding-bottom:8px;">${SUBJECT_PREFIX} ${sanitizeString(fields.type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))}</h2><table style="width:100%;border-collapse:collapse;">${buildHtmlTable(rows)}</table><p style="margin-top:20px;font-size:12px;color:#888;">This submission was automatically forwarded to hello@yalla-hack.com. The team will respond within 2 business days.</p></div></body></html>`;
+}
+async function sendSubmissionNotification(submission) {
+  try {
+    const subject = `${SUBJECT_PREFIX} ${submission.type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} from ${submission.senderName}`;
+    const html = buildHtml(submission);
+    const text2 = Object.entries(submission).filter(([, v]) => v !== void 0 && v !== "").map(([k, v]) => `${k}: ${v}`).join("\n");
+    await sendEmail({
+      to: SUBMISSION_TO,
+      subject,
+      html,
+      text: text2,
+      from: ENV.smtpFrom || "DJAC by Yalla Hack <hello@yalla-hack.com>",
+      replyTo: submission.senderEmail
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+async function sendPartnershipNotification(senderName, senderEmail, organizationName, partnershipType, proposalSummary, expectedBudget, timeline) {
+  return sendSubmissionNotification({
+    type: "partnership",
+    senderName,
+    senderEmail,
+    organizationName,
+    partnershipType,
+    proposalSummary,
+    expectedBudget,
+    timeline
+  });
+}
+async function sendSponsorshipNotification(senderName, senderEmail, organizationName, sponsorshipTier, sponsorshipAmount, benefitsRequired, eventName) {
+  return sendSubmissionNotification({
+    type: "sponsorship",
+    senderName,
+    senderEmail,
+    organizationName,
+    sponsorshipTier,
+    sponsorshipAmount,
+    benefitsRequired,
+    eventName
+  });
+}
+async function sendEventApplicationNotification(senderName, senderEmail, organizationName, eventName, eventDate, role, experience, availability) {
+  return sendSubmissionNotification({
+    type: "event_application",
+    senderName,
+    senderEmail,
+    organizationName,
+    eventName,
+    eventDate,
+    role,
+    experience,
+    availability
+  });
+}
+async function sendGeneralInquiryNotification(senderName, senderEmail, organizationName, subject, message, priority) {
+  return sendSubmissionNotification({
+    type: "general_inquiry",
+    senderName,
+    senderEmail,
+    organizationName,
+    subject,
+    message,
+    priority
+  });
+}
+
+// server/portal-router.ts
 var accessRequestSchema = z6.object({
   fullName: z6.string().trim().min(2, "Full name must be at least 2 characters").max(255),
   email: z6.string().trim().email().max(320),
@@ -11140,6 +12827,42 @@ var consultationRequestSchema = z6.object({
   summary: z6.string().trim().min(20).max(4e3),
   vendorName: z6.string().trim().max(255).optional(),
   techStackSummary: z6.string().trim().max(4e3).optional()
+});
+var partnershipSchema = z6.object({
+  senderName: z6.string().trim().min(2).max(255),
+  senderEmail: z6.string().trim().email().max(320),
+  organizationName: z6.string().trim().min(2).max(255),
+  partnershipType: z6.string().trim().min(2).max(120),
+  proposalSummary: z6.string().trim().min(10).max(4e3),
+  expectedBudget: z6.string().trim().max(120).optional(),
+  timeline: z6.string().trim().max(120).optional()
+});
+var sponsorshipSchema = z6.object({
+  senderName: z6.string().trim().min(2).max(255),
+  senderEmail: z6.string().trim().email().max(320),
+  organizationName: z6.string().trim().min(2).max(255),
+  sponsorshipTier: z6.string().trim().min(2).max(120),
+  sponsorshipAmount: z6.string().trim().max(120).optional(),
+  benefitsRequired: z6.string().trim().max(4e3).optional(),
+  eventName: z6.string().trim().max(255).optional()
+});
+var eventApplicationSchema = z6.object({
+  senderName: z6.string().trim().min(2).max(255),
+  senderEmail: z6.string().trim().email().max(320),
+  organizationName: z6.string().trim().min(2).max(255),
+  eventName: z6.string().trim().min(2).max(255),
+  eventDate: z6.string().trim().max(50).optional(),
+  role: z6.string().trim().min(2).max(120),
+  experience: z6.string().trim().max(4e3).optional(),
+  availability: z6.string().trim().max(4e3).optional()
+});
+var generalInquirySchema = z6.object({
+  senderName: z6.string().trim().min(2).max(255),
+  senderEmail: z6.string().trim().email().max(320),
+  organizationName: z6.string().trim().min(2).max(255),
+  subject: z6.string().trim().min(2).max(255),
+  message: z6.string().trim().min(10).max(4e3),
+  priority: z6.string().trim().max(50).optional()
 });
 var portalRouter = router({
   submitAccessRequest: publicProcedure.input(accessRequestSchema).mutation(async ({ ctx, input }) => {
@@ -11166,6 +12889,14 @@ var portalRouter = router({
       status: request.status,
       organizationName: input.organizationName,
       ts: (/* @__PURE__ */ new Date()).toISOString()
+    });
+    void sendSubmissionNotification({
+      type: "access_request",
+      senderName: input.fullName,
+      senderEmail: input.email,
+      organizationName: input.organizationName,
+      useCase: input.useCase ?? "",
+      preferredLocale: input.preferredLocale ?? ""
     });
     return request;
   }),
@@ -11194,6 +12925,17 @@ var portalRouter = router({
       organizationName: input.organizationName,
       topic: input.topic,
       ts: (/* @__PURE__ */ new Date()).toISOString()
+    });
+    void sendSubmissionNotification({
+      type: "consultation",
+      senderName: input.contactName,
+      senderEmail: input.contactEmail,
+      organizationName: input.organizationName,
+      topic: input.topic,
+      jurisdictions: input.jurisdictions,
+      summary: input.summary,
+      vendorName: input.vendorName ?? "",
+      techStackSummary: input.techStackSummary ?? ""
     });
     return request;
   }),
@@ -11232,7 +12974,78 @@ var portalRouter = router({
       topic: input.topic,
       ts: (/* @__PURE__ */ new Date()).toISOString()
     });
+    void sendSubmissionNotification({
+      type: "consultation",
+      senderName: input.contactName,
+      senderEmail: input.contactEmail,
+      organizationName: input.organizationName,
+      topic: input.topic,
+      jurisdictions: input.jurisdictions,
+      summary: input.summary,
+      vendorName: input.vendorName ?? "",
+      techStackSummary: input.techStackSummary ?? ""
+    });
     return request;
+  }),
+  submitPartnershipRequest: publicProcedure.input(partnershipSchema).mutation(async ({ input }) => {
+    const delivered = await sendPartnershipNotification(
+      input.senderName,
+      input.senderEmail,
+      input.organizationName,
+      input.partnershipType,
+      input.proposalSummary,
+      input.expectedBudget,
+      input.timeline
+    );
+    return {
+      success: delivered,
+      requestId: `partnership_${Date.now()}`
+    };
+  }),
+  submitSponsorshipRequest: publicProcedure.input(sponsorshipSchema).mutation(async ({ input }) => {
+    const delivered = await sendSponsorshipNotification(
+      input.senderName,
+      input.senderEmail,
+      input.organizationName,
+      input.sponsorshipTier,
+      input.sponsorshipAmount,
+      input.benefitsRequired,
+      input.eventName
+    );
+    return {
+      success: delivered,
+      requestId: `sponsorship_${Date.now()}`
+    };
+  }),
+  submitEventApplication: publicProcedure.input(eventApplicationSchema).mutation(async ({ input }) => {
+    const delivered = await sendEventApplicationNotification(
+      input.senderName,
+      input.senderEmail,
+      input.organizationName,
+      input.eventName,
+      input.eventDate ?? "",
+      input.role,
+      input.experience,
+      input.availability
+    );
+    return {
+      success: delivered,
+      requestId: `event_${Date.now()}`
+    };
+  }),
+  submitGeneralInquiry: publicProcedure.input(generalInquirySchema).mutation(async ({ input }) => {
+    const delivered = await sendGeneralInquiryNotification(
+      input.senderName,
+      input.senderEmail,
+      input.organizationName,
+      input.subject,
+      input.message,
+      input.priority
+    );
+    return {
+      success: delivered,
+      requestId: `inquiry_${Date.now()}`
+    };
   })
 });
 
@@ -11241,7 +13054,7 @@ init_db();
 init_env();
 import bcrypt from "bcryptjs";
 import { createHash as createHash4 } from "node:crypto";
-import { TRPCError as TRPCError6 } from "@trpc/server";
+import { TRPCError as TRPCError7 } from "@trpc/server";
 import { z as z7 } from "zod";
 import {
   generateSecret as otpGenerateSecret,
@@ -11250,6 +13063,7 @@ import {
 } from "otplib";
 import qrcode from "qrcode";
 init_email();
+init_sse_bus();
 
 // server/services/login-notification.ts
 init_db();
@@ -11257,7 +13071,22 @@ init_schema();
 import { eq as eq8 } from "drizzle-orm";
 
 // server/email/service.ts
+init_db();
 import { createTransport } from "nodemailer";
+import { sql as sql3 } from "drizzle-orm";
+async function logEmailDelivery2(opts) {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    await db.execute(sql3`
+            INSERT INTO "email_log" ("template", "recipient", "subject", "status", "sent_at", "error_message")
+            VALUES (${opts.template}, ${opts.recipient}, ${opts.subject}, ${opts.status},
+                    ${opts.status === "sent" ? sql3`NOW()` : sql3`NULL`},
+                    ${opts.errorMessage ?? null})
+        `);
+  } catch {
+  }
+}
 var FROM = "DJAC by Yalla Hack <hello@yalla-hack.com>";
 var REPLY_TO = "hello@yalla-hack.com";
 var APP_BASE_URL = (process.env.APP_URL || "https://app.yalla-hack.ae").replace(/\/$/, "");
@@ -11406,6 +13235,13 @@ async function send(user, subject, html, template) {
   const t2 = getTransporter();
   if (!t2) {
     console.info(`[Email] ${template} to ${email}: ${subject}`);
+    await logEmailDelivery2({
+      template,
+      recipient: email,
+      subject,
+      status: "failed",
+      errorMessage: "SMTP not configured"
+    });
     return;
   }
   try {
@@ -11416,14 +13252,34 @@ async function send(user, subject, html, template) {
       subject,
       html
     });
+    await logEmailDelivery2({
+      template,
+      recipient: email,
+      subject,
+      status: "sent"
+    });
   } catch (e) {
     console.error(`[Email] Failed to send ${template}:`, e);
+    await logEmailDelivery2({
+      template,
+      recipient: email,
+      subject,
+      status: "failed",
+      errorMessage: e?.message?.slice(0, 500) ?? "send failed"
+    });
   }
 }
 async function sendTo(email, subject, html, template) {
   const t2 = getTransporter();
   if (!t2) {
     console.info(`[Email] ${template} to ${email}: ${subject}`);
+    await logEmailDelivery2({
+      template,
+      recipient: email,
+      subject,
+      status: "failed",
+      errorMessage: "SMTP not configured"
+    });
     return;
   }
   try {
@@ -11434,13 +13290,26 @@ async function sendTo(email, subject, html, template) {
       subject,
       html
     });
+    await logEmailDelivery2({
+      template,
+      recipient: email,
+      subject,
+      status: "sent"
+    });
   } catch (e) {
     console.error(`[Email] Failed to send ${template}:`, e);
+    await logEmailDelivery2({
+      template,
+      recipient: email,
+      subject,
+      status: "failed",
+      errorMessage: e?.message?.slice(0, 500) ?? "send failed"
+    });
   }
 }
 
 // server/services/login-notification.ts
-function getClientIp3(req) {
+function getClientIp4(req) {
   const forwarded = req.headers["x-forwarded-for"];
   if (typeof forwarded === "string" && forwarded.trim()) {
     return forwarded.split(",")[0]?.trim() || "unknown";
@@ -11507,7 +13376,7 @@ function notifyLogin(req, user, table, org) {
           `[LoginNotification] Welcome email sent to ${email} (first login)`
         );
       } else {
-        const ip = getClientIp3(req);
+        const ip = getClientIp4(req);
         const location = getApproximateLocation(req);
         const device = getUserAgent(req);
         const timestamp2 = (/* @__PURE__ */ new Date()).toISOString();
@@ -11531,109 +13400,14 @@ function notifyLogin(req, user, table, org) {
   })();
 }
 
-// server/services/local-jwt.ts
-init_schema();
-init_db();
-init_env();
-import * as jose from "jose";
-import { parse as parseCookieHeader2 } from "cookie";
-import { eq as eq9 } from "drizzle-orm";
-var LOCAL_AUTH_COOKIE = "djac_local_session";
-var COOKIE_MAX_AGE_S = 60 * 60 * 24 * 7;
-function cookieOptions() {
-  const isSecure = !ENV.isDevelopment;
-  return {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: isSecure,
-    maxAge: COOKIE_MAX_AGE_S * 1e3,
-    path: "/"
-  };
-}
-async function signJwt(payload, ttl) {
-  const secret = new TextEncoder().encode(ENV.cookieSecret);
-  return new jose.SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime(ttl ?? `${COOKIE_MAX_AGE_S}s`).sign(secret);
-}
-async function verifyJwt(token) {
-  try {
-    const secret = new TextEncoder().encode(ENV.cookieSecret);
-    const { payload } = await jose.jwtVerify(token, secret);
-    return payload;
-  } catch {
-    return null;
-  }
-}
-function parseJwtUserId(sub) {
-  if (typeof sub === "number" && Number.isFinite(sub)) return sub;
-  if (typeof sub === "string" && sub.trim().length > 0) {
-    const parsed = Number.parseInt(sub, 10);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return null;
-}
-function getSessionTokenFromRequest(req) {
-  const fromParsedCookie = req.cookies?.[LOCAL_AUTH_COOKIE];
-  if (fromParsedCookie) return fromParsedCookie;
-  const rawCookieHeader = req.headers?.cookie;
-  if (typeof rawCookieHeader !== "string" || rawCookieHeader.length === 0)
-    return null;
-  const parsed = parseCookieHeader2(rawCookieHeader);
-  return parsed[LOCAL_AUTH_COOKIE] ?? null;
-}
-var _localMemoryUserId = 1;
-var localMemoryUsers = [];
-function isLocalMemoryFallbackEnabled() {
-  return ENV.isDevelopment && ENV.allowInMemoryPersistenceFallback;
-}
-function createLocalMemoryUser(input) {
-  const now = /* @__PURE__ */ new Date();
-  const row = {
-    id: _localMemoryUserId++,
-    name: input.name,
-    email: input.email,
-    passwordHash: input.passwordHash,
-    userType: input.userType,
-    companyName: input.companyName ?? null,
-    jobTitle: input.jobTitle ?? null,
-    industry: input.industry ?? null,
-    complianceResponsibility: input.complianceResponsibility ?? null,
-    preferredLocale: input.preferredLocale,
-    status: input.status ?? "active",
-    lastSignedIn: now,
-    totpSecret: null,
-    mfaEnabled: 0,
-    mfaBackupCodes: null,
-    phoneNumber: null,
-    verifiedAt: null,
-    lastMfaVerifiedAt: null,
-    firstLoginEmailSent: 0,
-    createdAt: now,
-    updatedAt: now
-  };
-  localMemoryUsers.unshift(row);
-  return row;
-}
-async function resolveLocalSession(req) {
-  const token = getSessionTokenFromRequest(req);
-  if (!token) return null;
-  const payload = await verifyJwt(token);
-  if (!payload) return null;
-  const userId = parseJwtUserId(payload.sub);
-  if (!userId) return null;
-  const db = await getDb();
-  if (db) {
-    const [row] = await db.select().from(localUsers).where(eq9(localUsers.id, userId)).limit(1);
-    return row ?? null;
-  }
-  if (isLocalMemoryFallbackEnabled()) {
-    return localMemoryUsers.find((u) => u.id === userId) ?? null;
-  }
-  return null;
-}
+// server/local-auth-router.ts
+init_const();
+init_local_jwt();
 
 // server/local-auth-store.ts
 init_schema();
 init_db();
+init_local_jwt();
 import { eq as eq10 } from "drizzle-orm";
 async function findLocalUserByEmail(email) {
   const db = await getDb();
@@ -12026,6 +13800,7 @@ async function cleanupExpiredOtps() {
 }
 
 // server/local-auth-router.ts
+init_local_jwt();
 var authenticator = {
   generateSecret: () => otpGenerateSecret(),
   keyuri: (account, service, secret) => generateURI({ issuer: service, label: account, secret }),
@@ -12081,20 +13856,20 @@ var localAuthRouter = router({
   register: publicProcedure.input(registerSchema).mutation(async ({ input, ctx }) => {
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const normalizedEmail = input.email.toLowerCase();
     if (await checkEmailExists(normalizedEmail)) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "CONFLICT",
         message: "An account with this email already exists."
       });
     }
     if (input.phoneNumber && await checkPhoneExists(input.phoneNumber)) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "CONFLICT",
         message: "An account with this phone number already exists."
       });
@@ -12169,7 +13944,7 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
@@ -12179,13 +13954,13 @@ var localAuthRouter = router({
     const hashToCheck = user?.passwordHash ?? dummyHash;
     const valid = await bcrypt.compare(input.password, hashToCheck);
     if (!user || !valid) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid email or password."
       });
     }
     if (user.status === "suspended") {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "FORBIDDEN",
         message: "This account has been suspended. Contact support."
       });
@@ -12272,13 +14047,13 @@ var localAuthRouter = router({
       if (isElevatedLocalUserType(payload?.userType)) isAdmin = true;
     }
     if (!isAdmin)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "FORBIDDEN",
         message: "Admin access required."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
@@ -12299,20 +14074,20 @@ var localAuthRouter = router({
       if (isElevatedLocalUserType(payload?.userType)) isAdmin = true;
     }
     if (!isAdmin)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "FORBIDDEN",
         message: "Admin access required."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const user = await findLocalUserById(input.userId);
     if (!user)
-      throw new TRPCError6({ code: "NOT_FOUND", message: "User not found." });
+      throw new TRPCError7({ code: "NOT_FOUND", message: "User not found." });
     await updateLocalUserStatus(input.userId, input.status);
     return { success: true };
   }),
@@ -12364,14 +14139,14 @@ var localAuthRouter = router({
       purpose: "password-reset"
     });
     if (!verifyResult.success) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: verifyResult.message
       });
     }
     const user = await findLocalUserByEmail(input.email);
     if (!user || user.status === "suspended") {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "NOT_FOUND",
         message: "Account not found or suspended."
       });
@@ -12401,20 +14176,20 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Not logged in."
       });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
@@ -12438,32 +14213,32 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Not logged in."
       });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "NOT_FOUND",
         message: "Account not found."
       });
     if (!user.passwordHash)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "Account uses OTP login. Set a password first."
       });
@@ -12472,7 +14247,7 @@ var localAuthRouter = router({
       user.passwordHash
     );
     if (!valid)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Current password is incorrect."
       });
@@ -12497,11 +14272,11 @@ var localAuthRouter = router({
   setup2fa: publicProcedure.mutation(async ({ ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError6({ code: "UNAUTHORIZED", message: "Not logged in." });
+      throw new TRPCError7({ code: "UNAUTHORIZED", message: "Not logged in." });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
@@ -12521,21 +14296,21 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Not logged in."
       });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const user = await findLocalUserById(userId);
     const storedSecret = user?.totpSecret ?? null;
     if (!storedSecret)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "No pending 2FA setup. Call setup2fa first."
       });
@@ -12544,7 +14319,7 @@ var localAuthRouter = router({
       secret: storedSecret
     });
     if (!isValid)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "Invalid authenticator code."
       });
@@ -12570,38 +14345,38 @@ var localAuthRouter = router({
   disable2fa: publicProcedure.input(z7.object({ password: z7.string().min(1).max(128) })).mutation(async ({ input, ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Not logged in."
       });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "NOT_FOUND",
         message: "Account not found."
       });
     if (!user.passwordHash)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "Account uses OTP login. Set a password first."
       });
     const valid = await bcrypt.compare(input.password, user.passwordHash);
     if (!valid)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Incorrect password."
       });
@@ -12624,38 +14399,38 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const payload = await verifyJwt(input.pendingToken);
     if (!payload || payload["purpose"] !== "totp-challenge") {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid or expired challenge token."
       });
     }
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid challenge token."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "NOT_FOUND",
         message: "Account not found."
       });
     const code = input.code.toUpperCase();
     if (!user.mfaEnabled)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "2FA is not enabled for this account."
       });
     if (!user.totpSecret)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: "2FA misconfigured."
       });
@@ -12665,7 +14440,7 @@ var localAuthRouter = router({
       const backupCodes = user.mfaBackupCodes ? JSON.parse(user.mfaBackupCodes) : [];
       const backupIdx = backupCodes.indexOf(hashed);
       if (backupIdx === -1)
-        throw new TRPCError6({
+        throw new TRPCError7({
           code: "UNAUTHORIZED",
           message: "Invalid authentication code."
         });
@@ -12698,19 +14473,19 @@ var localAuthRouter = router({
   sendVerificationEmail: publicProcedure.mutation(async ({ ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError6({ code: "UNAUTHORIZED", message: "Not logged in." });
+      throw new TRPCError7({ code: "UNAUTHORIZED", message: "Not logged in." });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError6({ code: "NOT_FOUND", message: "Account not found." });
+      throw new TRPCError7({ code: "NOT_FOUND", message: "Account not found." });
     if (!user.email)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "No email address on file. Add an email in Account Settings."
       });
@@ -12750,32 +14525,32 @@ If you did not create this account, ignore this email.`
         throw new Error();
       })();
     } catch {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "The verification link is invalid or has expired."
       });
     }
     if (payload["purpose"] !== "email-verify" || typeof payload["sub"] !== "string") {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "Invalid verification token."
       });
     }
     const userId = parseInt(payload["sub"], 10);
     if (!Number.isFinite(userId)) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "Invalid verification token."
       });
     }
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "NOT_FOUND",
         message: "Account not found."
       });
     if (user.verifiedAt)
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "BAD_REQUEST",
         message: "Email is already verified."
       });
@@ -12803,7 +14578,7 @@ If you did not create this account, ignore this email.`
       purpose: input.purpose
     });
     if (!result.success) {
-      throw new TRPCError6({ code: "BAD_REQUEST", message: result.message });
+      throw new TRPCError7({ code: "BAD_REQUEST", message: result.message });
     }
     void recordAuditEvent(ctx, {
       category: "auth",
@@ -12830,7 +14605,7 @@ If you did not create this account, ignore this email.`
   ).mutation(async ({ input, ctx }) => {
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError6({
+      throw new TRPCError7({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
@@ -12841,19 +14616,19 @@ If you did not create this account, ignore this email.`
       purpose: input.purpose
     });
     if (!result.success) {
-      throw new TRPCError6({ code: "UNAUTHORIZED", message: result.message });
+      throw new TRPCError7({ code: "UNAUTHORIZED", message: result.message });
     }
     const isPhone2 = /^\+?[1-9]/.test(input.identifier);
     const existing = isPhone2 ? await findLocalUserByPhone(input.identifier) : await findLocalUserByEmail(input.identifier.toLowerCase());
     if (input.purpose === "login") {
       if (!existing) {
-        throw new TRPCError6({
+        throw new TRPCError7({
           code: "NOT_FOUND",
           message: "No account found with this identifier. Please register first."
         });
       }
       if (existing.status === "suspended") {
-        throw new TRPCError6({
+        throw new TRPCError7({
           code: "FORBIDDEN",
           message: "Account suspended."
         });
@@ -12952,6 +14727,7 @@ If you did not create this account, ignore this email.`
 });
 
 // server/compliance-framework-router.ts
+init_const();
 import { z as z8 } from "zod";
 
 // server/compliance-timetable.ts
@@ -20121,8 +21897,10 @@ var complianceFrameworkRouter = router({
 });
 
 // server/vendor-router.ts
-import { TRPCError as TRPCError7 } from "@trpc/server";
+init_const();
+import { TRPCError as TRPCError8 } from "@trpc/server";
 import { z as z9 } from "zod";
+init_orchestrator();
 init_supplier_assessment();
 var idSchema2 = z9.number().int().positive();
 var vendorTechStackComponentSchema = z9.object({
@@ -20248,7 +22026,7 @@ var vendorRouter = router({
       ctx.organizationId
     );
     if (!existing) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "NOT_FOUND",
         message: "Vendor not found."
       });
@@ -20276,7 +22054,7 @@ var vendorRouter = router({
       ctx.organizationId
     );
     if (!existing) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "NOT_FOUND",
         message: "Vendor not found."
       });
@@ -20563,7 +22341,7 @@ var vendorRouter = router({
       ctx.organizationId
     );
     if (!vendor) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "NOT_FOUND",
         message: "Vendor not found."
       });
@@ -21423,7 +23201,7 @@ async function completeDeadline(id, organizationId) {
   const now = /* @__PURE__ */ new Date();
   if (!db) {
     const idx = memoryDeadlines.findIndex(
-      (d2) => d2.id === id && (d2.organizationId === organizationId || d2.organizationId === null)
+      (d2) => d2.id === id && d2.organizationId === organizationId
     );
     if (idx < 0) return null;
     memoryDeadlines[idx] = {
@@ -21434,10 +23212,10 @@ async function completeDeadline(id, organizationId) {
     };
     return memoryDeadlines[idx];
   }
-  const whereClause = organizationId != null ? and8(
+  const whereClause = and8(
     eq14(complianceDeadlines.id, id),
     eq14(complianceDeadlines.organizationId, organizationId)
-  ) : eq14(complianceDeadlines.id, id);
+  );
   await db.update(complianceDeadlines).set({ status: "completed", completedAt: now }).where(whereClause);
   const [row] = await db.select().from(complianceDeadlines).where(eq14(complianceDeadlines.id, id)).limit(1);
   return row ?? null;
@@ -21533,7 +23311,9 @@ var deadlineRouter = router({
       assignedToUserId: input.assignedToUserId ?? ctx.user?.id ?? null
     });
   }),
-  complete: protectedProcedure.input(z10.number().int().positive()).mutation(async ({ input, ctx }) => {
+  // orgProcedure guarantees a non-null organization before the store is called,
+  // so a deadline can only ever be completed within the caller's own tenant.
+  complete: orgProcedure.input(z10.number().int().positive()).mutation(async ({ input, ctx }) => {
     await requireModulePermissionIfOrgContext(
       ctx,
       "compliance_calendar",
@@ -21552,6 +23332,7 @@ var deadlineRouter = router({
 });
 
 // server/auth-router.ts
+init_const();
 import { z as z11 } from "zod";
 var authRouter = router({
   me: publicProcedure.query((opts) => opts.ctx.user),
@@ -21584,7 +23365,8 @@ var authRouter = router({
 
 // server/role-router.ts
 import { z as z12 } from "zod";
-import { TRPCError as TRPCError8 } from "@trpc/server";
+import { TRPCError as TRPCError9 } from "@trpc/server";
+init_const();
 
 // server/role-store.ts
 init_schema();
@@ -21686,13 +23468,13 @@ var roleRouter = router({
   ).mutation(async ({ ctx, input }) => {
     const actorRole = ctx.user.role;
     if (!hasMinRole(actorRole, "super_admin") && (input.newRole === "super_admin" || input.newRole === "yalla_hack_employee")) {
-      throw new TRPCError8({
+      throw new TRPCError9({
         code: "FORBIDDEN",
         message: NOT_PLATFORM_ADMIN_ERR_MSG
       });
     }
     if (input.targetUserId === ctx.user.id && !hasMinRole(input.newRole, actorRole)) {
-      throw new TRPCError8({
+      throw new TRPCError9({
         code: "FORBIDDEN",
         message: "You cannot demote your own role."
       });
@@ -21702,7 +23484,7 @@ var roleRouter = router({
       input.newRole
     );
     if (!target)
-      throw new TRPCError8({
+      throw new TRPCError9({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable or user not found"
       });
@@ -21743,7 +23525,7 @@ var roleRouter = router({
   ).mutation(async ({ ctx, input }) => {
     const actorRole = ctx.user.role;
     if (!hasMinRole(actorRole, "super_admin") && (input.newUserType === "super_admin" || input.newUserType === "yalla_hack_employee")) {
-      throw new TRPCError8({
+      throw new TRPCError9({
         code: "FORBIDDEN",
         message: NOT_PLATFORM_ADMIN_ERR_MSG
       });
@@ -21753,7 +23535,7 @@ var roleRouter = router({
       input.newUserType
     );
     if (!target)
-      throw new TRPCError8({
+      throw new TRPCError9({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable or user not found"
       });
@@ -21805,6 +23587,7 @@ var roleRouter = router({
 
 // server/rbac-router.ts
 import { z as z13 } from "zod";
+init_const();
 var moduleSlugsSchema = z13.enum([...MODULE_SLUGS]);
 function getLocalUserId(user) {
   if (!user) return null;
@@ -21880,7 +23663,7 @@ var rbacRouter = router({
 
 // server/org-members-router.ts
 import { z as z14 } from "zod";
-import { TRPCError as TRPCError9 } from "@trpc/server";
+import { TRPCError as TRPCError10 } from "@trpc/server";
 init_env();
 init_email();
 import { randomBytes } from "crypto";
@@ -22096,13 +23879,13 @@ var orgMembersRouter = router({
     await requireModulePermission(ctx, "team_members", "canEdit");
     const member = await getOrgMember(ctx.organizationId, input.memberId);
     if (!member) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "NOT_FOUND",
         message: "Member not found in this organization."
       });
     }
     if (member.role === "owner") {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "FORBIDDEN",
         message: "The organization owner's role cannot be changed here."
       });
@@ -22121,13 +23904,13 @@ var orgMembersRouter = router({
     await requireModulePermission(ctx, "team_members", "canDelete");
     const member = await getOrgMember(ctx.organizationId, input);
     if (!member) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "NOT_FOUND",
         message: "Member not found in this organization."
       });
     }
     if (member.role === "owner") {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "FORBIDDEN",
         message: "The organization owner cannot be removed. Transfer ownership first."
       });
@@ -22152,21 +23935,21 @@ var orgMembersRouter = router({
     const inviteEmailRaw = input.email.trim();
     const inviteEmail = inviteEmailRaw.toLowerCase();
     if (ctx.organizationId < 0) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "FORBIDDEN",
         message: "Cannot invite members in dev-bypass mode."
       });
     }
     const org = await getOrgForInvite(ctx.organizationId);
     if (!org) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "NOT_FOUND",
         message: "Organization not found."
       });
     }
     const activeCount = await countActiveMembers(ctx.organizationId);
     if (activeCount >= org.maxSeats) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "FORBIDDEN",
         message: "Seat limit reached. Upgrade your plan to invite more members."
       });
@@ -22176,7 +23959,7 @@ var orgMembersRouter = router({
       inviteEmail
     );
     if (isDuplicate) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "CONFLICT",
         message: "This email already has a membership or pending invite in your organization."
       });
@@ -22253,19 +24036,19 @@ var orgMembersRouter = router({
   acceptInvite: protectedProcedure.input(z14.string().min(1).max(64)).mutation(async ({ ctx, input }) => {
     const member = await getInviteByToken(input);
     if (!member)
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "NOT_FOUND",
         message: "Invitation not found."
       });
     if (member.status !== "invited") {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "BAD_REQUEST",
         message: "This invitation has already been used or was cancelled."
       });
     }
     const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1e3;
     if (Date.now() - new Date(member.createdAt).getTime() > SEVEN_DAYS) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "BAD_REQUEST",
         message: "This invitation has expired."
       });
@@ -22273,7 +24056,7 @@ var orgMembersRouter = router({
     const userEmail = ctx.user.email?.trim().toLowerCase() ?? "";
     const inviteEmail = member.inviteEmail?.trim().toLowerCase() ?? "";
     if (!userEmail || !inviteEmail || userEmail !== inviteEmail) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "FORBIDDEN",
         message: "This invitation is issued for a different account email."
       });
@@ -22292,7 +24075,7 @@ var orgMembersRouter = router({
 
 // server/org-settings-router.ts
 import { z as z15 } from "zod";
-import { TRPCError as TRPCError10 } from "@trpc/server";
+import { TRPCError as TRPCError11 } from "@trpc/server";
 
 // server/org-settings-store.ts
 init_db();
@@ -22373,7 +24156,7 @@ var orgSettingsRouter = router({
       ctx.organizationRole ?? "analyst"
     );
     if (!org)
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "NOT_FOUND",
         message: "Organization not found"
       });
@@ -22386,13 +24169,13 @@ var orgSettingsRouter = router({
   update: orgAdminProcedure.use(requireMfa).input(updateOrgSchema).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "org_settings", "canEdit");
     if (Object.keys(input).length === 0) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "BAD_REQUEST",
         message: "No fields to update"
       });
     }
     if (ctx.organizationId < 0) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "FORBIDDEN",
         message: "Cannot update dev virtual organization"
       });
@@ -22549,8 +24332,9 @@ var scorecardRouter = router({
 });
 
 // server/api-keys-router.ts
+init_rateLimiter();
 import { z as z16 } from "zod";
-import { TRPCError as TRPCError11 } from "@trpc/server";
+import { TRPCError as TRPCError12 } from "@trpc/server";
 
 // server/api-keys-store.ts
 init_schema();
@@ -22630,17 +24414,38 @@ async function revokeApiKey(orgId, keyId) {
 }
 
 // server/api-keys-router.ts
+var API_KEYS_LIMIT = 20;
+var API_KEYS_WINDOW_MS = 6e4;
 var apiKeysRouter = router({
   /**
    * List all active (non-revoked) API keys for the org.
-   * Raw key is never returned — only id, name, prefix, scopes, dates.
+   * Raw key is never returned â€” only id, name, prefix, scopes, dates.
    */
   list: activeOrgProcedure.query(async ({ ctx }) => {
-    await requireModulePermission(ctx, "api_keys", "canView");
-    return listApiKeys(ctx.organizationId);
+    try {
+      await requireModulePermission(ctx, "api_keys", "canView");
+      const rl = await checkRateLimit(
+        `apikeys:list:${ctx.organizationId}`,
+        API_KEYS_LIMIT,
+        API_KEYS_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError12({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded. Please try again shortly."
+        });
+      }
+      return listApiKeys(ctx.organizationId);
+    } catch (err) {
+      if (err instanceof TRPCError12) throw err;
+      throw new TRPCError12({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to list API keys"
+      });
+    }
   }),
   /**
-   * Create a new API key. Returns the raw key ONCE — not stored.
+   * Create a new API key. Returns the raw key ONCE â€” not stored.
    * Only org admins can create keys.
    */
   create: orgAdminProcedure.use(requireMfa).input(
@@ -22686,9 +24491,20 @@ var apiKeysRouter = router({
    */
   revoke: orgAdminProcedure.use(requireMfa).input(z16.number().int().positive()).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "api_keys", "canDelete");
+    const rl = await checkRateLimit(
+      `apikeys:revoke:${ctx.organizationId}`,
+      API_KEYS_LIMIT,
+      API_KEYS_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError12({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please try again shortly."
+      });
+    }
     const orgId = ctx.organizationId;
     const found = await revokeApiKey(orgId, input);
-    if (!found) throw new TRPCError11({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError12({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "auth",
       action: "api_key.revoke",
@@ -22702,7 +24518,7 @@ var apiKeysRouter = router({
 
 // server/remediation-router.ts
 import { z as z17 } from "zod";
-import { TRPCError as TRPCError12 } from "@trpc/server";
+import { TRPCError as TRPCError13 } from "@trpc/server";
 
 // server/remediation-store.ts
 init_schema();
@@ -22890,7 +24706,7 @@ var remediationRouter = router({
       input.status
     );
     if (!result)
-      throw new TRPCError12({ code: "NOT_FOUND", message: "Task not found" });
+      throw new TRPCError13({ code: "NOT_FOUND", message: "Task not found" });
     return result;
   }),
   /**
@@ -22907,7 +24723,7 @@ var remediationRouter = router({
       dueDate
     );
     if (!result)
-      throw new TRPCError12({ code: "NOT_FOUND", message: "Task not found" });
+      throw new TRPCError13({ code: "NOT_FOUND", message: "Task not found" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "remediation_task_updated",
@@ -22924,7 +24740,7 @@ var remediationRouter = router({
     await requireModulePermission(ctx, "remediation_planner", "canDelete");
     const deleted = await removeTask(ctx.organizationId, id);
     if (!deleted)
-      throw new TRPCError12({ code: "NOT_FOUND", message: "Task not found" });
+      throw new TRPCError13({ code: "NOT_FOUND", message: "Task not found" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "remediation_task_deleted",
@@ -22938,7 +24754,7 @@ var remediationRouter = router({
 
 // server/risk-register-router.ts
 import { z as z18 } from "zod";
-import { TRPCError as TRPCError13 } from "@trpc/server";
+import { TRPCError as TRPCError14 } from "@trpc/server";
 
 // server/risk-register-store.ts
 init_schema();
@@ -23127,7 +24943,7 @@ var riskRegisterRouter = router({
     const reviewDate = reviewDateStr === null ? null : reviewDateStr ? new Date(reviewDateStr) : void 0;
     const result = await patchRisk(orgId, id, rest, reviewDate);
     if (!result)
-      throw new TRPCError13({ code: "NOT_FOUND", message: "Risk not found" });
+      throw new TRPCError14({ code: "NOT_FOUND", message: "Risk not found" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "risk_entry_updated",
@@ -23145,7 +24961,7 @@ var riskRegisterRouter = router({
     const orgId = ctx.organizationId;
     const deleted = await removeRisk(orgId, id);
     if (!deleted)
-      throw new TRPCError13({ code: "NOT_FOUND", message: "Risk not found" });
+      throw new TRPCError14({ code: "NOT_FOUND", message: "Risk not found" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "risk_entry_deleted",
@@ -23159,7 +24975,7 @@ var riskRegisterRouter = router({
 
 // server/policy-router.ts
 import { z as z19 } from "zod";
-import { TRPCError as TRPCError14 } from "@trpc/server";
+import { TRPCError as TRPCError15 } from "@trpc/server";
 
 // server/policy-store.ts
 init_schema();
@@ -23393,7 +25209,7 @@ var policyRouter = router({
     const { id, ...data } = input;
     const orgId = ctx.organizationId;
     const result = await patchPolicy(orgId, id, data);
-    if (!result) throw new TRPCError14({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError15({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "policy.patch",
@@ -23407,10 +25223,10 @@ var policyRouter = router({
     await requireModulePermission(ctx, "policy_manager", "canEdit");
     const orgId = ctx.organizationId;
     const currentStatus = await getPolicyStatus(orgId, input.id);
-    if (currentStatus === null) throw new TRPCError14({ code: "NOT_FOUND" });
+    if (currentStatus === null) throw new TRPCError15({ code: "NOT_FOUND" });
     const allowed = STATUS_TRANSITIONS[currentStatus] ?? [];
     if (!allowed.includes(input.status)) {
-      throw new TRPCError14({
+      throw new TRPCError15({
         code: "BAD_REQUEST",
         message: `Cannot transition from '${currentStatus}' to '${input.status}'`
       });
@@ -23420,7 +25236,7 @@ var policyRouter = router({
       input.id,
       input.status
     );
-    if (!result) throw new TRPCError14({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError15({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "policy.updateStatus",
@@ -23435,7 +25251,7 @@ var policyRouter = router({
     await requireModulePermission(ctx, "policy_manager", "canDelete");
     const orgId = ctx.organizationId;
     const found = await deletePolicy(orgId, id);
-    if (!found) throw new TRPCError14({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError15({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "policy.remove",
@@ -23449,7 +25265,7 @@ var policyRouter = router({
 
 // server/incident-router.ts
 import { z as z20 } from "zod";
-import { TRPCError as TRPCError15 } from "@trpc/server";
+import { TRPCError as TRPCError16 } from "@trpc/server";
 
 // server/incident-store.ts
 init_schema();
@@ -23718,7 +25534,7 @@ var incidentRouter = router({
     const { id, ...data } = input;
     const orgId = ctx.organizationId;
     const result = await patchIncident(orgId, id, data);
-    if (!result) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError16({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "incident.patch",
@@ -23732,10 +25548,10 @@ var incidentRouter = router({
     await requireModulePermission(ctx, "incident_register", "canEdit");
     const orgId = ctx.organizationId;
     const currentStatus = await getIncidentStatus(orgId, input.id);
-    if (currentStatus === null) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (currentStatus === null) throw new TRPCError16({ code: "NOT_FOUND" });
     const allowed = STATUS_TRANSITIONS2[currentStatus] ?? [];
     if (!allowed.includes(input.status)) {
-      throw new TRPCError15({
+      throw new TRPCError16({
         code: "BAD_REQUEST",
         message: `Cannot transition from '${currentStatus}' to '${input.status}'`
       });
@@ -23745,7 +25561,7 @@ var incidentRouter = router({
       input.id,
       input.status
     );
-    if (!result) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError16({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "incident.updateStatus",
@@ -23760,7 +25576,7 @@ var incidentRouter = router({
     await requireModulePermission(ctx, "incident_register", "canEdit");
     const orgId = ctx.organizationId;
     const result = await markIncidentNotified(orgId, id);
-    if (!result) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError16({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "incident.markNotified",
@@ -23774,7 +25590,7 @@ var incidentRouter = router({
     await requireModulePermission(ctx, "incident_register", "canDelete");
     const orgId = ctx.organizationId;
     const found = await deleteIncident(orgId, id);
-    if (!found) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError16({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "incident.remove",
@@ -23788,7 +25604,7 @@ var incidentRouter = router({
 
 // server/audit-schedule-router.ts
 import { z as z21 } from "zod";
-import { TRPCError as TRPCError16 } from "@trpc/server";
+import { TRPCError as TRPCError17 } from "@trpc/server";
 
 // server/audit-schedule-store.ts
 init_schema();
@@ -23965,8 +25781,16 @@ var patchSchema3 = createSchema5.partial().extend({
 });
 var auditScheduleRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
-    await requireModulePermission(ctx, "audit_schedule", "canView");
-    return listAudits(ctx.organizationId);
+    try {
+      await requireModulePermission(ctx, "audit_schedule", "canView");
+      return listAudits(ctx.organizationId);
+    } catch (err) {
+      if (err instanceof TRPCError17) throw err;
+      throw new TRPCError17({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to list audits"
+      });
+    }
   }),
   create: activeOrgProcedure.input(createSchema5).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "audit_schedule", "canCreate");
@@ -24008,7 +25832,7 @@ var auditScheduleRouter = router({
     const orgId = ctx.organizationId;
     const result = await completeAudit(orgId, input.id, input.findings);
     if (!result.found) {
-      throw new TRPCError16({ code: "NOT_FOUND", message: "Audit not found" });
+      throw new TRPCError17({ code: "NOT_FOUND", message: "Audit not found" });
     }
     void recordAuditEvent(ctx, {
       category: "data_write",
@@ -24036,7 +25860,7 @@ var auditScheduleRouter = router({
 
 // server/vendor-compliance-router.ts
 import { z as z22 } from "zod";
-import { TRPCError as TRPCError17 } from "@trpc/server";
+import { TRPCError as TRPCError18 } from "@trpc/server";
 
 // server/vendor-compliance-store.ts
 init_schema();
@@ -24210,7 +26034,7 @@ var vendorComplianceRouter = router({
       input.vendorId
     );
     if (!profile)
-      throw new TRPCError17({ code: "NOT_FOUND", message: "Vendor not found" });
+      throw new TRPCError18({ code: "NOT_FOUND", message: "Vendor not found" });
     return profile;
   })
 });
@@ -24426,7 +26250,7 @@ var complianceReportRouter = router({
 
 // server/ctem-router.ts
 import { z as z24 } from "zod";
-import { TRPCError as TRPCError18 } from "@trpc/server";
+import { TRPCError as TRPCError19 } from "@trpc/server";
 
 // server/ctem-scoring.ts
 init_schema();
@@ -25486,7 +27310,7 @@ var ctemRouter = router({
     try {
       return await createCtemAsset(ctx.organizationId ?? -1, input);
     } catch {
-      throw new TRPCError18({
+      throw new TRPCError19({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -25500,11 +27324,11 @@ var ctemRouter = router({
     const { id, ...patch } = input;
     const ownerOrgId = await getCtemAssetOrgId(id);
     if (ownerOrgId === null || ownerOrgId !== orgId)
-      throw new TRPCError18({ code: "NOT_FOUND", message: "Asset not found" });
+      throw new TRPCError19({ code: "NOT_FOUND", message: "Asset not found" });
     try {
       return await updateCtemAsset(id, patch);
     } catch {
-      throw new TRPCError18({
+      throw new TRPCError19({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -25515,7 +27339,7 @@ var ctemRouter = router({
     const orgId = ctx.organizationId ?? -1;
     const ownerOrgId = await getCtemAssetOrgId(input.id);
     if (ownerOrgId === null || ownerOrgId !== orgId)
-      throw new TRPCError18({ code: "NOT_FOUND", message: "Asset not found" });
+      throw new TRPCError19({ code: "NOT_FOUND", message: "Asset not found" });
     await deleteCtemAsset(input.id);
     return { ok: true };
   }),
@@ -25532,7 +27356,7 @@ var ctemRouter = router({
     if (input?.assetId) {
       const ownerOrgId = await getCtemAssetOrgId(input.assetId);
       if (ownerOrgId === null || ownerOrgId !== orgId)
-        throw new TRPCError18({
+        throw new TRPCError19({
           code: "NOT_FOUND",
           message: "Asset not found"
         });
@@ -25544,11 +27368,11 @@ var ctemRouter = router({
     const orgId = ctx.organizationId ?? -1;
     const assetOrgId = await getCtemAssetOrgId(input.assetId);
     if (assetOrgId === null || assetOrgId !== orgId)
-      throw new TRPCError18({ code: "NOT_FOUND", message: "Asset not found" });
+      throw new TRPCError19({ code: "NOT_FOUND", message: "Asset not found" });
     try {
       return await createCtemVulnerability(input);
     } catch {
-      throw new TRPCError18({
+      throw new TRPCError19({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -25569,17 +27393,17 @@ var ctemRouter = router({
     const { id, ...patch } = input;
     const vuln = await getCtemVulnAssetOwner(id);
     if (!vuln)
-      throw new TRPCError18({
+      throw new TRPCError19({
         code: "NOT_FOUND",
         message: "Vulnerability not found"
       });
     const assetOrgId = await getCtemAssetOrgId(vuln.assetId);
     if (assetOrgId === null || assetOrgId !== orgId)
-      throw new TRPCError18({ code: "FORBIDDEN", message: "Access denied" });
+      throw new TRPCError19({ code: "FORBIDDEN", message: "Access denied" });
     try {
       return await patchCtemVulnerability(id, patch);
     } catch {
-      throw new TRPCError18({
+      throw new TRPCError19({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -25627,7 +27451,7 @@ var ctemRouter = router({
 
 // server/evidence-router.ts
 import { z as z25 } from "zod";
-import { TRPCError as TRPCError19 } from "@trpc/server";
+import { TRPCError as TRPCError20 } from "@trpc/server";
 
 // server/evidence-store.ts
 init_schema();
@@ -25832,7 +27656,7 @@ var evidenceRouter = router({
     await requireModulePermission(ctx, "evidence_repository", "canDelete");
     const orgId = ctx.organizationId;
     const ev = await getEvidenceForRemoval(orgId, evidenceId);
-    if (!ev) throw new TRPCError19({ code: "NOT_FOUND" });
+    if (!ev) throw new TRPCError20({ code: "NOT_FOUND" });
     await removeEvidence(orgId, evidenceId);
     void recordAuditEvent(ctx, {
       category: "data_write",
@@ -25854,7 +27678,7 @@ var evidenceRouter = router({
 
 // server/dsr-router.ts
 import { z as z26 } from "zod";
-import { TRPCError as TRPCError20 } from "@trpc/server";
+import { TRPCError as TRPCError21 } from "@trpc/server";
 
 // server/dsr-store.ts
 init_schema();
@@ -26230,7 +28054,7 @@ var dsrRouter = router({
       updateValues.completedAt = data.completedAt ? new Date(data.completedAt) : null;
     }
     const success = await patchDsr(orgId, id, updateValues);
-    if (!success) throw new TRPCError20({ code: "NOT_FOUND" });
+    if (!success) throw new TRPCError21({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "dsr.patch",
@@ -26244,7 +28068,7 @@ var dsrRouter = router({
     await requireModulePermission(ctx, "dsr_management", "canDelete");
     const orgId = ctx.organizationId;
     const success = await removeDsr(orgId, id);
-    if (!success) throw new TRPCError20({ code: "NOT_FOUND" });
+    if (!success) throw new TRPCError21({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "dsr.remove",
@@ -26261,7 +28085,7 @@ var dsrRouter = router({
 });
 
 // server/compliance-chat-router.ts
-import { TRPCError as TRPCError21 } from "@trpc/server";
+import { TRPCError as TRPCError22 } from "@trpc/server";
 import { z as z27 } from "zod";
 
 // server/_core/llm.ts
@@ -26378,6 +28202,8 @@ async function invokeLLM(params) {
     tools,
     toolChoice,
     tool_choice,
+    maxTokens,
+    max_tokens,
     outputSchema,
     output_schema,
     responseFormat,
@@ -26397,7 +28223,8 @@ async function invokeLLM(params) {
   if (normalizedToolChoice) {
     payload.tool_choice = normalizedToolChoice;
   }
-  payload.max_tokens = 32768;
+  const requestedMaxTokens = maxTokens ?? max_tokens;
+  payload.max_tokens = typeof requestedMaxTokens === "number" && Number.isFinite(requestedMaxTokens) && requestedMaxTokens > 0 ? Math.min(Math.floor(requestedMaxTokens), 32768) : 32768;
   payload.thinking = {
     budget_tokens: 128
   };
@@ -26430,6 +28257,7 @@ async function invokeLLM(params) {
 // server/compliance-chat-router.ts
 init_env();
 init_config_schema();
+init_rateLimiter();
 var chatMessageSchema = z27.object({
   role: z27.enum(["user", "assistant"]),
   content: z27.string().max(2e3)
@@ -26497,10 +28325,21 @@ var complianceChatRouter = router({
    */
   chat: activeOrgProcedure.input(chatInputSchema).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "pro_intelligence", "canView");
+    const rl = await checkRateLimit(
+      `complianceChat:${ctx.user?.id ?? ctx.organizationId}`,
+      20,
+      6e4
+    );
+    if (!rl.allowed) {
+      throw new TRPCError22({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please wait before retrying."
+      });
+    }
     const { messages, jurisdiction } = input;
     const lastMessage = messages[messages.length - 1];
     if (lastMessage.role !== "user") {
-      throw new TRPCError21({
+      throw new TRPCError22({
         code: "BAD_REQUEST",
         message: "The last message must be from the user."
       });
@@ -26547,7 +28386,7 @@ var complianceChatRouter = router({
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown LLM error";
-      throw new TRPCError21({
+      throw new TRPCError22({
         code: "INTERNAL_SERVER_ERROR",
         message: `AI service error: ${message}`
       });
@@ -26557,9 +28396,12 @@ var complianceChatRouter = router({
 
 // server/service-request-router.ts
 import { z as z28 } from "zod";
-import { TRPCError as TRPCError22 } from "@trpc/server";
+import { TRPCError as TRPCError23 } from "@trpc/server";
+init_const();
+init_logger();
 init_email();
 init_env();
+init_sse_bus();
 
 // server/service-request-store.ts
 init_schema();
@@ -26725,7 +28567,7 @@ var serviceRequestRouter = router({
   get: activeOrgProcedure.input(z28.object({ id: z28.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "service_requests", "canView");
     const req = await getRequest(ctx.organizationId, input.id);
-    if (!req) throw new TRPCError22({ code: "NOT_FOUND" });
+    if (!req) throw new TRPCError23({ code: "NOT_FOUND" });
     return req;
   }),
   create: activeOrgProcedure.input(createSchema7).mutation(async ({ ctx, input }) => {
@@ -26750,8 +28592,8 @@ Priority: ${input.priority}
 
 Description:
 ${input.description}`;
-      sendEmail({
-        to: ENV.smtpFrom ?? "admin@yalla-hack.net",
+      void sendEmail({
+        to: ENV.smtpFrom ?? "hello@yalla-hack.com",
         subject: `[DJAC] New Service Request: ${input.title}`,
         html: `<pre>${body}</pre>`,
         text: body
@@ -26782,9 +28624,9 @@ ${input.description}`;
     await requireModulePermission(ctx, "service_requests", "canEdit");
     const orgId = ctx.organizationId;
     const result = await cancelRequest(orgId, input.id);
-    if (result === "not_found") throw new TRPCError22({ code: "NOT_FOUND" });
+    if (result === "not_found") throw new TRPCError23({ code: "NOT_FOUND" });
     if (result === "not_cancellable")
-      throw new TRPCError22({
+      throw new TRPCError23({
         code: "BAD_REQUEST",
         message: "Request cannot be cancelled in its current state"
       });
@@ -26799,7 +28641,7 @@ ${input.description}`;
   }),
   adminList: protectedProcedure.query(async ({ ctx }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError22({ code: "FORBIDDEN" });
+      throw new TRPCError23({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "service_requests",
@@ -26811,7 +28653,7 @@ ${input.description}`;
     z28.object({ id: z28.number().int().positive() }).merge(adminUpdateSchema)
   ).mutation(async ({ ctx, input }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError22({ code: "FORBIDDEN" });
+      throw new TRPCError23({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "service_requests",
@@ -26826,7 +28668,7 @@ ${input.description}`;
     if (data.clientResponse !== void 0)
       updateValues.respondedAt = /* @__PURE__ */ new Date();
     const updated = await adminUpdateRequest(id, updateValues);
-    if (!updated) throw new TRPCError22({ code: "NOT_FOUND" });
+    if (!updated) throw new TRPCError23({ code: "NOT_FOUND" });
     if (data.clientResponse && updated.organizationId != null) {
       broadcastSSE("service_request_updated", {
         id,
@@ -26848,7 +28690,7 @@ ${input.description}`;
 
 // server/asset-inventory-router.ts
 import { z as z29 } from "zod";
-import { TRPCError as TRPCError23 } from "@trpc/server";
+import { TRPCError as TRPCError24 } from "@trpc/server";
 
 // server/asset-inventory-store.ts
 init_schema();
@@ -27050,14 +28892,30 @@ var patchSchema5 = createSchema8.partial().extend({
 });
 var assetInventoryRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
-    await requireModulePermission(ctx, "asset_inventory", "canView");
-    return listAssets(ctx.organizationId);
+    try {
+      await requireModulePermission(ctx, "asset_inventory", "canView");
+      return listAssets(ctx.organizationId);
+    } catch (err) {
+      if (err instanceof TRPCError24) throw err;
+      throw new TRPCError24({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to list assets"
+      });
+    }
   }),
   get: activeOrgProcedure.input(z29.object({ id: z29.number().int().positive() })).query(async ({ ctx, input }) => {
-    await requireModulePermission(ctx, "asset_inventory", "canView");
-    const asset = await getAsset(ctx.organizationId, input.id);
-    if (!asset) throw new TRPCError23({ code: "NOT_FOUND" });
-    return asset;
+    try {
+      await requireModulePermission(ctx, "asset_inventory", "canView");
+      const asset = await getAsset(ctx.organizationId, input.id);
+      if (!asset) throw new TRPCError24({ code: "NOT_FOUND" });
+      return asset;
+    } catch (err) {
+      if (err instanceof TRPCError24) throw err;
+      throw new TRPCError24({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch asset"
+      });
+    }
   }),
   create: activeOrgProcedure.input(createSchema8).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "asset_inventory", "canCreate");
@@ -27079,7 +28937,7 @@ var assetInventoryRouter = router({
     const { id, ...data } = input;
     const orgId = ctx.organizationId;
     const existing = await getAssetForPatch(orgId, id);
-    if (!existing) throw new TRPCError23({ code: "NOT_FOUND" });
+    if (!existing) throw new TRPCError24({ code: "NOT_FOUND" });
     const updateValues = {
       ...data,
       updatedAt: /* @__PURE__ */ new Date()
@@ -27104,7 +28962,7 @@ var assetInventoryRouter = router({
     await requireModulePermission(ctx, "asset_inventory", "canDelete");
     const orgId = ctx.organizationId;
     const result = await deleteAsset(orgId, input.id);
-    if (!result.found) throw new TRPCError23({ code: "NOT_FOUND" });
+    if (!result.found) throw new TRPCError24({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "asset.remove",
@@ -27116,33 +28974,42 @@ var assetInventoryRouter = router({
     return { success: true };
   }),
   summary: activeOrgProcedure.query(async ({ ctx }) => {
-    await requireModulePermission(ctx, "asset_inventory", "canView");
-    const assets = await getAllOrgAssets(ctx.organizationId);
-    let totalVulns = 0;
-    let criticalAssets = 0;
-    let internetFacingCount = 0;
-    let totalRisk = 0;
-    for (const a of assets) {
-      totalVulns += a.openVulnCount ?? 0;
-      totalRisk += a.riskScore ?? 0;
-      if (a.criticality === "critical") criticalAssets++;
-      if (a.exposure === "internet_facing") internetFacingCount++;
+    try {
+      await requireModulePermission(ctx, "asset_inventory", "canView");
+      const assets = await getAllOrgAssets(ctx.organizationId);
+      let totalVulns = 0;
+      let criticalAssets = 0;
+      let internetFacingCount = 0;
+      let totalRisk = 0;
+      for (const a of assets) {
+        totalVulns += a.openVulnCount ?? 0;
+        totalRisk += a.riskScore ?? 0;
+        if (a.criticality === "critical") criticalAssets++;
+        if (a.exposure === "internet_facing") internetFacingCount++;
+      }
+      const avgRisk = assets.length > 0 ? Math.round(totalRisk / assets.length) : 0;
+      return {
+        total: assets.length,
+        criticalCount: criticalAssets,
+        criticalAssets,
+        internetFacingCount,
+        avgRisk,
+        totalOpenVulnerabilities: totalVulns
+      };
+    } catch (err) {
+      if (err instanceof TRPCError24) throw err;
+      throw new TRPCError24({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch asset summary"
+      });
     }
-    const avgRisk = assets.length > 0 ? Math.round(totalRisk / assets.length) : 0;
-    return {
-      total: assets.length,
-      criticalCount: criticalAssets,
-      criticalAssets,
-      internetFacingCount,
-      avgRisk,
-      totalOpenVulnerabilities: totalVulns
-    };
   })
 });
 
 // server/threat-intel-router.ts
 import { z as z30 } from "zod";
-import { TRPCError as TRPCError24 } from "@trpc/server";
+import { TRPCError as TRPCError25 } from "@trpc/server";
+init_const();
 
 // server/threat-intel-store.ts
 init_schema();
@@ -27386,12 +29253,12 @@ var threatIntelRouter = router({
   get: activeOrgProcedure.input(z30.object({ id: z30.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "pro_intelligence", "canView");
     const item = await getThreatItem(ctx.organizationId, input.id);
-    if (!item) throw new TRPCError24({ code: "NOT_FOUND" });
+    if (!item) throw new TRPCError25({ code: "NOT_FOUND" });
     return item;
   }),
   adminCreate: protectedProcedure.input(createSchema9).mutation(async ({ ctx, input }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError24({ code: "FORBIDDEN" });
+      throw new TRPCError25({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "pro_intelligence",
@@ -27411,7 +29278,7 @@ var threatIntelRouter = router({
   }),
   adminUpdate: protectedProcedure.input(z30.object({ id: z30.number().int().positive() }).merge(updateSchema)).mutation(async ({ ctx, input }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError24({ code: "FORBIDDEN" });
+      throw new TRPCError25({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "pro_intelligence",
@@ -27423,7 +29290,7 @@ var threatIntelRouter = router({
       updatedAt: /* @__PURE__ */ new Date()
     };
     const updated = await adminUpdateThreatItem(id, updateValues);
-    if (!updated) throw new TRPCError24({ code: "NOT_FOUND" });
+    if (!updated) throw new TRPCError25({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "threatIntel.adminUpdate",
@@ -27436,14 +29303,14 @@ var threatIntelRouter = router({
   }),
   adminRemove: protectedProcedure.input(z30.object({ id: z30.number().int().positive() })).mutation(async ({ ctx, input }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError24({ code: "FORBIDDEN" });
+      throw new TRPCError25({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "pro_intelligence",
       "canDelete"
     );
     const found = await adminRemoveThreatItem(input.id);
-    if (!found) throw new TRPCError24({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError25({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "threatIntel.adminRemove",
@@ -27457,7 +29324,7 @@ var threatIntelRouter = router({
 
 // server/security-maturity-router.ts
 import { z as z31 } from "zod";
-import { TRPCError as TRPCError25 } from "@trpc/server";
+import { TRPCError as TRPCError26 } from "@trpc/server";
 
 // server/security-maturity-store.ts
 init_schema();
@@ -27611,7 +29478,7 @@ var securityMaturityRouter = router({
   get: activeOrgProcedure.input(z31.object({ id: z31.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "security_maturity", "canView");
     const a = await getAssessment(ctx.organizationId, input.id);
-    if (!a) throw new TRPCError25({ code: "NOT_FOUND" });
+    if (!a) throw new TRPCError26({ code: "NOT_FOUND" });
     return a;
   }),
   create: activeOrgProcedure.input(createSchema10).mutation(async ({ ctx, input }) => {
@@ -27639,7 +29506,7 @@ var securityMaturityRouter = router({
       ctx.organizationId,
       input.id
     );
-    if (!found) throw new TRPCError25({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError26({ code: "NOT_FOUND" });
     await recordAuditEvent(ctx, {
       category: "data_write",
       action: "security_maturity.delete",
@@ -27652,7 +29519,7 @@ var securityMaturityRouter = router({
 });
 
 // server/google-auth-router.ts
-import { TRPCError as TRPCError26 } from "@trpc/server";
+import { TRPCError as TRPCError27 } from "@trpc/server";
 import { z as z32 } from "zod";
 
 // server/services/supabase.ts
@@ -27676,12 +29543,15 @@ function getSupabaseClient() {
 // server/google-auth-router.ts
 init_db();
 init_env();
+init_const();
+init_local_jwt();
+init_sse_bus();
 var googleAuthRouter = router({
   /** Get the Google OAuth URL for sign-in */
   getAuthUrl: publicProcedure.input(z32.object({ redirectTo: z32.string().optional() })).query(async ({ input }) => {
     const supabase = getSupabaseClient();
     if (!supabase) {
-      throw new TRPCError26({
+      throw new TRPCError27({
         code: "INTERNAL_SERVER_ERROR",
         message: "Supabase client not configured."
       });
@@ -27698,7 +29568,7 @@ var googleAuthRouter = router({
       }
     });
     if (!data.url) {
-      throw new TRPCError26({
+      throw new TRPCError27({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to generate Google auth URL."
       });
@@ -27713,14 +29583,14 @@ var googleAuthRouter = router({
     })
   ).query(async ({ input, ctx }) => {
     if (!input.code) {
-      throw new TRPCError26({
+      throw new TRPCError27({
         code: "BAD_REQUEST",
         message: "No authorization code provided."
       });
     }
     const supabase = getSupabaseClient();
     if (!supabase) {
-      throw new TRPCError26({
+      throw new TRPCError27({
         code: "INTERNAL_SERVER_ERROR",
         message: "Supabase client not configured."
       });
@@ -27729,7 +29599,7 @@ var googleAuthRouter = router({
       input.code
     );
     if (error || !data?.user) {
-      throw new TRPCError26({
+      throw new TRPCError27({
         code: "UNAUTHORIZED",
         message: error?.message ?? "Google authentication failed."
       });
@@ -27749,7 +29619,7 @@ var googleAuthRouter = router({
     });
     const user = await getUserByOpenId(openId);
     if (!user) {
-      throw new TRPCError26({
+      throw new TRPCError27({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to create user account."
       });
@@ -27799,7 +29669,7 @@ import { z as z33 } from "zod";
 // server/knowledge-graph-store.ts
 init_db();
 init_schema();
-import { and as and26, eq as eq35, or as or6, like, sql as sql2, asc as asc3 } from "drizzle-orm";
+import { and as and26, eq as eq35, or as or6, like, sql as sql4, asc as asc3 } from "drizzle-orm";
 async function seedKnowledgeGraph(input, organizationId) {
   const db = await getDb();
   if (!db)
@@ -27842,7 +29712,7 @@ async function queryKnowledgeGraph(query) {
   const conditions = [];
   if (query.kinds && query.kinds.length > 0) {
     conditions.push(
-      sql2`${knowledgeGraphNodes.kind} = ANY(${query.kinds}::text[])`
+      sql4`${knowledgeGraphNodes.kind} = ANY(${query.kinds}::text[])`
     );
   }
   if (query.region) {
@@ -27854,8 +29724,8 @@ async function queryKnowledgeGraph(query) {
   if (query.search) {
     const q = `%${query.search.toLowerCase()}%`;
     const searchCond = or6(
-      like(sql2`LOWER(${knowledgeGraphNodes.label})`, q),
-      like(sql2`LOWER(${knowledgeGraphNodes.description})`, q)
+      like(sql4`LOWER(${knowledgeGraphNodes.label})`, q),
+      like(sql4`LOWER(${knowledgeGraphNodes.description})`, q)
     );
     if (searchCond) conditions.push(searchCond);
   }
@@ -27865,8 +29735,8 @@ async function queryKnowledgeGraph(query) {
   const nodeIds = nodes.map((n) => n.nodeId);
   const edges = nodeIds.length > 0 ? await db.select().from(knowledgeGraphEdges).where(
     or6(
-      sql2`${knowledgeGraphEdges.sourceNodeId} = ANY(${nodeIds}::text[])`,
-      sql2`${knowledgeGraphEdges.targetNodeId} = ANY(${nodeIds}::text[])`
+      sql4`${knowledgeGraphEdges.sourceNodeId} = ANY(${nodeIds}::text[])`,
+      sql4`${knowledgeGraphEdges.targetNodeId} = ANY(${nodeIds}::text[])`
     )
   ).limit(500) : [];
   return { nodes, edges };
@@ -27879,11 +29749,11 @@ async function getAllKnowledgeGraphNodes() {
 async function getKnowledgeGraphStats() {
   const db = await getDb();
   if (!db) return { nodes: 0, edges: 0, byKind: [] };
-  const nodeCount = await db.select({ count: sql2`count(*)::int` }).from(knowledgeGraphNodes);
-  const edgeCount = await db.select({ count: sql2`count(*)::int` }).from(knowledgeGraphEdges);
+  const nodeCount = await db.select({ count: sql4`count(*)::int` }).from(knowledgeGraphNodes);
+  const edgeCount = await db.select({ count: sql4`count(*)::int` }).from(knowledgeGraphEdges);
   const kindCounts = await db.select({
     kind: knowledgeGraphNodes.kind,
-    count: sql2`count(*)::int`
+    count: sql4`count(*)::int`
   }).from(knowledgeGraphNodes).groupBy(knowledgeGraphNodes.kind);
   return {
     nodes: Number(nodeCount[0]?.count ?? 0),
@@ -28024,12 +29894,12 @@ var knowledgeGraphRouter = router({
 
 // server/regulatory-change-router.ts
 import { z as z34 } from "zod";
-import { TRPCError as TRPCError27 } from "@trpc/server";
+import { TRPCError as TRPCError28 } from "@trpc/server";
 
 // server/regulatory-change-store.ts
 init_schema();
 init_db();
-import { and as and27, desc as desc20, eq as eq36, sql as sql3 } from "drizzle-orm";
+import { and as and27, desc as desc20, eq as eq36, sql as sql5 } from "drizzle-orm";
 var MEM_CHANGES = [];
 var memSeq12 = 1;
 var SEED_CHANGES = [
@@ -28399,7 +30269,7 @@ async function listRegulatoryChanges(orgId, filters) {
   const where = conditions.length > 0 ? and27(...conditions) : void 0;
   const [rows, countResult] = await Promise.all([
     db.select().from(regulatoryChanges).where(where).orderBy(desc20(regulatoryChanges.publicationDate)).limit(limit).offset(offset),
-    db.select({ count: sql3`count(*)` }).from(regulatoryChanges).where(where)
+    db.select({ count: sql5`count(*)` }).from(regulatoryChanges).where(where)
   ]);
   const total = Number(countResult[0]?.count ?? 0);
   return { rows, total };
@@ -28428,17 +30298,17 @@ async function getRegulatoryChangeStats() {
   const [jurisdictionRows, statusRows, changeTypeRows, totalResult] = await Promise.all([
     db.select({
       jurisdiction: regulatoryChanges.jurisdiction,
-      count: sql3`count(*)`
+      count: sql5`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.jurisdiction).orderBy(regulatoryChanges.jurisdiction),
     db.select({
       status: regulatoryChanges.status,
-      count: sql3`count(*)`
+      count: sql5`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.status).orderBy(regulatoryChanges.status),
     db.select({
       changeType: regulatoryChanges.changeType,
-      count: sql3`count(*)`
+      count: sql5`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.changeType).orderBy(regulatoryChanges.changeType),
-    db.select({ count: sql3`count(*)` }).from(regulatoryChanges)
+    db.select({ count: sql5`count(*)` }).from(regulatoryChanges)
   ]);
   return {
     total: Number(totalResult[0]?.count ?? 0),
@@ -28512,21 +30382,21 @@ function aggregateJurisdictions(changes) {
   for (const c of changes) {
     map.set(c.jurisdiction, (map.get(c.jurisdiction) ?? 0) + 1);
   }
-  return Array.from(map.entries()).map(([jurisdiction, count2]) => ({ jurisdiction, count: count2 })).sort((a, b) => a.jurisdiction.localeCompare(b.jurisdiction));
+  return Array.from(map.entries()).map(([jurisdiction, count3]) => ({ jurisdiction, count: count3 })).sort((a, b) => a.jurisdiction.localeCompare(b.jurisdiction));
 }
 function aggregateStatuses(changes) {
   const map = /* @__PURE__ */ new Map();
   for (const c of changes) {
     map.set(c.status, (map.get(c.status) ?? 0) + 1);
   }
-  return Array.from(map.entries()).map(([status, count2]) => ({ status, count: count2 })).sort((a, b) => a.status.localeCompare(b.status));
+  return Array.from(map.entries()).map(([status, count3]) => ({ status, count: count3 })).sort((a, b) => a.status.localeCompare(b.status));
 }
 function aggregateChangeTypes(changes) {
   const map = /* @__PURE__ */ new Map();
   for (const c of changes) {
     map.set(c.changeType, (map.get(c.changeType) ?? 0) + 1);
   }
-  return Array.from(map.entries()).map(([changeType, count2]) => ({ changeType, count: count2 })).sort((a, b) => a.changeType.localeCompare(b.changeType));
+  return Array.from(map.entries()).map(([changeType, count3]) => ({ changeType, count: count3 })).sort((a, b) => a.changeType.localeCompare(b.changeType));
 }
 
 // server/regulatory-change-router.ts
@@ -28569,7 +30439,7 @@ var regulatoryChangeRouter = router({
     await requireModulePermission(ctx, "regulatory_changes", "canView");
     const change = await getRegulatoryChangeById(input.id);
     if (!change) {
-      throw new TRPCError27({ code: "NOT_FOUND" });
+      throw new TRPCError28({ code: "NOT_FOUND" });
     }
     return change;
   }),
@@ -28615,7 +30485,7 @@ var regulatoryChangeRouter = router({
     await requireModulePermission(ctx, "regulatory_changes", "canEdit");
     const result = await markRegulatoryChangeEffective(input.id);
     if (!result) {
-      throw new TRPCError27({ code: "NOT_FOUND" });
+      throw new TRPCError28({ code: "NOT_FOUND" });
     }
     void recordAuditEvent(ctx, {
       category: "data_write",
@@ -28630,7 +30500,7 @@ var regulatoryChangeRouter = router({
     await requireModulePermission(ctx, "regulatory_changes", "canDelete");
     const success = await removeRegulatoryChange(input.id);
     if (!success) {
-      throw new TRPCError27({ code: "NOT_FOUND" });
+      throw new TRPCError28({ code: "NOT_FOUND" });
     }
     void recordAuditEvent(ctx, {
       category: "data_write",
@@ -28645,7 +30515,7 @@ var regulatoryChangeRouter = router({
 
 // server/compliance-simulation-router.ts
 import { z as z35 } from "zod";
-import { TRPCError as TRPCError28 } from "@trpc/server";
+import { TRPCError as TRPCError29 } from "@trpc/server";
 
 // server/compliance-simulation-store.ts
 init_schema();
@@ -29342,6 +31212,7 @@ async function compareSimulations(orgId, id1, id2) {
 }
 
 // server/compliance-simulation-router.ts
+var knownFrameworkCodes = GLOBAL_FRAMEWORK_PACKS.map((p) => p.code);
 var simulationTypeEnum2 = z35.enum([
   "readiness",
   "gap_analysis",
@@ -29353,8 +31224,16 @@ var runEngineSchema = z35.object({
   name: z35.string().trim().min(1).max(255),
   description: z35.string().trim().max(2e3).optional(),
   simulationType: simulationTypeEnum2,
-  jurisdiction: z35.string().trim().min(1).max(200),
-  frameworks: z35.array(z35.string().trim().min(1)).min(1).max(50),
+  jurisdiction: z35.string().trim().min(1).max(200).refine(
+    (v) => GLOBAL_JURISDICTIONS.includes(
+      v
+    ),
+    { message: "Invalid jurisdiction" }
+  ),
+  frameworks: z35.array(z35.string().trim().min(1)).min(1).max(50).refine(
+    (frameworks2) => frameworks2.every((f) => knownFrameworkCodes.includes(f)),
+    { message: "One or more frameworks are not valid" }
+  ),
   industry: z35.string().trim().max(200).optional(),
   organizationSize: z35.enum(["startup", "sme", "enterprise"]).optional()
 });
@@ -29366,13 +31245,13 @@ var complianceSimulationRouter = router({
   getScenario: activeOrgProcedure.input(z35.object({ id: z35.string().min(1) })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canView");
     const scenario = getSimulationScenarioById(input.id);
-    if (!scenario) throw new TRPCError28({ code: "NOT_FOUND" });
+    if (!scenario) throw new TRPCError29({ code: "NOT_FOUND" });
     return scenario;
   }),
   run: activeOrgProcedure.input(z35.object({ scenarioId: z35.string().min(1) })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canCreate");
     const result = runSimulation(input.scenarioId);
-    if (!result) throw new TRPCError28({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError29({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "simulation.run_preset",
@@ -29424,14 +31303,14 @@ var complianceSimulationRouter = router({
     await requireModulePermission(ctx, "compliance_simulation", "canView");
     const orgId = ctx.organizationId;
     const result = await getSimulationById(orgId, input.id);
-    if (!result) throw new TRPCError28({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError29({ code: "NOT_FOUND" });
     return result;
   }),
   archive: activeOrgProcedure.input(z35.object({ id: z35.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canDelete");
     const orgId = ctx.organizationId;
     const success = await archiveSimulation(orgId, input.id);
-    if (!success) throw new TRPCError28({ code: "NOT_FOUND" });
+    if (!success) throw new TRPCError29({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "simulation.archive",
@@ -29450,7 +31329,7 @@ var complianceSimulationRouter = router({
     await requireModulePermission(ctx, "compliance_simulation", "canView");
     const orgId = ctx.organizationId;
     const result = await compareSimulations(orgId, input.id1, input.id2);
-    if (!result) throw new TRPCError28({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError29({ code: "NOT_FOUND" });
     return result;
   })
 });
@@ -29841,7 +31720,10 @@ init_schema();
 init_db();
 import { z as z37 } from "zod";
 import { eq as eq38 } from "drizzle-orm";
-import { TRPCError as TRPCError29 } from "@trpc/server";
+init_rateLimiter();
+import { TRPCError as TRPCError30 } from "@trpc/server";
+var ONBOARD_LIMIT = 20;
+var ONBOARD_WINDOW_MS = 6e4;
 var onboardingResponsesSchema = z37.object({
   frameworks: z37.array(z37.string().min(1)).max(20).optional(),
   objectives: z37.array(z37.string().min(1)).max(12).optional(),
@@ -29861,7 +31743,7 @@ var onboardingRouter = router({
   getProgress: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError29({
+      throw new TRPCError30({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -29876,7 +31758,7 @@ var onboardingRouter = router({
   ).mutation(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError29({
+      throw new TRPCError30({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -29915,15 +31797,32 @@ var onboardingRouter = router({
     }
     return { ok: true };
   }),
-  skip: protectedProcedure.mutation(async ({ ctx }) => {
+  skip: protectedProcedure.input(z37.object({})).mutation(async ({ ctx, input: _input }) => {
+    const rl = await checkRateLimit(
+      `onboard:skip:${ctx.user.id}`,
+      ONBOARD_LIMIT,
+      ONBOARD_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError30({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded."
+      });
+    }
     const db = await getDb();
     if (!db)
-      throw new TRPCError29({
+      throw new TRPCError30({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     const existing = await db.select().from(onboardingProgress).where(eq38(onboardingProgress.userId, ctx.user.id));
     if (existing[0]) {
+      if (existing[0].skipped) {
+        throw new TRPCError30({
+          code: "CONFLICT",
+          message: "Onboarding already skipped."
+        });
+      }
       await db.update(onboardingProgress).set({ skipped: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq38(onboardingProgress.userId, ctx.user.id));
     } else {
       await db.insert(onboardingProgress).values({
@@ -29936,7 +31835,7 @@ var onboardingRouter = router({
   complete: protectedProcedure.mutation(async ({ ctx }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError29({
+      throw new TRPCError30({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -29957,8 +31856,8 @@ var onboardingRouter = router({
 init_schema();
 init_db();
 import { z as z38 } from "zod";
-import { eq as eq39, desc as desc22, sql as sql4 } from "drizzle-orm";
-import { TRPCError as TRPCError30 } from "@trpc/server";
+import { eq as eq39, desc as desc22, sql as sql6 } from "drizzle-orm";
+import { TRPCError as TRPCError31 } from "@trpc/server";
 var analyticsRouter = router({
   track: protectedProcedure.input(
     z38.object({
@@ -29968,68 +31867,89 @@ var analyticsRouter = router({
       sessionId: z38.string().max(64).optional()
     })
   ).mutation(async ({ ctx, input }) => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError30({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Database unavailable"
+    try {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError31({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable"
+        });
+      await db.insert(analyticsEvents).values({
+        userId: ctx.user.id,
+        organizationId: ctx.organizationId ?? 0,
+        event: input.event,
+        category: input.category,
+        properties: input.properties ?? {},
+        sessionId: input.sessionId
       });
-    await db.insert(analyticsEvents).values({
-      userId: ctx.user.id,
-      organizationId: ctx.organizationId ?? 0,
-      event: input.event,
-      category: input.category,
-      properties: input.properties ?? {},
-      sessionId: input.sessionId
-    });
-    await db.insert(userActivitySummary).values({
-      userId: ctx.user.id,
-      totalSessions: input.sessionId ? 1 : 0,
-      totalEvents: 1,
-      lastActiveAt: /* @__PURE__ */ new Date()
-    }).onConflictDoUpdate({
-      target: userActivitySummary.userId,
-      set: {
-        totalEvents: sql4`${userActivitySummary.totalEvents} + 1`,
+      await db.insert(userActivitySummary).values({
+        userId: ctx.user.id,
+        totalSessions: input.sessionId ? 1 : 0,
+        totalEvents: 1,
         lastActiveAt: /* @__PURE__ */ new Date()
-      }
-    });
-    return { ok: true };
+      }).onConflictDoUpdate({
+        target: userActivitySummary.userId,
+        set: {
+          totalEvents: sql6`${userActivitySummary.totalEvents} + 1`,
+          lastActiveAt: /* @__PURE__ */ new Date()
+        }
+      });
+      return { ok: true };
+    } catch {
+      throw new TRPCError31({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to track analytics event"
+      });
+    }
   }),
   getUserMetrics: protectedProcedure.input(
     z38.object({
       days: z38.number().int().min(1).max(365).optional()
     })
   ).query(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError30({
+    try {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError31({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable"
+        });
+      const rows = await db.select().from(userActivitySummary).where(eq39(userActivitySummary.userId, ctx.user.id));
+      const summary = rows[0];
+      return {
+        totalEvents: summary?.totalEvents ?? 0,
+        totalSessions: summary?.totalSessions ?? 0,
+        lastActiveAt: summary?.lastActiveAt?.toISOString() ?? null,
+        activationScore: summary?.activationScore ?? 0,
+        healthScore: summary?.healthScore ?? 0
+      };
+    } catch {
+      throw new TRPCError31({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Database unavailable"
+        message: "Failed to fetch user metrics"
       });
-    const rows = await db.select().from(userActivitySummary).where(eq39(userActivitySummary.userId, ctx.user.id));
-    const summary = rows[0];
-    return {
-      totalEvents: summary?.totalEvents ?? 0,
-      totalSessions: summary?.totalSessions ?? 0,
-      lastActiveAt: summary?.lastActiveAt?.toISOString() ?? null,
-      activationScore: summary?.activationScore ?? 0,
-      healthScore: summary?.healthScore ?? 0
-    };
+    }
   }),
   getRecentEvents: protectedProcedure.input(
     z38.object({
       limit: z38.number().int().min(1).max(500).default(50)
     })
   ).query(async ({ ctx, input }) => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError30({
+    try {
+      const db = await getDb();
+      if (!db)
+        throw new TRPCError31({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database unavailable"
+        });
+      const rows = await db.select().from(analyticsEvents).where(eq39(analyticsEvents.userId, ctx.user.id)).orderBy(desc22(analyticsEvents.createdAt)).limit(input.limit);
+      return rows;
+    } catch {
+      throw new TRPCError31({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Database unavailable"
+        message: "Failed to fetch recent events"
       });
-    const rows = await db.select().from(analyticsEvents).where(eq39(analyticsEvents.userId, ctx.user.id)).orderBy(desc22(analyticsEvents.createdAt)).limit(input.limit);
-    return rows;
+    }
   })
 });
 
@@ -30038,7 +31958,14 @@ init_schema();
 init_db();
 import { z as z39 } from "zod";
 import { eq as eq40, desc as desc23, and as and29 } from "drizzle-orm";
-import { TRPCError as TRPCError31 } from "@trpc/server";
+init_rateLimiter();
+import { TRPCError as TRPCError32 } from "@trpc/server";
+var NOTIF_LIMIT = 30;
+var NOTIF_WINDOW_MS = 6e4;
+var unreadCountSchema = z39.object({
+  limit: z39.number().int().min(1).max(100).default(20)
+});
+var markAllReadSchema = z39.object({});
 var notificationsRouter = router({
   list: protectedProcedure.input(
     z39.object({
@@ -30049,7 +31976,7 @@ var notificationsRouter = router({
   ).query(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError31({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -30063,10 +31990,10 @@ var notificationsRouter = router({
     }
     return await query;
   }),
-  unreadCount: protectedProcedure.query(async ({ ctx }) => {
+  unreadCount: protectedProcedure.input(unreadCountSchema).query(async ({ ctx, input: _input }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError31({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -30079,9 +32006,20 @@ var notificationsRouter = router({
     return rows.length;
   }),
   markRead: protectedProcedure.input(z39.object({ id: z39.number().int() })).mutation(async ({ ctx, input }) => {
+    const rl = await checkRateLimit(
+      `notif:read:${ctx.user.id}`,
+      NOTIF_LIMIT,
+      NOTIF_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError32({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please try again shortly."
+      });
+    }
     const db = await getDb();
     if (!db)
-      throw new TRPCError31({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -30093,10 +32031,21 @@ var notificationsRouter = router({
     );
     return { ok: true };
   }),
-  markAllRead: protectedProcedure.mutation(async ({ ctx }) => {
+  markAllRead: protectedProcedure.input(markAllReadSchema).mutation(async ({ ctx, input: _input }) => {
+    const rl = await checkRateLimit(
+      `notif:allread:${ctx.user.id}`,
+      NOTIF_LIMIT,
+      NOTIF_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError32({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please try again shortly."
+      });
+    }
     const db = await getDb();
     if (!db)
-      throw new TRPCError31({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
@@ -30112,6 +32061,7 @@ var notificationsRouter = router({
 
 // server/personalization-router.ts
 import { z as z40 } from "zod";
+import { TRPCError as TRPCError33 } from "@trpc/server";
 
 // server/personalization.ts
 init_db();
@@ -30203,7 +32153,7 @@ async function generateRecommendations(profile) {
   if (actionRecs.length === 0) {
     actionRecs.push({
       title: "Explore the Compliance Framework Library",
-      description: "Browse 46 frameworks across 29 jurisdictions to understand your obligations.",
+      description: "Browse 46 frameworks across 28 jurisdictions to understand your obligations.",
       category: "assessment",
       urgency: "this-week"
     });
@@ -30248,6 +32198,9 @@ function emptyRecommendations() {
 }
 
 // server/personalization-router.ts
+init_rateLimiter();
+var RECO_LIMIT = 30;
+var RECO_WINDOW_MS = 6e4;
 var personalizationRouter = router({
   getRecommendations: protectedProcedure.input(
     z40.object({
@@ -30257,7 +32210,18 @@ var personalizationRouter = router({
       country: z40.string().default(""),
       complianceMaturity: z40.enum(["beginner", "intermediate", "advanced"]).default("beginner")
     })
-  ).query(async ({ input }) => {
+  ).query(async ({ ctx, input }) => {
+    const rl = await checkRateLimit(
+      `reco:${ctx.user.id}`,
+      RECO_LIMIT,
+      RECO_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError33({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded."
+      });
+    }
     return generateRecommendations(input);
   })
 });
@@ -30267,17 +32231,31 @@ init_schema();
 init_db();
 import { z as z41 } from "zod";
 import { eq as eq41, desc as desc24 } from "drizzle-orm";
-import { TRPCError as TRPCError32 } from "@trpc/server";
+init_rateLimiter();
+import { TRPCError as TRPCError34 } from "@trpc/server";
+var C360_LIMIT = 20;
+var C360_WINDOW_MS = 6e4;
 var customer360Router = router({
   list: adminProcedure.input(
     z41.object({
       limit: z41.number().int().min(1).max(100).default(20),
       offset: z41.number().int().min(0).default(0)
     })
-  ).query(async ({ input }) => {
+  ).query(async ({ ctx, input }) => {
+    const rl = await checkRateLimit(
+      `c360:list:${ctx.user.id}`,
+      C360_LIMIT,
+      C360_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError34({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded."
+      });
+    }
     const db = await getDb();
     if (!db)
-      throw new TRPCError32({
+      throw new TRPCError34({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable"
       });
@@ -30294,7 +32272,7 @@ var customer360Router = router({
   getProfile: adminProcedure.input(z41.object({ userId: z41.number().int() })).query(async ({ input }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError32({
+      throw new TRPCError34({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable"
       });
@@ -30399,6 +32377,8 @@ init_env();
 init_schema();
 init_db();
 init_env();
+init_sdk();
+init_local_jwt();
 import crypto3 from "crypto";
 import { and as and30, eq as eq42, isNull as isNull4 } from "drizzle-orm";
 async function resolveDevBypassUser() {
@@ -30775,8 +32755,11 @@ function serveStatic(app) {
 }
 
 // server/ai/ws.ts
+init_const();
 init_db();
 init_env();
+init_sdk();
+init_orchestrator();
 import { parse as parseCookieHeader3 } from "cookie";
 import { WebSocketServer } from "ws";
 var WS_PATH_DEFAULT = "/ws/ai-jobs";
@@ -31717,17 +33700,20 @@ function startOtpCleanupScheduler() {
   return () => clearInterval(timer);
 }
 
+// server/_core/index.ts
+init_queueFactory();
+
 // server/_core/auto-migrate.ts
 init_db();
 init_env();
-import { sql as sql5 } from "drizzle-orm";
+import { sql as sql7 } from "drizzle-orm";
 var migrationApplied = false;
 async function seedComplianceFrameworks(db) {
   try {
     const { complianceFrameworks: complianceFrameworks2 } = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
     let seeded = 0;
     for (const fw of complianceFrameworks2) {
-      await db.execute(sql5`
+      await db.execute(sql7`
                 INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
                 VALUES (${fw.code}, ${fw.name}, ${fw.country}, ${fw.description ?? null}, ${fw.scope ?? null}, ${fw.enforcementAuthority ?? null}, ${fw.maxPenalty ?? null})
                 ON CONFLICT ("code") DO UPDATE SET
@@ -31756,16 +33742,16 @@ async function ensureMigrated() {
   const db = await getDb();
   if (!db) return;
   try {
-    await db.execute(sql5`
+    await db.execute(sql7`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "verifiedAt" timestamp
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "lastMfaVerifiedAt" timestamp
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "firstLoginEmailSent" integer DEFAULT 0 NOT NULL
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "yallaAdminSessions" (
                 "id"            varchar(64)   NOT NULL PRIMARY KEY,
                 "adminUsername" varchar(120)  NOT NULL,
@@ -31777,7 +33763,7 @@ async function ensureMigrated() {
                 "isRevoked"     integer       NOT NULL DEFAULT 0
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "yallaAdminAuditLogs" (
                 "id"            serial        PRIMARY KEY,
                 "sessionId"     varchar(64),
@@ -31789,17 +33775,17 @@ async function ensureMigrated() {
                 "createdAt"     timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "phoneNumber" varchar(20)
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             ALTER TABLE "complianceControls" ADD COLUMN IF NOT EXISTS "applicability" varchar(255)
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE UNIQUE INDEX IF NOT EXISTS "localUsers_phoneNumber_idx"
             ON "localUsers" ("phoneNumber") WHERE "phoneNumber" IS NOT NULL
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "otpCodes" (
                 "id"         serial        PRIMARY KEY,
                 "identifier" varchar(320)  NOT NULL,
@@ -31810,7 +33796,7 @@ async function ensureMigrated() {
                 "createdAt"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "auditLogs" (
                 "id"             serial        PRIMARY KEY,
                 "userId"         integer,
@@ -31830,26 +33816,26 @@ async function ensureMigrated() {
             )
         `);
     const indexes = [
-      `CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
-      `CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
-      `CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
-      `CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
-      `CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
-      `CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
-      `CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
-      `CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
-      `CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
-      `CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
-      `CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`
+      sql7`CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
+      sql7`CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
+      sql7`CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
+      sql7`CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
+      sql7`CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
+      sql7`CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
+      sql7`CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
+      sql7`CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
+      sql7`CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
+      sql7`CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
+      sql7`CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`
     ];
     for (const idx of indexes) {
-      await db.execute(sql5.raw(idx));
+      await db.execute(idx);
     }
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx"
             ON "complianceControls" ("frameworkId", "controlCode")
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx"
             ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")
         `);
@@ -31879,21 +33865,14 @@ async function ensureMigrated() {
       "Egypt"
     ];
     for (const j of globalJurisdictions) {
-      const escaped = j.replace(/'/g, "''");
       await db.execute(
-        sql5.raw(
-          `ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
-        )
+        sql7`ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
       await db.execute(
-        sql5.raw(
-          `ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
-        )
+        sql7`ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
       await db.execute(
-        sql5.raw(
-          `ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS '${escaped}'`
-        )
+        sql7`ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
     }
     const newRegions = [
@@ -31906,24 +33885,21 @@ async function ensureMigrated() {
       "Global"
     ];
     for (const r of newRegions) {
-      const escapedR = r.replace(/'/g, "''");
-      await db.execute(
-        sql5.raw(`ALTER TYPE "region" ADD VALUE IF NOT EXISTS '${escapedR}'`)
-      );
+      await db.execute(sql7`ALTER TYPE "region" ADD VALUE IF NOT EXISTS ${r}`);
     }
-    await db.execute(sql5`
+    await db.execute(sql7`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedAt" DROP DEFAULT
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedAt" DROP NOT NULL
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedByIp" DROP NOT NULL
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "onboarding_progress" (
                 "id"              serial        PRIMARY KEY,
                 "user_id"         integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -31936,7 +33912,7 @@ async function ensureMigrated() {
                 "updated_at"      timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "organization_profiles_custom" (
                 "id"                       serial        PRIMARY KEY,
                 "organization_id"          integer       NOT NULL UNIQUE REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -31950,7 +33926,7 @@ async function ensureMigrated() {
                 "updated_at"               timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "user_preferences" (
                 "id"                    serial        PRIMARY KEY,
                 "user_id"               integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -31964,7 +33940,7 @@ async function ensureMigrated() {
                 "updated_at"            timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "feature_flags" (
                 "id"                   serial        PRIMARY KEY,
                 "name"                 varchar(100)  NOT NULL UNIQUE,
@@ -31976,7 +33952,7 @@ async function ensureMigrated() {
                 "updated_at"           timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "analytics_events" (
                 "id"               serial        PRIMARY KEY,
                 "user_id"          integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -31988,7 +33964,7 @@ async function ensureMigrated() {
                 "created_at"       timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "user_activity_summary" (
                 "user_id"           integer       PRIMARY KEY REFERENCES "users" ("id") ON DELETE CASCADE,
                 "total_sessions"    integer       DEFAULT 0,
@@ -32000,7 +33976,7 @@ async function ensureMigrated() {
                 "updated_at"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "email_log" (
                 "id"               serial        PRIMARY KEY,
                 "user_id"          integer       REFERENCES "users" ("id") ON DELETE SET NULL,
@@ -32016,7 +33992,7 @@ async function ensureMigrated() {
                 "created_at"       timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "notifications" (
                 "id"          serial        PRIMARY KEY,
                 "user_id"     integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -32029,7 +34005,7 @@ async function ensureMigrated() {
                 "created_at"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             DO $$ BEGIN
                 CREATE TYPE "knowledgeGraphNodeKind" AS ENUM (
                     'region','framework','standard','edition','agent','regulator',
@@ -32039,7 +34015,7 @@ async function ensureMigrated() {
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             DO $$ BEGIN
                 CREATE TYPE "knowledgeGraphEdgeRelation" AS ENUM (
                     'contains','activates','supports','maps_to','requires','conflicts',
@@ -32049,7 +34025,7 @@ async function ensureMigrated() {
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "knowledgeGraphNodes" (
                 "id"               serial        PRIMARY KEY,
                 "nodeId"           varchar(120)  NOT NULL UNIQUE,
@@ -32065,7 +34041,7 @@ async function ensureMigrated() {
                 "updatedAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "knowledgeGraphEdges" (
                 "id"               serial        PRIMARY KEY,
                 "sourceNodeId"     varchar(120)  NOT NULL,
@@ -32077,7 +34053,7 @@ async function ensureMigrated() {
                 "createdAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "regulatoryChanges" (
                 "id"               serial        PRIMARY KEY,
                 "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE SET NULL,
@@ -32096,7 +34072,7 @@ async function ensureMigrated() {
                 "updatedAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "complianceSimulations" (
                 "id"                   serial        PRIMARY KEY,
                 "organizationId"       integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -32119,7 +34095,7 @@ async function ensureMigrated() {
                 "updatedAt"            timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql5`
+    await db.execute(sql7`
             CREATE TABLE IF NOT EXISTS "aiAgentRuns" (
                 "id"               serial        PRIMARY KEY,
                 "organizationId"   integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -32140,7 +34116,7 @@ async function ensureMigrated() {
         `);
     const driftExec = async (label, stmt) => {
       try {
-        await db.execute(sql5.raw(stmt));
+        await db.execute(stmt);
         if (!ENV.isProduction) console.info(`[Migrate] Drift ok: ${label}`);
       } catch (err) {
         console.warn(
@@ -32151,8 +34127,38 @@ async function ensureMigrated() {
     };
     await driftExec(
       "auditLogs.chainHash",
-      `ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text;`
+      sql7`ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text`
     );
+    const tenantIndexTables = [
+      "complianceReports",
+      "apiKeys",
+      "compliancePolicies",
+      "complianceIncidents",
+      "auditSchedules",
+      "ctemAssets",
+      "continuousComplianceRuns",
+      "rolePermissions",
+      "complianceEvidence",
+      "dsrRequests",
+      "serviceRequests",
+      "assetInventory",
+      "securityMaturityAssessments",
+      "threatIntelItems",
+      "knowledgeGraphNodes",
+      "knowledgeGraphEdges",
+      "regulatoryChanges",
+      "complianceSimulations",
+      "aiAgentRuns",
+      "organization_profiles_custom",
+      "analytics_events",
+      "email_log"
+    ];
+    for (const table of tenantIndexTables) {
+      await driftExec(
+        `index ${table}.organizationId`,
+        sql7`CREATE INDEX IF NOT EXISTS ${sql7.identifier(`${table}_organizationId_idx`)} ON ${sql7.identifier(table)} ("organizationId")`
+      );
+    }
     const driftEnums = {
       plan: ["free_trial", "starter", "professional", "enterprise"],
       paidPlan: ["starter", "professional", "enterprise"],
@@ -32172,184 +34178,202 @@ async function ensureMigrated() {
     for (const [typeName, values] of Object.entries(driftEnums)) {
       await driftExec(
         `create enum ${typeName}`,
-        `DO $$ BEGIN
-           CREATE TYPE "${typeName}" AS ENUM (${values.map((v) => `'${v}'`).join(",")});
+        sql7`DO $$ BEGIN
+           CREATE TYPE ${sql7.identifier(typeName)} AS ENUM (${values.map((v) => sql7`${v}`).join(",")})
          EXCEPTION WHEN duplicate_object THEN NULL;
          END $$;`
       );
       for (const v of values) {
         await driftExec(
           `enum ${typeName}.${v}`,
-          `ALTER TYPE "${typeName}" ADD VALUE IF NOT EXISTS '${v}'`
+          sql7`ALTER TYPE ${sql7.identifier(typeName)} ADD VALUE IF NOT EXISTS ${v}`
         );
       }
     }
     const driftColumns = [
-      // organizations — billing/trial/stripe columns
       [
         "organizations",
-        `ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`
+        sql7`ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`
       ],
-      ["organizations", `ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
+      ["organizations", sql7`ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
       [
         "organizations",
-        `ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`
-      ],
-      [
-        "organizations",
-        `ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`
+        sql7`ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`
       ],
       [
         "organizations",
-        `ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`
-      ],
-      ["organizations", `ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`],
-      ["organizations", `ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
-      [
-        "organizations",
-        `ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`
       ],
       [
         "organizations",
-        `ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`
       ],
       [
         "organizations",
-        `ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`
+      ],
+      ["organizations", sql7`ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
+      [
+        "organizations",
+        sql7`ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        `ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        `ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`
       ],
-      ["organizations", `ADD COLUMN IF NOT EXISTS "metadata" text`],
-      // auditLogs — local-user actor columns
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "userId" integer`],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "localUserId" integer`],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "organizationId" integer`],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
+      [
+        "organizations",
+        sql7`ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`
+      ],
+      [
+        "organizations",
+        sql7`ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`
+      ],
+      ["organizations", sql7`ADD COLUMN IF NOT EXISTS "metadata" text`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "localUserId" integer`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "organizationId" integer`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
       [
         "auditLogs",
-        `ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`
       ],
       [
         "auditLogs",
-        `ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`
       ],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "entityId" integer`],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "entityId" integer`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
       [
         "auditLogs",
-        `ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`
       ],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "payload" text`],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
-      ["auditLogs", `ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
-      // subscriptions — Stripe sync columns
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "payload" text`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
+      ["auditLogs", sql7`ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
       [
         "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`
-      ],
-      ["subscriptions", `ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`],
-      [
-        "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`
       ],
       [
         "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`
       ],
       [
         "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`
       ],
       [
         "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`
       ],
       [
         "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`
       ],
       [
         "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`
+        sql7`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`
       ],
       [
         "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`
+        sql7`ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`
       ],
       [
         "subscriptions",
-        `ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`
       ],
-      ["subscriptions", `ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
-      ["subscriptions", `ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`],
-      ["subscriptions", `ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
-      // billingEvents — Stripe event log columns
-      ["billingEvents", `ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
-      ["billingEvents", `ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`],
+      [
+        "subscriptions",
+        sql7`ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`
+      ],
+      [
+        "subscriptions",
+        sql7`ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`
+      ],
+      ["subscriptions", sql7`ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
+      [
+        "subscriptions",
+        sql7`ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`
+      ],
+      ["subscriptions", sql7`ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
+      ["billingEvents", sql7`ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
       [
         "billingEvents",
-        `ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`
       ],
       [
         "billingEvents",
-        `ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`
       ],
-      ["billingEvents", `ADD COLUMN IF NOT EXISTS "amountCents" integer`],
       [
         "billingEvents",
-        `ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`
+        sql7`ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`
       ],
-      ["billingEvents", `ADD COLUMN IF NOT EXISTS "description" text`],
-      ["billingEvents", `ADD COLUMN IF NOT EXISTS "rawPayload" text`],
-      // organizationMembers — local-user membership columns
-      ["organizationMembers", `ADD COLUMN IF NOT EXISTS "localUserId" integer`],
-      ["organizationMembers", `ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["billingEvents", sql7`ADD COLUMN IF NOT EXISTS "amountCents" integer`],
+      [
+        "billingEvents",
+        sql7`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`
+      ],
+      ["billingEvents", sql7`ADD COLUMN IF NOT EXISTS "description" text`],
+      ["billingEvents", sql7`ADD COLUMN IF NOT EXISTS "rawPayload" text`],
       [
         "organizationMembers",
-        `ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`
+        sql7`ADD COLUMN IF NOT EXISTS "localUserId" integer`
       ],
+      ["organizationMembers", sql7`ADD COLUMN IF NOT EXISTS "userId" integer`],
       [
         "organizationMembers",
-        `ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`
-      ],
-      [
-        "organizationMembers",
-        `ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`
-      ],
-      [
-        "organizationMembers",
-        `ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`
+        sql7`ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`
       ],
       [
         "organizationMembers",
-        `ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`
+        sql7`ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`
       ],
       [
         "organizationMembers",
-        `ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
+        sql7`ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`
+      ],
+      [
+        "organizationMembers",
+        sql7`ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`
+      ],
+      [
+        "organizationMembers",
+        sql7`ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`
+      ],
+      [
+        "organizationMembers",
+        sql7`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
       ]
     ];
     for (const [table, clause] of driftColumns) {
-      await driftExec(table, `ALTER TABLE "${table}" ${clause}`);
+      await driftExec(
+        table,
+        sql7`ALTER TABLE ${sql7.identifier(table)} ${clause}`
+      );
     }
     await driftExec(
       "subscriptions unique stripeSubscriptionId",
-      `CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique"
-       ON "subscriptions" ("stripeSubscriptionId")`
+      sql7`CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique" ON "subscriptions" ("stripeSubscriptionId")`
     );
     await driftExec(
       "billingEvents unique stripeEventId",
-      `CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique"
-       ON "billingEvents" ("stripeEventId")`
+      sql7`CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique" ON "billingEvents" ("stripeEventId")`
     );
     await seedComplianceFrameworks(db);
+    await db.execute(sql7`
+            CREATE TABLE IF NOT EXISTS "yallaAdminSettings" (
+                "key"       varchar(64) NOT NULL PRIMARY KEY,
+                "value"     text        NOT NULL,
+                "updatedAt" timestamp   NOT NULL DEFAULT now()
+            )
+        `);
     migrationApplied = true;
     if (!ENV.isProduction) {
       console.info("[Migrate] Schema auto-migration complete.");
@@ -32366,165 +34390,8 @@ async function ensureMigrated() {
 init_env();
 init_config_schema();
 init_db();
+init_rateLimiter();
 import { nanoid as nanoid2 } from "nanoid";
-
-// server/_core/security.ts
-init_env();
-var NO_INDEX_PATH_PREFIXES = [
-  "/api/",
-  "/dashboard",
-  "/vendor-assessment",
-  "/vendor-risk",
-  "/market-entry",
-  "/client-workspace",
-  "/admin-control-center",
-  "/operations",
-  "/laws",
-  "/compliance-tracker",
-  "/report-center",
-  "/billing",
-  "/compliance-calendar",
-  "/onboarding-wizard",
-  "/saas-metrics",
-  "/heatmap",
-  "/notifications",
-  "/company/dashboard",
-  "/superadmin/dashboard",
-  "/pro-intelligence",
-  "/account-settings",
-  "/team-members",
-  "/org-settings",
-  "/invite-accept",
-  "/audit-log",
-  "/compliance-scorecard",
-  "/api-keys",
-  "/gap-tracker",
-  "/assessment-history",
-  "/vendor/",
-  "/remediation-planner",
-  "/risk-register",
-  "/policy-manager",
-  "/incident-register",
-  "/audit-schedule",
-  "/vendor-compliance",
-  "/compliance-reports",
-  "/continuous-compliance",
-  "/evidence-locker",
-  "/dsr-tracker",
-  "/login",
-  "/signup",
-  "/forgot-password",
-  "/reset-password"
-];
-function normalizePath(pathname) {
-  const [withoutQuery] = pathname.split(/[?#]/, 1);
-  const normalized = withoutQuery.trim().toLowerCase();
-  return normalized || "/";
-}
-function shouldNoIndex(pathname) {
-  const normalized = normalizePath(pathname);
-  return NO_INDEX_PATH_PREFIXES.some(
-    (prefix) => normalized === prefix || normalized.startsWith(prefix)
-  );
-}
-function shouldDisableCaching(pathname) {
-  const normalized = normalizePath(pathname);
-  return normalized.startsWith("/api/") || shouldNoIndex(normalized);
-}
-var INLINE_SCRIPT_HASHES = [
-  "'sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc='",
-  "'sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U='",
-  "'sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k='",
-  "'sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess='"
-];
-var FORGE_HOST = "https://forge.butterfly-effect.dev";
-function buildCsp(isProduction) {
-  const parts = [
-    "default-src 'self'",
-    "base-uri 'self'",
-    "object-src 'none'",
-    "img-src 'self' data: blob: https:",
-    "font-src 'self' data: https://fonts.gstatic.com",
-    `connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co ${FORGE_HOST}`,
-    "frame-src https://js.stripe.com https://hooks.stripe.com",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-    "report-uri /api/csp-report"
-  ];
-  if (isProduction) {
-    parts.push(
-      `script-src 'self' https://js.stripe.com ${FORGE_HOST} ${INLINE_SCRIPT_HASHES.join(" ")}`
-    );
-    parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
-    parts.push("upgrade-insecure-requests");
-  } else {
-    parts.push(
-      `script-src 'self' 'unsafe-inline' https://js.stripe.com ${FORGE_HOST}`
-    );
-    parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
-  }
-  return parts;
-}
-function getSecurityHeadersForRequest({
-  pathname,
-  isHttps
-}) {
-  const normalized = normalizePath(pathname);
-  const isProduction = ENV.isProduction;
-  const cspParts = buildCsp(isProduction);
-  const roCspParts = buildCsp(false).map(
-    (p) => p.startsWith("report-uri") ? "report-uri /api/csp-report?ro=1" : p
-  );
-  const headers = {
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), browsing-topics=(), usb=(), midi=(), sync-xhr=(), magnetometer=(), gyroscope=(), serial=(), fullscreen=(self)",
-    "Cross-Origin-Opener-Policy": "same-origin",
-    "Cross-Origin-Resource-Policy": "same-origin",
-    "Origin-Agent-Cluster": "?1",
-    // Omitting Timing-Allow-Origin is the correct way to block cross-origin
-    // pages from reading Resource Timing data (header absent = no access).
-    // Do NOT set it to "'none'" — that is a malformed value that browsers
-    // may handle inconsistently.
-    "Content-Security-Policy": cspParts.join("; "),
-    "Content-Security-Policy-Report-Only": roCspParts.join("; ")
-  };
-  if (shouldNoIndex(normalized)) {
-    headers["X-Robots-Tag"] = "noindex, nofollow, noarchive, nosnippet";
-  }
-  if (shouldDisableCaching(normalized)) {
-    headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private";
-    headers.Pragma = "no-cache";
-    headers.Expires = "0";
-  }
-  if (isHttps) {
-    headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload";
-  }
-  return headers;
-}
-function parseCspReport(body) {
-  if (!body || typeof body !== "object") return {};
-  const report = body["csp-report"];
-  if (!report || typeof report !== "object") return {};
-  return report;
-}
-function getClientIp4(req) {
-  const cfConnectingIp = req.headers["cf-connecting-ip"];
-  if (typeof cfConnectingIp === "string" && cfConnectingIp.trim()) {
-    return cfConnectingIp.trim();
-  }
-  const realIp = req.headers["x-real-ip"];
-  if (typeof realIp === "string" && realIp.trim()) {
-    return realIp.trim();
-  }
-  const forwardedFor = req.headers["x-forwarded-for"];
-  const forwardedValue = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
-  if (forwardedValue && typeof forwardedValue === "string") {
-    return forwardedValue.split(",")[0].trim();
-  }
-  return req.ip || req.socket.remoteAddress || "unknown";
-}
 
 // server/_core/yalla-admin-router.ts
 init_db();
@@ -32534,8 +34401,18 @@ import bcrypt2 from "bcryptjs";
 import { SignJWT as SignJWT3, jwtVerify as jwtVerify3 } from "jose";
 import { nanoid } from "nanoid";
 import { parse as parseCookieHeader4 } from "cookie";
+import {
+  generateSecret as otpGenerateSecret2,
+  generateURI as generateURI2,
+  verifySync as otpVerifySync2
+} from "otplib";
+import qrcode2 from "qrcode";
 init_env();
-import { sql as sql6 } from "drizzle-orm";
+init_logger();
+init_rateLimiter();
+init_sse_bus();
+init_sse_bus();
+import { sql as sql8 } from "drizzle-orm";
 var ADMIN_SECRET = ENV.yallaAdminSecret;
 var ADMIN_USERNAME = ENV.yallaAdminUsername;
 var ADMIN_PASSWORD_HASH = ENV.yallaAdminPasswordHash;
@@ -32553,9 +34430,9 @@ if (ENV.isProduction && !jwtSecretStr) {
 var ADMIN_JWT_SECRET = new TextEncoder().encode(jwtSecretStr);
 var IP_ALLOWLIST = IP_ALLOWLIST_RAW ? IP_ALLOWLIST_RAW.split(",").map((s) => s.trim()).filter(Boolean) : [];
 var GATE_COOKIE_VALUE = ADMIN_SECRET ? createHash5("sha256").update(`yalla-admin-gate:${ADMIN_SECRET}`).digest("hex") : "";
-var loginAttempts = /* @__PURE__ */ new Map();
 var MAX_ATTEMPTS = 5;
-var LOCKOUT_MS = 15 * 60 * 1e3;
+var LOCKOUT_WINDOW_MS = 15 * 60 * 1e3;
+var loginFailKey = (ip) => `admin-login-fail:${ip}`;
 var usedOwnerLinkNonces = /* @__PURE__ */ new Map();
 var revokedSessions = /* @__PURE__ */ new Map();
 function pruneRevokedSessions() {
@@ -32563,12 +34440,32 @@ function pruneRevokedSessions() {
   for (const [id, revokedAt] of revokedSessions) {
     if (revokedAt < cutoff) revokedSessions.delete(id);
   }
+  for (const [id, touched] of sessionLastTouch) {
+    if (touched < cutoff) sessionLastTouch.delete(id);
+  }
 }
 function revokeAdminSession(sessionId) {
   revokedSessions.set(sessionId, Date.now());
 }
 function isAdminSessionRevoked(sessionId) {
   return revokedSessions.has(sessionId);
+}
+var sessionLastTouch = /* @__PURE__ */ new Map();
+function touchAdminSession(sessionId) {
+  const now = Date.now();
+  const last = sessionLastTouch.get(sessionId) ?? 0;
+  if (now - last < 6e4) return;
+  sessionLastTouch.set(sessionId, now);
+  void (async () => {
+    try {
+      const db = await getDb();
+      if (!db) return;
+      await db.execute(
+        sql8`UPDATE "yallaAdminSessions" SET "lastSeenAt" = NOW() WHERE id = ${sessionId}`
+      );
+    } catch {
+    }
+  })();
 }
 var endpointRateMap = /* @__PURE__ */ new Map();
 var ENDPOINT_WINDOW_MS = 5 * 60 * 1e3;
@@ -32581,6 +34478,108 @@ function getClientIp5(req) {
   }
   if (Array.isArray(hdr)) return hdr[hdr.length - 1].trim();
   return req.socket.remoteAddress ?? "unknown";
+}
+async function isLoginLocked(ip, res) {
+  const count3 = await getRateLimitCount(loginFailKey(ip), LOCKOUT_WINDOW_MS);
+  if (count3 >= MAX_ATTEMPTS) {
+    const windowIndex = Math.floor(Date.now() / LOCKOUT_WINDOW_MS);
+    const retryAfterSec = Math.max(
+      1,
+      Math.ceil(((windowIndex + 1) * LOCKOUT_WINDOW_MS - Date.now()) / 1e3)
+    );
+    res.setHeader("Retry-After", String(retryAfterSec));
+    res.status(429).json({
+      error: `Too many failed attempts. Locked for ${Math.ceil(retryAfterSec / 60)} more minute(s).`,
+      retryAfterSec
+    });
+    return true;
+  }
+  return false;
+}
+async function recordLoginFailure(ip) {
+  await checkRateLimit(loginFailKey(ip), MAX_ATTEMPTS, LOCKOUT_WINDOW_MS);
+}
+async function clearLoginFailures(ip) {
+  await resetRateLimit(loginFailKey(ip), LOCKOUT_WINDOW_MS);
+}
+async function getAdminSetting(key) {
+  try {
+    const db = await getDb();
+    if (!db) return null;
+    const result = await db.execute(
+      sql8`SELECT "value" FROM "yallaAdminSettings" WHERE "key" = ${key}`
+    );
+    const rows = result.rows;
+    return rows?.[0]?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+async function setAdminSetting(key, value) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  await db.execute(sql8`
+            INSERT INTO "yallaAdminSettings" ("key", "value", "updatedAt")
+            VALUES (${key}, ${value}, NOW())
+            ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = NOW()
+        `);
+}
+async function deleteAdminSetting(key) {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    await db.execute(
+      sql8`DELETE FROM "yallaAdminSettings" WHERE "key" = ${key}`
+    );
+  } catch {
+  }
+}
+async function verifyAdminPassword(password) {
+  const overrideHash = await getAdminSetting("passwordHash");
+  if (overrideHash) return bcrypt2.compare(password, overrideHash);
+  if (ADMIN_PASSWORD_HASH) return bcrypt2.compare(password, ADMIN_PASSWORD_HASH);
+  if (ENV.isDevelopment) {
+    const devPassword = process.env["YALLA_ADMIN_DEV_PASSWORD"] || "";
+    return devPassword.length > 0 && password === devPassword;
+  }
+  return false;
+}
+async function isFounderMfaEnabled() {
+  return await getAdminSetting("mfaEnabled") === "1";
+}
+async function createAdminSession(req, res, ip, opts = {}) {
+  const sessionId = nanoid(32);
+  const expiresAt = new Date(Date.now() + SESSION_TTL_H * 3600 * 1e3);
+  const token = await signSession(sessionId, ADMIN_USERNAME);
+  try {
+    const db = await getDb();
+    if (db) {
+      await db.execute(sql8`
+                INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
+                VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
+            `);
+    }
+  } catch {
+    logger.warn(
+      "[YallaAdmin] Failed to persist session \u2014 login proceeds without DB"
+    );
+  }
+  await auditLog(
+    sessionId,
+    ADMIN_USERNAME,
+    "login.success",
+    ip,
+    void 0,
+    opts.mfaVia ? { mfa: opts.mfaVia } : void 0
+  );
+  broadcastSSE("admin_login", {
+    ip,
+    mfa: opts.mfaVia ?? false,
+    ts: (/* @__PURE__ */ new Date()).toISOString()
+  });
+  res.cookie(COOKIE_NAME2, token, cookieOptions2(req));
+  if (opts.setGateCookie) setGateCookie(req, res);
+  res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
 }
 function hashOwnerLinkNonce(nonce) {
   return createHash5("sha256").update(`yalla-admin-link:${nonce}`).digest("hex");
@@ -32614,12 +34613,15 @@ async function auditLog(sessionId, adminUsername, action, ip, target, payload) {
     const db = await getDb();
     if (!db) return;
     const payloadStr = payload ? JSON.stringify(payload) : null;
-    await db.execute(sql6`
-            INSERT INTO yallaAdminAuditLogs (sessionId, adminUsername, action, target, ipAddress, payload)
-            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql6`CAST(${payloadStr} AS JSON)` : null})
+    await db.execute(sql8`
+            INSERT INTO "yallaAdminAuditLogs" ("sessionId", "adminUsername", "action", "target", "ipAddress", "payload")
+            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql8`CAST(${payloadStr} AS JSON)` : null})
         `);
   } catch {
   }
+}
+async function auditAdminAction(sessionId, adminUsername, action, ip, target, payload) {
+  await auditLog(sessionId, adminUsername, action, ip, target, payload);
 }
 function getAdminCookie(req) {
   const cookieHeader = req.headers.cookie;
@@ -32690,9 +34692,9 @@ async function hasUsedOwnerLinkNonce(nonce) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    const linkResult = await db.execute(sql6`
-            SELECT id FROM yallaAdminAccessLinkNonces
-            WHERE nonceHash = ${nonceHash}
+    const linkResult = await db.execute(sql8`
+            SELECT id FROM "yallaAdminAccessLinkNonces"
+            WHERE "nonceHash" = ${nonceHash}
             LIMIT 1
         `);
     const rows = linkResult.rows;
@@ -32710,9 +34712,9 @@ async function consumeOwnerLinkNonce(req, nonce, expiresAt, redirectTarget) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    await db.execute(sql6`
-            INSERT INTO yallaAdminAccessLinkNonces (nonceHash, redirectTarget, expiresAt, consumedByIp)
-            VALUES (${nonceHash}, ${redirectTarget}, FROM_UNIXTIME(${expiresAt}), ${getClientIp5(req)})
+    await db.execute(sql8`
+            INSERT INTO "yallaAdminAccessLinkNonces" ("nonceHash", "redirectTarget", "expiresAt", "consumedByIp")
+            VALUES (${nonceHash}, ${redirectTarget}, to_timestamp(${expiresAt}), ${getClientIp5(req)})
         `);
   } catch {
     consumeOwnerLinkNonceInMemory(nonce, expiresAt);
@@ -32752,7 +34754,7 @@ function hasLinkGate(req) {
   return getAccessToken(req) === ADMIN_SECRET;
 }
 function tokenGate(req, res, next) {
-  if (req.path === "/bootstrap" || req.path === "/login" || req.path === "/react-login" || req.path === "/me") {
+  if (req.path === "/bootstrap" || req.path === "/login" || req.path === "/react-login" || req.path === "/me" || req.path === "/2fa/verify") {
     next();
     return;
   }
@@ -32771,16 +34773,43 @@ function tokenGate(req, res, next) {
   }
   res.status(401).json({ error: "Unauthorized" });
 }
+function ipv4ToInt(ip) {
+  const parts = ip.split(".");
+  if (parts.length !== 4) return null;
+  let n = 0;
+  for (const p of parts) {
+    if (!/^\d{1,3}$/.test(p)) return null;
+    const v = parseInt(p, 10);
+    if (v < 0 || v > 255) return null;
+    n = (n << 8 | v) >>> 0;
+  }
+  return n >>> 0;
+}
+function ipMatchesEntry(ip, entry) {
+  const normalisedIp = ip.startsWith("::ffff:") ? ip.slice(7) : ip;
+  if (normalisedIp === entry) return true;
+  if (!entry.includes("/")) return false;
+  const [rangeRaw, bitsRaw] = entry.split("/");
+  const bits = parseInt(bitsRaw, 10);
+  if (Number.isNaN(bits) || bits < 0 || bits > 32) return false;
+  const range = rangeRaw.startsWith("::ffff:") ? rangeRaw.slice(7) : rangeRaw;
+  const ipNum = ipv4ToInt(normalisedIp);
+  const rangeNum = ipv4ToInt(range);
+  if (ipNum === null || rangeNum === null) return false;
+  if (bits === 0) return true;
+  const mask = ~((1 << 32 - bits) - 1) >>> 0;
+  return (ipNum & mask) === (rangeNum & mask);
+}
+function isIpAllowed(ip) {
+  if (IP_ALLOWLIST.length === 0) return true;
+  return IP_ALLOWLIST.some((entry) => ipMatchesEntry(ip, entry));
+}
 function ipAllowlist(req, res, next) {
   if (IP_ALLOWLIST.length === 0) {
     next();
     return;
   }
-  const ip = getClientIp5(req);
-  const allowed = IP_ALLOWLIST.some(
-    (entry) => ip === entry || ip.startsWith(entry.split("/")[0])
-  );
-  if (!allowed) {
+  if (!isIpAllowed(getClientIp5(req))) {
     res.status(403).json({ error: "Access denied from this IP address." });
     return;
   }
@@ -32839,7 +34868,7 @@ function requireJsonContentType(req, res, next) {
   next();
 }
 async function requireSession(req, res, next) {
-  if (req.path === "/bootstrap" || req.path === "/login" || req.path === "/react-login" || req.path === "/me") {
+  if (req.path === "/bootstrap" || req.path === "/login" || req.path === "/react-login" || req.path === "/me" || req.path === "/2fa/verify") {
     next();
     return;
   }
@@ -32861,9 +34890,9 @@ async function requireSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql6`
-                SELECT isRevoked FROM yallaAdminSessions
-                WHERE id = ${parsed.sessionId} AND expiresAt > NOW()
+      const sessionResult = await db.execute(sql8`
+                SELECT "isRevoked" FROM "yallaAdminSessions"
+                WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
             `);
       const rows = sessionResult.rows;
@@ -32876,6 +34905,7 @@ async function requireSession(req, res, next) {
     logger.warn("[YallaAdmin] Session DB check failed \u2014 allowing through");
   }
   req.adminSession = parsed;
+  touchAdminSession(parsed.sessionId);
   next();
 }
 async function handleBootstrap(req, res) {
@@ -32955,56 +34985,26 @@ async function handleLogin(req, res) {
     res.status(400).json({ error: "Invalid credentials format." });
     return;
   }
-  const lockState = loginAttempts.get(ip);
-  if (lockState && lockState.lockedUntil > Date.now()) {
-    const remainingMs = lockState.lockedUntil - Date.now();
-    const retryAfterSec = Math.ceil(remainingMs / 1e3);
-    res.setHeader("Retry-After", String(retryAfterSec));
-    res.status(429).json({
-      error: `Too many failed attempts. Locked for ${Math.ceil(remainingMs / 6e4)} more minute(s).`,
-      retryAfterSec
-    });
-    return;
-  }
+  if (await isLoginLocked(ip, res)) return;
   const usernameOk = username === ADMIN_USERNAME;
-  let passwordOk = false;
-  if (ADMIN_PASSWORD_HASH) {
-    passwordOk = await bcrypt2.compare(password, ADMIN_PASSWORD_HASH);
-  } else if (ENV.isDevelopment) {
-    const devPassword = process.env["YALLA_ADMIN_DEV_PASSWORD"] || "";
-    passwordOk = devPassword.length > 0 && password === devPassword;
-  }
+  const passwordOk = usernameOk && await verifyAdminPassword(password);
   if (!usernameOk || !passwordOk) {
-    const current = loginAttempts.get(ip) ?? { count: 0, lockedUntil: 0 };
-    const newCount = current.count + 1;
-    const lockedUntil = newCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
-    loginAttempts.set(ip, { count: newCount, lockedUntil });
+    await recordLoginFailure(ip);
     await auditLog(null, username, "login.failed", ip);
     res.status(401).json({ error: "Invalid credentials." });
     return;
   }
-  loginAttempts.delete(ip);
-  const sessionId = nanoid(32);
-  const expiresAt = new Date(Date.now() + SESSION_TTL_H * 3600 * 1e3);
-  const token = await signSession(sessionId, ADMIN_USERNAME);
-  try {
-    const db = await getDb();
-    if (db) {
-      await db.execute(sql6`
-                INSERT INTO yallaAdminSessions (id, adminUsername, ipAddress, userAgent, expiresAt)
-                VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
-            `);
-    }
-  } catch {
-    logger.warn(
-      "[YallaAdmin] Failed to persist session \u2014 login proceeds without DB"
-    );
+  await clearLoginFailures(ip);
+  if (await isFounderMfaEnabled()) {
+    const pendingToken = await new SignJWT3({
+      sub: ADMIN_USERNAME,
+      purpose: "yalla-totp-challenge"
+    }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("5m").sign(ADMIN_JWT_SECRET);
+    await auditLog(null, ADMIN_USERNAME, "login.mfa_challenge", ip);
+    res.json({ ok: false, mfaRequired: true, pendingToken });
+    return;
   }
-  await auditLog(sessionId, ADMIN_USERNAME, "login.success", ip);
-  broadcastSSE("admin_login", { ip, ts: (/* @__PURE__ */ new Date()).toISOString() });
-  res.cookie(COOKIE_NAME2, token, cookieOptions2(req));
-  setGateCookie(req, res);
-  res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
+  await createAdminSession(req, res, ip, { setGateCookie: true });
 }
 async function handleReactLogin(req, res) {
   const { username, password } = req.body ?? {};
@@ -33017,55 +35017,26 @@ async function handleReactLogin(req, res) {
     res.status(400).json({ error: "Invalid credentials format." });
     return;
   }
-  const lockState = loginAttempts.get(ip);
-  if (lockState && lockState.lockedUntil > Date.now()) {
-    const remainingMs = lockState.lockedUntil - Date.now();
-    const retryAfterSec = Math.ceil(remainingMs / 1e3);
-    res.setHeader("Retry-After", String(retryAfterSec));
-    res.status(429).json({
-      error: `Too many failed attempts. Locked for ${Math.ceil(remainingMs / 6e4)} more minute(s).`,
-      retryAfterSec
-    });
-    return;
-  }
+  if (await isLoginLocked(ip, res)) return;
   const usernameOk = username === ADMIN_USERNAME;
-  let passwordOk = false;
-  if (ADMIN_PASSWORD_HASH) {
-    passwordOk = await bcrypt2.compare(password, ADMIN_PASSWORD_HASH);
-  } else if (ENV.isDevelopment) {
-    const devPassword = process.env["YALLA_ADMIN_DEV_PASSWORD"] || "";
-    passwordOk = devPassword.length > 0 && password === devPassword;
-  }
+  const passwordOk = usernameOk && await verifyAdminPassword(password);
   if (!usernameOk || !passwordOk) {
-    const current = loginAttempts.get(ip) ?? { count: 0, lockedUntil: 0 };
-    const newCount = current.count + 1;
-    const lockedUntil = newCount >= MAX_ATTEMPTS ? Date.now() + LOCKOUT_MS : 0;
-    loginAttempts.set(ip, { count: newCount, lockedUntil });
+    await recordLoginFailure(ip);
     await auditLog(null, username, "login.failed", ip);
     res.status(401).json({ error: "Invalid credentials." });
     return;
   }
-  loginAttempts.delete(ip);
-  const sessionId = nanoid(32);
-  const expiresAt = new Date(Date.now() + SESSION_TTL_H * 3600 * 1e3);
-  const token = await signSession(sessionId, ADMIN_USERNAME);
-  try {
-    const db = await getDb();
-    if (db) {
-      await db.execute(sql6`
-                INSERT INTO yallaAdminSessions (id, adminUsername, ipAddress, userAgent, expiresAt)
-                VALUES ($${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
-            `);
-    }
-  } catch {
-    logger.warn(
-      "[YallaAdmin] Failed to persist session \u2014 login proceeds without DB"
-    );
+  await clearLoginFailures(ip);
+  if (await isFounderMfaEnabled()) {
+    const pendingToken = await new SignJWT3({
+      sub: ADMIN_USERNAME,
+      purpose: "yalla-totp-challenge"
+    }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("5m").sign(ADMIN_JWT_SECRET);
+    await auditLog(null, ADMIN_USERNAME, "login.mfa_challenge", ip);
+    res.json({ ok: false, mfaRequired: true, pendingToken });
+    return;
   }
-  await auditLog(sessionId, ADMIN_USERNAME, "login.success", ip);
-  broadcastSSE("admin_login", { ip, ts: (/* @__PURE__ */ new Date()).toISOString() });
-  res.cookie(COOKIE_NAME2, token, cookieOptions2(req));
-  res.json({ ok: true, username: ADMIN_USERNAME, expiresAt });
+  await createAdminSession(req, res, ip);
 }
 async function handleLogout(req, res) {
   const session = req.adminSession;
@@ -33075,8 +35046,8 @@ async function handleLogout(req, res) {
     try {
       const db = await getDb();
       if (db) {
-        await db.execute(sql6`
-                    UPDATE yallaAdminSessions SET isRevoked = 1 WHERE id = ${session.sessionId}
+        await db.execute(sql8`
+                    UPDATE "yallaAdminSessions" SET "isRevoked" = 1 WHERE id = ${session.sessionId}
                 `);
       }
     } catch {
@@ -33107,9 +35078,9 @@ async function handleMe(req, res) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql6`
-                SELECT isRevoked FROM yallaAdminSessions
-                WHERE id = ${session.sessionId} AND expiresAt > NOW()
+      const sessionResult = await db.execute(sql8`
+                SELECT "isRevoked" FROM "yallaAdminSessions"
+                WHERE id = ${session.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
             `);
       const rows = sessionResult.rows;
@@ -33134,42 +35105,43 @@ async function handleOverview(_req, res) {
       return;
     }
     const usersResult = await db.execute(
-      sql6`SELECT COUNT(*) as total FROM localUsers`
+      sql8`SELECT COUNT(*) as total FROM "localUsers"`
     );
     const usersRow = usersResult.rows;
     const orgsResult = await db.execute(
-      sql6`SELECT COUNT(*) as total FROM organizations`
+      sql8`SELECT COUNT(*) as total FROM "organizations"`
     );
     const orgsRow = orgsResult.rows;
-    const activeSessionsResult = await db.execute(sql6`
-            SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()
-        `);
-    const activeSessionsRow = activeSessionsResult.rows;
-    const todayLoginsResult = await db.execute(sql6`
-            SELECT COUNT(*) as total FROM auditLogs
-            WHERE action = 'auth.login' AND createdAt >= CURRENT_DATE
+    const todayLoginsResult = await db.execute(sql8`
+            SELECT COUNT(*) as total FROM "auditLogs"
+            WHERE action = 'auth.login' AND "createdAt" >= CURRENT_DATE
         `);
     const todayLoginsRow = todayLoginsResult.rows;
-    const serviceRequestsResult = await db.execute(sql6`
-            SELECT COUNT(*) as total FROM serviceRequests WHERE status NOT IN ('completed', 'cancelled')
+    const serviceRequestsResult = await db.execute(sql8`
+            SELECT COUNT(*) as total FROM "serviceRequests" WHERE status NOT IN ('completed', 'cancelled')
         `);
     const serviceRequestsRow = serviceRequestsResult.rows;
     const assetsResult = await db.execute(
-      sql6`SELECT COUNT(*) as total FROM assetInventory`
+      sql8`SELECT COUNT(*) as total FROM "assetInventory"`
     );
     const assetsRow = assetsResult.rows;
-    const todaySignupsResult = await db.execute(sql6`
-            SELECT COUNT(*) as total FROM localUsers WHERE createdAt::date = CURRENT_DATE
+    const todaySignupsResult = await db.execute(sql8`
+            SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const todaySignupsRow = todaySignupsResult.rows;
-    const newOrgsResult = await db.execute(sql6`
-            SELECT COUNT(*) as total FROM organizations WHERE createdAt::date = CURRENT_DATE
+    const newOrgsResult = await db.execute(sql8`
+            SELECT COUNT(*) as total FROM "organizations" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const newOrgsRow = newOrgsResult.rows;
-    const revenueResult = await db.execute(sql6`
-            SELECT COUNT(*) as total FROM organizations WHERE plan IN ('professional','enterprise') AND isActive = 1
+    const revenueResult = await db.execute(sql8`
+            SELECT COUNT(*) as total FROM "organizations" WHERE plan IN ('professional','enterprise') AND "isActive" = 1
         `);
     const revenueRow = revenueResult.rows;
+    const activeSessionsResult = await db.execute(sql8`
+            SELECT COUNT(*) as total FROM "yallaAdminSessions"
+            WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
+        `);
+    const activeSessionsRow = activeSessionsResult.rows;
     res.json({
       totalUsers: usersRow?.[0]?.total ?? 0,
       totalOrgs: orgsRow?.[0]?.total ?? 0,
@@ -33197,22 +35169,19 @@ async function handleUsers(req, res) {
       200
     );
     const offset = parseInt(req.query.offset ?? "0", 10) || 0;
-    const usersDbResult = await db.execute(sql6`
+    const usersDbResult = await db.execute(sql8`
             SELECT
                 u.id,
-                u.username,
+                u.name AS username,
                 u.email,
-                u.role,
+                u."userType" AS role,
                 u.status,
-                u.isEmailVerified,
-                u.isMfaEnabled,
-                u.createdAt,
-                u.lastLoginAt,
-                COUNT(DISTINCT s.id) as activeSessions
-            FROM localUsers u
-            LEFT JOIN localUserSessions s ON s.userId = u.id AND s.expiresAt > NOW()
-            GROUP BY u.id
-            ORDER BY u.createdAt DESC
+                u."mfaEnabled" AS "isMfaEnabled",
+                u."createdAt",
+                u."lastSignedIn" AS "lastLoginAt",
+                0 AS "activeSessions"
+            FROM "localUsers" u
+            ORDER BY u."createdAt" DESC
             LIMIT ${limit} OFFSET ${offset}
         `);
     const users2 = usersDbResult.rows;
@@ -33231,12 +35200,12 @@ async function handleSystem(_req, res) {
     let tableCount = 0;
     if (db) {
       try {
-        const versionResult = await db.execute(sql6`SELECT VERSION() as v`);
+        const versionResult = await db.execute(sql8`SELECT version() as v`);
         const vRow = versionResult.rows;
         dbVersion = vRow?.[0]?.v ?? "";
-        const tableResult = await db.execute(sql6`
-                    SELECT COUNT(*) as c FROM information_schema.TABLES
-                    WHERE TABLE_SCHEMA = DATABASE()
+        const tableResult = await db.execute(sql8`
+                    SELECT COUNT(*) as c FROM information_schema.tables
+                    WHERE table_schema = 'public'
                 `);
         const tRow = tableResult.rows;
         tableCount = tRow?.[0]?.c ?? 0;
@@ -33280,7 +35249,7 @@ async function handleAudit(req, res) {
     );
     const action = req.query.action;
     const auditResult = await db.execute(
-      action ? sql6`SELECT * FROM yallaAdminAuditLogs WHERE action = ${action} ORDER BY createdAt DESC LIMIT ${limit}` : sql6`SELECT * FROM yallaAdminAuditLogs ORDER BY createdAt DESC LIMIT ${limit}`
+      action ? sql8`SELECT * FROM "yallaAdminAuditLogs" WHERE action = ${action} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql8`SELECT * FROM "yallaAdminAuditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = auditResult.rows;
     res.json(rows ?? []);
@@ -33301,7 +35270,7 @@ async function handlePlatformAudit(req, res) {
     );
     const category = req.query.category;
     const platformAuditResult = await db.execute(
-      category ? sql6`SELECT * FROM auditLogs WHERE category = ${category} ORDER BY createdAt DESC LIMIT ${limit}` : sql6`SELECT * FROM auditLogs ORDER BY createdAt DESC LIMIT ${limit}`
+      category ? sql8`SELECT * FROM "auditLogs" WHERE category = ${category} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql8`SELECT * FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = platformAuditResult.rows;
     res.json(rows ?? []);
@@ -33323,92 +35292,92 @@ async function handleInteractions(req, res) {
     const context = req.query.context?.trim();
     const action = req.query.action?.trim();
     const interactionResult = await db.execute(
-      context && action ? sql6`
+      context && action ? sql8`
                     SELECT
                         l.id,
                         l.context,
                         l.action,
-                        l.entityType,
-                        l.entityId,
-                        l.inputSnapshot,
-                        l.outputRef,
-                        l.durationMs,
-                        l.createdAt,
-                        l.organizationId,
-                        COALESCE(lu.username, u.name, 'anonymous visitor') as actorName,
+                        l."entityType",
+                        l."entityId",
+                        l."inputSnapshot",
+                        l."outputRef",
+                        l."durationMs",
+                        l."createdAt",
+                        l."organizationId",
+                        COALESCE(lu.name, u.name, 'anonymous visitor') as actorName,
                         COALESCE(lu.email, u.email, '') as actorEmail,
                         o.name as organizationName
-                    FROM userInteractionLogs l
-                    LEFT JOIN localUsers lu ON lu.id = l.localUserId
-                    LEFT JOIN users u ON u.id = l.userId
-                    LEFT JOIN organizations o ON o.id = l.organizationId
+                    FROM "userInteractionLogs" l
+                    LEFT JOIN "localUsers" lu ON lu.id = l."localUserId"
+                    LEFT JOIN users u ON u.id = l."userId"
+                    LEFT JOIN "organizations" o ON o.id = l."organizationId"
                     WHERE l.context = ${context} AND l.action = ${action}
-                    ORDER BY l.createdAt DESC
+                    ORDER BY l."createdAt" DESC
                     LIMIT ${limit}
-                ` : context ? sql6`
+                ` : context ? sql8`
                         SELECT
                             l.id,
                             l.context,
                             l.action,
-                            l.entityType,
-                            l.entityId,
-                            l.inputSnapshot,
-                            l.outputRef,
-                            l.durationMs,
-                            l.createdAt,
-                            l.organizationId,
-                            COALESCE(lu.username, u.name, 'anonymous visitor') as actorName,
+                            l."entityType",
+                            l."entityId",
+                            l."inputSnapshot",
+                            l."outputRef",
+                            l."durationMs",
+                            l."createdAt",
+                            l."organizationId",
+                            COALESCE(lu.name, u.name, 'anonymous visitor') as actorName,
                             COALESCE(lu.email, u.email, '') as actorEmail,
                             o.name as organizationName
-                        FROM userInteractionLogs l
-                        LEFT JOIN localUsers lu ON lu.id = l.localUserId
-                        LEFT JOIN users u ON u.id = l.userId
-                        LEFT JOIN organizations o ON o.id = l.organizationId
+                        FROM "userInteractionLogs" l
+                        LEFT JOIN "localUsers" lu ON lu.id = l."localUserId"
+                        LEFT JOIN users u ON u.id = l."userId"
+                        LEFT JOIN "organizations" o ON o.id = l."organizationId"
                         WHERE l.context = ${context}
-                        ORDER BY l.createdAt DESC
+                        ORDER BY l."createdAt" DESC
                         LIMIT ${limit}
-                    ` : action ? sql6`
+                    ` : action ? sql8`
                             SELECT
                                 l.id,
                                 l.context,
                                 l.action,
-                                l.entityType,
-                                l.entityId,
-                                l.inputSnapshot,
-                                l.outputRef,
-                                l.durationMs,
-                                l.createdAt,
-                                l.organizationId,
-                                COALESCE(lu.username, u.name, 'anonymous visitor') as actorName,
+                                l."entityType",
+                                l."entityId",
+                                l."inputSnapshot",
+                                l."outputRef",
+                                l."durationMs",
+                                l."createdAt",
+                                l."organizationId",
+                                COALESCE(lu.name, u.name, 'anonymous visitor') as actorName,
                                 COALESCE(lu.email, u.email, '') as actorEmail,
                                 o.name as organizationName
-                            FROM userInteractionLogs l
-                            LEFT JOIN localUsers lu ON lu.id = l.localUserId
-                            LEFT JOIN users u ON u.id = l.userId
-                            LEFT JOIN organizations o ON o.id = l.organizationId
+                            FROM "userInteractionLogs" l
+                            LEFT JOIN "localUsers" lu ON lu.id = l."localUserId"
+                            LEFT JOIN users u ON u.id = l."userId"
+                            LEFT JOIN "organizations" o ON o.id = l."organizationId"
                             WHERE l.action = ${action}
-                            ORDER BY l.createdAt DESC
+                            ORDER BY l."createdAt" DESC
                             LIMIT ${limit}
-                        ` : sql6`
+                        ` : sql8`
                             SELECT
                                 l.id,
                                 l.context,
                                 l.action,
-                                l.entityType,
-                                l.entityId,
-                                l.inputSnapshot,
-                                l.outputRef,
-                                l.durationMs,
-                                l.createdAt,
-                                l.organizationId,
-                                COALESCE(lu.username, u.name, 'anonymous visitor') as actorName,
+                                l."entityType",
+                                l."entityId",
+                                l."inputSnapshot",
+                                l."outputRef",
+                                l."durationMs",
+                                l."createdAt",
+                                l."organizationId",
+                                COALESCE(lu.name, u.name, 'anonymous visitor') as actorName,
                                 COALESCE(lu.email, u.email, '') as actorEmail,
                                 o.name as organizationName
-                            FROM userInteractionLogs l
-                            LEFT JOIN localUsers lu ON lu.id = l.localUserId
-                            LEFT JOIN users u ON u.id = l.userId
-                            LEFT JOIN organizations o ON o.id = l.organizationId
-                            ORDER BY l.createdAt DESC
+                            FROM "userInteractionLogs" l
+                            LEFT JOIN "localUsers" lu ON lu.id = l."localUserId"
+                            LEFT JOIN users u ON u.id = l."userId"
+                            LEFT JOIN "organizations" o ON o.id = l."organizationId"
+                            ORDER BY l."createdAt" DESC
                             LIMIT ${limit}
                         `
     );
@@ -33431,23 +35400,23 @@ async function handleIntake(req, res) {
     ]);
     let serviceRequests2 = [];
     if (db) {
-      const srResult = await db.execute(sql6`
+      const srResult = await db.execute(sql8`
                 SELECT
                     sr.id,
-                    sr.serviceType,
+                    sr."serviceType",
                     sr.title,
                     sr.priority,
                     sr.status,
-                    sr.requestedByUserId,
-                    sr.createdAt,
-                    sr.updatedAt,
-                    lu.username as requestedByUsername,
-                    lu.email as requestedByEmail,
-                    o.name as organizationName
-                FROM serviceRequests sr
-                LEFT JOIN localUsers lu ON lu.id = sr.requestedByUserId
-                LEFT JOIN organizations o ON o.id = sr.organizationId
-                ORDER BY sr.createdAt DESC
+                    sr."requestedByUserId",
+                    sr."createdAt",
+                    sr."updatedAt",
+                    lu.name as "requestedByUsername",
+                    lu.email as "requestedByEmail",
+                    o.name as "organizationName"
+                FROM "serviceRequests" sr
+                LEFT JOIN "localUsers" lu ON lu.id = sr."requestedByUserId"
+                LEFT JOIN "organizations" o ON o.id = sr."organizationId"
+                ORDER BY sr."createdAt" DESC
                 LIMIT ${limit}
             `);
       const srRows = srResult.rows;
@@ -33479,27 +35448,27 @@ async function handleOnboarding(req, res) {
       200
     );
     const [countsResult, recentResult] = await Promise.all([
-      db.execute(sql6`
+      db.execute(sql8`
                 SELECT stage, COUNT(*) as total
-                FROM userOnboarding
+                FROM "userOnboarding"
                 GROUP BY stage
                 ORDER BY total DESC
             `),
-      db.execute(sql6`
+      db.execute(sql8`
                 SELECT
                     o.id,
                     o.stage,
-                    o.accountIntent,
-                    o.selectedLocale,
-                    o.completedAt,
-                    o.createdAt,
-                    o.updatedAt,
-                    COALESCE(lu.username, u.name, 'unknown') as userLabel,
-                    COALESCE(lu.email, u.email, '') as userEmail
-                FROM userOnboarding o
-                LEFT JOIN localUsers lu ON lu.id = o.localUserId
-                LEFT JOIN users u ON u.id = o.userId
-                ORDER BY o.updatedAt DESC
+                    o."accountIntent",
+                    o."selectedLocale",
+                    o."completedAt",
+                    o."createdAt",
+                    o."updatedAt",
+                    COALESCE(lu.name, u.name, 'unknown') as "userLabel",
+                    COALESCE(lu.email, u.email, '') as "userEmail"
+                FROM "userOnboarding" o
+                LEFT JOIN "localUsers" lu ON lu.id = o."localUserId"
+                LEFT JOIN users u ON u.id = o."userId"
+                ORDER BY o."updatedAt" DESC
                 LIMIT ${limit}
             `)
     ]);
@@ -33521,21 +35490,21 @@ async function handleValidationFailures(req, res) {
       parseInt(req.query.limit ?? "100", 10) || 100,
       500
     );
-    const validationResult = await db.execute(sql6`
+    const validationResult = await db.execute(sql8`
             SELECT
                 id,
                 category,
                 action,
-                entityType,
-                entityId,
-                targetEntity,
-                actorRole,
+                "entityType",
+                "entityId",
+                "targetEntity",
+                "actorRole",
                 outcome,
                 payload,
-                createdAt
-            FROM auditLogs
+                "createdAt"
+            FROM "auditLogs"
             WHERE action = 'trpc.validation_failed' OR outcome IN ('failure', 'blocked')
-            ORDER BY createdAt DESC
+            ORDER BY "createdAt" DESC
             LIMIT ${limit}
         `);
     const rows = validationResult.rows;
@@ -33556,52 +35525,52 @@ async function handleSubscriptions(req, res) {
       500
     );
     const [subsResult, eventsResult, summaryResult] = await Promise.all([
-      db.execute(sql6`
+      db.execute(sql8`
                 SELECT
                     s.id,
                     s.plan,
                     s.status,
-                    s.billingInterval,
-                    s.amountCents,
+                    s."billingInterval",
+                    s."amountCents",
                     s.currency,
-                    s.currentPeriodStart,
-                    s.currentPeriodEnd,
-                    s.cancelAtPeriodEnd,
-                    s.canceledAt,
-                    s.stripeSubscriptionId,
-                    s.createdAt,
-                    s.updatedAt,
-                    o.name          AS organizationName,
-                    o.slug          AS organizationSlug,
-                    o.billingEmail  AS billingEmail
-                FROM subscriptions s
-                JOIN organizations o ON o.id = s.organizationId
-                ORDER BY s.updatedAt DESC
+                    s."currentPeriodStart",
+                    s."currentPeriodEnd",
+                    s."cancelAtPeriodEnd",
+                    s."canceledAt",
+                    s."stripeSubscriptionId",
+                    s."createdAt",
+                    s."updatedAt",
+                    o.name          AS "organizationName",
+                    o.slug          AS "organizationSlug",
+                    o."billingEmail"  AS "billingEmail"
+                FROM "subscriptions" s
+                JOIN "organizations" o ON o.id = s."organizationId"
+                ORDER BY s."updatedAt" DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql6`
+      db.execute(sql8`
                 SELECT
                     be.id,
-                    be.eventType,
+                    be."eventType",
                     be.status,
-                    be.amountCents,
+                    be."amountCents",
                     be.currency,
-                    be.stripeEventId,
-                    be.createdAt,
-                    o.name AS organizationName
-                FROM billingEvents be
-                JOIN organizations o ON o.id = be.organizationId
-                ORDER BY be.createdAt DESC
+                    be."stripeEventId",
+                    be."createdAt",
+                    o.name AS "organizationName"
+                FROM "billingEvents" be
+                JOIN "organizations" o ON o.id = be."organizationId"
+                ORDER BY be."createdAt" DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql6`
+      db.execute(sql8`
                 SELECT
                     plan,
                     status,
                     currency,
                     COUNT(*)           AS count,
-                    SUM(amountCents)   AS totalAmountCents
-                FROM subscriptions
+                    SUM("amountCents")  AS "totalAmountCents"
+                FROM "subscriptions"
                 GROUP BY plan, status, currency
                 ORDER BY plan, status
             `)
@@ -33629,22 +35598,21 @@ async function handleSignups(req, res) {
       parseInt(req.query.limit ?? "50", 10) || 50,
       200
     );
-    const signupsResult = await db.execute(sql6`
+    const signupsResult = await db.execute(sql8`
             SELECT
                 u.id,
-                u.username,
+                u.name AS username,
                 u.email,
-                u.role,
-                u.isEmailVerified,
-                u.isMfaEnabled,
-                u.createdAt,
-                u.lastLoginAt,
-                o.name  AS organizationName,
-                o.plan  AS organizationPlan
-            FROM localUsers u
-            LEFT JOIN organizationMembers om ON om.localUserId = u.id
-            LEFT JOIN organizations o ON o.id = om.organizationId
-            ORDER BY u.createdAt DESC
+                u."userType" AS role,
+                u."mfaEnabled" AS "isMfaEnabled",
+                u."createdAt",
+                u."lastSignedIn" AS "lastLoginAt",
+                o.name  AS "organizationName",
+                o.plan  AS "organizationPlan"
+            FROM "localUsers" u
+            LEFT JOIN "organizationMembers" om ON om."localUserId" = u.id
+            LEFT JOIN "organizations" o ON o.id = om."organizationId"
+            ORDER BY u."createdAt" DESC
             LIMIT ${limit}
         `);
     const rows = signupsResult.rows;
@@ -33664,22 +35632,21 @@ async function handleOrgs(req, res) {
       parseInt(req.query.limit ?? "100", 10) || 100,
       500
     );
-    const orgsResult = await db.execute(sql6`
+    const orgsResult = await db.execute(sql8`
             SELECT
                 o.id,
                 o.name,
                 o.plan,
-                o.isActive,
-                o.trialEndsAt,
-                o.createdAt,
-                o.updatedAt,
-                COUNT(DISTINCT om.id)   AS memberCount,
-                COUNT(DISTINCT CASE WHEN s.expiresAt > NOW() THEN s.id END) AS activeSessions
-            FROM organizations o
-            LEFT JOIN organizationMembers om ON om.organizationId = o.id
-            LEFT JOIN localUserSessions  s  ON s.userId = om.localUserId
+                o."isActive",
+                o."trialEndsAt",
+                o."createdAt",
+                o."updatedAt",
+                COUNT(DISTINCT om.id)   AS "memberCount",
+                0 AS "activeSessions"
+            FROM "organizations" o
+            LEFT JOIN "organizationMembers" om ON om."organizationId" = o.id
             GROUP BY o.id
-            ORDER BY o.createdAt DESC
+            ORDER BY o."createdAt" DESC
             LIMIT ${limit}
         `);
     const rows = orgsResult.rows;
@@ -33702,14 +35669,12 @@ async function handleRealtime(_req, res) {
       return;
     }
     const [sessResult, actResult, newUsersResult] = await Promise.all([
+      db.execute(sql8`SELECT 0 as total`),
       db.execute(
-        sql6`SELECT COUNT(*) as total FROM localUserSessions WHERE expiresAt > NOW()`
+        sql8`SELECT COUNT(*) as total FROM "auditLogs" WHERE "createdAt" >= NOW() - INTERVAL '5 minutes'`
       ),
       db.execute(
-        sql6`SELECT COUNT(*) as total FROM auditLogs WHERE createdAt >= NOW() - INTERVAL '5 minutes'`
-      ),
-      db.execute(
-        sql6`SELECT COUNT(*) as total FROM localUsers WHERE createdAt >= NOW() - INTERVAL '60 minutes'`
+        sql8`SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt" >= NOW() - INTERVAL '60 minutes'`
       )
     ]);
     const sessRow = sessResult.rows;
@@ -33740,28 +35705,24 @@ async function handleUserDetail(req, res) {
       return;
     }
     const [userResult, sessionResult, auditResult, interactionResult] = await Promise.all([
-      db.execute(sql6`
-                SELECT u.id, u.username, u.email, u.role, u.status, u.isEmailVerified, u.isMfaEnabled,
-                       u.createdAt, u.lastLoginAt, o.name AS organizationName, o.plan AS organizationPlan
-                FROM localUsers u
-                LEFT JOIN organizationMembers om ON om.localUserId = u.id
-                LEFT JOIN organizations o ON o.id = om.organizationId
+      db.execute(sql8`
+                SELECT u.id, u.name AS username, u.email, u."userType" AS role, u.status, u."mfaEnabled" AS "isMfaEnabled",
+                       u."createdAt", u."lastSignedIn" AS "lastLoginAt", o.name AS "organizationName", o.plan AS "organizationPlan"
+                FROM "localUsers" u
+                LEFT JOIN "organizationMembers" om ON om."localUserId" = u.id
+                LEFT JOIN "organizations" o ON o.id = om."organizationId"
                 WHERE u.id = ${userId} LIMIT 1
             `),
-      db.execute(sql6`
-                SELECT id, ipAddress, userAgent, createdAt, expiresAt
-                FROM localUserSessions WHERE userId = ${userId}
-                ORDER BY createdAt DESC LIMIT 20
+      db.execute(sql8`SELECT 0 AS id LIMIT 0`),
+      db.execute(sql8`
+                SELECT category, action, outcome, "createdAt"
+                FROM "auditLogs" WHERE "localUserId" = ${userId}
+                ORDER BY "createdAt" DESC LIMIT 30
             `),
-      db.execute(sql6`
-                SELECT category, action, outcome, createdAt
-                FROM auditLogs WHERE localUserId = ${userId}
-                ORDER BY createdAt DESC LIMIT 30
-            `),
-      db.execute(sql6`
-                SELECT context, action, entityType, createdAt, durationMs
-                FROM userInteractionLogs WHERE localUserId = ${userId}
-                ORDER BY createdAt DESC LIMIT 30
+      db.execute(sql8`
+                SELECT context, action, "entityType", "createdAt", "durationMs"
+                FROM "userInteractionLogs" WHERE "localUserId" = ${userId}
+                ORDER BY "createdAt" DESC LIMIT 30
             `)
     ]);
     const user = userResult.rows[0];
@@ -33792,30 +35753,30 @@ async function handleOrgDetail(req, res) {
       return;
     }
     const [orgResult, membersResult, subscriptionResult, auditResult] = await Promise.all([
-      db.execute(sql6`
-                SELECT id, name, plan, status, isActive, trialEndsAt, createdAt, updatedAt,
-                       contactEmail, billingEmail
-                FROM organizations WHERE id = ${orgId} LIMIT 1
+      db.execute(sql8`
+                SELECT id, name, slug, plan, "isActive", "trialEndsAt", "createdAt", "updatedAt",
+                       industry, "billingEmail"
+                FROM "organizations" WHERE id = ${orgId} LIMIT 1
             `),
-      db.execute(sql6`
-                SELECT om.role, u.id AS userId, u.username, u.email, u.status AS userStatus,
-                       u.lastLoginAt, om.joinedAt
-                FROM organizationMembers om
-                JOIN localUsers u ON u.id = om.localUserId
-                WHERE om.organizationId = ${orgId}
-                ORDER BY om.joinedAt ASC
+      db.execute(sql8`
+                SELECT om.role, u.id AS "userId", u.name AS username, u.email, u.status AS "userStatus",
+                       u."lastSignedIn" AS "lastLoginAt", om."createdAt" AS "joinedAt"
+                FROM "organizationMembers" om
+                JOIN "localUsers" u ON u.id = om."localUserId"
+                WHERE om."organizationId" = ${orgId}
+                ORDER BY om."createdAt" ASC
                 LIMIT 50
             `),
-      db.execute(sql6`
-                SELECT id, plan, status, currentPeriodStart, currentPeriodEnd, cancelAtPeriodEnd,
-                       createdAt, updatedAt
-                FROM subscriptions WHERE organizationId = ${orgId}
-                ORDER BY createdAt DESC LIMIT 1
+      db.execute(sql8`
+                SELECT id, plan, status, "currentPeriodStart", "currentPeriodEnd", "cancelAtPeriodEnd",
+                       "createdAt", "updatedAt"
+                FROM "subscriptions" WHERE "organizationId" = ${orgId}
+                ORDER BY "createdAt" DESC LIMIT 1
             `),
-      db.execute(sql6`
-                SELECT category, action, outcome, createdAt
-                FROM auditLogs WHERE organizationId = ${orgId}
-                ORDER BY createdAt DESC LIMIT 30
+      db.execute(sql8`
+                SELECT category, action, outcome, "createdAt"
+                FROM "auditLogs" WHERE "organizationId" = ${orgId}
+                ORDER BY "createdAt" DESC LIMIT 30
             `)
     ]);
     const org = orgResult.rows[0];
@@ -33853,7 +35814,7 @@ async function handleSuspendUser(req, res) {
       return;
     }
     const userResult = await db.execute(
-      sql6`SELECT id, email, status FROM localUsers WHERE id = ${userId} LIMIT 1`
+      sql8`SELECT id, email, status FROM "localUsers" WHERE id = ${userId} LIMIT 1`
     );
     const rows = userResult.rows;
     const user = rows[0];
@@ -33863,7 +35824,7 @@ async function handleSuspendUser(req, res) {
     }
     const newStatus = suspend ? "suspended" : "active";
     await db.execute(
-      sql6`UPDATE localUsers SET status = ${newStatus}, updatedAt = NOW() WHERE id = ${userId}`
+      sql8`UPDATE "localUsers" SET status = ${newStatus}, "updatedAt" = NOW() WHERE id = ${userId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -33892,31 +35853,18 @@ async function handleRevokeUserSessions(req, res) {
     res.status(400).json({ error: "Invalid user id" });
     return;
   }
-  try {
-    const db = await getDb();
-    if (!db) {
-      res.status(503).json({ error: "Database unavailable" });
-      return;
-    }
-    await db.execute(
-      sql6`DELETE FROM localUserSessions WHERE userId = ${userId}`
-    );
-    await auditLog(
-      session?.sessionId ?? null,
-      session?.username ?? "unknown",
-      "user.revoke_sessions",
-      ip,
-      String(userId)
-    );
-    broadcastSSE("user_sessions_revoked", {
-      userId,
-      by: session?.username,
-      ts: (/* @__PURE__ */ new Date()).toISOString()
-    });
-    res.json({ success: true, userId });
-  } catch {
-    res.status(500).json({ error: "Failed to revoke user sessions" });
-  }
+  await auditLog(
+    session?.sessionId ?? null,
+    session?.username ?? "unknown",
+    "user.revoke_sessions",
+    ip,
+    String(userId)
+  );
+  res.json({
+    success: true,
+    userId,
+    note: "Sessions are stateless; suspend the user to block access."
+  });
 }
 async function handleSuspendOrg(req, res) {
   const session = req.adminSession;
@@ -33938,7 +35886,7 @@ async function handleSuspendOrg(req, res) {
       return;
     }
     const orgCheckResult = await db.execute(
-      sql6`SELECT id, name, status FROM organizations WHERE id = ${orgId} LIMIT 1`
+      sql8`SELECT id, name, "isActive" FROM "organizations" WHERE id = ${orgId} LIMIT 1`
     );
     const rows = orgCheckResult.rows;
     const org = rows[0];
@@ -33947,8 +35895,9 @@ async function handleSuspendOrg(req, res) {
       return;
     }
     const newStatus = suspend ? "suspended" : "active";
+    const newIsActive = suspend ? 0 : 1;
     await db.execute(
-      sql6`UPDATE organizations SET status = ${newStatus}, updatedAt = NOW() WHERE id = ${orgId}`
+      sql8`UPDATE "organizations" SET "isActive" = ${newIsActive}, "updatedAt" = NOW() WHERE id = ${orgId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -34033,6 +35982,332 @@ async function handleGenerateAccessLink(req, res) {
     oneTime
   });
 }
+async function handleSessions(req, res) {
+  try {
+    const current = req.adminSession?.sessionId;
+    const db = await getDb();
+    if (!db) {
+      res.json([]);
+      return;
+    }
+    const result = await db.execute(sql8`
+            SELECT id, "adminUsername", "ipAddress", "userAgent", "createdAt", "expiresAt", "lastSeenAt"
+            FROM "yallaAdminSessions"
+            WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
+            ORDER BY "lastSeenAt" DESC
+            LIMIT 50
+        `);
+    const rows = result.rows ?? [];
+    res.json(
+      rows.map((r) => ({
+        id: r.id,
+        adminUsername: r.adminUsername,
+        ipAddress: r.ipAddress,
+        userAgent: r.userAgent,
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt ?? ""),
+        expiresAt: r.expiresAt instanceof Date ? r.expiresAt.toISOString() : String(r.expiresAt ?? ""),
+        lastSeenAt: r.lastSeenAt instanceof Date ? r.lastSeenAt.toISOString() : r.lastSeenAt ? String(r.lastSeenAt) : null,
+        isCurrent: r.id === current
+      }))
+    );
+  } catch {
+    res.status(500).json({ error: "Failed to list sessions" });
+  }
+}
+async function handleRevokeAdminSession(req, res) {
+  const session = req.adminSession;
+  const targetId = String(req.params.id ?? "");
+  const ip = getClientIp5(req);
+  if (!/^[A-Za-z0-9_-]{10,64}$/.test(targetId)) {
+    res.status(400).json({ error: "Invalid session id" });
+    return;
+  }
+  try {
+    const db = await getDb();
+    if (!db) {
+      res.status(503).json({ error: "Database unavailable" });
+      return;
+    }
+    const result = await db.execute(sql8`
+            UPDATE "yallaAdminSessions" SET "isRevoked" = 1
+            WHERE id = ${targetId} AND "isRevoked" = 0
+            RETURNING id
+        `);
+    const rows = result.rows;
+    if (!rows || rows.length === 0) {
+      res.json({ ok: true, alreadyRevoked: true });
+      return;
+    }
+    revokeAdminSession(targetId);
+    const isCurrent = session?.sessionId === targetId;
+    await auditLog(
+      session?.sessionId ?? null,
+      session?.username ?? "unknown",
+      "session.revoke",
+      ip,
+      targetId.slice(0, 12)
+    );
+    if (isCurrent) {
+      res.clearCookie(COOKIE_NAME2, { path: ADMIN_COOKIE_PATH });
+    }
+    res.json({ ok: true, isCurrent });
+  } catch {
+    res.status(500).json({ error: "Failed to revoke session" });
+  }
+}
+async function handlePasswordChange(req, res) {
+  const session = req.adminSession;
+  const ip = getClientIp5(req);
+  const { currentPassword, newPassword } = req.body ?? {};
+  if (typeof currentPassword !== "string" || typeof newPassword !== "string") {
+    res.status(400).json({ error: "Current and new password are required." });
+    return;
+  }
+  if (currentPassword.length > 256 || newPassword.length > 256) {
+    res.status(400).json({ error: "Invalid credentials format." });
+    return;
+  }
+  if (newPassword.length < 12) {
+    res.status(400).json({ error: "New password must be at least 12 characters." });
+    return;
+  }
+  if (!/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+    res.status(400).json({
+      error: "New password must contain at least one letter and one number."
+    });
+    return;
+  }
+  if (newPassword === currentPassword) {
+    res.status(400).json({ error: "New password must differ from the current password." });
+    return;
+  }
+  if (await isLoginLocked(ip, res)) return;
+  const currentOk = await verifyAdminPassword(currentPassword);
+  if (!currentOk) {
+    await recordLoginFailure(ip);
+    await auditLog(
+      session?.sessionId ?? null,
+      session?.username ?? "unknown",
+      "password.change_failed",
+      ip
+    );
+    res.status(401).json({ error: "Current password is incorrect." });
+    return;
+  }
+  await clearLoginFailures(ip);
+  try {
+    const newHash = await bcrypt2.hash(newPassword, 12);
+    await setAdminSetting("passwordHash", newHash);
+  } catch {
+    res.status(503).json({ error: "Could not persist new password." });
+    return;
+  }
+  try {
+    const db = await getDb();
+    if (db && session) {
+      const others = await db.execute(sql8`
+                SELECT id FROM "yallaAdminSessions"
+                WHERE "isRevoked" = 0 AND id != ${session.sessionId}
+            `);
+      const otherIds = others.rows ?? [];
+      for (const row of otherIds) revokeAdminSession(row.id);
+      await db.execute(sql8`
+                UPDATE "yallaAdminSessions" SET "isRevoked" = 1
+                WHERE "isRevoked" = 0 AND id != ${session.sessionId}
+            `);
+    }
+  } catch {
+    logger.warn(
+      "[YallaAdmin] Could not revoke other sessions on password change"
+    );
+  }
+  await auditLog(
+    session?.sessionId ?? null,
+    session?.username ?? "unknown",
+    "password.change",
+    ip
+  );
+  res.json({ ok: true, otherSessionsRevoked: true });
+}
+async function handle2faStatus(_req, res) {
+  res.json({ enabled: await isFounderMfaEnabled() });
+}
+async function handle2faSetup(req, res) {
+  const session = req.adminSession;
+  const ip = getClientIp5(req);
+  try {
+    const secret = otpGenerateSecret2();
+    await setAdminSetting("totpSecretPending", secret);
+    const uri = generateURI2({
+      issuer: "Yalla Hack Founders",
+      label: session?.username ?? ADMIN_USERNAME,
+      secret
+    });
+    const qrDataUrl = await qrcode2.toDataURL(uri);
+    await auditLog(
+      session?.sessionId ?? null,
+      session?.username ?? "unknown",
+      "2fa.setup_started",
+      ip
+    );
+    res.json({ secret, qrDataUrl });
+  } catch {
+    res.status(500).json({ error: "Failed to start 2FA setup" });
+  }
+}
+async function handle2faConfirm(req, res) {
+  const session = req.adminSession;
+  const ip = getClientIp5(req);
+  const { code } = req.body ?? {};
+  if (typeof code !== "string" || !/^\d{6}$/.test(code)) {
+    res.status(400).json({ error: "Enter the 6-digit code from your app." });
+    return;
+  }
+  const pendingSecret = await getAdminSetting("totpSecretPending");
+  if (!pendingSecret) {
+    res.status(400).json({ error: "No pending 2FA setup. Start setup again." });
+    return;
+  }
+  let valid;
+  try {
+    valid = otpVerifySync2({ token: code, secret: pendingSecret }).valid;
+  } catch {
+    valid = false;
+  }
+  if (!valid) {
+    await auditLog(
+      session?.sessionId ?? null,
+      session?.username ?? "unknown",
+      "2fa.confirm_failed",
+      ip
+    );
+    res.status(400).json({ error: "Invalid authenticator code." });
+    return;
+  }
+  const backupCodes = Array.from(
+    { length: 8 },
+    () => createHash5("sha256").update(`${ADMIN_USERNAME}-${Date.now()}-${Math.random()}`).digest("hex").slice(0, 10).toUpperCase()
+  );
+  const hashedCodes = backupCodes.map(
+    (c) => createHash5("sha256").update(c).digest("hex")
+  );
+  try {
+    await setAdminSetting("totpSecret", pendingSecret);
+    await setAdminSetting("mfaEnabled", "1");
+    await setAdminSetting("mfaBackupCodes", JSON.stringify(hashedCodes));
+    await deleteAdminSetting("totpSecretPending");
+  } catch {
+    res.status(503).json({ error: "Could not enable 2FA." });
+    return;
+  }
+  await auditLog(
+    session?.sessionId ?? null,
+    session?.username ?? "unknown",
+    "2fa.enable",
+    ip
+  );
+  broadcastSSE("platform_event", {
+    action: "admin_2fa_enabled",
+    ts: (/* @__PURE__ */ new Date()).toISOString()
+  });
+  res.json({ backupCodes });
+}
+async function handle2faDisable(req, res) {
+  const session = req.adminSession;
+  const ip = getClientIp5(req);
+  const { password } = req.body ?? {};
+  if (typeof password !== "string" || password.length === 0) {
+    res.status(400).json({ error: "Password is required to disable 2FA." });
+    return;
+  }
+  if (await isLoginLocked(ip, res)) return;
+  if (!await verifyAdminPassword(password)) {
+    await recordLoginFailure(ip);
+    res.status(401).json({ error: "Incorrect password." });
+    return;
+  }
+  await clearLoginFailures(ip);
+  await deleteAdminSetting("mfaEnabled");
+  await deleteAdminSetting("totpSecret");
+  await deleteAdminSetting("totpSecretPending");
+  await deleteAdminSetting("mfaBackupCodes");
+  await auditLog(
+    session?.sessionId ?? null,
+    session?.username ?? "unknown",
+    "2fa.disable",
+    ip
+  );
+  res.json({ ok: true });
+}
+async function handle2faVerify(req, res) {
+  const { pendingToken, code } = req.body ?? {};
+  const ip = getClientIp5(req);
+  if (typeof pendingToken !== "string" || typeof code !== "string") {
+    res.status(400).json({ error: "Challenge token and code are required." });
+    return;
+  }
+  if (await isLoginLocked(ip, res)) return;
+  let payload;
+  try {
+    const verified = await jwtVerify3(pendingToken, ADMIN_JWT_SECRET);
+    payload = verified.payload;
+  } catch {
+    payload = null;
+  }
+  if (!payload || payload.purpose !== "yalla-totp-challenge") {
+    res.status(401).json({ error: "Invalid or expired challenge." });
+    return;
+  }
+  if (!await isFounderMfaEnabled()) {
+    res.status(400).json({ error: "2FA is not enabled." });
+    return;
+  }
+  const totpSecret = await getAdminSetting("totpSecret");
+  if (!totpSecret) {
+    res.status(500).json({ error: "2FA misconfigured." });
+    return;
+  }
+  const normalised = code.trim().toUpperCase();
+  let via = null;
+  if (/^\d{6}$/.test(normalised)) {
+    try {
+      if (otpVerifySync2({ token: normalised, secret: totpSecret }).valid) {
+        via = "totp";
+      }
+    } catch {
+      via = null;
+    }
+  }
+  if (!via && normalised.length >= 8) {
+    const hashed = createHash5("sha256").update(normalised).digest("hex");
+    const stored = await getAdminSetting("mfaBackupCodes");
+    if (stored) {
+      try {
+        const codes = JSON.parse(stored);
+        const idx = codes.indexOf(hashed);
+        if (idx !== -1) {
+          codes.splice(idx, 1);
+          await setAdminSetting("mfaBackupCodes", JSON.stringify(codes));
+          via = "backup";
+        }
+      } catch {
+      }
+    }
+  }
+  if (!via) {
+    await recordLoginFailure(ip);
+    await auditLog(
+      null,
+      String(payload.sub ?? ADMIN_USERNAME),
+      "login.mfa_failed",
+      ip
+    );
+    res.status(401).json({ error: "Invalid authentication code." });
+    return;
+  }
+  await clearLoginFailures(ip);
+  await createAdminSession(req, res, ip, { mfaVia: via });
+}
 async function handleExportCsv(req, res) {
   const session = req.adminSession;
   const ip = getClientIp5(req);
@@ -34054,39 +36329,41 @@ async function handleExportCsv(req, res) {
     let headers;
     let filename;
     if (type === "users") {
-      const userExportResult = await db.execute(sql6`
-                SELECT id, username, email, role, isEmailVerified, isMfaEnabled, createdAt, lastLoginAt
-                FROM localUsers ORDER BY createdAt DESC LIMIT 10000
+      const userExportResult = await db.execute(sql8`
+                SELECT id, name, email, "phoneNumber", "userType" AS role, status,
+                       "companyName", "jobTitle", industry, "preferredLocale",
+                       "mfaEnabled" AS "isMfaEnabled", "createdAt", "lastSignedIn" AS "lastLoginAt"
+                FROM "localUsers" ORDER BY "createdAt" DESC LIMIT 10000
             `);
       const userRows = userExportResult.rows;
       rows = userRows ?? [];
-      headers = "id,username,email,role,isEmailVerified,isMfaEnabled,createdAt,lastLoginAt";
+      headers = "id,name,email,phoneNumber,role,status,companyName,jobTitle,industry,preferredLocale,isMfaEnabled,createdAt,lastLoginAt";
       filename = "users-export.csv";
     } else if (type === "orgs") {
-      const orgExportResult = await db.execute(sql6`
-                SELECT id, name, plan, isActive, trialEndsAt, createdAt
-                FROM organizations ORDER BY createdAt DESC LIMIT 10000
+      const orgExportResult = await db.execute(sql8`
+                SELECT id, name, plan, "isActive", "trialEndsAt", "createdAt"
+                FROM "organizations" ORDER BY "createdAt" DESC LIMIT 10000
             `);
       const orgRows = orgExportResult.rows;
       rows = orgRows ?? [];
       headers = "id,name,plan,isActive,trialEndsAt,createdAt";
       filename = "orgs-export.csv";
     } else if (type === "subscriptions") {
-      const subExportResult = await db.execute(sql6`
-                SELECT s.id, s.plan, s.status, s.currentPeriodStart, s.currentPeriodEnd,
-                       s.cancelAtPeriodEnd, o.name AS orgName, s.createdAt
-                FROM subscriptions s
-                JOIN organizations o ON o.id = s.organizationId
-                ORDER BY s.createdAt DESC LIMIT 10000
+      const subExportResult = await db.execute(sql8`
+                SELECT s.id, s.plan, s.status, s."currentPeriodStart", s."currentPeriodEnd",
+                       s."cancelAtPeriodEnd", o.name AS "orgName", s."createdAt"
+                FROM "subscriptions" s
+                JOIN "organizations" o ON o.id = s."organizationId"
+                ORDER BY s."createdAt" DESC LIMIT 10000
             `);
       const subRows = subExportResult.rows;
       rows = subRows ?? [];
       headers = "id,plan,status,currentPeriodStart,currentPeriodEnd,cancelAtPeriodEnd,orgName,createdAt";
       filename = "subscriptions-export.csv";
     } else if (type === "audit") {
-      const auditExportResult = await db.execute(sql6`
-                SELECT id, category, action, outcome, ipAddress, createdAt
-                FROM auditLogs ORDER BY createdAt DESC LIMIT 10000
+      const auditExportResult = await db.execute(sql8`
+                SELECT id, category, action, outcome, "ipHash" AS "ipAddress", "createdAt"
+                FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT 10000
             `);
       const auditRows = auditExportResult.rows;
       rows = auditRows ?? [];
@@ -34138,10 +36415,10 @@ function scheduleSessionCleanup() {
     try {
       const db = await getDb();
       if (!db) return;
-      await db.execute(sql6`
-                DELETE FROM yallaAdminSessions
-                WHERE expiresAt < NOW()
-                   OR (isRevoked = 1 AND lastSeenAt < NOW() - INTERVAL '7 days'))
+      await db.execute(sql8`
+                DELETE FROM "yallaAdminSessions"
+                WHERE "expiresAt" < NOW()
+                   OR ("isRevoked" = 1 AND "lastSeenAt" < NOW() - INTERVAL '7 days')
             `);
     } catch {
       logger.warn(
@@ -34165,6 +36442,20 @@ function createYallaAdminRouter() {
   router2.use((req, res, next) => void requireSession(req, res, next));
   router2.post("/logout", (req, res) => void handleLogout(req, res));
   router2.get("/me", (req, res) => void handleMe(req, res));
+  router2.get("/2fa/status", (req, res) => void handle2faStatus(req, res));
+  router2.post("/2fa/setup", (req, res) => void handle2faSetup(req, res));
+  router2.post("/2fa/confirm", (req, res) => void handle2faConfirm(req, res));
+  router2.post("/2fa/disable", (req, res) => void handle2faDisable(req, res));
+  router2.post("/2fa/verify", (req, res) => void handle2faVerify(req, res));
+  router2.post(
+    "/password/change",
+    (req, res) => void handlePasswordChange(req, res)
+  );
+  router2.get("/stats/sessions", (req, res) => void handleSessions(req, res));
+  router2.post(
+    "/sessions/:id/revoke",
+    (req, res) => void handleRevokeAdminSession(req, res)
+  );
   router2.get("/stats/overview", (req, res) => void handleOverview(req, res));
   router2.get("/stats/users", (req, res) => void handleUsers(req, res));
   router2.get("/stats/signups", (req, res) => void handleSignups(req, res));
@@ -34223,20 +36514,24 @@ function createYallaAdminRouter() {
 // server/_core/admin-dashboard-router.ts
 init_db();
 init_env();
-import {
+init_logger();
+init_rateLimiter();
+import { z as z42 } from "zod";
+import express3, {
   Router
 } from "express";
-import { sql as sql8 } from "drizzle-orm";
+import { sql as sql12 } from "drizzle-orm";
 
 // server/_core/admin-dashboard-store.ts
 init_schema();
 init_db();
-import { and as and33, count, desc as desc25, eq as eq48, gte as gte2, like as like2, or as or7, sql as sql7 } from "drizzle-orm";
+init_local_jwt();
+import { and as and33, count, desc as desc25, eq as eq48, gte as gte2, like as like2, or as or7, sql as sql9 } from "drizzle-orm";
 async function getUnifiedUsers(options) {
   const db = await getDb();
   if (!db) {
     const memFallback = isLocalMemoryFallbackEnabled() ? localMemoryUsers : [];
-    const filtered = memFallback.filter((u) => !options.status || u.status === options.status).map((u) => ({
+    const filtered = memFallback.filter((u) => !options.status || u.status === options.status).filter((u) => !options.role || (u.userType ?? "visitor") === options.role).map((u) => ({
       id: u.id,
       source: "local",
       name: u.name,
@@ -34261,6 +36556,9 @@ async function getUnifiedUsers(options) {
     };
   }
   const conditions = [];
+  if (options.source === "oauth") {
+    return { users: [], total: 0 };
+  }
   if (options.search) {
     const term = `%${options.search}%`;
     conditions.push(
@@ -34280,16 +36578,19 @@ async function getUnifiedUsers(options) {
       )
     );
   }
+  if (options.role) {
+    conditions.push(sql9`${localUsers.userType} = ${options.role}::"userType"`);
+  }
   const whereClause = conditions.length > 0 ? and33(...conditions) : void 0;
   const [total] = await db.select({ count: count() }).from(localUsers).where(whereClause);
   const rows = await db.select({
     id: localUsers.id,
-    source: sql7`'local'`.as("source"),
+    source: sql9`'local'`.as("source"),
     name: localUsers.name,
     email: localUsers.email,
     phoneNumber: localUsers.phoneNumber,
-    role: sql7`${localUsers.userType}`,
-    status: sql7`${localUsers.status}`,
+    role: sql9`${localUsers.userType}`,
+    status: sql9`${localUsers.status}`,
     companyName: localUsers.companyName,
     jobTitle: localUsers.jobTitle,
     industry: localUsers.industry,
@@ -34302,7 +36603,7 @@ async function getUnifiedUsers(options) {
     orgCount: count()
   }).from(organizationMembers).where(
     and33(
-      sql7`${organizationMembers.localUserId} IS NOT NULL`,
+      sql9`${organizationMembers.localUserId} IS NOT NULL`,
       eq48(organizationMembers.status, "active")
     )
   ).groupBy(organizationMembers.localUserId);
@@ -34330,10 +36631,10 @@ async function getUserStats() {
   }
   const [localCounts] = await db.select({
     total: count(),
-    active: sql7`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
-    suspended: sql7`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
-    pending: sql7`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
-    newThisMonth: sql7`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`
+    active: sql9`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
+    suspended: sql9`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
+    pending: sql9`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
+    newThisMonth: sql9`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`
   }).from(localUsers);
   const [oauthCounts] = await db.select({ total: count() }).from(users);
   const roleCounts = await db.select({
@@ -34442,14 +36743,14 @@ async function getMonthlyRegistrations(months = 12) {
   const db = await getDb();
   if (!db) return [];
   const rows = await db.select({
-    month: sql7`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
+    month: sql9`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
     count: count()
   }).from(localUsers).where(
     gte2(
       localUsers.createdAt,
-      sql7`CURRENT_DATE - INTERVAL '${sql7.raw(String(months))} months'`
+      sql9`CURRENT_DATE - INTERVAL '${sql9.raw(String(months))} months'`
     )
-  ).groupBy(sql7`1`).orderBy(sql7`1`);
+  ).groupBy(sql9`1`).orderBy(sql9`1`);
   return rows;
 }
 async function getSubscriptionData() {
@@ -34488,10 +36789,10 @@ async function getOrganizationData() {
     id: organizations.id,
     name: organizations.name,
     plan: organizations.plan,
-    status: sql7`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'inactive' END`,
-    memberCount: sql7`COUNT(DISTINCT ${organizationMembers.id})`,
+    status: sql9`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'suspended' END`,
+    memberCount: sql9`COUNT(DISTINCT ${organizationMembers.id})`,
     createdAt: organizations.createdAt,
-    lastActivity: sql7`MAX(${organizationMembers.createdAt})`
+    lastActivity: sql9`MAX(${organizationMembers.createdAt})`
   }).from(organizations).leftJoin(
     organizationMembers,
     eq48(organizations.id, organizationMembers.organizationId)
@@ -34520,10 +36821,402 @@ async function getSecurityEvents(limit = 200) {
       eq48(auditLogs.outcome, "blocked")
     )
   ).orderBy(desc25(auditLogs.createdAt)).limit(limit);
-  return rows.map((r) => ({ ...r, createdAt: r.createdAt?.toISOString() || "" }));
+  const platformEvents = rows.map((r) => ({
+    ...r,
+    createdAt: r.createdAt?.toISOString() || "",
+    source: "platform"
+  }));
+  let adminEvents = [];
+  try {
+    const adminResult = await db.execute(sql9`
+            SELECT id, action, "ipAddress", "createdAt", "target",
+                   CASE
+                       WHEN action IN ('login.failed', 'login.link_denied',
+                                       'access_link.rejected', 'login.mfa_failed',
+                                       'password.change_failed')
+                           THEN 'failure'
+                       ELSE 'success'
+                   END AS outcome
+            FROM "yallaAdminAuditLogs"
+            WHERE action LIKE 'login.%' OR action LIKE 'access_link.%'
+               OR action LIKE 'password.%' OR action LIKE '2fa.%'
+               OR action LIKE 'session.%'
+            ORDER BY "createdAt" DESC
+            LIMIT ${limit}
+        `);
+    adminEvents = (adminResult.rows ?? []).map((r) => ({
+      id: r.id,
+      action: r.action,
+      category: "auth",
+      outcome: r.outcome,
+      ipAddress: r.ipAddress ?? null,
+      createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt ?? ""),
+      targetEntity: r.target ?? null,
+      source: "admin"
+    }));
+  } catch {
+  }
+  return [...platformEvents, ...adminEvents].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).slice(0, limit);
 }
 
 // server/_core/admin-dashboard-router.ts
+init_admin_insights_store();
+
+// server/_core/platform-monitor-store.ts
+init_schema();
+init_db();
+import { desc as desc27, eq as eq50, gte as gte4, sql as sql11 } from "drizzle-orm";
+var DAY_MS3 = 24 * 60 * 60 * 1e3;
+var INTERVAL_MONTHS = {
+  monthly: 1,
+  quarterly: 3,
+  biannual: 6,
+  annual: 12
+};
+var emptyTraffic = () => ({
+  totalEvents: 0,
+  totalSessions: 0,
+  events24h: 0,
+  events7d: 0,
+  activeUsers24h: 0,
+  activeUsers7d: 0,
+  activeUsers30d: 0,
+  trackedUsers: 0,
+  avgActivationScore: 0,
+  avgHealthScore: 0,
+  daily: [],
+  signups: [],
+  topEvents: []
+});
+var emptyRevenue = () => ({
+  mrrCents: 0,
+  arrCents: 0,
+  arpuCents: 0,
+  payingSubscriptions: 0,
+  trialingSubscriptions: 0,
+  pastDueSubscriptions: 0,
+  canceledSubscriptions: 0,
+  churnRiskSubscriptions: 0,
+  currency: "USD",
+  byPlan: [],
+  byStatus: [],
+  failedPayments30d: 0,
+  failedAmountCents30d: 0,
+  refundedAmountCents30d: 0,
+  recentBillingEvents: []
+});
+var emptyAi = () => ({
+  total: 0,
+  queued: 0,
+  running: 0,
+  completed: 0,
+  failed: 0,
+  cancelled: 0,
+  successRate: 0,
+  avgDurationMs: 0,
+  p95DurationMs: 0,
+  last24h: 0,
+  recentFailures: []
+});
+var emptyEmail = () => ({
+  total: 0,
+  sent: 0,
+  failed: 0,
+  opened: 0,
+  clicked: 0,
+  queued: 0,
+  openRate: 0,
+  clickRate: 0,
+  last24hSent: 0,
+  recentFailures: []
+});
+var emptySecurity = () => ({
+  totalUsers: 0,
+  mfaEnabledUsers: 0,
+  mfaAdoptionRate: 0,
+  suspendedUsers: 0,
+  pendingUsers: 0
+});
+var num = (v) => {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+async function getTrafficMetrics(days = 30) {
+  const db = await getDb();
+  if (!db) return emptyTraffic();
+  const now = Date.now();
+  const since24h = new Date(now - DAY_MS3);
+  const since7d = new Date(now - 7 * DAY_MS3);
+  const since30d = new Date(now - 30 * DAY_MS3);
+  const sinceWindow = new Date(now - days * DAY_MS3);
+  const [totals] = await db.select({
+    totalEvents: sql11`COUNT(*)::int`,
+    events24h: sql11`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since24h})::int`,
+    events7d: sql11`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since7d})::int`
+  }).from(analyticsEvents);
+  const daily = await db.select({
+    date: sql11`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`,
+    events: sql11`COUNT(*)::int`,
+    users: sql11`COUNT(DISTINCT ${analyticsEvents.userId})::int`
+  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(sql11`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`).orderBy(sql11`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`);
+  const signups = await db.select({
+    date: sql11`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`,
+    count: sql11`COUNT(*)::int`
+  }).from(localUsers).where(gte4(localUsers.createdAt, sinceWindow)).groupBy(sql11`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`).orderBy(sql11`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`);
+  const topEvents = await db.select({
+    event: analyticsEvents.event,
+    category: analyticsEvents.category,
+    count: sql11`COUNT(*)::int`
+  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(analyticsEvents.event, analyticsEvents.category).orderBy(desc27(sql11`COUNT(*)`)).limit(10);
+  const [summary] = await db.select({
+    trackedUsers: sql11`COUNT(*)::int`,
+    totalSessions: sql11`COALESCE(SUM(${userActivitySummary.totalSessions}), 0)::int`,
+    activeUsers24h: sql11`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since24h})::int`,
+    activeUsers7d: sql11`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since7d})::int`,
+    activeUsers30d: sql11`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since30d})::int`,
+    avgActivationScore: sql11`COALESCE(AVG(${userActivitySummary.activationScore}), 0)::int`,
+    avgHealthScore: sql11`COALESCE(AVG(${userActivitySummary.healthScore}), 0)::int`
+  }).from(userActivitySummary);
+  return {
+    totalEvents: num(totals?.totalEvents),
+    totalSessions: num(summary?.totalSessions),
+    events24h: num(totals?.events24h),
+    events7d: num(totals?.events7d),
+    activeUsers24h: num(summary?.activeUsers24h),
+    activeUsers7d: num(summary?.activeUsers7d),
+    activeUsers30d: num(summary?.activeUsers30d),
+    trackedUsers: num(summary?.trackedUsers),
+    avgActivationScore: num(summary?.avgActivationScore),
+    avgHealthScore: num(summary?.avgHealthScore),
+    daily: daily.map((r) => ({
+      date: r.date,
+      events: num(r.events),
+      users: num(r.users)
+    })),
+    signups: signups.map((r) => ({ date: r.date, count: num(r.count) })),
+    topEvents: topEvents.map((r) => ({
+      event: r.event,
+      category: r.category,
+      count: num(r.count)
+    }))
+  };
+}
+async function getRevenueMetrics() {
+  const db = await getDb();
+  if (!db) return emptyRevenue();
+  const now = Date.now();
+  const since30d = new Date(now - 30 * DAY_MS3);
+  const subs = await db.select({
+    plan: subscriptions.plan,
+    status: subscriptions.status,
+    billingInterval: subscriptions.billingInterval,
+    amountCents: subscriptions.amountCents,
+    currency: subscriptions.currency,
+    cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd
+  }).from(subscriptions);
+  let mrrCents = 0;
+  let paying = 0;
+  let trialing = 0;
+  let pastDue = 0;
+  let canceled = 0;
+  let churnRisk = 0;
+  let currency = "USD";
+  const planMap = /* @__PURE__ */ new Map();
+  const statusMap = /* @__PURE__ */ new Map();
+  for (const s of subs) {
+    const status = String(s.status);
+    statusMap.set(status, (statusMap.get(status) ?? 0) + 1);
+    if (s.currency) currency = s.currency;
+    const months = INTERVAL_MONTHS[String(s.billingInterval)] ?? 1;
+    const monthly = Math.round(num(s.amountCents) / months);
+    if (status === "active" || status === "past_due") {
+      mrrCents += monthly;
+      const p = planMap.get(String(s.plan)) ?? { count: 0, mrrCents: 0 };
+      p.count += 1;
+      p.mrrCents += monthly;
+      planMap.set(String(s.plan), p);
+    }
+    if (status === "active") paying += 1;
+    if (status === "trialing") trialing += 1;
+    if (status === "past_due") pastDue += 1;
+    if (status === "canceled") canceled += 1;
+    if (s.cancelAtPeriodEnd === 1) churnRisk += 1;
+  }
+  const [billing] = await db.select({
+    failedPayments: sql11`COUNT(*) FILTER (WHERE ${billingEvents.status} = 'failed')::int`,
+    failedAmount: sql11`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'failed'), 0)::int`,
+    refundedAmount: sql11`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'refunded'), 0)::int`
+  }).from(billingEvents).where(gte4(billingEvents.createdAt, since30d));
+  const recentBillingEvents = await db.select({
+    id: billingEvents.id,
+    eventType: billingEvents.eventType,
+    status: billingEvents.status,
+    amountCents: billingEvents.amountCents,
+    currency: billingEvents.currency,
+    organizationName: organizations.name,
+    createdAt: billingEvents.createdAt
+  }).from(billingEvents).leftJoin(organizations, eq50(organizations.id, billingEvents.organizationId)).orderBy(desc27(billingEvents.createdAt)).limit(20);
+  return {
+    mrrCents,
+    arrCents: mrrCents * 12,
+    arpuCents: paying > 0 ? Math.round(mrrCents / paying) : 0,
+    payingSubscriptions: paying,
+    trialingSubscriptions: trialing,
+    pastDueSubscriptions: pastDue,
+    canceledSubscriptions: canceled,
+    churnRiskSubscriptions: churnRisk,
+    currency,
+    byPlan: [...planMap.entries()].map(([plan, v]) => ({ plan, count: v.count, mrrCents: v.mrrCents })).sort((a, b) => b.mrrCents - a.mrrCents),
+    byStatus: [...statusMap.entries()].map(([status, count3]) => ({ status, count: count3 })).sort((a, b) => b.count - a.count),
+    failedPayments30d: num(billing?.failedPayments),
+    failedAmountCents30d: num(billing?.failedAmount),
+    refundedAmountCents30d: num(billing?.refundedAmount),
+    recentBillingEvents: recentBillingEvents.map((r) => ({
+      id: r.id,
+      eventType: r.eventType,
+      status: String(r.status),
+      amountCents: r.amountCents,
+      currency: r.currency ?? "USD",
+      organizationName: r.organizationName,
+      createdAt: r.createdAt?.toISOString() ?? ""
+    }))
+  };
+}
+async function getAiJobMetrics() {
+  const db = await getDb();
+  if (!db) return emptyAi();
+  const since24h = new Date(Date.now() - DAY_MS3);
+  const [counts] = await db.select({
+    total: sql11`COUNT(*)::int`,
+    queued: sql11`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'queued')::int`,
+    running: sql11`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'running')::int`,
+    completed: sql11`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'completed')::int`,
+    failed: sql11`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'failed')::int`,
+    cancelled: sql11`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'cancelled')::int`,
+    last24h: sql11`COUNT(*) FILTER (WHERE ${aiAgentRuns.createdAt} >= ${since24h})::int`,
+    avgDurationMs: sql11`COALESCE(AVG(${aiAgentRuns.durationMs}) FILTER (WHERE ${aiAgentRuns.durationMs} IS NOT NULL), 0)::int`
+  }).from(aiAgentRuns);
+  const durations = await db.select({ durationMs: aiAgentRuns.durationMs }).from(aiAgentRuns).where(sql11`${aiAgentRuns.durationMs} IS NOT NULL`).orderBy(desc27(aiAgentRuns.createdAt)).limit(500);
+  const sorted = durations.map((d2) => num(d2.durationMs)).filter((d2) => d2 > 0).sort((a, b) => a - b);
+  const p95 = sorted.length > 0 ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))] : 0;
+  const recentFailures = await db.select({
+    id: aiAgentRuns.id,
+    agentName: aiAgentRuns.agentName,
+    organizationId: aiAgentRuns.organizationId,
+    errorMessage: aiAgentRuns.errorMessage,
+    createdAt: aiAgentRuns.createdAt
+  }).from(aiAgentRuns).where(eq50(aiAgentRuns.status, "failed")).orderBy(desc27(aiAgentRuns.createdAt)).limit(10);
+  const completed = num(counts?.completed);
+  const failed = num(counts?.failed);
+  const finished = completed + failed;
+  return {
+    total: num(counts?.total),
+    queued: num(counts?.queued),
+    running: num(counts?.running),
+    completed,
+    failed,
+    cancelled: num(counts?.cancelled),
+    successRate: finished > 0 ? Math.round(completed / finished * 1e3) / 10 : 0,
+    avgDurationMs: num(counts?.avgDurationMs),
+    p95DurationMs: p95,
+    last24h: num(counts?.last24h),
+    recentFailures: recentFailures.map((r) => ({
+      id: r.id,
+      agentName: r.agentName,
+      organizationId: r.organizationId,
+      errorMessage: r.errorMessage,
+      createdAt: r.createdAt?.toISOString() ?? ""
+    }))
+  };
+}
+async function getEmailMetrics() {
+  const db = await getDb();
+  if (!db) return emptyEmail();
+  const since24h = new Date(Date.now() - DAY_MS3);
+  const [counts] = await db.select({
+    total: sql11`COUNT(*)::int`,
+    sent: sql11`COUNT(*) FILTER (WHERE ${emailLog.status} = 'sent')::int`,
+    failed: sql11`COUNT(*) FILTER (WHERE ${emailLog.status} = 'failed')::int`,
+    queued: sql11`COUNT(*) FILTER (WHERE ${emailLog.status} = 'queued')::int`,
+    opened: sql11`COUNT(*) FILTER (WHERE ${emailLog.openedAt} IS NOT NULL)::int`,
+    clicked: sql11`COUNT(*) FILTER (WHERE ${emailLog.clickedAt} IS NOT NULL)::int`,
+    last24hSent: sql11`COUNT(*) FILTER (WHERE ${emailLog.createdAt} >= ${since24h} AND ${emailLog.status} = 'sent')::int`
+  }).from(emailLog);
+  const recentFailures = await db.select({
+    id: emailLog.id,
+    template: emailLog.template,
+    recipient: emailLog.recipient,
+    errorMessage: emailLog.errorMessage,
+    createdAt: emailLog.createdAt
+  }).from(emailLog).where(eq50(emailLog.status, "failed")).orderBy(desc27(emailLog.createdAt)).limit(10);
+  const sent = num(counts?.sent);
+  const opened = num(counts?.opened);
+  const clicked = num(counts?.clicked);
+  return {
+    total: num(counts?.total),
+    sent,
+    failed: num(counts?.failed),
+    queued: num(counts?.queued),
+    opened,
+    clicked,
+    openRate: sent > 0 ? Math.round(opened / sent * 1e3) / 10 : 0,
+    clickRate: sent > 0 ? Math.round(clicked / sent * 1e3) / 10 : 0,
+    last24hSent: num(counts?.last24hSent),
+    recentFailures: recentFailures.map((r) => ({
+      id: r.id,
+      template: r.template,
+      recipient: r.recipient,
+      errorMessage: r.errorMessage,
+      createdAt: r.createdAt?.toISOString() ?? ""
+    }))
+  };
+}
+async function getSecurityMetrics() {
+  const db = await getDb();
+  if (!db) return emptySecurity();
+  const [row] = await db.select({
+    totalUsers: sql11`COUNT(*)::int`,
+    mfaEnabledUsers: sql11`COUNT(*) FILTER (WHERE ${localUsers.mfaEnabled} = 1)::int`,
+    suspendedUsers: sql11`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')::int`,
+    pendingUsers: sql11`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')::int`
+  }).from(localUsers);
+  const total = num(row?.totalUsers);
+  const mfa = num(row?.mfaEnabledUsers);
+  return {
+    totalUsers: total,
+    mfaEnabledUsers: mfa,
+    mfaAdoptionRate: total > 0 ? Math.round(mfa / total * 1e3) / 10 : 0,
+    suspendedUsers: num(row?.suspendedUsers),
+    pendingUsers: num(row?.pendingUsers)
+  };
+}
+async function getPlatformOverview(days = 30) {
+  const [traffic, revenue, ai, email, security] = await Promise.all([
+    getTrafficMetrics(days),
+    getRevenueMetrics(),
+    getAiJobMetrics(),
+    getEmailMetrics(),
+    getSecurityMetrics()
+  ]);
+  return {
+    generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    traffic,
+    revenue,
+    ai,
+    email,
+    security
+  };
+}
+
+// server/_core/admin-dashboard-router.ts
+var usersQuerySchema = z42.object({
+  search: z42.string().optional(),
+  status: z42.string().optional(),
+  role: z42.string().optional(),
+  source: z42.enum(["local", "oauth"]).optional(),
+  limit: z42.number().int().min(1).max(100).optional(),
+  offset: z42.number().int().min(0).optional()
+});
 async function requireAdminSession(req, res, next) {
   const token = getAdminCookie(req);
   if (!token) {
@@ -34542,9 +37235,9 @@ async function requireAdminSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql8`
-                SELECT isRevoked FROM yallaAdminSessions
-                WHERE id = ${parsed.sessionId} AND expiresAt > NOW()
+      const sessionResult = await db.execute(sql12`
+                SELECT "isRevoked" FROM "yallaAdminSessions"
+                WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
             `);
       const rows = sessionResult.rows;
@@ -34557,6 +37250,7 @@ async function requireAdminSession(req, res, next) {
     logger.warn({ error }, "Admin dashboard session DB check failed");
   }
   req.adminSession = parsed;
+  touchAdminSession(parsed.sessionId);
   next();
 }
 function corsHeaders(res) {
@@ -34571,6 +37265,62 @@ function corsHeaders(res) {
 function createAdminDashboardRouter() {
   const router2 = Router();
   router2.use((req, res, next) => {
+    const key = `admin-dashboard:${getClientIp5(req)}`;
+    checkRateLimit(key, 30, 6e4).then((result) => {
+      res.setHeader("X-RateLimit-Limit", String(result.limit));
+      res.setHeader("X-RateLimit-Remaining", String(result.remaining));
+      res.setHeader("X-RateLimit-Reset", String(result.resetAt));
+      if (!result.allowed) {
+        const retryAfter = Math.max(
+          1,
+          result.resetAt - Math.floor(Date.now() / 1e3)
+        );
+        res.setHeader("Retry-After", String(retryAfter));
+        res.status(429).json({ error: "Too many requests. Please retry shortly." });
+        return;
+      }
+      next();
+    }).catch(() => next());
+  });
+  router2.use(express3.json({ limit: "2mb" }));
+  router2.use((req, res, next) => {
+    const requestId = req.headers["x-request-id"];
+    req.headers["x-request-id"] = requestId ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    res.setHeader("X-Request-ID", req.headers["x-request-id"]);
+    next();
+  });
+  router2.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      logger.info(
+        {
+          requestId: req.headers["x-request-id"],
+          method: req.method,
+          path: req.path,
+          status: res.statusCode,
+          durationMs: duration,
+          ip: getClientIp5(req)
+        },
+        `[admin-dashboard] ${req.method} ${req.path} ${res.statusCode} ${duration}ms`
+      );
+    });
+    next();
+  });
+  router2.use((req, _res, next) => {
+    if (req.method === "GET") {
+      for (const key of Object.keys(req.query)) {
+        const val = req.query[key];
+        if (typeof val === "string") {
+          req.query[key] = sanitizeString(val, 200);
+        } else if (Array.isArray(val)) {
+          req.query[key] = val.map((v) => sanitizeString(String(v), 200));
+        }
+      }
+    }
+    next();
+  });
+  router2.use((req, res, next) => {
     corsHeaders(res);
     if (req.method === "OPTIONS") {
       res.status(204).end();
@@ -34578,17 +37328,32 @@ function createAdminDashboardRouter() {
     }
     next();
   });
+  router2.use((req, res, next) => {
+    if (!isIpAllowed(getClientIp5(req))) {
+      res.status(403).json({ error: "Access denied from this IP address." });
+      return;
+    }
+    next();
+  });
   router2.use((req, res, next) => void requireAdminSession(req, res, next));
   router2.get("/users", async (req, res) => {
     try {
-      const { search, status, role, source, limit, offset } = req.query;
+      const parseResult = usersQuerySchema.safeParse(req.query);
+      if (!parseResult.success) {
+        res.status(400).json({
+          error: "Invalid query parameters",
+          details: parseResult.error.flatten()
+        });
+        return;
+      }
+      const { search, status, role, source, limit, offset } = parseResult.data;
       const result = await getUnifiedUsers({
         search,
         status,
         role,
         source,
-        limit: limit ? Number(limit) : 50,
-        offset: offset ? Number(offset) : 0
+        limit,
+        offset
       });
       res.json(result);
     } catch (error) {
@@ -34646,6 +37411,14 @@ function createAdminDashboardRouter() {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      const session = req.adminSession;
+      await auditAdminAction(
+        session?.sessionId ?? null,
+        session?.username ?? "unknown",
+        suspend ? "user.suspend" : "user.unsuspend",
+        getClientIp5(req),
+        String(userId)
+      );
       res.json({ success: true, status: suspend ? "suspended" : "active" });
     } catch (error) {
       logger.error({ error }, "Failed to toggle user suspension");
@@ -34659,9 +37432,14 @@ function createAdminDashboardRouter() {
         res.status(400).json({ error: "Invalid user ID" });
         return;
       }
-      const { role } = req.body;
-      if (!role || typeof role !== "string") {
+      const rawRole = req.body?.role;
+      if (!rawRole || typeof rawRole !== "string") {
         res.status(400).json({ error: "Role is required" });
+        return;
+      }
+      const role = sanitizeString(rawRole, 64);
+      if (!role) {
+        res.status(400).json({ error: "Role is invalid" });
         return;
       }
       const success = await updateUserRole(userId, role);
@@ -34669,6 +37447,15 @@ function createAdminDashboardRouter() {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      const session = req.adminSession;
+      await auditAdminAction(
+        session?.sessionId ?? null,
+        session?.username ?? "unknown",
+        "user.role_change",
+        getClientIp5(req),
+        String(userId),
+        { role }
+      );
       res.json({ success: true, role });
     } catch (error) {
       logger.error({ error }, "Failed to update user role");
@@ -34687,6 +37474,14 @@ function createAdminDashboardRouter() {
         res.status(404).json({ error: "User not found" });
         return;
       }
+      const session = req.adminSession;
+      await auditAdminAction(
+        session?.sessionId ?? null,
+        session?.username ?? "unknown",
+        "user.delete",
+        getClientIp5(req),
+        String(userId)
+      );
       res.json({ success: true });
     } catch (error) {
       logger.error({ error }, "Failed to delete user");
@@ -34731,11 +37526,190 @@ function createAdminDashboardRouter() {
       res.status(500).json({ error: "Failed to get security events" });
     }
   });
+  const monitorDays = (req) => {
+    const raw = Number(req.query.days);
+    return Number.isFinite(raw) && raw > 0 && raw <= 180 ? Math.floor(raw) : 30;
+  };
+  router2.get("/platform/overview", async (req, res) => {
+    try {
+      res.json(await getPlatformOverview(monitorDays(req)));
+    } catch (error) {
+      logger.error({ error }, "Failed to get platform overview");
+      res.status(500).json({ error: "Failed to get platform overview" });
+    }
+  });
+  router2.get("/platform/traffic", async (req, res) => {
+    try {
+      res.json(await getTrafficMetrics(monitorDays(req)));
+    } catch (error) {
+      logger.error({ error }, "Failed to get traffic metrics");
+      res.status(500).json({ error: "Failed to get traffic metrics" });
+    }
+  });
+  router2.get("/platform/revenue", async (_req, res) => {
+    try {
+      res.json(await getRevenueMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get revenue metrics");
+      res.status(500).json({ error: "Failed to get revenue metrics" });
+    }
+  });
+  router2.get("/platform/ai-jobs", async (_req, res) => {
+    try {
+      res.json(await getAiJobMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get AI job metrics");
+      res.status(500).json({ error: "Failed to get AI job metrics" });
+    }
+  });
+  router2.get("/platform/email", async (_req, res) => {
+    try {
+      res.json(await getEmailMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get email metrics");
+      res.status(500).json({ error: "Failed to get email metrics" });
+    }
+  });
+  router2.get("/platform/security", async (_req, res) => {
+    try {
+      res.json(await getSecurityMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get security metrics");
+      res.status(500).json({ error: "Failed to get security metrics" });
+    }
+  });
+  router2.get("/platform/ai-pool", async (_req, res) => {
+    try {
+      const { getAgentPoolStatus: getAgentPoolStatus2 } = await Promise.resolve().then(() => (init_orchestrator(), orchestrator_exports));
+      res.json(getAgentPoolStatus2());
+    } catch (error) {
+      logger.warn({ error }, "AI pool status unavailable");
+      res.json({ agents: [], stats: {}, capabilities: [] });
+    }
+  });
+  router2.get("/users/:id/timeline", async (req, res) => {
+    try {
+      const userId = Number(req.params.id);
+      if (Number.isNaN(userId)) {
+        res.status(400).json({ error: "Invalid user ID" });
+        return;
+      }
+      const limit = req.query.limit ? Number(req.query.limit) : 100;
+      res.json(await getUserTimeline(userId, limit));
+    } catch (error) {
+      logger.error({ error }, "Failed to get user timeline");
+      res.status(500).json({ error: "Failed to get user timeline" });
+    }
+  });
+  router2.get("/users/:id/auth-history", async (req, res) => {
+    try {
+      const userId = Number(req.params.id);
+      if (Number.isNaN(userId)) {
+        res.status(400).json({ error: "Invalid user ID" });
+        return;
+      }
+      const limit = req.query.limit ? Number(req.query.limit) : 50;
+      res.json(await getUserAuthHistory(userId, limit));
+    } catch (error) {
+      logger.error({ error }, "Failed to get user auth history");
+      res.status(500).json({ error: "Failed to get user auth history" });
+    }
+  });
+  router2.get("/engagement", async (req, res) => {
+    try {
+      const days = req.query.days ? Number(req.query.days) : 30;
+      res.json(
+        await getEngagementMetrics(
+          Number.isFinite(days) && days > 0 && days <= 365 ? days : 30
+        )
+      );
+    } catch (error) {
+      logger.error({ error }, "Failed to get engagement metrics");
+      res.status(500).json({ error: "Failed to get engagement metrics" });
+    }
+  });
+  const REPORT_TYPES = [
+    "growth",
+    "engagement",
+    "revenue",
+    "security",
+    "operations"
+  ];
+  router2.get("/reports/:type", async (req, res) => {
+    try {
+      const type = req.params.type;
+      if (!REPORT_TYPES.includes(type)) {
+        res.status(400).json({
+          error: "Invalid report type",
+          supported: REPORT_TYPES
+        });
+        return;
+      }
+      const days = req.query.days ? Number(req.query.days) : 30;
+      const report = await buildReport(
+        type,
+        Number.isFinite(days) && days > 0 && days <= 365 ? days : 30
+      );
+      if (req.query.format === "csv") {
+        const csv = reportToCsv(report);
+        const stamp = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${type}-report-${stamp}.csv"`
+        );
+        res.send(csv);
+        return;
+      }
+      if (req.query.format === "pdf") {
+        const pdfBytes = await (await Promise.resolve().then(() => (init_admin_insights_store(), admin_insights_store_exports))).reportToPdf(report);
+        const stamp = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${type}-report-${stamp}.pdf"`
+        );
+        res.send(Buffer.from(pdfBytes));
+        return;
+      }
+      res.json(report);
+    } catch (error) {
+      logger.error({ error }, "Failed to build report");
+      res.status(500).json({ error: "Failed to build report" });
+    }
+  });
+  router2.get("/alerts", async (_req, res) => {
+    try {
+      res.json(await getOperationalAlerts());
+    } catch (error) {
+      logger.error({ error }, "Failed to get operational alerts");
+      res.status(500).json({ error: "Failed to get operational alerts" });
+    }
+  });
+  router2.get("/live", async (_req, res) => {
+    try {
+      res.setHeader("Cache-Control", "no-store");
+      res.json(await getLiveMetrics());
+    } catch (error) {
+      logger.error({ error }, "Failed to get live metrics");
+      res.status(500).json({ error: "Failed to get live metrics" });
+    }
+  });
+  router2.post("/alerts/digest", async (_req, res) => {
+    try {
+      const result = await (await Promise.resolve().then(() => (init_admin_insights_store(), admin_insights_store_exports))).sendAlertDigest();
+      res.json(result);
+    } catch (error) {
+      logger.error({ error }, "Failed to send alert digest");
+      res.status(500).json({ error: "Failed to send alert digest" });
+    }
+  });
   return router2;
 }
 
 // server/_core/index.ts
 init_env();
+init_logger();
 import path5 from "path";
 import { fileURLToPath } from "url";
 initialiseSentry();
@@ -34755,7 +37729,7 @@ var AUTH_PROCEDURES = /* @__PURE__ */ new Set([
   "localAuth.changePassword"
 ]);
 function getClientKey(req) {
-  return getClientIp4(req);
+  return getClientIp3(req);
 }
 var RATE_LIMIT_BYPASS_PATHS = /* @__PURE__ */ new Set([
   "/api/health",
@@ -34865,9 +37839,17 @@ function securityHeaders(req, res, next) {
 }
 async function createApp() {
   checkProductionEnv();
-  const app = express3();
+  const app = express4();
   app.set("trust proxy", true);
   app.disable("x-powered-by");
+  app.use((_req, res, next) => {
+    res.setTimeout(ENV.httpRequestTimeoutMs ?? 3e4, () => {
+      if (!res.headersSent) {
+        res.status(408).json({ error: "Request timeout" });
+      }
+    });
+    next();
+  });
   app.use(
     compression({
       threshold: 1024,
@@ -34913,7 +37895,7 @@ async function createApp() {
   app.use(apiRateLimit);
   app.post(
     "/api/webhooks/stripe",
-    express3.raw({ type: "application/json", limit: "5mb" }),
+    express4.raw({ type: "application/json", limit: "5mb" }),
     (req, res) => void stripeWebhookHandler(req, res)
   );
   const requireCronSecret = (req, res, next) => {
@@ -34995,8 +37977,8 @@ async function createApp() {
     }
     res.status(204).end();
   });
-  const jsonParser = express3.json({ limit: "2mb" });
-  const urlencodedParser = express3.urlencoded({ limit: "2mb", extended: true });
+  const jsonParser = express4.json({ limit: "2mb" });
+  const urlencodedParser = express4.urlencoded({ limit: "2mb", extended: true });
   app.use((req, res, next) => {
     if (typeof req.body === "object" && req.body !== null) {
       return next();
@@ -35207,9 +38189,45 @@ process.on("uncaughtException", (err) => {
 });
 
 // src/vercel-handler.ts
+import { timingSafeEqual as timingSafeEqual2 } from "node:crypto";
 var cachedApp = null;
 var initError = null;
 var migrationRun = false;
+function safeEqual(a, b) {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return timingSafeEqual2(ab, bb);
+}
+async function isOperationalAuthorized(req) {
+  const secret = process.env.CRON_SECRET;
+  const auth = req.headers?.authorization;
+  if (secret && typeof auth === "string" && auth.startsWith("Bearer ")) {
+    if (safeEqual(auth.slice(7), secret)) return true;
+  }
+  try {
+    const cookieHeader = req.headers?.cookie;
+    if (typeof cookieHeader !== "string" || cookieHeader.length === 0) {
+      return false;
+    }
+    const { parse } = await import("cookie");
+    const { COOKIE_NAME: COOKIE_NAME3, hasMinRole: hasMinRole2 } = await import("../../shared/const");
+    const cookies = parse(cookieHeader);
+    const { sdk: sdk2 } = await Promise.resolve().then(() => (init_sdk(), sdk_exports));
+    const session = await sdk2.verifySession(cookies[COOKIE_NAME3]);
+    if (session) {
+      const { getUserByOpenId: getUserByOpenId2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+      const user = await getUserByOpenId2(session.openId);
+      if (user && hasMinRole2(user.role, "admin")) return true;
+    }
+    const { resolveLocalSession: resolveLocalSession2 } = await Promise.resolve().then(() => (init_local_jwt(), local_jwt_exports));
+    const localUser = await resolveLocalSession2({ headers: req.headers });
+    if (localUser && localUser.userType === "admin") return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
 function getPath(req) {
   const url = req.url || "";
   const [base] = url.split("?");
@@ -35254,13 +38272,19 @@ async function handler(req, res) {
     });
     return;
   }
+  if (path6.startsWith("/api/_")) {
+    const authorized = await isOperationalAuthorized(req);
+    if (!authorized) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+  }
   if (path6.startsWith("/api/_debug")) {
     res.status(200).json({
       ok: true,
       url: req.url,
       path: path6,
       method: req.method,
-      headers: req.headers,
       node: process.version,
       pid: process.pid,
       memory: process.memoryUsage()
@@ -35306,18 +38330,18 @@ async function handler(req, res) {
       };
       if (dbClient) {
         try {
-          const { sql: sql9 } = await import("drizzle-orm");
+          const { sql: sql13 } = await import("drizzle-orm");
           const userCount = await dbClient.execute(
-            sql9`SELECT COUNT(*)::int as count FROM "localUsers"`
+            sql13`SELECT COUNT(*)::int as count FROM "localUsers"`
           );
           const orgCount = await dbClient.execute(
-            sql9`SELECT COUNT(*)::int as count FROM "organizations"`
+            sql13`SELECT COUNT(*)::int as count FROM "organizations"`
           );
           const fwCount = await dbClient.execute(
-            sql9`SELECT COUNT(*)::int as count FROM "frameworks"`
+            sql13`SELECT COUNT(*)::int as count FROM "frameworks"`
           );
           const vendorCount = await dbClient.execute(
-            sql9`SELECT COUNT(*)::int as count FROM "vendors"`
+            sql13`SELECT COUNT(*)::int as count FROM "vendors"`
           );
           stats.users = userCount.rows[0].count;
           stats.organizations = orgCount.rows[0].count;
@@ -35342,8 +38366,8 @@ async function handler(req, res) {
         res.status(200).json({ ok: false, error: "Database not connected" });
         return;
       }
-      const { sql: sql9 } = await import("drizzle-orm");
-      const tables = await db.execute(sql9`
+      const { sql: sql13 } = await import("drizzle-orm");
+      const tables = await db.execute(sql13`
         SELECT table_name FROM information_schema.tables
         WHERE table_schema = 'public'
         ORDER BY table_name
@@ -35385,11 +38409,11 @@ async function handler(req, res) {
         auditLogs: [],
         otpCodes: []
       };
-      const { sql: sql9 } = await import("drizzle-orm");
+      const { sql: sql13 } = await import("drizzle-orm");
       for (const [table, cols] of Object.entries(expected)) {
         if (cols.length === 0) continue;
         const result = await db.execute(
-          sql9.raw(
+          sql13.raw(
             `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='${table}'`
           )
         );
@@ -35419,14 +38443,14 @@ async function handler(req, res) {
       }
       const mod = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
       const { complianceRelationships: complianceRelationships2 } = mod;
-      const { sql: sql9 } = await import("drizzle-orm");
+      const { sql: sql13 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql9`SELECT "id", "code" FROM "frameworks"`
+        sql13`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql9`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
+        sql13`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
       );
       const batchSize = 30;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -35436,11 +38460,11 @@ async function handler(req, res) {
         const srcId = codeToId.get(rel.sourceFrameworkCode);
         const tgtId = codeToId.get(rel.targetFrameworkCode);
         if (!srcId || !tgtId) continue;
-        const exist = await db.execute(sql9`
+        const exist = await db.execute(sql13`
           SELECT 1 FROM "frameworkRelationships" WHERE "sourceFrameworkId" = ${srcId} AND "targetFrameworkId" = ${tgtId} LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql9`
+        await db.execute(sql13`
           INSERT INTO "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId", "relationshipType", "description", "severity", "riskLevel", "mitigation")
           VALUES (${srcId}, ${tgtId}, ${rel.relationshipType}, ${rel.description ?? null}, ${rel.severity ?? null}, ${rel.riskLevel ?? null}, ${rel.mitigation ?? null})
         `);
@@ -35471,14 +38495,14 @@ async function handler(req, res) {
       }
       const mod = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
       const controls = mod.complianceControls;
-      const { sql: sql9 } = await import("drizzle-orm");
+      const { sql: sql13 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql9`SELECT "id", "code" FROM "frameworks"`
+        sql13`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql9`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
+        sql13`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
       );
       const batchSize = 50;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -35487,13 +38511,13 @@ async function handler(req, res) {
       for (const ctrl of batch) {
         const fid = codeToId.get(ctrl.frameworkCode);
         if (!fid) continue;
-        const exist = await db.execute(sql9`
+        const exist = await db.execute(sql13`
           SELECT 1 FROM "complianceControls"
           WHERE "frameworkId" = ${fid} AND "controlCode" = ${ctrl.controlCode}
           LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql9`
+        await db.execute(sql13`
           INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
           VALUES (${fid}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
         `);
@@ -35585,7 +38609,6 @@ async function handler(req, res) {
         ok: !!db,
         hasApp: !!cachedApp,
         hasDbUrl: !!dbUrl,
-        dbUrlPrefix: typeof dbUrl === "string" ? dbUrl.substring(0, 20) + "..." : "none",
         node: process.version
       });
     } catch (e) {

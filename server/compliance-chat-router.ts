@@ -28,6 +28,7 @@ import { requireModulePermission } from "./_core/permission-guard";
 import { searchLawKnowledge } from "./legal-knowledge";
 import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
 import { recordUserInteraction } from "./interaction-logger";
+import { checkRateLimit } from "./_core/rateLimiter";
 
 // ── Schemas ────────────────────────────────────────────────────────────────
 
@@ -126,6 +127,20 @@ export const complianceChatRouter = router({
     .input(chatInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "pro_intelligence", "canView");
+
+      // LLM calls are expensive: enforce a per-user, per-minute quota.
+      const rl = await checkRateLimit(
+        `complianceChat:${ctx.user?.id ?? ctx.organizationId}`,
+        20,
+        60_000
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded. Please wait before retrying.",
+        });
+      }
+
       const { messages, jurisdiction } = input;
 
       // The last message should always be from the user

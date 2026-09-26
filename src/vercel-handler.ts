@@ -1,9 +1,62 @@
 import { createApp } from "../server/_core/index";
 import { ensureMigrated } from "../server/_core/auto-migrate";
+import { timingSafeEqual } from "node:crypto";
 
 let cachedApp: any = null;
 let initError: string | null = null;
 let migrationRun = false;
+
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return timingSafeEqual(ab, bb);
+}
+
+/**
+ * Operational endpoints under /api/_* are internal tooling (diagnostics,
+ * seeding, migrations, SMTP checks). They must never be reachable anonymously:
+ * access requires either the CRON_SECRET bearer token or an authenticated
+ * platform-admin session. Unauthenticated callers receive a 404 so the surface
+ * is not advertised.
+ */
+async function isOperationalAuthorized(req: any): Promise<boolean> {
+  const secret = process.env.CRON_SECRET;
+  const auth = req.headers?.authorization;
+  if (secret && typeof auth === "string" && auth.startsWith("Bearer ")) {
+    if (safeEqual(auth.slice(7), secret)) return true;
+  }
+
+  try {
+    const cookieHeader = req.headers?.cookie;
+    if (typeof cookieHeader !== "string" || cookieHeader.length === 0) {
+      return false;
+    }
+
+    // 1) OAuth / Google session cookie
+    const { parse } = await import("cookie");
+    const { COOKIE_NAME, hasMinRole } = await import("../../shared/const");
+    const cookies = parse(cookieHeader);
+    const { sdk } = await import("../server/_core/sdk");
+    const session = await sdk.verifySession(cookies[COOKIE_NAME]);
+    if (session) {
+      const { getUserByOpenId } = await import("../server/db");
+      const user = await getUserByOpenId(session.openId);
+      if (user && hasMinRole(user.role, "admin")) return true;
+    }
+
+    // 2) Local (email + password) session cookie
+    const { resolveLocalSession } = await import(
+      "../server/services/local-jwt"
+    );
+    const localUser = await resolveLocalSession({ headers: req.headers });
+    if (localUser && localUser.userType === "admin") return true;
+  } catch {
+    return false;
+  }
+
+  return false;
+}
 
 function getPath(req: any): string {
   const url: string = req.url || "";
@@ -59,13 +112,23 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
+  // All operational/debug endpoints live under /api/_* and are gated: either a
+  // valid CRON_SECRET bearer token or an authenticated platform-admin session.
+  // Anything else gets a 404 so the surface is not advertised.
+  if (path.startsWith("/api/_")) {
+    const authorized = await isOperationalAuthorized(req);
+    if (!authorized) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+  }
+
   if (path.startsWith("/api/_debug")) {
     res.status(200).json({
       ok: true,
       url: req.url,
       path,
       method: req.method,
-      headers: req.headers,
       node: process.version,
       pid: process.pid,
       memory: process.memoryUsage(),
@@ -448,8 +511,6 @@ export default async function handler(req: any, res: any) {
         ok: !!db,
         hasApp: !!cachedApp,
         hasDbUrl: !!dbUrl,
-        dbUrlPrefix:
-          typeof dbUrl === "string" ? dbUrl.substring(0, 20) + "..." : "none",
         node: process.version,
       });
     } catch (e) {

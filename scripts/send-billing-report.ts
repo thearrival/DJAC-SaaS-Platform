@@ -178,8 +178,8 @@ function html(): string {
 <h2>Stripe Configuration Status</h2>
 <table>
 <tr><th>Config Key</th><th>Status</th><th>Value</th></tr>
-<tr><td>STRIPE_SECRET_KEY</td><td>${badge(hasSecret ? "PASS" : "FAIL")}</td><td class="mono">${hasSecret ? "sk_test_51SQPD0K..." : "MISSING"}</td></tr>
-<tr><td>STRIPE_WEBHOOK_SECRET</td><td>${badge(hasWebhook ? "PASS" : "FAIL")}</td><td class="mono">${hasWebhook ? "whsec_c783b081..." : "MISSING"}</td></tr>
+<tr><td>STRIPE_SECRET_KEY</td><td>${badge(hasSecret ? "PASS" : "FAIL")}</td><td class="mono">${hasSecret ? "configured" : "MISSING"}</td></tr>
+<tr><td>STRIPE_WEBHOOK_SECRET</td><td>${badge(hasWebhook ? "PASS" : "FAIL")}</td><td class="mono">${hasWebhook ? "configured" : "MISSING"}</td></tr>
 <tr><td>API Version</td><td>${badge("PASS")}</td><td>2026-02-25.clover</td></tr>
 <tr><td>Mode</td><td>${badge("PASS")}</td><td>Test Mode</td></tr>
 </table>
