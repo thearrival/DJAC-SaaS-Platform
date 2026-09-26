@@ -88,12 +88,21 @@ const JURISDICTION_FRAMEWORKS: Record<string, string[]> = {
 };
 
 export const INJECTION_PATTERNS: RegExp[] = [
-  /ignore\s+all\s+previous\s+instructions/i,
-  /system\s+prompt/i,
-  /jailbreak/i,
+  // Instruction-override attempts (cover "previous", "prior", "above", "earlier").
+  /ignore\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions|directives|rules|prompts)/i,
+  /disregard\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions|directives|rules|prompts)/i,
+  /forget\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions|directives|rules|prompts)/i,
+  // Prompt/secret exfiltration.
+  /(reveal|show|print|repeat|leak|expose)\s+.{0,40}(system\s+prompt|hidden\s+instructions|initial\s+prompt)/i,
+  // Role hijacking.
+  /(you\s+are\s+now|from\s+now\s+on\s+you\s+(are|will))/i,
+  /(developer|dan)\s+mode/i,
+  /\bjailbreak\b/i,
+  /override\s+(your\s+)?(safety|security|system)\s+(rules|instructions|prompt)/i,
+  // Common abuse payloads.
   /<script[\s>]/i,
   /rm\s+-rf\s+\//i,
-  /drop\s+table/i,
+  /\bdrop\s+table\b/i,
   /shutdown\s+-h/i,
 ];
 
@@ -242,17 +251,20 @@ async function callAgentSwarm<T>(
   }
 }
 
+export function findInjectionThreats(payload: string): RegExp[] {
+  return INJECTION_PATTERNS.filter(pattern => pattern.test(payload));
+}
+
 export function runSecurityGatekeeper(payload: string) {
-  const threats = INJECTION_PATTERNS.filter(pattern => pattern.test(payload));
-  if (threats.length > 0) {
+  if (findInjectionThreats(payload).length > 0) {
     throw new Error(
       "Security Gatekeeper blocked potentially malicious assessment payload."
     );
   }
 }
 
-function runIntake(vendor: Vendor, rawDocumentText: string): IntakeResult {
-  const combinedText = [
+function collectIntakeText(vendor: Vendor, rawDocumentText: string): string {
+  return [
     vendor.vendorName,
     vendor.vendorDescription || "",
     vendor.industry || "",
@@ -280,6 +292,10 @@ function runIntake(vendor: Vendor, rawDocumentText: string): IntakeResult {
     .filter(Boolean)
     .join("\n")
     .trim();
+}
+
+function runIntake(vendor: Vendor, rawDocumentText: string): IntakeResult {
+  const combinedText = collectIntakeText(vendor, rawDocumentText);
 
   const lower = combinedText.toLowerCase();
   const documentType =
@@ -668,7 +684,10 @@ export async function executeAssessmentPipeline(
   const _requestedEngine = input.engine ?? ENV.aiAssessmentEngineDefault;
 
   reportStage("gatekeeper", "Security Gatekeeper scanning payload.");
+  // Scan BOTH the uploaded document text and every vendor profile field: all of
+  // them are forwarded to the extraction model and must be treated as untrusted.
   runSecurityGatekeeper(rawDocumentText);
+  runSecurityGatekeeper(collectIntakeText(input.vendor, ""));
 
   reportStage("intake", "Intake Clerk classifying submission.");
   const intake = runIntake(input.vendor, rawDocumentText);

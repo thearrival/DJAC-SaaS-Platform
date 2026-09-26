@@ -424,9 +424,17 @@ export async function createApp() {
   // req.body), the parser throws "stream is not readable" — swallow it and
   // continue with an empty body rather than 500ing every request.
   app.use(
-    (err: unknown, _req: Request, _res: Response, next: NextFunction): void => {
+    (err: unknown, _req: Request, res: Response, next: NextFunction): void => {
       if (err instanceof Error && err.message === "stream is not readable") {
         return next();
+      }
+      // Malformed JSON bodies (body-parser) are client errors, never 500s.
+      const status =
+        (err as { status?: number; statusCode?: number } | null)?.status ??
+        (err as { statusCode?: number } | null)?.statusCode;
+      if (typeof status === "number" && status >= 400 && status < 500) {
+        res.status(status).json({ error: "Invalid request body" });
+        return;
       }
       next(err);
     }

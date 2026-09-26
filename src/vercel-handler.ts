@@ -78,6 +78,7 @@ export default async function handler(req: any, res: any) {
   const path = getPath(req);
 
   if (path.startsWith("/api/status")) {
+    res.setHeader("Cache-Control", "no-store");
     try {
       if (!cachedApp && !initError) cachedApp = await createApp();
       const dbModule = await import("../server/db");
@@ -102,6 +103,7 @@ export default async function handler(req: any, res: any) {
   }
 
   if (path.startsWith("/api/health") || path.startsWith("/health")) {
+    res.setHeader("Cache-Control", "no-store");
     res.status(200).json({
       ok: true,
       status: "healthy",
