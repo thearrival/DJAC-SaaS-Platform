@@ -520,6 +520,12 @@ export async function ensureMigrated(): Promise<void> {
       );
     }
 
+    // Hot-path user-scoped lookups (notifications badge count/list).
+    await driftExec(
+      "index notifications.user_id",
+      sql`CREATE INDEX IF NOT EXISTS ${sql.identifier("notifications_user_id_idx")} ON ${sql.identifier("notifications")} ("user_id")`
+    );
+
     const driftEnums: Record<string, string[]> = {
       plan: ["free_trial", "starter", "professional", "enterprise"],
       paidPlan: ["starter", "professional", "enterprise"],

@@ -225,38 +225,42 @@ export async function createOrganizationForUser(params: {
   const now = new Date();
   const trialEnd = trialEndsAt(now);
 
-  const [inserted] = await db
-    .insert(organizations)
-    .values({
-      slug: params.slug,
-      name: params.name,
-      billingEmail: params.billingEmail,
-      industry: params.industry,
-      primaryJurisdiction: params.primaryJurisdiction ?? "Both",
-      plan: "free_trial",
-      trialStartedAt: now,
-      trialEndsAt: trialEnd,
-      isActive: 1,
-      maxSeats: 5,
-    })
-    .returning({ id: organizations.id });
+  // Organization + owner membership must be created atomically: a partial
+  // failure previously left an org with no owner (or vice versa).
+  return db.transaction(async tx => {
+    const [inserted] = await tx
+      .insert(organizations)
+      .values({
+        slug: params.slug,
+        name: params.name,
+        billingEmail: params.billingEmail,
+        industry: params.industry,
+        primaryJurisdiction: params.primaryJurisdiction ?? "Both",
+        plan: "free_trial",
+        trialStartedAt: now,
+        trialEndsAt: trialEnd,
+        isActive: 1,
+        maxSeats: 5,
+      })
+      .returning({ id: organizations.id });
 
-  const orgId = inserted.id;
+    const orgId = inserted.id;
 
-  // Create the owner membership
-  await db.insert(organizationMembers).values({
-    organizationId: orgId,
-    userId: params.ownerUserId,
-    localUserId: params.ownerLocalUserId,
-    role: "owner",
-    status: "active",
+    // Create the owner membership
+    await tx.insert(organizationMembers).values({
+      organizationId: orgId,
+      userId: params.ownerUserId,
+      localUserId: params.ownerLocalUserId,
+      role: "owner",
+      status: "active",
+    });
+
+    const [org] = await tx
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, orgId));
+    return org!;
   });
-
-  const [org] = await db
-    .select()
-    .from(organizations)
-    .where(eq(organizations.id, orgId));
-  return org!;
 }
 
 // ─── tRPC Billing Router ─────────────────────────────────────────────────────

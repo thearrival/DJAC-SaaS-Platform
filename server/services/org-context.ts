@@ -10,7 +10,7 @@
 
 import type { User, OrganizationMember } from "../../drizzle/schema";
 import { organizations, organizationMembers } from "../../drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { trialEndsAt } from "./billing-entitlements";
 
@@ -49,31 +49,52 @@ async function createDefaultOrganizationForUser(
       .slice(0, 60) || "default"
   }`;
 
-  const [inserted] = await db
-    .insert(organizations)
-    .values({
-      slug: safeSlug,
-      name: orgName,
-      billingEmail: user.email || `user-${ownerKey}@example.local`,
-      primaryJurisdiction: "Both",
-      plan: "free_trial",
-      trialStartedAt: now,
-      trialEndsAt: defaultTrialEndsAt,
-      isActive: 1,
-      maxSeats: 5,
-    })
-    .returning({ id: organizations.id });
+  // Create the organization and its owner membership atomically. A per-owner
+  // Postgres advisory lock (taken inside the transaction) serialises concurrent
+  // first requests for the same user and we re-check membership afterwards, so
+  // the check-then-insert race can no longer create duplicate organizations.
+  return db.transaction(async tx => {
+    await tx.execute(
+      sql`SELECT pg_advisory_xact_lock(hashtext(${`org-owner:${ownerKey}`}))`
+    );
 
-  const organizationId = inserted.id;
+    const existingMembership = await tx
+      .select({ organizationId: organizationMembers.organizationId })
+      .from(organizationMembers)
+      .where(
+        localUserId != null
+          ? eq(organizationMembers.localUserId, localUserId)
+          : eq(organizationMembers.userId, user.id)
+      )
+      .limit(1);
+    if (existingMembership.length > 0) return null;
 
-  await db.insert(organizationMembers).values({
-    organizationId,
-    ...(localUserId != null ? { localUserId } : { userId: user.id }),
-    role: "owner",
-    status: "active",
+    const [inserted] = await tx
+      .insert(organizations)
+      .values({
+        slug: safeSlug,
+        name: orgName,
+        billingEmail: user.email || `user-${ownerKey}@example.local`,
+        primaryJurisdiction: "Both",
+        plan: "free_trial",
+        trialStartedAt: now,
+        trialEndsAt: defaultTrialEndsAt,
+        isActive: 1,
+        maxSeats: 5,
+      })
+      .returning({ id: organizations.id });
+
+    const organizationId = inserted.id;
+
+    await tx.insert(organizationMembers).values({
+      organizationId,
+      ...(localUserId != null ? { localUserId } : { userId: user.id }),
+      role: "owner",
+      status: "active",
+    });
+
+    return { organizationId, organizationRole: "owner" as const };
   });
-
-  return { organizationId, organizationRole: "owner" };
 }
 
 /** Parse the real localUsers.id from a virtual local-auth user's openId ("local:<id>") */
