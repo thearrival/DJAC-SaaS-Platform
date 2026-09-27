@@ -172,23 +172,30 @@ export async function stripeWebhookHandler(
   res.json({ received: true });
 }
 
+type WebhookDb = NonNullable<Awaited<ReturnType<typeof getDb>>>;
+
+/**
+ * A Stripe event is a duplicate only if a previous attempt fully applied it.
+ * A row left in "pending" (a mid-processing failure) must be reprocessed so
+ * Stripe retries can heal subscription state instead of being ignored forever.
+ */
+export async function isDuplicateBillingEvent(
+  db: WebhookDb,
+  stripeEventId: string
+): Promise<boolean> {
+  const existing = await db
+    .select({ id: billingEvents.id, status: billingEvents.status })
+    .from(billingEvents)
+    .where(eq(billingEvents.stripeEventId, stripeEventId))
+    .limit(1);
+  return existing.length > 0 && existing[0]!.status === "success";
+}
+
 export async function processStripeEvent(
   event: import("stripe").Stripe.Event,
-  db: NonNullable<Awaited<ReturnType<typeof getDb>>>
+  db: WebhookDb
 ) {
-  const idempotencyGuard = async (): Promise<boolean> => {
-    const existing = await db
-      .select({ id: billingEvents.id, status: billingEvents.status })
-      .from(billingEvents)
-      .where(eq(billingEvents.stripeEventId, event.id))
-      .limit(1);
-    // Only a fully-applied event is a duplicate. A row left in "pending" means
-    // a previous attempt failed part-way; reprocessing lets Stripe retries heal
-    // the subscription state instead of being permanently ignored.
-    return existing.length > 0 && existing[0]!.status === "success";
-  };
-
-  if (await idempotencyGuard()) {
+  if (await isDuplicateBillingEvent(db, event.id)) {
     console.info("[Stripe Webhook] Duplicate event ignored:", event.id);
     return;
   }

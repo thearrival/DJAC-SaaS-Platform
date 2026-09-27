@@ -33118,12 +33118,12 @@ async function stripeWebhookHandler(req, res) {
   }
   res.json({ received: true });
 }
+async function isDuplicateBillingEvent(db, stripeEventId) {
+  const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq44(billingEvents.stripeEventId, stripeEventId)).limit(1);
+  return existing.length > 0 && existing[0].status === "success";
+}
 async function processStripeEvent(event, db) {
-  const idempotencyGuard = async () => {
-    const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq44(billingEvents.stripeEventId, event.id)).limit(1);
-    return existing.length > 0 && existing[0].status === "success";
-  };
-  if (await idempotencyGuard()) {
+  if (await isDuplicateBillingEvent(db, event.id)) {
     console.info("[Stripe Webhook] Duplicate event ignored:", event.id);
     return;
   }
