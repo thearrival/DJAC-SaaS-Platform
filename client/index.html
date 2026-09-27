@@ -7,6 +7,26 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1"
     />
 
+    <!-- Apply the stored locale's text direction before first paint to avoid an
+         LTR flash for RTL (Arabic) users. Key matches localeTypes.ts. -->
+    <script>
+      (function () {
+        try {
+          var loc = localStorage.getItem("djac-locale");
+          if (loc) {
+            document.documentElement.setAttribute(
+              "dir",
+              loc === "ar" ? "rtl" : "ltr"
+            );
+            document.documentElement.setAttribute(
+              "lang",
+              loc === "ar" ? "ar-SA" : loc
+            );
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <!-- Primary SEO -->
     <meta
       name="description"

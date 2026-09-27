@@ -8252,7 +8252,7 @@ __export(admin_insights_store_exports, {
   sendAlertDigest: () => sendAlertDigest
 });
 import { readFileSync } from "node:fs";
-import { and as and34, count as count2, desc as desc26, eq as eq49, gte as gte3, sql as sql10 } from "drizzle-orm";
+import { and as and35, count as count2, desc as desc26, eq as eq49, gte as gte3, sql as sql10 } from "drizzle-orm";
 async function getUserTimeline(userId, limit = 100) {
   const db = await getDb();
   if (!db) return [];
@@ -8332,7 +8332,7 @@ async function getUserAuthHistory(userId, limit = 50) {
     userAgent: auditLogs.userAgent,
     createdAt: auditLogs.createdAt
   }).from(auditLogs).where(
-    and34(eq49(auditLogs.localUserId, userId), eq49(auditLogs.category, "auth"))
+    and35(eq49(auditLogs.localUserId, userId), eq49(auditLogs.category, "auth"))
   ).orderBy(desc26(auditLogs.createdAt)).limit(limit);
   return rows.map((r) => ({
     id: r.id,
@@ -9657,6 +9657,8 @@ async function deleteVendorProfile(vendorId, userId, organizationId) {
   }
   const useOrg = organizationId != null && organizationId > 0;
   const whereClause = useOrg ? and(eq2(vendors.id, vendorId), eq2(vendors.organizationId, organizationId)) : and(eq2(vendors.id, vendorId), eq2(vendors.userId, userId));
+  const [owned] = await db.select({ id: vendors.id }).from(vendors).where(whereClause).limit(1);
+  if (!owned) throw new Error("Vendor not found");
   await db.delete(techStackComponents).where(eq2(techStackComponents.vendorId, vendorId));
   await db.delete(vendors).where(whereClause);
 }
@@ -29358,7 +29360,7 @@ import { TRPCError as TRPCError26 } from "@trpc/server";
 // server/security-maturity-store.ts
 init_schema();
 init_db();
-import { desc as desc19, eq as eq34 } from "drizzle-orm";
+import { and as and26, desc as desc19, eq as eq34 } from "drizzle-orm";
 var MEM_ASSESSMENTS = [];
 var memSeq11 = 1;
 function toMaturityLevel(overallScore) {
@@ -29460,9 +29462,19 @@ async function deleteAssessmentRow(orgId, id) {
     MEM_ASSESSMENTS.splice(idx, 1);
     return true;
   }
-  const [existing] = await db.select({ id: securityMaturityAssessments.id }).from(securityMaturityAssessments).where(eq34(securityMaturityAssessments.id, id)).limit(1);
+  const [existing] = await db.select({ id: securityMaturityAssessments.id }).from(securityMaturityAssessments).where(
+    and26(
+      eq34(securityMaturityAssessments.id, id),
+      eq34(securityMaturityAssessments.organizationId, orgId)
+    )
+  ).limit(1);
   if (!existing) return false;
-  await db.delete(securityMaturityAssessments).where(eq34(securityMaturityAssessments.id, id));
+  await db.delete(securityMaturityAssessments).where(
+    and26(
+      eq34(securityMaturityAssessments.id, id),
+      eq34(securityMaturityAssessments.organizationId, orgId)
+    )
+  );
   return true;
 }
 
@@ -29698,7 +29710,7 @@ import { z as z33 } from "zod";
 // server/knowledge-graph-store.ts
 init_db();
 init_schema();
-import { and as and26, eq as eq35, or as or6, like, sql as sql4, asc as asc3 } from "drizzle-orm";
+import { and as and27, eq as eq35, or as or6, like, sql as sql4, asc as asc3 } from "drizzle-orm";
 async function seedKnowledgeGraph(input, organizationId) {
   const db = await getDb();
   if (!db)
@@ -29718,7 +29730,7 @@ async function seedKnowledgeGraph(input, organizationId) {
   }
   for (const e of input.edges) {
     const existing = await db.select().from(knowledgeGraphEdges).where(
-      and26(
+      and27(
         eq35(knowledgeGraphEdges.sourceNodeId, e.source),
         eq35(knowledgeGraphEdges.targetNodeId, e.target),
         eq35(knowledgeGraphEdges.relation, e.relation)
@@ -29760,7 +29772,7 @@ async function queryKnowledgeGraph(query) {
   }
   const limit = query.limit ?? 50;
   const offset = query.offset ?? 0;
-  const nodes = await db.select().from(knowledgeGraphNodes).where(conditions.length > 0 ? and26(...conditions) : void 0).limit(limit).offset(offset).orderBy(asc3(knowledgeGraphNodes.label));
+  const nodes = await db.select().from(knowledgeGraphNodes).where(conditions.length > 0 ? and27(...conditions) : void 0).limit(limit).offset(offset).orderBy(asc3(knowledgeGraphNodes.label));
   const nodeIds = nodes.map((n) => n.nodeId);
   const edges = nodeIds.length > 0 ? await db.select().from(knowledgeGraphEdges).where(
     or6(
@@ -29928,7 +29940,7 @@ import { TRPCError as TRPCError28 } from "@trpc/server";
 // server/regulatory-change-store.ts
 init_schema();
 init_db();
-import { and as and27, desc as desc20, eq as eq36, sql as sql5 } from "drizzle-orm";
+import { and as and28, desc as desc20, eq as eq36, sql as sql5 } from "drizzle-orm";
 var MEM_CHANGES = [];
 var memSeq12 = 1;
 var SEED_CHANGES = [
@@ -30295,7 +30307,7 @@ async function listRegulatoryChanges(orgId, filters) {
   if (filters?.frameworkCode) {
     conditions.push(eq36(regulatoryChanges.frameworkCode, filters.frameworkCode));
   }
-  const where = conditions.length > 0 ? and27(...conditions) : void 0;
+  const where = conditions.length > 0 ? and28(...conditions) : void 0;
   const [rows, countResult] = await Promise.all([
     db.select().from(regulatoryChanges).where(where).orderBy(desc20(regulatoryChanges.publicationDate)).limit(limit).offset(offset),
     db.select({ count: sql5`count(*)` }).from(regulatoryChanges).where(where)
@@ -30391,7 +30403,7 @@ async function markRegulatoryChangeEffective(id) {
     return change;
   }
   await db.update(regulatoryChanges).set({ status: "in_effect", updatedAt: /* @__PURE__ */ new Date() }).where(
-    and27(eq36(regulatoryChanges.id, id), eq36(regulatoryChanges.status, "pending"))
+    and28(eq36(regulatoryChanges.id, id), eq36(regulatoryChanges.status, "pending"))
   );
   return getRegulatoryChangeById(id);
 }
@@ -30549,7 +30561,7 @@ import { TRPCError as TRPCError29 } from "@trpc/server";
 // server/compliance-simulation-store.ts
 init_schema();
 init_db();
-import { and as and28, desc as desc21, eq as eq37, inArray as inArray7 } from "drizzle-orm";
+import { and as and29, desc as desc21, eq as eq37, inArray as inArray7 } from "drizzle-orm";
 var SCENARIOS = [
   {
     id: "scenario-expand-saudi",
@@ -31083,7 +31095,7 @@ async function getSimulationHistory(orgId) {
   const db = await getDb();
   if (db && orgId > 0) {
     const rows = await db.select().from(complianceSimulations).where(
-      and28(
+      and29(
         eq37(complianceSimulations.organizationId, orgId),
         inArray7(complianceSimulations.status, ["completed", "draft"])
       )
@@ -31124,7 +31136,7 @@ async function getSimulationById(orgId, id) {
   const db = await getDb();
   if (db && orgId > 0) {
     const [row] = await db.select().from(complianceSimulations).where(
-      and28(
+      and29(
         eq37(complianceSimulations.id, id),
         eq37(complianceSimulations.organizationId, orgId)
       )
@@ -31163,7 +31175,7 @@ async function archiveSimulation(orgId, id) {
   const db = await getDb();
   if (db && orgId > 0) {
     const [existing] = await db.select({ id: complianceSimulations.id }).from(complianceSimulations).where(
-      and28(
+      and29(
         eq37(complianceSimulations.id, id),
         eq37(complianceSimulations.organizationId, orgId)
       )
@@ -31986,7 +31998,7 @@ var analyticsRouter = router({
 init_schema();
 init_db();
 import { z as z39 } from "zod";
-import { eq as eq40, desc as desc23, and as and29 } from "drizzle-orm";
+import { eq as eq40, desc as desc23, and as and30 } from "drizzle-orm";
 init_rateLimiter();
 import { TRPCError as TRPCError32 } from "@trpc/server";
 var NOTIF_LIMIT = 30;
@@ -32013,7 +32025,7 @@ var notificationsRouter = router({
     if (input.unreadOnly) {
       conditions.push(eq40(notifications.isRead, false));
     }
-    const query = db.select().from(notifications).where(and29(...conditions)).orderBy(desc23(notifications.createdAt)).limit(input.limit);
+    const query = db.select().from(notifications).where(and30(...conditions)).orderBy(desc23(notifications.createdAt)).limit(input.limit);
     if (input.offset > 0) {
       query.offset(input.offset);
     }
@@ -32027,7 +32039,7 @@ var notificationsRouter = router({
         message: "Database unavailable"
       });
     const rows = await db.select().from(notifications).where(
-      and29(
+      and30(
         eq40(notifications.userId, ctx.user.id),
         eq40(notifications.isRead, false)
       )
@@ -32053,7 +32065,7 @@ var notificationsRouter = router({
         message: "Database unavailable"
       });
     await db.update(notifications).set({ isRead: true, readAt: /* @__PURE__ */ new Date() }).where(
-      and29(
+      and30(
         eq40(notifications.id, input.id),
         eq40(notifications.userId, ctx.user.id)
       )
@@ -32079,7 +32091,7 @@ var notificationsRouter = router({
         message: "Database unavailable"
       });
     await db.update(notifications).set({ isRead: true, readAt: /* @__PURE__ */ new Date() }).where(
-      and29(
+      and30(
         eq40(notifications.userId, ctx.user.id),
         eq40(notifications.isRead, false)
       )
@@ -32409,7 +32421,7 @@ init_env();
 init_sdk();
 init_local_jwt();
 import crypto3 from "crypto";
-import { and as and30, eq as eq42, isNull as isNull4 } from "drizzle-orm";
+import { and as and31, eq as eq42, isNull as isNull4 } from "drizzle-orm";
 async function resolveDevBypassUser() {
   const now = /* @__PURE__ */ new Date();
   return {
@@ -32446,7 +32458,7 @@ async function resolveApiKeyAuth(req) {
     revokedAt: apiKeys.revokedAt,
     expiresAt: apiKeys.expiresAt,
     scopes: apiKeys.scopes
-  }).from(apiKeys).where(and30(eq42(apiKeys.keyHash, keyHash), isNull4(apiKeys.revokedAt))).limit(1);
+  }).from(apiKeys).where(and31(eq42(apiKeys.keyHash, keyHash), isNull4(apiKeys.revokedAt))).limit(1);
   if (!keyRow || keyRow.expiresAt && keyRow.expiresAt <= now) return null;
   db.update(apiKeys).set({ lastUsedAt: now }).where(eq42(apiKeys.id, keyRow.id)).catch(() => {
   });
@@ -32518,7 +32530,7 @@ async function resolveOAuthUser(req) {
 // server/services/org-context.ts
 init_schema();
 init_db();
-import { and as and31, eq as eq43 } from "drizzle-orm";
+import { and as and32, eq as eq43 } from "drizzle-orm";
 async function createDefaultOrganizationForUser(user, localUserId) {
   if (user.id <= 0 && !localUserId) return null;
   const db = await getDb();
@@ -32560,7 +32572,7 @@ async function resolveOrganizationForUser(user) {
     organizationId: organizationMembers.organizationId,
     role: organizationMembers.role
   }).from(organizationMembers).where(
-    and31(
+    and32(
       eq43(organizationMembers.userId, user.id),
       eq43(organizationMembers.status, "active")
     )
@@ -32588,7 +32600,7 @@ async function resolveOrganizationForLocalUser(user) {
     organizationId: organizationMembers.organizationId,
     role: organizationMembers.role
   }).from(organizationMembers).where(
-    and31(
+    and32(
       eq43(organizationMembers.localUserId, localUserId),
       eq43(organizationMembers.status, "active")
     )
@@ -32777,6 +32789,9 @@ function serveStatic(app) {
       }
     })
   );
+  app.use("/api", (req, res) => {
+    res.status(404).json({ error: "Not found", path: req.path });
+  });
   app.use("*", (_req, res) => {
     res.setHeader("Cache-Control", "public, no-cache");
     res.sendFile(path4.resolve(distPath, "index.html"));
@@ -33429,7 +33444,7 @@ init_schema();
 init_db();
 init_email();
 init_env();
-import { and as and32, eq as eq46, lte, gte, inArray as inArray9 } from "drizzle-orm";
+import { and as and33, eq as eq46, lte, gte, inArray as inArray9 } from "drizzle-orm";
 var INTERVAL_MS2 = 2 * 60 * 60 * 1e3;
 var DAY_MS2 = 24 * 60 * 60 * 1e3;
 var sentSet = /* @__PURE__ */ new Set();
@@ -33481,7 +33496,7 @@ async function runDeadlineAlertCheck() {
   const now = /* @__PURE__ */ new Date();
   const horizon = new Date(now.getTime() + 31 * DAY_MS2);
   const upcoming = await db.select().from(complianceDeadlines).where(
-    and32(
+    and33(
       eq46(complianceDeadlines.status, "upcoming"),
       gte(complianceDeadlines.deadlineDate, now),
       lte(complianceDeadlines.deadlineDate, horizon)
@@ -33531,7 +33546,7 @@ async function runDeadlineAlertCheck() {
     const dedupKey = `${deadline.id}:${milestone}`;
     if (sentSet.has(dedupKey)) continue;
     const members = await db.select({ email: users.email, name: users.name }).from(organizationMembers).innerJoin(users, eq46(organizationMembers.userId, users.id)).where(
-      and32(
+      and33(
         eq46(organizationMembers.organizationId, deadline.organizationId),
         eq46(organizationMembers.status, "active"),
         inArray9(organizationMembers.role, [
@@ -33542,7 +33557,7 @@ async function runDeadlineAlertCheck() {
       )
     );
     const invitedEmails = await db.select({ inviteEmail: organizationMembers.inviteEmail }).from(organizationMembers).where(
-      and32(
+      and33(
         eq46(organizationMembers.organizationId, deadline.organizationId),
         eq46(organizationMembers.status, "invited"),
         inArray9(organizationMembers.role, [
@@ -36555,7 +36570,7 @@ import { sql as sql12 } from "drizzle-orm";
 init_schema();
 init_db();
 init_local_jwt();
-import { and as and33, count, desc as desc25, eq as eq48, gte as gte2, like as like2, or as or7, sql as sql9 } from "drizzle-orm";
+import { and as and34, count, desc as desc25, eq as eq48, gte as gte2, like as like2, or as or7, sql as sql9 } from "drizzle-orm";
 async function getUnifiedUsers(options) {
   const db = await getDb();
   if (!db) {
@@ -36610,7 +36625,7 @@ async function getUnifiedUsers(options) {
   if (options.role) {
     conditions.push(sql9`${localUsers.userType} = ${options.role}::"userType"`);
   }
-  const whereClause = conditions.length > 0 ? and33(...conditions) : void 0;
+  const whereClause = conditions.length > 0 ? and34(...conditions) : void 0;
   const [total] = await db.select({ count: count() }).from(localUsers).where(whereClause);
   const rows = await db.select({
     id: localUsers.id,
@@ -36631,7 +36646,7 @@ async function getUnifiedUsers(options) {
     localUserId: organizationMembers.localUserId,
     orgCount: count()
   }).from(organizationMembers).where(
-    and33(
+    and34(
       sql9`${organizationMembers.localUserId} IS NOT NULL`,
       eq48(organizationMembers.status, "active")
     )
@@ -36699,7 +36714,7 @@ async function getUserDetail(userId) {
     organizations,
     eq48(organizationMembers.organizationId, organizations.id)
   ).where(
-    and33(
+    and34(
       eq48(organizationMembers.localUserId, userId),
       eq48(organizationMembers.status, "active")
     )

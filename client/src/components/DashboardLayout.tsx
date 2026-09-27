@@ -775,6 +775,7 @@ function DashboardLayoutContent({
                   />
                   <button
                     onClick={toggleSidebar}
+                    aria-label={t("layout.toggleSidebar", "Toggle sidebar")}
                     className="absolute inset-0 flex items-center justify-center bg-accent/90 rounded-md opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <PanelLeft className="h-4 w-4 text-foreground rtl:rotate-180" />
@@ -800,6 +801,7 @@ function DashboardLayoutContent({
                   </div>
                   <button
                     onClick={toggleSidebar}
+                    aria-label={t("layout.toggleSidebar", "Toggle sidebar")}
                     className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                   >
                     <PanelLeft className="h-4 w-4 text-muted-foreground rtl:rotate-180" />

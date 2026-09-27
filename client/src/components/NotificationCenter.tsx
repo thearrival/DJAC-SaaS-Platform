@@ -359,8 +359,16 @@ export function NotificationCenter() {
                     return (
                       <div
                         key={n.id}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            markRead(n.id);
+                          }
+                        }}
                         className={cn(
-                          "group flex cursor-default items-start gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50",
+                          "group flex cursor-default items-start gap-3 px-4 py-2.5 transition-colors hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           cfg.rowBg,
                           isRead && "opacity-60"
                         )}

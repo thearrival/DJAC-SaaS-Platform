@@ -171,6 +171,12 @@ export function serveStatic(app: Express) {
     })
   );
 
+  // API routes must never fall through to the SPA HTML shell: unknown /api/*
+  // paths return a JSON 404 so API clients can parse the response.
+  app.use("/api", (req, res) => {
+    res.status(404).json({ error: "Not found", path: req.path });
+  });
+
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
     res.setHeader("Cache-Control", "public, no-cache");
