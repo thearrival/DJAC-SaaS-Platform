@@ -526,6 +526,19 @@ export async function ensureMigrated(): Promise<void> {
       sql`CREATE INDEX IF NOT EXISTS ${sql.identifier("notifications_user_id_idx")} ON ${sql.identifier("notifications")} ("user_id")`
     );
 
+    // Shared rate-limit windows — Postgres fallback when Redis is not
+    // configured, so limits still span all serverless instances.
+    await driftExec(
+      "rate limit windows table",
+      sql`CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
+        "key" text NOT NULL,
+        "windowIndex" bigint NOT NULL,
+        "count" integer NOT NULL DEFAULT 0,
+        "createdAt" timestamp with time zone NOT NULL DEFAULT now(),
+        PRIMARY KEY ("key", "windowIndex")
+      )`
+    );
+
     const driftEnums: Record<string, string[]> = {
       plan: ["free_trial", "starter", "professional", "enterprise"],
       paidPlan: ["starter", "professional", "enterprise"],

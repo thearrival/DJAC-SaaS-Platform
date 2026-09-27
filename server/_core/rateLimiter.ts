@@ -1,14 +1,18 @@
 /**
- * Rate limiter — Redis-backed (fixed window) with automatic in-memory fallback.
+ * Rate limiter — Redis-backed (fixed window) with Postgres and in-memory
+ * fallbacks.
  *
  * When REDIS_URL is configured the counters are stored in Redis so all
- * horizontal replicas share the same budget per client key.
- * If Redis is unreachable the module transparently falls back to an in-process
- * Map without throwing, keeping the server available.
+ * horizontal replicas share the same budget per client key. In production
+ * without Redis, a shared Postgres counter table (`rateLimitWindows`) is used
+ * so limits still span replicas. If both are unavailable the module falls back
+ * to an in-process Map without throwing, keeping the server available.
  */
 
 import Redis from "ioredis";
+import { sql } from "drizzle-orm";
 import { ENV } from "./env";
+import { getDb } from "../db";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Redis singleton
@@ -64,6 +68,90 @@ _pruneInterval = setInterval(() => {
 _pruneInterval.unref();
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Postgres fallback (shared across horizontal replicas when Redis is absent)
+//
+// Serverless instances do not share process memory, so the in-memory fallback
+// only rate-limits within a single instance. When running in production without
+// Redis we use a fixed-window counter table that all instances share. The table
+// is created by auto-migrate (`rateLimitWindows`).
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function tryPostgresIncrement(
+  key: string,
+  windowIndex: number
+): Promise<number | null> {
+  if (!ENV.isProduction) return null;
+  try {
+    const db = await getDb();
+    if (!db) return null;
+    const result = await db.execute(sql`
+      INSERT INTO "rateLimitWindows" ("key", "windowIndex", "count")
+      VALUES (${key}, ${windowIndex}, 1)
+      ON CONFLICT ("key", "windowIndex")
+      DO UPDATE SET "count" = "rateLimitWindows"."count" + 1
+      RETURNING "count"
+    `);
+    const row = (result.rows?.[0] ?? null) as {
+      count?: number | string;
+    } | null;
+    if (!row) return null;
+    const count = Number(row.count);
+    if (!Number.isFinite(count)) return null;
+    // Probabilistic (1%) cleanup of windows older than a day.
+    if (Math.random() < 0.01) {
+      void db
+        .execute(
+          sql`DELETE FROM "rateLimitWindows" WHERE "createdAt" < now() - interval '1 day'`
+        )
+        .catch(() => {});
+    }
+    return count;
+  } catch {
+    return null;
+  }
+}
+
+async function tryPostgresCount(
+  key: string,
+  windowIndex: number
+): Promise<number | null> {
+  if (!ENV.isProduction) return null;
+  try {
+    const db = await getDb();
+    if (!db) return null;
+    const result = await db.execute(sql`
+      SELECT "count" FROM "rateLimitWindows"
+      WHERE "key" = ${key} AND "windowIndex" = ${windowIndex}
+      LIMIT 1
+    `);
+    const row = (result.rows?.[0] ?? null) as {
+      count?: number | string;
+    } | null;
+    if (!row) return 0;
+    const count = Number(row.count);
+    return Number.isFinite(count) ? count : 0;
+  } catch {
+    return null;
+  }
+}
+
+async function tryPostgresReset(
+  key: string,
+  windowIndex: number
+): Promise<void> {
+  if (!ENV.isProduction) return;
+  try {
+    const db = await getDb();
+    if (!db) return;
+    await db.execute(
+      sql`DELETE FROM "rateLimitWindows" WHERE "key" = ${key} AND "windowIndex" = ${windowIndex}`
+    );
+  } catch {
+    // best-effort
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Public API
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -117,6 +205,17 @@ export async function checkRateLimit(
     }
   }
 
+  // ── Postgres fallback (shared across serverless instances) ─────────────────
+  const pgCount = await tryPostgresIncrement(key, windowIndex);
+  if (pgCount != null) {
+    return {
+      allowed: pgCount <= limit,
+      remaining: Math.max(0, limit - pgCount),
+      resetAt,
+      limit,
+    };
+  }
+
   // ── In-memory fallback ─────────────────────────────────────────────────────
   const now = Date.now();
   const existing = _memStore.get(key);
@@ -158,6 +257,10 @@ export async function getRateLimitCount(
     }
   }
 
+  // ── Postgres fallback ──────────────────────────────────────────────────────
+  const pgCount = await tryPostgresCount(key, windowIndex);
+  if (pgCount != null) return pgCount;
+
   const existing = _memStore.get(key);
   if (!existing || Date.now() > existing.resetAt) return 0;
   return existing.count;
@@ -178,9 +281,10 @@ export async function resetRateLimit(
     try {
       await redis.del(`rl:${windowIndex}:${key}`);
     } catch {
-      // Best-effort — memory fallback below still clears local state.
+      // Best-effort — fallbacks below still clear local state.
     }
   }
+  await tryPostgresReset(key, windowIndex);
   _memStore.delete(key);
 }
 

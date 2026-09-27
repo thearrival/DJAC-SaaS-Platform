@@ -21,11 +21,13 @@ The following were committed to git history at some point and must be rotated:
 
 Then (optional but recommended) purge history with `git filter-repo` and force-push.
 
-### 1.2 Distributed rate limiting (reliability/abuse)
+### 1.2 Distributed rate limiting (reliability/abuse) — OPTIONAL
 
-- Provide a **Redis URL** (`REDIS_URL`, e.g. `redis://default:<pass>@<host>:<port>`).
-- Until set, the rate limiter falls back to **per-instance memory** (a serverless
-  instance fleet does not share limits).
+- The limiter now uses a shared **Postgres** counter table (`rateLimitWindows`,
+  created by auto-migrate) in production when Redis is absent, so limits span
+  all serverless instances.
+- A **Redis URL** (`REDIS_URL`) is recommended for lower latency / less DB load,
+  but is **no longer required for correctness**.
 
 ### 1.3 Backup & Disaster Recovery (data integrity)
 
@@ -59,17 +61,17 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
 
 ## 2. Required Vercel environment variables (presence check)
 
-| Var                                           | Purpose                             | Status                           |
-| --------------------------------------------- | ----------------------------------- | -------------------------------- |
-| `JWT_SECRET` (≥32 chars)                      | sessions                            | present (encrypted)              |
-| `DATABASE_URL`                                | Postgres                            | present                          |
-| `APP_URL` / `APP_DOMAIN`                      | absolute links                      | present                          |
-| `CRON_SECRET`                                 | cron auth + internal `/api/_*` gate | present                          |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | billing                             | present                          |
-| `SMTP_*`                                      | email                               | present (rotate pass)            |
-| `SENTRY_DSN`                                  | monitoring                          | present                          |
-| `REDIS_URL`                                   | distributed rate limiting           | **MISSING**                      |
-| `AGENT_SWARM_TOKEN`                           | auth for AI swarm egress            | **MISSING (only if swarm used)** |
+| Var                                           | Purpose                             | Status                              |
+| --------------------------------------------- | ----------------------------------- | ----------------------------------- |
+| `JWT_SECRET` (≥32 chars)                      | sessions                            | present (encrypted)                 |
+| `DATABASE_URL`                                | Postgres                            | present                             |
+| `APP_URL` / `APP_DOMAIN`                      | absolute links                      | present                             |
+| `CRON_SECRET`                                 | cron auth + internal `/api/_*` gate | present                             |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | billing                             | present                             |
+| `SMTP_*`                                      | email                               | present (rotate pass)               |
+| `SENTRY_DSN`                                  | monitoring                          | present                             |
+| `REDIS_URL`                                   | distributed rate limiting           | OPTIONAL (Postgres fallback active) |
+| `AGENT_SWARM_TOKEN`                           | auth for AI swarm egress            | **MISSING (only if swarm used)**    |
 
 ---
 

@@ -2878,6 +2878,7 @@ __export(rateLimiter_exports, {
   resetRateLimit: () => resetRateLimit
 });
 import Redis from "ioredis";
+import { sql as sql2 } from "drizzle-orm";
 function getRedis() {
   if (_redisInitialised) return _redis;
   _redisInitialised = true;
@@ -2900,6 +2901,62 @@ function getRedis() {
   } catch {
     console.warn("[RateLimiter] Failed to create Redis connection");
     return null;
+  }
+}
+async function tryPostgresIncrement(key, windowIndex) {
+  if (!ENV.isProduction) return null;
+  try {
+    const db = await getDb();
+    if (!db) return null;
+    const result = await db.execute(sql2`
+      INSERT INTO "rateLimitWindows" ("key", "windowIndex", "count")
+      VALUES (${key}, ${windowIndex}, 1)
+      ON CONFLICT ("key", "windowIndex")
+      DO UPDATE SET "count" = "rateLimitWindows"."count" + 1
+      RETURNING "count"
+    `);
+    const row = result.rows?.[0] ?? null;
+    if (!row) return null;
+    const count3 = Number(row.count);
+    if (!Number.isFinite(count3)) return null;
+    if (Math.random() < 0.01) {
+      void db.execute(
+        sql2`DELETE FROM "rateLimitWindows" WHERE "createdAt" < now() - interval '1 day'`
+      ).catch(() => {
+      });
+    }
+    return count3;
+  } catch {
+    return null;
+  }
+}
+async function tryPostgresCount(key, windowIndex) {
+  if (!ENV.isProduction) return null;
+  try {
+    const db = await getDb();
+    if (!db) return null;
+    const result = await db.execute(sql2`
+      SELECT "count" FROM "rateLimitWindows"
+      WHERE "key" = ${key} AND "windowIndex" = ${windowIndex}
+      LIMIT 1
+    `);
+    const row = result.rows?.[0] ?? null;
+    if (!row) return 0;
+    const count3 = Number(row.count);
+    return Number.isFinite(count3) ? count3 : 0;
+  } catch {
+    return null;
+  }
+}
+async function tryPostgresReset(key, windowIndex) {
+  if (!ENV.isProduction) return;
+  try {
+    const db = await getDb();
+    if (!db) return;
+    await db.execute(
+      sql2`DELETE FROM "rateLimitWindows" WHERE "key" = ${key} AND "windowIndex" = ${windowIndex}`
+    );
+  } catch {
   }
 }
 async function checkRateLimit(key, limit, windowMs) {
@@ -2927,6 +2984,15 @@ async function checkRateLimit(key, limit, windowMs) {
         cause.message
       );
     }
+  }
+  const pgCount = await tryPostgresIncrement(key, windowIndex);
+  if (pgCount != null) {
+    return {
+      allowed: pgCount <= limit,
+      remaining: Math.max(0, limit - pgCount),
+      resetAt,
+      limit
+    };
   }
   const now = Date.now();
   const existing = _memStore.get(key);
@@ -2956,6 +3022,8 @@ async function getRateLimitCount(key, windowMs) {
       );
     }
   }
+  const pgCount = await tryPostgresCount(key, windowIndex);
+  if (pgCount != null) return pgCount;
   const existing = _memStore.get(key);
   if (!existing || Date.now() > existing.resetAt) return 0;
   return existing.count;
@@ -2969,6 +3037,7 @@ async function resetRateLimit(key, windowMs) {
     } catch {
     }
   }
+  await tryPostgresReset(key, windowIndex);
   _memStore.delete(key);
 }
 function getRateLimiterStats() {
@@ -2993,6 +3062,7 @@ var init_rateLimiter = __esm({
   "server/_core/rateLimiter.ts"() {
     "use strict";
     init_env();
+    init_db();
     _redis = null;
     _redisInitialised = false;
     _memStore = /* @__PURE__ */ new Map();
@@ -5732,7 +5802,7 @@ __export(email_exports, {
   sendEmail: () => sendEmail
 });
 import nodemailer from "nodemailer";
-import { sql as sql2 } from "drizzle-orm";
+import { sql as sql3 } from "drizzle-orm";
 async function logEmailDelivery(payload, status, errorMessage) {
   await logDelivery(
     {
@@ -5749,10 +5819,10 @@ async function logDelivery(payload, status, errorMessage) {
   try {
     const db = await getDb();
     if (!db) return;
-    await db.execute(sql2`
+    await db.execute(sql3`
             INSERT INTO "email_log" ("template", "recipient", "subject", "status", "sent_at", "error_message")
             VALUES ('transactional', ${payload.to}, ${payload.subject}, ${status},
-                    ${status === "sent" ? sql2`NOW()` : sql2`NULL`},
+                    ${status === "sent" ? sql3`NOW()` : sql3`NULL`},
                     ${errorMessage ?? null})
         `);
   } catch {
@@ -8276,7 +8346,7 @@ __export(admin_insights_store_exports, {
   sendAlertDigest: () => sendAlertDigest
 });
 import { readFileSync } from "node:fs";
-import { and as and35, count as count2, desc as desc26, eq as eq49, gte as gte3, sql as sql11 } from "drizzle-orm";
+import { and as and35, count as count2, desc as desc26, eq as eq49, gte as gte3, sql as sql12 } from "drizzle-orm";
 async function getUserTimeline(userId, limit = 100) {
   const db = await getDb();
   if (!db) return [];
@@ -8391,7 +8461,7 @@ async function getEngagementMetrics(windowDays = 30) {
   const windowStart = new Date(
     now.getTime() - Math.max(windowDays, 1) * 24 * 3600 * 1e3
   );
-  const activeCounts = await db.execute(sql11`
+  const activeCounts = await db.execute(sql12`
     WITH actors AS (
       SELECT "localUserId" AS uid, MAX("createdAt") AS last_at
       FROM "auditLogs"
@@ -8416,13 +8486,13 @@ async function getEngagementMetrics(windowDays = 30) {
   const ac = activeCounts.rows[0] ?? {};
   const totals = await db.select({
     total: count2(),
-    newInWindow: sql11`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
-    dormant: sql11`COUNT(*) FILTER (WHERE "lastSignedIn" IS NULL OR "lastSignedIn" < ${monthAgo})`
+    newInWindow: sql12`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
+    dormant: sql12`COUNT(*) FILTER (WHERE "lastSignedIn" IS NULL OR "lastSignedIn" < ${monthAgo})`
   }).from(localUsers);
   const totalsRow = totals[0];
   const totalUsers = Number(totalsRow?.total ?? 0);
   const [newWindow] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.createdAt, windowStart));
-  const dailyRows = await db.execute(sql11`
+  const dailyRows = await db.execute(sql12`
     SELECT to_char(d, 'YYYY-MM-DD') AS date, COUNT(DISTINCT uid) AS count
     FROM (
       SELECT date_trunc('day', "createdAt") AS d, "localUserId" AS uid
@@ -8437,7 +8507,7 @@ async function getEngagementMetrics(windowDays = 30) {
     ORDER BY d
   `);
   const dailyActive = dailyRows.rows.map((r) => ({ date: r.date, count: Number(r.count) })).slice(-90);
-  const topUserRows = await db.execute(sql11`
+  const topUserRows = await db.execute(sql12`
     SELECT u.id, u.name, u.email,
            COUNT(*) AS "eventCount",
            MAX(a."createdAt") AS "lastActiveAt"
@@ -8455,7 +8525,7 @@ async function getEngagementMetrics(windowDays = 30) {
     eventCount: Number(r.eventCount),
     lastActiveAt: r.lastActiveAt instanceof Date ? r.lastActiveAt.toISOString() : r.lastActiveAt ?? null
   }));
-  const featureRows = await db.execute(sql11`
+  const featureRows = await db.execute(sql12`
     SELECT action, COUNT(*) AS count
     FROM "userInteractionLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8464,7 +8534,7 @@ async function getEngagementMetrics(windowDays = 30) {
     LIMIT 12
   `);
   const topFeatures = featureRows.rows.map((r) => ({ action: r.action, count: Number(r.count) }));
-  const orgRows = await db.execute(sql11`
+  const orgRows = await db.execute(sql12`
     SELECT o.id, o.name, COUNT(*) AS "eventCount"
     FROM "auditLogs" a
     JOIN "organizationMembers" m ON m."localUserId" = a."localUserId"
@@ -8546,15 +8616,15 @@ function titleFor(type) {
 async function buildGrowthReport(db, base, windowStart) {
   const [stats] = await db.select({
     total: count2(),
-    newInWindow: sql11`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
-    verified: sql11`COUNT(*) FILTER (WHERE "verifiedAt" IS NOT NULL)`,
-    mfa: sql11`COUNT(*) FILTER (WHERE "mfaEnabled" = 1)`,
-    active: sql11`COUNT(*) FILTER (WHERE "status" = 'active')`,
-    pending: sql11`COUNT(*) FILTER (WHERE "status" = 'pending')`,
-    suspended: sql11`COUNT(*) FILTER (WHERE "status" = 'suspended')`
+    newInWindow: sql12`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
+    verified: sql12`COUNT(*) FILTER (WHERE "verifiedAt" IS NOT NULL)`,
+    mfa: sql12`COUNT(*) FILTER (WHERE "mfaEnabled" = 1)`,
+    active: sql12`COUNT(*) FILTER (WHERE "status" = 'active')`,
+    pending: sql12`COUNT(*) FILTER (WHERE "status" = 'pending')`,
+    suspended: sql12`COUNT(*) FILTER (WHERE "status" = 'suspended')`
   }).from(localUsers);
   const byRole = await db.select({ role: localUsers.userType, c: count2() }).from(localUsers).groupBy(localUsers.userType);
-  const byDay = await db.execute(sql11`
+  const byDay = await db.execute(sql12`
     SELECT to_char("createdAt", 'YYYY-MM-DD') AS day, COUNT(*) AS count
     FROM "localUsers"
     WHERE "createdAt" >= ${windowStart}
@@ -8596,14 +8666,14 @@ async function buildGrowthReport(db, base, windowStart) {
 }
 async function buildEngagementReport(db, base, windowStart) {
   const eng = await getEngagementMetrics(base.windowDays);
-  const loginRows = await db.execute(sql11`
+  const loginRows = await db.execute(sql12`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS logins
     FROM "auditLogs"
     WHERE action = 'user.login' AND "createdAt" >= ${windowStart}
     GROUP BY 1 ORDER BY 1
   `);
-  const featureRows = await db.execute(sql11`
+  const featureRows = await db.execute(sql12`
     SELECT action, COUNT(*) AS count
     FROM "userInteractionLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8722,7 +8792,7 @@ async function buildRevenueReport(db, base, windowStart) {
 }
 async function buildSecurityReport(db, base, windowStart) {
   const outcomeRows = await db.select({ outcome: auditLogs.outcome, c: count2() }).from(auditLogs).where(gte3(auditLogs.createdAt, windowStart)).groupBy(auditLogs.outcome);
-  const actionRows = await db.execute(sql11`
+  const actionRows = await db.execute(sql12`
     SELECT action, COUNT(*) AS count
     FROM "auditLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8730,19 +8800,19 @@ async function buildSecurityReport(db, base, windowStart) {
            OR action LIKE '%role%' OR action LIKE '%password%')
     GROUP BY action ORDER BY count DESC LIMIT 25
   `);
-  const dailyFailures = await db.execute(sql11`
+  const dailyFailures = await db.execute(sql12`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS count
     FROM "auditLogs"
     WHERE outcome = 'failure' AND "createdAt" >= ${windowStart}
     GROUP BY 1 ORDER BY 1
   `);
-  const roleChanges = await db.execute(sql11`
+  const roleChanges = await db.execute(sql12`
     SELECT COUNT(*) AS c FROM "auditLogs"
     WHERE action LIKE '%role%' AND "createdAt" >= ${windowStart}
   `);
   const founderFails = await db.execute(
-    sql11`
+    sql12`
     SELECT COUNT(*) AS c FROM "yallaAdminAuditLogs"
     WHERE action IN ('login.failed','login.mfa_failed')
       AND "createdAt" >= ${windowStart}
@@ -8788,22 +8858,22 @@ async function buildSecurityReport(db, base, windowStart) {
 }
 async function buildOperationsReport(db, base, windowStart) {
   const srByStatus = await db.select({ status: serviceRequests.status, c: count2() }).from(serviceRequests).groupBy(serviceRequests.status);
-  const srOpen = await db.execute(sql11`
+  const srOpen = await db.execute(sql12`
     SELECT COUNT(*) AS c FROM "serviceRequests"
     WHERE status NOT IN ('completed','cancelled') AND "createdAt" >= ${windowStart}
   `);
-  const adminNotes = await db.execute(sql11`
+  const adminNotes = await db.execute(sql12`
     SELECT COUNT(*) AS c FROM "adminNotifications"
     WHERE "isRead" = 0
   `);
   const emails = await db.execute(
-    sql11`
+    sql12`
     SELECT status, COUNT(*) AS c FROM "email_log"
     WHERE "createdAt" >= ${windowStart}
     GROUP BY status
   `
   ).catch(() => ({ rows: [] }));
-  const dailyRegs = await db.execute(sql11`
+  const dailyRegs = await db.execute(sql12`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS count
     FROM "localUsers"
@@ -9016,7 +9086,7 @@ async function getOperationalAlerts() {
   const dayAgo = new Date(now.getTime() - 24 * 3600 * 1e3);
   const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1e3);
   try {
-    const failRow = await db.execute(sql11`
+    const failRow = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE outcome = 'failure' AND "createdAt" >= ${dayAgo}
     `);
@@ -9051,7 +9121,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const openSr = await db.execute(sql11`
+    const openSr = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "serviceRequests"
       WHERE status NOT IN ('completed','cancelled')
     `);
@@ -9080,7 +9150,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const dormant = await db.execute(sql11`
+    const dormant = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "localUsers"
       WHERE "status" = 'active'
         AND ("lastSignedIn" IS NULL OR "lastSignedIn" < ${weekAgo})
@@ -9100,7 +9170,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const unread = await db.execute(sql11`
+    const unread = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "adminNotifications" WHERE "isRead" = 0
     `);
     const n = Number(unread.rows[0]?.c ?? 0);
@@ -9160,24 +9230,24 @@ async function getLiveMetrics() {
   if (!db) return empty;
   try {
     const [online] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.lastSignedIn, fiveMinAgo));
-    const sessionsResult = await db.execute(sql11`
+    const sessionsResult = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "yallaAdminSessions"
       WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
     `);
     const [signups] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.createdAt, dayStart));
-    const loginsResult = await db.execute(sql11`
+    const loginsResult = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE action = 'user.login' AND "createdAt" >= ${dayStart}
     `);
-    const failsResult = await db.execute(sql11`
+    const failsResult = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE outcome = 'failure' AND "createdAt" >= ${dayAgo}
     `);
-    const openSrResult = await db.execute(sql11`
+    const openSrResult = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "serviceRequests"
       WHERE status NOT IN ('completed','cancelled')
     `);
-    const unreadResult = await db.execute(sql11`
+    const unreadResult = await db.execute(sql12`
       SELECT COUNT(*) AS c FROM "adminNotifications" WHERE "isRead" = 0
     `);
     const recent = await db.select({
@@ -13117,15 +13187,15 @@ import { eq as eq8 } from "drizzle-orm";
 // server/email/service.ts
 init_db();
 import { createTransport } from "nodemailer";
-import { sql as sql3 } from "drizzle-orm";
+import { sql as sql4 } from "drizzle-orm";
 async function logEmailDelivery2(opts) {
   try {
     const db = await getDb();
     if (!db) return;
-    await db.execute(sql3`
+    await db.execute(sql4`
             INSERT INTO "email_log" ("template", "recipient", "subject", "status", "sent_at", "error_message")
             VALUES (${opts.template}, ${opts.recipient}, ${opts.subject}, ${opts.status},
-                    ${opts.status === "sent" ? sql3`NOW()` : sql3`NULL`},
+                    ${opts.status === "sent" ? sql4`NOW()` : sql4`NULL`},
                     ${opts.errorMessage ?? null})
         `);
   } catch {
@@ -29742,7 +29812,7 @@ import { z as z33 } from "zod";
 // server/knowledge-graph-store.ts
 init_db();
 init_schema();
-import { and as and27, eq as eq35, or as or6, like, sql as sql4, asc as asc3, isNull as isNull4 } from "drizzle-orm";
+import { and as and27, eq as eq35, or as or6, like, sql as sql5, asc as asc3, isNull as isNull4 } from "drizzle-orm";
 async function seedKnowledgeGraph(input, organizationId) {
   const db = await getDb();
   if (!db)
@@ -29791,7 +29861,7 @@ async function queryKnowledgeGraph(query, organizationId) {
   );
   if (query.kinds && query.kinds.length > 0) {
     conditions.push(
-      sql4`${knowledgeGraphNodes.kind} = ANY(${query.kinds}::text[])`
+      sql5`${knowledgeGraphNodes.kind} = ANY(${query.kinds}::text[])`
     );
   }
   if (query.region) {
@@ -29803,8 +29873,8 @@ async function queryKnowledgeGraph(query, organizationId) {
   if (query.search) {
     const q = `%${query.search.toLowerCase()}%`;
     const searchCond = or6(
-      like(sql4`LOWER(${knowledgeGraphNodes.label})`, q),
-      like(sql4`LOWER(${knowledgeGraphNodes.description})`, q)
+      like(sql5`LOWER(${knowledgeGraphNodes.label})`, q),
+      like(sql5`LOWER(${knowledgeGraphNodes.description})`, q)
     );
     if (searchCond) conditions.push(searchCond);
   }
@@ -29814,8 +29884,8 @@ async function queryKnowledgeGraph(query, organizationId) {
   const nodeIds = nodes.map((n) => n.nodeId);
   const edges = nodeIds.length > 0 ? await db.select().from(knowledgeGraphEdges).where(
     or6(
-      sql4`${knowledgeGraphEdges.sourceNodeId} = ANY(${nodeIds}::text[])`,
-      sql4`${knowledgeGraphEdges.targetNodeId} = ANY(${nodeIds}::text[])`
+      sql5`${knowledgeGraphEdges.sourceNodeId} = ANY(${nodeIds}::text[])`,
+      sql5`${knowledgeGraphEdges.targetNodeId} = ANY(${nodeIds}::text[])`
     )
   ).limit(500) : [];
   return { nodes, edges };
@@ -29832,11 +29902,11 @@ async function getAllKnowledgeGraphNodes(organizationId) {
 async function getKnowledgeGraphStats() {
   const db = await getDb();
   if (!db) return { nodes: 0, edges: 0, byKind: [] };
-  const nodeCount = await db.select({ count: sql4`count(*)::int` }).from(knowledgeGraphNodes);
-  const edgeCount = await db.select({ count: sql4`count(*)::int` }).from(knowledgeGraphEdges);
+  const nodeCount = await db.select({ count: sql5`count(*)::int` }).from(knowledgeGraphNodes);
+  const edgeCount = await db.select({ count: sql5`count(*)::int` }).from(knowledgeGraphEdges);
   const kindCounts = await db.select({
     kind: knowledgeGraphNodes.kind,
-    count: sql4`count(*)::int`
+    count: sql5`count(*)::int`
   }).from(knowledgeGraphNodes).groupBy(knowledgeGraphNodes.kind);
   return {
     nodes: Number(nodeCount[0]?.count ?? 0),
@@ -29982,7 +30052,7 @@ import { TRPCError as TRPCError28 } from "@trpc/server";
 // server/regulatory-change-store.ts
 init_schema();
 init_db();
-import { and as and28, desc as desc20, eq as eq36, sql as sql5 } from "drizzle-orm";
+import { and as and28, desc as desc20, eq as eq36, sql as sql6 } from "drizzle-orm";
 var MEM_CHANGES = [];
 var memSeq12 = 1;
 var SEED_CHANGES = [
@@ -30355,7 +30425,7 @@ async function listRegulatoryChanges(orgId, filters) {
   const where = conditions.length > 0 ? and28(...conditions) : void 0;
   const [rows, countResult] = await Promise.all([
     db.select().from(regulatoryChanges).where(where).orderBy(desc20(regulatoryChanges.publicationDate)).limit(limit).offset(offset),
-    db.select({ count: sql5`count(*)` }).from(regulatoryChanges).where(where)
+    db.select({ count: sql6`count(*)` }).from(regulatoryChanges).where(where)
   ]);
   const total = Number(countResult[0]?.count ?? 0);
   return { rows, total };
@@ -30384,17 +30454,17 @@ async function getRegulatoryChangeStats() {
   const [jurisdictionRows, statusRows, changeTypeRows, totalResult] = await Promise.all([
     db.select({
       jurisdiction: regulatoryChanges.jurisdiction,
-      count: sql5`count(*)`
+      count: sql6`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.jurisdiction).orderBy(regulatoryChanges.jurisdiction),
     db.select({
       status: regulatoryChanges.status,
-      count: sql5`count(*)`
+      count: sql6`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.status).orderBy(regulatoryChanges.status),
     db.select({
       changeType: regulatoryChanges.changeType,
-      count: sql5`count(*)`
+      count: sql6`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.changeType).orderBy(regulatoryChanges.changeType),
-    db.select({ count: sql5`count(*)` }).from(regulatoryChanges)
+    db.select({ count: sql6`count(*)` }).from(regulatoryChanges)
   ]);
   return {
     total: Number(totalResult[0]?.count ?? 0),
@@ -31942,7 +32012,7 @@ var onboardingRouter = router({
 init_schema();
 init_db();
 import { z as z38 } from "zod";
-import { eq as eq39, desc as desc22, sql as sql6 } from "drizzle-orm";
+import { eq as eq39, desc as desc22, sql as sql7 } from "drizzle-orm";
 import { TRPCError as TRPCError31 } from "@trpc/server";
 var analyticsRouter = router({
   track: protectedProcedure.input(
@@ -31976,7 +32046,7 @@ var analyticsRouter = router({
       }).onConflictDoUpdate({
         target: userActivitySummary.userId,
         set: {
-          totalEvents: sql6`${userActivitySummary.totalEvents} + 1`,
+          totalEvents: sql7`${userActivitySummary.totalEvents} + 1`,
           lastActiveAt: /* @__PURE__ */ new Date()
         }
       });
@@ -32575,7 +32645,7 @@ async function resolveOAuthUser(req) {
 // server/services/org-context.ts
 init_schema();
 init_db();
-import { and as and32, eq as eq43, sql as sql7 } from "drizzle-orm";
+import { and as and32, eq as eq43, sql as sql8 } from "drizzle-orm";
 async function createDefaultOrganizationForUser(user, localUserId) {
   if (user.id <= 0 && !localUserId) return null;
   const db = await getDb();
@@ -32587,7 +32657,7 @@ async function createDefaultOrganizationForUser(user, localUserId) {
   const safeSlug = `org-${ownerKey}-${orgName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "default"}`;
   return db.transaction(async (tx) => {
     await tx.execute(
-      sql7`SELECT pg_advisory_xact_lock(hashtext(${`org-owner:${ownerKey}`}))`
+      sql8`SELECT pg_advisory_xact_lock(hashtext(${`org-owner:${ownerKey}`}))`
     );
     const existingMembership = await tx.select({ organizationId: organizationMembers.organizationId }).from(organizationMembers).where(
       localUserId != null ? eq43(organizationMembers.localUserId, localUserId) : eq43(organizationMembers.userId, user.id)
@@ -33804,14 +33874,14 @@ init_queueFactory();
 // server/_core/auto-migrate.ts
 init_db();
 init_env();
-import { sql as sql8 } from "drizzle-orm";
+import { sql as sql9 } from "drizzle-orm";
 var migrationApplied = false;
 async function seedComplianceFrameworks(db) {
   try {
     const { complianceFrameworks: complianceFrameworks2 } = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
     let seeded = 0;
     for (const fw of complianceFrameworks2) {
-      await db.execute(sql8`
+      await db.execute(sql9`
                 INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
                 VALUES (${fw.code}, ${fw.name}, ${fw.country}, ${fw.description ?? null}, ${fw.scope ?? null}, ${fw.enforcementAuthority ?? null}, ${fw.maxPenalty ?? null})
                 ON CONFLICT ("code") DO UPDATE SET
@@ -33840,16 +33910,16 @@ async function ensureMigrated() {
   const db = await getDb();
   if (!db) return;
   try {
-    await db.execute(sql8`
+    await db.execute(sql9`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "verifiedAt" timestamp
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "lastMfaVerifiedAt" timestamp
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "firstLoginEmailSent" integer DEFAULT 0 NOT NULL
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "yallaAdminSessions" (
                 "id"            varchar(64)   NOT NULL PRIMARY KEY,
                 "adminUsername" varchar(120)  NOT NULL,
@@ -33861,7 +33931,7 @@ async function ensureMigrated() {
                 "isRevoked"     integer       NOT NULL DEFAULT 0
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "yallaAdminAuditLogs" (
                 "id"            serial        PRIMARY KEY,
                 "sessionId"     varchar(64),
@@ -33873,17 +33943,17 @@ async function ensureMigrated() {
                 "createdAt"     timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "phoneNumber" varchar(20)
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             ALTER TABLE "complianceControls" ADD COLUMN IF NOT EXISTS "applicability" varchar(255)
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE UNIQUE INDEX IF NOT EXISTS "localUsers_phoneNumber_idx"
             ON "localUsers" ("phoneNumber") WHERE "phoneNumber" IS NOT NULL
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "otpCodes" (
                 "id"         serial        PRIMARY KEY,
                 "identifier" varchar(320)  NOT NULL,
@@ -33894,7 +33964,7 @@ async function ensureMigrated() {
                 "createdAt"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "auditLogs" (
                 "id"             serial        PRIMARY KEY,
                 "userId"         integer,
@@ -33914,26 +33984,26 @@ async function ensureMigrated() {
             )
         `);
     const indexes = [
-      sql8`CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
-      sql8`CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
-      sql8`CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
-      sql8`CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
-      sql8`CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
-      sql8`CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
-      sql8`CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
-      sql8`CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
-      sql8`CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
-      sql8`CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
-      sql8`CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`
+      sql9`CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
+      sql9`CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
+      sql9`CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
+      sql9`CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
+      sql9`CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
+      sql9`CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
+      sql9`CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
+      sql9`CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
+      sql9`CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
+      sql9`CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
+      sql9`CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`
     ];
     for (const idx of indexes) {
       await db.execute(idx);
     }
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx"
             ON "complianceControls" ("frameworkId", "controlCode")
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx"
             ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")
         `);
@@ -33964,13 +34034,13 @@ async function ensureMigrated() {
     ];
     for (const j of globalJurisdictions) {
       await db.execute(
-        sql8`ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql9`ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
       await db.execute(
-        sql8`ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql9`ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
       await db.execute(
-        sql8`ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql9`ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
     }
     const newRegions = [
@@ -33983,21 +34053,21 @@ async function ensureMigrated() {
       "Global"
     ];
     for (const r of newRegions) {
-      await db.execute(sql8`ALTER TYPE "region" ADD VALUE IF NOT EXISTS ${r}`);
+      await db.execute(sql9`ALTER TYPE "region" ADD VALUE IF NOT EXISTS ${r}`);
     }
-    await db.execute(sql8`
+    await db.execute(sql9`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedAt" DROP DEFAULT
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedAt" DROP NOT NULL
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedByIp" DROP NOT NULL
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "onboarding_progress" (
                 "id"              serial        PRIMARY KEY,
                 "user_id"         integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -34010,7 +34080,7 @@ async function ensureMigrated() {
                 "updated_at"      timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "organization_profiles_custom" (
                 "id"                       serial        PRIMARY KEY,
                 "organization_id"          integer       NOT NULL UNIQUE REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -34024,7 +34094,7 @@ async function ensureMigrated() {
                 "updated_at"               timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "user_preferences" (
                 "id"                    serial        PRIMARY KEY,
                 "user_id"               integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -34038,7 +34108,7 @@ async function ensureMigrated() {
                 "updated_at"            timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "feature_flags" (
                 "id"                   serial        PRIMARY KEY,
                 "name"                 varchar(100)  NOT NULL UNIQUE,
@@ -34050,7 +34120,7 @@ async function ensureMigrated() {
                 "updated_at"           timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "analytics_events" (
                 "id"               serial        PRIMARY KEY,
                 "user_id"          integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -34062,7 +34132,7 @@ async function ensureMigrated() {
                 "created_at"       timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "user_activity_summary" (
                 "user_id"           integer       PRIMARY KEY REFERENCES "users" ("id") ON DELETE CASCADE,
                 "total_sessions"    integer       DEFAULT 0,
@@ -34074,7 +34144,7 @@ async function ensureMigrated() {
                 "updated_at"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "email_log" (
                 "id"               serial        PRIMARY KEY,
                 "user_id"          integer       REFERENCES "users" ("id") ON DELETE SET NULL,
@@ -34090,7 +34160,7 @@ async function ensureMigrated() {
                 "created_at"       timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "notifications" (
                 "id"          serial        PRIMARY KEY,
                 "user_id"     integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -34103,7 +34173,7 @@ async function ensureMigrated() {
                 "created_at"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             DO $$ BEGIN
                 CREATE TYPE "knowledgeGraphNodeKind" AS ENUM (
                     'region','framework','standard','edition','agent','regulator',
@@ -34113,7 +34183,7 @@ async function ensureMigrated() {
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             DO $$ BEGIN
                 CREATE TYPE "knowledgeGraphEdgeRelation" AS ENUM (
                     'contains','activates','supports','maps_to','requires','conflicts',
@@ -34123,7 +34193,7 @@ async function ensureMigrated() {
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "knowledgeGraphNodes" (
                 "id"               serial        PRIMARY KEY,
                 "nodeId"           varchar(120)  NOT NULL UNIQUE,
@@ -34139,7 +34209,7 @@ async function ensureMigrated() {
                 "updatedAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "knowledgeGraphEdges" (
                 "id"               serial        PRIMARY KEY,
                 "sourceNodeId"     varchar(120)  NOT NULL,
@@ -34151,7 +34221,7 @@ async function ensureMigrated() {
                 "createdAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "regulatoryChanges" (
                 "id"               serial        PRIMARY KEY,
                 "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE SET NULL,
@@ -34170,7 +34240,7 @@ async function ensureMigrated() {
                 "updatedAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "complianceSimulations" (
                 "id"                   serial        PRIMARY KEY,
                 "organizationId"       integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -34193,7 +34263,7 @@ async function ensureMigrated() {
                 "updatedAt"            timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "aiAgentRuns" (
                 "id"               serial        PRIMARY KEY,
                 "organizationId"   integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -34225,7 +34295,7 @@ async function ensureMigrated() {
     };
     await driftExec(
       "auditLogs.chainHash",
-      sql8`ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text`
+      sql9`ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text`
     );
     const tenantIndexTables = [
       "complianceReports",
@@ -34260,12 +34330,22 @@ async function ensureMigrated() {
       const column = tenantIndexColumns[table] ?? "organizationId";
       await driftExec(
         `index ${table}.${column}`,
-        sql8`CREATE INDEX IF NOT EXISTS ${sql8.identifier(`${table}_${column}_idx`)} ON ${sql8.identifier(table)} (${sql8.identifier(column)})`
+        sql9`CREATE INDEX IF NOT EXISTS ${sql9.identifier(`${table}_${column}_idx`)} ON ${sql9.identifier(table)} (${sql9.identifier(column)})`
       );
     }
     await driftExec(
       "index notifications.user_id",
-      sql8`CREATE INDEX IF NOT EXISTS ${sql8.identifier("notifications_user_id_idx")} ON ${sql8.identifier("notifications")} ("user_id")`
+      sql9`CREATE INDEX IF NOT EXISTS ${sql9.identifier("notifications_user_id_idx")} ON ${sql9.identifier("notifications")} ("user_id")`
+    );
+    await driftExec(
+      "rate limit windows table",
+      sql9`CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
+        "key" text NOT NULL,
+        "windowIndex" bigint NOT NULL,
+        "count" integer NOT NULL DEFAULT 0,
+        "createdAt" timestamp with time zone NOT NULL DEFAULT now(),
+        PRIMARY KEY ("key", "windowIndex")
+      )`
     );
     const driftEnums = {
       plan: ["free_trial", "starter", "professional", "enterprise"],
@@ -34286,196 +34366,196 @@ async function ensureMigrated() {
     for (const [typeName, values] of Object.entries(driftEnums)) {
       await driftExec(
         `create enum ${typeName}`,
-        sql8`DO $$ BEGIN
-           CREATE TYPE ${sql8.identifier(typeName)} AS ENUM (${values.map((v) => sql8`${v}`).join(",")})
+        sql9`DO $$ BEGIN
+           CREATE TYPE ${sql9.identifier(typeName)} AS ENUM (${values.map((v) => sql9`${v}`).join(",")})
          EXCEPTION WHEN duplicate_object THEN NULL;
          END $$;`
       );
       for (const v of values) {
         await driftExec(
           `enum ${typeName}.${v}`,
-          sql8`ALTER TYPE ${sql8.identifier(typeName)} ADD VALUE IF NOT EXISTS ${v}`
+          sql9`ALTER TYPE ${sql9.identifier(typeName)} ADD VALUE IF NOT EXISTS ${v}`
         );
       }
     }
     const driftColumns = [
       [
         "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`
+        sql9`ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`
       ],
-      ["organizations", sql8`ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
+      ["organizations", sql9`ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
       [
         "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`
-      ],
-      [
-        "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`
+        sql9`ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`
       ],
       [
         "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`
       ],
       [
         "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`
-      ],
-      ["organizations", sql8`ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
-      [
-        "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`
       ],
       [
         "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`
+      ],
+      ["organizations", sql9`ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
+      [
+        "organizations",
+        sql9`ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql8`ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`
       ],
-      ["organizations", sql8`ADD COLUMN IF NOT EXISTS "metadata" text`],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "userId" integer`],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "localUserId" integer`],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "organizationId" integer`],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
+      [
+        "organizations",
+        sql9`ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`
+      ],
+      ["organizations", sql9`ADD COLUMN IF NOT EXISTS "metadata" text`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "localUserId" integer`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "organizationId" integer`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
       [
         "auditLogs",
-        sql8`ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`
       ],
       [
         "auditLogs",
-        sql8`ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`
       ],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "entityId" integer`],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "entityId" integer`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
       [
         "auditLogs",
-        sql8`ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`
       ],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "payload" text`],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
-      ["auditLogs", sql8`ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "payload" text`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
+      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`
-      ],
-      [
-        "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`
+        sql9`ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`
       ],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`
       ],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`
       ],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`
       ],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`
       ],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`
       ],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`
+        sql9`ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`
       ],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`
+        sql9`ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`
       ],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`
       ],
-      ["subscriptions", sql8`ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
       [
         "subscriptions",
-        sql8`ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`
+        sql9`ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`
       ],
-      ["subscriptions", sql8`ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
-      ["billingEvents", sql8`ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
+      ["subscriptions", sql9`ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
+      [
+        "subscriptions",
+        sql9`ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`
+      ],
+      ["subscriptions", sql9`ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
+      ["billingEvents", sql9`ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
       [
         "billingEvents",
-        sql8`ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`
-      ],
-      [
-        "billingEvents",
-        sql8`ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`
       ],
       [
         "billingEvents",
-        sql8`ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`
+        sql9`ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`
       ],
-      ["billingEvents", sql8`ADD COLUMN IF NOT EXISTS "amountCents" integer`],
       [
         "billingEvents",
-        sql8`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`
+        sql9`ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`
       ],
-      ["billingEvents", sql8`ADD COLUMN IF NOT EXISTS "description" text`],
-      ["billingEvents", sql8`ADD COLUMN IF NOT EXISTS "rawPayload" text`],
+      ["billingEvents", sql9`ADD COLUMN IF NOT EXISTS "amountCents" integer`],
+      [
+        "billingEvents",
+        sql9`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`
+      ],
+      ["billingEvents", sql9`ADD COLUMN IF NOT EXISTS "description" text`],
+      ["billingEvents", sql9`ADD COLUMN IF NOT EXISTS "rawPayload" text`],
       [
         "organizationMembers",
-        sql8`ADD COLUMN IF NOT EXISTS "localUserId" integer`
+        sql9`ADD COLUMN IF NOT EXISTS "localUserId" integer`
       ],
-      ["organizationMembers", sql8`ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["organizationMembers", sql9`ADD COLUMN IF NOT EXISTS "userId" integer`],
       [
         "organizationMembers",
-        sql8`ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`
-      ],
-      [
-        "organizationMembers",
-        sql8`ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`
-      ],
-      [
-        "organizationMembers",
-        sql8`ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`
+        sql9`ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`
       ],
       [
         "organizationMembers",
-        sql8`ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`
+        sql9`ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`
       ],
       [
         "organizationMembers",
-        sql8`ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`
+        sql9`ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`
       ],
       [
         "organizationMembers",
-        sql8`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
+        sql9`ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`
+      ],
+      [
+        "organizationMembers",
+        sql9`ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`
+      ],
+      [
+        "organizationMembers",
+        sql9`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
       ]
     ];
     for (const [table, clause] of driftColumns) {
       await driftExec(
         table,
-        sql8`ALTER TABLE ${sql8.identifier(table)} ${clause}`
+        sql9`ALTER TABLE ${sql9.identifier(table)} ${clause}`
       );
     }
     await driftExec(
       "subscriptions unique stripeSubscriptionId",
-      sql8`CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique" ON "subscriptions" ("stripeSubscriptionId")`
+      sql9`CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique" ON "subscriptions" ("stripeSubscriptionId")`
     );
     await driftExec(
       "billingEvents unique stripeEventId",
-      sql8`CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique" ON "billingEvents" ("stripeEventId")`
+      sql9`CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique" ON "billingEvents" ("stripeEventId")`
     );
     await seedComplianceFrameworks(db);
-    await db.execute(sql8`
+    await db.execute(sql9`
             CREATE TABLE IF NOT EXISTS "yallaAdminSettings" (
                 "key"       varchar(64) NOT NULL PRIMARY KEY,
                 "value"     text        NOT NULL,
@@ -34520,7 +34600,7 @@ init_logger();
 init_rateLimiter();
 init_sse_bus();
 init_sse_bus();
-import { sql as sql9 } from "drizzle-orm";
+import { sql as sql10 } from "drizzle-orm";
 var ADMIN_SECRET = ENV.yallaAdminSecret;
 var ADMIN_USERNAME = ENV.yallaAdminUsername;
 var ADMIN_PASSWORD_HASH = ENV.yallaAdminPasswordHash;
@@ -34569,7 +34649,7 @@ function touchAdminSession(sessionId) {
       const db = await getDb();
       if (!db) return;
       await db.execute(
-        sql9`UPDATE "yallaAdminSessions" SET "lastSeenAt" = NOW() WHERE id = ${sessionId}`
+        sql10`UPDATE "yallaAdminSessions" SET "lastSeenAt" = NOW() WHERE id = ${sessionId}`
       );
     } catch {
     }
@@ -34615,7 +34695,7 @@ async function getAdminSetting(key) {
     const db = await getDb();
     if (!db) return null;
     const result = await db.execute(
-      sql9`SELECT "value" FROM "yallaAdminSettings" WHERE "key" = ${key}`
+      sql10`SELECT "value" FROM "yallaAdminSettings" WHERE "key" = ${key}`
     );
     const rows = result.rows;
     return rows?.[0]?.value ?? null;
@@ -34626,7 +34706,7 @@ async function getAdminSetting(key) {
 async function setAdminSetting(key, value) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.execute(sql9`
+  await db.execute(sql10`
             INSERT INTO "yallaAdminSettings" ("key", "value", "updatedAt")
             VALUES (${key}, ${value}, NOW())
             ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = NOW()
@@ -34637,7 +34717,7 @@ async function deleteAdminSetting(key) {
     const db = await getDb();
     if (!db) return;
     await db.execute(
-      sql9`DELETE FROM "yallaAdminSettings" WHERE "key" = ${key}`
+      sql10`DELETE FROM "yallaAdminSettings" WHERE "key" = ${key}`
     );
   } catch {
   }
@@ -34662,7 +34742,7 @@ async function createAdminSession(req, res, ip, opts = {}) {
   try {
     const db = await getDb();
     if (db) {
-      await db.execute(sql9`
+      await db.execute(sql10`
                 INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
                 VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
             `);
@@ -34721,9 +34801,9 @@ async function auditLog(sessionId, adminUsername, action, ip, target, payload) {
     const db = await getDb();
     if (!db) return;
     const payloadStr = payload ? JSON.stringify(payload) : null;
-    await db.execute(sql9`
+    await db.execute(sql10`
             INSERT INTO "yallaAdminAuditLogs" ("sessionId", "adminUsername", "action", "target", "ipAddress", "payload")
-            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql9`CAST(${payloadStr} AS JSON)` : null})
+            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql10`CAST(${payloadStr} AS JSON)` : null})
         `);
   } catch {
   }
@@ -34800,7 +34880,7 @@ async function hasUsedOwnerLinkNonce(nonce) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    const linkResult = await db.execute(sql9`
+    const linkResult = await db.execute(sql10`
             SELECT id FROM "yallaAdminAccessLinkNonces"
             WHERE "nonceHash" = ${nonceHash}
             LIMIT 1
@@ -34820,7 +34900,7 @@ async function consumeOwnerLinkNonce(req, nonce, expiresAt, redirectTarget) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    await db.execute(sql9`
+    await db.execute(sql10`
             INSERT INTO "yallaAdminAccessLinkNonces" ("nonceHash", "redirectTarget", "expiresAt", "consumedByIp")
             VALUES (${nonceHash}, ${redirectTarget}, to_timestamp(${expiresAt}), ${getClientIp5(req)})
         `);
@@ -34998,7 +35078,7 @@ async function requireSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql9`
+      const sessionResult = await db.execute(sql10`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -35154,7 +35234,7 @@ async function handleLogout(req, res) {
     try {
       const db = await getDb();
       if (db) {
-        await db.execute(sql9`
+        await db.execute(sql10`
                     UPDATE "yallaAdminSessions" SET "isRevoked" = 1 WHERE id = ${session.sessionId}
                 `);
       }
@@ -35186,7 +35266,7 @@ async function handleMe(req, res) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql9`
+      const sessionResult = await db.execute(sql10`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${session.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -35213,39 +35293,39 @@ async function handleOverview(_req, res) {
       return;
     }
     const usersResult = await db.execute(
-      sql9`SELECT COUNT(*) as total FROM "localUsers"`
+      sql10`SELECT COUNT(*) as total FROM "localUsers"`
     );
     const usersRow = usersResult.rows;
     const orgsResult = await db.execute(
-      sql9`SELECT COUNT(*) as total FROM "organizations"`
+      sql10`SELECT COUNT(*) as total FROM "organizations"`
     );
     const orgsRow = orgsResult.rows;
-    const todayLoginsResult = await db.execute(sql9`
+    const todayLoginsResult = await db.execute(sql10`
             SELECT COUNT(*) as total FROM "auditLogs"
             WHERE action = 'auth.login' AND "createdAt" >= CURRENT_DATE
         `);
     const todayLoginsRow = todayLoginsResult.rows;
-    const serviceRequestsResult = await db.execute(sql9`
+    const serviceRequestsResult = await db.execute(sql10`
             SELECT COUNT(*) as total FROM "serviceRequests" WHERE status NOT IN ('completed', 'cancelled')
         `);
     const serviceRequestsRow = serviceRequestsResult.rows;
     const assetsResult = await db.execute(
-      sql9`SELECT COUNT(*) as total FROM "assetInventory"`
+      sql10`SELECT COUNT(*) as total FROM "assetInventory"`
     );
     const assetsRow = assetsResult.rows;
-    const todaySignupsResult = await db.execute(sql9`
+    const todaySignupsResult = await db.execute(sql10`
             SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const todaySignupsRow = todaySignupsResult.rows;
-    const newOrgsResult = await db.execute(sql9`
+    const newOrgsResult = await db.execute(sql10`
             SELECT COUNT(*) as total FROM "organizations" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const newOrgsRow = newOrgsResult.rows;
-    const revenueResult = await db.execute(sql9`
+    const revenueResult = await db.execute(sql10`
             SELECT COUNT(*) as total FROM "organizations" WHERE plan IN ('professional','enterprise') AND "isActive" = 1
         `);
     const revenueRow = revenueResult.rows;
-    const activeSessionsResult = await db.execute(sql9`
+    const activeSessionsResult = await db.execute(sql10`
             SELECT COUNT(*) as total FROM "yallaAdminSessions"
             WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
         `);
@@ -35277,7 +35357,7 @@ async function handleUsers(req, res) {
       200
     );
     const offset = parseInt(req.query.offset ?? "0", 10) || 0;
-    const usersDbResult = await db.execute(sql9`
+    const usersDbResult = await db.execute(sql10`
             SELECT
                 u.id,
                 u.name AS username,
@@ -35308,10 +35388,10 @@ async function handleSystem(_req, res) {
     let tableCount = 0;
     if (db) {
       try {
-        const versionResult = await db.execute(sql9`SELECT version() as v`);
+        const versionResult = await db.execute(sql10`SELECT version() as v`);
         const vRow = versionResult.rows;
         dbVersion = vRow?.[0]?.v ?? "";
-        const tableResult = await db.execute(sql9`
+        const tableResult = await db.execute(sql10`
                     SELECT COUNT(*) as c FROM information_schema.tables
                     WHERE table_schema = 'public'
                 `);
@@ -35357,7 +35437,7 @@ async function handleAudit(req, res) {
     );
     const action = req.query.action;
     const auditResult = await db.execute(
-      action ? sql9`SELECT * FROM "yallaAdminAuditLogs" WHERE action = ${action} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql9`SELECT * FROM "yallaAdminAuditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
+      action ? sql10`SELECT * FROM "yallaAdminAuditLogs" WHERE action = ${action} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql10`SELECT * FROM "yallaAdminAuditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = auditResult.rows;
     res.json(rows ?? []);
@@ -35378,7 +35458,7 @@ async function handlePlatformAudit(req, res) {
     );
     const category = req.query.category;
     const platformAuditResult = await db.execute(
-      category ? sql9`SELECT * FROM "auditLogs" WHERE category = ${category} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql9`SELECT * FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
+      category ? sql10`SELECT * FROM "auditLogs" WHERE category = ${category} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql10`SELECT * FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = platformAuditResult.rows;
     res.json(rows ?? []);
@@ -35400,7 +35480,7 @@ async function handleInteractions(req, res) {
     const context = req.query.context?.trim();
     const action = req.query.action?.trim();
     const interactionResult = await db.execute(
-      context && action ? sql9`
+      context && action ? sql10`
                     SELECT
                         l.id,
                         l.context,
@@ -35422,7 +35502,7 @@ async function handleInteractions(req, res) {
                     WHERE l.context = ${context} AND l.action = ${action}
                     ORDER BY l."createdAt" DESC
                     LIMIT ${limit}
-                ` : context ? sql9`
+                ` : context ? sql10`
                         SELECT
                             l.id,
                             l.context,
@@ -35444,7 +35524,7 @@ async function handleInteractions(req, res) {
                         WHERE l.context = ${context}
                         ORDER BY l."createdAt" DESC
                         LIMIT ${limit}
-                    ` : action ? sql9`
+                    ` : action ? sql10`
                             SELECT
                                 l.id,
                                 l.context,
@@ -35466,7 +35546,7 @@ async function handleInteractions(req, res) {
                             WHERE l.action = ${action}
                             ORDER BY l."createdAt" DESC
                             LIMIT ${limit}
-                        ` : sql9`
+                        ` : sql10`
                             SELECT
                                 l.id,
                                 l.context,
@@ -35508,7 +35588,7 @@ async function handleIntake(req, res) {
     ]);
     let serviceRequests2 = [];
     if (db) {
-      const srResult = await db.execute(sql9`
+      const srResult = await db.execute(sql10`
                 SELECT
                     sr.id,
                     sr."serviceType",
@@ -35556,13 +35636,13 @@ async function handleOnboarding(req, res) {
       200
     );
     const [countsResult, recentResult] = await Promise.all([
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT stage, COUNT(*) as total
                 FROM "userOnboarding"
                 GROUP BY stage
                 ORDER BY total DESC
             `),
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT
                     o.id,
                     o.stage,
@@ -35598,7 +35678,7 @@ async function handleValidationFailures(req, res) {
       parseInt(req.query.limit ?? "100", 10) || 100,
       500
     );
-    const validationResult = await db.execute(sql9`
+    const validationResult = await db.execute(sql10`
             SELECT
                 id,
                 category,
@@ -35633,7 +35713,7 @@ async function handleSubscriptions(req, res) {
       500
     );
     const [subsResult, eventsResult, summaryResult] = await Promise.all([
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT
                     s.id,
                     s.plan,
@@ -35656,7 +35736,7 @@ async function handleSubscriptions(req, res) {
                 ORDER BY s."updatedAt" DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT
                     be.id,
                     be."eventType",
@@ -35671,7 +35751,7 @@ async function handleSubscriptions(req, res) {
                 ORDER BY be."createdAt" DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT
                     plan,
                     status,
@@ -35706,7 +35786,7 @@ async function handleSignups(req, res) {
       parseInt(req.query.limit ?? "50", 10) || 50,
       200
     );
-    const signupsResult = await db.execute(sql9`
+    const signupsResult = await db.execute(sql10`
             SELECT
                 u.id,
                 u.name AS username,
@@ -35740,7 +35820,7 @@ async function handleOrgs(req, res) {
       parseInt(req.query.limit ?? "100", 10) || 100,
       500
     );
-    const orgsResult = await db.execute(sql9`
+    const orgsResult = await db.execute(sql10`
             SELECT
                 o.id,
                 o.name,
@@ -35777,12 +35857,12 @@ async function handleRealtime(_req, res) {
       return;
     }
     const [sessResult, actResult, newUsersResult] = await Promise.all([
-      db.execute(sql9`SELECT 0 as total`),
+      db.execute(sql10`SELECT 0 as total`),
       db.execute(
-        sql9`SELECT COUNT(*) as total FROM "auditLogs" WHERE "createdAt" >= NOW() - INTERVAL '5 minutes'`
+        sql10`SELECT COUNT(*) as total FROM "auditLogs" WHERE "createdAt" >= NOW() - INTERVAL '5 minutes'`
       ),
       db.execute(
-        sql9`SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt" >= NOW() - INTERVAL '60 minutes'`
+        sql10`SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt" >= NOW() - INTERVAL '60 minutes'`
       )
     ]);
     const sessRow = sessResult.rows;
@@ -35813,7 +35893,7 @@ async function handleUserDetail(req, res) {
       return;
     }
     const [userResult, sessionResult, auditResult, interactionResult] = await Promise.all([
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT u.id, u.name AS username, u.email, u."userType" AS role, u.status, u."mfaEnabled" AS "isMfaEnabled",
                        u."createdAt", u."lastSignedIn" AS "lastLoginAt", o.name AS "organizationName", o.plan AS "organizationPlan"
                 FROM "localUsers" u
@@ -35821,13 +35901,13 @@ async function handleUserDetail(req, res) {
                 LEFT JOIN "organizations" o ON o.id = om."organizationId"
                 WHERE u.id = ${userId} LIMIT 1
             `),
-      db.execute(sql9`SELECT 0 AS id LIMIT 0`),
-      db.execute(sql9`
+      db.execute(sql10`SELECT 0 AS id LIMIT 0`),
+      db.execute(sql10`
                 SELECT category, action, outcome, "createdAt"
                 FROM "auditLogs" WHERE "localUserId" = ${userId}
                 ORDER BY "createdAt" DESC LIMIT 30
             `),
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT context, action, "entityType", "createdAt", "durationMs"
                 FROM "userInteractionLogs" WHERE "localUserId" = ${userId}
                 ORDER BY "createdAt" DESC LIMIT 30
@@ -35861,12 +35941,12 @@ async function handleOrgDetail(req, res) {
       return;
     }
     const [orgResult, membersResult, subscriptionResult, auditResult] = await Promise.all([
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT id, name, slug, plan, "isActive", "trialEndsAt", "createdAt", "updatedAt",
                        industry, "billingEmail"
                 FROM "organizations" WHERE id = ${orgId} LIMIT 1
             `),
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT om.role, u.id AS "userId", u.name AS username, u.email, u.status AS "userStatus",
                        u."lastSignedIn" AS "lastLoginAt", om."createdAt" AS "joinedAt"
                 FROM "organizationMembers" om
@@ -35875,13 +35955,13 @@ async function handleOrgDetail(req, res) {
                 ORDER BY om."createdAt" ASC
                 LIMIT 50
             `),
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT id, plan, status, "currentPeriodStart", "currentPeriodEnd", "cancelAtPeriodEnd",
                        "createdAt", "updatedAt"
                 FROM "subscriptions" WHERE "organizationId" = ${orgId}
                 ORDER BY "createdAt" DESC LIMIT 1
             `),
-      db.execute(sql9`
+      db.execute(sql10`
                 SELECT category, action, outcome, "createdAt"
                 FROM "auditLogs" WHERE "organizationId" = ${orgId}
                 ORDER BY "createdAt" DESC LIMIT 30
@@ -35922,7 +36002,7 @@ async function handleSuspendUser(req, res) {
       return;
     }
     const userResult = await db.execute(
-      sql9`SELECT id, email, status FROM "localUsers" WHERE id = ${userId} LIMIT 1`
+      sql10`SELECT id, email, status FROM "localUsers" WHERE id = ${userId} LIMIT 1`
     );
     const rows = userResult.rows;
     const user = rows[0];
@@ -35932,7 +36012,7 @@ async function handleSuspendUser(req, res) {
     }
     const newStatus = suspend ? "suspended" : "active";
     await db.execute(
-      sql9`UPDATE "localUsers" SET status = ${newStatus}, "updatedAt" = NOW() WHERE id = ${userId}`
+      sql10`UPDATE "localUsers" SET status = ${newStatus}, "updatedAt" = NOW() WHERE id = ${userId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -35994,7 +36074,7 @@ async function handleSuspendOrg(req, res) {
       return;
     }
     const orgCheckResult = await db.execute(
-      sql9`SELECT id, name, "isActive" FROM "organizations" WHERE id = ${orgId} LIMIT 1`
+      sql10`SELECT id, name, "isActive" FROM "organizations" WHERE id = ${orgId} LIMIT 1`
     );
     const rows = orgCheckResult.rows;
     const org = rows[0];
@@ -36005,7 +36085,7 @@ async function handleSuspendOrg(req, res) {
     const newStatus = suspend ? "suspended" : "active";
     const newIsActive = suspend ? 0 : 1;
     await db.execute(
-      sql9`UPDATE "organizations" SET "isActive" = ${newIsActive}, "updatedAt" = NOW() WHERE id = ${orgId}`
+      sql10`UPDATE "organizations" SET "isActive" = ${newIsActive}, "updatedAt" = NOW() WHERE id = ${orgId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -36098,7 +36178,7 @@ async function handleSessions(req, res) {
       res.json([]);
       return;
     }
-    const result = await db.execute(sql9`
+    const result = await db.execute(sql10`
             SELECT id, "adminUsername", "ipAddress", "userAgent", "createdAt", "expiresAt", "lastSeenAt"
             FROM "yallaAdminSessions"
             WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
@@ -36136,7 +36216,7 @@ async function handleRevokeAdminSession(req, res) {
       res.status(503).json({ error: "Database unavailable" });
       return;
     }
-    const result = await db.execute(sql9`
+    const result = await db.execute(sql10`
             UPDATE "yallaAdminSessions" SET "isRevoked" = 1
             WHERE id = ${targetId} AND "isRevoked" = 0
             RETURNING id
@@ -36213,13 +36293,13 @@ async function handlePasswordChange(req, res) {
   try {
     const db = await getDb();
     if (db && session) {
-      const others = await db.execute(sql9`
+      const others = await db.execute(sql10`
                 SELECT id FROM "yallaAdminSessions"
                 WHERE "isRevoked" = 0 AND id != ${session.sessionId}
             `);
       const otherIds = others.rows ?? [];
       for (const row of otherIds) revokeAdminSession(row.id);
-      await db.execute(sql9`
+      await db.execute(sql10`
                 UPDATE "yallaAdminSessions" SET "isRevoked" = 1
                 WHERE "isRevoked" = 0 AND id != ${session.sessionId}
             `);
@@ -36437,7 +36517,7 @@ async function handleExportCsv(req, res) {
     let headers;
     let filename;
     if (type === "users") {
-      const userExportResult = await db.execute(sql9`
+      const userExportResult = await db.execute(sql10`
                 SELECT id, name, email, "phoneNumber", "userType" AS role, status,
                        "companyName", "jobTitle", industry, "preferredLocale",
                        "mfaEnabled" AS "isMfaEnabled", "createdAt", "lastSignedIn" AS "lastLoginAt"
@@ -36448,7 +36528,7 @@ async function handleExportCsv(req, res) {
       headers = "id,name,email,phoneNumber,role,status,companyName,jobTitle,industry,preferredLocale,isMfaEnabled,createdAt,lastLoginAt";
       filename = "users-export.csv";
     } else if (type === "orgs") {
-      const orgExportResult = await db.execute(sql9`
+      const orgExportResult = await db.execute(sql10`
                 SELECT id, name, plan, "isActive", "trialEndsAt", "createdAt"
                 FROM "organizations" ORDER BY "createdAt" DESC LIMIT 10000
             `);
@@ -36457,7 +36537,7 @@ async function handleExportCsv(req, res) {
       headers = "id,name,plan,isActive,trialEndsAt,createdAt";
       filename = "orgs-export.csv";
     } else if (type === "subscriptions") {
-      const subExportResult = await db.execute(sql9`
+      const subExportResult = await db.execute(sql10`
                 SELECT s.id, s.plan, s.status, s."currentPeriodStart", s."currentPeriodEnd",
                        s."cancelAtPeriodEnd", o.name AS "orgName", s."createdAt"
                 FROM "subscriptions" s
@@ -36469,7 +36549,7 @@ async function handleExportCsv(req, res) {
       headers = "id,plan,status,currentPeriodStart,currentPeriodEnd,cancelAtPeriodEnd,orgName,createdAt";
       filename = "subscriptions-export.csv";
     } else if (type === "audit") {
-      const auditExportResult = await db.execute(sql9`
+      const auditExportResult = await db.execute(sql10`
                 SELECT id, category, action, outcome, "ipHash" AS "ipAddress", "createdAt"
                 FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT 10000
             `);
@@ -36523,7 +36603,7 @@ function scheduleSessionCleanup() {
     try {
       const db = await getDb();
       if (!db) return;
-      await db.execute(sql9`
+      await db.execute(sql10`
                 DELETE FROM "yallaAdminSessions"
                 WHERE "expiresAt" < NOW()
                    OR ("isRevoked" = 1 AND "lastSeenAt" < NOW() - INTERVAL '7 days')
@@ -36628,13 +36708,13 @@ import { z as z42 } from "zod";
 import express3, {
   Router
 } from "express";
-import { sql as sql13 } from "drizzle-orm";
+import { sql as sql14 } from "drizzle-orm";
 
 // server/_core/admin-dashboard-store.ts
 init_schema();
 init_db();
 init_local_jwt();
-import { and as and34, count, desc as desc25, eq as eq48, gte as gte2, like as like2, or as or7, sql as sql10 } from "drizzle-orm";
+import { and as and34, count, desc as desc25, eq as eq48, gte as gte2, like as like2, or as or7, sql as sql11 } from "drizzle-orm";
 async function getUnifiedUsers(options) {
   const db = await getDb();
   if (!db) {
@@ -36687,18 +36767,18 @@ async function getUnifiedUsers(options) {
     );
   }
   if (options.role) {
-    conditions.push(sql10`${localUsers.userType} = ${options.role}::"userType"`);
+    conditions.push(sql11`${localUsers.userType} = ${options.role}::"userType"`);
   }
   const whereClause = conditions.length > 0 ? and34(...conditions) : void 0;
   const [total] = await db.select({ count: count() }).from(localUsers).where(whereClause);
   const rows = await db.select({
     id: localUsers.id,
-    source: sql10`'local'`.as("source"),
+    source: sql11`'local'`.as("source"),
     name: localUsers.name,
     email: localUsers.email,
     phoneNumber: localUsers.phoneNumber,
-    role: sql10`${localUsers.userType}`,
-    status: sql10`${localUsers.status}`,
+    role: sql11`${localUsers.userType}`,
+    status: sql11`${localUsers.status}`,
     companyName: localUsers.companyName,
     jobTitle: localUsers.jobTitle,
     industry: localUsers.industry,
@@ -36711,7 +36791,7 @@ async function getUnifiedUsers(options) {
     orgCount: count()
   }).from(organizationMembers).where(
     and34(
-      sql10`${organizationMembers.localUserId} IS NOT NULL`,
+      sql11`${organizationMembers.localUserId} IS NOT NULL`,
       eq48(organizationMembers.status, "active")
     )
   ).groupBy(organizationMembers.localUserId);
@@ -36739,10 +36819,10 @@ async function getUserStats() {
   }
   const [localCounts] = await db.select({
     total: count(),
-    active: sql10`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
-    suspended: sql10`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
-    pending: sql10`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
-    newThisMonth: sql10`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`
+    active: sql11`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
+    suspended: sql11`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
+    pending: sql11`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
+    newThisMonth: sql11`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`
   }).from(localUsers);
   const [oauthCounts] = await db.select({ total: count() }).from(users);
   const roleCounts = await db.select({
@@ -36851,14 +36931,14 @@ async function getMonthlyRegistrations(months = 12) {
   const db = await getDb();
   if (!db) return [];
   const rows = await db.select({
-    month: sql10`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
+    month: sql11`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
     count: count()
   }).from(localUsers).where(
     gte2(
       localUsers.createdAt,
-      sql10`CURRENT_DATE - INTERVAL '${sql10.raw(String(months))} months'`
+      sql11`CURRENT_DATE - INTERVAL '${sql11.raw(String(months))} months'`
     )
-  ).groupBy(sql10`1`).orderBy(sql10`1`);
+  ).groupBy(sql11`1`).orderBy(sql11`1`);
   return rows;
 }
 async function getSubscriptionData() {
@@ -36897,10 +36977,10 @@ async function getOrganizationData() {
     id: organizations.id,
     name: organizations.name,
     plan: organizations.plan,
-    status: sql10`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'suspended' END`,
-    memberCount: sql10`COUNT(DISTINCT ${organizationMembers.id})`,
+    status: sql11`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'suspended' END`,
+    memberCount: sql11`COUNT(DISTINCT ${organizationMembers.id})`,
     createdAt: organizations.createdAt,
-    lastActivity: sql10`MAX(${organizationMembers.createdAt})`
+    lastActivity: sql11`MAX(${organizationMembers.createdAt})`
   }).from(organizations).leftJoin(
     organizationMembers,
     eq48(organizations.id, organizationMembers.organizationId)
@@ -36936,7 +37016,7 @@ async function getSecurityEvents(limit = 200) {
   }));
   let adminEvents = [];
   try {
-    const adminResult = await db.execute(sql10`
+    const adminResult = await db.execute(sql11`
             SELECT id, action, "ipAddress", "createdAt", "target",
                    CASE
                        WHEN action IN ('login.failed', 'login.link_denied',
@@ -36973,7 +37053,7 @@ init_admin_insights_store();
 // server/_core/platform-monitor-store.ts
 init_schema();
 init_db();
-import { desc as desc27, eq as eq50, gte as gte4, sql as sql12 } from "drizzle-orm";
+import { desc as desc27, eq as eq50, gte as gte4, sql as sql13 } from "drizzle-orm";
 var DAY_MS3 = 24 * 60 * 60 * 1e3;
 var INTERVAL_MONTHS = {
   monthly: 1,
@@ -37058,32 +37138,32 @@ async function getTrafficMetrics(days = 30) {
   const since30d = new Date(now - 30 * DAY_MS3);
   const sinceWindow = new Date(now - days * DAY_MS3);
   const [totals] = await db.select({
-    totalEvents: sql12`COUNT(*)::int`,
-    events24h: sql12`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since24h})::int`,
-    events7d: sql12`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since7d})::int`
+    totalEvents: sql13`COUNT(*)::int`,
+    events24h: sql13`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since24h})::int`,
+    events7d: sql13`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since7d})::int`
   }).from(analyticsEvents);
   const daily = await db.select({
-    date: sql12`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`,
-    events: sql12`COUNT(*)::int`,
-    users: sql12`COUNT(DISTINCT ${analyticsEvents.userId})::int`
-  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(sql12`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`).orderBy(sql12`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`);
+    date: sql13`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`,
+    events: sql13`COUNT(*)::int`,
+    users: sql13`COUNT(DISTINCT ${analyticsEvents.userId})::int`
+  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(sql13`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`).orderBy(sql13`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`);
   const signups = await db.select({
-    date: sql12`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`,
-    count: sql12`COUNT(*)::int`
-  }).from(localUsers).where(gte4(localUsers.createdAt, sinceWindow)).groupBy(sql12`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`).orderBy(sql12`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`);
+    date: sql13`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`,
+    count: sql13`COUNT(*)::int`
+  }).from(localUsers).where(gte4(localUsers.createdAt, sinceWindow)).groupBy(sql13`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`).orderBy(sql13`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`);
   const topEvents = await db.select({
     event: analyticsEvents.event,
     category: analyticsEvents.category,
-    count: sql12`COUNT(*)::int`
-  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(analyticsEvents.event, analyticsEvents.category).orderBy(desc27(sql12`COUNT(*)`)).limit(10);
+    count: sql13`COUNT(*)::int`
+  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(analyticsEvents.event, analyticsEvents.category).orderBy(desc27(sql13`COUNT(*)`)).limit(10);
   const [summary] = await db.select({
-    trackedUsers: sql12`COUNT(*)::int`,
-    totalSessions: sql12`COALESCE(SUM(${userActivitySummary.totalSessions}), 0)::int`,
-    activeUsers24h: sql12`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since24h})::int`,
-    activeUsers7d: sql12`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since7d})::int`,
-    activeUsers30d: sql12`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since30d})::int`,
-    avgActivationScore: sql12`COALESCE(AVG(${userActivitySummary.activationScore}), 0)::int`,
-    avgHealthScore: sql12`COALESCE(AVG(${userActivitySummary.healthScore}), 0)::int`
+    trackedUsers: sql13`COUNT(*)::int`,
+    totalSessions: sql13`COALESCE(SUM(${userActivitySummary.totalSessions}), 0)::int`,
+    activeUsers24h: sql13`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since24h})::int`,
+    activeUsers7d: sql13`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since7d})::int`,
+    activeUsers30d: sql13`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since30d})::int`,
+    avgActivationScore: sql13`COALESCE(AVG(${userActivitySummary.activationScore}), 0)::int`,
+    avgHealthScore: sql13`COALESCE(AVG(${userActivitySummary.healthScore}), 0)::int`
   }).from(userActivitySummary);
   return {
     totalEvents: num(totals?.totalEvents),
@@ -37151,9 +37231,9 @@ async function getRevenueMetrics() {
     if (s.cancelAtPeriodEnd === 1) churnRisk += 1;
   }
   const [billing] = await db.select({
-    failedPayments: sql12`COUNT(*) FILTER (WHERE ${billingEvents.status} = 'failed')::int`,
-    failedAmount: sql12`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'failed'), 0)::int`,
-    refundedAmount: sql12`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'refunded'), 0)::int`
+    failedPayments: sql13`COUNT(*) FILTER (WHERE ${billingEvents.status} = 'failed')::int`,
+    failedAmount: sql13`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'failed'), 0)::int`,
+    refundedAmount: sql13`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'refunded'), 0)::int`
   }).from(billingEvents).where(gte4(billingEvents.createdAt, since30d));
   const recentBillingEvents = await db.select({
     id: billingEvents.id,
@@ -37195,16 +37275,16 @@ async function getAiJobMetrics() {
   if (!db) return emptyAi();
   const since24h = new Date(Date.now() - DAY_MS3);
   const [counts] = await db.select({
-    total: sql12`COUNT(*)::int`,
-    queued: sql12`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'queued')::int`,
-    running: sql12`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'running')::int`,
-    completed: sql12`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'completed')::int`,
-    failed: sql12`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'failed')::int`,
-    cancelled: sql12`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'cancelled')::int`,
-    last24h: sql12`COUNT(*) FILTER (WHERE ${aiAgentRuns.createdAt} >= ${since24h})::int`,
-    avgDurationMs: sql12`COALESCE(AVG(${aiAgentRuns.durationMs}) FILTER (WHERE ${aiAgentRuns.durationMs} IS NOT NULL), 0)::int`
+    total: sql13`COUNT(*)::int`,
+    queued: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'queued')::int`,
+    running: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'running')::int`,
+    completed: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'completed')::int`,
+    failed: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'failed')::int`,
+    cancelled: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'cancelled')::int`,
+    last24h: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.createdAt} >= ${since24h})::int`,
+    avgDurationMs: sql13`COALESCE(AVG(${aiAgentRuns.durationMs}) FILTER (WHERE ${aiAgentRuns.durationMs} IS NOT NULL), 0)::int`
   }).from(aiAgentRuns);
-  const durations = await db.select({ durationMs: aiAgentRuns.durationMs }).from(aiAgentRuns).where(sql12`${aiAgentRuns.durationMs} IS NOT NULL`).orderBy(desc27(aiAgentRuns.createdAt)).limit(500);
+  const durations = await db.select({ durationMs: aiAgentRuns.durationMs }).from(aiAgentRuns).where(sql13`${aiAgentRuns.durationMs} IS NOT NULL`).orderBy(desc27(aiAgentRuns.createdAt)).limit(500);
   const sorted = durations.map((d2) => num(d2.durationMs)).filter((d2) => d2 > 0).sort((a, b) => a - b);
   const p95 = sorted.length > 0 ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))] : 0;
   const recentFailures = await db.select({
@@ -37242,13 +37322,13 @@ async function getEmailMetrics() {
   if (!db) return emptyEmail();
   const since24h = new Date(Date.now() - DAY_MS3);
   const [counts] = await db.select({
-    total: sql12`COUNT(*)::int`,
-    sent: sql12`COUNT(*) FILTER (WHERE ${emailLog.status} = 'sent')::int`,
-    failed: sql12`COUNT(*) FILTER (WHERE ${emailLog.status} = 'failed')::int`,
-    queued: sql12`COUNT(*) FILTER (WHERE ${emailLog.status} = 'queued')::int`,
-    opened: sql12`COUNT(*) FILTER (WHERE ${emailLog.openedAt} IS NOT NULL)::int`,
-    clicked: sql12`COUNT(*) FILTER (WHERE ${emailLog.clickedAt} IS NOT NULL)::int`,
-    last24hSent: sql12`COUNT(*) FILTER (WHERE ${emailLog.createdAt} >= ${since24h} AND ${emailLog.status} = 'sent')::int`
+    total: sql13`COUNT(*)::int`,
+    sent: sql13`COUNT(*) FILTER (WHERE ${emailLog.status} = 'sent')::int`,
+    failed: sql13`COUNT(*) FILTER (WHERE ${emailLog.status} = 'failed')::int`,
+    queued: sql13`COUNT(*) FILTER (WHERE ${emailLog.status} = 'queued')::int`,
+    opened: sql13`COUNT(*) FILTER (WHERE ${emailLog.openedAt} IS NOT NULL)::int`,
+    clicked: sql13`COUNT(*) FILTER (WHERE ${emailLog.clickedAt} IS NOT NULL)::int`,
+    last24hSent: sql13`COUNT(*) FILTER (WHERE ${emailLog.createdAt} >= ${since24h} AND ${emailLog.status} = 'sent')::int`
   }).from(emailLog);
   const recentFailures = await db.select({
     id: emailLog.id,
@@ -37283,10 +37363,10 @@ async function getSecurityMetrics() {
   const db = await getDb();
   if (!db) return emptySecurity();
   const [row] = await db.select({
-    totalUsers: sql12`COUNT(*)::int`,
-    mfaEnabledUsers: sql12`COUNT(*) FILTER (WHERE ${localUsers.mfaEnabled} = 1)::int`,
-    suspendedUsers: sql12`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')::int`,
-    pendingUsers: sql12`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')::int`
+    totalUsers: sql13`COUNT(*)::int`,
+    mfaEnabledUsers: sql13`COUNT(*) FILTER (WHERE ${localUsers.mfaEnabled} = 1)::int`,
+    suspendedUsers: sql13`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')::int`,
+    pendingUsers: sql13`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')::int`
   }).from(localUsers);
   const total = num(row?.totalUsers);
   const mfa = num(row?.mfaEnabledUsers);
@@ -37343,7 +37423,7 @@ async function requireAdminSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql13`
+      const sessionResult = await db.execute(sql14`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -38448,18 +38528,18 @@ async function handler(req, res) {
       };
       if (dbClient) {
         try {
-          const { sql: sql14 } = await import("drizzle-orm");
+          const { sql: sql15 } = await import("drizzle-orm");
           const userCount = await dbClient.execute(
-            sql14`SELECT COUNT(*)::int as count FROM "localUsers"`
+            sql15`SELECT COUNT(*)::int as count FROM "localUsers"`
           );
           const orgCount = await dbClient.execute(
-            sql14`SELECT COUNT(*)::int as count FROM "organizations"`
+            sql15`SELECT COUNT(*)::int as count FROM "organizations"`
           );
           const fwCount = await dbClient.execute(
-            sql14`SELECT COUNT(*)::int as count FROM "frameworks"`
+            sql15`SELECT COUNT(*)::int as count FROM "frameworks"`
           );
           const vendorCount = await dbClient.execute(
-            sql14`SELECT COUNT(*)::int as count FROM "vendors"`
+            sql15`SELECT COUNT(*)::int as count FROM "vendors"`
           );
           stats.users = userCount.rows[0].count;
           stats.organizations = orgCount.rows[0].count;
@@ -38484,8 +38564,8 @@ async function handler(req, res) {
         res.status(200).json({ ok: false, error: "Database not connected" });
         return;
       }
-      const { sql: sql14 } = await import("drizzle-orm");
-      const tables = await db.execute(sql14`
+      const { sql: sql15 } = await import("drizzle-orm");
+      const tables = await db.execute(sql15`
         SELECT table_name FROM information_schema.tables
         WHERE table_schema = 'public'
         ORDER BY table_name
@@ -38527,11 +38607,11 @@ async function handler(req, res) {
         auditLogs: [],
         otpCodes: []
       };
-      const { sql: sql14 } = await import("drizzle-orm");
+      const { sql: sql15 } = await import("drizzle-orm");
       for (const [table, cols] of Object.entries(expected)) {
         if (cols.length === 0) continue;
         const result = await db.execute(
-          sql14.raw(
+          sql15.raw(
             `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='${table}'`
           )
         );
@@ -38561,14 +38641,14 @@ async function handler(req, res) {
       }
       const mod = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
       const { complianceRelationships: complianceRelationships2 } = mod;
-      const { sql: sql14 } = await import("drizzle-orm");
+      const { sql: sql15 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql14`SELECT "id", "code" FROM "frameworks"`
+        sql15`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql14`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
+        sql15`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
       );
       const batchSize = 30;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -38578,11 +38658,11 @@ async function handler(req, res) {
         const srcId = codeToId.get(rel.sourceFrameworkCode);
         const tgtId = codeToId.get(rel.targetFrameworkCode);
         if (!srcId || !tgtId) continue;
-        const exist = await db.execute(sql14`
+        const exist = await db.execute(sql15`
           SELECT 1 FROM "frameworkRelationships" WHERE "sourceFrameworkId" = ${srcId} AND "targetFrameworkId" = ${tgtId} LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql14`
+        await db.execute(sql15`
           INSERT INTO "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId", "relationshipType", "description", "severity", "riskLevel", "mitigation")
           VALUES (${srcId}, ${tgtId}, ${rel.relationshipType}, ${rel.description ?? null}, ${rel.severity ?? null}, ${rel.riskLevel ?? null}, ${rel.mitigation ?? null})
         `);
@@ -38613,14 +38693,14 @@ async function handler(req, res) {
       }
       const mod = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
       const controls = mod.complianceControls;
-      const { sql: sql14 } = await import("drizzle-orm");
+      const { sql: sql15 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql14`SELECT "id", "code" FROM "frameworks"`
+        sql15`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql14`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
+        sql15`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
       );
       const batchSize = 50;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -38629,13 +38709,13 @@ async function handler(req, res) {
       for (const ctrl of batch) {
         const fid = codeToId.get(ctrl.frameworkCode);
         if (!fid) continue;
-        const exist = await db.execute(sql14`
+        const exist = await db.execute(sql15`
           SELECT 1 FROM "complianceControls"
           WHERE "frameworkId" = ${fid} AND "controlCode" = ${ctrl.controlCode}
           LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql14`
+        await db.execute(sql15`
           INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
           VALUES (${fid}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
         `);
