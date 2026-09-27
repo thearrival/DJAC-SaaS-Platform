@@ -3481,7 +3481,9 @@ function runDualJurisdictionAssessment(vendor) {
     (chinaScore + saudiScore + euScore + usScore + brazilScore + globalScore) / 6
   );
   const riskLevel = inferRiskLevel(overallScore, gaps);
-  const status = scoreToStatus(overallScore);
+  const rawStatus = scoreToStatus(overallScore);
+  const hasAnyJurisdictionSignal = requiresChinaControls || requiresSaudiControls || requiresEUControls || requiresUSControls || requiresBrazilControls;
+  const status = !hasAnyJurisdictionSignal && rawStatus === "compliant" ? "partial" : rawStatus;
   const recommendations = dedupe(
     gaps.map((gap) => gap.mitigation).concat([
       "Run legal validation for all critical and high findings before onboarding.",
@@ -4091,11 +4093,14 @@ async function callAgentSwarm(stagePath, payload) {
   const abortController = new AbortController();
   const timeout = setTimeout(() => abortController.abort(), 15e3);
   try {
+    const swarmToken = process.env.AGENT_SWARM_TOKEN;
+    const headers = {
+      "content-type": "application/json"
+    };
+    if (swarmToken) headers.authorization = `Bearer ${swarmToken}`;
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: {
-        "content-type": "application/json"
-      },
+      headers,
       body: JSON.stringify(payload),
       signal: abortController.signal
     });
@@ -4382,7 +4387,9 @@ function buildDbPayload(assessment, remediationPlan, ragControls) {
   ).flatMap(
     ([jurisdiction, codes]) => codes.map((code) => ({
       frameworkCode: code,
-      complianceScore: assessment.jurisdictionScores[jurisdiction] ?? assessment.overallScore,
+      // Null when the jurisdiction has no measured score — never substitute the
+      // overall score, which would attribute a global number to a local regime.
+      complianceScore: assessment.jurisdictionScores[jurisdiction] ?? null,
       riskLevel: assessment.riskLevel,
       status: assessment.status,
       findings: assessment.gaps.filter((gap) => gap.frameworks.includes(code)).map((gap) => `${gap.code}: ${gap.title}`),
@@ -4440,10 +4447,20 @@ async function executeAssessmentPipeline(input, reportStage) {
     }
   );
   const assessment = externalAssessment || runJudge(input.vendor, extractedFacts);
-  for (const key of JURISDICTION_SCORE_KEYS) {
+  const missingScoreKeys = JURISDICTION_SCORE_KEYS.filter((key) => {
     const score = assessment.jurisdictionScores[key];
-    if (typeof score !== "number" || !Number.isFinite(score)) {
-      assessment.jurisdictionScores[key] = assessment.overallScore;
+    return typeof score !== "number" || !Number.isFinite(score);
+  });
+  if (missingScoreKeys.length > 0) {
+    const provided = JURISDICTION_SCORE_KEYS.map(
+      (key) => assessment.jurisdictionScores[key]
+    ).filter((n) => typeof n === "number" && Number.isFinite(n));
+    const conservative = provided.length > 0 ? Math.min(...provided) : 0;
+    for (const key of missingScoreKeys) {
+      assessment.jurisdictionScores[key] = conservative;
+    }
+    if (assessment.status === "compliant") {
+      assessment.status = "partial";
     }
   }
   reportStage(
@@ -9284,14 +9301,15 @@ function registerOAuthRoutes(app) {
         lastSignedIn: signedInAt,
         lastActivityAt: signedInAt
       });
+      const sessionTtlMs = 1e3 * 60 * 60 * 24 * 30;
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
-        expiresInMs: ONE_YEAR_MS
+        expiresInMs: sessionTtlMs
       });
       const cookieOptions3 = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, {
         ...cookieOptions3,
-        maxAge: ONE_YEAR_MS
+        maxAge: sessionTtlMs
       });
       res.redirect(302, "/");
     } catch (error) {
@@ -27490,8 +27508,10 @@ var MEM_EVIDENCE = [
     organizationId: 1,
     sourceType: "policy",
     sourceId: null,
-    title: "PIPL Compliance Policy v2 \u2014 Internal Approval Record",
-    url: "https://example.com/documents/pipl-compliance-policy-v2-approval.pdf",
+    title: "[DEMO] PIPL Compliance Policy v2 \u2014 Internal Approval Record",
+    // Demo data must not present fabricated external citations — use an
+    // internal (non-resolvable) reference instead of a placeholder domain.
+    url: "/demo/evidence/pipl-compliance-policy-v2-approval.pdf",
     description: "Board approval record for the PIPL data processing policy update.",
     addedByUserId: null,
     tags: "pipl,china,policy",
@@ -27503,8 +27523,8 @@ var MEM_EVIDENCE = [
     organizationId: 1,
     sourceType: "audit_schedule",
     sourceId: null,
-    title: "Q1 Internal Audit \u2014 SOC 2 Readiness Report",
-    url: "https://example.com/audits/q1-2025-soc2-readiness.pdf",
+    title: "[DEMO] Q1 Internal Audit \u2014 SOC 2 Readiness Report",
+    url: "/demo/evidence/q1-2025-soc2-readiness.pdf",
     description: "External auditor readiness report for Q1 SOC 2 review.",
     addedByUserId: null,
     tags: "soc2,audit",
@@ -27516,8 +27536,8 @@ var MEM_EVIDENCE = [
     organizationId: 1,
     sourceType: "risk",
     sourceId: null,
-    title: "Cross-Border Data Transfer Risk \u2014 PDPL Impact Assessment",
-    url: "https://example.com/risk/cross-border-pdpl-impact-assessment.pdf",
+    title: "[DEMO] Cross-Border Data Transfer Risk \u2014 PDPL Impact Assessment",
+    url: "/demo/evidence/cross-border-pdpl-impact-assessment.pdf",
     description: "Formal impact assessment for Saudi Arabia data transfer risks under PDPL.",
     addedByUserId: null,
     tags: "pdpl,saudi,risk",
@@ -30128,7 +30148,8 @@ var SEED_CHANGES = [
     publicationDate: /* @__PURE__ */ new Date("2025-05-15"),
     status: "in_effect",
     impact: "GenAI providers must conduct data security assessments for model training, implement data subject consent mechanisms for training data, and label AI-generated content with digital watermarks.",
-    url: "https://www.cac.gov.cn/2025-04/15/c_1723456789.htm"
+    // Fabricated source URL removed — no verifiable official source available.
+    url: null
   },
   {
     frameworkCode: "PIPL",
@@ -30141,7 +30162,7 @@ var SEED_CHANGES = [
     publicationDate: /* @__PURE__ */ new Date("2025-08-01"),
     status: "in_effect",
     impact: "Security assessments now required for transfers of personal information of over 10,000 individuals (down from 100,000). Standard contracts available for transfers under 10,000 individuals.",
-    url: "https://www.cac.gov.cn/2025-07/25/c_1726543210.htm"
+    url: null
   },
   {
     frameworkCode: "PIPL",
@@ -30154,7 +30175,7 @@ var SEED_CHANGES = [
     publicationDate: /* @__PURE__ */ new Date("2025-12-20"),
     status: "in_effect",
     impact: "Platforms collecting geolocation and biometric data must review purpose limitation. Separate consent mechanisms for cross-border data sharing must be implemented. Fine signals aggressive enforcement stance.",
-    url: "https://www.cac.gov.cn/2025-12/20/c_1723456123.htm"
+    url: null
   },
   // Saudi Arabia - PDPL
   {
@@ -30235,7 +30256,8 @@ var SEED_CHANGES = [
     publicationDate: /* @__PURE__ */ new Date("2026-02-10"),
     status: "pending",
     impact: "Organisations certified under ISO 27701 must transition to the 2026 edition within 18 months. New controls include AI training data governance, automated decision transparency, and privacy-by-design engineering requirements.",
-    url: "https://www.iso.org/standard/27701-2026"
+    // ISO 27701:2026 does not exist — fabricated URL removed.
+    url: null
   },
   {
     frameworkCode: "ISO 27001",
@@ -30248,7 +30270,8 @@ var SEED_CHANGES = [
     publicationDate: /* @__PURE__ */ new Date("2026-03-01"),
     status: "pending",
     impact: "Organisations with ISO 27001 certification must transition within 24 months. Key changes include new cloud security controls (A.5.32-A.5.40), AI-specific security requirements, and expanded threat intelligence collection obligations.",
-    url: "https://www.iso.org/standard/27001-2026"
+    // ISO 27001:2026 does not exist — fabricated URL removed.
+    url: null
   }
 ];
 function toRow(change, id) {

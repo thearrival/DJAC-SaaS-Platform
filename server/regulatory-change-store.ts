@@ -275,7 +275,8 @@ const SEED_CHANGES: InsertRegulatoryChange[] = [
     status: "in_effect",
     impact:
       "GenAI providers must conduct data security assessments for model training, implement data subject consent mechanisms for training data, and label AI-generated content with digital watermarks.",
-    url: "https://www.cac.gov.cn/2025-04/15/c_1723456789.htm",
+    // Fabricated source URL removed — no verifiable official source available.
+    url: null,
   },
   {
     frameworkCode: "PIPL",
@@ -291,7 +292,7 @@ const SEED_CHANGES: InsertRegulatoryChange[] = [
     status: "in_effect",
     impact:
       "Security assessments now required for transfers of personal information of over 10,000 individuals (down from 100,000). Standard contracts available for transfers under 10,000 individuals.",
-    url: "https://www.cac.gov.cn/2025-07/25/c_1726543210.htm",
+    url: null,
   },
   {
     frameworkCode: "PIPL",
@@ -307,7 +308,7 @@ const SEED_CHANGES: InsertRegulatoryChange[] = [
     status: "in_effect",
     impact:
       "Platforms collecting geolocation and biometric data must review purpose limitation. Separate consent mechanisms for cross-border data sharing must be implemented. Fine signals aggressive enforcement stance.",
-    url: "https://www.cac.gov.cn/2025-12/20/c_1723456123.htm",
+    url: null,
   },
 
   // Saudi Arabia - PDPL
@@ -405,7 +406,8 @@ const SEED_CHANGES: InsertRegulatoryChange[] = [
     status: "pending",
     impact:
       "Organisations certified under ISO 27701 must transition to the 2026 edition within 18 months. New controls include AI training data governance, automated decision transparency, and privacy-by-design engineering requirements.",
-    url: "https://www.iso.org/standard/27701-2026",
+    // ISO 27701:2026 does not exist — fabricated URL removed.
+    url: null,
   },
   {
     frameworkCode: "ISO 27001",
@@ -420,7 +422,8 @@ const SEED_CHANGES: InsertRegulatoryChange[] = [
     status: "pending",
     impact:
       "Organisations with ISO 27001 certification must transition within 24 months. Key changes include new cloud security controls (A.5.32-A.5.40), AI-specific security requirements, and expanded threat intelligence collection obligations.",
-    url: "https://www.iso.org/standard/27001-2026",
+    // ISO 27001:2026 does not exist — fabricated URL removed.
+    url: null,
   },
 ];
 

@@ -1,4 +1,4 @@
-import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const";
+import { COOKIE_NAME } from "../../shared/const";
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
@@ -39,15 +39,18 @@ export function registerOAuthRoutes(app: Express) {
         lastActivityAt: signedInAt,
       });
 
+      // 30-day sessions (down from 1 year). Long-lived non-revocable tokens were
+      // a standing risk; re-authentication is cheap.
+      const sessionTtlMs = 1000 * 60 * 60 * 24 * 30;
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
-        expiresInMs: ONE_YEAR_MS,
+        expiresInMs: sessionTtlMs,
       });
 
       const cookieOptions = getSessionCookieOptions(req);
       res.cookie(COOKIE_NAME, sessionToken, {
         ...cookieOptions,
-        maxAge: ONE_YEAR_MS,
+        maxAge: sessionTtlMs,
       });
 
       res.redirect(302, "/");

@@ -43,8 +43,10 @@ const MEM_EVIDENCE: EvidenceRow[] = [
     organizationId: 1,
     sourceType: "policy",
     sourceId: null,
-    title: "PIPL Compliance Policy v2 — Internal Approval Record",
-    url: "https://example.com/documents/pipl-compliance-policy-v2-approval.pdf",
+    title: "[DEMO] PIPL Compliance Policy v2 — Internal Approval Record",
+    // Demo data must not present fabricated external citations — use an
+    // internal (non-resolvable) reference instead of a placeholder domain.
+    url: "/demo/evidence/pipl-compliance-policy-v2-approval.pdf",
     description:
       "Board approval record for the PIPL data processing policy update.",
     addedByUserId: null,
@@ -57,8 +59,8 @@ const MEM_EVIDENCE: EvidenceRow[] = [
     organizationId: 1,
     sourceType: "audit_schedule",
     sourceId: null,
-    title: "Q1 Internal Audit — SOC 2 Readiness Report",
-    url: "https://example.com/audits/q1-2025-soc2-readiness.pdf",
+    title: "[DEMO] Q1 Internal Audit — SOC 2 Readiness Report",
+    url: "/demo/evidence/q1-2025-soc2-readiness.pdf",
     description: "External auditor readiness report for Q1 SOC 2 review.",
     addedByUserId: null,
     tags: "soc2,audit",
@@ -70,8 +72,8 @@ const MEM_EVIDENCE: EvidenceRow[] = [
     organizationId: 1,
     sourceType: "risk",
     sourceId: null,
-    title: "Cross-Border Data Transfer Risk — PDPL Impact Assessment",
-    url: "https://example.com/risk/cross-border-pdpl-impact-assessment.pdf",
+    title: "[DEMO] Cross-Border Data Transfer Risk — PDPL Impact Assessment",
+    url: "/demo/evidence/cross-border-pdpl-impact-assessment.pdf",
     description:
       "Formal impact assessment for Saudi Arabia data transfer risks under PDPL.",
     addedByUserId: null,

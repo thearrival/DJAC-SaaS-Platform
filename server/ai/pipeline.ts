@@ -230,11 +230,18 @@ async function callAgentSwarm<T>(
   const timeout = setTimeout(() => abortController.abort(), 15_000);
 
   try {
+    // Authenticate to the agent swarm when a shared token is configured. The
+    // payload contains full vendor PII, so an unauthenticated egress endpoint
+    // must never be the default in production.
+    const swarmToken = process.env.AGENT_SWARM_TOKEN;
+    const headers: Record<string, string> = {
+      "content-type": "application/json",
+    };
+    if (swarmToken) headers.authorization = `Bearer ${swarmToken}`;
+
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
+      headers,
       body: JSON.stringify(payload),
       signal: abortController.signal,
     });
@@ -639,10 +646,12 @@ function buildDbPayload(
   ).flatMap(([jurisdiction, codes]) =>
     codes.map(code => ({
       frameworkCode: code,
+      // Null when the jurisdiction has no measured score — never substitute the
+      // overall score, which would attribute a global number to a local regime.
       complianceScore:
         assessment.jurisdictionScores[
           jurisdiction as keyof typeof assessment.jurisdictionScores
-        ] ?? assessment.overallScore,
+        ] ?? null,
       riskLevel: assessment.riskLevel,
       status: assessment.status,
       findings: assessment.gaps
@@ -720,10 +729,25 @@ export async function executeAssessmentPipeline(
   );
   const assessment =
     externalAssessment || runJudge(input.vendor, extractedFacts);
-  for (const key of JURISDICTION_SCORE_KEYS) {
+  // Never inflate scores for jurisdictions the model did not actually evaluate.
+  // Previously a missing score was replaced with overallScore (which can be
+  // high), silently crediting the vendor; use the conservative minimum of the
+  // provided scores instead, and downgrade a "compliant" verdict whenever data
+  // was incomplete.
+  const missingScoreKeys = JURISDICTION_SCORE_KEYS.filter(key => {
     const score = assessment.jurisdictionScores[key];
-    if (typeof score !== "number" || !Number.isFinite(score)) {
-      assessment.jurisdictionScores[key] = assessment.overallScore;
+    return typeof score !== "number" || !Number.isFinite(score);
+  });
+  if (missingScoreKeys.length > 0) {
+    const provided = JURISDICTION_SCORE_KEYS.map(
+      key => assessment.jurisdictionScores[key]
+    ).filter((n): n is number => typeof n === "number" && Number.isFinite(n));
+    const conservative = provided.length > 0 ? Math.min(...provided) : 0;
+    for (const key of missingScoreKeys) {
+      assessment.jurisdictionScores[key] = conservative;
+    }
+    if (assessment.status === "compliant") {
+      assessment.status = "partial";
     }
   }
 

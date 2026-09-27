@@ -929,7 +929,20 @@ export function runDualJurisdictionAssessment(
       6
   );
   const riskLevel = inferRiskLevel(overallScore, gaps);
-  const status = scoreToStatus(overallScore);
+  const rawStatus = scoreToStatus(overallScore);
+  // Missing jurisdiction signals must never be reported as "compliant": with no
+  // operating/regulatory/data-location inputs the core jurisdictions default to
+  // 100, so the vendor would otherwise be credited without any real assessment.
+  const hasAnyJurisdictionSignal =
+    requiresChinaControls ||
+    requiresSaudiControls ||
+    requiresEUControls ||
+    requiresUSControls ||
+    requiresBrazilControls;
+  const status =
+    !hasAnyJurisdictionSignal && rawStatus === "compliant"
+      ? "partial"
+      : rawStatus;
 
   const recommendations = dedupe(
     gaps
