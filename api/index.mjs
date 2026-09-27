@@ -38100,6 +38100,9 @@ async function createApp() {
   );
   app.use("/api/yalla-admin", createYallaAdminRouter());
   app.use("/api/admin-dashboard", createAdminDashboardRouter());
+  app.use("/api", (req, res) => {
+    res.status(404).json({ error: "Not found", path: req.path });
+  });
   app.use(sentryErrorHandler());
   app.use((err, _req, res, _next) => {
     logger.error({ err }, "Unhandled Express error");

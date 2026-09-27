@@ -506,6 +506,13 @@ export async function createApp() {
   app.use("/api/yalla-admin", createYallaAdminRouter());
   app.use("/api/admin-dashboard", createAdminDashboardRouter());
 
+  // Unknown API routes: always answer with JSON. Without this, unmatched /api/*
+  // requests fall through to Express's HTML 404 page (and historically could be
+  // confused with the SPA shell), which API clients cannot parse.
+  app.use("/api", (req: Request, res: Response) => {
+    res.status(404).json({ error: "Not found", path: req.path });
+  });
+
   app.use(sentryErrorHandler());
 
   // Fallback error handler (4-arg) when Sentry is not configured or for errors
