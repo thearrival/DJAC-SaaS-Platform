@@ -1,4 +1,4 @@
-import { and, eq, or, like, sql, asc } from "drizzle-orm";
+import { and, eq, or, like, sql, asc, isNull } from "drizzle-orm";
 import { getDb } from "./db";
 import {
   knowledgeGraphNodes,
@@ -75,11 +75,25 @@ export async function seedKnowledgeGraph(
   return { nodesSeeded: input.nodes.length, edgesSeeded: input.edges.length };
 }
 
-export async function queryKnowledgeGraph(query: GraphQuery) {
+export async function queryKnowledgeGraph(
+  query: GraphQuery,
+  organizationId?: number | null
+) {
   const db = await getDb();
   if (!db) return { nodes: [], edges: [] };
 
   const conditions: ReturnType<typeof eq>[] = [];
+
+  // Tenant isolation: a caller may only see global nodes
+  // (organizationId IS NULL) and their own organization's custom nodes.
+  conditions.push(
+    (organizationId != null
+      ? or(
+          isNull(knowledgeGraphNodes.organizationId),
+          eq(knowledgeGraphNodes.organizationId, organizationId)
+        )
+      : isNull(knowledgeGraphNodes.organizationId)) as any
+  );
 
   if (query.kinds && query.kinds.length > 0) {
     conditions.push(
@@ -134,12 +148,23 @@ export async function queryKnowledgeGraph(query: GraphQuery) {
   return { nodes, edges };
 }
 
-export async function getAllKnowledgeGraphNodes() {
+export async function getAllKnowledgeGraphNodes(
+  organizationId?: number | null
+) {
   const db = await getDb();
   if (!db) return [];
+  // Only global nodes plus the caller's own organization's custom nodes.
+  const scope =
+    organizationId != null
+      ? or(
+          isNull(knowledgeGraphNodes.organizationId),
+          eq(knowledgeGraphNodes.organizationId, organizationId)
+        )
+      : isNull(knowledgeGraphNodes.organizationId);
   return db
     .select()
     .from(knowledgeGraphNodes)
+    .where(scope)
     .orderBy(asc(knowledgeGraphNodes.kind), asc(knowledgeGraphNodes.label));
 }
 

@@ -29742,7 +29742,7 @@ import { z as z33 } from "zod";
 // server/knowledge-graph-store.ts
 init_db();
 init_schema();
-import { and as and27, eq as eq35, or as or6, like, sql as sql4, asc as asc3 } from "drizzle-orm";
+import { and as and27, eq as eq35, or as or6, like, sql as sql4, asc as asc3, isNull as isNull4 } from "drizzle-orm";
 async function seedKnowledgeGraph(input, organizationId) {
   const db = await getDb();
   if (!db)
@@ -29779,10 +29779,16 @@ async function seedKnowledgeGraph(input, organizationId) {
   }
   return { nodesSeeded: input.nodes.length, edgesSeeded: input.edges.length };
 }
-async function queryKnowledgeGraph(query) {
+async function queryKnowledgeGraph(query, organizationId) {
   const db = await getDb();
   if (!db) return { nodes: [], edges: [] };
   const conditions = [];
+  conditions.push(
+    organizationId != null ? or6(
+      isNull4(knowledgeGraphNodes.organizationId),
+      eq35(knowledgeGraphNodes.organizationId, organizationId)
+    ) : isNull4(knowledgeGraphNodes.organizationId)
+  );
   if (query.kinds && query.kinds.length > 0) {
     conditions.push(
       sql4`${knowledgeGraphNodes.kind} = ANY(${query.kinds}::text[])`
@@ -29814,10 +29820,14 @@ async function queryKnowledgeGraph(query) {
   ).limit(500) : [];
   return { nodes, edges };
 }
-async function getAllKnowledgeGraphNodes() {
+async function getAllKnowledgeGraphNodes(organizationId) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(knowledgeGraphNodes).orderBy(asc3(knowledgeGraphNodes.kind), asc3(knowledgeGraphNodes.label));
+  const scope = organizationId != null ? or6(
+    isNull4(knowledgeGraphNodes.organizationId),
+    eq35(knowledgeGraphNodes.organizationId, organizationId)
+  ) : isNull4(knowledgeGraphNodes.organizationId);
+  return db.select().from(knowledgeGraphNodes).where(scope).orderBy(asc3(knowledgeGraphNodes.kind), asc3(knowledgeGraphNodes.label));
 }
 async function getKnowledgeGraphStats() {
   const db = await getDb();
@@ -29900,8 +29910,8 @@ var knowledgeGraphRouter = router({
   stats: protectedProcedure.query(async () => {
     return getKnowledgeGraphStats();
   }),
-  allNodes: protectedProcedure.query(async () => {
-    return getAllKnowledgeGraphNodes();
+  allNodes: protectedProcedure.query(async ({ ctx }) => {
+    return getAllKnowledgeGraphNodes(ctx.organizationId);
   }),
   query: protectedProcedure.input(
     z33.object({
@@ -29912,8 +29922,8 @@ var knowledgeGraphRouter = router({
       limit: z33.number().int().min(1).max(100).default(50),
       offset: z33.number().int().min(0).default(0)
     })
-  ).query(async ({ input }) => {
-    return queryKnowledgeGraph(input);
+  ).query(async ({ ctx, input }) => {
+    return queryKnowledgeGraph(input, ctx.organizationId);
   }),
   seed: protectedProcedure.input(
     z33.object({
@@ -32456,7 +32466,7 @@ init_env();
 init_sdk();
 init_local_jwt();
 import crypto3 from "crypto";
-import { and as and31, eq as eq42, isNull as isNull4 } from "drizzle-orm";
+import { and as and31, eq as eq42, isNull as isNull5 } from "drizzle-orm";
 async function resolveDevBypassUser() {
   const now = /* @__PURE__ */ new Date();
   return {
@@ -32493,7 +32503,7 @@ async function resolveApiKeyAuth(req) {
     revokedAt: apiKeys.revokedAt,
     expiresAt: apiKeys.expiresAt,
     scopes: apiKeys.scopes
-  }).from(apiKeys).where(and31(eq42(apiKeys.keyHash, keyHash), isNull4(apiKeys.revokedAt))).limit(1);
+  }).from(apiKeys).where(and31(eq42(apiKeys.keyHash, keyHash), isNull5(apiKeys.revokedAt))).limit(1);
   if (!keyRow || keyRow.expiresAt && keyRow.expiresAt <= now) return null;
   db.update(apiKeys).set({ lastUsedAt: now }).where(eq42(apiKeys.id, keyRow.id)).catch(() => {
   });

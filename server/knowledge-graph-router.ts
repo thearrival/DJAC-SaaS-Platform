@@ -55,8 +55,8 @@ export const knowledgeGraphRouter = router({
     return getKnowledgeGraphStats();
   }),
 
-  allNodes: protectedProcedure.query(async () => {
-    return getAllKnowledgeGraphNodes();
+  allNodes: protectedProcedure.query(async ({ ctx }) => {
+    return getAllKnowledgeGraphNodes(ctx.organizationId);
   }),
 
   query: protectedProcedure
@@ -70,8 +70,8 @@ export const knowledgeGraphRouter = router({
         offset: z.number().int().min(0).default(0),
       })
     )
-    .query(async ({ input }) => {
-      return queryKnowledgeGraph(input as GraphQuery);
+    .query(async ({ ctx, input }) => {
+      return queryKnowledgeGraph(input as GraphQuery, ctx.organizationId);
     }),
 
   seed: protectedProcedure
