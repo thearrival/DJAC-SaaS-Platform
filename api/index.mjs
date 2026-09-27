@@ -34197,10 +34197,16 @@ async function ensureMigrated() {
       "analytics_events",
       "email_log"
     ];
+    const tenantIndexColumns = {
+      organization_profiles_custom: "organization_id",
+      analytics_events: "organization_id",
+      email_log: "organization_id"
+    };
     for (const table of tenantIndexTables) {
+      const column = tenantIndexColumns[table] ?? "organizationId";
       await driftExec(
-        `index ${table}.organizationId`,
-        sql7`CREATE INDEX IF NOT EXISTS ${sql7.identifier(`${table}_organizationId_idx`)} ON ${sql7.identifier(table)} ("organizationId")`
+        `index ${table}.${column}`,
+        sql7`CREATE INDEX IF NOT EXISTS ${sql7.identifier(`${table}_${column}_idx`)} ON ${sql7.identifier(table)} (${sql7.identifier(column)})`
       );
     }
     const driftEnums = {

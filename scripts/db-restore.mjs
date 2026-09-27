@@ -71,40 +71,36 @@ console.log(
   `[db-restore] Database: ${dbUrl.replace(/\/\/.+:.+@/, "://***:***@")}`
 );
 
-try {
-  // Check if backup file is gzipped and decompress if needed
-  const tempFile = isGzipped ? filePath : null;
-  const restoreFile = isGzipped ? filePath : filePath;
+// db-backup.mjs produces a PLAIN SQL dump (created with pg_dump --clean
+// --if-exists), optionally gzipped. That is not a pg_restore archive, so the
+// restore must go through psql. --drop/--clean are pg_restore flags and are
+// rejected by psql — the dump already contains DROP ... IF EXISTS statements.
+if (dropFlag || cleanFlag) {
+  console.warn(
+    "[db-restore] --drop/--clean are ignored: the backup is a plain SQL dump " +
+      "that already contains DROP ... IF EXISTS statements."
+  );
+}
 
+try {
   if (verboseFlag) {
     const stats = fs.statSync(filePath);
     const sizeMB = (stats.size / (1024 * 1024)).toFixed(1);
     console.log(`[db-restore] File size: ${sizeMB} MB`);
     console.log(
-      `[db-restore] Format: ${isGzipped ? "gzip compressed" : "plain SQL"}`
+      `[db-restore] Format: ${isGzipped ? "gzip compressed SQL" : "plain SQL"}`
     );
   }
 
-  const flags = [];
-  if (dropFlag) flags.push("--drop");
-  if (cleanFlag) flags.push("--clean");
-  flags.push("--if-exists");
-  flags.push("--no-owner");
-  flags.push("--no-acl");
-
-  const flagStr = flags.join(" ");
-
   if (isGzipped) {
-    // Restore from gzipped backup using pipe
-    console.log(`[db-restore] Decompressing and restoring gzipped backup...`);
-    execSync(`gunzip -c "${filePath}" | pg_restore ${flagStr} "${dbUrl}"`, {
+    console.log(`[db-restore] Decompressing and restoring gzipped SQL dump...`);
+    execSync(`gunzip -c "${filePath}" | psql "${dbUrl}" -v ON_ERROR_STOP=1`, {
       stdio: verboseFlag ? "inherit" : "pipe",
       timeout: 600_000,
     });
   } else {
-    // Restore from plain SQL file using psql
     console.log(`[db-restore] Restoring from SQL dump...`);
-    execSync(`psql "${dbUrl}" ${flagStr} -f "${filePath}"`, {
+    execSync(`psql "${dbUrl}" -v ON_ERROR_STOP=1 -f "${filePath}"`, {
       stdio: verboseFlag ? "inherit" : "pipe",
       timeout: 600_000,
     });

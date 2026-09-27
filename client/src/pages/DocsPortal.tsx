@@ -2351,6 +2351,7 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
           <span className="text-xs font-mono text-zinc-400">{lang}</span>
           <button
             onClick={copy}
+            aria-label={copied ? "Copied" : "Copy code"}
             className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
           >
             {copied ? (
@@ -2377,6 +2378,7 @@ function CodeBlock({ code, lang }: { code: string; lang?: string }) {
       {!lang && (
         <button
           onClick={copy}
+          aria-label={copied ? "Copied" : "Copy code"}
           className="absolute top-2 right-2 p-1.5 rounded-md bg-zinc-800/80 text-zinc-500 hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           {copied ? (

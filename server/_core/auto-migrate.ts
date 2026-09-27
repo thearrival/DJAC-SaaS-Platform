@@ -504,10 +504,19 @@ export async function ensureMigrated(): Promise<void> {
       "analytics_events",
       "email_log",
     ];
+    // Most tenant tables use the camelCase "organizationId" column, but the
+    // snake_case tables below use "organization_id". The previous single-column
+    // DDL threw for them and the index was silently never created.
+    const tenantIndexColumns: Record<string, string> = {
+      organization_profiles_custom: "organization_id",
+      analytics_events: "organization_id",
+      email_log: "organization_id",
+    };
     for (const table of tenantIndexTables) {
+      const column = tenantIndexColumns[table] ?? "organizationId";
       await driftExec(
-        `index ${table}.organizationId`,
-        sql`CREATE INDEX IF NOT EXISTS ${sql.identifier(`${table}_organizationId_idx`)} ON ${sql.identifier(table)} ("organizationId")`
+        `index ${table}.${column}`,
+        sql`CREATE INDEX IF NOT EXISTS ${sql.identifier(`${table}_${column}_idx`)} ON ${sql.identifier(table)} (${sql.identifier(column)})`
       );
     }
 
