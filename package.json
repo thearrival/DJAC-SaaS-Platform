@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "verify:all": "pnpm lint && pnpm check && pnpm test && pnpm build",
     "i18n:report": "node scripts/i18n-report.mjs",
     "og-image": "node scripts/generate-og-image.mjs",

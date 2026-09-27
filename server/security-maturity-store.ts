@@ -2,7 +2,7 @@
  * Security Maturity Store — DB operations for security-maturity-router.ts
  */
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { securityMaturityAssessments } from "../drizzle/schema";
 import { getDb } from "./db";
 
@@ -209,14 +209,26 @@ export async function deleteAssessmentRow(
     MEM_ASSESSMENTS.splice(idx, 1);
     return true;
   }
+  // Every statement must be tenant-scoped: selecting/deleting by id alone
+  // allows one organization to delete another organization's assessment.
   const [existing] = await db
     .select({ id: securityMaturityAssessments.id })
     .from(securityMaturityAssessments)
-    .where(eq(securityMaturityAssessments.id, id))
+    .where(
+      and(
+        eq(securityMaturityAssessments.id, id),
+        eq(securityMaturityAssessments.organizationId, orgId)
+      )
+    )
     .limit(1);
   if (!existing) return false;
   await db
     .delete(securityMaturityAssessments)
-    .where(eq(securityMaturityAssessments.id, id));
+    .where(
+      and(
+        eq(securityMaturityAssessments.id, id),
+        eq(securityMaturityAssessments.organizationId, orgId)
+      )
+    );
   return true;
 }

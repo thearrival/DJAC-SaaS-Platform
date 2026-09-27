@@ -279,13 +279,18 @@ export async function updateVendorProfile(
     ? and(eq(vendors.id, vendorId), eq(vendors.organizationId, organizationId!))
     : and(eq(vendors.id, vendorId), eq(vendors.userId, userId));
 
-  await db
+  // Only touch the vendor's child rows if the tenant-scoped update actually
+  // matched a row — otherwise a mismatched org/user could still destroy another
+  // tenant's tech-stack components.
+  const updatedRows = await db
     .update(vendors)
     .set({
       ...toInsertValues(userId, input, organizationId),
       updatedAt: new Date(),
     })
-    .where(whereClause);
+    .where(whereClause)
+    .returning({ id: vendors.id });
+  if (updatedRows.length === 0) throw new Error("Vendor not found");
 
   // Replace tech stack components: delete old, insert new
   await db
@@ -328,6 +333,15 @@ export async function deleteVendorProfile(
   const whereClause = useOrg
     ? and(eq(vendors.id, vendorId), eq(vendors.organizationId, organizationId!))
     : and(eq(vendors.id, vendorId), eq(vendors.userId, userId));
+
+  // Verify the tenant owns this vendor BEFORE touching child rows, otherwise a
+  // mismatched org/user could destroy another tenant's tech-stack components.
+  const [owned] = await db
+    .select({ id: vendors.id })
+    .from(vendors)
+    .where(whereClause)
+    .limit(1);
+  if (!owned) throw new Error("Vendor not found");
 
   // Delete tech stack first (FK constraint)
   await db

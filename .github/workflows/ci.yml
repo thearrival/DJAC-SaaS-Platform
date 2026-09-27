@@ -26,6 +26,22 @@ jobs:
       - run: pnpm check
       - run: pnpm format:check
 
+  security:
+    name: Security Scans
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm install --frozen-lockfile || true
+      # Secret scan of the working tree. Reports (non-blocking) until historical
+      # findings are purged; then flip --exit-code to 1 to make it a hard gate.
+      - name: Secret scan (gitleaks)
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
+            detect --source=/repo --no-git --redact --verbose --exit-code 0
+      # Block CI on critical dependency vulnerabilities.
+      - name: Dependency audit (critical)
+        run: pnpm audit --audit-level=critical
+
   test:
     name: Tests
     runs-on: ubuntu-latest
@@ -38,7 +54,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test
+      - run: pnpm test:coverage
         env:
           NODE_ENV: test
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

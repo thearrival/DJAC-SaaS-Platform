@@ -57,7 +57,7 @@ jobs:
         run: |
           sleep 15
           STATUS=$(curl -sfL --max-redirs 5 "${{ steps.deploy.outputs.deploy_url }}/api/status") || exit 1
-          echo "$STATUS" | jq -e '.ok == true and .dbConnected == true and .env == "production"' >/dev/null || {
+          echo "$STATUS" | jq -e '.ok == true and .dbConnected == true and (.env == "production" or .env == "staging" or .env == "preview")' >/dev/null || {
             echo "API not fully healthy: $STATUS"
             exit 1
           }
