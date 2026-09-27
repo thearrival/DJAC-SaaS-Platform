@@ -3477,8 +3477,15 @@ function runDualJurisdictionAssessment(vendor) {
   usScore = clampScore(usScore);
   brazilScore = clampScore(brazilScore);
   globalScore = clampScore(globalScore);
+  const applicableCoreScores = [];
+  if (requiresChinaControls) applicableCoreScores.push(chinaScore);
+  if (requiresSaudiControls) applicableCoreScores.push(saudiScore);
+  if (requiresEUControls) applicableCoreScores.push(euScore);
+  if (requiresUSControls) applicableCoreScores.push(usScore);
+  if (requiresBrazilControls) applicableCoreScores.push(brazilScore);
+  const overallBasis = [...applicableCoreScores, globalScore];
   const overallScore = clampScore(
-    (chinaScore + saudiScore + euScore + usScore + brazilScore + globalScore) / 6
+    overallBasis.reduce((total, score) => total + score, 0) / overallBasis.length
   );
   const riskLevel = inferRiskLevel(overallScore, gaps);
   const rawStatus = scoreToStatus(overallScore);
@@ -18345,7 +18352,9 @@ function generateComplianceReport(opts) {
     }
   };
   const includeBoth = jurisdiction === "both";
-  const filtered = JURISDICTION_FILTER[jurisdiction] ? allObligations.filter((o) => o.country === jurisdiction) : allObligations;
+  const filtered = includeBoth ? allObligations : JURISDICTION_FILTER[jurisdiction] ? allObligations.filter((o) => o.country === jurisdiction) : allObligations.filter(
+    (o) => o.country.toLowerCase() === String(jurisdiction).toLowerCase()
+  );
   const criticalCount = filtered.filter((o) => o.riskLevel === "critical").length;
   const highCount = filtered.filter((o) => o.riskLevel === "high").length;
   const gapCount = criticalCount + highCount;
@@ -18356,9 +18365,10 @@ function generateComplianceReport(opts) {
   const includeBrazil = jurisdiction !== "Saudi Arabia" && jurisdiction !== "China" && jurisdiction !== "EU" && jurisdiction !== "US";
   const frameworksCovered = includeBoth ? 10 : includeSaudi ? 3 : includeChina ? 4 : includeEU ? 2 : includeUS ? 3 : includeBrazil ? 1 : 4;
   const scoreFormula = (obligations) => {
+    if (obligations.length === 0) return 0;
     const crit = obligations.filter((o) => o.riskLevel === "critical").length;
     const high = obligations.filter((o) => o.riskLevel === "high").length;
-    return Math.max(45, Math.min(95, Math.round(100 - crit * 5 - high * 2)));
+    return Math.max(0, Math.min(100, Math.round(100 - crit * 5 - high * 2)));
   };
   const overallScore = scoreFormula(filtered);
   const saudiObls = allObligations.filter((o) => o.country === "Saudi Arabia");

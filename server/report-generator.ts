@@ -451,9 +451,17 @@ export function generateComplianceReport(opts: ReportOptions): {
   };
   const includeBoth = jurisdiction === "both";
 
-  const filtered = JURISDICTION_FILTER[jurisdiction]
-    ? allObligations.filter(o => o.country === jurisdiction)
-    : allObligations;
+  // Only obligations for the REQUESTED jurisdiction. Previously any jurisdiction
+  // outside the 5-regime table (e.g. United Kingdom, Japan) fell through to
+  // ALL obligations, producing a multi-regime report mislabeled as the
+  // requested one.
+  const filtered = includeBoth
+    ? allObligations
+    : JURISDICTION_FILTER[jurisdiction]
+      ? allObligations.filter(o => o.country === jurisdiction)
+      : allObligations.filter(
+          o => o.country.toLowerCase() === String(jurisdiction).toLowerCase()
+        );
 
   const criticalCount = filtered.filter(o => o.riskLevel === "critical").length;
   const highCount = filtered.filter(o => o.riskLevel === "high").length;
@@ -499,10 +507,15 @@ export function generateComplianceReport(opts: ReportOptions): {
             : includeBrazil
               ? 1
               : 4;
+  // Honest 0–100 rule-based index. Previously floored at 45 / capped at 95,
+  // which masked failures and implied near-perfection; and unassessed
+  // obligations yielded 95. Zero matched obligations now yields 0 rather than
+  // a passing score.
   const scoreFormula = (obligations: typeof filtered) => {
+    if (obligations.length === 0) return 0;
     const crit = obligations.filter(o => o.riskLevel === "critical").length;
     const high = obligations.filter(o => o.riskLevel === "high").length;
-    return Math.max(45, Math.min(95, Math.round(100 - crit * 5 - high * 2)));
+    return Math.max(0, Math.min(100, Math.round(100 - crit * 5 - high * 2)));
   };
   const overallScore = scoreFormula(filtered);
   const saudiObls = allObligations.filter(o => o.country === "Saudi Arabia");

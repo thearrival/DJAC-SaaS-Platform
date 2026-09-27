@@ -924,9 +924,20 @@ export function runDualJurisdictionAssessment(
   brazilScore = clampScore(brazilScore);
   globalScore = clampScore(globalScore);
 
+  // Average only the jurisdictions that actually apply to this vendor. A
+  // vendor operating solely in China must not be credited 100 for EU/Brazil
+  // regimes it was never assessed against. Global assurance frameworks
+  // (ISO/SOC 2/NIST) remain a universal baseline.
+  const applicableCoreScores: number[] = [];
+  if (requiresChinaControls) applicableCoreScores.push(chinaScore);
+  if (requiresSaudiControls) applicableCoreScores.push(saudiScore);
+  if (requiresEUControls) applicableCoreScores.push(euScore);
+  if (requiresUSControls) applicableCoreScores.push(usScore);
+  if (requiresBrazilControls) applicableCoreScores.push(brazilScore);
+  const overallBasis = [...applicableCoreScores, globalScore];
   const overallScore = clampScore(
-    (chinaScore + saudiScore + euScore + usScore + brazilScore + globalScore) /
-      6
+    overallBasis.reduce((total, score) => total + score, 0) /
+      overallBasis.length
   );
   const riskLevel = inferRiskLevel(overallScore, gaps);
   const rawStatus = scoreToStatus(overallScore);
