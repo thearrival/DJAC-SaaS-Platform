@@ -2218,6 +2218,7 @@ function IpRegistrationSection({ C }: { C: DesignTokens }) {
           {
             src: "/cnipa-logo.png",
             alt: "China National Intellectual Property Administration",
+            href: undefined as string | undefined,
             fallbackChar: "国",
             fallbackBg: "linear-gradient(135deg,#ef4444,rgba(239,68,68,0.12))",
             fallbackColor: "#ef4444",
@@ -2229,6 +2230,8 @@ function IpRegistrationSection({ C }: { C: DesignTokens }) {
           {
             src: "/usco-logo.png",
             alt: "United States Copyright Office",
+            // Public registration record for this work (opens in a new tab).
+            href: "https://publicrecords.copyright.gov/detailed-record/siebel_TXu002560878",
             fallbackChar: "©",
             fallbackBg: "linear-gradient(135deg,#00d2ff,#050508)",
             fallbackColor: "#00d2ff",
@@ -2263,62 +2266,81 @@ function IpRegistrationSection({ C }: { C: DesignTokens }) {
                 flexShrink: 0,
               }}
             >
-              <img
-                src={card.src}
-                alt={card.alt}
+              <a
+                href={card.href || undefined}
+                target={card.href ? "_blank" : undefined}
+                rel={card.href ? "noopener noreferrer" : undefined}
+                aria-label={
+                  card.href
+                    ? `View the ${card.alt} registration record`
+                    : undefined
+                }
                 style={{
-                  maxHeight: 44,
-                  maxWidth: 96,
-                  width: "auto",
-                  height: "auto",
-                  objectFit: "contain",
-                  display: "block",
-                }}
-                onError={e => {
-                  e.currentTarget.style.display = "none";
-                  const fb = e.currentTarget
-                    .nextElementSibling as HTMLElement | null;
-                  if (fb) fb.style.display = "flex";
-                }}
-              />
-              {/* Fallback (only shown when PNG missing) */}
-              <div
-                style={{
-                  display: "none",
+                  display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: 2,
+                  cursor: card.href ? "pointer" : "default",
                 }}
               >
+                <img
+                  src={card.src}
+                  alt={card.alt}
+                  style={{
+                    maxHeight: 44,
+                    maxWidth: 96,
+                    width: "auto",
+                    height: "auto",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                  onError={e => {
+                    e.currentTarget.style.display = "none";
+                    const fb = e.currentTarget
+                      .nextElementSibling as HTMLElement | null;
+                    if (fb) fb.style.display = "flex";
+                  }}
+                />
+                {/* Fallback (only shown when PNG missing) */}
                 <div
                   style={{
-                    width: 30,
-                    height: 30,
-                    borderRadius: "50%",
-                    background: card.fallbackBg,
-                    display: "flex",
+                    display: "none",
+                    flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: card.fallbackFontSize,
-                    fontWeight: 900,
-                    color: "#fff",
-                    fontFamily:
-                      card.fallbackFontSize > 14 ? "Georgia, serif" : "inherit",
+                    gap: 2,
                   }}
                 >
-                  {card.fallbackChar}
+                  <div
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: "50%",
+                      background: card.fallbackBg,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: card.fallbackFontSize,
+                      fontWeight: 900,
+                      color: "#fff",
+                      fontFamily:
+                        card.fallbackFontSize > 14
+                          ? "Georgia, serif"
+                          : "inherit",
+                    }}
+                  >
+                    {card.fallbackChar}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 6.5,
+                      fontWeight: 800,
+                      color: card.fallbackColor,
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    {card.fallbackLabel}
+                  </span>
                 </div>
-                <span
-                  style={{
-                    fontSize: 6.5,
-                    fontWeight: 800,
-                    color: card.fallbackColor,
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  {card.fallbackLabel}
-                </span>
-              </div>
+              </a>
             </div>
             <p
               style={{
@@ -3051,20 +3073,28 @@ export default function Signup() {
             </div>
             <span style={{ color: C.border, fontSize: 13 }}>·</span>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <img
-                src="/usco-logo.png"
-                alt="U.S. Copyright Office"
-                style={{
-                  height: 18,
-                  width: "auto",
-                  maxWidth: 54,
-                  objectFit: "contain",
-                  verticalAlign: "middle",
-                }}
-                onError={e => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
+              <a
+                href="https://publicrecords.copyright.gov/detailed-record/siebel_TXu002560878"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View the U.S. Copyright Office registration record"
+                style={{ display: "inline-flex", alignItems: "center" }}
+              >
+                <img
+                  src="/usco-logo.png"
+                  alt="U.S. Copyright Office"
+                  style={{
+                    height: 18,
+                    width: "auto",
+                    maxWidth: 54,
+                    objectFit: "contain",
+                    verticalAlign: "middle",
+                  }}
+                  onError={e => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              </a>
               <span style={{ fontSize: 10, color: C.muted, fontWeight: 500 }}>
                 U.S. Copyright Office Registered
               </span>
