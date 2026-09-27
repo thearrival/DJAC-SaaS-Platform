@@ -33110,8 +33110,8 @@ async function stripeWebhookHandler(req, res) {
 }
 async function processStripeEvent(event, db) {
   const idempotencyGuard = async () => {
-    const existing = await db.select({ id: billingEvents.id }).from(billingEvents).where(eq44(billingEvents.stripeEventId, event.id)).limit(1);
-    return existing.length > 0;
+    const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq44(billingEvents.stripeEventId, event.id)).limit(1);
+    return existing.length > 0 && existing[0].status === "success";
   };
   if (await idempotencyGuard()) {
     console.info("[Stripe Webhook] Duplicate event ignored:", event.id);
@@ -33133,7 +33133,7 @@ async function processStripeEvent(event, db) {
         status: "pending",
         description: `Checkout completed \u2014 plan: ${plan}/${interval}`,
         rawPayload: JSON.stringify(event.data.object)
-      });
+      }).onConflictDoNothing({ target: billingEvents.stripeEventId });
       await db.update(organizations).set({ plan, stripeCustomerId: String(session.customer ?? "") }).where(eq44(organizations.id, orgId));
       await upsertSubscriptionRecord(db, {
         organizationId: orgId,

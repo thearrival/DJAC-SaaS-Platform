@@ -54,10 +54,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      # Unit tests must never touch a real database: they intentionally use the
+      # in-memory fallback. Deliberately NOT passing DATABASE_URL here prevents
+      # CI from writing to a live/managed database. Add a throwaway Postgres
+      # service container when DB-path integration tests are introduced.
       - run: pnpm test:coverage
         env:
           NODE_ENV: test
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}

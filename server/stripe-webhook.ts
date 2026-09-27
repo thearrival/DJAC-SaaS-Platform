@@ -178,11 +178,14 @@ export async function processStripeEvent(
 ) {
   const idempotencyGuard = async (): Promise<boolean> => {
     const existing = await db
-      .select({ id: billingEvents.id })
+      .select({ id: billingEvents.id, status: billingEvents.status })
       .from(billingEvents)
       .where(eq(billingEvents.stripeEventId, event.id))
       .limit(1);
-    return existing.length > 0;
+    // Only a fully-applied event is a duplicate. A row left in "pending" means
+    // a previous attempt failed part-way; reprocessing lets Stripe retries heal
+    // the subscription state instead of being permanently ignored.
+    return existing.length > 0 && existing[0]!.status === "success";
   };
 
   if (await idempotencyGuard()) {
@@ -212,14 +215,19 @@ export async function processStripeEvent(
       // Prevents duplicate processing if a crash occurs between the org/subscription
       // mutation and the event insert (the unique constraint on stripeEventId acts as
       // the idempotency guard on retry).
-      await db.insert(billingEvents).values({
-        organizationId: orgId,
-        stripeEventId: event.id,
-        eventType: event.type,
-        status: "pending",
-        description: `Checkout completed — plan: ${plan}/${interval}`,
-        rawPayload: JSON.stringify(event.data.object),
-      });
+      await db
+        .insert(billingEvents)
+        .values({
+          organizationId: orgId,
+          stripeEventId: event.id,
+          eventType: event.type,
+          status: "pending",
+          description: `Checkout completed — plan: ${plan}/${interval}`,
+          rawPayload: JSON.stringify(event.data.object),
+        })
+        // Tolerate the marker already existing from a failed earlier attempt so
+        // a retry can complete the mutations below instead of erroring.
+        .onConflictDoNothing({ target: billingEvents.stripeEventId });
 
       await db
         .update(organizations)

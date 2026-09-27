@@ -1,229 +1,97 @@
-# DJAC SaaS - Testing Guide
+# DJAC SaaS — Testing Guide
 
 ## Overview
 
-DJAC uses **Vitest** as its test runner, with tests written in TypeScript. Tests are organized into unit tests (individual functions/procedures) and integration tests (API flows, database operations).
+DJAC uses **Vitest**. Tests currently run in a **single `node` environment** and
+cover server logic plus static client consistency checks. There is no DOM/JSX
+test environment installed, so component (`.tsx`) tests do not run today.
 
 ## Quick Start
 
 ```bash
-pnpm test                  # Run all tests
-pnpm test -- --reporter=verbose   # Verbose output
-npx vitest run path/to/file.test.ts  # Run specific file
-npx vitest --ui            # Interactive test UI
-npx vitest --coverage      # Coverage report
+pnpm test              # run all tests (vitest run)
+pnpm test:coverage     # run with coverage (thresholds enforced)
+pnpm verify:all        # lint + tsc + tests + production build
 ```
 
-## Test Structure
+Run a single file: `npx vitest run server/__tests__/unit/rbac.test.ts`.
+
+## Test Structure (actual)
 
 ```
-server/__tests__/
-├── unit/
-│   ├── auth.test.ts           # Authentication utilities
-│   ├── rbac.test.ts           # Role-based access control
-│   ├── validation.test.ts     # Zod schema validation
-│   ├── api-health.test.ts     # Health endpoint tests
-│   └── supabase-integration.test.ts  # Supabase client integration
-├── integration/
-│   ├── compliance-flow.test.ts # End-to-end compliance workflows
-│   ├── vendor-assessment.test.ts # Vendor assessment pipeline
-│   └── billing-webhook.test.ts  # Stripe webhook processing
-
-client/src/__tests__/
-├── components/                 # Component rendering tests
-└── hooks/                      # Custom hook tests
+server/__tests__/unit/          # ~40 files — helpers, stores, config, scoring
+server/__tests__/integration/   # API/auth/admin security; smoke tests skip unless SMOKE_BASE_URL is set
+client/src/__tests__/           # static consistency: locales, jurisdictions, i18n integrity
 ```
+
+Config lives in `vitest.config.ts`:
+
+- `environment: "node"`, `pool: "forks"`, `minWorkers: 1`, `maxWorkers: 6`.
+- `include`: `server/**/*.test.ts`, `server/**/*.spec.ts`,
+  `client/src/**/*.test.ts|spec.ts` — **`.tsx` is intentionally excluded**.
+- No `setupFiles`, no globals.
+- Coverage (`v8`) with a **baseline ratchet**: lines/statements ≥ 3,
+  functions ≥ 2, branches ≥ 2. Raise these as tests are added — do not lower.
+- Aliases: `@` → `client/src`, `@shared` → `shared`.
+
+## Database in tests
+
+Unit tests intentionally exercise the **in-memory fallback** (no `getDb()`
+database). CI **does not** inject `DATABASE_URL` on purpose — tests must never
+write to a real or managed database. When DB-path integration tests are added,
+run them against a disposable Postgres **service container**, not a shared
+instance.
+
+## CI
+
+`.github/workflows/ci.yml` gates every push/PR on: `pnpm lint`, `pnpm check`,
+`pnpm format:check`, `pnpm test:coverage`, a production `pnpm build`, and
+Supabase migration lint. A separate **Security Scans** job runs a gitleaks
+secret scan (reporting) and `pnpm audit --audit-level=critical`.
+CodeQL runs on a schedule.
 
 ## Writing Tests
 
-### Unit Test Pattern
+### Unit test
 
 ```typescript
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("riskCalculator", () => {
-  it("should compute risk level from likelihood and impact", () => {
-    const result = computeRiskLevel("high", "medium");
-    expect(result).toBe("high");
-  });
-
-  it("should throw for invalid inputs", () => {
-    expect(() => computeRiskLevel("invalid", "low")).toThrow();
+  it("computes the risk level", () => {
+    expect(computeRiskLevel("high", "medium")).toBe("high");
   });
 });
 ```
 
-### tRPC Procedure Test Pattern
+### Mocking modules
 
 ```typescript
-import { describe, it, expect, beforeEach } from "vitest";
-import { createCallerFactory, type AppRouter } from "../routers";
+import { describe, it, expect, vi } from "vitest";
 
-describe("vendor.list", () => {
-  let caller: ReturnType<typeof createCallerFactory<AppRouter>>;
-
-  beforeEach(async () => {
-    const createCaller = createCallerFactory();
-    caller = createCaller({
-      // Mock context with authenticated user
-      user: { id: 1, role: "company_admin" },
-      orgId: "org_test_123",
-    });
-  });
-
-  it("should return vendors for the org", async () => {
-    const vendors = await caller.vendor.list({ orgId: "org_test_123" });
-    expect(Array.isArray(vendors)).toBe(true);
-  });
-});
+vi.mock("../../db", () => ({ getDb: async () => null }));
+// now imports resolved below use the in-memory fallback deterministically
 ```
 
-### Integration Test Pattern
+### Asserting tenant isolation
 
-```typescript
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { getDb } from "../db";
+Every store query/mutation that takes an `organizationId` must be scoped by it.
+Add a regression test whenever you touch such a query (see
+`server/__tests__/unit/deadline-tenant-isolation.test.ts`).
 
-describe("Vendor Assessment Flow", () => {
-  let orgId: string;
-  let vendorId: number;
-
-  beforeAll(async () => {
-    // Set up test data in test database
-    const db = getDb();
-    const [org] = await db
-      .insert(organizations)
-      .values({
-        name: "Test Org",
-        plan: "starter",
-      })
-      .returning();
-    orgId = org.id;
-  });
-
-  it("should create vendor and run assessment", async () => {
-    // 1. Create vendor
-    const vendor = await caller.vendor.create({
-      orgId,
-      name: "Test Vendor",
-      jurisdiction: "Saudi Arabia",
-    });
-    expect(vendor.id).toBeDefined();
-
-    // 2. Run assessment
-    const assessment = await caller.vendorCompliance.assess({
-      vendorId: vendor.id,
-      frameworkId: "nca-ecc",
-    });
-    expect(assessment.status).toBe("completed");
-  });
-
-  afterAll(async () => {
-    // Clean up test data
-    const db = getDb();
-    await db.delete(organizations).where(eq(organizations.id, orgId));
-  });
-});
-```
-
-### Mocking External Services
-
-```typescript
-import { vi, describe, it, expect } from "vitest";
-
-// Mock Stripe
-vi.mock("stripe", () => ({
-  default: vi.fn(() => ({
-    checkout: { sessions: { create: vi.fn() } },
-    webhooks: { constructEvent: vi.fn() },
-  })),
-}));
-
-// Mock OpenAI
-vi.mock("openai", () => ({
-  default: vi.fn(() => ({
-    chat: {
-      completions: {
-        create: vi.fn().mockResolvedValue({
-          choices: [{ message: { content: "mocked response" } }],
-        }),
-      },
-    },
-  })),
-}));
-```
-
-## Running Specific Tests
+## Smoke & ops scripts
 
 ```bash
-# Run all unit tests
-npx vitest run server/__tests__/unit
-
-# Run all integration tests
-npx vitest run server/__tests__/integration
-
-# Run tests matching a pattern
-npx vitest run -t "auth"
-
-# Run tests in watch mode (re-run on file changes)
-npx vitest
-
-# Run with specific environment
-NODE_ENV=test pnpm test
+pnpm smoke:runtime          # runtime health check
+pnpm smoke:runtime:strict   # strict assertions
+pnpm prod:preflight         # production config preflight
+pnpm db:doctor              # database diagnostics
 ```
-
-## Test Environment
-
-Tests use a dedicated test configuration (`vitest.config.ts`):
-
-- **Environment**: `node` for server tests, `jsdom` for client tests
-- **Setup files**: Global test setup (mock database, env vars)
-- **Timeout**: 30 seconds default, configurable per test
-- **Parallel**: Tests run in parallel by default; use `--pool=forks` for database tests
-
-## CI Integration
-
-Tests run automatically in CI (`.github/workflows/ci.yml`):
-
-```yaml
-- name: Run tests
-  run: pnpm test
-```
-
-CI uses a test database instance provisioned via the Supabase test project.
 
 ## Best Practices
 
-1. **Isolated tests** — Each test should set up its own data and clean up after
-2. **Mock external APIs** — Never call Stripe, OpenAI, or SendGrid in tests
-3. **Test edge cases** — Empty inputs, boundary values, unauthorized access
-4. **Use `.test.ts` suffix** — Vitest auto-discovers files matching `*.test.ts`
-5. **Group related tests** — Use `describe` blocks for logical grouping
-6. **Test RBAC** — Verify that each procedure enforces correct authorization
-7. **Test rate limiting** — Verify rate limit headers are returned correctly
-8. **Keep tests fast** — Unit tests should run in milliseconds, integration tests in seconds
-
-## Smoke Tests
-
-Operational smoke tests are in `scripts/`:
-
-```bash
-pnpm smoke:runtime          # Runtime health check (basic)
-pnpm smoke:runtime:strict   # Strict mode with assertions
-pnpm smoke:scale            # Load/scale smoke test
-pnpm prod:preflight         # Production readiness check
-pnpm prod:preflight:strict  # Strict production preflight
-pnpm db:doctor              # Database health check
-```
-
-## Writing New Tests
-
-When adding a new feature:
-
-1. Write unit tests for pure functions/logic first
-2. Write integration tests for the tRPC procedure
-3. Test with and without valid authentication
-4. Test with different role levels (analyst vs admin)
-5. Test input validation (invalid/missing fields)
-6. Test error handling paths
-7. Add to CI if it's a critical path
+1. Isolate tests; prefer the in-memory fallback over a real database.
+2. Never call Stripe/OpenAI/SMTP in tests — mock them.
+3. Cover authorization and tenant-scoping for new procedures.
+4. Add a regression test for every bug fixed.
+5. Keep the coverage ratchet moving **up**, never down.

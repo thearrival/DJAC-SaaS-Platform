@@ -49,7 +49,7 @@ Closes #
 
 - [ ] New tests added (if applicable)
 - [ ] Existing tests pass without modification
-- [ ] Test coverage meets the 80% minimum threshold
+- [ ] Test coverage meets the configured threshold (see `vitest.config.ts`)
 
 ### Test Commands
 
@@ -75,7 +75,7 @@ pnpm verify:all
 - [ ] Zod validation is present on all tRPC procedure inputs
 - [ ] No console.log or debugger statements left in code
 - [ ] No unused imports or dead code
-- [ ] All new code has appropriate test coverage (minimum 80%)
+- [ ] All new code has appropriate test coverage (see `vitest.config.ts` thresholds)
 
 ### Linting & Formatting
 
