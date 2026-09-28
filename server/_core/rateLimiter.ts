@@ -76,6 +76,29 @@ _pruneInterval.unref();
 // is created by auto-migrate (`rateLimitWindows`).
 // ─────────────────────────────────────────────────────────────────────────────
 
+let _pgTableEnsured = false;
+
+/** Create the shared counter table on first use (self-healing). */
+async function ensureRateLimitTable(
+  db: NonNullable<Awaited<ReturnType<typeof getDb>>>
+): Promise<void> {
+  if (_pgTableEnsured) return;
+  try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
+        "key" text NOT NULL,
+        "windowIndex" bigint NOT NULL,
+        "count" integer NOT NULL DEFAULT 0,
+        "createdAt" timestamp with time zone NOT NULL DEFAULT now(),
+        PRIMARY KEY ("key", "windowIndex")
+      )
+    `);
+    _pgTableEnsured = true;
+  } catch {
+    // leave the flag false so a later request retries
+  }
+}
+
 async function tryPostgresIncrement(
   key: string,
   windowIndex: number
@@ -84,6 +107,7 @@ async function tryPostgresIncrement(
   try {
     const db = await getDb();
     if (!db) return null;
+    await ensureRateLimitTable(db);
     const result = await db.execute(sql`
       INSERT INTO "rateLimitWindows" ("key", "windowIndex", "count")
       VALUES (${key}, ${windowIndex}, 1)

@@ -528,11 +528,14 @@ export default async function handler(req: any, res: any) {
   try {
     if (!cachedApp && !initError) {
       cachedApp = await createApp();
-      // Run migration synchronously before accepting any traffic
-      if (!migrationRun) {
-        migrationRun = true;
-        await ensureMigrated();
-      }
+    }
+    // Run migrations before serving real traffic — OUTSIDE the createApp guard.
+    // The short-circuit routes above (/api/status, /api/health, /api/_*) call
+    // createApp() without migrating, so if a health check hits first the app is
+    // already cached and migrations would previously never run on this instance.
+    if (!migrationRun) {
+      migrationRun = true;
+      await ensureMigrated();
     }
     if (!cachedApp) {
       res.status(500).json({

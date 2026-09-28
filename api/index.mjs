@@ -2903,11 +2903,28 @@ function getRedis() {
     return null;
   }
 }
+async function ensureRateLimitTable(db) {
+  if (_pgTableEnsured) return;
+  try {
+    await db.execute(sql2`
+      CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
+        "key" text NOT NULL,
+        "windowIndex" bigint NOT NULL,
+        "count" integer NOT NULL DEFAULT 0,
+        "createdAt" timestamp with time zone NOT NULL DEFAULT now(),
+        PRIMARY KEY ("key", "windowIndex")
+      )
+    `);
+    _pgTableEnsured = true;
+  } catch {
+  }
+}
 async function tryPostgresIncrement(key, windowIndex) {
   if (!ENV.isProduction) return null;
   try {
     const db = await getDb();
     if (!db) return null;
+    await ensureRateLimitTable(db);
     const result = await db.execute(sql2`
       INSERT INTO "rateLimitWindows" ("key", "windowIndex", "count")
       VALUES (${key}, ${windowIndex}, 1)
@@ -3057,7 +3074,7 @@ async function closeRateLimiter() {
     _redis = null;
   }
 }
-var _redis, _redisInitialised, _memStore, _pruneInterval;
+var _redis, _redisInitialised, _memStore, _pruneInterval, _pgTableEnsured;
 var init_rateLimiter = __esm({
   "server/_core/rateLimiter.ts"() {
     "use strict";
@@ -3074,6 +3091,7 @@ var init_rateLimiter = __esm({
       }
     }, 5 * 6e4);
     _pruneInterval.unref();
+    _pgTableEnsured = false;
   }
 });
 
@@ -38821,10 +38839,10 @@ async function handler(req, res) {
   try {
     if (!cachedApp && !initError) {
       cachedApp = await createApp();
-      if (!migrationRun) {
-        migrationRun = true;
-        await ensureMigrated();
-      }
+    }
+    if (!migrationRun) {
+      migrationRun = true;
+      await ensureMigrated();
     }
     if (!cachedApp) {
       res.status(500).json({
