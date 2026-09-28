@@ -70,7 +70,27 @@ backups db-backup produces`).
 3. Database schema rollback: only via a forward, reviewed migration — never
    `DROP` production data.
 
-## 7. Responsible parties
+## 7. Backup availability (verified 2026-09-28)
+
+Checked with the Supabase CLI against the production project:
+
+```
+$ supabase backups list --project-ref gcsoeumdjrejfxuovfcw
+REGION                 | WALG | PITR  | EARLIEST TIMESTAMP | LATEST TIMESTAMP
+Northeast Asia (Seoul) | true | false | 0                  | 0
+```
+
+**Interpretation:** WAL-G is enabled at the platform level, but **PITR is off
+and there are no listed backup timestamps** — i.e. there is currently **no
+verified restorable backup**. This must be resolved before go-live:
+
+- **Option A (recommended):** enable Supabase daily backups / PITR (plan
+  dependent) in Dashboard → Database → Backups.
+- **Option B:** run `scripts/db-backup.mjs` on a schedule to **off-site** storage
+  (S3/R2, not the app host) and verify with `scripts/yh-backup-check.sh`.
+- Either way, record a restore-drill date here once executed.
+
+## 8. Responsible parties
 
 | Concern                           | Owner                   |
 | --------------------------------- | ----------------------- |
