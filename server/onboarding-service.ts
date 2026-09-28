@@ -238,19 +238,38 @@ export async function getOnboardingState(
       ruleId: r.ruleId,
     }));
 
+    const hasCompleted = Boolean(resolvedCompletedAt);
+
+    // Before completion, an empty table just means "not personalised yet", so a
+    // generated preview is shown. Once the user HAS completed, an empty table
+    // means "they dismissed everything" — regenerating here would resurrect
+    // exactly the modules they chose to hide, and `firstAction` would point the
+    // dashboard straight back at a dismissed module.
+    const visibleRecommendations = hasCompleted
+      ? recommendations
+      : recommendations.length > 0
+        ? recommendations
+        : generatePersonalization(profile);
+
+    const firstAction = recommendations.length
+      ? {
+          moduleId: recommendations[0].moduleId,
+          ruleId: recommendations[0].ruleId,
+        }
+      : hasCompleted
+        ? null
+        : profile.objectives.length
+          ? chooseFirstAction(profile)
+          : null;
+
     return {
       questionnaireVersion: QUESTIONNAIRE_VERSION,
       organizationId: organizationId ?? null,
       shouldOnboard,
       answers,
       profile,
-      recommendations:
-        recommendations.length > 0
-          ? recommendations
-          : generatePersonalization(profile),
-      firstAction: profile.objectives.length
-        ? chooseFirstAction(profile)
-        : null,
+      recommendations: visibleRecommendations,
+      firstAction,
       completedAt: resolvedCompletedAt,
       skipped: resolvedSkipped,
       currentStep: progress?.currentStep ?? 0,

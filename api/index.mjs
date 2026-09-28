@@ -32484,14 +32484,20 @@ async function getOnboardingState(identity, organizationId) {
       reason: r.reason,
       ruleId: r.ruleId
     }));
+    const hasCompleted = Boolean(resolvedCompletedAt);
+    const visibleRecommendations = hasCompleted ? recommendations : recommendations.length > 0 ? recommendations : generatePersonalization(profile);
+    const firstAction = recommendations.length ? {
+      moduleId: recommendations[0].moduleId,
+      ruleId: recommendations[0].ruleId
+    } : hasCompleted ? null : profile.objectives.length ? chooseFirstAction(profile) : null;
     return {
       questionnaireVersion: QUESTIONNAIRE_VERSION,
       organizationId: organizationId ?? null,
       shouldOnboard,
       answers,
       profile,
-      recommendations: recommendations.length > 0 ? recommendations : generatePersonalization(profile),
-      firstAction: profile.objectives.length ? chooseFirstAction(profile) : null,
+      recommendations: visibleRecommendations,
+      firstAction,
       completedAt: resolvedCompletedAt,
       skipped: resolvedSkipped,
       currentStep: progress?.currentStep ?? 0,
