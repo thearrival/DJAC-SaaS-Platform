@@ -1549,9 +1549,48 @@ export function listGlobalFrameworkPacksByCategory(
   );
 }
 
+/**
+ * Jurisdictions that are countries or territories with their own legal authority.
+ *
+ * Some packs are scoped to a supranational body or a multi-country region rather
+ * than a single jurisdiction (the EU, the African Union, North America, or the
+ * "Global" cross-border bucket). Counting those as jurisdictions inflated the
+ * headline number — it reported 34 when only 30 are actual jurisdictions.
+ */
+const SUPRANATIONAL_SCOPES = new Set([
+  "European Union",
+  "African Union",
+  "North America",
+  "Global",
+]);
+
+/** True when a pack scope is a real jurisdiction rather than a grouping. */
+export function isJurisdictionScope(scope: string): boolean {
+  return !SUPRANATIONAL_SCOPES.has(scope);
+}
+
+/** Countries/territories that have at least one framework pack. */
 export function listGlobalJurisdictions(): string[] {
   return [
-    ...new Set(GLOBAL_FRAMEWORK_PACKS.map(pack => pack.jurisdiction)),
+    ...new Set(
+      GLOBAL_FRAMEWORK_PACKS.map(pack => pack.jurisdiction).filter(scope =>
+        isJurisdictionScope(scope)
+      )
+    ),
+  ].sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * Supranational and cross-border groupings, reported separately so the
+ * jurisdiction count stays a count of actual legal jurisdictions.
+ */
+export function listGlobalSupranationalScopes(): string[] {
+  return [
+    ...new Set(
+      GLOBAL_FRAMEWORK_PACKS.map(pack => pack.jurisdiction).filter(
+        scope => !isJurisdictionScope(scope)
+      )
+    ),
   ].sort((a, b) => a.localeCompare(b));
 }
 

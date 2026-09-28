@@ -24,6 +24,7 @@
  */
 
 import React, { useEffect, useRef, useState, type ReactNode } from "react";
+import { COVERAGE } from "../../../shared/coverage-claims";
 import {
   Shield,
   Globe2,
@@ -1127,10 +1128,10 @@ export default function DJACHero() {
               <FeatureCard
                 icon={<Scale size={24} color="#10b981" />}
                 title="Jurisdiction Intelligence"
-                description="Real-time legal knowledge graph covering 28 jurisdictions. Cross-border transfer risk scoring and proactive regulatory change alerts."
+                description={`Real-time legal knowledge graph covering ${COVERAGE.jurisdictions} jurisdictions. Cross-border transfer risk scoring and proactive regulatory change alerts.`}
                 accent="#10b981"
                 items={[
-                  "28 jurisdictions · live regulatory updates",
+                  `${COVERAGE.jurisdictions} jurisdictions · live regulatory updates`,
                   "GDPR SCCs / BCRs adequacy checks",
                   "Transfer risk calculator EU→US, EU→SA",
                   "Law library with AI-powered search",

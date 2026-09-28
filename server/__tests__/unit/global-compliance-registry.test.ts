@@ -10,6 +10,7 @@ import {
   listGlobalFrameworkPacksByCategory,
   listGlobalFrameworkPacksByJurisdiction,
   listGlobalJurisdictions,
+  listGlobalSupranationalScopes,
   getGlobalRegistrySummary,
   listGlobalFrameworkPacksByRegion,
   searchGlobalRegistry,
@@ -61,7 +62,11 @@ describe("Global compliance registry", () => {
     const authorities = listGlobalAuthorities();
 
     expect(jurisdictions).toContain("United States");
-    expect(jurisdictions).toContain("European Union");
+    // The EU is a supranational scope, not a country/territory: it is reported
+    // separately via listGlobalSupranationalScopes() so the jurisdiction count
+    // is a count of actual legal jurisdictions.
+    expect(jurisdictions).not.toContain("European Union");
+    expect(listGlobalSupranationalScopes()).toContain("European Union");
     expect(categories).toContain("privacy");
     expect(authorities).toContain("NIST");
     expect(

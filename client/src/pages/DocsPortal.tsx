@@ -14,6 +14,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { COVERAGE } from "../../../shared/coverage-claims";
 import {
   BookOpen,
   Search,
@@ -148,7 +149,7 @@ const HOME_FEATURES: Record<
     },
     {
       icon: "shield",
-      title: "28 Jurisdictions",
+      title: `${COVERAGE.jurisdictions} Jurisdictions`,
       desc: "PIPL, PDPL, GDPR, NCA-ECC, CSL, DSL and global standards",
       link: "/docs/frameworks/jurisdictions",
     },
@@ -186,7 +187,7 @@ const HOME_FEATURES: Record<
     },
     {
       icon: "shield",
-      title: "28 ولاية قضائية",
+      title: `${COVERAGE.jurisdictions} ولاية قضائية`,
       desc: "PIPL وPDPL وGDPR وNCA-ECC وCSL وDSL والمعايير العالمية",
       link: "/docs/frameworks/jurisdictions",
     },
@@ -224,7 +225,7 @@ const HOME_FEATURES: Record<
     },
     {
       icon: "shield",
-      title: "28 司法管辖区",
+      title: `${COVERAGE.jurisdictions} 司法管辖区`,
       desc: "PIPL、PDPL、GDPR、NCA-ECC、CSL、DSL及全球标准",
       link: "/docs/frameworks/jurisdictions",
     },
@@ -590,14 +591,14 @@ const docsData: Record<string, DocSection[]> = {
           id: "welcome",
           title: "Welcome to DJAC",
           summary:
-            "DJAC is the world's first AI-powered cross-jurisdiction compliance intelligence platform. Deploy in minutes and achieve regulatory compliance across 28 jurisdictions.",
+            "DJAC is the world's first AI-powered cross-jurisdiction compliance intelligence platform. Deploy in minutes and achieve regulatory compliance across ${COVERAGE.jurisdictions} jurisdictions.",
           content: `### What is DJAC?
 DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automates regulatory compliance across jurisdictions — China, Saudi Arabia, the GCC, the EU, North America, and APAC.
 
 > **info** Built for compliance officers, legal teams, enterprise administrators, consultants, and government regulators.
 
 ### Why DJAC?
-- **28 Jurisdictions** — PIPL, PDPL, CSL, DSL, GDPR, ISO 27001, SOC 2, NIST CSF, HIPAA, and more
+- **${COVERAGE.jurisdictions} Jurisdictions** — PIPL, PDPL, CSL, DSL, GDPR, ISO 27001, SOC 2, NIST CSF, HIPAA, and more
 - **AI-Powered Analysis** — Gemini driven 8-stage compliance assessment pipeline
 - **Real-Time Monitoring** — Continuous compliance tracking with automated gap detection
 - **Cross-Border Intelligence** — Data transfer compliance checker and regulatory change monitoring
@@ -625,7 +626,7 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 > **faq** How long does an AI vendor assessment take?
 > **answer** Most assessments complete in under 60 seconds, streaming live progress over the WebSocket as each of the 8 pipeline stages finishes.
 > **faq** Which regulations are supported out of the box?
-> **answer** 46 frameworks with full control-level detail, plus 107 curated framework packs, across 28 jurisdictions — including GDPR, NIS2, DORA, PIPL, PDPL, ISO 27001, SOC 2, and more. The AI engine auto-recommends the relevant ones for your profile.
+> **answer** ${COVERAGE.controlFrameworks} frameworks with full control-level detail, plus ${COVERAGE.frameworkPacks} curated framework packs, across ${COVERAGE.jurisdictions} jurisdictions — including GDPR, NIS2, DORA, PIPL, PDPL, ISO 27001, SOC 2, and more. The AI engine auto-recommends the relevant ones for your profile.
 > **faq** Can DJAC run on our own infrastructure?
 > **answer** Yes — besides Vercel cloud hosting, self-hosted Docker deployment is supported, and the platform can be extended with custom frameworks.`,
         },
@@ -741,7 +742,7 @@ Each of the 30+ modules has 6 permission flags:
 - Eliminates AI hallucinations in compliance advice
 - Ensures framework-specific recommendations
 - Maintains audit trail of control-to-finding mappings
-- Supports 28 jurisdictions with jurisdiction-specific controls
+- Supports ${COVERAGE.jurisdictions} jurisdictions with jurisdiction-specific controls
 
 > **tip** The RAG system is what makes DJAC legally reliable — it never guesses about regulatory requirements.
 
@@ -761,8 +762,7 @@ Each of the 30+ modules has 6 permission flags:
         {
           id: "jurisdictions",
           title: "Supported Jurisdictions",
-          summary:
-            "DJAC covers 28 jurisdictions across APAC, EMEA, North America, and Africa with comprehensive regulatory frameworks.",
+          summary: `DJAC covers ${COVERAGE.jurisdictions} jurisdictions across APAC, EMEA, North America, and Africa with comprehensive regulatory frameworks.`,
           content: `### APAC Region
 - **China** — PIPL, CSL, DSL, MLPS 2.0
 - **Japan** — APPI
@@ -1434,13 +1434,12 @@ docsData.ar = [
       {
         id: "welcome",
         title: "مرحباً بك في DJAC",
-        summary:
-          "DJAC هي أول منصة ذكاء امتثال تنظيمي مدعومة بالذكاء الاصطناعي عبر 28 ولاية قضائية.",
+        summary: `DJAC هي أول منصة ذكاء امتثال تنظيمي مدعومة بالذكاء الاصطناعي عبر ${COVERAGE.jurisdictions} ولاية قضائية.`,
         content: `### ما هو DJAC؟
 DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسسية تعمل على أتمتة الامتثال التنظيمي عبر الصين والسعودية ودول الخليج والاتحاد الأوروبي وأمريكا الشمالية وآسيا والمحيط الهادئ.
 
 ### لماذا DJAC؟
-- **28 ولاية قضائية** — PIPL، PDPL، CSL، DSL، GDPR، ISO 27001، SOC 2 وغيرها
+- **${COVERAGE.jurisdictions} ولاية قضائية** — PIPL، PDPL، CSL، DSL، GDPR، ISO 27001، SOC 2 وغيرها
 - **تحليل بالذكاء الاصطناعي** — تقييم امتثال من 8 مراحل مدعوم بـ Gemini
 - **مراقبة مستمرة** — تتبع الامتثال مع اكتشاف الفجوات تلقائياً
 - **ذكاء عابر للحدود** — فحص نقل البيانات ومراقبة التغييرات التنظيمية
@@ -1457,7 +1456,7 @@ DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسس�
 > **faq** كم يستغرق تقييم المورد بالذكاء الاصطناعي؟
 > **answer** تكتمل معظم التقييمات في أقل من 60 ثانية، مع بث التقدم مباشرة عبر WebSocket أثناء إنهاء كل مرحلة من مراحل خط الأنابيب الثماني.
 > **faq** ما هي اللوائح المدعومة افتراضياً؟
-> **answer** أكثر من 60 إطاراً عبر 29 ولاية قضائية — بما في ذلك GDPR وNIS2 وDORA وPIPL وPDPL وISO 27001 وSOC 2 وغيرها. يوصي محرك الذكاء الاصطناعي تلقائياً بالأطر ذات الصلة بملفك.
+> **answer** ${COVERAGE.controlFrameworks} إطاراً عبر ${COVERAGE.jurisdictions} ولاية قضائية — بما في ذلك GDPR وNIS2 وDORA وPIPL وPDPL وISO 27001 وSOC 2 وغيرها. يوصي محرك الذكاء الاصطناعي تلقائياً بالأطر ذات الصلة بملفك.
 > **faq** هل يمكن تشغيل DJAC على بنيتنا التحتية الخاصة؟
 > **answer** نعم — بالإضافة إلى الاستضافة السحابية على Vercel، يتم دعم النشر الذاتي عبر Docker مع إمكانية توسيع المنصة بأطر مخصصة.`,
       },
@@ -1507,8 +1506,7 @@ DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسس�
       {
         id: "jurisdictions",
         title: "الولايات القضائية المدعومة",
-        summary:
-          "تغطي DJAC أكثر من 29 ولاية قضائية عبر آسيا والمحيط الهادئ وأوروبا والشرق الأوسط وأمريكا الشمالية وأفريقيا.",
+        summary: `تغطي DJAC ${COVERAGE.jurisdictions} ولاية قضائية عبر آسيا والمحيط الهادئ وأوروبا والشرق الأوسط وأمريكا الشمالية وأفريقيا.`,
         content: `### منطقة آسيا والمحيط الهادئ
 - **الصين** — PIPL، CSL، DSL، MLPS 2.0
 - **اليابان** — APPI
@@ -1725,7 +1723,7 @@ docsData.zh = [
 DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理中国、沙特、海湾合作委员会、欧盟、北美和亚太地区的监管合规。
 
 ### 为什么选择 DJAC？
-- **28 司法管辖区** — PIPL、PDPL、CSL、DSL、GDPR、ISO 27001、SOC 2等
+- **${COVERAGE.jurisdictions} 司法管辖区** — PIPL、PDPL、CSL、DSL、GDPR、ISO 27001、SOC 2等
 - **AI驱动分析** — Gemini驱动的8阶段合规评估流程
 - **实时监控** — 持续合规跟踪，自动检测差距
 - **跨境智能** — 数据传输合规检查器和监管变化监控

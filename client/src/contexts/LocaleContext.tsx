@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LocaleContext } from "./localeStore";
 import {
   STORAGE_KEY,
@@ -7,6 +7,7 @@ import {
 } from "./localeTypes";
 import { LOCALE_SUPPLEMENT } from "./localeSupplement";
 import { ONBOARDING_STRINGS } from "./onboardingStrings";
+import { interpolateCoverage } from "../../../shared/coverage-claims";
 
 const messages: Record<string, Record<string, string>> = {
   en: {
@@ -1370,14 +1371,14 @@ const messages: Record<string, Record<string, string>> = {
     "featureGate.title": "{feature} is a Premium Feature",
     "footer.dehengEst": "Est. 1993 · Global Practice",
     "footer.partnerPrefix": "In partnership with",
-    "footer.regions": "Global · 28 Jurisdictions",
+    "footer.regions": "Global · {{jurisdictions}} Jurisdictions",
     "footer.tagline": "Multi-Jurisdiction Compliance Intelligence",
     "forgot.backToLogin": "Back to login",
     "forgot.badge": "Secure Reset",
     "forgot.emailAriaLabel": "Email address",
     "forgot.emailPlaceholder": "you@example.com",
     "forgot.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · 28 Jurisdictions",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "forgot.newPassword": "New password (min 8 chars)",
     "forgot.notice.body":
       "For security reasons, reset links are only valid for 1 hour.",
@@ -1511,7 +1512,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.heroLine1": "Built for",
     "home.heroLine2": "Global Compliance Intelligence",
     "home.heroSubtitle":
-      "Handle cross-border compliance across 28 jurisdictions with confidence. DJAC brings GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF, and more into one focused workspace.",
+      "Handle cross-border compliance across {{jurisdictions}} jurisdictions with confidence. DJAC brings GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF, and more into one focused workspace.",
     "home.heroTitle": "Compliance Made Clear",
     "home.howTitle": "How DJAC Works",
     "home.intakeSubtitle":
@@ -1635,7 +1636,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Unauthorised Access",
     "incident.updated": "Incident updated",
     "invite.layout.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · 28 Jurisdictions",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "invite.layout.notice":
       "Verified invitation link · TLS 1.3 · DJAC Compliance Platform",
     "inviteAccept.acceptButton": "Accept & Join",
@@ -2396,7 +2397,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Confirm new password",
     "reset.confirmPasswordPlaceholder": "Confirm new password",
     "reset.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · 28 Jurisdictions",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "reset.goToLogin": "Go to login",
     "reset.mismatch": "Passwords do not match.",
     "reset.missingToken": "Missing reset token. Use the link from your email.",
@@ -2691,7 +2692,8 @@ const messages: Record<string, Record<string, string>> = {
     "signup.tabSignIn": "Sign In",
     "signup.tabSwitcher": "Account type",
     "signup.tabVisitor": "Visitor",
-    "signup.tagline": "Global Compliance Intelligence — 28 Jurisdictions",
+    "signup.tagline":
+      "Global Compliance Intelligence — {{jurisdictions}} Jurisdictions",
     "signup.termsConsent.and": "and",
     "signup.termsConsent.legal": "This constitutes a binding agreement.",
     "signup.termsConsent.prefix": "I agree to the",
@@ -2724,7 +2726,7 @@ const messages: Record<string, Record<string, string>> = {
       "Know your compliance gaps in any jurisdiction before you launch — not after a regulator calls.",
     "signup.vp4Title": "Global Market Entry Scan",
     "signup.vp5Desc":
-      "Every regulation, obligation, and penalty searchable in plain language across 28 jurisdictions.",
+      "Every regulation, obligation, and penalty searchable in plain language across {{jurisdictions}} jurisdictions.",
     "signup.vp5Title": "Legal Library",
     "signup.welcomeBack": "Welcome back",
     "signup.workEmail": "Work email",
@@ -3015,7 +3017,7 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.searchPlaceholder": "Search obligations...",
     "tracker.showDetails": "Show details",
     "tracker.subtitle":
-      "Track deadlines, recurring obligations, and high-priority cybersecurity duties across 28 jurisdictions.",
+      "Track deadlines, recurring obligations, and high-priority cybersecurity duties across {{jurisdictions}} jurisdictions.",
     "tracker.summaryLoadError": "Failed to load obligations summary.",
     "tracker.summaryLoading": "Loading summary...",
     "tracker.tabBrazil": "🇧🇷 Brazil",
@@ -4649,13 +4651,14 @@ const messages: Record<string, Record<string, string>> = {
     "featureGate.title": "{feature} ميزة مدفوعة",
     "footer.dehengEst": "تأسست عام 1993 · ممارسة عالمية",
     "footer.partnerPrefix": "بالشراكة مع",
-    "footer.regions": "عالمي · أكثر من 40 ولاية قضائية",
+    "footer.regions": "عالمي · أكثر من {{jurisdictions}} ولاية قضائية",
     "footer.tagline": "ذكاء الامتثال متعدد الولايات القضائية",
     "forgot.backToLogin": "العودة إلى تسجيل الدخول",
     "forgot.badge": "إعادة تعيين آمنة",
     "forgot.emailAriaLabel": "عنوان البريد الإلكتروني",
     "forgot.emailPlaceholder": "بريدك@example.com",
-    "forgot.footer": "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · 28 ولاية قضائية",
+    "forgot.footer":
+      "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
     "forgot.newPassword": "كلمة مرور جديدة (8 أحرف كحد أدنى)",
     "forgot.notice.body":
       "لأسباب أمنية، روابط إعادة التعيين صالحة لمدة ساعة واحدة فقط.",
@@ -4911,7 +4914,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "وصول غير مصرح",
     "incident.updated": "تم تحديث الحادثة",
     "invite.layout.footer":
-      "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · 28 ولاية قضائية",
+      "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
     "invite.layout.notice": "رابط دعوة موثّق · TLS 1.3 · منصة DJAC للامتثال",
     "inviteAccept.acceptButton": "قبول والانضمام",
     "inviteAccept.accepting": "جاري القبول...",
@@ -5655,7 +5658,8 @@ const messages: Record<string, Record<string, string>> = {
     "reset.badge": "إعادة تعيين آمنة",
     "reset.confirmAriaLabel": "تأكيد كلمة المرور الجديدة",
     "reset.confirmPasswordPlaceholder": "تأكيد كلمة المرور الجديدة",
-    "reset.footer": "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · 28 ولاية قضائية",
+    "reset.footer":
+      "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
     "reset.goToLogin": "الانتقال إلى تسجيل الدخول",
     "reset.mismatch": "كلمتا المرور غير متطابقتين.",
     "reset.missingToken":
@@ -5940,7 +5944,8 @@ const messages: Record<string, Record<string, string>> = {
     "signup.tabSignIn": "تسجيل الدخول",
     "signup.tabSwitcher": "نوع الحساب",
     "signup.tabVisitor": "زائر",
-    "signup.tagline": "ذكاء الامتثال العالمي — أكثر من 40 ولاية قضائية",
+    "signup.tagline":
+      "ذكاء الامتثال العالمي — أكثر من {{jurisdictions}} ولاية قضائية",
     "signup.termsConsent.and": "و",
     "signup.termsConsent.legal": "يُعدّ هذا اتفاقية ملزمة.",
     "signup.termsConsent.prefix": "أوافق على",
@@ -5972,7 +5977,7 @@ const messages: Record<string, Record<string, string>> = {
       "اكتشف فجوات الامتثال في أي ولاية قضائية قبل الإطلاق — لا بعد مكالمة المنظّم.",
     "signup.vp4Title": "مسح دخول السوق العالمي",
     "signup.vp5Desc":
-      "كل لائحة والتزام وعقوبة قابلة للبحث بلغة سهلة عبر 28 ولاية قضائية.",
+      "كل لائحة والتزام وعقوبة قابلة للبحث بلغة سهلة عبر {{jurisdictions}} ولاية قضائية.",
     "signup.vp5Title": "مكتبة قانونية",
     "signup.welcomeBack": "مرحبًا بعودتك",
     "signup.workEmail": "البريد المهني",
@@ -7812,13 +7817,14 @@ const messages: Record<string, Record<string, string>> = {
     "featureGate.title": "{feature} 是高级功能",
     "footer.dehengEst": "成立于1993年 · 全球业务",
     "footer.partnerPrefix": "与…合作",
-    "footer.regions": "全球 · 28 司法管辖区",
+    "footer.regions": "全球 · {{jurisdictions}} 司法管辖区",
     "footer.tagline": "多司法管辖区合规智能",
     "forgot.backToLogin": "返回登录",
     "forgot.badge": "安全重置",
     "forgot.emailAriaLabel": "电子邮件地址",
     "forgot.emailPlaceholder": "您的邮箱@example.com",
-    "forgot.footer": "DJAC 工具 · 企业级合规智能 · 全球 · 28 司法管辖区",
+    "forgot.footer":
+      "DJAC 工具 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
     "forgot.newPassword": "新密码（最少8个字符）",
     "forgot.notice.body": "出于安全原因，重置链接仅在 1 小时内有效。",
     "forgot.notice.header": "安全提示",
@@ -7931,7 +7937,8 @@ const messages: Record<string, Record<string, string>> = {
     "home.fieldTopic": "主题",
     "home.fieldUseCase": "使用场景",
     "home.fieldVendor": "供应商名称（可选）",
-    "home.footer": "面向全球运营的企业级合规分析。覆盖28司法管辖区。",
+    "home.footer":
+      "面向全球运营的企业级合规分析。覆盖{{jurisdictions}}司法管辖区。",
     "home.footer.copyright": "(c)",
     "home.footer.credits": "DJAC 工具 · 由 Yalla Hack 提供支持 ·",
     "home.frameworkAnalysis": "框架分析",
@@ -8059,7 +8066,8 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.third_party_breach": "第三方泄露",
     "incident.type.unauthorized_access": "未授权访问",
     "incident.updated": "事件已更新",
-    "invite.layout.footer": "DJAC 工具 · 企业级合规智能 · 全球 · 28 司法管辖区",
+    "invite.layout.footer":
+      "DJAC 工具 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
     "invite.layout.notice": "已验证的邀请码链接 · TLS 1.3 · DJAC 合规平台",
     "inviteAccept.acceptButton": "接受并加入",
     "inviteAccept.accepting": "接受中...",
@@ -8770,7 +8778,8 @@ const messages: Record<string, Record<string, string>> = {
     "reset.badge": "安全重置",
     "reset.confirmAriaLabel": "确认新密码",
     "reset.confirmPasswordPlaceholder": "确认新密码",
-    "reset.footer": "DJAC 工具 · 企业级合规智能 · 全球 · 28 司法管辖区",
+    "reset.footer":
+      "DJAC 工具 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
     "reset.goToLogin": "前往登录",
     "reset.mismatch": "两次输入的密码不一致。",
     "reset.missingToken": "缺少重置令牌。请使用邮件中的链接。",
@@ -9075,7 +9084,7 @@ const messages: Record<string, Record<string, string>> = {
       "进入任何司法管辖区前了解合规差距 — 而非等到监管机构来电。",
     "signup.vp4Title": "全球市场准入扫描",
     "signup.vp5Desc":
-      "覆盖 28 司法管辖区的每项法规、义务和处罚，均可用通俗语言检索。",
+      "覆盖 {{jurisdictions}} 司法管辖区的每项法规、义务和处罚，均可用通俗语言检索。",
     "signup.vp5Title": "法律文献库",
     "signup.welcomeBack": "欢迎回来",
     "signup.workEmail": "工作邮箱",
@@ -11061,14 +11070,14 @@ const messages: Record<string, Record<string, string>> = {
     "featureGate.title": "{feature} est une fonctionnalité Premium",
     "footer.dehengEst": "Établi en 1993 · Pratique mondiale",
     "footer.partnerPrefix": "En partenariat avec",
-    "footer.regions": "Global · 40+ Jurisdictions",
+    "footer.regions": "Global · {{jurisdictions}} Jurisdictions",
     "footer.tagline": "Intelligence de conformité multi-juridictions",
     "forgot.backToLogin": "Retour à la connexion",
     "forgot.badge": "Secure Reset",
     "forgot.emailAriaLabel": "Adresse e-mail",
     "forgot.emailPlaceholder": "you@example.com",
     "forgot.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · 40+ Jurisdictions",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "forgot.newPassword": "Nouveau mot de passe (8 caractères minimum)",
     "forgot.notice.body":
       "Pour des raisons de sécurité, les liens de réinitialisation ne sont valables que pendant 1 heure.",
@@ -11215,7 +11224,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.heroLine1": "Built for",
     "home.heroLine2": "Intelligence de conformité mondiale",
     "home.heroSubtitle":
-      "Handle cross-border compliance across 40+ jurisdictions with confidence. DJAC brings GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF, and more into one focused workspace.",
+      "Handle cross-border compliance across {{jurisdictions}} jurisdictions with confidence. DJAC brings GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF, and more into one focused workspace.",
     "home.heroTitle": "La conformité en toute clarté",
     "home.howTitle": "Comment fonctionne DJAC",
     "home.intakeSubtitle":
@@ -11344,7 +11353,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Accès non autorisé",
     "incident.updated": "Incident mis à jour",
     "invite.layout.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · 40+ Jurisdictions",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "invite.layout.notice":
       "Lien d'invitation vérifié · TLS 1.3 · Plateforme de conformité DJAC",
     "inviteAccept.acceptButton": "Accepter et rejoindre",
@@ -12141,7 +12150,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Confirmer le nouveau mot de passe",
     "reset.confirmPasswordPlaceholder": "Confirmer le nouveau mot de passe",
     "reset.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · 40+ Jurisdictions",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "reset.goToLogin": "Go to login",
     "reset.mismatch": "Les mots de passe ne correspondent pas.",
     "reset.missingToken":
@@ -12451,7 +12460,8 @@ const messages: Record<string, Record<string, string>> = {
     "signup.tabSignIn": "Sign In",
     "signup.tabSwitcher": "Account type",
     "signup.tabVisitor": "Visitor",
-    "signup.tagline": "Global Compliance Intelligence — 40+ Jurisdictions",
+    "signup.tagline":
+      "Global Compliance Intelligence — {{jurisdictions}} Jurisdictions",
     "signup.termsConsent.and": "and",
     "signup.termsConsent.legal": "Ceci constitue un accord contraignant.",
     "signup.termsConsent.prefix": "J’accepte les",
@@ -12484,7 +12494,7 @@ const messages: Record<string, Record<string, string>> = {
       "Identifiez vos lacunes de conformité dans chaque juridiction avant votre lancement — pas après l’appel d’un régulateur.",
     "signup.vp4Title": "Analyse d’entrée sur le marché mondial",
     "signup.vp5Desc":
-      "Every regulation, obligation, and penalty searchable in plain language across 40+ jurisdictions.",
+      "Every regulation, obligation, and penalty searchable in plain language across {{jurisdictions}} jurisdictions.",
     "signup.vp5Title": "Bibliothèque juridique",
     "signup.welcomeBack": "Welcome back",
     "signup.workEmail": "Work email",
@@ -12783,7 +12793,7 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.searchPlaceholder": "Rechercher des obligations…",
     "tracker.showDetails": "Show details",
     "tracker.subtitle":
-      "Track deadlines, recurring obligations, and high-priority cybersecurity duties across 40+ jurisdictions.",
+      "Track deadlines, recurring obligations, and high-priority cybersecurity duties across {{jurisdictions}} jurisdictions.",
     "tracker.summaryLoadError":
       "Échec du chargement du résumé des obligations.",
     "tracker.summaryLoading": "Chargement du résumé...",
@@ -14513,14 +14523,14 @@ const messages: Record<string, Record<string, string>> = {
     "featureGate.title": "{feature} es una función premium",
     "footer.dehengEst": "Fundada en 1993 · Práctica global",
     "footer.partnerPrefix": "En colaboración con",
-    "footer.regions": "Global · 28 jurisdicciones",
+    "footer.regions": "Global · {{jurisdictions}} jurisdicciones",
     "footer.tagline": "Inteligencia de cumplimiento multijurisdiccional",
     "forgot.backToLogin": "Volver al inicio de sesión",
     "forgot.badge": "Restablecimiento seguro",
     "forgot.emailAriaLabel": "Dirección de correo electrónico",
     "forgot.emailPlaceholder": "correo@ejemplo.com",
     "forgot.footer":
-      "Herramienta DJAC · Inteligencia de cumplimiento empresarial · Global · 28 jurisdicciones",
+      "Herramienta DJAC · Inteligencia de cumplimiento empresarial · Global · {{jurisdictions}} jurisdicciones",
     "forgot.newPassword": "Nueva contraseña (mín. 8 caracteres)",
     "forgot.notice.body":
       "Por motivos de seguridad, los enlaces de restablecimiento solo son válidos durante 1 hora.",
@@ -14663,7 +14673,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.heroLine1": "Diseñado para",
     "home.heroLine2": "Inteligencia de cumplimiento global",
     "home.heroSubtitle":
-      "Gestione el cumplimiento transfronterizo en 28 jurisdicciones con confianza. DJAC reúne GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF y más en un único espacio de trabajo enfocado.",
+      "Gestione el cumplimiento transfronterizo en {{jurisdictions}} jurisdicciones con confianza. DJAC reúne GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF y más en un único espacio de trabajo enfocado.",
     "home.heroTitle": "Cumplimiento claro",
     "home.howTitle": "Cómo funciona DJAC",
     "home.intakeSubtitle":
@@ -14792,7 +14802,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Acceso no autorizado",
     "incident.updated": "Incidente actualizado",
     "invite.layout.footer":
-      "DJAC Tool · Inteligencia de Cumplimiento Empresarial · Global · 28 Jurisdicciones",
+      "DJAC Tool · Inteligencia de Cumplimiento Empresarial · Global · {{jurisdictions}} Jurisdicciones",
     "invite.layout.notice":
       "Enlace de invitación verificado · TLS 1.3 · Plataforma de cumplimiento DJAC",
     "inviteAccept.acceptButton": "Aceptar y unirme",
@@ -15590,7 +15600,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Confirmar nueva contraseña",
     "reset.confirmPasswordPlaceholder": "Confirmar nueva contraseña",
     "reset.footer":
-      "DJAC Tool · Inteligencia de cumplimiento empresarial · Global · 28 jurisdicciones",
+      "DJAC Tool · Inteligencia de cumplimiento empresarial · Global · {{jurisdictions}} jurisdicciones",
     "reset.goToLogin": "Ir a iniciar sesión",
     "reset.mismatch": "Las contraseñas no coinciden.",
     "reset.missingToken":
@@ -15896,7 +15906,8 @@ const messages: Record<string, Record<string, string>> = {
     "signup.tabSignIn": "Iniciar sesión",
     "signup.tabSwitcher": "Tipo de cuenta",
     "signup.tabVisitor": "Visitante",
-    "signup.tagline": "Inteligencia global de cumplimiento — 28 jurisdicciones",
+    "signup.tagline":
+      "Inteligencia global de cumplimiento — {{jurisdictions}} jurisdicciones",
     "signup.termsConsent.and": "y",
     "signup.termsConsent.legal": "Esto constituye un acuerdo vinculante.",
     "signup.termsConsent.prefix": "Acepto los",
@@ -15929,7 +15940,7 @@ const messages: Record<string, Record<string, string>> = {
       "Conoce tus brechas de cumplimiento en cualquier jurisdicción antes de lanzarte, no después de que llame un regulador.",
     "signup.vp4Title": "Análisis de entrada al mercado global",
     "signup.vp5Desc":
-      "Todas las regulaciones, obligaciones y sanciones se pueden buscar en lenguaje claro en 28 jurisdicciones.",
+      "Todas las regulaciones, obligaciones y sanciones se pueden buscar en lenguaje claro en {{jurisdictions}} jurisdicciones.",
     "signup.vp5Title": "Biblioteca jurídica",
     "signup.welcomeBack": "Bienvenido de nuevo",
     "signup.workEmail": "Correo electrónico de trabajo",
@@ -16231,7 +16242,7 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.searchPlaceholder": "Buscar obligaciones...",
     "tracker.showDetails": "Mostrar detalles",
     "tracker.subtitle":
-      "Realice un seguimiento de los plazos, las obligaciones recurrentes y los deberes de ciberseguridad de alta prioridad en 28 jurisdicciones.",
+      "Realice un seguimiento de los plazos, las obligaciones recurrentes y los deberes de ciberseguridad de alta prioridad en {{jurisdictions}} jurisdicciones.",
     "tracker.summaryLoadError": "Error al cargar el resumen de obligaciones.",
     "tracker.summaryLoading": "Cargando resumen...",
     "tracker.tabBrazil": "🇧🇷 Brasil",
@@ -17962,14 +17973,14 @@ const messages: Record<string, Record<string, string>> = {
     "featureGate.title": "{feature} ist eine Premium-Funktion",
     "footer.dehengEst": "Gegr. 1993 · Globale Praxis",
     "footer.partnerPrefix": "In Partnerschaft mit",
-    "footer.regions": "Weltweit · 28 Rechtsordnungen",
+    "footer.regions": "Weltweit · {{jurisdictions}} Rechtsordnungen",
     "footer.tagline": "Compliance-Intelligenz für mehrere Rechtsordnungen",
     "forgot.backToLogin": "Zurück zur Anmeldung",
     "forgot.badge": "Sicherer Reset",
     "forgot.emailAriaLabel": "E-Mail-Adresse",
     "forgot.emailPlaceholder": "name@beispiel.de",
     "forgot.footer":
-      "DJAC Tool · Enterprise-Compliance-Intelligenz · Weltweit · 28 Rechtsordnungen",
+      "DJAC Tool · Enterprise-Compliance-Intelligenz · Weltweit · {{jurisdictions}} Rechtsordnungen",
     "forgot.newPassword": "Neues Passwort (mind. 8 Zeichen)",
     "forgot.notice.body":
       "Aus Sicherheitsgründen sind Links zum Zurücksetzen nur 1 Stunde gültig.",
@@ -18236,7 +18247,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Unbefugter Zugriff",
     "incident.updated": "Vorfall aktualisiert",
     "invite.layout.footer":
-      "DJAC Tool · Unternehmens-Compliance-Intelligenz · Global · 28 Rechtsordnungen",
+      "DJAC Tool · Unternehmens-Compliance-Intelligenz · Global · {{jurisdictions}} Rechtsordnungen",
     "invite.layout.notice":
       "Verifizierter Einladungslink · TLS 1.3 · DJAC Compliance Platform",
     "inviteAccept.acceptButton": "Annehmen & Beitreten",
@@ -19033,7 +19044,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Neues Passwort bestätigen",
     "reset.confirmPasswordPlaceholder": "Neues Passwort bestätigen",
     "reset.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · 28 Rechtsordnungen",
+      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Rechtsordnungen",
     "reset.goToLogin": "Zur Anmeldung gehen",
     "reset.mismatch": "Die Passwörter stimmen nicht überein.",
     "reset.missingToken":
@@ -19671,7 +19682,7 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.searchPlaceholder": "Verpflichtungen durchsuchen …",
     "tracker.showDetails": "Details anzeigen",
     "tracker.subtitle":
-      "Verfolgen Sie Fristen, wiederkehrende Verpflichtungen und vorrangige Cybersicherheitspflichten in 28 Rechtsordnungen.",
+      "Verfolgen Sie Fristen, wiederkehrende Verpflichtungen und vorrangige Cybersicherheitspflichten in {{jurisdictions}} Rechtsordnungen.",
     "tracker.summaryLoadError":
       "Verpflichtungsübersicht konnte nicht geladen werden.",
     "tracker.summaryLoading": "Zusammenfassung wird geladen …",
@@ -21365,14 +21376,14 @@ const messages: Record<string, Record<string, string>> = {
     "featureGate.title": "{feature}はプレミアム機能です",
     "footer.dehengEst": "1993年設立 · グローバルプラクティス",
     "footer.partnerPrefix": "提携:",
-    "footer.regions": "グローバル · 28法域",
+    "footer.regions": "グローバル · {{jurisdictions}}法域",
     "footer.tagline": "多法域コンプライアンスインテリジェンス",
     "forgot.backToLogin": "ログインに戻る",
     "forgot.badge": "セキュアリセット",
     "forgot.emailAriaLabel": "メールアドレス",
     "forgot.emailPlaceholder": "you@example.com",
     "forgot.footer":
-      "DJACツール · エンタープライズコンプライアンスインテリジェンス · グローバル · 28法域",
+      "DJACツール · エンタープライズコンプライアンスインテリジェンス · グローバル · {{jurisdictions}}法域",
     "forgot.newPassword": "新しいパスワード（8文字以上）",
     "forgot.notice.body":
       "セキュリティ上の理由により、リセットリンクの有効期限は1時間のみです。",
@@ -21634,7 +21645,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "不正アクセス",
     "incident.updated": "インシデントを更新しました",
     "invite.layout.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · グローバル · 28法域",
+      "DJAC Tool · Enterprise Compliance Intelligence · グローバル · {{jurisdictions}}法域",
     "invite.layout.notice":
       "確認済み招待リンク · TLS 1.3 · DJAC コンプライアンスプラットフォーム",
     "inviteAccept.acceptButton": "承認して参加",
@@ -27997,14 +28008,14 @@ const messages: Record<string, Record<string, string>> = {
     "featureGate.title": "{feature} é um recurso premium",
     "footer.dehengEst": "Desde 1993 · Atuação Global",
     "footer.partnerPrefix": "Em parceria com",
-    "footer.regions": "Global · 28 Jurisdições",
+    "footer.regions": "Global · {{jurisdictions}} Jurisdições",
     "footer.tagline": "Inteligência de Conformidade Multijurisdicional",
     "forgot.backToLogin": "Voltar para o login",
     "forgot.badge": "Redefinição Segura",
     "forgot.emailAriaLabel": "Endereço de e-mail",
     "forgot.emailPlaceholder": "voce@exemplo.com",
     "forgot.footer":
-      "Ferramenta DJAC · Inteligência de Conformidade Empresarial · Global · 28 Jurisdições",
+      "Ferramenta DJAC · Inteligência de Conformidade Empresarial · Global · {{jurisdictions}} Jurisdições",
     "forgot.newPassword": "Nova senha (mín. 8 caracteres)",
     "forgot.notice.body":
       "Por motivos de segurança, os links de redefinição são válidos por apenas 1 hora.",
@@ -28147,7 +28158,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.heroLine1": "Desenvolvido para",
     "home.heroLine2": "Inteligência de conformidade global",
     "home.heroSubtitle":
-      "Gerencie a conformidade transfronteiriça em 28 jurisdições com confiança. O DJAC reúne GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF e muito mais em um único espaço de trabalho focado.",
+      "Gerencie a conformidade transfronteiriça em {{jurisdictions}} jurisdições com confiança. O DJAC reúne GDPR, CCPA, LGPD, PIPL, PDPL, NIST CSF e muito mais em um único espaço de trabalho focado.",
     "home.heroTitle": "Conformidade descomplicada",
     "home.howTitle": "Como o DJAC funciona",
     "home.intakeSubtitle":
@@ -28274,7 +28285,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Acesso não autorizado",
     "incident.updated": "Incidente atualizado",
     "invite.layout.footer":
-      "Ferramenta DJAC · Inteligência de Compliance Empresarial · Global · 28 Jurisdições",
+      "Ferramenta DJAC · Inteligência de Compliance Empresarial · Global · {{jurisdictions}} Jurisdições",
     "invite.layout.notice":
       "Link de convite verificado · TLS 1.3 · Plataforma de Compliance DJAC",
     "inviteAccept.acceptButton": "Aceitar e entrar",
@@ -29061,7 +29072,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Confirmar nova senha",
     "reset.confirmPasswordPlaceholder": "Confirmar nova senha",
     "reset.footer":
-      "DJAC Tool · Inteligência de Conformidade Empresarial · Global · 28 Jurisdições",
+      "DJAC Tool · Inteligência de Conformidade Empresarial · Global · {{jurisdictions}} Jurisdições",
     "reset.goToLogin": "Ir para o login",
     "reset.mismatch": "As senhas não coincidem.",
     "reset.missingToken":
@@ -29364,7 +29375,8 @@ const messages: Record<string, Record<string, string>> = {
     "signup.tabSignIn": "Entrar",
     "signup.tabSwitcher": "Tipo de conta",
     "signup.tabVisitor": "Visitante",
-    "signup.tagline": "Inteligência Global de Compliance — 28 Jurisdições",
+    "signup.tagline":
+      "Inteligência Global de Compliance — {{jurisdictions}} Jurisdições",
     "signup.termsConsent.and": "e",
     "signup.termsConsent.legal": "Isto constitui um acordo vinculativo.",
     "signup.termsConsent.prefix": "Eu concordo com os",
@@ -29397,7 +29409,7 @@ const messages: Record<string, Record<string, string>> = {
       "Conheça suas lacunas de conformidade em qualquer jurisdição antes do lançamento — e não depois que um regulador ligar.",
     "signup.vp4Title": "Análise de entrada no mercado global",
     "signup.vp5Desc":
-      "Cada regulamentação, obrigação e penalidade pesquisável em linguagem simples em 28 jurisdições.",
+      "Cada regulamentação, obrigação e penalidade pesquisável em linguagem simples em {{jurisdictions}} jurisdições.",
     "signup.vp5Title": "Biblioteca jurídica",
     "signup.welcomeBack": "Bem-vindo de volta",
     "signup.workEmail": "E-mail corporativo",
@@ -29694,7 +29706,7 @@ const messages: Record<string, Record<string, string>> = {
     "tracker.searchPlaceholder": "Pesquisar obrigações...",
     "tracker.showDetails": "Mostrar detalhes",
     "tracker.subtitle":
-      "Acompanhe prazos, obrigações recorrentes e deveres de cibersegurança de alta prioridade em 28 jurisdições.",
+      "Acompanhe prazos, obrigações recorrentes e deveres de cibersegurança de alta prioridade em {{jurisdictions}} jurisdições.",
     "tracker.summaryLoadError": "Falha ao carregar o resumo das obrigações.",
     "tracker.summaryLoading": "Carregando resumo...",
     "tracker.tabBrazil": "🇧🇷 Brasil",
@@ -30033,11 +30045,16 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
       locale,
       setLocale: setLocaleState,
       direction,
+      // Coverage figures ({{jurisdictions}}, {{frameworkPacks}}, …) are
+      // substituted here from shared/coverage-claims so all 9 locales publish
+      // the same numbers as the data, instead of hardcoding digits that drift.
       t: (key: string, fallback: string) =>
-        messages[locale][key] ||
-        ONBOARDING_STRINGS[locale]?.[key] ||
-        LOCALE_SUPPLEMENT[locale]?.[key] ||
-        fallback,
+        interpolateCoverage(
+          messages[locale][key] ||
+            ONBOARDING_STRINGS[locale]?.[key] ||
+            LOCALE_SUPPLEMENT[locale]?.[key] ||
+            fallback
+        ),
     }),
     [locale, direction]
   );

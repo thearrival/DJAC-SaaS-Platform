@@ -87,7 +87,7 @@ const html = `<!doctype html>
     <img class="logo" src="${logoUrl}" alt="" />
     <div class="title">DJAC</div>
     <div class="subtitle">Data, Jurisdiction &amp; AI Compliance</div>
-    <div class="tagline">28 jurisdictions &bull; 9 languages &bull; AI-powered</div>
+    <div class="tagline">${COVERAGE.jurisdictions} jurisdictions &bull; 9 languages &bull; AI-powered</div>
   </div>
 </body>
 </html>`;

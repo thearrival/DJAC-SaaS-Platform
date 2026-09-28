@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DJAC Signup / Login page - standalone (no DashboardLayout).
  * Routes: /signup  /login
  * Supports: 9 languages (full UI dictionary via useLocale) + dark & light themes.
@@ -2711,7 +2711,7 @@ export default function Signup() {
             <ShieldCheck size={11} style={{ flexShrink: 0 }} />
             {t(
               "signup.tagline",
-              "Global Compliance Intelligence · 28 Jurisdictions"
+              "Global Compliance Intelligence · {{jurisdictions}} Jurisdictions"
             )}
           </div>
 
@@ -2759,7 +2759,7 @@ export default function Signup() {
           >
             {t(
               "signup.heroDesc",
-              "The global compliance intelligence platform built for compliance officers, DPOs, and legal teams managing regulatory obligations across 28 jurisdictions including GDPR, PIPL, PDPL, LGPD, POPIA, and CCPA."
+              "The global compliance intelligence platform built for compliance officers, DPOs, and legal teams managing regulatory obligations across {{jurisdictions}} jurisdictions including GDPR, PIPL, PDPL, LGPD, POPIA, and CCPA."
             )}
           </p>
 

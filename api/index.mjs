@@ -21709,9 +21709,22 @@ function listGlobalFrameworkPacksByCategory(category) {
     (pack) => pack.category.toLowerCase() === normalized
   );
 }
+var SUPRANATIONAL_SCOPES = /* @__PURE__ */ new Set([
+  "European Union",
+  "African Union",
+  "North America",
+  "Global"
+]);
+function isJurisdictionScope(scope) {
+  return !SUPRANATIONAL_SCOPES.has(scope);
+}
 function listGlobalJurisdictions() {
   return [
-    ...new Set(GLOBAL_FRAMEWORK_PACKS.map((pack) => pack.jurisdiction))
+    ...new Set(
+      GLOBAL_FRAMEWORK_PACKS.map((pack) => pack.jurisdiction).filter(
+        (scope) => isJurisdictionScope(scope)
+      )
+    )
   ].sort((a, b) => a.localeCompare(b));
 }
 function listGlobalFrameworkCategories() {
@@ -33443,6 +33456,24 @@ var notificationsRouter = router({
 import { z as z40 } from "zod";
 import { TRPCError as TRPCError33 } from "@trpc/server";
 
+// shared/coverage-claims.ts
+var COVERAGE = {
+  /** Countries/territories with at least one framework pack. */
+  jurisdictions: 30,
+  /** Cross-border/supranational scopes, reported separately. */
+  supranationalScopes: 4,
+  /** Framework packs with curated, profile-aware detail. */
+  frameworkPacks: 107,
+  /** Frameworks with control-level detail (assessment engine coverage). */
+  controlFrameworks: 46
+};
+var COVERAGE_TOKENS = {
+  jurisdictions: String(COVERAGE.jurisdictions),
+  supranationalScopes: String(COVERAGE.supranationalScopes),
+  frameworkPacks: String(COVERAGE.frameworkPacks),
+  controlFrameworks: String(COVERAGE.controlFrameworks)
+};
+
 // server/personalization.ts
 init_db();
 init_schema();
@@ -33533,7 +33564,7 @@ async function generateRecommendations(profile) {
   if (actionRecs.length === 0) {
     actionRecs.push({
       title: "Explore the Compliance Framework Library",
-      description: "Browse 46 frameworks across 28 jurisdictions to understand your obligations.",
+      description: `Browse ${COVERAGE.controlFrameworks} frameworks with control-level detail and ${COVERAGE.frameworkPacks} framework packs across ${COVERAGE.jurisdictions} jurisdictions to understand your obligations.`,
       category: "assessment",
       urgency: "this-week"
     });

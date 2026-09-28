@@ -3,6 +3,7 @@
  * Users earn achievements, track progress, and learn through
  * scenario-based challenges with real-time feedback.
  */
+import { COVERAGE } from "../../../shared/coverage-claims";
 import { useState, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useLocale } from "@/contexts/useLocale";
@@ -62,8 +63,7 @@ const QUIZ_QUESTIONS: QuizQuestion[] = [
     question: "How many jurisdictions does DJAC support?",
     options: ["12", "19", "28", "5"],
     correct: 2,
-    explanation:
-      "DJAC covers 28 jurisdictions across APAC, EMEA, North America, and Africa — including China (PIPL, CSL, DSL), Saudi Arabia (PDPL), UAE, EU (GDPR), and more.",
+    explanation: `DJAC covers ${COVERAGE.jurisdictions} jurisdictions across APAC, EMEA, North America, and Africa — including China (PIPL, CSL, DSL), Saudi Arabia (PDPL), UAE, EU (GDPR), and more.`,
   },
   {
     question: "What AI model powers DJAC's compliance assessments?",

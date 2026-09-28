@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { useLocale } from "@/contexts/useLocale";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { COVERAGE } from "../../../shared/coverage-claims";
 import {
   X,
   ChevronLeft,
@@ -44,8 +45,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     target: '[data-tour-id="tour-menu-analysis"]',
     title: "Compliance Framework Library",
-    description:
-      "Browse 46 frameworks across 28 jurisdictions. Select your frameworks to unlock AI-powered gap analysis and cross-jurisdiction comparisons.",
+    description: `Browse ${COVERAGE.controlFrameworks} frameworks with control-level detail and ${COVERAGE.frameworkPacks} framework packs across ${COVERAGE.jurisdictions} jurisdictions. Select your frameworks to unlock AI-powered gap analysis and cross-jurisdiction comparisons.`,
     icon: BookOpen,
     offsetX: 0,
     offsetY: 8,
