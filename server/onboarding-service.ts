@@ -21,6 +21,7 @@ import {
   personalizationRecommendations,
   onboardingProgress,
   organizationProfilesCustom,
+  users,
 } from "../drizzle/schema";
 import {
   QUESTIONNAIRE_VERSION,
@@ -44,6 +45,8 @@ export type OnboardingActor = {
 export type OnboardingState = {
   questionnaireVersion: number;
   organizationId: number | null;
+  /** True only for recent accounts that have not started onboarding. */
+  shouldOnboard: boolean;
   answers: Record<string, unknown>;
   profile: ReturnType<typeof deriveProfile>;
   recommendations: Recommendation[];
@@ -61,6 +64,7 @@ export type OnboardingState = {
 const EMPTY_STATE: OnboardingState = {
   questionnaireVersion: QUESTIONNAIRE_VERSION,
   organizationId: null,
+  shouldOnboard: false,
   answers: {},
   profile: {
     objectives: [],
@@ -141,6 +145,28 @@ export async function getOnboardingState(
       .orderBy(desc(onboardingEvents.createdAt))
       .limit(50);
 
+    // Only recent accounts with no onboarding activity are asked to onboard, so
+    // existing production users are never disrupted.
+    let shouldOnboard = false;
+    try {
+      const [account] = await db
+        .select({ createdAt: users.createdAt })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      const ageMs = account?.createdAt
+        ? Date.now() - new Date(account.createdAt).getTime()
+        : Number.POSITIVE_INFINITY;
+      const isNewAccount = ageMs <= 14 * 24 * 60 * 60 * 1000;
+      shouldOnboard =
+        !progress?.completedAt &&
+        !(progress?.skipped ?? false) &&
+        Object.keys(answers).length === 0 &&
+        isNewAccount;
+    } catch {
+      shouldOnboard = false;
+    }
+
     const recommendations: Recommendation[] = recs.map(r => ({
       moduleId: r.moduleId,
       priority: r.priority,
@@ -151,6 +177,7 @@ export async function getOnboardingState(
     return {
       questionnaireVersion: QUESTIONNAIRE_VERSION,
       organizationId: organizationId ?? null,
+      shouldOnboard,
       answers,
       profile,
       recommendations:

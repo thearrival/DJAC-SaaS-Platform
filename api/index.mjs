@@ -32347,6 +32347,7 @@ async function ensureOnboardingSchema(db) {
 var EMPTY_STATE = {
   questionnaireVersion: QUESTIONNAIRE_VERSION,
   organizationId: null,
+  shouldOnboard: false,
   answers: {},
   profile: {
     objectives: [],
@@ -32396,6 +32397,15 @@ async function getOnboardingState(userId, organizationId) {
       stepNumber: onboardingEvents.stepNumber,
       createdAt: onboardingEvents.createdAt
     }).from(onboardingEvents).where(eq38(onboardingEvents.userId, userId)).orderBy(desc22(onboardingEvents.createdAt)).limit(50);
+    let shouldOnboard = false;
+    try {
+      const [account] = await db.select({ createdAt: users.createdAt }).from(users).where(eq38(users.id, userId)).limit(1);
+      const ageMs = account?.createdAt ? Date.now() - new Date(account.createdAt).getTime() : Number.POSITIVE_INFINITY;
+      const isNewAccount = ageMs <= 14 * 24 * 60 * 60 * 1e3;
+      shouldOnboard = !progress?.completedAt && !(progress?.skipped ?? false) && Object.keys(answers).length === 0 && isNewAccount;
+    } catch {
+      shouldOnboard = false;
+    }
     const recommendations = recs.map((r) => ({
       moduleId: r.moduleId,
       priority: r.priority,
@@ -32405,6 +32415,7 @@ async function getOnboardingState(userId, organizationId) {
     return {
       questionnaireVersion: QUESTIONNAIRE_VERSION,
       organizationId: organizationId ?? null,
+      shouldOnboard,
       answers,
       profile,
       recommendations: recommendations.length > 0 ? recommendations : generatePersonalization(profile),

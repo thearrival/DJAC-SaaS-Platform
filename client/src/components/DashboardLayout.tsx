@@ -589,7 +589,7 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
   const [, navigate] = useLocation();
   const currentPath = window.location.pathname;
 
-  const { data, isLoading, isError } = trpc.rbac.onboardingStatus.useQuery(
+  const { data, isLoading, isError } = trpc.onboarding.getState.useQuery(
     undefined,
     {
       retry: false,
@@ -597,20 +597,21 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
     }
   );
 
-  const isComplete = data?.complete ?? true;
-  const isOnWizardPage = currentPath === "/onboarding-wizard";
+  // Only recent accounts with no onboarding activity are gated (server-computed),
+  // so existing users are never disrupted. Fail open on error.
+  const shouldOnboard = data?.shouldOnboard ?? false;
+  const isOnGetStartedPage = currentPath === "/get-started";
   const shouldRedirect =
     !isSuperAdmin &&
     !isPlatformAdmin &&
     !isLoading &&
     !isError &&
-    !isComplete &&
-    !isOnWizardPage;
+    shouldOnboard &&
+    !isOnGetStartedPage;
 
-  // Redirect to onboarding wizard if onboarding not complete
   useEffect(() => {
     if (shouldRedirect) {
-      navigate("/onboarding-wizard");
+      navigate("/get-started");
     }
   }, [shouldRedirect, navigate]);
 
@@ -622,8 +623,8 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
   // On error, allow access (don't block users from the platform)
   if (isError) return <>{children}</>;
 
-  // If onboarding complete or already on wizard page, proceed normally
-  if (isComplete || isOnWizardPage) return <>{children}</>;
+  // Otherwise proceed (the redirect, when needed, happens in the effect above).
+  if (!shouldRedirect) return <>{children}</>;
 
   return null;
 }
