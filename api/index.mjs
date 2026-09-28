@@ -20255,6 +20255,61 @@ async function getReportShareByToken(token) {
   return row;
 }
 
+// shared/regulatory-provenance.ts
+var DEFAULT_REVIEW_WINDOW_DAYS = 730;
+var PROVENANCE_REGISTRY = {};
+function unverifiedProvenance(claimCode) {
+  return { claimCode, status: "unverified" };
+}
+function daysBetween(from, to) {
+  const then = Date.parse(from);
+  if (Number.isNaN(then)) return Number.POSITIVE_INFINITY;
+  return (to - then) / 864e5;
+}
+function resolveProvenance(entry, claimCode, now = Date.now()) {
+  if (!entry) return unverifiedProvenance(claimCode);
+  if (entry.status === "verified" && entry.lastVerified) {
+    const window = entry.reviewWindowDays ?? DEFAULT_REVIEW_WINDOW_DAYS;
+    if (daysBetween(entry.lastVerified, now) > window) {
+      return { ...entry, status: "stale" };
+    }
+  }
+  return entry;
+}
+function getProvenance(claimCode, now = Date.now()) {
+  return resolveProvenance(PROVENANCE_REGISTRY[claimCode], claimCode, now);
+}
+function summariseProvenance(claimCodes, now = Date.now()) {
+  let verified = 0;
+  let pendingReview = 0;
+  let stale = 0;
+  let unverified = 0;
+  for (const code of claimCodes) {
+    switch (getProvenance(code, now).status) {
+      case "verified":
+        verified++;
+        break;
+      case "pending_review":
+        pendingReview++;
+        break;
+      case "stale":
+        stale++;
+        break;
+      default:
+        unverified++;
+    }
+  }
+  const total = claimCodes.length;
+  return {
+    total,
+    verified,
+    pendingReview,
+    stale,
+    unverified,
+    fullyVerified: total > 0 && verified === total
+  };
+}
+
 // server/global-compliance-registry.ts
 var GLOBAL_REGIONS = [
   "North America",
@@ -21754,7 +21809,10 @@ function getGlobalRegistrySummary() {
     editions: GLOBAL_INDUSTRY_EDITIONS.length,
     agents: GLOBAL_AI_AGENTS.length,
     graphNodes: graph.nodes.length,
-    graphEdges: graph.edges.length
+    graphEdges: graph.edges.length,
+    provenance: summariseProvenance(
+      GLOBAL_FRAMEWORK_PACKS.map((pack) => pack.code)
+    )
   };
 }
 function searchGlobalRegistry(query, limit = 20) {

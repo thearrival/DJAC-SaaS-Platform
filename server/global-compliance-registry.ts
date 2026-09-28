@@ -1,3 +1,8 @@
+import {
+  summariseProvenance,
+  type ProvenanceSummary,
+} from "../shared/regulatory-provenance";
+
 export type GlobalRegion =
   | "North America"
   | "Europe"
@@ -64,6 +69,13 @@ export type GlobalRegistrySummary = {
   agents: number;
   graphNodes: number;
   graphEdges: number;
+  /**
+   * Verification state of the framework corpus, derived from the provenance
+   * registry rather than asserted in copy. Customer-facing language about
+   * coverage must read `provenance.fullyVerified` before claiming that every
+   * framework is a verified, currently-sourced citation.
+   */
+  provenance: ProvenanceSummary;
 };
 
 export const GLOBAL_REGIONS: GlobalRegion[] = [
@@ -1661,6 +1673,9 @@ export function getGlobalRegistrySummary(): GlobalRegistrySummary {
     agents: GLOBAL_AI_AGENTS.length,
     graphNodes: graph.nodes.length,
     graphEdges: graph.edges.length,
+    provenance: summariseProvenance(
+      GLOBAL_FRAMEWORK_PACKS.map(pack => pack.code)
+    ),
   };
 }
 
