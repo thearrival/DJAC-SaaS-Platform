@@ -36,6 +36,10 @@ export default tseslint.config(
       "api/index.mjs",
       "**/*.min.js",
       "tailwind.config.js",
+      // Playwright E2E specs + config: typed against @playwright/test, which is
+      // installed on demand in the dedicated e2e workflow (not a devDependency).
+      "e2e/",
+      "playwright.config.ts",
     ],
   },
   {

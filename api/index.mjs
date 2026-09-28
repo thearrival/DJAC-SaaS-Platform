@@ -32717,6 +32717,22 @@ async function getOnboardingIntelligence(windowDays = 30) {
       ORDER BY "count" DESC
       LIMIT 20
     `);
+    const newUsers = await db.execute(sql8`
+      SELECT date_trunc('day', "created_at")::date AS "day", COUNT(*)::int AS "count"
+      FROM "users"
+      WHERE "created_at" >= now() - (${days} * interval '1 day')
+      GROUP BY 1
+      ORDER BY 1 DESC
+      LIMIT 60
+    `);
+    const engagement = await db.execute(sql8`
+      SELECT "event_type", COUNT(*)::int AS "count"
+      FROM "onboarding_events"
+      WHERE "created_at" >= now() - (${days} * interval '1 day')
+      GROUP BY 1
+      ORDER BY 2 DESC
+      LIMIT 30
+    `);
     const funnel = await db.execute(sql8`
       SELECT date_trunc('day', "created_at")::date AS "day", COUNT(*)::int AS "events"
       FROM "onboarding_events"
@@ -32731,6 +32747,8 @@ async function getOnboardingIntelligence(windowDays = 30) {
       byIndustry: byIndustry.rows ?? [],
       byObjective: byObjective.rows ?? [],
       byModule: byModule.rows ?? [],
+      newUsers: newUsers.rows ?? [],
+      engagement: engagement.rows ?? [],
       funnel: funnel.rows ?? []
     };
   } catch {
@@ -32739,6 +32757,8 @@ async function getOnboardingIntelligence(windowDays = 30) {
       byIndustry: [],
       byObjective: [],
       byModule: [],
+      newUsers: [],
+      engagement: [],
       funnel: []
     };
   }

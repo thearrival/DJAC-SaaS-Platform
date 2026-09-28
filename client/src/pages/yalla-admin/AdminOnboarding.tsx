@@ -209,6 +209,24 @@ export default function AdminOnboarding() {
       </div>
 
       <div style={cardStyle}>
+        <p className="mb-3 text-sm font-medium">Personalization engagement</p>
+        {(data?.engagement ?? []).length === 0 ? (
+          <p className="text-sm text-white/50">No data yet.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <tbody>
+              {data.engagement.map((row: any) => (
+                <tr key={row.event_type} className="border-b border-white/5">
+                  <td className="py-1.5">{row.event_type}</td>
+                  <td className="py-1.5 text-end text-white/70">{row.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div style={cardStyle}>
         <p className="mb-3 text-sm font-medium">Inspect a user's onboarding</p>
         <div className="flex items-center gap-2 max-w-md">
           <input
