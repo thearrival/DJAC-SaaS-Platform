@@ -35,6 +35,22 @@ import {
 } from "./services/personalization/engine";
 import { ensureOnboardingSchema } from "./_core/onboarding-schema";
 
+/**
+ * Every catch block in this file intentionally degrades to a safe fallback so a
+ * database problem can never break authentication, authorization, or page
+ * rendering. That resilience previously made failures invisible: a broken write
+ * path surfaced only as a generic client error with nothing in the logs, which
+ * cost hours of blind debugging on the local-identity FK bug.
+ *
+ * These fallbacks must stay, but they must never be silent. Every one of them
+ * logs a scoped, PII-free warning so production logs name the exact operation
+ * that failed and the underlying driver error (constraint name, column, etc.).
+ */
+function warnOnboarding(scope: string, err: unknown) {
+  const detail = err instanceof Error ? err.message : String(err);
+  console.warn(`[onboarding:${scope}] failed — ${detail}`, err);
+}
+
 export type OnboardingIdentity = {
   userId: number | null;
   localUserId: number | null;
@@ -210,8 +226,9 @@ export async function getOnboardingState(
         !resolvedSkipped &&
         Object.keys(answers).length === 0 &&
         isNewAccount;
-    } catch {
+    } catch (err) {
       shouldOnboard = false;
+      warnOnboarding("getState.accountAge", err);
     }
 
     const recommendations: Recommendation[] = recs.map(r => ({
@@ -243,7 +260,8 @@ export async function getOnboardingState(
         createdAt: new Date(e.createdAt).toISOString(),
       })),
     };
-  } catch {
+  } catch (err) {
+    warnOnboarding("getState", err);
     return { ...EMPTY_STATE, organizationId: organizationId ?? null };
   }
 }
@@ -274,7 +292,8 @@ export async function getOnboardingTimelineForAnyId(id: number, limit = 200) {
       )
       .orderBy(desc(onboardingEvents.createdAt))
       .limit(Math.min(Math.max(limit, 1), 500));
-  } catch {
+  } catch (err) {
+    warnOnboarding("getTimelineForAnyId", err);
     return [];
   }
 }
@@ -305,7 +324,8 @@ export async function getOnboardingResponsesForAnyId(id: number) {
       .orderBy(desc(onboardingProfileHistory.createdAt))
       .limit(200);
     return { responses, history };
-  } catch {
+  } catch (err) {
+    warnOnboarding("getResponsesForAnyId", err);
     return { responses: [], history: [] };
   }
 }
@@ -353,8 +373,9 @@ async function recordEvent(
       onboardingVersion: QUESTIONNAIRE_VERSION,
       payload,
     });
-  } catch {
+  } catch (err) {
     // best-effort
+    warnOnboarding("recordEvent", err);
   }
 }
 
@@ -453,7 +474,8 @@ export async function submitAnswer(
       input.stepNumber
     );
     return { ok: true, changed: result };
-  } catch {
+  } catch (err) {
+    warnOnboarding("submitAnswer", err);
     return { ok: false, changed: false, error: "Could not save that answer" };
   }
 }
@@ -509,8 +531,9 @@ async function syncDerivedState(
           },
         });
     }
-  } catch {
+  } catch (err) {
     // best-effort consolidation only
+    warnOnboarding("syncDerivedState", err);
   }
 }
 
@@ -593,7 +616,8 @@ export async function completeOnboarding(
       recommendationCount: recommendations.length,
     });
     return { ok: true, recommendations };
-  } catch {
+  } catch (err) {
+    warnOnboarding("completeOnboarding", err);
     return { ok: false, recommendations: [] };
   }
 }
@@ -609,8 +633,9 @@ export async function recordOnboardingSkipped(actor: OnboardingActor) {
           target: onboardingProgress.userId,
           set: { skipped: true, updatedAt: new Date() },
         });
-    } catch {
+    } catch (err) {
       /* best-effort */
+      warnOnboarding("recordOnboardingSkipped", err);
     }
   }
   await recordEvent(actor, "onboarding_skipped");
@@ -634,7 +659,8 @@ export async function dismissRecommendation(
       );
     await recordEvent(actor, "recommendation_dismissed", { moduleId });
     return { ok: true };
-  } catch {
+  } catch (err) {
+    warnOnboarding("dismissRecommendation", err);
     return { ok: false };
   }
 }
@@ -680,7 +706,8 @@ export async function recordModuleSignal(
     }
     await recordEvent(actor, signal, { moduleId });
     return { ok: true };
-  } catch {
+  } catch (err) {
+    warnOnboarding("recordModuleSignal", err);
     return { ok: false };
   }
 }
@@ -694,13 +721,26 @@ export async function getOnboardingIntelligence(windowDays = 30) {
   }
   const days = Math.min(Math.max(windowDays, 1), 365);
   try {
+    // Derive the funnel from onboarding_events, NOT onboarding_progress:
+    // onboarding_progress is keyed on users.id only, so it is empty for every
+    // local (email/password) user — the platform's primary auth path — which
+    // made this funnel report near-zero totals. Events carry both identities.
     const totals = await db.execute(sql`
+      WITH flagged AS (
+        SELECT
+          COALESCE('u:' || "user_id"::text, 'l:' || "local_user_id"::text) AS actor,
+          bool_or("event_type" = 'onboarding_completed') AS completed,
+          bool_or("event_type" = 'onboarding_skipped') AS skipped
+        FROM "onboarding_events"
+        WHERE "user_id" IS NOT NULL OR "local_user_id" IS NOT NULL
+        GROUP BY 1
+      )
       SELECT
         COUNT(*)::int AS "started",
-        COUNT(*) FILTER (WHERE "completed_at" IS NOT NULL)::int AS "completed",
-        COUNT(*) FILTER (WHERE "skipped" = true)::int AS "skipped",
-        COUNT(*) FILTER (WHERE "completed_at" IS NULL AND "skipped" IS NOT TRUE)::int AS "in_progress"
-      FROM "onboarding_progress"
+        COUNT(*) FILTER (WHERE completed)::int AS "completed",
+        COUNT(*) FILTER (WHERE skipped AND NOT completed)::int AS "skipped",
+        COUNT(*) FILTER (WHERE NOT completed AND NOT skipped)::int AS "in_progress"
+      FROM flagged
     `);
 
     const byIndustry = await db.execute(sql`
@@ -731,12 +771,21 @@ export async function getOnboardingIntelligence(windowDays = 30) {
       LIMIT 20
     `);
 
+    // Signups across BOTH identity kinds (local email/password AND OAuth).
     const newUsers = await db.execute(sql`
-      SELECT date_trunc('day', "created_at")::date AS "day", COUNT(*)::int AS "count"
-      FROM "localUsers"
-      WHERE "created_at" >= now() - (${days} * interval '1 day')
-      GROUP BY 1
-      ORDER BY 1 DESC
+      SELECT day, SUM("count")::int AS "count" FROM (
+        SELECT date_trunc('day', "created_at")::date AS day, COUNT(*)::int AS "count"
+        FROM "localUsers"
+        WHERE "created_at" >= now() - (${days} * interval '1 day')
+        GROUP BY 1
+        UNION ALL
+        SELECT date_trunc('day', "created_at")::date AS day, COUNT(*)::int AS "count"
+        FROM "users"
+        WHERE "created_at" >= now() - (${days} * interval '1 day')
+        GROUP BY 1
+      ) combined
+      GROUP BY day
+      ORDER BY day DESC
       LIMIT 60
     `);
 
@@ -768,7 +817,8 @@ export async function getOnboardingIntelligence(windowDays = 30) {
       engagement: engagement.rows ?? [],
       funnel: funnel.rows ?? [],
     };
-  } catch {
+  } catch (err) {
+    warnOnboarding("getOnboardingIntelligence", err);
     return {
       totals: {},
       byIndustry: [],

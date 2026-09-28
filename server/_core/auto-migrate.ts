@@ -277,93 +277,16 @@ export async function ensureMigrated(): Promise<void> {
             )
         `);
 
-    // Migration 0006: intelligent onboarding (answer-level, versioned, auditable)
-    await db.execute(sql`
-            CREATE TABLE IF NOT EXISTS "onboarding_responses" (
-                "id"                 serial      PRIMARY KEY,
-                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
-                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
-                "session_id"         varchar(64) NOT NULL,
-                "onboarding_version" integer     NOT NULL DEFAULT 1,
-                "question_id"        varchar(80) NOT NULL,
-                "question_version"   integer     NOT NULL DEFAULT 1,
-                "step_number"        integer     NOT NULL DEFAULT 0,
-                "answer_value"       jsonb,
-                "source"             varchar(40) NOT NULL DEFAULT 'onboarding',
-                "submitted_at"       timestamp   NOT NULL DEFAULT now(),
-                "created_at"         timestamp   NOT NULL DEFAULT now(),
-                "updated_at"         timestamp   NOT NULL DEFAULT now()
-            )
-        `);
-    await db.execute(sql`
-            CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_user_q_idx"
-                ON "onboarding_responses" ("user_id", "onboarding_version", "question_id")
-        `);
-    await db.execute(sql`
-            CREATE INDEX IF NOT EXISTS "onboarding_responses_user_idx"
-                ON "onboarding_responses" ("user_id")
-        `);
-    await db.execute(sql`
-            CREATE TABLE IF NOT EXISTS "onboarding_events" (
-                "id"                 serial      PRIMARY KEY,
-                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
-                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
-                "session_id"         varchar(64),
-                "event_type"         varchar(60) NOT NULL,
-                "step_number"        integer,
-                "actor_type"         varchar(20) NOT NULL DEFAULT 'user',
-                "actor_id"           varchar(80),
-                "request_id"         varchar(80),
-                "onboarding_version" integer     NOT NULL DEFAULT 1,
-                "payload"            jsonb       DEFAULT '{}'::jsonb,
-                "created_at"         timestamp   NOT NULL DEFAULT now()
-            )
-        `);
-    await db.execute(sql`
-            CREATE INDEX IF NOT EXISTS "onboarding_events_user_idx"
-                ON "onboarding_events" ("user_id", "created_at")
-        `);
-    await db.execute(sql`
-            CREATE TABLE IF NOT EXISTS "onboarding_profile_history" (
-                "id"                 serial      PRIMARY KEY,
-                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
-                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
-                "field"              varchar(80) NOT NULL,
-                "previous_value"     jsonb,
-                "new_value"          jsonb,
-                "actor_type"         varchar(20) NOT NULL DEFAULT 'user',
-                "actor_id"           varchar(80),
-                "source"             varchar(40) NOT NULL DEFAULT 'onboarding',
-                "onboarding_version" integer     NOT NULL DEFAULT 1,
-                "created_at"         timestamp   NOT NULL DEFAULT now()
-            )
-        `);
-    await db.execute(sql`
-            CREATE INDEX IF NOT EXISTS "onboarding_profile_history_user_idx"
-                ON "onboarding_profile_history" ("user_id", "created_at")
-        `);
-    await db.execute(sql`
-            CREATE TABLE IF NOT EXISTS "personalization_recommendations" (
-                "id"              serial      PRIMARY KEY,
-                "user_id"         integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
-                "organization_id" integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
-                "module_id"       varchar(80) NOT NULL,
-                "priority"        integer     NOT NULL DEFAULT 50,
-                "reason"          text        NOT NULL DEFAULT '',
-                "rule_id"         varchar(80) NOT NULL DEFAULT 'default',
-                "status"          varchar(20) NOT NULL DEFAULT 'active',
-                "created_at"      timestamp   NOT NULL DEFAULT now(),
-                "updated_at"      timestamp   NOT NULL DEFAULT now()
-            )
-        `);
-    await db.execute(sql`
-            CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_user_module_idx"
-                ON "personalization_recommendations" ("user_id", "module_id")
-        `);
-    await db.execute(sql`
-            CREATE INDEX IF NOT EXISTS "personalization_recommendations_user_idx"
-                ON "personalization_recommendations" ("user_id")
-        `);
+    // Migration 0006 (intelligent onboarding) is intentionally NOT duplicated
+    // here. Those four tables are owned by server/_core/onboarding-schema.ts
+    // (ensureOnboardingSchema), which is called near the top of this file and
+    // is the single source of truth.
+    //
+    // This previously carried a second, stale copy of the DDL. It declared
+    // "user_id" NOT NULL with a foreign key to users(id) and had no
+    // "local_user_id" column, so any recreate of the tables would silently
+    // break every local (email/password) user — the primary auth path. That is
+    // exactly the defect fixed in the dual-identity migration.
 
     // Migration 0006: analytics + feature flags tables
     await db.execute(sql`

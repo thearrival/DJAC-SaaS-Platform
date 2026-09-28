@@ -32395,6 +32395,10 @@ async function ensureOnboardingSchema(db) {
 }
 
 // server/onboarding-service.ts
+function warnOnboarding(scope, err) {
+  const detail = err instanceof Error ? err.message : String(err);
+  console.warn(`[onboarding:${scope}] failed \u2014 ${detail}`, err);
+}
 var EMPTY_STATE = {
   questionnaireVersion: QUESTIONNAIRE_VERSION,
   organizationId: null,
@@ -32470,8 +32474,9 @@ async function getOnboardingState(identity, organizationId) {
       const ageMs = account?.createdAt ? Date.now() - new Date(account.createdAt).getTime() : Number.POSITIVE_INFINITY;
       const isNewAccount = ageMs <= 14 * 24 * 60 * 60 * 1e3;
       shouldOnboard = !resolvedCompletedAt && !resolvedSkipped && Object.keys(answers).length === 0 && isNewAccount;
-    } catch {
+    } catch (err) {
       shouldOnboard = false;
+      warnOnboarding("getState.accountAge", err);
     }
     const recommendations = recs.map((r) => ({
       moduleId: r.moduleId,
@@ -32496,7 +32501,8 @@ async function getOnboardingState(identity, organizationId) {
         createdAt: new Date(e.createdAt).toISOString()
       }))
     };
-  } catch {
+  } catch (err) {
+    warnOnboarding("getState", err);
     return { ...EMPTY_STATE, organizationId: organizationId ?? null };
   }
 }
@@ -32519,7 +32525,8 @@ async function getOnboardingTimelineForAnyId(id, limit = 200) {
         eq38(onboardingEvents.localUserId, id)
       )
     ).orderBy(desc22(onboardingEvents.createdAt)).limit(Math.min(Math.max(limit, 1), 500));
-  } catch {
+  } catch (err) {
+    warnOnboarding("getTimelineForAnyId", err);
     return [];
   }
 }
@@ -32540,7 +32547,8 @@ async function getOnboardingResponsesForAnyId(id) {
       )
     ).orderBy(desc22(onboardingProfileHistory.createdAt)).limit(200);
     return { responses, history };
-  } catch {
+  } catch (err) {
+    warnOnboarding("getResponsesForAnyId", err);
     return { responses: [], history: [] };
   }
 }
@@ -32570,7 +32578,8 @@ async function recordEvent(actor, eventType, payload = {}, stepNumber) {
       onboardingVersion: QUESTIONNAIRE_VERSION,
       payload
     });
-  } catch {
+  } catch (err) {
+    warnOnboarding("recordEvent", err);
   }
 }
 async function submitAnswer(actor, input) {
@@ -32643,7 +32652,8 @@ async function submitAnswer(actor, input) {
       input.stepNumber
     );
     return { ok: true, changed: result };
-  } catch {
+  } catch (err) {
+    warnOnboarding("submitAnswer", err);
     return { ok: false, changed: false, error: "Could not save that answer" };
   }
 }
@@ -32686,7 +32696,8 @@ async function syncDerivedState(actor, answers) {
         }
       });
     }
-  } catch {
+  } catch (err) {
+    warnOnboarding("syncDerivedState", err);
   }
 }
 async function completeOnboarding(actor) {
@@ -32749,7 +32760,8 @@ async function completeOnboarding(actor) {
       recommendationCount: recommendations.length
     });
     return { ok: true, recommendations };
-  } catch {
+  } catch (err) {
+    warnOnboarding("completeOnboarding", err);
     return { ok: false, recommendations: [] };
   }
 }
@@ -32765,7 +32777,8 @@ async function dismissRecommendation(actor, moduleId) {
     );
     await recordEvent(actor, "recommendation_dismissed", { moduleId });
     return { ok: true };
-  } catch {
+  } catch (err) {
+    warnOnboarding("dismissRecommendation", err);
     return { ok: false };
   }
 }
@@ -32795,7 +32808,8 @@ async function recordModuleSignal(actor, moduleId, signal) {
     }
     await recordEvent(actor, signal, { moduleId });
     return { ok: true };
-  } catch {
+  } catch (err) {
+    warnOnboarding("recordModuleSignal", err);
     return { ok: false };
   }
 }
@@ -32807,12 +32821,21 @@ async function getOnboardingIntelligence(windowDays = 30) {
   const days = Math.min(Math.max(windowDays, 1), 365);
   try {
     const totals = await db.execute(sql8`
+      WITH flagged AS (
+        SELECT
+          COALESCE('u:' || "user_id"::text, 'l:' || "local_user_id"::text) AS actor,
+          bool_or("event_type" = 'onboarding_completed') AS completed,
+          bool_or("event_type" = 'onboarding_skipped') AS skipped
+        FROM "onboarding_events"
+        WHERE "user_id" IS NOT NULL OR "local_user_id" IS NOT NULL
+        GROUP BY 1
+      )
       SELECT
         COUNT(*)::int AS "started",
-        COUNT(*) FILTER (WHERE "completed_at" IS NOT NULL)::int AS "completed",
-        COUNT(*) FILTER (WHERE "skipped" = true)::int AS "skipped",
-        COUNT(*) FILTER (WHERE "completed_at" IS NULL AND "skipped" IS NOT TRUE)::int AS "in_progress"
-      FROM "onboarding_progress"
+        COUNT(*) FILTER (WHERE completed)::int AS "completed",
+        COUNT(*) FILTER (WHERE skipped AND NOT completed)::int AS "skipped",
+        COUNT(*) FILTER (WHERE NOT completed AND NOT skipped)::int AS "in_progress"
+      FROM flagged
     `);
     const byIndustry = await db.execute(sql8`
       SELECT "industry", COUNT(*)::int AS "count"
@@ -32840,11 +32863,19 @@ async function getOnboardingIntelligence(windowDays = 30) {
       LIMIT 20
     `);
     const newUsers = await db.execute(sql8`
-      SELECT date_trunc('day', "created_at")::date AS "day", COUNT(*)::int AS "count"
-      FROM "localUsers"
-      WHERE "created_at" >= now() - (${days} * interval '1 day')
-      GROUP BY 1
-      ORDER BY 1 DESC
+      SELECT day, SUM("count")::int AS "count" FROM (
+        SELECT date_trunc('day', "created_at")::date AS day, COUNT(*)::int AS "count"
+        FROM "localUsers"
+        WHERE "created_at" >= now() - (${days} * interval '1 day')
+        GROUP BY 1
+        UNION ALL
+        SELECT date_trunc('day', "created_at")::date AS day, COUNT(*)::int AS "count"
+        FROM "users"
+        WHERE "created_at" >= now() - (${days} * interval '1 day')
+        GROUP BY 1
+      ) combined
+      GROUP BY day
+      ORDER BY day DESC
       LIMIT 60
     `);
     const engagement = await db.execute(sql8`
@@ -32873,7 +32904,8 @@ async function getOnboardingIntelligence(windowDays = 30) {
       engagement: engagement.rows ?? [],
       funnel: funnel.rows ?? []
     };
-  } catch {
+  } catch (err) {
+    warnOnboarding("getOnboardingIntelligence", err);
     return {
       totals: {},
       byIndustry: [],
@@ -35236,92 +35268,6 @@ async function ensureMigrated() {
                 "created_at"            timestamp     NOT NULL DEFAULT now(),
                 "updated_at"            timestamp     NOT NULL DEFAULT now()
             )
-        `);
-    await db.execute(sql11`
-            CREATE TABLE IF NOT EXISTS "onboarding_responses" (
-                "id"                 serial      PRIMARY KEY,
-                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
-                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
-                "session_id"         varchar(64) NOT NULL,
-                "onboarding_version" integer     NOT NULL DEFAULT 1,
-                "question_id"        varchar(80) NOT NULL,
-                "question_version"   integer     NOT NULL DEFAULT 1,
-                "step_number"        integer     NOT NULL DEFAULT 0,
-                "answer_value"       jsonb,
-                "source"             varchar(40) NOT NULL DEFAULT 'onboarding',
-                "submitted_at"       timestamp   NOT NULL DEFAULT now(),
-                "created_at"         timestamp   NOT NULL DEFAULT now(),
-                "updated_at"         timestamp   NOT NULL DEFAULT now()
-            )
-        `);
-    await db.execute(sql11`
-            CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_user_q_idx"
-                ON "onboarding_responses" ("user_id", "onboarding_version", "question_id")
-        `);
-    await db.execute(sql11`
-            CREATE INDEX IF NOT EXISTS "onboarding_responses_user_idx"
-                ON "onboarding_responses" ("user_id")
-        `);
-    await db.execute(sql11`
-            CREATE TABLE IF NOT EXISTS "onboarding_events" (
-                "id"                 serial      PRIMARY KEY,
-                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
-                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
-                "session_id"         varchar(64),
-                "event_type"         varchar(60) NOT NULL,
-                "step_number"        integer,
-                "actor_type"         varchar(20) NOT NULL DEFAULT 'user',
-                "actor_id"           varchar(80),
-                "request_id"         varchar(80),
-                "onboarding_version" integer     NOT NULL DEFAULT 1,
-                "payload"            jsonb       DEFAULT '{}'::jsonb,
-                "created_at"         timestamp   NOT NULL DEFAULT now()
-            )
-        `);
-    await db.execute(sql11`
-            CREATE INDEX IF NOT EXISTS "onboarding_events_user_idx"
-                ON "onboarding_events" ("user_id", "created_at")
-        `);
-    await db.execute(sql11`
-            CREATE TABLE IF NOT EXISTS "onboarding_profile_history" (
-                "id"                 serial      PRIMARY KEY,
-                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
-                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
-                "field"              varchar(80) NOT NULL,
-                "previous_value"     jsonb,
-                "new_value"          jsonb,
-                "actor_type"         varchar(20) NOT NULL DEFAULT 'user',
-                "actor_id"           varchar(80),
-                "source"             varchar(40) NOT NULL DEFAULT 'onboarding',
-                "onboarding_version" integer     NOT NULL DEFAULT 1,
-                "created_at"         timestamp   NOT NULL DEFAULT now()
-            )
-        `);
-    await db.execute(sql11`
-            CREATE INDEX IF NOT EXISTS "onboarding_profile_history_user_idx"
-                ON "onboarding_profile_history" ("user_id", "created_at")
-        `);
-    await db.execute(sql11`
-            CREATE TABLE IF NOT EXISTS "personalization_recommendations" (
-                "id"              serial      PRIMARY KEY,
-                "user_id"         integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
-                "organization_id" integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
-                "module_id"       varchar(80) NOT NULL,
-                "priority"        integer     NOT NULL DEFAULT 50,
-                "reason"          text        NOT NULL DEFAULT '',
-                "rule_id"         varchar(80) NOT NULL DEFAULT 'default',
-                "status"          varchar(20) NOT NULL DEFAULT 'active',
-                "created_at"      timestamp   NOT NULL DEFAULT now(),
-                "updated_at"      timestamp   NOT NULL DEFAULT now()
-            )
-        `);
-    await db.execute(sql11`
-            CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_user_module_idx"
-                ON "personalization_recommendations" ("user_id", "module_id")
-        `);
-    await db.execute(sql11`
-            CREATE INDEX IF NOT EXISTS "personalization_recommendations_user_idx"
-                ON "personalization_recommendations" ("user_id")
         `);
     await db.execute(sql11`
             CREATE TABLE IF NOT EXISTS "feature_flags" (
