@@ -51,6 +51,9 @@ const Pricing = lazy(() => import("./pages/Pricing"));
 const BillingAccount = lazy(() => import("./pages/BillingAccount"));
 const ComplianceCalendar = lazy(() => import("./pages/ComplianceCalendar"));
 const OnboardingWizard = lazy(() => import("./pages/OnboardingWizard"));
+const OnboardingQuestionnaire = lazy(
+  () => import("./pages/OnboardingQuestionnaire")
+);
 const SaaSMetrics = lazy(() => import("./pages/SaaSMetrics"));
 const ComplianceHeatmap = lazy(() => import("./pages/ComplianceHeatmap"));
 const Notifications = lazy(() => import("./pages/Notifications"));
@@ -110,6 +113,9 @@ const AdminSecurity = lazy(() => import("./pages/yalla-admin/AdminSecurity"));
 const AdminAudit = lazy(() => import("./pages/yalla-admin/AdminAudit"));
 const AdminAnalytics = lazy(() => import("./pages/yalla-admin/AdminAnalytics"));
 const AdminInsights = lazy(() => import("./pages/yalla-admin/AdminInsights"));
+const AdminOnboarding = lazy(
+  () => import("./pages/yalla-admin/AdminOnboarding")
+);
 const AdminReports = lazy(() => import("./pages/yalla-admin/AdminReports"));
 const AdminUserDetail = lazy(
   () => import("./pages/yalla-admin/AdminUserDetail")
@@ -336,6 +342,13 @@ function Router() {
           </FoundersLayout>
         </RouteErrorBoundary>
       </Route>
+      <Route path={"/yalla-hack-owners-console/onboarding"}>
+        <RouteErrorBoundary>
+          <FoundersLayout>
+            <AdminOnboarding />
+          </FoundersLayout>
+        </RouteErrorBoundary>
+      </Route>
       <Route path={"/yalla-hack-owners-console/reports"}>
         <RouteErrorBoundary>
           <FoundersLayout>
@@ -425,6 +438,9 @@ function Router() {
             </Route>
             <Route path={"/onboarding-wizard"}>
               <OnboardingWizard />
+            </Route>
+            <Route path={"/get-started"}>
+              <OnboardingQuestionnaire />
             </Route>
             <Route path={"/saas-metrics"}>
               <FeatureGate plan="enterprise" feature="SaaS Metrics">

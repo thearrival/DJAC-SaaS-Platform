@@ -20,6 +20,12 @@ import {
   touchAdminSession,
 } from "./yalla-admin-router";
 import {
+  getOnboardingIntelligence,
+  getOnboardingTimeline,
+  getOnboardingResponsesForUser,
+  getOnboardingState,
+} from "../onboarding-service";
+import {
   getUnifiedUsers,
   getUserStats,
   getUserDetail,
@@ -535,6 +541,40 @@ export function createAdminDashboardRouter(): Router {
     } catch (error) {
       logger.error({ error }, "Failed to get engagement metrics");
       res.status(500).json({ error: "Failed to get engagement metrics" });
+    }
+  });
+
+  // ── Onboarding intelligence (funnel + per-user timeline/responses) ────────
+  router.get("/onboarding", async (req, res) => {
+    try {
+      const days = req.query.days ? Number(req.query.days) : 30;
+      res.json(
+        await getOnboardingIntelligence(
+          Number.isFinite(days) && days > 0 && days <= 365 ? days : 30
+        )
+      );
+    } catch (error) {
+      logger.error({ error }, "Failed to get onboarding intelligence");
+      res.status(500).json({ error: "Failed to get onboarding intelligence" });
+    }
+  });
+
+  router.get("/onboarding/users/:id", async (req, res) => {
+    try {
+      const userId = Number(req.params.id);
+      if (Number.isNaN(userId)) {
+        res.status(400).json({ error: "Invalid user ID" });
+        return;
+      }
+      const [state, responses, timeline] = await Promise.all([
+        getOnboardingState(userId, null),
+        getOnboardingResponsesForUser(userId),
+        getOnboardingTimeline(userId, 200),
+      ]);
+      res.json({ state, ...responses, timeline });
+    } catch (error) {
+      logger.error({ error }, "Failed to get user onboarding");
+      res.status(500).json({ error: "Failed to get user onboarding" });
     }
   });
 

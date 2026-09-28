@@ -8,6 +8,26 @@ import { getDb } from "./db";
 import { protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { checkRateLimit } from "./_core/rateLimiter";
+import { recordUserInteraction } from "./interaction-logger";
+import type { TrpcContext } from "./_core/context";
+import {
+  getOnboardingState,
+  submitAnswer as persistAnswer,
+  completeOnboarding,
+  type OnboardingActor,
+} from "./onboarding-service";
+import { getQuestionnaire } from "./services/personalization/engine";
+
+function actorFromCtx(ctx: TrpcContext, sessionId?: string): OnboardingActor {
+  const userId = ctx.user?.id ?? 0;
+  return {
+    userId,
+    organizationId: ctx.organizationId ?? null,
+    sessionId: sessionId ?? `sess-${userId}`,
+    actorType: "user",
+    actorId: userId ? String(userId) : null,
+  };
+}
 
 const ONBOARD_LIMIT = 20;
 const ONBOARD_WINDOW_MS = 60_000;
@@ -161,31 +181,96 @@ export const onboardingRouter = router({
       return { ok: true };
     }),
 
-  complete: protectedProcedure.mutation(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db)
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Database unavailable",
+  // ── Intelligent onboarding (answer-level, versioned, auditable) ─────────────
+
+  /** Versioned questionnaire definition (stable ids; client localizes labels). */
+  getQuestionnaire: protectedProcedure.query(async () => getQuestionnaire()),
+
+  /** Server-side state for resume + personalization. */
+  getState: protectedProcedure.query(async ({ ctx }) =>
+    getOnboardingState(ctx.user.id, ctx.organizationId ?? null)
+  ),
+
+  /** Persist a single answer idempotently (no duplicate rows on retry). */
+  submitAnswer: protectedProcedure
+    .input(
+      z.object({
+        questionId: z.string().min(1).max(80),
+        value: z.union([
+          z.string().max(500),
+          z.array(z.string().max(500)).max(20),
+        ]),
+        stepNumber: z.number().int().min(0).max(20),
+        sessionId: z.string().min(1).max(64).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const rl = await checkRateLimit(
+        `onboard:answer:${ctx.user.id}`,
+        120,
+        ONBOARD_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded.",
+        });
+      }
+      const actor = actorFromCtx(ctx, input.sessionId);
+      const result = await persistAnswer(actor, {
+        questionId: input.questionId,
+        value: input.value,
+        stepNumber: input.stepNumber,
       });
-
-    const existing = await db
-      .select()
-      .from(onboardingProgress)
-      .where(eq(onboardingProgress.userId, ctx.user.id));
-
-    if (existing[0]) {
-      await db
-        .update(onboardingProgress)
-        .set({ completedAt: new Date(), updatedAt: new Date() })
-        .where(eq(onboardingProgress.userId, ctx.user.id));
-    } else {
-      await db.insert(onboardingProgress).values({
-        userId: ctx.user.id,
-        completedAt: new Date(),
+      if (!result.ok) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: result.error ?? "Could not save that answer.",
+        });
+      }
+      void recordUserInteraction(ctx, {
+        context: "onboarding",
+        action: "question_answered",
+        entityType: "onboarding",
+        outputRef: { questionId: input.questionId, changed: result.changed },
       });
-    }
+      return result;
+    }),
 
-    return { ok: true };
+  /** Persisted, explainable recommendations (derived server-side). */
+  getRecommendations: protectedProcedure.query(async ({ ctx }) => {
+    const state = await getOnboardingState(
+      ctx.user.id,
+      ctx.organizationId ?? null
+    );
+    return {
+      recommendations: state.recommendations,
+      firstAction: state.firstAction,
+      profile: state.profile,
+      completedAt: state.completedAt,
+    };
   }),
+
+  /** Finalise: persist recommendations + completion atomically (idempotent). */
+  complete: protectedProcedure
+    .input(
+      z.object({ sessionId: z.string().min(1).max(64).optional() }).optional()
+    )
+    .mutation(async ({ ctx, input }) => {
+      const actor = actorFromCtx(ctx, input?.sessionId);
+      const result = await completeOnboarding(actor);
+      if (!result.ok) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Could not complete onboarding.",
+        });
+      }
+      void recordUserInteraction(ctx, {
+        context: "onboarding",
+        action: "onboarding_completed",
+        entityType: "onboarding",
+        outputRef: { recommendations: result.recommendations.length },
+      });
+      return { ok: true, recommendations: result.recommendations };
+    }),
 });

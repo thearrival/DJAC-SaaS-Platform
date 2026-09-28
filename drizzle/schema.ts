@@ -8,6 +8,8 @@ import {
   timestamp,
   boolean,
   jsonb,
+  index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2111,6 +2113,133 @@ export const organizationProfilesCustom = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   }
+);
+
+// ── Intelligent onboarding: answer-level, versioned, auditable ────────────────
+// Every question is stored as its own idempotent row (stable machine `answerValue`,
+// never translated labels), with an event timeline and a profile-change history.
+
+export const onboardingResponses = pgTable(
+  "onboarding_responses",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    organizationId: integer("organization_id").references(
+      () => organizations.id,
+      {
+        onDelete: "cascade",
+      }
+    ),
+    sessionId: varchar("session_id", { length: 64 }).notNull(),
+    onboardingVersion: integer("onboarding_version").notNull().default(1),
+    questionId: varchar("question_id", { length: 80 }).notNull(),
+    questionVersion: integer("question_version").notNull().default(1),
+    stepNumber: integer("step_number").notNull().default(0),
+    /** Stable machine value(s) (e.g. ["vendor_risk"]); labels resolved client-side. */
+    answerValue: jsonb("answer_value").$type<unknown>(),
+    source: varchar("source", { length: 40 }).notNull().default("onboarding"),
+    submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  t => ({
+    uniqAnswer: uniqueIndex("onboarding_responses_user_q_idx").on(
+      t.userId,
+      t.onboardingVersion,
+      t.questionId
+    ),
+    userIdx: index("onboarding_responses_user_idx").on(t.userId),
+  })
+);
+
+export const onboardingEvents = pgTable(
+  "onboarding_events",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    organizationId: integer("organization_id").references(
+      () => organizations.id,
+      {
+        onDelete: "cascade",
+      }
+    ),
+    sessionId: varchar("session_id", { length: 64 }),
+    eventType: varchar("event_type", { length: 60 }).notNull(),
+    stepNumber: integer("step_number"),
+    actorType: varchar("actor_type", { length: 20 }).notNull().default("user"),
+    actorId: varchar("actor_id", { length: 80 }),
+    requestId: varchar("request_id", { length: 80 }),
+    onboardingVersion: integer("onboarding_version").notNull().default(1),
+    payload: jsonb("payload").$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  t => ({
+    userIdx: index("onboarding_events_user_idx").on(t.userId, t.createdAt),
+  })
+);
+
+export const onboardingProfileHistory = pgTable(
+  "onboarding_profile_history",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    organizationId: integer("organization_id").references(
+      () => organizations.id,
+      {
+        onDelete: "cascade",
+      }
+    ),
+    field: varchar("field", { length: 80 }).notNull(),
+    previousValue: jsonb("previous_value").$type<unknown>(),
+    newValue: jsonb("new_value").$type<unknown>(),
+    actorType: varchar("actor_type", { length: 20 }).notNull().default("user"),
+    actorId: varchar("actor_id", { length: 80 }),
+    source: varchar("source", { length: 40 }).notNull().default("onboarding"),
+    onboardingVersion: integer("onboarding_version").notNull().default(1),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  t => ({
+    userIdx: index("onboarding_profile_history_user_idx").on(
+      t.userId,
+      t.createdAt
+    ),
+  })
+);
+
+export const personalizationRecommendations = pgTable(
+  "personalization_recommendations",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    organizationId: integer("organization_id").references(
+      () => organizations.id,
+      {
+        onDelete: "cascade",
+      }
+    ),
+    moduleId: varchar("module_id", { length: 80 }).notNull(),
+    priority: integer("priority").notNull().default(50),
+    reason: text("reason").notNull().default(""),
+    ruleId: varchar("rule_id", { length: 80 }).notNull().default("default"),
+    status: varchar("status", { length: 20 }).notNull().default("active"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  t => ({
+    uniq: uniqueIndex("personalization_recommendations_user_module_idx").on(
+      t.userId,
+      t.moduleId
+    ),
+    userIdx: index("personalization_recommendations_user_idx").on(t.userId),
+  })
 );
 
 export const userPreferences = pgTable("user_preferences", {

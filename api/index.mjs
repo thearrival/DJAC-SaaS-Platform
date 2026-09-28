@@ -608,9 +608,11 @@ import {
   text,
   timestamp,
   boolean,
-  jsonb
+  jsonb,
+  index,
+  uniqueIndex
 } from "drizzle-orm/pg-core";
-var userTypeEnum, localeEnum, userStatusEnum, roleEnum, userOAuthStatusEnum, accessRequestStatusEnum, consultationStatusEnum, priorityEnum, severityEnum, criticalityEnum, actorTypeEnum, notificationCategoryEnum, relationshipTypeEnum, mappingTypeEnum, assessmentStatusEnum, jurisdictionEnum, planEnum, paidPlanEnum, orgMemberRoleEnum, orgMemberStatusEnum, billingIntervalEnum, subscriptionStatusEnum, billingEventStatusEnum, reportTypeEnum, reportStatusEnum, auditLogCategoryEnum, auditLogOutcomeEnum, taskSeverityEnum, taskStatusEnum, riskCategoryEnum, treatmentEnum, riskStatusEnum, policyTypeEnum, policyStatusEnum, incidentTypeEnum, incidentStatusEnum, auditTypeEnum, auditStatusEnum, recurrenceEnum, ctemAssetTypeEnum, regionEnum, assetStatusEnum, vulnSeverityEnum, simulationTypeEnum, complianceSimulationTypeEnum, complianceSimulationRiskEnum, complianceSimulationStatusEnum, priorityTierEnum, runStatusEnum, triggeredByEnum, severityImpactEnum, onboardingStageEnum, accountIntentEnum, evidenceSourceTypeEnum, dsrRequestTypeEnum, dsrJurisdictionEnum, dsrStatusEnum, dsrPriorityEnum, serviceTypeEnum, servicePriorityEnum, serviceStatusEnum, inventoryAssetTypeEnum, exposureEnum, inventoryStatusEnum, maturityLevelEnum, threatCategoryEnum, threatSeverityEnum, tlpEnum, regulatoryChangeTypeEnum, regulatoryChangeStatusEnum, deadlineJurisdictionEnum, deadlinePriorityEnum, deadlineStatusEnum, localUsers, users, accessRequests, consultationRequests, activityEvents, adminNotifications, frameworks, complianceControls, frameworkRelationships, controlMappings, vendors, techStackComponents, vendorAssessments, assessmentGaps, organizations, organizationMembers, subscriptions, billingEvents, complianceReports, apiKeys, userInteractionLogs, yallaAdminAccessLinkNonces, complianceDeadlines, auditLogs, reportShares, remediationTasks, riskRegister, compliancePolicies, complianceIncidents, auditSchedules, ctemAssets, ctemVulnerabilities, ctemAttackSimulations, ctemRiskScores, continuousComplianceRuns, complianceExposureMappings, userOnboarding, rolePermissions, vendorShares, regulatorOversightTargets, complianceEvidence, dsrRequests, serviceRequests, assetInventory, securityMaturityAssessments, threatIntelItems, yallaAdminSessions, yallaAdminAuditLogs, otpCodes, knowledgeGraphNodeKindEnum, knowledgeGraphEdgeRelationEnum, knowledgeGraphNodes, knowledgeGraphEdges, regulatoryChanges, complianceSimulations, aiAgentRunStatusEnum, aiAgentRuns, onboardingProgress, organizationProfilesCustom, userPreferences, featureFlags, analyticsEvents, userActivitySummary, emailLog, notifications;
+var userTypeEnum, localeEnum, userStatusEnum, roleEnum, userOAuthStatusEnum, accessRequestStatusEnum, consultationStatusEnum, priorityEnum, severityEnum, criticalityEnum, actorTypeEnum, notificationCategoryEnum, relationshipTypeEnum, mappingTypeEnum, assessmentStatusEnum, jurisdictionEnum, planEnum, paidPlanEnum, orgMemberRoleEnum, orgMemberStatusEnum, billingIntervalEnum, subscriptionStatusEnum, billingEventStatusEnum, reportTypeEnum, reportStatusEnum, auditLogCategoryEnum, auditLogOutcomeEnum, taskSeverityEnum, taskStatusEnum, riskCategoryEnum, treatmentEnum, riskStatusEnum, policyTypeEnum, policyStatusEnum, incidentTypeEnum, incidentStatusEnum, auditTypeEnum, auditStatusEnum, recurrenceEnum, ctemAssetTypeEnum, regionEnum, assetStatusEnum, vulnSeverityEnum, simulationTypeEnum, complianceSimulationTypeEnum, complianceSimulationRiskEnum, complianceSimulationStatusEnum, priorityTierEnum, runStatusEnum, triggeredByEnum, severityImpactEnum, onboardingStageEnum, accountIntentEnum, evidenceSourceTypeEnum, dsrRequestTypeEnum, dsrJurisdictionEnum, dsrStatusEnum, dsrPriorityEnum, serviceTypeEnum, servicePriorityEnum, serviceStatusEnum, inventoryAssetTypeEnum, exposureEnum, inventoryStatusEnum, maturityLevelEnum, threatCategoryEnum, threatSeverityEnum, tlpEnum, regulatoryChangeTypeEnum, regulatoryChangeStatusEnum, deadlineJurisdictionEnum, deadlinePriorityEnum, deadlineStatusEnum, localUsers, users, accessRequests, consultationRequests, activityEvents, adminNotifications, frameworks, complianceControls, frameworkRelationships, controlMappings, vendors, techStackComponents, vendorAssessments, assessmentGaps, organizations, organizationMembers, subscriptions, billingEvents, complianceReports, apiKeys, userInteractionLogs, yallaAdminAccessLinkNonces, complianceDeadlines, auditLogs, reportShares, remediationTasks, riskRegister, compliancePolicies, complianceIncidents, auditSchedules, ctemAssets, ctemVulnerabilities, ctemAttackSimulations, ctemRiskScores, continuousComplianceRuns, complianceExposureMappings, userOnboarding, rolePermissions, vendorShares, regulatorOversightTargets, complianceEvidence, dsrRequests, serviceRequests, assetInventory, securityMaturityAssessments, threatIntelItems, yallaAdminSessions, yallaAdminAuditLogs, otpCodes, knowledgeGraphNodeKindEnum, knowledgeGraphEdgeRelationEnum, knowledgeGraphNodes, knowledgeGraphEdges, regulatoryChanges, complianceSimulations, aiAgentRunStatusEnum, aiAgentRuns, onboardingProgress, organizationProfilesCustom, onboardingResponses, onboardingEvents, onboardingProfileHistory, personalizationRecommendations, userPreferences, featureFlags, analyticsEvents, userActivitySummary, emailLog, notifications;
 var init_schema = __esm({
   "drizzle/schema.ts"() {
     "use strict";
@@ -2168,6 +2170,117 @@ var init_schema = __esm({
         createdAt: timestamp("created_at").defaultNow().notNull(),
         updatedAt: timestamp("updated_at").defaultNow().notNull()
       }
+    );
+    onboardingResponses = pgTable(
+      "onboarding_responses",
+      {
+        id: serial("id").primaryKey(),
+        userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+        organizationId: integer("organization_id").references(
+          () => organizations.id,
+          {
+            onDelete: "cascade"
+          }
+        ),
+        sessionId: varchar("session_id", { length: 64 }).notNull(),
+        onboardingVersion: integer("onboarding_version").notNull().default(1),
+        questionId: varchar("question_id", { length: 80 }).notNull(),
+        questionVersion: integer("question_version").notNull().default(1),
+        stepNumber: integer("step_number").notNull().default(0),
+        /** Stable machine value(s) (e.g. ["vendor_risk"]); labels resolved client-side. */
+        answerValue: jsonb("answer_value").$type(),
+        source: varchar("source", { length: 40 }).notNull().default("onboarding"),
+        submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at").defaultNow().notNull()
+      },
+      (t2) => ({
+        uniqAnswer: uniqueIndex("onboarding_responses_user_q_idx").on(
+          t2.userId,
+          t2.onboardingVersion,
+          t2.questionId
+        ),
+        userIdx: index("onboarding_responses_user_idx").on(t2.userId)
+      })
+    );
+    onboardingEvents = pgTable(
+      "onboarding_events",
+      {
+        id: serial("id").primaryKey(),
+        userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+        organizationId: integer("organization_id").references(
+          () => organizations.id,
+          {
+            onDelete: "cascade"
+          }
+        ),
+        sessionId: varchar("session_id", { length: 64 }),
+        eventType: varchar("event_type", { length: 60 }).notNull(),
+        stepNumber: integer("step_number"),
+        actorType: varchar("actor_type", { length: 20 }).notNull().default("user"),
+        actorId: varchar("actor_id", { length: 80 }),
+        requestId: varchar("request_id", { length: 80 }),
+        onboardingVersion: integer("onboarding_version").notNull().default(1),
+        payload: jsonb("payload").$type().default({}),
+        createdAt: timestamp("created_at").defaultNow().notNull()
+      },
+      (t2) => ({
+        userIdx: index("onboarding_events_user_idx").on(t2.userId, t2.createdAt)
+      })
+    );
+    onboardingProfileHistory = pgTable(
+      "onboarding_profile_history",
+      {
+        id: serial("id").primaryKey(),
+        userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+        organizationId: integer("organization_id").references(
+          () => organizations.id,
+          {
+            onDelete: "cascade"
+          }
+        ),
+        field: varchar("field", { length: 80 }).notNull(),
+        previousValue: jsonb("previous_value").$type(),
+        newValue: jsonb("new_value").$type(),
+        actorType: varchar("actor_type", { length: 20 }).notNull().default("user"),
+        actorId: varchar("actor_id", { length: 80 }),
+        source: varchar("source", { length: 40 }).notNull().default("onboarding"),
+        onboardingVersion: integer("onboarding_version").notNull().default(1),
+        createdAt: timestamp("created_at").defaultNow().notNull()
+      },
+      (t2) => ({
+        userIdx: index("onboarding_profile_history_user_idx").on(
+          t2.userId,
+          t2.createdAt
+        )
+      })
+    );
+    personalizationRecommendations = pgTable(
+      "personalization_recommendations",
+      {
+        id: serial("id").primaryKey(),
+        userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+        organizationId: integer("organization_id").references(
+          () => organizations.id,
+          {
+            onDelete: "cascade"
+          }
+        ),
+        moduleId: varchar("module_id", { length: 80 }).notNull(),
+        priority: integer("priority").notNull().default(50),
+        reason: text("reason").notNull().default(""),
+        ruleId: varchar("rule_id", { length: 80 }).notNull().default("default"),
+        status: varchar("status", { length: 20 }).notNull().default("active"),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        updatedAt: timestamp("updated_at").defaultNow().notNull()
+      },
+      (t2) => ({
+        uniq: uniqueIndex("personalization_recommendations_user_module_idx").on(
+          t2.userId,
+          t2.moduleId
+        ),
+        userIdx: index("personalization_recommendations_user_idx").on(t2.userId)
+      })
     );
     userPreferences = pgTable("user_preferences", {
       id: serial("id").primaryKey(),
@@ -5297,8 +5410,8 @@ var init_queue = __esm({
           (a, b) => a.updatedAt < b.updatedAt ? -1 : 1
         );
         const overflow = ordered.length - HISTORY_RETENTION;
-        for (let index = 0; index < overflow; index += 1) {
-          this.persistedSnapshots.delete(ordered[index].id);
+        for (let index2 = 0; index2 < overflow; index2 += 1) {
+          this.persistedSnapshots.delete(ordered[index2].id);
         }
       }
       queueHistoryWrite() {
@@ -6137,8 +6250,8 @@ async function loadFallbackData() {
   const modulePath = "../scripts/compliance-reference-data.mjs";
   const referenceModule = await import(modulePath);
   const now = /* @__PURE__ */ new Date();
-  const fallbackFrameworks = referenceModule.complianceFrameworks.map((framework, index) => ({
-    id: index + 1,
+  const fallbackFrameworks = referenceModule.complianceFrameworks.map((framework, index2) => ({
+    id: index2 + 1,
     code: framework.code,
     name: framework.name,
     country: framework.country,
@@ -6153,13 +6266,13 @@ async function loadFallbackData() {
     fallbackFrameworks.map((framework) => [framework.code, framework.id])
   );
   const fallbackControls = [];
-  referenceModule.complianceControls.forEach((control, index) => {
+  referenceModule.complianceControls.forEach((control, index2) => {
     const frameworkId = frameworkIdByCode.get(control.frameworkCode);
     if (!frameworkId) {
       return;
     }
     fallbackControls.push({
-      id: index + 1,
+      id: index2 + 1,
       frameworkId,
       controlCode: control.controlCode,
       controlName: control.controlName,
@@ -6172,7 +6285,7 @@ async function loadFallbackData() {
     });
   });
   const fallbackRelationships = [];
-  referenceModule.complianceRelationships.forEach((relationship, index) => {
+  referenceModule.complianceRelationships.forEach((relationship, index2) => {
     const sourceFrameworkId = frameworkIdByCode.get(
       relationship.sourceFrameworkCode
     );
@@ -6183,7 +6296,7 @@ async function loadFallbackData() {
       return;
     }
     fallbackRelationships.push({
-      id: index + 1,
+      id: index2 + 1,
       sourceFrameworkId,
       targetFrameworkId,
       relationshipType: relationship.relationshipType,
@@ -8364,7 +8477,7 @@ __export(admin_insights_store_exports, {
   sendAlertDigest: () => sendAlertDigest
 });
 import { readFileSync } from "node:fs";
-import { and as and35, count as count2, desc as desc26, eq as eq49, gte as gte3, sql as sql12 } from "drizzle-orm";
+import { and as and36, count as count2, desc as desc27, eq as eq50, gte as gte3, sql as sql13 } from "drizzle-orm";
 async function getUserTimeline(userId, limit = 100) {
   const db = await getDb();
   if (!db) return [];
@@ -8378,14 +8491,14 @@ async function getUserTimeline(userId, limit = 100) {
       ipAddress: auditLogs.ipHash,
       userAgent: auditLogs.userAgent,
       createdAt: auditLogs.createdAt
-    }).from(auditLogs).where(eq49(auditLogs.localUserId, userId)).orderBy(desc26(auditLogs.createdAt)).limit(limit),
+    }).from(auditLogs).where(eq50(auditLogs.localUserId, userId)).orderBy(desc27(auditLogs.createdAt)).limit(limit),
     db.select({
       id: activityEvents.id,
       action: activityEvents.action,
       entityType: activityEvents.entityType,
       ipAddress: activityEvents.ipHash,
       createdAt: activityEvents.createdAt
-    }).from(activityEvents).where(eq49(activityEvents.localUserId, userId)).orderBy(desc26(activityEvents.createdAt)).limit(limit),
+    }).from(activityEvents).where(eq50(activityEvents.localUserId, userId)).orderBy(desc27(activityEvents.createdAt)).limit(limit),
     db.select({
       id: userInteractionLogs.id,
       action: userInteractionLogs.action,
@@ -8394,7 +8507,7 @@ async function getUserTimeline(userId, limit = 100) {
       ipAddress: userInteractionLogs.ipHash,
       userAgent: userInteractionLogs.userAgent,
       createdAt: userInteractionLogs.createdAt
-    }).from(userInteractionLogs).where(eq49(userInteractionLogs.localUserId, userId)).orderBy(desc26(userInteractionLogs.createdAt)).limit(limit)
+    }).from(userInteractionLogs).where(eq50(userInteractionLogs.localUserId, userId)).orderBy(desc27(userInteractionLogs.createdAt)).limit(limit)
   ]);
   const merged = [
     ...auditRows.map((r) => ({
@@ -8444,8 +8557,8 @@ async function getUserAuthHistory(userId, limit = 50) {
     userAgent: auditLogs.userAgent,
     createdAt: auditLogs.createdAt
   }).from(auditLogs).where(
-    and35(eq49(auditLogs.localUserId, userId), eq49(auditLogs.category, "auth"))
-  ).orderBy(desc26(auditLogs.createdAt)).limit(limit);
+    and36(eq50(auditLogs.localUserId, userId), eq50(auditLogs.category, "auth"))
+  ).orderBy(desc27(auditLogs.createdAt)).limit(limit);
   return rows.map((r) => ({
     id: r.id,
     action: r.action,
@@ -8479,7 +8592,7 @@ async function getEngagementMetrics(windowDays = 30) {
   const windowStart = new Date(
     now.getTime() - Math.max(windowDays, 1) * 24 * 3600 * 1e3
   );
-  const activeCounts = await db.execute(sql12`
+  const activeCounts = await db.execute(sql13`
     WITH actors AS (
       SELECT "localUserId" AS uid, MAX("createdAt") AS last_at
       FROM "auditLogs"
@@ -8504,13 +8617,13 @@ async function getEngagementMetrics(windowDays = 30) {
   const ac = activeCounts.rows[0] ?? {};
   const totals = await db.select({
     total: count2(),
-    newInWindow: sql12`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
-    dormant: sql12`COUNT(*) FILTER (WHERE "lastSignedIn" IS NULL OR "lastSignedIn" < ${monthAgo})`
+    newInWindow: sql13`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
+    dormant: sql13`COUNT(*) FILTER (WHERE "lastSignedIn" IS NULL OR "lastSignedIn" < ${monthAgo})`
   }).from(localUsers);
   const totalsRow = totals[0];
   const totalUsers = Number(totalsRow?.total ?? 0);
   const [newWindow] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.createdAt, windowStart));
-  const dailyRows = await db.execute(sql12`
+  const dailyRows = await db.execute(sql13`
     SELECT to_char(d, 'YYYY-MM-DD') AS date, COUNT(DISTINCT uid) AS count
     FROM (
       SELECT date_trunc('day', "createdAt") AS d, "localUserId" AS uid
@@ -8525,7 +8638,7 @@ async function getEngagementMetrics(windowDays = 30) {
     ORDER BY d
   `);
   const dailyActive = dailyRows.rows.map((r) => ({ date: r.date, count: Number(r.count) })).slice(-90);
-  const topUserRows = await db.execute(sql12`
+  const topUserRows = await db.execute(sql13`
     SELECT u.id, u.name, u.email,
            COUNT(*) AS "eventCount",
            MAX(a."createdAt") AS "lastActiveAt"
@@ -8543,7 +8656,7 @@ async function getEngagementMetrics(windowDays = 30) {
     eventCount: Number(r.eventCount),
     lastActiveAt: r.lastActiveAt instanceof Date ? r.lastActiveAt.toISOString() : r.lastActiveAt ?? null
   }));
-  const featureRows = await db.execute(sql12`
+  const featureRows = await db.execute(sql13`
     SELECT action, COUNT(*) AS count
     FROM "userInteractionLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8552,7 +8665,7 @@ async function getEngagementMetrics(windowDays = 30) {
     LIMIT 12
   `);
   const topFeatures = featureRows.rows.map((r) => ({ action: r.action, count: Number(r.count) }));
-  const orgRows = await db.execute(sql12`
+  const orgRows = await db.execute(sql13`
     SELECT o.id, o.name, COUNT(*) AS "eventCount"
     FROM "auditLogs" a
     JOIN "organizationMembers" m ON m."localUserId" = a."localUserId"
@@ -8634,15 +8747,15 @@ function titleFor(type) {
 async function buildGrowthReport(db, base, windowStart) {
   const [stats] = await db.select({
     total: count2(),
-    newInWindow: sql12`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
-    verified: sql12`COUNT(*) FILTER (WHERE "verifiedAt" IS NOT NULL)`,
-    mfa: sql12`COUNT(*) FILTER (WHERE "mfaEnabled" = 1)`,
-    active: sql12`COUNT(*) FILTER (WHERE "status" = 'active')`,
-    pending: sql12`COUNT(*) FILTER (WHERE "status" = 'pending')`,
-    suspended: sql12`COUNT(*) FILTER (WHERE "status" = 'suspended')`
+    newInWindow: sql13`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
+    verified: sql13`COUNT(*) FILTER (WHERE "verifiedAt" IS NOT NULL)`,
+    mfa: sql13`COUNT(*) FILTER (WHERE "mfaEnabled" = 1)`,
+    active: sql13`COUNT(*) FILTER (WHERE "status" = 'active')`,
+    pending: sql13`COUNT(*) FILTER (WHERE "status" = 'pending')`,
+    suspended: sql13`COUNT(*) FILTER (WHERE "status" = 'suspended')`
   }).from(localUsers);
   const byRole = await db.select({ role: localUsers.userType, c: count2() }).from(localUsers).groupBy(localUsers.userType);
-  const byDay = await db.execute(sql12`
+  const byDay = await db.execute(sql13`
     SELECT to_char("createdAt", 'YYYY-MM-DD') AS day, COUNT(*) AS count
     FROM "localUsers"
     WHERE "createdAt" >= ${windowStart}
@@ -8684,14 +8797,14 @@ async function buildGrowthReport(db, base, windowStart) {
 }
 async function buildEngagementReport(db, base, windowStart) {
   const eng = await getEngagementMetrics(base.windowDays);
-  const loginRows = await db.execute(sql12`
+  const loginRows = await db.execute(sql13`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS logins
     FROM "auditLogs"
     WHERE action = 'user.login' AND "createdAt" >= ${windowStart}
     GROUP BY 1 ORDER BY 1
   `);
-  const featureRows = await db.execute(sql12`
+  const featureRows = await db.execute(sql13`
     SELECT action, COUNT(*) AS count
     FROM "userInteractionLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8746,8 +8859,8 @@ async function buildRevenueReport(db, base, windowStart) {
     periodEnd: subscriptions.currentPeriodEnd
   }).from(subscriptions).innerJoin(
     organizations,
-    eq49(subscriptions.organizationId, organizations.id)
-  ).orderBy(desc26(subscriptions.updatedAt)).limit(500);
+    eq50(subscriptions.organizationId, organizations.id)
+  ).orderBy(desc27(subscriptions.updatedAt)).limit(500);
   const active = subs.filter(
     (s) => s.status === "active" || s.status === "trialing"
   );
@@ -8810,7 +8923,7 @@ async function buildRevenueReport(db, base, windowStart) {
 }
 async function buildSecurityReport(db, base, windowStart) {
   const outcomeRows = await db.select({ outcome: auditLogs.outcome, c: count2() }).from(auditLogs).where(gte3(auditLogs.createdAt, windowStart)).groupBy(auditLogs.outcome);
-  const actionRows = await db.execute(sql12`
+  const actionRows = await db.execute(sql13`
     SELECT action, COUNT(*) AS count
     FROM "auditLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8818,19 +8931,19 @@ async function buildSecurityReport(db, base, windowStart) {
            OR action LIKE '%role%' OR action LIKE '%password%')
     GROUP BY action ORDER BY count DESC LIMIT 25
   `);
-  const dailyFailures = await db.execute(sql12`
+  const dailyFailures = await db.execute(sql13`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS count
     FROM "auditLogs"
     WHERE outcome = 'failure' AND "createdAt" >= ${windowStart}
     GROUP BY 1 ORDER BY 1
   `);
-  const roleChanges = await db.execute(sql12`
+  const roleChanges = await db.execute(sql13`
     SELECT COUNT(*) AS c FROM "auditLogs"
     WHERE action LIKE '%role%' AND "createdAt" >= ${windowStart}
   `);
   const founderFails = await db.execute(
-    sql12`
+    sql13`
     SELECT COUNT(*) AS c FROM "yallaAdminAuditLogs"
     WHERE action IN ('login.failed','login.mfa_failed')
       AND "createdAt" >= ${windowStart}
@@ -8876,22 +8989,22 @@ async function buildSecurityReport(db, base, windowStart) {
 }
 async function buildOperationsReport(db, base, windowStart) {
   const srByStatus = await db.select({ status: serviceRequests.status, c: count2() }).from(serviceRequests).groupBy(serviceRequests.status);
-  const srOpen = await db.execute(sql12`
+  const srOpen = await db.execute(sql13`
     SELECT COUNT(*) AS c FROM "serviceRequests"
     WHERE status NOT IN ('completed','cancelled') AND "createdAt" >= ${windowStart}
   `);
-  const adminNotes = await db.execute(sql12`
+  const adminNotes = await db.execute(sql13`
     SELECT COUNT(*) AS c FROM "adminNotifications"
     WHERE "isRead" = 0
   `);
   const emails = await db.execute(
-    sql12`
+    sql13`
     SELECT status, COUNT(*) AS c FROM "email_log"
     WHERE "createdAt" >= ${windowStart}
     GROUP BY status
   `
   ).catch(() => ({ rows: [] }));
-  const dailyRegs = await db.execute(sql12`
+  const dailyRegs = await db.execute(sql13`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS count
     FROM "localUsers"
@@ -9104,7 +9217,7 @@ async function getOperationalAlerts() {
   const dayAgo = new Date(now.getTime() - 24 * 3600 * 1e3);
   const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1e3);
   try {
-    const failRow = await db.execute(sql12`
+    const failRow = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE outcome = 'failure' AND "createdAt" >= ${dayAgo}
     `);
@@ -9123,7 +9236,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const pastDue = await db.select({ c: count2() }).from(subscriptions).where(eq49(subscriptions.status, "past_due"));
+    const pastDue = await db.select({ c: count2() }).from(subscriptions).where(eq50(subscriptions.status, "past_due"));
     if ((pastDue[0]?.c ?? 0) > 0) {
       const pastDueCount = Number(pastDue[0].c);
       alerts.push({
@@ -9139,7 +9252,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const openSr = await db.execute(sql12`
+    const openSr = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "serviceRequests"
       WHERE status NOT IN ('completed','cancelled')
     `);
@@ -9168,7 +9281,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const dormant = await db.execute(sql12`
+    const dormant = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "localUsers"
       WHERE "status" = 'active'
         AND ("lastSignedIn" IS NULL OR "lastSignedIn" < ${weekAgo})
@@ -9188,7 +9301,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const unread = await db.execute(sql12`
+    const unread = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "adminNotifications" WHERE "isRead" = 0
     `);
     const n = Number(unread.rows[0]?.c ?? 0);
@@ -9206,7 +9319,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const canceling = await db.select({ c: count2() }).from(subscriptions).where(eq49(subscriptions.cancelAtPeriodEnd, 1));
+    const canceling = await db.select({ c: count2() }).from(subscriptions).where(eq50(subscriptions.cancelAtPeriodEnd, 1));
     if ((canceling[0]?.c ?? 0) > 0) {
       alerts.push({
         id: "canceling",
@@ -9248,24 +9361,24 @@ async function getLiveMetrics() {
   if (!db) return empty;
   try {
     const [online] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.lastSignedIn, fiveMinAgo));
-    const sessionsResult = await db.execute(sql12`
+    const sessionsResult = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "yallaAdminSessions"
       WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
     `);
     const [signups] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.createdAt, dayStart));
-    const loginsResult = await db.execute(sql12`
+    const loginsResult = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE action = 'user.login' AND "createdAt" >= ${dayStart}
     `);
-    const failsResult = await db.execute(sql12`
+    const failsResult = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE outcome = 'failure' AND "createdAt" >= ${dayAgo}
     `);
-    const openSrResult = await db.execute(sql12`
+    const openSrResult = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "serviceRequests"
       WHERE status NOT IN ('completed','cancelled')
     `);
-    const unreadResult = await db.execute(sql12`
+    const unreadResult = await db.execute(sql13`
       SELECT COUNT(*) AS c FROM "adminNotifications" WHERE "isRead" = 0
     `);
     const recent = await db.select({
@@ -9275,7 +9388,7 @@ async function getLiveMetrics() {
       outcome: auditLogs.outcome,
       userName: localUsers.name,
       createdAt: auditLogs.createdAt
-    }).from(auditLogs).leftJoin(localUsers, eq49(auditLogs.localUserId, localUsers.id)).orderBy(desc26(auditLogs.createdAt)).limit(25);
+    }).from(auditLogs).leftJoin(localUsers, eq50(auditLogs.localUserId, localUsers.id)).orderBy(desc27(auditLogs.createdAt)).limit(25);
     return {
       generatedAt: now.toISOString(),
       sseClients: getSSEClientCount2(),
@@ -10567,9 +10680,9 @@ async function listConsultationSummaries(limit = 50) {
   }));
 }
 function buildActivitySeries(activityRows) {
-  const labels = Array.from({ length: 7 }, (_, index) => {
+  const labels = Array.from({ length: 7 }, (_, index2) => {
     const date = /* @__PURE__ */ new Date();
-    date.setDate(date.getDate() - (6 - index));
+    date.setDate(date.getDate() - (6 - index2));
     return date.toISOString().slice(0, 10);
   });
   const counts = new Map(labels.map((label) => [label, 0]));
@@ -19147,8 +19260,8 @@ function pageBreakXml() {
 function parseMarkdownBlocks(markdown) {
   const lines = markdown.split(/\r?\n/);
   const blocks = [];
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index]?.trim() ?? "";
+  for (let index2 = 0; index2 < lines.length; index2 += 1) {
+    const line = lines[index2]?.trim() ?? "";
     if (!line || /^---+$/.test(line)) {
       continue;
     }
@@ -19168,19 +19281,19 @@ function parseMarkdownBlocks(markdown) {
       });
       continue;
     }
-    if (line.startsWith("|") && /^\|[-\s|]+\|?$/.test(lines[index + 1]?.trim() ?? "")) {
+    if (line.startsWith("|") && /^\|[-\s|]+\|?$/.test(lines[index2 + 1]?.trim() ?? "")) {
       const rows = [];
       rows.push(
         line.split("|").map((cell) => cleanInlineMarkdown(cell)).filter(Boolean)
       );
-      index += 2;
-      while (index < lines.length && (lines[index]?.trim() ?? "").startsWith("|")) {
+      index2 += 2;
+      while (index2 < lines.length && (lines[index2]?.trim() ?? "").startsWith("|")) {
         rows.push(
-          lines[index].split("|").map((cell) => cleanInlineMarkdown(cell)).filter(Boolean)
+          lines[index2].split("|").map((cell) => cleanInlineMarkdown(cell)).filter(Boolean)
         );
-        index += 1;
+        index2 += 1;
       }
-      index -= 1;
+      index2 -= 1;
       if (rows.length > 0) {
         blocks.push({ kind: "table", rows });
       }
@@ -19950,8 +20063,8 @@ async function buildPdfBuffer(options, report) {
       continue;
     }
   }
-  pages.forEach((entry, index) => {
-    const pageNumberText = `${index + 1} / ${pages.length}`;
+  pages.forEach((entry, index2) => {
+    const pageNumberText = `${index2 + 1} / ${pages.length}`;
     entry.page.drawText(pageNumberText, {
       x: pageWidth - marginX - fontRegular.widthOfTextAtSize(pageNumberText, 6.5),
       y: FOOTER_H - 9,
@@ -31893,9 +32006,577 @@ var crossBorderDataFlowRouter = router({
 init_schema();
 init_db();
 import { z as z37 } from "zod";
-import { eq as eq38 } from "drizzle-orm";
+import { eq as eq39 } from "drizzle-orm";
 init_rateLimiter();
 import { TRPCError as TRPCError30 } from "@trpc/server";
+
+// server/onboarding-service.ts
+init_db();
+init_schema();
+import { and as and30, desc as desc22, eq as eq38, sql as sql7 } from "drizzle-orm";
+
+// server/services/personalization/engine.ts
+var QUESTIONNAIRE_VERSION = 1;
+var QUESTIONS = [
+  {
+    id: "primary_objective",
+    version: 1,
+    step: 1,
+    labelKey: "onboarding.q.objective.label",
+    helpKey: "onboarding.q.objective.help",
+    multi: true,
+    required: true,
+    options: [
+      {
+        value: "compliance_management",
+        labelKey: "onboarding.opt.objective.compliance"
+      },
+      {
+        value: "privacy_management",
+        labelKey: "onboarding.opt.objective.privacy"
+      },
+      {
+        value: "regulatory_readiness",
+        labelKey: "onboarding.opt.objective.regulatory"
+      },
+      { value: "risk_management", labelKey: "onboarding.opt.objective.risk" },
+      {
+        value: "vendor_risk",
+        labelKey: "onboarding.opt.objective.vendor_risk"
+      },
+      {
+        value: "audit_preparation",
+        labelKey: "onboarding.opt.objective.audit"
+      },
+      {
+        value: "security_compliance",
+        labelKey: "onboarding.opt.objective.security"
+      },
+      {
+        value: "incident_management",
+        labelKey: "onboarding.opt.objective.incident"
+      },
+      {
+        value: "data_subject_requests",
+        labelKey: "onboarding.opt.objective.dsr"
+      },
+      {
+        value: "continuous_monitoring",
+        labelKey: "onboarding.opt.objective.monitoring"
+      },
+      { value: "ai_governance", labelKey: "onboarding.opt.objective.ai" },
+      { value: "other", labelKey: "onboarding.opt.objective.other" }
+    ]
+  },
+  {
+    id: "industry",
+    version: 1,
+    step: 2,
+    labelKey: "onboarding.q.industry.label",
+    multi: false,
+    required: false,
+    options: [
+      { value: "technology", labelKey: "onboarding.opt.industry.technology" },
+      {
+        value: "financial_services",
+        labelKey: "onboarding.opt.industry.finance"
+      },
+      { value: "healthcare", labelKey: "onboarding.opt.industry.healthcare" },
+      { value: "government", labelKey: "onboarding.opt.industry.government" },
+      { value: "energy", labelKey: "onboarding.opt.industry.energy" },
+      {
+        value: "telecommunications",
+        labelKey: "onboarding.opt.industry.telecom"
+      },
+      {
+        value: "manufacturing",
+        labelKey: "onboarding.opt.industry.manufacturing"
+      },
+      { value: "ecommerce", labelKey: "onboarding.opt.industry.ecommerce" },
+      {
+        value: "professional_services",
+        labelKey: "onboarding.opt.industry.services"
+      },
+      { value: "education", labelKey: "onboarding.opt.industry.education" },
+      { value: "other", labelKey: "onboarding.opt.industry.other" }
+    ]
+  },
+  {
+    id: "professional_role",
+    version: 1,
+    step: 3,
+    labelKey: "onboarding.q.role.label",
+    multi: false,
+    required: false,
+    options: [
+      { value: "founder_executive", labelKey: "onboarding.opt.role.founder" },
+      { value: "compliance", labelKey: "onboarding.opt.role.compliance" },
+      { value: "legal", labelKey: "onboarding.opt.role.legal" },
+      { value: "risk", labelKey: "onboarding.opt.role.risk" },
+      { value: "security", labelKey: "onboarding.opt.role.security" },
+      { value: "it", labelKey: "onboarding.opt.role.it" },
+      { value: "privacy_dpo", labelKey: "onboarding.opt.role.privacy" },
+      { value: "audit", labelKey: "onboarding.opt.role.audit" },
+      { value: "operations", labelKey: "onboarding.opt.role.operations" },
+      { value: "consultant", labelKey: "onboarding.opt.role.consultant" },
+      { value: "other", labelKey: "onboarding.opt.role.other" }
+    ]
+  },
+  {
+    id: "experience_level",
+    version: 1,
+    step: 4,
+    labelKey: "onboarding.q.experience.label",
+    multi: false,
+    required: false,
+    options: [
+      { value: "new", labelKey: "onboarding.opt.exp.new" },
+      { value: "basic", labelKey: "onboarding.opt.exp.basic" },
+      { value: "intermediate", labelKey: "onboarding.opt.exp.intermediate" },
+      { value: "advanced", labelKey: "onboarding.opt.exp.advanced" },
+      { value: "expert", labelKey: "onboarding.opt.exp.expert" }
+    ]
+  },
+  {
+    id: "immediate_goal",
+    version: 1,
+    step: 5,
+    labelKey: "onboarding.q.goal.label",
+    multi: false,
+    required: false,
+    options: [
+      { value: "understand_posture", labelKey: "onboarding.opt.goal.posture" },
+      { value: "prepare_audit", labelKey: "onboarding.opt.goal.audit" },
+      {
+        value: "understand_regulations",
+        labelKey: "onboarding.opt.goal.regulations"
+      },
+      { value: "assess_vendors", labelKey: "onboarding.opt.goal.vendors" },
+      { value: "build_risk_register", labelKey: "onboarding.opt.goal.risk" },
+      {
+        value: "manage_privacy_requests",
+        labelKey: "onboarding.opt.goal.privacy"
+      },
+      { value: "prepare_framework", labelKey: "onboarding.opt.goal.framework" },
+      { value: "monitor_exposure", labelKey: "onboarding.opt.goal.monitoring" },
+      { value: "build_program", labelKey: "onboarding.opt.goal.program" }
+    ]
+  }
+];
+var QUESTION_IDS = QUESTIONS.map((q) => q.id);
+function getQuestionnaire() {
+  return { version: QUESTIONNAIRE_VERSION, questions: QUESTIONS };
+}
+function asStringArray(value) {
+  if (Array.isArray(value)) {
+    return value.filter((v) => typeof v === "string");
+  }
+  return typeof value === "string" && value.length > 0 ? [value] : [];
+}
+function deriveProfile(answers) {
+  return {
+    objectives: asStringArray(answers.primary_objective),
+    industry: asStringArray(answers.industry)[0] ?? null,
+    role: asStringArray(answers.professional_role)[0] ?? null,
+    experience: asStringArray(answers.experience_level)[0] ?? null,
+    immediateGoal: asStringArray(answers.immediate_goal)[0] ?? null
+  };
+}
+var OBJECTIVE_MODULE = {
+  compliance_management: "compliance_assessment",
+  privacy_management: "privacy_dsr",
+  regulatory_readiness: "framework_mapping",
+  risk_management: "risk_register",
+  vendor_risk: "vendor_risk",
+  audit_preparation: "audit_prep",
+  security_compliance: "compliance_assessment",
+  incident_management: "incident_management",
+  data_subject_requests: "privacy_dsr",
+  continuous_monitoring: "continuous_monitoring",
+  ai_governance: "ai_governance"
+};
+var GOAL_MODULE = {
+  understand_posture: "compliance_assessment",
+  prepare_audit: "audit_prep",
+  understand_regulations: "framework_mapping",
+  assess_vendors: "vendor_risk",
+  build_risk_register: "risk_register",
+  manage_privacy_requests: "privacy_dsr",
+  prepare_framework: "framework_mapping",
+  monitor_exposure: "continuous_monitoring",
+  build_program: "policies"
+};
+function generatePersonalization(profile) {
+  const byModule = /* @__PURE__ */ new Map();
+  const put = (moduleId, priority, ruleId) => {
+    const existing = byModule.get(moduleId);
+    if (!existing || existing.priority < priority) {
+      byModule.set(moduleId, { moduleId, priority, reason: ruleId, ruleId });
+    }
+  };
+  for (const objective of profile.objectives) {
+    const moduleId = OBJECTIVE_MODULE[objective];
+    if (moduleId) put(moduleId, 80, `objective.${objective}`);
+  }
+  if (profile.immediateGoal) {
+    const moduleId = GOAL_MODULE[profile.immediateGoal];
+    if (moduleId) put(moduleId, 95, `goal.${profile.immediateGoal}`);
+  }
+  if (profile.experience === "new" || profile.experience === "basic") {
+    put("compliance_assessment", 100, "experience.starter_guidance");
+  }
+  if (profile.industry === "healthcare" || profile.industry === "financial_services") {
+    put("framework_mapping", 70, `industry.${profile.industry}`);
+  }
+  if (profile.role === "audit") put("audit_prep", 85, "role.audit");
+  if (profile.role === "privacy_dpo")
+    put("privacy_dsr", 85, "role.privacy_dpo");
+  if (profile.role === "security")
+    put("incident_management", 75, "role.security");
+  put("compliance_assessment", 40, "baseline");
+  return [...byModule.values()].sort((a, b) => b.priority - a.priority);
+}
+function chooseFirstAction(profile) {
+  const [top] = generatePersonalization(profile);
+  return { moduleId: top.moduleId, ruleId: top.ruleId };
+}
+
+// server/onboarding-service.ts
+var EMPTY_STATE = {
+  questionnaireVersion: QUESTIONNAIRE_VERSION,
+  organizationId: null,
+  answers: {},
+  profile: {
+    objectives: [],
+    industry: null,
+    role: null,
+    experience: null,
+    immediateGoal: null
+  },
+  recommendations: [],
+  firstAction: null,
+  completedAt: null,
+  skipped: false,
+  currentStep: 0,
+  timeline: []
+};
+function isValidQuestion(questionId) {
+  return QUESTIONS.some((q) => q.id === questionId);
+}
+async function getOnboardingState(userId, organizationId) {
+  const db = await getDb();
+  if (!db) return { ...EMPTY_STATE };
+  try {
+    const rows = await db.select().from(onboardingResponses).where(
+      and30(
+        eq38(onboardingResponses.userId, userId),
+        eq38(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION)
+      )
+    );
+    const answers = {};
+    for (const row of rows) answers[row.questionId] = row.answerValue;
+    const profile = deriveProfile(answers);
+    const [progress] = await db.select().from(onboardingProgress).where(eq38(onboardingProgress.userId, userId)).limit(1);
+    const recs = await db.select().from(personalizationRecommendations).where(
+      and30(
+        eq38(personalizationRecommendations.userId, userId),
+        eq38(personalizationRecommendations.status, "active")
+      )
+    ).orderBy(desc22(personalizationRecommendations.priority));
+    const events = await db.select({
+      eventType: onboardingEvents.eventType,
+      stepNumber: onboardingEvents.stepNumber,
+      createdAt: onboardingEvents.createdAt
+    }).from(onboardingEvents).where(eq38(onboardingEvents.userId, userId)).orderBy(desc22(onboardingEvents.createdAt)).limit(50);
+    const recommendations = recs.map((r) => ({
+      moduleId: r.moduleId,
+      priority: r.priority,
+      reason: r.reason,
+      ruleId: r.ruleId
+    }));
+    return {
+      questionnaireVersion: QUESTIONNAIRE_VERSION,
+      organizationId: organizationId ?? null,
+      answers,
+      profile,
+      recommendations: recommendations.length > 0 ? recommendations : generatePersonalization(profile),
+      firstAction: profile.objectives.length ? chooseFirstAction(profile) : null,
+      completedAt: progress?.completedAt ? new Date(progress.completedAt).toISOString() : null,
+      skipped: progress?.skipped ?? false,
+      currentStep: progress?.currentStep ?? 0,
+      timeline: events.map((e) => ({
+        eventType: e.eventType,
+        stepNumber: e.stepNumber ?? null,
+        createdAt: new Date(e.createdAt).toISOString()
+      }))
+    };
+  } catch {
+    return { ...EMPTY_STATE };
+  }
+}
+async function getOnboardingTimeline(userId, limit = 200) {
+  const db = await getDb();
+  if (!db) return [];
+  try {
+    return await db.select().from(onboardingEvents).where(eq38(onboardingEvents.userId, userId)).orderBy(desc22(onboardingEvents.createdAt)).limit(Math.min(Math.max(limit, 1), 500));
+  } catch {
+    return [];
+  }
+}
+async function getOnboardingResponsesForUser(userId) {
+  const db = await getDb();
+  if (!db) return { responses: [], history: [] };
+  try {
+    const responses = await db.select().from(onboardingResponses).where(eq38(onboardingResponses.userId, userId)).orderBy(onboardingResponses.stepNumber);
+    const history = await db.select().from(onboardingProfileHistory).where(eq38(onboardingProfileHistory.userId, userId)).orderBy(desc22(onboardingProfileHistory.createdAt)).limit(200);
+    return { responses, history };
+  } catch {
+    return { responses: [], history: [] };
+  }
+}
+async function recordEvent(actor, eventType, payload = {}, stepNumber) {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db.insert(onboardingEvents).values({
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+      sessionId: actor.sessionId,
+      eventType,
+      stepNumber: stepNumber ?? null,
+      actorType: actor.actorType ?? "user",
+      actorId: actor.actorId ?? null,
+      requestId: actor.requestId ?? null,
+      onboardingVersion: QUESTIONNAIRE_VERSION,
+      payload
+    });
+  } catch {
+  }
+}
+async function submitAnswer(actor, input) {
+  if (!isValidQuestion(input.questionId)) {
+    return { ok: false, changed: false, error: "Unknown question" };
+  }
+  const db = await getDb();
+  if (!db) return { ok: true, changed: false };
+  try {
+    const result = await db.transaction(async (tx) => {
+      const [existing] = await tx.select({ answerValue: onboardingResponses.answerValue }).from(onboardingResponses).where(
+        and30(
+          eq38(onboardingResponses.userId, actor.userId),
+          eq38(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
+          eq38(onboardingResponses.questionId, input.questionId)
+        )
+      ).limit(1);
+      const previous = existing?.answerValue ?? null;
+      const changed = JSON.stringify(previous) !== JSON.stringify(input.value);
+      await tx.insert(onboardingResponses).values({
+        userId: actor.userId,
+        organizationId: actor.organizationId,
+        sessionId: actor.sessionId,
+        onboardingVersion: QUESTIONNAIRE_VERSION,
+        questionId: input.questionId,
+        questionVersion: QUESTIONS.find((q) => q.id === input.questionId)?.version ?? 1,
+        stepNumber: input.stepNumber,
+        answerValue: input.value,
+        source: input.source ?? "onboarding",
+        submittedAt: /* @__PURE__ */ new Date(),
+        updatedAt: /* @__PURE__ */ new Date()
+      }).onConflictDoUpdate({
+        target: [
+          onboardingResponses.userId,
+          onboardingResponses.onboardingVersion,
+          onboardingResponses.questionId
+        ],
+        set: {
+          answerValue: input.value,
+          stepNumber: input.stepNumber,
+          sessionId: actor.sessionId,
+          source: input.source ?? "onboarding",
+          submittedAt: /* @__PURE__ */ new Date(),
+          updatedAt: /* @__PURE__ */ new Date()
+        }
+      });
+      if (changed) {
+        await tx.insert(onboardingProfileHistory).values({
+          userId: actor.userId,
+          organizationId: actor.organizationId,
+          field: input.questionId,
+          previousValue: previous,
+          newValue: input.value,
+          actorType: actor.actorType ?? "user",
+          actorId: actor.actorId ?? null,
+          source: input.source ?? "onboarding",
+          onboardingVersion: QUESTIONNAIRE_VERSION
+        });
+      }
+      return changed;
+    });
+    await syncDerivedState(actor, { [input.questionId]: input.value });
+    await recordEvent(
+      actor,
+      "question_answered",
+      { questionId: input.questionId, changed: result },
+      input.stepNumber
+    );
+    return { ok: true, changed: result };
+  } catch {
+    return { ok: false, changed: false, error: "Could not save that answer" };
+  }
+}
+async function syncDerivedState(actor, answers) {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    const profile = deriveProfile(answers);
+    const completedSteps = Object.keys(answers);
+    await db.insert(onboardingProgress).values({
+      userId: actor.userId,
+      currentStep: Math.max(0, completedSteps.length),
+      completedSteps,
+      responses: answers,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).onConflictDoUpdate({
+      target: onboardingProgress.userId,
+      set: {
+        completedSteps,
+        responses: answers,
+        updatedAt: /* @__PURE__ */ new Date()
+      }
+    });
+    if (actor.organizationId != null) {
+      await db.insert(organizationProfilesCustom).values({
+        organizationId: actor.organizationId,
+        industry: profile.industry,
+        complianceMaturity: profile.experience,
+        businessObjectives: profile.objectives,
+        updatedAt: /* @__PURE__ */ new Date()
+      }).onConflictDoUpdate({
+        target: organizationProfilesCustom.organizationId,
+        set: {
+          industry: profile.industry,
+          complianceMaturity: profile.experience,
+          businessObjectives: profile.objectives,
+          updatedAt: /* @__PURE__ */ new Date()
+        }
+      });
+    }
+  } catch {
+  }
+}
+async function completeOnboarding(actor) {
+  const db = await getDb();
+  if (!db) return { ok: true, recommendations: [] };
+  try {
+    const state = await getOnboardingState(actor.userId, actor.organizationId);
+    const recommendations = generatePersonalization(state.profile);
+    await db.transaction(async (tx) => {
+      for (const rec of recommendations) {
+        await tx.insert(personalizationRecommendations).values({
+          userId: actor.userId,
+          organizationId: actor.organizationId,
+          moduleId: rec.moduleId,
+          priority: rec.priority,
+          reason: rec.reason,
+          ruleId: rec.ruleId,
+          status: "active",
+          updatedAt: /* @__PURE__ */ new Date()
+        }).onConflictDoUpdate({
+          target: [
+            personalizationRecommendations.userId,
+            personalizationRecommendations.moduleId
+          ],
+          set: {
+            priority: rec.priority,
+            reason: rec.reason,
+            ruleId: rec.ruleId,
+            status: "active",
+            updatedAt: /* @__PURE__ */ new Date()
+          }
+        });
+      }
+      const now = /* @__PURE__ */ new Date();
+      await tx.insert(onboardingProgress).values({
+        userId: actor.userId,
+        completedAt: now,
+        responses: state.answers,
+        updatedAt: now
+      }).onConflictDoUpdate({
+        target: onboardingProgress.userId,
+        set: { completedAt: now, updatedAt: now }
+      });
+      if (actor.organizationId != null) {
+        await tx.insert(organizationProfilesCustom).values({
+          organizationId: actor.organizationId,
+          onboardingCompletedAt: now
+        }).onConflictDoUpdate({
+          target: organizationProfilesCustom.organizationId,
+          set: { onboardingCompletedAt: now, updatedAt: now }
+        });
+      }
+    });
+    await recordEvent(actor, "onboarding_completed", {
+      recommendationCount: recommendations.length
+    });
+    return { ok: true, recommendations };
+  } catch {
+    return { ok: false, recommendations: [] };
+  }
+}
+async function getOnboardingIntelligence(windowDays = 30) {
+  const db = await getDb();
+  if (!db) {
+    return { totals: {}, byIndustry: [], byObjective: [], funnel: [] };
+  }
+  const days = Math.min(Math.max(windowDays, 1), 365);
+  try {
+    const totals = await db.execute(sql7`
+      SELECT
+        COUNT(*)::int AS "started",
+        COUNT(*) FILTER (WHERE "completed_at" IS NOT NULL)::int AS "completed",
+        COUNT(*) FILTER (WHERE "skipped" = true)::int AS "skipped",
+        COUNT(*) FILTER (WHERE "completed_at" IS NULL AND "skipped" IS NOT TRUE)::int AS "in_progress"
+      FROM "onboarding_progress"
+    `);
+    const byObjective = await db.execute(sql7`
+      SELECT "industry", COUNT(*)::int AS "count"
+      FROM "organization_profiles_custom"
+      WHERE "industry" IS NOT NULL
+      GROUP BY "industry"
+      ORDER BY "count" DESC
+      LIMIT 20
+    `);
+    const funnel = await db.execute(sql7`
+      SELECT date_trunc('day', "created_at")::date AS "day", COUNT(*)::int AS "events"
+      FROM "onboarding_events"
+      WHERE "created_at" >= now() - (${days} * interval '1 day')
+      GROUP BY 1
+      ORDER BY 1 DESC
+      LIMIT 60
+    `);
+    return {
+      windowDays: days,
+      totals: totals.rows?.[0] ?? {},
+      byIndustry: byObjective.rows ?? [],
+      byObjective: [],
+      funnel: funnel.rows ?? []
+    };
+  } catch {
+    return { totals: {}, byIndustry: [], byObjective: [], funnel: [] };
+  }
+}
+
+// server/onboarding-router.ts
+function actorFromCtx(ctx, sessionId) {
+  const userId = ctx.user?.id ?? 0;
+  return {
+    userId,
+    organizationId: ctx.organizationId ?? null,
+    sessionId: sessionId ?? `sess-${userId}`,
+    actorType: "user",
+    actorId: userId ? String(userId) : null
+  };
+}
 var ONBOARD_LIMIT = 20;
 var ONBOARD_WINDOW_MS = 6e4;
 var onboardingResponsesSchema = z37.object({
@@ -31921,7 +32602,7 @@ var onboardingRouter = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const rows = await db.select().from(onboardingProgress).where(eq38(onboardingProgress.userId, ctx.user.id));
+    const rows = await db.select().from(onboardingProgress).where(eq39(onboardingProgress.userId, ctx.user.id));
     return rows[0] ?? null;
   }),
   updateProgress: protectedProcedure.input(
@@ -31936,7 +32617,7 @@ var onboardingRouter = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const existing = await db.select().from(onboardingProgress).where(eq38(onboardingProgress.userId, ctx.user.id));
+    const existing = await db.select().from(onboardingProgress).where(eq39(onboardingProgress.userId, ctx.user.id));
     const row = existing[0];
     if (row) {
       const completed = new Set(row.completedSteps ?? []);
@@ -31946,7 +32627,7 @@ var onboardingRouter = router({
         completedSteps: Array.from(completed),
         responses: input.responses ?? void 0,
         updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq38(onboardingProgress.userId, ctx.user.id));
+      }).where(eq39(onboardingProgress.userId, ctx.user.id));
     } else {
       await db.insert(onboardingProgress).values({
         userId: ctx.user.id,
@@ -31989,7 +32670,7 @@ var onboardingRouter = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const existing = await db.select().from(onboardingProgress).where(eq38(onboardingProgress.userId, ctx.user.id));
+    const existing = await db.select().from(onboardingProgress).where(eq39(onboardingProgress.userId, ctx.user.id));
     if (existing[0]) {
       if (existing[0].skipped) {
         throw new TRPCError30({
@@ -31997,7 +32678,7 @@ var onboardingRouter = router({
           message: "Onboarding already skipped."
         });
       }
-      await db.update(onboardingProgress).set({ skipped: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq38(onboardingProgress.userId, ctx.user.id));
+      await db.update(onboardingProgress).set({ skipped: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq39(onboardingProgress.userId, ctx.user.id));
     } else {
       await db.insert(onboardingProgress).values({
         userId: ctx.user.id,
@@ -32006,23 +32687,88 @@ var onboardingRouter = router({
     }
     return { ok: true };
   }),
-  complete: protectedProcedure.mutation(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db)
+  // ── Intelligent onboarding (answer-level, versioned, auditable) ─────────────
+  /** Versioned questionnaire definition (stable ids; client localizes labels). */
+  getQuestionnaire: protectedProcedure.query(async () => getQuestionnaire()),
+  /** Server-side state for resume + personalization. */
+  getState: protectedProcedure.query(
+    async ({ ctx }) => getOnboardingState(ctx.user.id, ctx.organizationId ?? null)
+  ),
+  /** Persist a single answer idempotently (no duplicate rows on retry). */
+  submitAnswer: protectedProcedure.input(
+    z37.object({
+      questionId: z37.string().min(1).max(80),
+      value: z37.union([
+        z37.string().max(500),
+        z37.array(z37.string().max(500)).max(20)
+      ]),
+      stepNumber: z37.number().int().min(0).max(20),
+      sessionId: z37.string().min(1).max(64).optional()
+    })
+  ).mutation(async ({ ctx, input }) => {
+    const rl = await checkRateLimit(
+      `onboard:answer:${ctx.user.id}`,
+      120,
+      ONBOARD_WINDOW_MS
+    );
+    if (!rl.allowed) {
       throw new TRPCError30({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Database unavailable"
-      });
-    const existing = await db.select().from(onboardingProgress).where(eq38(onboardingProgress.userId, ctx.user.id));
-    if (existing[0]) {
-      await db.update(onboardingProgress).set({ completedAt: /* @__PURE__ */ new Date(), updatedAt: /* @__PURE__ */ new Date() }).where(eq38(onboardingProgress.userId, ctx.user.id));
-    } else {
-      await db.insert(onboardingProgress).values({
-        userId: ctx.user.id,
-        completedAt: /* @__PURE__ */ new Date()
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded."
       });
     }
-    return { ok: true };
+    const actor = actorFromCtx(ctx, input.sessionId);
+    const result = await submitAnswer(actor, {
+      questionId: input.questionId,
+      value: input.value,
+      stepNumber: input.stepNumber
+    });
+    if (!result.ok) {
+      throw new TRPCError30({
+        code: "INTERNAL_SERVER_ERROR",
+        message: result.error ?? "Could not save that answer."
+      });
+    }
+    void recordUserInteraction(ctx, {
+      context: "onboarding",
+      action: "question_answered",
+      entityType: "onboarding",
+      outputRef: { questionId: input.questionId, changed: result.changed }
+    });
+    return result;
+  }),
+  /** Persisted, explainable recommendations (derived server-side). */
+  getRecommendations: protectedProcedure.query(async ({ ctx }) => {
+    const state = await getOnboardingState(
+      ctx.user.id,
+      ctx.organizationId ?? null
+    );
+    return {
+      recommendations: state.recommendations,
+      firstAction: state.firstAction,
+      profile: state.profile,
+      completedAt: state.completedAt
+    };
+  }),
+  /** Finalise: persist recommendations + completion atomically (idempotent). */
+  complete: protectedProcedure.input(
+    z37.object({ sessionId: z37.string().min(1).max(64).optional() }).optional()
+  ).mutation(async ({ ctx, input }) => {
+    const actor = actorFromCtx(ctx, input?.sessionId);
+    const result = await completeOnboarding(actor);
+    if (!result.ok) {
+      throw new TRPCError30({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Could not complete onboarding."
+      });
+    }
+    void recordUserInteraction(ctx, {
+      context: "onboarding",
+      action: "onboarding_completed",
+      entityType: "onboarding",
+      outputRef: { recommendations: result.recommendations.length }
+    });
+    return { ok: true, recommendations: result.recommendations };
   })
 });
 
@@ -32030,7 +32776,7 @@ var onboardingRouter = router({
 init_schema();
 init_db();
 import { z as z38 } from "zod";
-import { eq as eq39, desc as desc22, sql as sql7 } from "drizzle-orm";
+import { eq as eq40, desc as desc23, sql as sql8 } from "drizzle-orm";
 import { TRPCError as TRPCError31 } from "@trpc/server";
 var analyticsRouter = router({
   track: protectedProcedure.input(
@@ -32064,7 +32810,7 @@ var analyticsRouter = router({
       }).onConflictDoUpdate({
         target: userActivitySummary.userId,
         set: {
-          totalEvents: sql7`${userActivitySummary.totalEvents} + 1`,
+          totalEvents: sql8`${userActivitySummary.totalEvents} + 1`,
           lastActiveAt: /* @__PURE__ */ new Date()
         }
       });
@@ -32088,7 +32834,7 @@ var analyticsRouter = router({
           code: "INTERNAL_SERVER_ERROR",
           message: "Database unavailable"
         });
-      const rows = await db.select().from(userActivitySummary).where(eq39(userActivitySummary.userId, ctx.user.id));
+      const rows = await db.select().from(userActivitySummary).where(eq40(userActivitySummary.userId, ctx.user.id));
       const summary = rows[0];
       return {
         totalEvents: summary?.totalEvents ?? 0,
@@ -32116,7 +32862,7 @@ var analyticsRouter = router({
           code: "INTERNAL_SERVER_ERROR",
           message: "Database unavailable"
         });
-      const rows = await db.select().from(analyticsEvents).where(eq39(analyticsEvents.userId, ctx.user.id)).orderBy(desc22(analyticsEvents.createdAt)).limit(input.limit);
+      const rows = await db.select().from(analyticsEvents).where(eq40(analyticsEvents.userId, ctx.user.id)).orderBy(desc23(analyticsEvents.createdAt)).limit(input.limit);
       return rows;
     } catch {
       throw new TRPCError31({
@@ -32131,7 +32877,7 @@ var analyticsRouter = router({
 init_schema();
 init_db();
 import { z as z39 } from "zod";
-import { eq as eq40, desc as desc23, and as and30 } from "drizzle-orm";
+import { eq as eq41, desc as desc24, and as and31 } from "drizzle-orm";
 init_rateLimiter();
 import { TRPCError as TRPCError32 } from "@trpc/server";
 var NOTIF_LIMIT = 30;
@@ -32154,11 +32900,11 @@ var notificationsRouter = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const conditions = [eq40(notifications.userId, ctx.user.id)];
+    const conditions = [eq41(notifications.userId, ctx.user.id)];
     if (input.unreadOnly) {
-      conditions.push(eq40(notifications.isRead, false));
+      conditions.push(eq41(notifications.isRead, false));
     }
-    const query = db.select().from(notifications).where(and30(...conditions)).orderBy(desc23(notifications.createdAt)).limit(input.limit);
+    const query = db.select().from(notifications).where(and31(...conditions)).orderBy(desc24(notifications.createdAt)).limit(input.limit);
     if (input.offset > 0) {
       query.offset(input.offset);
     }
@@ -32172,9 +32918,9 @@ var notificationsRouter = router({
         message: "Database unavailable"
       });
     const rows = await db.select().from(notifications).where(
-      and30(
-        eq40(notifications.userId, ctx.user.id),
-        eq40(notifications.isRead, false)
+      and31(
+        eq41(notifications.userId, ctx.user.id),
+        eq41(notifications.isRead, false)
       )
     );
     return rows.length;
@@ -32198,9 +32944,9 @@ var notificationsRouter = router({
         message: "Database unavailable"
       });
     await db.update(notifications).set({ isRead: true, readAt: /* @__PURE__ */ new Date() }).where(
-      and30(
-        eq40(notifications.id, input.id),
-        eq40(notifications.userId, ctx.user.id)
+      and31(
+        eq41(notifications.id, input.id),
+        eq41(notifications.userId, ctx.user.id)
       )
     );
     return { ok: true };
@@ -32224,9 +32970,9 @@ var notificationsRouter = router({
         message: "Database unavailable"
       });
     await db.update(notifications).set({ isRead: true, readAt: /* @__PURE__ */ new Date() }).where(
-      and30(
-        eq40(notifications.userId, ctx.user.id),
-        eq40(notifications.isRead, false)
+      and31(
+        eq41(notifications.userId, ctx.user.id),
+        eq41(notifications.isRead, false)
       )
     );
     return { ok: true };
@@ -32404,7 +33150,7 @@ var personalizationRouter = router({
 init_schema();
 init_db();
 import { z as z41 } from "zod";
-import { eq as eq41, desc as desc24 } from "drizzle-orm";
+import { eq as eq42, desc as desc25 } from "drizzle-orm";
 init_rateLimiter();
 import { TRPCError as TRPCError34 } from "@trpc/server";
 var C360_LIMIT = 20;
@@ -32440,7 +33186,7 @@ var customer360Router = router({
       role: users.role,
       status: users.status,
       createdAt: users.createdAt
-    }).from(users).orderBy(desc24(users.createdAt)).limit(input.limit).offset(input.offset);
+    }).from(users).orderBy(desc25(users.createdAt)).limit(input.limit).offset(input.offset);
     return userRows;
   }),
   getProfile: adminProcedure.input(z41.object({ userId: z41.number().int() })).query(async ({ input }) => {
@@ -32450,16 +33196,16 @@ var customer360Router = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable"
       });
-    const userRows = await db.select().from(users).where(eq41(users.id, input.userId)).limit(1);
+    const userRows = await db.select().from(users).where(eq42(users.id, input.userId)).limit(1);
     const user = userRows[0];
     if (!user) return null;
     let activity = null;
     try {
-      const rows = await db.select().from(userActivitySummary).where(eq41(userActivitySummary.userId, input.userId));
+      const rows = await db.select().from(userActivitySummary).where(eq42(userActivitySummary.userId, input.userId));
       activity = rows[0] ?? null;
     } catch {
     }
-    const recentEvents = await db.select().from(analyticsEvents).where(eq41(analyticsEvents.userId, input.userId)).orderBy(desc24(analyticsEvents.createdAt)).limit(20);
+    const recentEvents = await db.select().from(analyticsEvents).where(eq42(analyticsEvents.userId, input.userId)).orderBy(desc25(analyticsEvents.createdAt)).limit(20);
     return {
       user: {
         id: user.id,
@@ -32554,7 +33300,7 @@ init_env();
 init_sdk();
 init_local_jwt();
 import crypto3 from "crypto";
-import { and as and31, eq as eq42, isNull as isNull5 } from "drizzle-orm";
+import { and as and32, eq as eq43, isNull as isNull5 } from "drizzle-orm";
 async function resolveDevBypassUser() {
   const now = /* @__PURE__ */ new Date();
   return {
@@ -32591,9 +33337,9 @@ async function resolveApiKeyAuth(req) {
     revokedAt: apiKeys.revokedAt,
     expiresAt: apiKeys.expiresAt,
     scopes: apiKeys.scopes
-  }).from(apiKeys).where(and31(eq42(apiKeys.keyHash, keyHash), isNull5(apiKeys.revokedAt))).limit(1);
+  }).from(apiKeys).where(and32(eq43(apiKeys.keyHash, keyHash), isNull5(apiKeys.revokedAt))).limit(1);
   if (!keyRow || keyRow.expiresAt && keyRow.expiresAt <= now) return null;
-  db.update(apiKeys).set({ lastUsedAt: now }).where(eq42(apiKeys.id, keyRow.id)).catch(() => {
+  db.update(apiKeys).set({ lastUsedAt: now }).where(eq43(apiKeys.id, keyRow.id)).catch(() => {
   });
   const organizationRole = null;
   const user = {
@@ -32663,7 +33409,7 @@ async function resolveOAuthUser(req) {
 // server/services/org-context.ts
 init_schema();
 init_db();
-import { and as and32, eq as eq43, sql as sql8 } from "drizzle-orm";
+import { and as and33, eq as eq44, sql as sql9 } from "drizzle-orm";
 async function createDefaultOrganizationForUser(user, localUserId) {
   if (user.id <= 0 && !localUserId) return null;
   const db = await getDb();
@@ -32675,10 +33421,10 @@ async function createDefaultOrganizationForUser(user, localUserId) {
   const safeSlug = `org-${ownerKey}-${orgName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "default"}`;
   return db.transaction(async (tx) => {
     await tx.execute(
-      sql8`SELECT pg_advisory_xact_lock(hashtext(${`org-owner:${ownerKey}`}))`
+      sql9`SELECT pg_advisory_xact_lock(hashtext(${`org-owner:${ownerKey}`}))`
     );
     const existingMembership = await tx.select({ organizationId: organizationMembers.organizationId }).from(organizationMembers).where(
-      localUserId != null ? eq43(organizationMembers.localUserId, localUserId) : eq43(organizationMembers.userId, user.id)
+      localUserId != null ? eq44(organizationMembers.localUserId, localUserId) : eq44(organizationMembers.userId, user.id)
     ).limit(1);
     if (existingMembership.length > 0) return null;
     const [inserted] = await tx.insert(organizations).values({
@@ -32714,9 +33460,9 @@ async function resolveOrganizationForUser(user) {
     organizationId: organizationMembers.organizationId,
     role: organizationMembers.role
   }).from(organizationMembers).where(
-    and32(
-      eq43(organizationMembers.userId, user.id),
-      eq43(organizationMembers.status, "active")
+    and33(
+      eq44(organizationMembers.userId, user.id),
+      eq44(organizationMembers.status, "active")
     )
   ).limit(1);
   if (!membership) {
@@ -32742,9 +33488,9 @@ async function resolveOrganizationForLocalUser(user) {
     organizationId: organizationMembers.organizationId,
     role: organizationMembers.role
   }).from(organizationMembers).where(
-    and32(
-      eq43(organizationMembers.localUserId, localUserId),
-      eq43(organizationMembers.status, "active")
+    and33(
+      eq44(organizationMembers.localUserId, localUserId),
+      eq44(organizationMembers.status, "active")
     )
   ).limit(1);
   if (!membership) {
@@ -33121,7 +33867,7 @@ function registerAssessmentWebSocketServer(server) {
 init_env();
 init_db();
 init_schema();
-import { eq as eq44 } from "drizzle-orm";
+import { eq as eq45 } from "drizzle-orm";
 function mapStripeStatus(s) {
   const valid = [
     "trialing",
@@ -33144,7 +33890,7 @@ function resolveTier(plan, interval) {
   ) ?? null;
 }
 async function upsertSubscriptionRecord(db, params) {
-  const existing = await db.select({ id: subscriptions.id }).from(subscriptions).where(eq44(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)).limit(1);
+  const existing = await db.select({ id: subscriptions.id }).from(subscriptions).where(eq45(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)).limit(1);
   const payload = {
     organizationId: params.organizationId,
     stripeSubscriptionId: params.stripeSubscriptionId,
@@ -33163,7 +33909,7 @@ async function upsertSubscriptionRecord(db, params) {
   };
   if (existing.length > 0) {
     await db.update(subscriptions).set(payload).where(
-      eq44(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
+      eq45(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
     );
     return;
   }
@@ -33207,7 +33953,7 @@ async function stripeWebhookHandler(req, res) {
   res.json({ received: true });
 }
 async function isDuplicateBillingEvent(db, stripeEventId) {
-  const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq44(billingEvents.stripeEventId, stripeEventId)).limit(1);
+  const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq45(billingEvents.stripeEventId, stripeEventId)).limit(1);
   return existing.length > 0 && existing[0].status === "success";
 }
 async function processStripeEvent(event, db) {
@@ -33232,7 +33978,7 @@ async function processStripeEvent(event, db) {
         description: `Checkout completed \u2014 plan: ${plan}/${interval}`,
         rawPayload: JSON.stringify(event.data.object)
       }).onConflictDoNothing({ target: billingEvents.stripeEventId });
-      await db.update(organizations).set({ plan, stripeCustomerId: String(session.customer ?? "") }).where(eq44(organizations.id, orgId));
+      await db.update(organizations).set({ plan, stripeCustomerId: String(session.customer ?? "") }).where(eq45(organizations.id, orgId));
       await upsertSubscriptionRecord(db, {
         organizationId: orgId,
         stripeSubscriptionId: String(session.subscription),
@@ -33245,14 +33991,14 @@ async function processStripeEvent(event, db) {
         cancelAtPeriodEnd: 0,
         stripeMetadata: JSON.stringify(session.metadata ?? {})
       });
-      await db.update(billingEvents).set({ status: "success" }).where(eq44(billingEvents.stripeEventId, event.id));
+      await db.update(billingEvents).set({ status: "success" }).where(eq45(billingEvents.stripeEventId, event.id));
       break;
     }
     // ── Invoice paid → subscription active ───────────────────────────────────
     case "invoice.payment_succeeded": {
       const invoice = event.data.object;
       const orgResult = await db.select({ id: organizations.id }).from(organizations).where(
-        eq44(organizations.stripeCustomerId, String(invoice.customer ?? ""))
+        eq45(organizations.stripeCustomerId, String(invoice.customer ?? ""))
       ).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
@@ -33283,7 +34029,7 @@ async function processStripeEvent(event, db) {
           stripeMetadata: JSON.stringify(invoice.lines?.data?.[0] ?? {})
         });
       } else if (subId) {
-        await db.update(subscriptions).set({ status: "active", lastInvoiceId: invoice.id }).where(eq44(subscriptions.stripeSubscriptionId, subId));
+        await db.update(subscriptions).set({ status: "active", lastInvoiceId: invoice.id }).where(eq45(subscriptions.stripeSubscriptionId, subId));
       }
       await db.insert(billingEvents).values({
         organizationId: orgId,
@@ -33301,12 +34047,12 @@ async function processStripeEvent(event, db) {
     case "invoice.payment_failed": {
       const invoice = event.data.object;
       const orgResult = await db.select({ id: organizations.id }).from(organizations).where(
-        eq44(organizations.stripeCustomerId, String(invoice.customer ?? ""))
+        eq45(organizations.stripeCustomerId, String(invoice.customer ?? ""))
       ).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       const subIdFailed = invoice.subscription ?? invoice.parent?.subscription_details?.subscription ?? "";
-      await db.update(subscriptions).set({ status: "past_due" }).where(eq44(subscriptions.stripeSubscriptionId, subIdFailed));
+      await db.update(subscriptions).set({ status: "past_due" }).where(eq45(subscriptions.stripeSubscriptionId, subIdFailed));
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -33320,7 +34066,7 @@ async function processStripeEvent(event, db) {
     // ── Subscription updated ──────────────────────────────────────────────────
     case "customer.subscription.updated": {
       const sub = event.data.object;
-      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq44(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
+      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq45(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       const priceId = sub.items?.data?.[0]?.price?.id ?? "";
@@ -33347,7 +34093,7 @@ async function processStripeEvent(event, db) {
           cancelAtPeriodEnd: sub.cancel_at_period_end ? 1 : 0,
           stripeMetadata: JSON.stringify(sub.metadata ?? {})
         });
-        await db.update(organizations).set({ plan: planInfo.plan }).where(eq44(organizations.id, orgId));
+        await db.update(organizations).set({ plan: planInfo.plan }).where(eq45(organizations.id, orgId));
       } else {
         await db.update(subscriptions).set({
           stripePriceId: priceId || null,
@@ -33356,7 +34102,7 @@ async function processStripeEvent(event, db) {
           currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1e3) : null,
           cancelAtPeriodEnd: sub.cancel_at_period_end ? 1 : 0,
           stripeMetadata: JSON.stringify(sub.metadata ?? {})
-        }).where(eq44(subscriptions.stripeSubscriptionId, sub.id));
+        }).where(eq45(subscriptions.stripeSubscriptionId, sub.id));
       }
       await db.insert(billingEvents).values({
         organizationId: orgId,
@@ -33371,14 +34117,14 @@ async function processStripeEvent(event, db) {
     // ── Subscription cancelled ────────────────────────────────────────────────
     case "customer.subscription.deleted": {
       const sub = event.data.object;
-      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq44(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
+      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq45(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       await db.update(subscriptions).set({
         status: "canceled",
         cancelAtPeriodEnd: 0,
         canceledAt: sub.canceled_at ? new Date(sub.canceled_at * 1e3) : /* @__PURE__ */ new Date()
-      }).where(eq44(subscriptions.stripeSubscriptionId, sub.id));
+      }).where(eq45(subscriptions.stripeSubscriptionId, sub.id));
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -33443,7 +34189,7 @@ init_schema();
 init_db();
 init_email();
 init_env();
-import { eq as eq45 } from "drizzle-orm";
+import { eq as eq46 } from "drizzle-orm";
 var INTERVAL_MS = 6 * 60 * 60 * 1e3;
 var DAY_MS = 24 * 60 * 60 * 1e3;
 function milestoneColumn(milestone) {
@@ -33523,7 +34269,7 @@ async function runReminderCheck() {
     trialReminderDay3Sent: organizations.trialReminderDay3Sent,
     trialReminderDay6Sent: organizations.trialReminderDay6Sent,
     trialExpiredNoticeSent: organizations.trialExpiredNoticeSent
-  }).from(organizations).where(eq45(organizations.plan, "free_trial"));
+  }).from(organizations).where(eq46(organizations.plan, "free_trial"));
   if (trialOrgs.length === 0) return;
   const pricingUrl = `${ENV.appUrl}/pricing`;
   let sent = 0;
@@ -33549,7 +34295,7 @@ async function runReminderCheck() {
         html: buildEmailHtml(org.name, milestone, pricingUrl),
         text: buildEmailText(org.name, milestone, pricingUrl)
       });
-      await db.update(organizations).set({ [col]: 1 }).where(eq45(organizations.id, org.id));
+      await db.update(organizations).set({ [col]: 1 }).where(eq46(organizations.id, org.id));
       sent++;
     } catch (err) {
       console.warn(
@@ -33586,7 +34332,7 @@ init_schema();
 init_db();
 init_email();
 init_env();
-import { and as and33, eq as eq46, lte, gte, inArray as inArray9 } from "drizzle-orm";
+import { and as and34, eq as eq47, lte, gte, inArray as inArray9 } from "drizzle-orm";
 var INTERVAL_MS2 = 2 * 60 * 60 * 1e3;
 var DAY_MS2 = 24 * 60 * 60 * 1e3;
 var sentSet = /* @__PURE__ */ new Set();
@@ -33638,8 +34384,8 @@ async function runDeadlineAlertCheck() {
   const now = /* @__PURE__ */ new Date();
   const horizon = new Date(now.getTime() + 31 * DAY_MS2);
   const upcoming = await db.select().from(complianceDeadlines).where(
-    and33(
-      eq46(complianceDeadlines.status, "upcoming"),
+    and34(
+      eq47(complianceDeadlines.status, "upcoming"),
       gte(complianceDeadlines.deadlineDate, now),
       lte(complianceDeadlines.deadlineDate, horizon)
     )
@@ -33687,10 +34433,10 @@ async function runDeadlineAlertCheck() {
     if (!milestone) continue;
     const dedupKey = `${deadline.id}:${milestone}`;
     if (sentSet.has(dedupKey)) continue;
-    const members = await db.select({ email: users.email, name: users.name }).from(organizationMembers).innerJoin(users, eq46(organizationMembers.userId, users.id)).where(
-      and33(
-        eq46(organizationMembers.organizationId, deadline.organizationId),
-        eq46(organizationMembers.status, "active"),
+    const members = await db.select({ email: users.email, name: users.name }).from(organizationMembers).innerJoin(users, eq47(organizationMembers.userId, users.id)).where(
+      and34(
+        eq47(organizationMembers.organizationId, deadline.organizationId),
+        eq47(organizationMembers.status, "active"),
         inArray9(organizationMembers.role, [
           "owner",
           "admin",
@@ -33699,9 +34445,9 @@ async function runDeadlineAlertCheck() {
       )
     );
     const invitedEmails = await db.select({ inviteEmail: organizationMembers.inviteEmail }).from(organizationMembers).where(
-      and33(
-        eq46(organizationMembers.organizationId, deadline.organizationId),
-        eq46(organizationMembers.status, "invited"),
+      and34(
+        eq47(organizationMembers.organizationId, deadline.organizationId),
+        eq47(organizationMembers.status, "invited"),
         inArray9(organizationMembers.role, [
           "owner",
           "admin",
@@ -33750,7 +34496,7 @@ function startDeadlineAlertScheduler() {
 // server/report-scheduler.ts
 init_schema();
 init_db();
-import { eq as eq47 } from "drizzle-orm";
+import { eq as eq48 } from "drizzle-orm";
 init_env();
 var INTERVAL_MS3 = 6 * 60 * 60 * 1e3;
 var sentSet2 = /* @__PURE__ */ new Set();
@@ -33794,7 +34540,7 @@ async function runScheduledReports() {
     name: organizations.name,
     billingEmail: organizations.billingEmail,
     primaryJurisdiction: organizations.primaryJurisdiction
-  }).from(organizations).where(eq47(organizations.isActive, 1));
+  }).from(organizations).where(eq48(organizations.isActive, 1));
   for (const org of activeOrgs) {
     if (!org.billingEmail) continue;
     const jurisdiction = mapJurisdiction(org.primaryJurisdiction);
@@ -33892,14 +34638,14 @@ init_queueFactory();
 // server/_core/auto-migrate.ts
 init_db();
 init_env();
-import { sql as sql9 } from "drizzle-orm";
+import { sql as sql10 } from "drizzle-orm";
 var migrationApplied = false;
 async function seedComplianceFrameworks(db) {
   try {
     const { complianceFrameworks: complianceFrameworks2 } = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
     let seeded = 0;
     for (const fw of complianceFrameworks2) {
-      await db.execute(sql9`
+      await db.execute(sql10`
                 INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
                 VALUES (${fw.code}, ${fw.name}, ${fw.country}, ${fw.description ?? null}, ${fw.scope ?? null}, ${fw.enforcementAuthority ?? null}, ${fw.maxPenalty ?? null})
                 ON CONFLICT ("code") DO UPDATE SET
@@ -33928,16 +34674,16 @@ async function ensureMigrated() {
   const db = await getDb();
   if (!db) return;
   try {
-    await db.execute(sql9`
+    await db.execute(sql10`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "verifiedAt" timestamp
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "lastMfaVerifiedAt" timestamp
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "firstLoginEmailSent" integer DEFAULT 0 NOT NULL
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "yallaAdminSessions" (
                 "id"            varchar(64)   NOT NULL PRIMARY KEY,
                 "adminUsername" varchar(120)  NOT NULL,
@@ -33949,7 +34695,7 @@ async function ensureMigrated() {
                 "isRevoked"     integer       NOT NULL DEFAULT 0
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "yallaAdminAuditLogs" (
                 "id"            serial        PRIMARY KEY,
                 "sessionId"     varchar(64),
@@ -33961,17 +34707,17 @@ async function ensureMigrated() {
                 "createdAt"     timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "phoneNumber" varchar(20)
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             ALTER TABLE "complianceControls" ADD COLUMN IF NOT EXISTS "applicability" varchar(255)
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE UNIQUE INDEX IF NOT EXISTS "localUsers_phoneNumber_idx"
             ON "localUsers" ("phoneNumber") WHERE "phoneNumber" IS NOT NULL
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "otpCodes" (
                 "id"         serial        PRIMARY KEY,
                 "identifier" varchar(320)  NOT NULL,
@@ -33982,7 +34728,7 @@ async function ensureMigrated() {
                 "createdAt"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "auditLogs" (
                 "id"             serial        PRIMARY KEY,
                 "userId"         integer,
@@ -34002,26 +34748,26 @@ async function ensureMigrated() {
             )
         `);
     const indexes = [
-      sql9`CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
-      sql9`CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
-      sql9`CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
-      sql9`CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
-      sql9`CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
-      sql9`CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
-      sql9`CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
-      sql9`CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
-      sql9`CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
-      sql9`CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
-      sql9`CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`
+      sql10`CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
+      sql10`CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
+      sql10`CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
+      sql10`CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
+      sql10`CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
+      sql10`CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
+      sql10`CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
+      sql10`CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
+      sql10`CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
+      sql10`CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
+      sql10`CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`
     ];
     for (const idx of indexes) {
       await db.execute(idx);
     }
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx"
             ON "complianceControls" ("frameworkId", "controlCode")
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx"
             ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")
         `);
@@ -34052,13 +34798,13 @@ async function ensureMigrated() {
     ];
     for (const j of globalJurisdictions) {
       await db.execute(
-        sql9`ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql10`ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
       await db.execute(
-        sql9`ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql10`ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
       await db.execute(
-        sql9`ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql10`ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
     }
     const newRegions = [
@@ -34071,21 +34817,21 @@ async function ensureMigrated() {
       "Global"
     ];
     for (const r of newRegions) {
-      await db.execute(sql9`ALTER TYPE "region" ADD VALUE IF NOT EXISTS ${r}`);
+      await db.execute(sql10`ALTER TYPE "region" ADD VALUE IF NOT EXISTS ${r}`);
     }
-    await db.execute(sql9`
+    await db.execute(sql10`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedAt" DROP DEFAULT
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedAt" DROP NOT NULL
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedByIp" DROP NOT NULL
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "onboarding_progress" (
                 "id"              serial        PRIMARY KEY,
                 "user_id"         integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -34098,7 +34844,7 @@ async function ensureMigrated() {
                 "updated_at"      timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "organization_profiles_custom" (
                 "id"                       serial        PRIMARY KEY,
                 "organization_id"          integer       NOT NULL UNIQUE REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -34112,7 +34858,7 @@ async function ensureMigrated() {
                 "updated_at"               timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "user_preferences" (
                 "id"                    serial        PRIMARY KEY,
                 "user_id"               integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -34126,7 +34872,93 @@ async function ensureMigrated() {
                 "updated_at"            timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
+            CREATE TABLE IF NOT EXISTS "onboarding_responses" (
+                "id"                 serial      PRIMARY KEY,
+                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "session_id"         varchar(64) NOT NULL,
+                "onboarding_version" integer     NOT NULL DEFAULT 1,
+                "question_id"        varchar(80) NOT NULL,
+                "question_version"   integer     NOT NULL DEFAULT 1,
+                "step_number"        integer     NOT NULL DEFAULT 0,
+                "answer_value"       jsonb,
+                "source"             varchar(40) NOT NULL DEFAULT 'onboarding',
+                "submitted_at"       timestamp   NOT NULL DEFAULT now(),
+                "created_at"         timestamp   NOT NULL DEFAULT now(),
+                "updated_at"         timestamp   NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql10`
+            CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_user_q_idx"
+                ON "onboarding_responses" ("user_id", "onboarding_version", "question_id")
+        `);
+    await db.execute(sql10`
+            CREATE INDEX IF NOT EXISTS "onboarding_responses_user_idx"
+                ON "onboarding_responses" ("user_id")
+        `);
+    await db.execute(sql10`
+            CREATE TABLE IF NOT EXISTS "onboarding_events" (
+                "id"                 serial      PRIMARY KEY,
+                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "session_id"         varchar(64),
+                "event_type"         varchar(60) NOT NULL,
+                "step_number"        integer,
+                "actor_type"         varchar(20) NOT NULL DEFAULT 'user',
+                "actor_id"           varchar(80),
+                "request_id"         varchar(80),
+                "onboarding_version" integer     NOT NULL DEFAULT 1,
+                "payload"            jsonb       DEFAULT '{}'::jsonb,
+                "created_at"         timestamp   NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql10`
+            CREATE INDEX IF NOT EXISTS "onboarding_events_user_idx"
+                ON "onboarding_events" ("user_id", "created_at")
+        `);
+    await db.execute(sql10`
+            CREATE TABLE IF NOT EXISTS "onboarding_profile_history" (
+                "id"                 serial      PRIMARY KEY,
+                "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+                "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "field"              varchar(80) NOT NULL,
+                "previous_value"     jsonb,
+                "new_value"          jsonb,
+                "actor_type"         varchar(20) NOT NULL DEFAULT 'user',
+                "actor_id"           varchar(80),
+                "source"             varchar(40) NOT NULL DEFAULT 'onboarding',
+                "onboarding_version" integer     NOT NULL DEFAULT 1,
+                "created_at"         timestamp   NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql10`
+            CREATE INDEX IF NOT EXISTS "onboarding_profile_history_user_idx"
+                ON "onboarding_profile_history" ("user_id", "created_at")
+        `);
+    await db.execute(sql10`
+            CREATE TABLE IF NOT EXISTS "personalization_recommendations" (
+                "id"              serial      PRIMARY KEY,
+                "user_id"         integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+                "organization_id" integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
+                "module_id"       varchar(80) NOT NULL,
+                "priority"        integer     NOT NULL DEFAULT 50,
+                "reason"          text        NOT NULL DEFAULT '',
+                "rule_id"         varchar(80) NOT NULL DEFAULT 'default',
+                "status"          varchar(20) NOT NULL DEFAULT 'active',
+                "created_at"      timestamp   NOT NULL DEFAULT now(),
+                "updated_at"      timestamp   NOT NULL DEFAULT now()
+            )
+        `);
+    await db.execute(sql10`
+            CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_user_module_idx"
+                ON "personalization_recommendations" ("user_id", "module_id")
+        `);
+    await db.execute(sql10`
+            CREATE INDEX IF NOT EXISTS "personalization_recommendations_user_idx"
+                ON "personalization_recommendations" ("user_id")
+        `);
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "feature_flags" (
                 "id"                   serial        PRIMARY KEY,
                 "name"                 varchar(100)  NOT NULL UNIQUE,
@@ -34138,7 +34970,7 @@ async function ensureMigrated() {
                 "updated_at"           timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "analytics_events" (
                 "id"               serial        PRIMARY KEY,
                 "user_id"          integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -34150,7 +34982,7 @@ async function ensureMigrated() {
                 "created_at"       timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "user_activity_summary" (
                 "user_id"           integer       PRIMARY KEY REFERENCES "users" ("id") ON DELETE CASCADE,
                 "total_sessions"    integer       DEFAULT 0,
@@ -34162,7 +34994,7 @@ async function ensureMigrated() {
                 "updated_at"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "email_log" (
                 "id"               serial        PRIMARY KEY,
                 "user_id"          integer       REFERENCES "users" ("id") ON DELETE SET NULL,
@@ -34178,7 +35010,7 @@ async function ensureMigrated() {
                 "created_at"       timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "notifications" (
                 "id"          serial        PRIMARY KEY,
                 "user_id"     integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -34191,7 +35023,7 @@ async function ensureMigrated() {
                 "created_at"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             DO $$ BEGIN
                 CREATE TYPE "knowledgeGraphNodeKind" AS ENUM (
                     'region','framework','standard','edition','agent','regulator',
@@ -34201,7 +35033,7 @@ async function ensureMigrated() {
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             DO $$ BEGIN
                 CREATE TYPE "knowledgeGraphEdgeRelation" AS ENUM (
                     'contains','activates','supports','maps_to','requires','conflicts',
@@ -34211,7 +35043,7 @@ async function ensureMigrated() {
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "knowledgeGraphNodes" (
                 "id"               serial        PRIMARY KEY,
                 "nodeId"           varchar(120)  NOT NULL UNIQUE,
@@ -34227,7 +35059,7 @@ async function ensureMigrated() {
                 "updatedAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "knowledgeGraphEdges" (
                 "id"               serial        PRIMARY KEY,
                 "sourceNodeId"     varchar(120)  NOT NULL,
@@ -34239,7 +35071,7 @@ async function ensureMigrated() {
                 "createdAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "regulatoryChanges" (
                 "id"               serial        PRIMARY KEY,
                 "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE SET NULL,
@@ -34258,7 +35090,7 @@ async function ensureMigrated() {
                 "updatedAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "complianceSimulations" (
                 "id"                   serial        PRIMARY KEY,
                 "organizationId"       integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -34281,7 +35113,7 @@ async function ensureMigrated() {
                 "updatedAt"            timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "aiAgentRuns" (
                 "id"               serial        PRIMARY KEY,
                 "organizationId"   integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -34313,7 +35145,7 @@ async function ensureMigrated() {
     };
     await driftExec(
       "auditLogs.chainHash",
-      sql9`ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text`
+      sql10`ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text`
     );
     const tenantIndexTables = [
       "complianceReports",
@@ -34348,16 +35180,16 @@ async function ensureMigrated() {
       const column = tenantIndexColumns[table] ?? "organizationId";
       await driftExec(
         `index ${table}.${column}`,
-        sql9`CREATE INDEX IF NOT EXISTS ${sql9.identifier(`${table}_${column}_idx`)} ON ${sql9.identifier(table)} (${sql9.identifier(column)})`
+        sql10`CREATE INDEX IF NOT EXISTS ${sql10.identifier(`${table}_${column}_idx`)} ON ${sql10.identifier(table)} (${sql10.identifier(column)})`
       );
     }
     await driftExec(
       "index notifications.user_id",
-      sql9`CREATE INDEX IF NOT EXISTS ${sql9.identifier("notifications_user_id_idx")} ON ${sql9.identifier("notifications")} ("user_id")`
+      sql10`CREATE INDEX IF NOT EXISTS ${sql10.identifier("notifications_user_id_idx")} ON ${sql10.identifier("notifications")} ("user_id")`
     );
     await driftExec(
       "rate limit windows table",
-      sql9`CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
+      sql10`CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
         "key" text NOT NULL,
         "windowIndex" bigint NOT NULL,
         "count" integer NOT NULL DEFAULT 0,
@@ -34384,196 +35216,196 @@ async function ensureMigrated() {
     for (const [typeName, values] of Object.entries(driftEnums)) {
       await driftExec(
         `create enum ${typeName}`,
-        sql9`DO $$ BEGIN
-           CREATE TYPE ${sql9.identifier(typeName)} AS ENUM (${values.map((v) => sql9`${v}`).join(",")})
+        sql10`DO $$ BEGIN
+           CREATE TYPE ${sql10.identifier(typeName)} AS ENUM (${values.map((v) => sql10`${v}`).join(",")})
          EXCEPTION WHEN duplicate_object THEN NULL;
          END $$;`
       );
       for (const v of values) {
         await driftExec(
           `enum ${typeName}.${v}`,
-          sql9`ALTER TYPE ${sql9.identifier(typeName)} ADD VALUE IF NOT EXISTS ${v}`
+          sql10`ALTER TYPE ${sql10.identifier(typeName)} ADD VALUE IF NOT EXISTS ${v}`
         );
       }
     }
     const driftColumns = [
       [
         "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`
+        sql10`ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`
       ],
-      ["organizations", sql9`ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
+      ["organizations", sql10`ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
       [
         "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`
-      ],
-      [
-        "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`
+        sql10`ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`
       ],
       [
         "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`
       ],
       [
         "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`
-      ],
-      ["organizations", sql9`ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
-      [
-        "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`
       ],
       [
         "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`
+      ],
+      ["organizations", sql10`ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
+      [
+        "organizations",
+        sql10`ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql9`ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`
       ],
-      ["organizations", sql9`ADD COLUMN IF NOT EXISTS "metadata" text`],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "userId" integer`],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "localUserId" integer`],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "organizationId" integer`],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
+      [
+        "organizations",
+        sql10`ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`
+      ],
+      ["organizations", sql10`ADD COLUMN IF NOT EXISTS "metadata" text`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "localUserId" integer`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "organizationId" integer`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
       [
         "auditLogs",
-        sql9`ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`
       ],
       [
         "auditLogs",
-        sql9`ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`
       ],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "entityId" integer`],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "entityId" integer`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
       [
         "auditLogs",
-        sql9`ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`
       ],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "payload" text`],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
-      ["auditLogs", sql9`ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "payload" text`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
+      ["auditLogs", sql10`ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`
-      ],
-      [
-        "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`
+        sql10`ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`
       ],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`
       ],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`
       ],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`
       ],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`
       ],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`
       ],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`
+        sql10`ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`
       ],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`
+        sql10`ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`
       ],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`
       ],
-      ["subscriptions", sql9`ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
       [
         "subscriptions",
-        sql9`ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`
+        sql10`ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`
       ],
-      ["subscriptions", sql9`ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
-      ["billingEvents", sql9`ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
+      ["subscriptions", sql10`ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
+      [
+        "subscriptions",
+        sql10`ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`
+      ],
+      ["subscriptions", sql10`ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
+      ["billingEvents", sql10`ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
       [
         "billingEvents",
-        sql9`ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`
-      ],
-      [
-        "billingEvents",
-        sql9`ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`
       ],
       [
         "billingEvents",
-        sql9`ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`
+        sql10`ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`
       ],
-      ["billingEvents", sql9`ADD COLUMN IF NOT EXISTS "amountCents" integer`],
       [
         "billingEvents",
-        sql9`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`
+        sql10`ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`
       ],
-      ["billingEvents", sql9`ADD COLUMN IF NOT EXISTS "description" text`],
-      ["billingEvents", sql9`ADD COLUMN IF NOT EXISTS "rawPayload" text`],
+      ["billingEvents", sql10`ADD COLUMN IF NOT EXISTS "amountCents" integer`],
+      [
+        "billingEvents",
+        sql10`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`
+      ],
+      ["billingEvents", sql10`ADD COLUMN IF NOT EXISTS "description" text`],
+      ["billingEvents", sql10`ADD COLUMN IF NOT EXISTS "rawPayload" text`],
       [
         "organizationMembers",
-        sql9`ADD COLUMN IF NOT EXISTS "localUserId" integer`
+        sql10`ADD COLUMN IF NOT EXISTS "localUserId" integer`
       ],
-      ["organizationMembers", sql9`ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["organizationMembers", sql10`ADD COLUMN IF NOT EXISTS "userId" integer`],
       [
         "organizationMembers",
-        sql9`ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`
-      ],
-      [
-        "organizationMembers",
-        sql9`ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`
-      ],
-      [
-        "organizationMembers",
-        sql9`ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`
+        sql10`ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`
       ],
       [
         "organizationMembers",
-        sql9`ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`
+        sql10`ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`
       ],
       [
         "organizationMembers",
-        sql9`ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`
+        sql10`ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`
       ],
       [
         "organizationMembers",
-        sql9`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
+        sql10`ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`
+      ],
+      [
+        "organizationMembers",
+        sql10`ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`
+      ],
+      [
+        "organizationMembers",
+        sql10`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
       ]
     ];
     for (const [table, clause] of driftColumns) {
       await driftExec(
         table,
-        sql9`ALTER TABLE ${sql9.identifier(table)} ${clause}`
+        sql10`ALTER TABLE ${sql10.identifier(table)} ${clause}`
       );
     }
     await driftExec(
       "subscriptions unique stripeSubscriptionId",
-      sql9`CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique" ON "subscriptions" ("stripeSubscriptionId")`
+      sql10`CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique" ON "subscriptions" ("stripeSubscriptionId")`
     );
     await driftExec(
       "billingEvents unique stripeEventId",
-      sql9`CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique" ON "billingEvents" ("stripeEventId")`
+      sql10`CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique" ON "billingEvents" ("stripeEventId")`
     );
     await seedComplianceFrameworks(db);
-    await db.execute(sql9`
+    await db.execute(sql10`
             CREATE TABLE IF NOT EXISTS "yallaAdminSettings" (
                 "key"       varchar(64) NOT NULL PRIMARY KEY,
                 "value"     text        NOT NULL,
@@ -34618,7 +35450,7 @@ init_logger();
 init_rateLimiter();
 init_sse_bus();
 init_sse_bus();
-import { sql as sql10 } from "drizzle-orm";
+import { sql as sql11 } from "drizzle-orm";
 var ADMIN_SECRET = ENV.yallaAdminSecret;
 var ADMIN_USERNAME = ENV.yallaAdminUsername;
 var ADMIN_PASSWORD_HASH = ENV.yallaAdminPasswordHash;
@@ -34667,7 +35499,7 @@ function touchAdminSession(sessionId) {
       const db = await getDb();
       if (!db) return;
       await db.execute(
-        sql10`UPDATE "yallaAdminSessions" SET "lastSeenAt" = NOW() WHERE id = ${sessionId}`
+        sql11`UPDATE "yallaAdminSessions" SET "lastSeenAt" = NOW() WHERE id = ${sessionId}`
       );
     } catch {
     }
@@ -34713,7 +35545,7 @@ async function getAdminSetting(key) {
     const db = await getDb();
     if (!db) return null;
     const result = await db.execute(
-      sql10`SELECT "value" FROM "yallaAdminSettings" WHERE "key" = ${key}`
+      sql11`SELECT "value" FROM "yallaAdminSettings" WHERE "key" = ${key}`
     );
     const rows = result.rows;
     return rows?.[0]?.value ?? null;
@@ -34724,7 +35556,7 @@ async function getAdminSetting(key) {
 async function setAdminSetting(key, value) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.execute(sql10`
+  await db.execute(sql11`
             INSERT INTO "yallaAdminSettings" ("key", "value", "updatedAt")
             VALUES (${key}, ${value}, NOW())
             ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = NOW()
@@ -34735,7 +35567,7 @@ async function deleteAdminSetting(key) {
     const db = await getDb();
     if (!db) return;
     await db.execute(
-      sql10`DELETE FROM "yallaAdminSettings" WHERE "key" = ${key}`
+      sql11`DELETE FROM "yallaAdminSettings" WHERE "key" = ${key}`
     );
   } catch {
   }
@@ -34760,7 +35592,7 @@ async function createAdminSession(req, res, ip, opts = {}) {
   try {
     const db = await getDb();
     if (db) {
-      await db.execute(sql10`
+      await db.execute(sql11`
                 INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
                 VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
             `);
@@ -34819,9 +35651,9 @@ async function auditLog(sessionId, adminUsername, action, ip, target, payload) {
     const db = await getDb();
     if (!db) return;
     const payloadStr = payload ? JSON.stringify(payload) : null;
-    await db.execute(sql10`
+    await db.execute(sql11`
             INSERT INTO "yallaAdminAuditLogs" ("sessionId", "adminUsername", "action", "target", "ipAddress", "payload")
-            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql10`CAST(${payloadStr} AS JSON)` : null})
+            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql11`CAST(${payloadStr} AS JSON)` : null})
         `);
   } catch {
   }
@@ -34898,7 +35730,7 @@ async function hasUsedOwnerLinkNonce(nonce) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    const linkResult = await db.execute(sql10`
+    const linkResult = await db.execute(sql11`
             SELECT id FROM "yallaAdminAccessLinkNonces"
             WHERE "nonceHash" = ${nonceHash}
             LIMIT 1
@@ -34918,7 +35750,7 @@ async function consumeOwnerLinkNonce(req, nonce, expiresAt, redirectTarget) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    await db.execute(sql10`
+    await db.execute(sql11`
             INSERT INTO "yallaAdminAccessLinkNonces" ("nonceHash", "redirectTarget", "expiresAt", "consumedByIp")
             VALUES (${nonceHash}, ${redirectTarget}, to_timestamp(${expiresAt}), ${getClientIp5(req)})
         `);
@@ -35096,7 +35928,7 @@ async function requireSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql10`
+      const sessionResult = await db.execute(sql11`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -35252,7 +36084,7 @@ async function handleLogout(req, res) {
     try {
       const db = await getDb();
       if (db) {
-        await db.execute(sql10`
+        await db.execute(sql11`
                     UPDATE "yallaAdminSessions" SET "isRevoked" = 1 WHERE id = ${session.sessionId}
                 `);
       }
@@ -35284,7 +36116,7 @@ async function handleMe(req, res) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql10`
+      const sessionResult = await db.execute(sql11`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${session.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -35311,39 +36143,39 @@ async function handleOverview(_req, res) {
       return;
     }
     const usersResult = await db.execute(
-      sql10`SELECT COUNT(*) as total FROM "localUsers"`
+      sql11`SELECT COUNT(*) as total FROM "localUsers"`
     );
     const usersRow = usersResult.rows;
     const orgsResult = await db.execute(
-      sql10`SELECT COUNT(*) as total FROM "organizations"`
+      sql11`SELECT COUNT(*) as total FROM "organizations"`
     );
     const orgsRow = orgsResult.rows;
-    const todayLoginsResult = await db.execute(sql10`
+    const todayLoginsResult = await db.execute(sql11`
             SELECT COUNT(*) as total FROM "auditLogs"
             WHERE action = 'auth.login' AND "createdAt" >= CURRENT_DATE
         `);
     const todayLoginsRow = todayLoginsResult.rows;
-    const serviceRequestsResult = await db.execute(sql10`
+    const serviceRequestsResult = await db.execute(sql11`
             SELECT COUNT(*) as total FROM "serviceRequests" WHERE status NOT IN ('completed', 'cancelled')
         `);
     const serviceRequestsRow = serviceRequestsResult.rows;
     const assetsResult = await db.execute(
-      sql10`SELECT COUNT(*) as total FROM "assetInventory"`
+      sql11`SELECT COUNT(*) as total FROM "assetInventory"`
     );
     const assetsRow = assetsResult.rows;
-    const todaySignupsResult = await db.execute(sql10`
+    const todaySignupsResult = await db.execute(sql11`
             SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const todaySignupsRow = todaySignupsResult.rows;
-    const newOrgsResult = await db.execute(sql10`
+    const newOrgsResult = await db.execute(sql11`
             SELECT COUNT(*) as total FROM "organizations" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const newOrgsRow = newOrgsResult.rows;
-    const revenueResult = await db.execute(sql10`
+    const revenueResult = await db.execute(sql11`
             SELECT COUNT(*) as total FROM "organizations" WHERE plan IN ('professional','enterprise') AND "isActive" = 1
         `);
     const revenueRow = revenueResult.rows;
-    const activeSessionsResult = await db.execute(sql10`
+    const activeSessionsResult = await db.execute(sql11`
             SELECT COUNT(*) as total FROM "yallaAdminSessions"
             WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
         `);
@@ -35375,7 +36207,7 @@ async function handleUsers(req, res) {
       200
     );
     const offset = parseInt(req.query.offset ?? "0", 10) || 0;
-    const usersDbResult = await db.execute(sql10`
+    const usersDbResult = await db.execute(sql11`
             SELECT
                 u.id,
                 u.name AS username,
@@ -35406,10 +36238,10 @@ async function handleSystem(_req, res) {
     let tableCount = 0;
     if (db) {
       try {
-        const versionResult = await db.execute(sql10`SELECT version() as v`);
+        const versionResult = await db.execute(sql11`SELECT version() as v`);
         const vRow = versionResult.rows;
         dbVersion = vRow?.[0]?.v ?? "";
-        const tableResult = await db.execute(sql10`
+        const tableResult = await db.execute(sql11`
                     SELECT COUNT(*) as c FROM information_schema.tables
                     WHERE table_schema = 'public'
                 `);
@@ -35455,7 +36287,7 @@ async function handleAudit(req, res) {
     );
     const action = req.query.action;
     const auditResult = await db.execute(
-      action ? sql10`SELECT * FROM "yallaAdminAuditLogs" WHERE action = ${action} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql10`SELECT * FROM "yallaAdminAuditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
+      action ? sql11`SELECT * FROM "yallaAdminAuditLogs" WHERE action = ${action} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql11`SELECT * FROM "yallaAdminAuditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = auditResult.rows;
     res.json(rows ?? []);
@@ -35476,7 +36308,7 @@ async function handlePlatformAudit(req, res) {
     );
     const category = req.query.category;
     const platformAuditResult = await db.execute(
-      category ? sql10`SELECT * FROM "auditLogs" WHERE category = ${category} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql10`SELECT * FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
+      category ? sql11`SELECT * FROM "auditLogs" WHERE category = ${category} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql11`SELECT * FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = platformAuditResult.rows;
     res.json(rows ?? []);
@@ -35498,7 +36330,7 @@ async function handleInteractions(req, res) {
     const context = req.query.context?.trim();
     const action = req.query.action?.trim();
     const interactionResult = await db.execute(
-      context && action ? sql10`
+      context && action ? sql11`
                     SELECT
                         l.id,
                         l.context,
@@ -35520,7 +36352,7 @@ async function handleInteractions(req, res) {
                     WHERE l.context = ${context} AND l.action = ${action}
                     ORDER BY l."createdAt" DESC
                     LIMIT ${limit}
-                ` : context ? sql10`
+                ` : context ? sql11`
                         SELECT
                             l.id,
                             l.context,
@@ -35542,7 +36374,7 @@ async function handleInteractions(req, res) {
                         WHERE l.context = ${context}
                         ORDER BY l."createdAt" DESC
                         LIMIT ${limit}
-                    ` : action ? sql10`
+                    ` : action ? sql11`
                             SELECT
                                 l.id,
                                 l.context,
@@ -35564,7 +36396,7 @@ async function handleInteractions(req, res) {
                             WHERE l.action = ${action}
                             ORDER BY l."createdAt" DESC
                             LIMIT ${limit}
-                        ` : sql10`
+                        ` : sql11`
                             SELECT
                                 l.id,
                                 l.context,
@@ -35606,7 +36438,7 @@ async function handleIntake(req, res) {
     ]);
     let serviceRequests2 = [];
     if (db) {
-      const srResult = await db.execute(sql10`
+      const srResult = await db.execute(sql11`
                 SELECT
                     sr.id,
                     sr."serviceType",
@@ -35654,13 +36486,13 @@ async function handleOnboarding(req, res) {
       200
     );
     const [countsResult, recentResult] = await Promise.all([
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT stage, COUNT(*) as total
                 FROM "userOnboarding"
                 GROUP BY stage
                 ORDER BY total DESC
             `),
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT
                     o.id,
                     o.stage,
@@ -35696,7 +36528,7 @@ async function handleValidationFailures(req, res) {
       parseInt(req.query.limit ?? "100", 10) || 100,
       500
     );
-    const validationResult = await db.execute(sql10`
+    const validationResult = await db.execute(sql11`
             SELECT
                 id,
                 category,
@@ -35731,7 +36563,7 @@ async function handleSubscriptions(req, res) {
       500
     );
     const [subsResult, eventsResult, summaryResult] = await Promise.all([
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT
                     s.id,
                     s.plan,
@@ -35754,7 +36586,7 @@ async function handleSubscriptions(req, res) {
                 ORDER BY s."updatedAt" DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT
                     be.id,
                     be."eventType",
@@ -35769,7 +36601,7 @@ async function handleSubscriptions(req, res) {
                 ORDER BY be."createdAt" DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT
                     plan,
                     status,
@@ -35804,7 +36636,7 @@ async function handleSignups(req, res) {
       parseInt(req.query.limit ?? "50", 10) || 50,
       200
     );
-    const signupsResult = await db.execute(sql10`
+    const signupsResult = await db.execute(sql11`
             SELECT
                 u.id,
                 u.name AS username,
@@ -35838,7 +36670,7 @@ async function handleOrgs(req, res) {
       parseInt(req.query.limit ?? "100", 10) || 100,
       500
     );
-    const orgsResult = await db.execute(sql10`
+    const orgsResult = await db.execute(sql11`
             SELECT
                 o.id,
                 o.name,
@@ -35875,12 +36707,12 @@ async function handleRealtime(_req, res) {
       return;
     }
     const [sessResult, actResult, newUsersResult] = await Promise.all([
-      db.execute(sql10`SELECT 0 as total`),
+      db.execute(sql11`SELECT 0 as total`),
       db.execute(
-        sql10`SELECT COUNT(*) as total FROM "auditLogs" WHERE "createdAt" >= NOW() - INTERVAL '5 minutes'`
+        sql11`SELECT COUNT(*) as total FROM "auditLogs" WHERE "createdAt" >= NOW() - INTERVAL '5 minutes'`
       ),
       db.execute(
-        sql10`SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt" >= NOW() - INTERVAL '60 minutes'`
+        sql11`SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt" >= NOW() - INTERVAL '60 minutes'`
       )
     ]);
     const sessRow = sessResult.rows;
@@ -35911,7 +36743,7 @@ async function handleUserDetail(req, res) {
       return;
     }
     const [userResult, sessionResult, auditResult, interactionResult] = await Promise.all([
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT u.id, u.name AS username, u.email, u."userType" AS role, u.status, u."mfaEnabled" AS "isMfaEnabled",
                        u."createdAt", u."lastSignedIn" AS "lastLoginAt", o.name AS "organizationName", o.plan AS "organizationPlan"
                 FROM "localUsers" u
@@ -35919,13 +36751,13 @@ async function handleUserDetail(req, res) {
                 LEFT JOIN "organizations" o ON o.id = om."organizationId"
                 WHERE u.id = ${userId} LIMIT 1
             `),
-      db.execute(sql10`SELECT 0 AS id LIMIT 0`),
-      db.execute(sql10`
+      db.execute(sql11`SELECT 0 AS id LIMIT 0`),
+      db.execute(sql11`
                 SELECT category, action, outcome, "createdAt"
                 FROM "auditLogs" WHERE "localUserId" = ${userId}
                 ORDER BY "createdAt" DESC LIMIT 30
             `),
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT context, action, "entityType", "createdAt", "durationMs"
                 FROM "userInteractionLogs" WHERE "localUserId" = ${userId}
                 ORDER BY "createdAt" DESC LIMIT 30
@@ -35959,12 +36791,12 @@ async function handleOrgDetail(req, res) {
       return;
     }
     const [orgResult, membersResult, subscriptionResult, auditResult] = await Promise.all([
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT id, name, slug, plan, "isActive", "trialEndsAt", "createdAt", "updatedAt",
                        industry, "billingEmail"
                 FROM "organizations" WHERE id = ${orgId} LIMIT 1
             `),
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT om.role, u.id AS "userId", u.name AS username, u.email, u.status AS "userStatus",
                        u."lastSignedIn" AS "lastLoginAt", om."createdAt" AS "joinedAt"
                 FROM "organizationMembers" om
@@ -35973,13 +36805,13 @@ async function handleOrgDetail(req, res) {
                 ORDER BY om."createdAt" ASC
                 LIMIT 50
             `),
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT id, plan, status, "currentPeriodStart", "currentPeriodEnd", "cancelAtPeriodEnd",
                        "createdAt", "updatedAt"
                 FROM "subscriptions" WHERE "organizationId" = ${orgId}
                 ORDER BY "createdAt" DESC LIMIT 1
             `),
-      db.execute(sql10`
+      db.execute(sql11`
                 SELECT category, action, outcome, "createdAt"
                 FROM "auditLogs" WHERE "organizationId" = ${orgId}
                 ORDER BY "createdAt" DESC LIMIT 30
@@ -36020,7 +36852,7 @@ async function handleSuspendUser(req, res) {
       return;
     }
     const userResult = await db.execute(
-      sql10`SELECT id, email, status FROM "localUsers" WHERE id = ${userId} LIMIT 1`
+      sql11`SELECT id, email, status FROM "localUsers" WHERE id = ${userId} LIMIT 1`
     );
     const rows = userResult.rows;
     const user = rows[0];
@@ -36030,7 +36862,7 @@ async function handleSuspendUser(req, res) {
     }
     const newStatus = suspend ? "suspended" : "active";
     await db.execute(
-      sql10`UPDATE "localUsers" SET status = ${newStatus}, "updatedAt" = NOW() WHERE id = ${userId}`
+      sql11`UPDATE "localUsers" SET status = ${newStatus}, "updatedAt" = NOW() WHERE id = ${userId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -36092,7 +36924,7 @@ async function handleSuspendOrg(req, res) {
       return;
     }
     const orgCheckResult = await db.execute(
-      sql10`SELECT id, name, "isActive" FROM "organizations" WHERE id = ${orgId} LIMIT 1`
+      sql11`SELECT id, name, "isActive" FROM "organizations" WHERE id = ${orgId} LIMIT 1`
     );
     const rows = orgCheckResult.rows;
     const org = rows[0];
@@ -36103,7 +36935,7 @@ async function handleSuspendOrg(req, res) {
     const newStatus = suspend ? "suspended" : "active";
     const newIsActive = suspend ? 0 : 1;
     await db.execute(
-      sql10`UPDATE "organizations" SET "isActive" = ${newIsActive}, "updatedAt" = NOW() WHERE id = ${orgId}`
+      sql11`UPDATE "organizations" SET "isActive" = ${newIsActive}, "updatedAt" = NOW() WHERE id = ${orgId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -36196,7 +37028,7 @@ async function handleSessions(req, res) {
       res.json([]);
       return;
     }
-    const result = await db.execute(sql10`
+    const result = await db.execute(sql11`
             SELECT id, "adminUsername", "ipAddress", "userAgent", "createdAt", "expiresAt", "lastSeenAt"
             FROM "yallaAdminSessions"
             WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
@@ -36234,7 +37066,7 @@ async function handleRevokeAdminSession(req, res) {
       res.status(503).json({ error: "Database unavailable" });
       return;
     }
-    const result = await db.execute(sql10`
+    const result = await db.execute(sql11`
             UPDATE "yallaAdminSessions" SET "isRevoked" = 1
             WHERE id = ${targetId} AND "isRevoked" = 0
             RETURNING id
@@ -36311,13 +37143,13 @@ async function handlePasswordChange(req, res) {
   try {
     const db = await getDb();
     if (db && session) {
-      const others = await db.execute(sql10`
+      const others = await db.execute(sql11`
                 SELECT id FROM "yallaAdminSessions"
                 WHERE "isRevoked" = 0 AND id != ${session.sessionId}
             `);
       const otherIds = others.rows ?? [];
       for (const row of otherIds) revokeAdminSession(row.id);
-      await db.execute(sql10`
+      await db.execute(sql11`
                 UPDATE "yallaAdminSessions" SET "isRevoked" = 1
                 WHERE "isRevoked" = 0 AND id != ${session.sessionId}
             `);
@@ -36535,7 +37367,7 @@ async function handleExportCsv(req, res) {
     let headers;
     let filename;
     if (type === "users") {
-      const userExportResult = await db.execute(sql10`
+      const userExportResult = await db.execute(sql11`
                 SELECT id, name, email, "phoneNumber", "userType" AS role, status,
                        "companyName", "jobTitle", industry, "preferredLocale",
                        "mfaEnabled" AS "isMfaEnabled", "createdAt", "lastSignedIn" AS "lastLoginAt"
@@ -36546,7 +37378,7 @@ async function handleExportCsv(req, res) {
       headers = "id,name,email,phoneNumber,role,status,companyName,jobTitle,industry,preferredLocale,isMfaEnabled,createdAt,lastLoginAt";
       filename = "users-export.csv";
     } else if (type === "orgs") {
-      const orgExportResult = await db.execute(sql10`
+      const orgExportResult = await db.execute(sql11`
                 SELECT id, name, plan, "isActive", "trialEndsAt", "createdAt"
                 FROM "organizations" ORDER BY "createdAt" DESC LIMIT 10000
             `);
@@ -36555,7 +37387,7 @@ async function handleExportCsv(req, res) {
       headers = "id,name,plan,isActive,trialEndsAt,createdAt";
       filename = "orgs-export.csv";
     } else if (type === "subscriptions") {
-      const subExportResult = await db.execute(sql10`
+      const subExportResult = await db.execute(sql11`
                 SELECT s.id, s.plan, s.status, s."currentPeriodStart", s."currentPeriodEnd",
                        s."cancelAtPeriodEnd", o.name AS "orgName", s."createdAt"
                 FROM "subscriptions" s
@@ -36567,7 +37399,7 @@ async function handleExportCsv(req, res) {
       headers = "id,plan,status,currentPeriodStart,currentPeriodEnd,cancelAtPeriodEnd,orgName,createdAt";
       filename = "subscriptions-export.csv";
     } else if (type === "audit") {
-      const auditExportResult = await db.execute(sql10`
+      const auditExportResult = await db.execute(sql11`
                 SELECT id, category, action, outcome, "ipHash" AS "ipAddress", "createdAt"
                 FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT 10000
             `);
@@ -36621,7 +37453,7 @@ function scheduleSessionCleanup() {
     try {
       const db = await getDb();
       if (!db) return;
-      await db.execute(sql10`
+      await db.execute(sql11`
                 DELETE FROM "yallaAdminSessions"
                 WHERE "expiresAt" < NOW()
                    OR ("isRevoked" = 1 AND "lastSeenAt" < NOW() - INTERVAL '7 days')
@@ -36726,13 +37558,13 @@ import { z as z42 } from "zod";
 import express3, {
   Router
 } from "express";
-import { sql as sql14 } from "drizzle-orm";
+import { sql as sql15 } from "drizzle-orm";
 
 // server/_core/admin-dashboard-store.ts
 init_schema();
 init_db();
 init_local_jwt();
-import { and as and34, count, desc as desc25, eq as eq48, gte as gte2, like as like2, or as or7, sql as sql11 } from "drizzle-orm";
+import { and as and35, count, desc as desc26, eq as eq49, gte as gte2, like as like2, or as or7, sql as sql12 } from "drizzle-orm";
 async function getUnifiedUsers(options) {
   const db = await getDb();
   if (!db) {
@@ -36778,39 +37610,39 @@ async function getUnifiedUsers(options) {
   }
   if (options.status) {
     conditions.push(
-      eq48(
+      eq49(
         localUsers.status,
         options.status
       )
     );
   }
   if (options.role) {
-    conditions.push(sql11`${localUsers.userType} = ${options.role}::"userType"`);
+    conditions.push(sql12`${localUsers.userType} = ${options.role}::"userType"`);
   }
-  const whereClause = conditions.length > 0 ? and34(...conditions) : void 0;
+  const whereClause = conditions.length > 0 ? and35(...conditions) : void 0;
   const [total] = await db.select({ count: count() }).from(localUsers).where(whereClause);
   const rows = await db.select({
     id: localUsers.id,
-    source: sql11`'local'`.as("source"),
+    source: sql12`'local'`.as("source"),
     name: localUsers.name,
     email: localUsers.email,
     phoneNumber: localUsers.phoneNumber,
-    role: sql11`${localUsers.userType}`,
-    status: sql11`${localUsers.status}`,
+    role: sql12`${localUsers.userType}`,
+    status: sql12`${localUsers.status}`,
     companyName: localUsers.companyName,
     jobTitle: localUsers.jobTitle,
     industry: localUsers.industry,
     preferredLocale: localUsers.preferredLocale,
     lastSignedIn: localUsers.lastSignedIn,
     createdAt: localUsers.createdAt
-  }).from(localUsers).where(whereClause).orderBy(desc25(localUsers.createdAt)).limit(options.limit ?? 50).offset(options.offset ?? 0);
+  }).from(localUsers).where(whereClause).orderBy(desc26(localUsers.createdAt)).limit(options.limit ?? 50).offset(options.offset ?? 0);
   const orgCounts = await db.select({
     localUserId: organizationMembers.localUserId,
     orgCount: count()
   }).from(organizationMembers).where(
-    and34(
-      sql11`${organizationMembers.localUserId} IS NOT NULL`,
-      eq48(organizationMembers.status, "active")
+    and35(
+      sql12`${organizationMembers.localUserId} IS NOT NULL`,
+      eq49(organizationMembers.status, "active")
     )
   ).groupBy(organizationMembers.localUserId);
   const orgCountMap = new Map(orgCounts.map((r) => [r.localUserId, r.orgCount]));
@@ -36837,10 +37669,10 @@ async function getUserStats() {
   }
   const [localCounts] = await db.select({
     total: count(),
-    active: sql11`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
-    suspended: sql11`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
-    pending: sql11`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
-    newThisMonth: sql11`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`
+    active: sql12`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
+    suspended: sql12`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
+    pending: sql12`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
+    newThisMonth: sql12`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`
   }).from(localUsers);
   const [oauthCounts] = await db.select({ total: count() }).from(users);
   const roleCounts = await db.select({
@@ -36865,7 +37697,7 @@ async function getUserStats() {
 async function getUserDetail(userId) {
   const db = await getDb();
   if (!db) return null;
-  const [user] = await db.select().from(localUsers).where(eq48(localUsers.id, userId)).limit(1);
+  const [user] = await db.select().from(localUsers).where(eq49(localUsers.id, userId)).limit(1);
   if (!user) return null;
   const memberships = await db.select({
     orgId: organizations.id,
@@ -36874,11 +37706,11 @@ async function getUserDetail(userId) {
     joinedAt: organizationMembers.createdAt
   }).from(organizationMembers).innerJoin(
     organizations,
-    eq48(organizationMembers.organizationId, organizations.id)
+    eq49(organizationMembers.organizationId, organizations.id)
   ).where(
-    and34(
-      eq48(organizationMembers.localUserId, userId),
-      eq48(organizationMembers.status, "active")
+    and35(
+      eq49(organizationMembers.localUserId, userId),
+      eq49(organizationMembers.status, "active")
     )
   );
   const activity = await db.select({
@@ -36886,7 +37718,7 @@ async function getUserDetail(userId) {
     action: auditLogs.action,
     category: auditLogs.category,
     createdAt: auditLogs.createdAt
-  }).from(auditLogs).where(eq48(auditLogs.localUserId, userId)).orderBy(desc25(auditLogs.createdAt)).limit(50);
+  }).from(auditLogs).where(eq49(auditLogs.localUserId, userId)).orderBy(desc26(auditLogs.createdAt)).limit(50);
   return {
     id: user.id,
     source: "local",
@@ -36909,7 +37741,7 @@ async function getUserDetail(userId) {
 async function toggleUserSuspension(userId, suspend) {
   const db = await getDb();
   if (!db) return false;
-  await db.update(localUsers).set({ status: suspend ? "suspended" : "active", updatedAt: /* @__PURE__ */ new Date() }).where(eq48(localUsers.id, userId));
+  await db.update(localUsers).set({ status: suspend ? "suspended" : "active", updatedAt: /* @__PURE__ */ new Date() }).where(eq49(localUsers.id, userId));
   return true;
 }
 async function updateUserRole(userId, newRole) {
@@ -36918,16 +37750,16 @@ async function updateUserRole(userId, newRole) {
   await db.update(localUsers).set({
     userType: newRole,
     updatedAt: /* @__PURE__ */ new Date()
-  }).where(eq48(localUsers.id, userId));
+  }).where(eq49(localUsers.id, userId));
   return true;
 }
 async function deleteUser(userId) {
   const db = await getDb();
   if (!db) return false;
-  await db.delete(organizationMembers).where(eq48(organizationMembers.localUserId, userId));
-  await db.delete(auditLogs).where(eq48(auditLogs.localUserId, userId));
-  await db.delete(userOnboarding).where(eq48(userOnboarding.localUserId, userId));
-  await db.delete(localUsers).where(eq48(localUsers.id, userId));
+  await db.delete(organizationMembers).where(eq49(organizationMembers.localUserId, userId));
+  await db.delete(auditLogs).where(eq49(auditLogs.localUserId, userId));
+  await db.delete(userOnboarding).where(eq49(userOnboarding.localUserId, userId));
+  await db.delete(localUsers).where(eq49(localUsers.id, userId));
   return true;
 }
 async function getRecentActivity(limit = 100) {
@@ -36943,20 +37775,20 @@ async function getRecentActivity(limit = 100) {
     outcome: auditLogs.outcome,
     ipAddress: auditLogs.ipHash,
     createdAt: auditLogs.createdAt
-  }).from(auditLogs).leftJoin(localUsers, eq48(auditLogs.localUserId, localUsers.id)).orderBy(desc25(auditLogs.createdAt)).limit(limit);
+  }).from(auditLogs).leftJoin(localUsers, eq49(auditLogs.localUserId, localUsers.id)).orderBy(desc26(auditLogs.createdAt)).limit(limit);
 }
 async function getMonthlyRegistrations(months = 12) {
   const db = await getDb();
   if (!db) return [];
   const rows = await db.select({
-    month: sql11`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
+    month: sql12`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
     count: count()
   }).from(localUsers).where(
     gte2(
       localUsers.createdAt,
-      sql11`CURRENT_DATE - INTERVAL '${sql11.raw(String(months))} months'`
+      sql12`CURRENT_DATE - INTERVAL '${sql12.raw(String(months))} months'`
     )
-  ).groupBy(sql11`1`).orderBy(sql11`1`);
+  ).groupBy(sql12`1`).orderBy(sql12`1`);
   return rows;
 }
 async function getSubscriptionData() {
@@ -36977,8 +37809,8 @@ async function getSubscriptionData() {
     updatedAt: subscriptions.updatedAt
   }).from(subscriptions).innerJoin(
     organizations,
-    eq48(subscriptions.organizationId, organizations.id)
-  ).orderBy(desc25(subscriptions.updatedAt)).limit(500);
+    eq49(subscriptions.organizationId, organizations.id)
+  ).orderBy(desc26(subscriptions.updatedAt)).limit(500);
   return {
     subscriptions: rows.map((r) => ({
       ...r,
@@ -36995,14 +37827,14 @@ async function getOrganizationData() {
     id: organizations.id,
     name: organizations.name,
     plan: organizations.plan,
-    status: sql11`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'suspended' END`,
-    memberCount: sql11`COUNT(DISTINCT ${organizationMembers.id})`,
+    status: sql12`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'suspended' END`,
+    memberCount: sql12`COUNT(DISTINCT ${organizationMembers.id})`,
     createdAt: organizations.createdAt,
-    lastActivity: sql11`MAX(${organizationMembers.createdAt})`
+    lastActivity: sql12`MAX(${organizationMembers.createdAt})`
   }).from(organizations).leftJoin(
     organizationMembers,
-    eq48(organizations.id, organizationMembers.organizationId)
-  ).groupBy(organizations.id).orderBy(desc25(organizations.createdAt)).limit(500);
+    eq49(organizations.id, organizationMembers.organizationId)
+  ).groupBy(organizations.id).orderBy(desc26(organizations.createdAt)).limit(500);
   return rows.map((r) => ({
     ...r,
     createdAt: r.createdAt?.toISOString() || "",
@@ -37022,11 +37854,11 @@ async function getSecurityEvents(limit = 200) {
     targetEntity: auditLogs.targetEntity
   }).from(auditLogs).where(
     or7(
-      eq48(auditLogs.category, "auth"),
-      eq48(auditLogs.outcome, "failure"),
-      eq48(auditLogs.outcome, "blocked")
+      eq49(auditLogs.category, "auth"),
+      eq49(auditLogs.outcome, "failure"),
+      eq49(auditLogs.outcome, "blocked")
     )
-  ).orderBy(desc25(auditLogs.createdAt)).limit(limit);
+  ).orderBy(desc26(auditLogs.createdAt)).limit(limit);
   const platformEvents = rows.map((r) => ({
     ...r,
     createdAt: r.createdAt?.toISOString() || "",
@@ -37034,7 +37866,7 @@ async function getSecurityEvents(limit = 200) {
   }));
   let adminEvents = [];
   try {
-    const adminResult = await db.execute(sql11`
+    const adminResult = await db.execute(sql12`
             SELECT id, action, "ipAddress", "createdAt", "target",
                    CASE
                        WHEN action IN ('login.failed', 'login.link_denied',
@@ -37071,7 +37903,7 @@ init_admin_insights_store();
 // server/_core/platform-monitor-store.ts
 init_schema();
 init_db();
-import { desc as desc27, eq as eq50, gte as gte4, sql as sql13 } from "drizzle-orm";
+import { desc as desc28, eq as eq51, gte as gte4, sql as sql14 } from "drizzle-orm";
 var DAY_MS3 = 24 * 60 * 60 * 1e3;
 var INTERVAL_MONTHS = {
   monthly: 1,
@@ -37156,32 +37988,32 @@ async function getTrafficMetrics(days = 30) {
   const since30d = new Date(now - 30 * DAY_MS3);
   const sinceWindow = new Date(now - days * DAY_MS3);
   const [totals] = await db.select({
-    totalEvents: sql13`COUNT(*)::int`,
-    events24h: sql13`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since24h})::int`,
-    events7d: sql13`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since7d})::int`
+    totalEvents: sql14`COUNT(*)::int`,
+    events24h: sql14`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since24h})::int`,
+    events7d: sql14`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since7d})::int`
   }).from(analyticsEvents);
   const daily = await db.select({
-    date: sql13`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`,
-    events: sql13`COUNT(*)::int`,
-    users: sql13`COUNT(DISTINCT ${analyticsEvents.userId})::int`
-  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(sql13`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`).orderBy(sql13`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`);
+    date: sql14`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`,
+    events: sql14`COUNT(*)::int`,
+    users: sql14`COUNT(DISTINCT ${analyticsEvents.userId})::int`
+  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(sql14`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`).orderBy(sql14`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`);
   const signups = await db.select({
-    date: sql13`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`,
-    count: sql13`COUNT(*)::int`
-  }).from(localUsers).where(gte4(localUsers.createdAt, sinceWindow)).groupBy(sql13`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`).orderBy(sql13`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`);
+    date: sql14`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`,
+    count: sql14`COUNT(*)::int`
+  }).from(localUsers).where(gte4(localUsers.createdAt, sinceWindow)).groupBy(sql14`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`).orderBy(sql14`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`);
   const topEvents = await db.select({
     event: analyticsEvents.event,
     category: analyticsEvents.category,
-    count: sql13`COUNT(*)::int`
-  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(analyticsEvents.event, analyticsEvents.category).orderBy(desc27(sql13`COUNT(*)`)).limit(10);
+    count: sql14`COUNT(*)::int`
+  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(analyticsEvents.event, analyticsEvents.category).orderBy(desc28(sql14`COUNT(*)`)).limit(10);
   const [summary] = await db.select({
-    trackedUsers: sql13`COUNT(*)::int`,
-    totalSessions: sql13`COALESCE(SUM(${userActivitySummary.totalSessions}), 0)::int`,
-    activeUsers24h: sql13`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since24h})::int`,
-    activeUsers7d: sql13`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since7d})::int`,
-    activeUsers30d: sql13`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since30d})::int`,
-    avgActivationScore: sql13`COALESCE(AVG(${userActivitySummary.activationScore}), 0)::int`,
-    avgHealthScore: sql13`COALESCE(AVG(${userActivitySummary.healthScore}), 0)::int`
+    trackedUsers: sql14`COUNT(*)::int`,
+    totalSessions: sql14`COALESCE(SUM(${userActivitySummary.totalSessions}), 0)::int`,
+    activeUsers24h: sql14`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since24h})::int`,
+    activeUsers7d: sql14`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since7d})::int`,
+    activeUsers30d: sql14`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since30d})::int`,
+    avgActivationScore: sql14`COALESCE(AVG(${userActivitySummary.activationScore}), 0)::int`,
+    avgHealthScore: sql14`COALESCE(AVG(${userActivitySummary.healthScore}), 0)::int`
   }).from(userActivitySummary);
   return {
     totalEvents: num(totals?.totalEvents),
@@ -37249,9 +38081,9 @@ async function getRevenueMetrics() {
     if (s.cancelAtPeriodEnd === 1) churnRisk += 1;
   }
   const [billing] = await db.select({
-    failedPayments: sql13`COUNT(*) FILTER (WHERE ${billingEvents.status} = 'failed')::int`,
-    failedAmount: sql13`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'failed'), 0)::int`,
-    refundedAmount: sql13`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'refunded'), 0)::int`
+    failedPayments: sql14`COUNT(*) FILTER (WHERE ${billingEvents.status} = 'failed')::int`,
+    failedAmount: sql14`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'failed'), 0)::int`,
+    refundedAmount: sql14`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'refunded'), 0)::int`
   }).from(billingEvents).where(gte4(billingEvents.createdAt, since30d));
   const recentBillingEvents = await db.select({
     id: billingEvents.id,
@@ -37261,7 +38093,7 @@ async function getRevenueMetrics() {
     currency: billingEvents.currency,
     organizationName: organizations.name,
     createdAt: billingEvents.createdAt
-  }).from(billingEvents).leftJoin(organizations, eq50(organizations.id, billingEvents.organizationId)).orderBy(desc27(billingEvents.createdAt)).limit(20);
+  }).from(billingEvents).leftJoin(organizations, eq51(organizations.id, billingEvents.organizationId)).orderBy(desc28(billingEvents.createdAt)).limit(20);
   return {
     mrrCents,
     arrCents: mrrCents * 12,
@@ -37293,16 +38125,16 @@ async function getAiJobMetrics() {
   if (!db) return emptyAi();
   const since24h = new Date(Date.now() - DAY_MS3);
   const [counts] = await db.select({
-    total: sql13`COUNT(*)::int`,
-    queued: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'queued')::int`,
-    running: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'running')::int`,
-    completed: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'completed')::int`,
-    failed: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'failed')::int`,
-    cancelled: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'cancelled')::int`,
-    last24h: sql13`COUNT(*) FILTER (WHERE ${aiAgentRuns.createdAt} >= ${since24h})::int`,
-    avgDurationMs: sql13`COALESCE(AVG(${aiAgentRuns.durationMs}) FILTER (WHERE ${aiAgentRuns.durationMs} IS NOT NULL), 0)::int`
+    total: sql14`COUNT(*)::int`,
+    queued: sql14`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'queued')::int`,
+    running: sql14`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'running')::int`,
+    completed: sql14`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'completed')::int`,
+    failed: sql14`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'failed')::int`,
+    cancelled: sql14`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'cancelled')::int`,
+    last24h: sql14`COUNT(*) FILTER (WHERE ${aiAgentRuns.createdAt} >= ${since24h})::int`,
+    avgDurationMs: sql14`COALESCE(AVG(${aiAgentRuns.durationMs}) FILTER (WHERE ${aiAgentRuns.durationMs} IS NOT NULL), 0)::int`
   }).from(aiAgentRuns);
-  const durations = await db.select({ durationMs: aiAgentRuns.durationMs }).from(aiAgentRuns).where(sql13`${aiAgentRuns.durationMs} IS NOT NULL`).orderBy(desc27(aiAgentRuns.createdAt)).limit(500);
+  const durations = await db.select({ durationMs: aiAgentRuns.durationMs }).from(aiAgentRuns).where(sql14`${aiAgentRuns.durationMs} IS NOT NULL`).orderBy(desc28(aiAgentRuns.createdAt)).limit(500);
   const sorted = durations.map((d2) => num(d2.durationMs)).filter((d2) => d2 > 0).sort((a, b) => a - b);
   const p95 = sorted.length > 0 ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))] : 0;
   const recentFailures = await db.select({
@@ -37311,7 +38143,7 @@ async function getAiJobMetrics() {
     organizationId: aiAgentRuns.organizationId,
     errorMessage: aiAgentRuns.errorMessage,
     createdAt: aiAgentRuns.createdAt
-  }).from(aiAgentRuns).where(eq50(aiAgentRuns.status, "failed")).orderBy(desc27(aiAgentRuns.createdAt)).limit(10);
+  }).from(aiAgentRuns).where(eq51(aiAgentRuns.status, "failed")).orderBy(desc28(aiAgentRuns.createdAt)).limit(10);
   const completed = num(counts?.completed);
   const failed = num(counts?.failed);
   const finished = completed + failed;
@@ -37340,13 +38172,13 @@ async function getEmailMetrics() {
   if (!db) return emptyEmail();
   const since24h = new Date(Date.now() - DAY_MS3);
   const [counts] = await db.select({
-    total: sql13`COUNT(*)::int`,
-    sent: sql13`COUNT(*) FILTER (WHERE ${emailLog.status} = 'sent')::int`,
-    failed: sql13`COUNT(*) FILTER (WHERE ${emailLog.status} = 'failed')::int`,
-    queued: sql13`COUNT(*) FILTER (WHERE ${emailLog.status} = 'queued')::int`,
-    opened: sql13`COUNT(*) FILTER (WHERE ${emailLog.openedAt} IS NOT NULL)::int`,
-    clicked: sql13`COUNT(*) FILTER (WHERE ${emailLog.clickedAt} IS NOT NULL)::int`,
-    last24hSent: sql13`COUNT(*) FILTER (WHERE ${emailLog.createdAt} >= ${since24h} AND ${emailLog.status} = 'sent')::int`
+    total: sql14`COUNT(*)::int`,
+    sent: sql14`COUNT(*) FILTER (WHERE ${emailLog.status} = 'sent')::int`,
+    failed: sql14`COUNT(*) FILTER (WHERE ${emailLog.status} = 'failed')::int`,
+    queued: sql14`COUNT(*) FILTER (WHERE ${emailLog.status} = 'queued')::int`,
+    opened: sql14`COUNT(*) FILTER (WHERE ${emailLog.openedAt} IS NOT NULL)::int`,
+    clicked: sql14`COUNT(*) FILTER (WHERE ${emailLog.clickedAt} IS NOT NULL)::int`,
+    last24hSent: sql14`COUNT(*) FILTER (WHERE ${emailLog.createdAt} >= ${since24h} AND ${emailLog.status} = 'sent')::int`
   }).from(emailLog);
   const recentFailures = await db.select({
     id: emailLog.id,
@@ -37354,7 +38186,7 @@ async function getEmailMetrics() {
     recipient: emailLog.recipient,
     errorMessage: emailLog.errorMessage,
     createdAt: emailLog.createdAt
-  }).from(emailLog).where(eq50(emailLog.status, "failed")).orderBy(desc27(emailLog.createdAt)).limit(10);
+  }).from(emailLog).where(eq51(emailLog.status, "failed")).orderBy(desc28(emailLog.createdAt)).limit(10);
   const sent = num(counts?.sent);
   const opened = num(counts?.opened);
   const clicked = num(counts?.clicked);
@@ -37381,10 +38213,10 @@ async function getSecurityMetrics() {
   const db = await getDb();
   if (!db) return emptySecurity();
   const [row] = await db.select({
-    totalUsers: sql13`COUNT(*)::int`,
-    mfaEnabledUsers: sql13`COUNT(*) FILTER (WHERE ${localUsers.mfaEnabled} = 1)::int`,
-    suspendedUsers: sql13`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')::int`,
-    pendingUsers: sql13`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')::int`
+    totalUsers: sql14`COUNT(*)::int`,
+    mfaEnabledUsers: sql14`COUNT(*) FILTER (WHERE ${localUsers.mfaEnabled} = 1)::int`,
+    suspendedUsers: sql14`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')::int`,
+    pendingUsers: sql14`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')::int`
   }).from(localUsers);
   const total = num(row?.totalUsers);
   const mfa = num(row?.mfaEnabledUsers);
@@ -37441,7 +38273,7 @@ async function requireAdminSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql14`
+      const sessionResult = await db.execute(sql15`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -37832,6 +38664,37 @@ function createAdminDashboardRouter() {
     } catch (error) {
       logger.error({ error }, "Failed to get engagement metrics");
       res.status(500).json({ error: "Failed to get engagement metrics" });
+    }
+  });
+  router2.get("/onboarding", async (req, res) => {
+    try {
+      const days = req.query.days ? Number(req.query.days) : 30;
+      res.json(
+        await getOnboardingIntelligence(
+          Number.isFinite(days) && days > 0 && days <= 365 ? days : 30
+        )
+      );
+    } catch (error) {
+      logger.error({ error }, "Failed to get onboarding intelligence");
+      res.status(500).json({ error: "Failed to get onboarding intelligence" });
+    }
+  });
+  router2.get("/onboarding/users/:id", async (req, res) => {
+    try {
+      const userId = Number(req.params.id);
+      if (Number.isNaN(userId)) {
+        res.status(400).json({ error: "Invalid user ID" });
+        return;
+      }
+      const [state, responses, timeline] = await Promise.all([
+        getOnboardingState(userId, null),
+        getOnboardingResponsesForUser(userId),
+        getOnboardingTimeline(userId, 200)
+      ]);
+      res.json({ state, ...responses, timeline });
+    } catch (error) {
+      logger.error({ error }, "Failed to get user onboarding");
+      res.status(500).json({ error: "Failed to get user onboarding" });
     }
   });
   const REPORT_TYPES = [
@@ -38546,18 +39409,18 @@ async function handler(req, res) {
       };
       if (dbClient) {
         try {
-          const { sql: sql15 } = await import("drizzle-orm");
+          const { sql: sql16 } = await import("drizzle-orm");
           const userCount = await dbClient.execute(
-            sql15`SELECT COUNT(*)::int as count FROM "localUsers"`
+            sql16`SELECT COUNT(*)::int as count FROM "localUsers"`
           );
           const orgCount = await dbClient.execute(
-            sql15`SELECT COUNT(*)::int as count FROM "organizations"`
+            sql16`SELECT COUNT(*)::int as count FROM "organizations"`
           );
           const fwCount = await dbClient.execute(
-            sql15`SELECT COUNT(*)::int as count FROM "frameworks"`
+            sql16`SELECT COUNT(*)::int as count FROM "frameworks"`
           );
           const vendorCount = await dbClient.execute(
-            sql15`SELECT COUNT(*)::int as count FROM "vendors"`
+            sql16`SELECT COUNT(*)::int as count FROM "vendors"`
           );
           stats.users = userCount.rows[0].count;
           stats.organizations = orgCount.rows[0].count;
@@ -38582,8 +39445,8 @@ async function handler(req, res) {
         res.status(200).json({ ok: false, error: "Database not connected" });
         return;
       }
-      const { sql: sql15 } = await import("drizzle-orm");
-      const tables = await db.execute(sql15`
+      const { sql: sql16 } = await import("drizzle-orm");
+      const tables = await db.execute(sql16`
         SELECT table_name FROM information_schema.tables
         WHERE table_schema = 'public'
         ORDER BY table_name
@@ -38625,11 +39488,11 @@ async function handler(req, res) {
         auditLogs: [],
         otpCodes: []
       };
-      const { sql: sql15 } = await import("drizzle-orm");
+      const { sql: sql16 } = await import("drizzle-orm");
       for (const [table, cols] of Object.entries(expected)) {
         if (cols.length === 0) continue;
         const result = await db.execute(
-          sql15.raw(
+          sql16.raw(
             `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='${table}'`
           )
         );
@@ -38659,14 +39522,14 @@ async function handler(req, res) {
       }
       const mod = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
       const { complianceRelationships: complianceRelationships2 } = mod;
-      const { sql: sql15 } = await import("drizzle-orm");
+      const { sql: sql16 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql15`SELECT "id", "code" FROM "frameworks"`
+        sql16`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql15`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
+        sql16`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
       );
       const batchSize = 30;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -38676,11 +39539,11 @@ async function handler(req, res) {
         const srcId = codeToId.get(rel.sourceFrameworkCode);
         const tgtId = codeToId.get(rel.targetFrameworkCode);
         if (!srcId || !tgtId) continue;
-        const exist = await db.execute(sql15`
+        const exist = await db.execute(sql16`
           SELECT 1 FROM "frameworkRelationships" WHERE "sourceFrameworkId" = ${srcId} AND "targetFrameworkId" = ${tgtId} LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql15`
+        await db.execute(sql16`
           INSERT INTO "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId", "relationshipType", "description", "severity", "riskLevel", "mitigation")
           VALUES (${srcId}, ${tgtId}, ${rel.relationshipType}, ${rel.description ?? null}, ${rel.severity ?? null}, ${rel.riskLevel ?? null}, ${rel.mitigation ?? null})
         `);
@@ -38711,14 +39574,14 @@ async function handler(req, res) {
       }
       const mod = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
       const controls = mod.complianceControls;
-      const { sql: sql15 } = await import("drizzle-orm");
+      const { sql: sql16 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql15`SELECT "id", "code" FROM "frameworks"`
+        sql16`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql15`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
+        sql16`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
       );
       const batchSize = 50;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -38727,13 +39590,13 @@ async function handler(req, res) {
       for (const ctrl of batch) {
         const fid = codeToId.get(ctrl.frameworkCode);
         if (!fid) continue;
-        const exist = await db.execute(sql15`
+        const exist = await db.execute(sql16`
           SELECT 1 FROM "complianceControls"
           WHERE "frameworkId" = ${fid} AND "controlCode" = ${ctrl.controlCode}
           LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql15`
+        await db.execute(sql16`
           INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
           VALUES (${fid}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
         `);
