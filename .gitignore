@@ -157,3 +157,10 @@ audit/*.log
 
 auth-fix-report.html
 billing-report.html
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+

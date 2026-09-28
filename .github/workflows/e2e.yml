@@ -22,10 +22,8 @@ jobs:
           node-version: "24"
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
-      - name: Install Playwright
-        run: |
-          pnpm add -D @playwright/test
-          npx playwright install --with-deps chromium
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
       - name: Run E2E
         env:
           E2E_BASE_URL: ${{ inputs.base_url }}
