@@ -102,10 +102,11 @@ export async function ensureOnboardingSchema(db: Db): Promise<void> {
       CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_user_q_idx"
         ON "onboarding_responses" ("user_id", "onboarding_version", "question_id")
     `,
+    // Non-partial so Postgres can infer it for ON CONFLICT (NULLs are distinct).
+    sql`DROP INDEX IF EXISTS "onboarding_responses_local_q_idx"`,
     sql`
       CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_local_q_idx"
         ON "onboarding_responses" ("local_user_id", "onboarding_version", "question_id")
-        WHERE "local_user_id" IS NOT NULL
     `,
     sql`
       CREATE INDEX IF NOT EXISTS "onboarding_responses_user_idx"
@@ -123,10 +124,10 @@ export async function ensureOnboardingSchema(db: Db): Promise<void> {
       CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_user_module_idx"
         ON "personalization_recommendations" ("user_id", "module_id")
     `,
+    sql`DROP INDEX IF EXISTS "personalization_recommendations_local_module_idx"`,
     sql`
       CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_local_module_idx"
         ON "personalization_recommendations" ("local_user_id", "module_id")
-        WHERE "local_user_id" IS NOT NULL
     `,
     sql`
       CREATE INDEX IF NOT EXISTS "personalization_recommendations_user_idx"
