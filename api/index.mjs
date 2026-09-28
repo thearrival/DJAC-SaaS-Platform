@@ -32458,12 +32458,18 @@ async function getOnboardingState(identity, organizationId) {
     }).from(onboardingEvents).where(
       isLocal ? eq38(onboardingEvents.localUserId, identity.localUserId) : eq38(onboardingEvents.userId, identity.userId)
     ).orderBy(desc22(onboardingEvents.createdAt)).limit(50);
+    const completedEvent = events.find(
+      (e) => e.eventType === "onboarding_completed"
+    );
+    const skippedEvent = events.some((e) => e.eventType === "onboarding_skipped");
+    const resolvedCompletedAt = progress?.completedAt ? new Date(progress.completedAt).toISOString() : completedEvent ? new Date(completedEvent.createdAt).toISOString() : null;
+    const resolvedSkipped = progress?.skipped ?? skippedEvent;
     let shouldOnboard = false;
     try {
       const account = isLocal ? (await db.select({ createdAt: localUsers.createdAt }).from(localUsers).where(eq38(localUsers.id, identity.localUserId)).limit(1))[0] : (await db.select({ createdAt: users.createdAt }).from(users).where(eq38(users.id, identity.userId)).limit(1))[0];
       const ageMs = account?.createdAt ? Date.now() - new Date(account.createdAt).getTime() : Number.POSITIVE_INFINITY;
       const isNewAccount = ageMs <= 14 * 24 * 60 * 60 * 1e3;
-      shouldOnboard = !progress?.completedAt && !(progress?.skipped ?? false) && Object.keys(answers).length === 0 && isNewAccount;
+      shouldOnboard = !resolvedCompletedAt && !resolvedSkipped && Object.keys(answers).length === 0 && isNewAccount;
     } catch {
       shouldOnboard = false;
     }
@@ -32481,8 +32487,8 @@ async function getOnboardingState(identity, organizationId) {
       profile,
       recommendations: recommendations.length > 0 ? recommendations : generatePersonalization(profile),
       firstAction: profile.objectives.length ? chooseFirstAction(profile) : null,
-      completedAt: progress?.completedAt ? new Date(progress.completedAt).toISOString() : null,
-      skipped: progress?.skipped ?? false,
+      completedAt: resolvedCompletedAt,
+      skipped: resolvedSkipped,
       currentStep: progress?.currentStep ?? 0,
       timeline: events.map((e) => ({
         eventType: e.eventType,

@@ -169,6 +169,20 @@ export async function getOnboardingState(
       .orderBy(desc(onboardingEvents.createdAt))
       .limit(50);
 
+    // Local users are not stored in the legacy onboarding_progress table, so
+    // completion/skip are derived from the event timeline (which exists for all
+    // identity kinds).
+    const completedEvent = events.find(
+      e => e.eventType === "onboarding_completed"
+    );
+    const skippedEvent = events.some(e => e.eventType === "onboarding_skipped");
+    const resolvedCompletedAt = progress?.completedAt
+      ? new Date(progress.completedAt).toISOString()
+      : completedEvent
+        ? new Date(completedEvent.createdAt).toISOString()
+        : null;
+    const resolvedSkipped = progress?.skipped ?? skippedEvent;
+
     // Account age for the "new user" onboarding gate.
     let shouldOnboard = false;
     try {
@@ -192,8 +206,8 @@ export async function getOnboardingState(
         : Number.POSITIVE_INFINITY;
       const isNewAccount = ageMs <= 14 * 24 * 60 * 60 * 1000;
       shouldOnboard =
-        !progress?.completedAt &&
-        !(progress?.skipped ?? false) &&
+        !resolvedCompletedAt &&
+        !resolvedSkipped &&
         Object.keys(answers).length === 0 &&
         isNewAccount;
     } catch {
@@ -220,10 +234,8 @@ export async function getOnboardingState(
       firstAction: profile.objectives.length
         ? chooseFirstAction(profile)
         : null,
-      completedAt: progress?.completedAt
-        ? new Date(progress.completedAt).toISOString()
-        : null,
-      skipped: progress?.skipped ?? false,
+      completedAt: resolvedCompletedAt,
+      skipped: resolvedSkipped,
       currentStep: progress?.currentStep ?? 0,
       timeline: events.map(e => ({
         eventType: e.eventType,
