@@ -30,6 +30,7 @@ import {
   chooseFirstAction,
   type Recommendation,
 } from "./services/personalization/engine";
+import { ensureOnboardingSchema } from "./_core/onboarding-schema";
 
 export type OnboardingActor = {
   userId: number;
@@ -76,6 +77,14 @@ const EMPTY_STATE: OnboardingState = {
   timeline: [],
 };
 
+/** getDb + idempotent schema bootstrap (once per process). */
+async function getReadyDb() {
+  const raw = await getDb();
+  if (!raw) return null;
+  await ensureOnboardingSchema(raw);
+  return raw;
+}
+
 function isValidQuestion(questionId: string): boolean {
   return QUESTIONS.some(q => q.id === questionId);
 }
@@ -86,7 +95,7 @@ export async function getOnboardingState(
   userId: number,
   organizationId: number | null
 ): Promise<OnboardingState> {
-  const db = await getDb();
+  const db = await getReadyDb();
   if (!db) return { ...EMPTY_STATE };
 
   try {
@@ -168,7 +177,7 @@ export async function getOnboardingState(
 }
 
 export async function getOnboardingTimeline(userId: number, limit = 200) {
-  const db = await getDb();
+  const db = await getReadyDb();
   if (!db) return [];
   try {
     return await db
@@ -183,7 +192,7 @@ export async function getOnboardingTimeline(userId: number, limit = 200) {
 }
 
 export async function getOnboardingResponsesForUser(userId: number) {
-  const db = await getDb();
+  const db = await getReadyDb();
   if (!db) return { responses: [], history: [] };
   try {
     const responses = await db
@@ -211,7 +220,7 @@ async function recordEvent(
   payload: Record<string, unknown> = {},
   stepNumber?: number
 ) {
-  const db = await getDb();
+  const db = await getReadyDb();
   if (!db) return;
   try {
     await db.insert(onboardingEvents).values({
@@ -248,7 +257,7 @@ export async function submitAnswer(
   if (!isValidQuestion(input.questionId)) {
     return { ok: false, changed: false, error: "Unknown question" };
   }
-  const db = await getDb();
+  const db = await getReadyDb();
   if (!db) return { ok: true, changed: false };
 
   try {
@@ -336,7 +345,7 @@ async function syncDerivedState(
   actor: OnboardingActor,
   answers: Record<string, unknown>
 ) {
-  const db = await getDb();
+  const db = await getReadyDb();
   if (!db) return;
   try {
     const profile = deriveProfile(answers);
@@ -392,7 +401,7 @@ async function syncDerivedState(
 export async function completeOnboarding(
   actor: OnboardingActor
 ): Promise<{ ok: boolean; recommendations: Recommendation[] }> {
-  const db = await getDb();
+  const db = await getReadyDb();
   if (!db) return { ok: true, recommendations: [] };
 
   try {
@@ -466,7 +475,7 @@ export async function completeOnboarding(
 }
 
 export async function recordOnboardingSkipped(actor: OnboardingActor) {
-  const db = await getDb();
+  const db = await getReadyDb();
   if (db) {
     try {
       await db
@@ -486,7 +495,7 @@ export async function recordOnboardingSkipped(actor: OnboardingActor) {
 // ── Owner-console intelligence (aggregate, tenant-safe) ───────────────────────
 
 export async function getOnboardingIntelligence(windowDays = 30) {
-  const db = await getDb();
+  const db = await getReadyDb();
   if (!db) {
     return { totals: {}, byIndustry: [], byObjective: [], funnel: [] };
   }

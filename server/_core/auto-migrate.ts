@@ -5,6 +5,7 @@
 import { sql, SQL } from "drizzle-orm";
 import { getDb } from "../db";
 import { ENV } from "../_core/env";
+import { ensureOnboardingSchema } from "./onboarding-schema";
 
 let migrationApplied = false;
 
@@ -49,6 +50,11 @@ export async function ensureMigrated(): Promise<void> {
 
   const db = await getDb();
   if (!db) return; // No DB connection — skip (in-memory mode)
+
+  // Bootstrap the self-healing onboarding schema FIRST, before the long (and
+  // occasionally aborting) migration sequence below, so these tables always
+  // exist even if a later statement fails.
+  await ensureOnboardingSchema(db);
 
   try {
     // Migration 0001: admin tables + performance indexes + verifiedAt
