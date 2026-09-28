@@ -21,13 +21,25 @@ import {
 import { getQuestionnaire } from "./services/personalization/engine";
 
 function actorFromCtx(ctx: TrpcContext, sessionId?: string): OnboardingActor {
-  const userId = ctx.user?.id ?? 0;
+  const rawId = ctx.user?.id ?? 0;
+  const openId = ctx.user?.openId ?? "";
+  const localMatch = /^local:(\d+)$/.exec(openId);
+  const localUserId = localMatch ? Number(localMatch[1]) : null;
+  // Local users have a synthetic negative id; use the real localUsers.id.
+  const userId = localUserId == null && rawId > 0 ? rawId : null;
+  const key = localUserId != null ? `local-${localUserId}` : `user-${userId}`;
   return {
     userId,
+    localUserId,
     organizationId: ctx.organizationId ?? null,
-    sessionId: sessionId ?? `sess-${userId}`,
+    sessionId: sessionId ?? `sess-${key}`,
     actorType: "user",
-    actorId: userId ? String(userId) : null,
+    actorId:
+      localUserId != null
+        ? `local:${localUserId}`
+        : userId
+          ? String(userId)
+          : null,
   };
 }
 
@@ -190,7 +202,7 @@ export const onboardingRouter = router({
 
   /** Server-side state for resume + personalization. */
   getState: protectedProcedure.query(async ({ ctx }) =>
-    getOnboardingState(ctx.user.id, ctx.organizationId ?? null)
+    getOnboardingState(actorFromCtx(ctx), ctx.organizationId ?? null)
   ),
 
   /** Persist a single answer idempotently (no duplicate rows on retry). */
@@ -242,7 +254,7 @@ export const onboardingRouter = router({
   /** Persisted, explainable recommendations (derived server-side). */
   getRecommendations: protectedProcedure.query(async ({ ctx }) => {
     const state = await getOnboardingState(
-      ctx.user.id,
+      actorFromCtx(ctx),
       ctx.organizationId ?? null
     );
     return {

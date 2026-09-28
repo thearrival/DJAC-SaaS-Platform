@@ -2123,9 +2123,13 @@ export const onboardingResponses = pgTable(
   "onboarding_responses",
   {
     id: serial("id").primaryKey(),
-    userId: integer("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    // Dual identity: OAuth users → userId; local (email/pw) users → localUserId.
+    userId: integer("user_id").references(() => users.id, {
+      onDelete: "cascade",
+    }),
+    localUserId: integer("local_user_id").references(() => localUsers.id, {
+      onDelete: "cascade",
+    }),
     organizationId: integer("organization_id").references(
       () => organizations.id,
       {
@@ -2158,9 +2162,13 @@ export const onboardingEvents = pgTable(
   "onboarding_events",
   {
     id: serial("id").primaryKey(),
-    userId: integer("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    // Dual identity: OAuth users → userId; local (email/pw) users → localUserId.
+    userId: integer("user_id").references(() => users.id, {
+      onDelete: "cascade",
+    }),
+    localUserId: integer("local_user_id").references(() => localUsers.id, {
+      onDelete: "cascade",
+    }),
     organizationId: integer("organization_id").references(
       () => organizations.id,
       {
@@ -2186,9 +2194,13 @@ export const onboardingProfileHistory = pgTable(
   "onboarding_profile_history",
   {
     id: serial("id").primaryKey(),
-    userId: integer("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    // Dual identity: OAuth users → userId; local (email/pw) users → localUserId.
+    userId: integer("user_id").references(() => users.id, {
+      onDelete: "cascade",
+    }),
+    localUserId: integer("local_user_id").references(() => localUsers.id, {
+      onDelete: "cascade",
+    }),
     organizationId: integer("organization_id").references(
       () => organizations.id,
       {
@@ -2216,9 +2228,13 @@ export const personalizationRecommendations = pgTable(
   "personalization_recommendations",
   {
     id: serial("id").primaryKey(),
-    userId: integer("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    // Dual identity: OAuth users → userId; local (email/pw) users → localUserId.
+    userId: integer("user_id").references(() => users.id, {
+      onDelete: "cascade",
+    }),
+    localUserId: integer("local_user_id").references(() => localUsers.id, {
+      onDelete: "cascade",
+    }),
     organizationId: integer("organization_id").references(
       () => organizations.id,
       {

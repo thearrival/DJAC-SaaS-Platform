@@ -2175,7 +2175,13 @@ var init_schema = __esm({
       "onboarding_responses",
       {
         id: serial("id").primaryKey(),
-        userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+        // Dual identity: OAuth users → userId; local (email/pw) users → localUserId.
+        userId: integer("user_id").references(() => users.id, {
+          onDelete: "cascade"
+        }),
+        localUserId: integer("local_user_id").references(() => localUsers.id, {
+          onDelete: "cascade"
+        }),
         organizationId: integer("organization_id").references(
           () => organizations.id,
           {
@@ -2207,7 +2213,13 @@ var init_schema = __esm({
       "onboarding_events",
       {
         id: serial("id").primaryKey(),
-        userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+        // Dual identity: OAuth users → userId; local (email/pw) users → localUserId.
+        userId: integer("user_id").references(() => users.id, {
+          onDelete: "cascade"
+        }),
+        localUserId: integer("local_user_id").references(() => localUsers.id, {
+          onDelete: "cascade"
+        }),
         organizationId: integer("organization_id").references(
           () => organizations.id,
           {
@@ -2232,7 +2244,13 @@ var init_schema = __esm({
       "onboarding_profile_history",
       {
         id: serial("id").primaryKey(),
-        userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+        // Dual identity: OAuth users → userId; local (email/pw) users → localUserId.
+        userId: integer("user_id").references(() => users.id, {
+          onDelete: "cascade"
+        }),
+        localUserId: integer("local_user_id").references(() => localUsers.id, {
+          onDelete: "cascade"
+        }),
         organizationId: integer("organization_id").references(
           () => organizations.id,
           {
@@ -2259,7 +2277,13 @@ var init_schema = __esm({
       "personalization_recommendations",
       {
         id: serial("id").primaryKey(),
-        userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+        // Dual identity: OAuth users → userId; local (email/pw) users → localUserId.
+        userId: integer("user_id").references(() => users.id, {
+          onDelete: "cascade"
+        }),
+        localUserId: integer("local_user_id").references(() => localUsers.id, {
+          onDelete: "cascade"
+        }),
         organizationId: integer("organization_id").references(
           () => organizations.id,
           {
@@ -32013,7 +32037,7 @@ import { TRPCError as TRPCError30 } from "@trpc/server";
 // server/onboarding-service.ts
 init_db();
 init_schema();
-import { and as and30, desc as desc22, eq as eq38, sql as sql8 } from "drizzle-orm";
+import { and as and30, desc as desc22, eq as eq38, or as or7, sql as sql8 } from "drizzle-orm";
 
 // server/services/personalization/engine.ts
 var QUESTIONNAIRE_VERSION = 1;
@@ -32244,13 +32268,20 @@ function chooseFirstAction(profile) {
 // server/_core/onboarding-schema.ts
 import { sql as sql7 } from "drizzle-orm";
 var _ensured = false;
+var IDENTITY_TABLES = [
+  "onboarding_responses",
+  "onboarding_events",
+  "onboarding_profile_history",
+  "personalization_recommendations"
+];
 async function ensureOnboardingSchema(db) {
   if (_ensured) return;
   const statements = [
     sql7`
       CREATE TABLE IF NOT EXISTS "onboarding_responses" (
         "id"                 serial      PRIMARY KEY,
-        "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+        "user_id"            integer     REFERENCES "users" ("id") ON DELETE CASCADE,
+        "local_user_id"      integer     REFERENCES "localUsers" ("id") ON DELETE CASCADE,
         "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
         "session_id"         varchar(64) NOT NULL,
         "onboarding_version" integer     NOT NULL DEFAULT 1,
@@ -32265,17 +32296,10 @@ async function ensureOnboardingSchema(db) {
       )
     `,
     sql7`
-      CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_user_q_idx"
-        ON "onboarding_responses" ("user_id", "onboarding_version", "question_id")
-    `,
-    sql7`
-      CREATE INDEX IF NOT EXISTS "onboarding_responses_user_idx"
-        ON "onboarding_responses" ("user_id")
-    `,
-    sql7`
       CREATE TABLE IF NOT EXISTS "onboarding_events" (
         "id"                 serial      PRIMARY KEY,
-        "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+        "user_id"            integer     REFERENCES "users" ("id") ON DELETE CASCADE,
+        "local_user_id"      integer     REFERENCES "localUsers" ("id") ON DELETE CASCADE,
         "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
         "session_id"         varchar(64),
         "event_type"         varchar(60) NOT NULL,
@@ -32289,13 +32313,10 @@ async function ensureOnboardingSchema(db) {
       )
     `,
     sql7`
-      CREATE INDEX IF NOT EXISTS "onboarding_events_user_idx"
-        ON "onboarding_events" ("user_id", "created_at")
-    `,
-    sql7`
       CREATE TABLE IF NOT EXISTS "onboarding_profile_history" (
         "id"                 serial      PRIMARY KEY,
-        "user_id"            integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+        "user_id"            integer     REFERENCES "users" ("id") ON DELETE CASCADE,
+        "local_user_id"      integer     REFERENCES "localUsers" ("id") ON DELETE CASCADE,
         "organization_id"    integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
         "field"              varchar(80) NOT NULL,
         "previous_value"     jsonb,
@@ -32308,13 +32329,10 @@ async function ensureOnboardingSchema(db) {
       )
     `,
     sql7`
-      CREATE INDEX IF NOT EXISTS "onboarding_profile_history_user_idx"
-        ON "onboarding_profile_history" ("user_id", "created_at")
-    `,
-    sql7`
       CREATE TABLE IF NOT EXISTS "personalization_recommendations" (
         "id"              serial      PRIMARY KEY,
-        "user_id"         integer     NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+        "user_id"         integer     REFERENCES "users" ("id") ON DELETE CASCADE,
+        "local_user_id"   integer     REFERENCES "localUsers" ("id") ON DELETE CASCADE,
         "organization_id" integer     REFERENCES "organizations" ("id") ON DELETE CASCADE,
         "module_id"       varchar(80) NOT NULL,
         "priority"        integer     NOT NULL DEFAULT 50,
@@ -32325,9 +32343,41 @@ async function ensureOnboardingSchema(db) {
         "updated_at"      timestamp   NOT NULL DEFAULT now()
       )
     `,
+    // Migrate pre-existing tables (created before dual-identity) — idempotent.
+    ...IDENTITY_TABLES.flatMap((table) => [
+      sql7`ALTER TABLE ${sql7.identifier(table)} ADD COLUMN IF NOT EXISTS "local_user_id" integer REFERENCES "localUsers" ("id") ON DELETE CASCADE`,
+      sql7`ALTER TABLE ${sql7.identifier(table)} ALTER COLUMN "user_id" DROP NOT NULL`,
+      sql7`CREATE INDEX IF NOT EXISTS ${sql7.identifier(`${table}_local_user_idx`)} ON ${sql7.identifier(table)} ("local_user_id")`
+    ]),
+    sql7`
+      CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_user_q_idx"
+        ON "onboarding_responses" ("user_id", "onboarding_version", "question_id")
+    `,
+    sql7`
+      CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_local_q_idx"
+        ON "onboarding_responses" ("local_user_id", "onboarding_version", "question_id")
+        WHERE "local_user_id" IS NOT NULL
+    `,
+    sql7`
+      CREATE INDEX IF NOT EXISTS "onboarding_responses_user_idx"
+        ON "onboarding_responses" ("user_id")
+    `,
+    sql7`
+      CREATE INDEX IF NOT EXISTS "onboarding_events_user_idx"
+        ON "onboarding_events" ("user_id", "created_at")
+    `,
+    sql7`
+      CREATE INDEX IF NOT EXISTS "onboarding_profile_history_user_idx"
+        ON "onboarding_profile_history" ("user_id", "created_at")
+    `,
     sql7`
       CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_user_module_idx"
         ON "personalization_recommendations" ("user_id", "module_id")
+    `,
+    sql7`
+      CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_local_module_idx"
+        ON "personalization_recommendations" ("local_user_id", "module_id")
+        WHERE "local_user_id" IS NOT NULL
     `,
     sql7`
       CREATE INDEX IF NOT EXISTS "personalization_recommendations_user_idx"
@@ -32372,23 +32422,31 @@ async function getReadyDb() {
 function isValidQuestion(questionId) {
   return QUESTIONS.some((q) => q.id === questionId);
 }
-async function getOnboardingState(userId, organizationId) {
+async function getOnboardingState(identity, organizationId) {
   const db = await getReadyDb();
-  if (!db) return { ...EMPTY_STATE };
+  if (!db || identity.userId == null && identity.localUserId == null) {
+    return { ...EMPTY_STATE, organizationId: organizationId ?? null };
+  }
+  const isLocal = identity.localUserId != null;
   try {
     const rows = await db.select().from(onboardingResponses).where(
       and30(
-        eq38(onboardingResponses.userId, userId),
+        isLocal ? eq38(onboardingResponses.localUserId, identity.localUserId) : eq38(onboardingResponses.userId, identity.userId),
         eq38(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION)
       )
     );
     const answers = {};
     for (const row of rows) answers[row.questionId] = row.answerValue;
     const profile = deriveProfile(answers);
-    const [progress] = await db.select().from(onboardingProgress).where(eq38(onboardingProgress.userId, userId)).limit(1);
+    const [progress] = await db.select().from(onboardingProgress).where(
+      isLocal ? eq38(onboardingProgress.userId, -(5e4 + identity.localUserId)) : eq38(onboardingProgress.userId, identity.userId)
+    ).limit(1);
     const recs = await db.select().from(personalizationRecommendations).where(
       and30(
-        eq38(personalizationRecommendations.userId, userId),
+        isLocal ? eq38(
+          personalizationRecommendations.localUserId,
+          identity.localUserId
+        ) : eq38(personalizationRecommendations.userId, identity.userId),
         eq38(personalizationRecommendations.status, "active")
       )
     ).orderBy(desc22(personalizationRecommendations.priority));
@@ -32396,10 +32454,12 @@ async function getOnboardingState(userId, organizationId) {
       eventType: onboardingEvents.eventType,
       stepNumber: onboardingEvents.stepNumber,
       createdAt: onboardingEvents.createdAt
-    }).from(onboardingEvents).where(eq38(onboardingEvents.userId, userId)).orderBy(desc22(onboardingEvents.createdAt)).limit(50);
+    }).from(onboardingEvents).where(
+      isLocal ? eq38(onboardingEvents.localUserId, identity.localUserId) : eq38(onboardingEvents.userId, identity.userId)
+    ).orderBy(desc22(onboardingEvents.createdAt)).limit(50);
     let shouldOnboard = false;
     try {
-      const [account] = await db.select({ createdAt: users.createdAt }).from(users).where(eq38(users.id, userId)).limit(1);
+      const account = isLocal ? (await db.select({ createdAt: localUsers.createdAt }).from(localUsers).where(eq38(localUsers.id, identity.localUserId)).limit(1))[0] : (await db.select({ createdAt: users.createdAt }).from(users).where(eq38(users.id, identity.userId)).limit(1))[0];
       const ageMs = account?.createdAt ? Date.now() - new Date(account.createdAt).getTime() : Number.POSITIVE_INFINITY;
       const isNewAccount = ageMs <= 14 * 24 * 60 * 60 * 1e3;
       shouldOnboard = !progress?.completedAt && !(progress?.skipped ?? false) && Object.keys(answers).length === 0 && isNewAccount;
@@ -32430,35 +32490,69 @@ async function getOnboardingState(userId, organizationId) {
       }))
     };
   } catch {
-    return { ...EMPTY_STATE };
+    return { ...EMPTY_STATE, organizationId: organizationId ?? null };
   }
 }
-async function getOnboardingTimeline(userId, limit = 200) {
+async function getOnboardingStateForAnyId(id) {
+  const byUser = await getOnboardingState(
+    { userId: id, localUserId: null },
+    null
+  );
+  if (Object.keys(byUser.answers).length > 0 || byUser.completedAt)
+    return byUser;
+  return getOnboardingState({ userId: null, localUserId: id }, null);
+}
+async function getOnboardingTimelineForAnyId(id, limit = 200) {
   const db = await getReadyDb();
   if (!db) return [];
   try {
-    return await db.select().from(onboardingEvents).where(eq38(onboardingEvents.userId, userId)).orderBy(desc22(onboardingEvents.createdAt)).limit(Math.min(Math.max(limit, 1), 500));
+    return await db.select().from(onboardingEvents).where(
+      or7(
+        eq38(onboardingEvents.userId, id),
+        eq38(onboardingEvents.localUserId, id)
+      )
+    ).orderBy(desc22(onboardingEvents.createdAt)).limit(Math.min(Math.max(limit, 1), 500));
   } catch {
     return [];
   }
 }
-async function getOnboardingResponsesForUser(userId) {
+async function getOnboardingResponsesForAnyId(id) {
   const db = await getReadyDb();
   if (!db) return { responses: [], history: [] };
   try {
-    const responses = await db.select().from(onboardingResponses).where(eq38(onboardingResponses.userId, userId)).orderBy(onboardingResponses.stepNumber);
-    const history = await db.select().from(onboardingProfileHistory).where(eq38(onboardingProfileHistory.userId, userId)).orderBy(desc22(onboardingProfileHistory.createdAt)).limit(200);
+    const responses = await db.select().from(onboardingResponses).where(
+      or7(
+        eq38(onboardingResponses.userId, id),
+        eq38(onboardingResponses.localUserId, id)
+      )
+    ).orderBy(onboardingResponses.stepNumber);
+    const history = await db.select().from(onboardingProfileHistory).where(
+      or7(
+        eq38(onboardingProfileHistory.userId, id),
+        eq38(onboardingProfileHistory.localUserId, id)
+      )
+    ).orderBy(desc22(onboardingProfileHistory.createdAt)).limit(200);
     return { responses, history };
   } catch {
     return { responses: [], history: [] };
   }
+}
+function identityColumns(actor) {
+  return {
+    userId: actor.userId ?? null,
+    localUserId: actor.localUserId ?? null
+  };
+}
+function identityWhere(table, actor) {
+  const t2 = table;
+  return actor.localUserId != null ? eq38(t2.localUserId, actor.localUserId) : eq38(t2.userId, actor.userId);
 }
 async function recordEvent(actor, eventType, payload = {}, stepNumber) {
   const db = await getReadyDb();
   if (!db) return;
   try {
     await db.insert(onboardingEvents).values({
-      userId: actor.userId,
+      ...identityColumns(actor),
       organizationId: actor.organizationId,
       sessionId: actor.sessionId,
       eventType,
@@ -32479,18 +32573,17 @@ async function submitAnswer(actor, input) {
   const db = await getReadyDb();
   if (!db) return { ok: true, changed: false };
   try {
+    const where = and30(
+      identityWhere(onboardingResponses, actor),
+      eq38(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
+      eq38(onboardingResponses.questionId, input.questionId)
+    );
     const result = await db.transaction(async (tx) => {
-      const [existing] = await tx.select({ answerValue: onboardingResponses.answerValue }).from(onboardingResponses).where(
-        and30(
-          eq38(onboardingResponses.userId, actor.userId),
-          eq38(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
-          eq38(onboardingResponses.questionId, input.questionId)
-        )
-      ).limit(1);
+      const [existing] = await tx.select({ answerValue: onboardingResponses.answerValue }).from(onboardingResponses).where(where).limit(1);
       const previous = existing?.answerValue ?? null;
       const changed = JSON.stringify(previous) !== JSON.stringify(input.value);
       await tx.insert(onboardingResponses).values({
-        userId: actor.userId,
+        ...identityColumns(actor),
         organizationId: actor.organizationId,
         sessionId: actor.sessionId,
         onboardingVersion: QUESTIONNAIRE_VERSION,
@@ -32502,7 +32595,11 @@ async function submitAnswer(actor, input) {
         submittedAt: /* @__PURE__ */ new Date(),
         updatedAt: /* @__PURE__ */ new Date()
       }).onConflictDoUpdate({
-        target: [
+        target: actor.localUserId != null ? [
+          onboardingResponses.localUserId,
+          onboardingResponses.onboardingVersion,
+          onboardingResponses.questionId
+        ] : [
           onboardingResponses.userId,
           onboardingResponses.onboardingVersion,
           onboardingResponses.questionId
@@ -32518,7 +32615,7 @@ async function submitAnswer(actor, input) {
       });
       if (changed) {
         await tx.insert(onboardingProfileHistory).values({
-          userId: actor.userId,
+          ...identityColumns(actor),
           organizationId: actor.organizationId,
           field: input.questionId,
           previousValue: previous,
@@ -32548,21 +32645,23 @@ async function syncDerivedState(actor, answers) {
   if (!db) return;
   try {
     const profile = deriveProfile(answers);
-    const completedSteps = Object.keys(answers);
-    await db.insert(onboardingProgress).values({
-      userId: actor.userId,
-      currentStep: Math.max(0, completedSteps.length),
-      completedSteps,
-      responses: answers,
-      updatedAt: /* @__PURE__ */ new Date()
-    }).onConflictDoUpdate({
-      target: onboardingProgress.userId,
-      set: {
+    if (actor.userId != null) {
+      const completedSteps = Object.keys(answers);
+      await db.insert(onboardingProgress).values({
+        userId: actor.userId,
+        currentStep: Math.max(0, completedSteps.length),
         completedSteps,
         responses: answers,
         updatedAt: /* @__PURE__ */ new Date()
-      }
-    });
+      }).onConflictDoUpdate({
+        target: onboardingProgress.userId,
+        set: {
+          completedSteps,
+          responses: answers,
+          updatedAt: /* @__PURE__ */ new Date()
+        }
+      });
+    }
     if (actor.organizationId != null) {
       await db.insert(organizationProfilesCustom).values({
         organizationId: actor.organizationId,
@@ -32587,12 +32686,12 @@ async function completeOnboarding(actor) {
   const db = await getReadyDb();
   if (!db) return { ok: true, recommendations: [] };
   try {
-    const state = await getOnboardingState(actor.userId, actor.organizationId);
+    const state = await getOnboardingState(actor, actor.organizationId);
     const recommendations = generatePersonalization(state.profile);
     await db.transaction(async (tx) => {
       for (const rec of recommendations) {
         await tx.insert(personalizationRecommendations).values({
-          userId: actor.userId,
+          ...identityColumns(actor),
           organizationId: actor.organizationId,
           moduleId: rec.moduleId,
           priority: rec.priority,
@@ -32601,7 +32700,10 @@ async function completeOnboarding(actor) {
           status: "active",
           updatedAt: /* @__PURE__ */ new Date()
         }).onConflictDoUpdate({
-          target: [
+          target: actor.localUserId != null ? [
+            personalizationRecommendations.localUserId,
+            personalizationRecommendations.moduleId
+          ] : [
             personalizationRecommendations.userId,
             personalizationRecommendations.moduleId
           ],
@@ -32615,15 +32717,17 @@ async function completeOnboarding(actor) {
         });
       }
       const now = /* @__PURE__ */ new Date();
-      await tx.insert(onboardingProgress).values({
-        userId: actor.userId,
-        completedAt: now,
-        responses: state.answers,
-        updatedAt: now
-      }).onConflictDoUpdate({
-        target: onboardingProgress.userId,
-        set: { completedAt: now, updatedAt: now }
-      });
+      if (actor.userId != null) {
+        await tx.insert(onboardingProgress).values({
+          userId: actor.userId,
+          completedAt: now,
+          responses: state.answers,
+          updatedAt: now
+        }).onConflictDoUpdate({
+          target: onboardingProgress.userId,
+          set: { completedAt: now, updatedAt: now }
+        });
+      }
       if (actor.organizationId != null) {
         await tx.insert(organizationProfilesCustom).values({
           organizationId: actor.organizationId,
@@ -32648,7 +32752,7 @@ async function dismissRecommendation(actor, moduleId) {
   try {
     await db.update(personalizationRecommendations).set({ status: "dismissed", updatedAt: /* @__PURE__ */ new Date() }).where(
       and30(
-        eq38(personalizationRecommendations.userId, actor.userId),
+        identityWhere(personalizationRecommendations, actor),
         eq38(personalizationRecommendations.moduleId, moduleId)
       )
     );
@@ -32668,7 +32772,7 @@ async function recordModuleSignal(actor, moduleId, signal) {
         updatedAt: /* @__PURE__ */ new Date()
       }).where(
         and30(
-          eq38(personalizationRecommendations.userId, actor.userId),
+          identityWhere(personalizationRecommendations, actor),
           eq38(personalizationRecommendations.moduleId, moduleId),
           eq38(personalizationRecommendations.status, "active")
         )
@@ -32677,7 +32781,7 @@ async function recordModuleSignal(actor, moduleId, signal) {
     if (signal === "first_action_completed") {
       await db.update(personalizationRecommendations).set({ status: "completed", updatedAt: /* @__PURE__ */ new Date() }).where(
         and30(
-          eq38(personalizationRecommendations.userId, actor.userId),
+          identityWhere(personalizationRecommendations, actor),
           eq38(personalizationRecommendations.moduleId, moduleId)
         )
       );
@@ -32691,7 +32795,7 @@ async function recordModuleSignal(actor, moduleId, signal) {
 async function getOnboardingIntelligence(windowDays = 30) {
   const db = await getReadyDb();
   if (!db) {
-    return { totals: {}, byIndustry: [], byObjective: [], funnel: [] };
+    return { totals: {}, byIndustry: [], byObjective: [], byModule: [] };
   }
   const days = Math.min(Math.max(windowDays, 1), 365);
   try {
@@ -32730,7 +32834,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
     `);
     const newUsers = await db.execute(sql8`
       SELECT date_trunc('day', "created_at")::date AS "day", COUNT(*)::int AS "count"
-      FROM "users"
+      FROM "localUsers"
       WHERE "created_at" >= now() - (${days} * interval '1 day')
       GROUP BY 1
       ORDER BY 1 DESC
@@ -32777,13 +32881,19 @@ async function getOnboardingIntelligence(windowDays = 30) {
 
 // server/onboarding-router.ts
 function actorFromCtx(ctx, sessionId) {
-  const userId = ctx.user?.id ?? 0;
+  const rawId = ctx.user?.id ?? 0;
+  const openId = ctx.user?.openId ?? "";
+  const localMatch = /^local:(\d+)$/.exec(openId);
+  const localUserId = localMatch ? Number(localMatch[1]) : null;
+  const userId = localUserId == null && rawId > 0 ? rawId : null;
+  const key = localUserId != null ? `local-${localUserId}` : `user-${userId}`;
   return {
     userId,
+    localUserId,
     organizationId: ctx.organizationId ?? null,
-    sessionId: sessionId ?? `sess-${userId}`,
+    sessionId: sessionId ?? `sess-${key}`,
     actorType: "user",
-    actorId: userId ? String(userId) : null
+    actorId: localUserId != null ? `local:${localUserId}` : userId ? String(userId) : null
   };
 }
 var ONBOARD_LIMIT = 20;
@@ -32901,7 +33011,7 @@ var onboardingRouter = router({
   getQuestionnaire: protectedProcedure.query(async () => getQuestionnaire()),
   /** Server-side state for resume + personalization. */
   getState: protectedProcedure.query(
-    async ({ ctx }) => getOnboardingState(ctx.user.id, ctx.organizationId ?? null)
+    async ({ ctx }) => getOnboardingState(actorFromCtx(ctx), ctx.organizationId ?? null)
   ),
   /** Persist a single answer idempotently (no duplicate rows on retry). */
   submitAnswer: protectedProcedure.input(
@@ -32949,7 +33059,7 @@ var onboardingRouter = router({
   /** Persisted, explainable recommendations (derived server-side). */
   getRecommendations: protectedProcedure.query(async ({ ctx }) => {
     const state = await getOnboardingState(
-      ctx.user.id,
+      actorFromCtx(ctx),
       ctx.organizationId ?? null
     );
     return {
@@ -37812,7 +37922,7 @@ import { sql as sql16 } from "drizzle-orm";
 init_schema();
 init_db();
 init_local_jwt();
-import { and as and35, count, desc as desc26, eq as eq49, gte as gte2, like as like2, or as or7, sql as sql13 } from "drizzle-orm";
+import { and as and35, count, desc as desc26, eq as eq49, gte as gte2, like as like2, or as or8, sql as sql13 } from "drizzle-orm";
 async function getUnifiedUsers(options) {
   const db = await getDb();
   if (!db) {
@@ -37848,7 +37958,7 @@ async function getUnifiedUsers(options) {
   if (options.search) {
     const term = `%${options.search}%`;
     conditions.push(
-      or7(
+      or8(
         like2(localUsers.name, term),
         like2(localUsers.email, term),
         like2(localUsers.companyName, term),
@@ -38101,7 +38211,7 @@ async function getSecurityEvents(limit = 200) {
     createdAt: auditLogs.createdAt,
     targetEntity: auditLogs.targetEntity
   }).from(auditLogs).where(
-    or7(
+    or8(
       eq49(auditLogs.category, "auth"),
       eq49(auditLogs.outcome, "failure"),
       eq49(auditLogs.outcome, "blocked")
@@ -38935,9 +39045,9 @@ function createAdminDashboardRouter() {
         return;
       }
       const [state, responses, timeline] = await Promise.all([
-        getOnboardingState(userId, null),
-        getOnboardingResponsesForUser(userId),
-        getOnboardingTimeline(userId, 200)
+        getOnboardingStateForAnyId(userId),
+        getOnboardingResponsesForAnyId(userId),
+        getOnboardingTimelineForAnyId(userId, 200)
       ]);
       res.json({ state, ...responses, timeline });
     } catch (error) {

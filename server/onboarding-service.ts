@@ -1,18 +1,19 @@
 /**
  * Onboarding service — persistence + orchestration.
  *
- * Extends the existing onboarding architecture (onboarding_progress /
- * organization_profiles_custom) with answer-level, versioned, auditable rows:
- *   • onboarding_responses        — one idempotent row per (user, version, question)
- *   • onboarding_events           — append-only timeline
- *   • onboarding_profile_history  — field-level change history
- *   • personalization_recommendations — persisted, explainable recommendations
+ * Extends the existing onboarding architecture with answer-level, versioned,
+ * auditable rows. IMPORTANT: the platform has TWO identity kinds —
+ *   • OAuth users      → users.id            (positive)
+ *   • Local (email/pw) → localUsers.id       (ctx.user.id is a synthetic negative)
+ * so every row carries BOTH `userId` and `localUserId`, exactly like the rest of
+ * the schema (userOnboarding, organizationMembers, …). This is essential: the
+ * primary auth path is local, and its synthetic id is NOT a users.id.
  *
  * Every function is defensive: if the database is unavailable it degrades to an
  * empty/fallback result and NEVER throws into authentication or authorization.
  */
 
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, or, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import {
   onboardingResponses,
@@ -22,6 +23,7 @@ import {
   onboardingProgress,
   organizationProfilesCustom,
   users,
+  localUsers,
 } from "../drizzle/schema";
 import {
   QUESTIONNAIRE_VERSION,
@@ -33,8 +35,12 @@ import {
 } from "./services/personalization/engine";
 import { ensureOnboardingSchema } from "./_core/onboarding-schema";
 
-export type OnboardingActor = {
-  userId: number;
+export type OnboardingIdentity = {
+  userId: number | null;
+  localUserId: number | null;
+};
+
+export type OnboardingActor = OnboardingIdentity & {
   organizationId: number | null;
   sessionId: string;
   actorType?: "user" | "admin" | "system";
@@ -45,7 +51,6 @@ export type OnboardingActor = {
 export type OnboardingState = {
   questionnaireVersion: number;
   organizationId: number | null;
-  /** True only for recent accounts that have not started onboarding. */
   shouldOnboard: boolean;
   answers: Record<string, unknown>;
   profile: ReturnType<typeof deriveProfile>;
@@ -96,11 +101,15 @@ function isValidQuestion(questionId: string): boolean {
 // ── Reads ─────────────────────────────────────────────────────────────────────
 
 export async function getOnboardingState(
-  userId: number,
+  identity: OnboardingIdentity,
   organizationId: number | null
 ): Promise<OnboardingState> {
   const db = await getReadyDb();
-  if (!db) return { ...EMPTY_STATE };
+  if (!db || (identity.userId == null && identity.localUserId == null)) {
+    return { ...EMPTY_STATE, organizationId: organizationId ?? null };
+  }
+
+  const isLocal = identity.localUserId != null;
 
   try {
     const rows = await db
@@ -108,7 +117,9 @@ export async function getOnboardingState(
       .from(onboardingResponses)
       .where(
         and(
-          eq(onboardingResponses.userId, userId),
+          isLocal
+            ? eq(onboardingResponses.localUserId, identity.localUserId!)
+            : eq(onboardingResponses.userId, identity.userId!),
           eq(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION)
         )
       );
@@ -120,7 +131,11 @@ export async function getOnboardingState(
     const [progress] = await db
       .select()
       .from(onboardingProgress)
-      .where(eq(onboardingProgress.userId, userId))
+      .where(
+        isLocal
+          ? eq(onboardingProgress.userId, -(50_000 + identity.localUserId!))
+          : eq(onboardingProgress.userId, identity.userId!)
+      )
       .limit(1);
 
     const recs = await db
@@ -128,7 +143,12 @@ export async function getOnboardingState(
       .from(personalizationRecommendations)
       .where(
         and(
-          eq(personalizationRecommendations.userId, userId),
+          isLocal
+            ? eq(
+                personalizationRecommendations.localUserId,
+                identity.localUserId!
+              )
+            : eq(personalizationRecommendations.userId, identity.userId!),
           eq(personalizationRecommendations.status, "active")
         )
       )
@@ -141,19 +161,32 @@ export async function getOnboardingState(
         createdAt: onboardingEvents.createdAt,
       })
       .from(onboardingEvents)
-      .where(eq(onboardingEvents.userId, userId))
+      .where(
+        isLocal
+          ? eq(onboardingEvents.localUserId, identity.localUserId!)
+          : eq(onboardingEvents.userId, identity.userId!)
+      )
       .orderBy(desc(onboardingEvents.createdAt))
       .limit(50);
 
-    // Only recent accounts with no onboarding activity are asked to onboard, so
-    // existing production users are never disrupted.
+    // Account age for the "new user" onboarding gate.
     let shouldOnboard = false;
     try {
-      const [account] = await db
-        .select({ createdAt: users.createdAt })
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
+      const account = isLocal
+        ? (
+            await db
+              .select({ createdAt: localUsers.createdAt })
+              .from(localUsers)
+              .where(eq(localUsers.id, identity.localUserId!))
+              .limit(1)
+          )[0]
+        : (
+            await db
+              .select({ createdAt: users.createdAt })
+              .from(users)
+              .where(eq(users.id, identity.userId!))
+              .limit(1)
+          )[0];
       const ageMs = account?.createdAt
         ? Date.now() - new Date(account.createdAt).getTime()
         : Number.POSITIVE_INFINITY;
@@ -199,18 +232,34 @@ export async function getOnboardingState(
       })),
     };
   } catch {
-    return { ...EMPTY_STATE };
+    return { ...EMPTY_STATE, organizationId: organizationId ?? null };
   }
 }
 
-export async function getOnboardingTimeline(userId: number, limit = 200) {
+/** Owner-console helper: resolve by users.id first, then localUsers.id. */
+export async function getOnboardingStateForAnyId(id: number) {
+  const byUser = await getOnboardingState(
+    { userId: id, localUserId: null },
+    null
+  );
+  if (Object.keys(byUser.answers).length > 0 || byUser.completedAt)
+    return byUser;
+  return getOnboardingState({ userId: null, localUserId: id }, null);
+}
+
+export async function getOnboardingTimelineForAnyId(id: number, limit = 200) {
   const db = await getReadyDb();
   if (!db) return [];
   try {
     return await db
       .select()
       .from(onboardingEvents)
-      .where(eq(onboardingEvents.userId, userId))
+      .where(
+        or(
+          eq(onboardingEvents.userId, id),
+          eq(onboardingEvents.localUserId, id)
+        )
+      )
       .orderBy(desc(onboardingEvents.createdAt))
       .limit(Math.min(Math.max(limit, 1), 500));
   } catch {
@@ -218,19 +267,29 @@ export async function getOnboardingTimeline(userId: number, limit = 200) {
   }
 }
 
-export async function getOnboardingResponsesForUser(userId: number) {
+export async function getOnboardingResponsesForAnyId(id: number) {
   const db = await getReadyDb();
   if (!db) return { responses: [], history: [] };
   try {
     const responses = await db
       .select()
       .from(onboardingResponses)
-      .where(eq(onboardingResponses.userId, userId))
+      .where(
+        or(
+          eq(onboardingResponses.userId, id),
+          eq(onboardingResponses.localUserId, id)
+        )
+      )
       .orderBy(onboardingResponses.stepNumber);
     const history = await db
       .select()
       .from(onboardingProfileHistory)
-      .where(eq(onboardingProfileHistory.userId, userId))
+      .where(
+        or(
+          eq(onboardingProfileHistory.userId, id),
+          eq(onboardingProfileHistory.localUserId, id)
+        )
+      )
       .orderBy(desc(onboardingProfileHistory.createdAt))
       .limit(200);
     return { responses, history };
@@ -240,6 +299,26 @@ export async function getOnboardingResponsesForUser(userId: number) {
 }
 
 // ── Writes ────────────────────────────────────────────────────────────────────
+
+function identityColumns(actor: OnboardingIdentity) {
+  return {
+    userId: actor.userId ?? null,
+    localUserId: actor.localUserId ?? null,
+  };
+}
+
+function identityWhere<T extends { userId: unknown; localUserId: unknown }>(
+  table: T,
+  actor: OnboardingIdentity
+) {
+  const t = table as unknown as {
+    userId: never;
+    localUserId: never;
+  };
+  return actor.localUserId != null
+    ? eq(t.localUserId, actor.localUserId as never)
+    : eq(t.userId, actor.userId as never);
+}
 
 async function recordEvent(
   actor: OnboardingActor,
@@ -251,7 +330,7 @@ async function recordEvent(
   if (!db) return;
   try {
     await db.insert(onboardingEvents).values({
-      userId: actor.userId,
+      ...identityColumns(actor),
       organizationId: actor.organizationId,
       sessionId: actor.sessionId,
       eventType,
@@ -267,11 +346,6 @@ async function recordEvent(
   }
 }
 
-/**
- * Persist a single answer idempotently. Re-submitting the same question updates
- * the existing row (no duplicates) and records a history entry only when the
- * value actually changed.
- */
 export async function submitAnswer(
   actor: OnboardingActor,
   input: {
@@ -288,17 +362,17 @@ export async function submitAnswer(
   if (!db) return { ok: true, changed: false };
 
   try {
+    const where = and(
+      identityWhere(onboardingResponses, actor),
+      eq(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
+      eq(onboardingResponses.questionId, input.questionId)
+    );
+
     const result = await db.transaction(async tx => {
       const [existing] = await tx
         .select({ answerValue: onboardingResponses.answerValue })
         .from(onboardingResponses)
-        .where(
-          and(
-            eq(onboardingResponses.userId, actor.userId),
-            eq(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
-            eq(onboardingResponses.questionId, input.questionId)
-          )
-        )
+        .where(where)
         .limit(1);
 
       const previous = existing?.answerValue ?? null;
@@ -307,7 +381,7 @@ export async function submitAnswer(
       await tx
         .insert(onboardingResponses)
         .values({
-          userId: actor.userId,
+          ...identityColumns(actor),
           organizationId: actor.organizationId,
           sessionId: actor.sessionId,
           onboardingVersion: QUESTIONNAIRE_VERSION,
@@ -321,11 +395,18 @@ export async function submitAnswer(
           updatedAt: new Date(),
         })
         .onConflictDoUpdate({
-          target: [
-            onboardingResponses.userId,
-            onboardingResponses.onboardingVersion,
-            onboardingResponses.questionId,
-          ],
+          target:
+            actor.localUserId != null
+              ? [
+                  onboardingResponses.localUserId,
+                  onboardingResponses.onboardingVersion,
+                  onboardingResponses.questionId,
+                ]
+              : [
+                  onboardingResponses.userId,
+                  onboardingResponses.onboardingVersion,
+                  onboardingResponses.questionId,
+                ],
           set: {
             answerValue: input.value as never,
             stepNumber: input.stepNumber,
@@ -338,7 +419,7 @@ export async function submitAnswer(
 
       if (changed) {
         await tx.insert(onboardingProfileHistory).values({
-          userId: actor.userId,
+          ...identityColumns(actor),
           organizationId: actor.organizationId,
           field: input.questionId,
           previousValue: previous as never,
@@ -352,7 +433,6 @@ export async function submitAnswer(
       return changed;
     });
 
-    // Keep the legacy progress table + org profile in sync (best-effort).
     await syncDerivedState(actor, { [input.questionId]: input.value });
     await recordEvent(
       actor,
@@ -362,12 +442,11 @@ export async function submitAnswer(
     );
     return { ok: true, changed: result };
   } catch {
-    // Retryable — surface a clear error so the UI can offer recovery.
     return { ok: false, changed: false, error: "Could not save that answer" };
   }
 }
 
-/** Merge the current answers into the legacy tables the rest of the app reads. */
+/** Merge into the legacy tables the rest of the app reads (best-effort). */
 async function syncDerivedState(
   actor: OnboardingActor,
   answers: Record<string, unknown>
@@ -376,25 +455,27 @@ async function syncDerivedState(
   if (!db) return;
   try {
     const profile = deriveProfile(answers);
-    const completedSteps = Object.keys(answers);
-
-    await db
-      .insert(onboardingProgress)
-      .values({
-        userId: actor.userId,
-        currentStep: Math.max(0, completedSteps.length),
-        completedSteps,
-        responses: answers as Record<string, unknown>,
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: onboardingProgress.userId,
-        set: {
+    // onboarding_progress is keyed on users.id only — safe for OAuth users.
+    if (actor.userId != null) {
+      const completedSteps = Object.keys(answers);
+      await db
+        .insert(onboardingProgress)
+        .values({
+          userId: actor.userId,
+          currentStep: Math.max(0, completedSteps.length),
           completedSteps,
           responses: answers as Record<string, unknown>,
           updatedAt: new Date(),
-        },
-      });
+        })
+        .onConflictDoUpdate({
+          target: onboardingProgress.userId,
+          set: {
+            completedSteps,
+            responses: answers as Record<string, unknown>,
+            updatedAt: new Date(),
+          },
+        });
+    }
 
     if (actor.organizationId != null) {
       await db
@@ -421,10 +502,6 @@ async function syncDerivedState(
   }
 }
 
-/**
- * Finalise onboarding: persist recommendations + completion atomically and
- * record the completion event. Safe to call multiple times (idempotent).
- */
 export async function completeOnboarding(
   actor: OnboardingActor
 ): Promise<{ ok: boolean; recommendations: Recommendation[] }> {
@@ -432,7 +509,7 @@ export async function completeOnboarding(
   if (!db) return { ok: true, recommendations: [] };
 
   try {
-    const state = await getOnboardingState(actor.userId, actor.organizationId);
+    const state = await getOnboardingState(actor, actor.organizationId);
     const recommendations = generatePersonalization(state.profile);
 
     await db.transaction(async tx => {
@@ -440,7 +517,7 @@ export async function completeOnboarding(
         await tx
           .insert(personalizationRecommendations)
           .values({
-            userId: actor.userId,
+            ...identityColumns(actor),
             organizationId: actor.organizationId,
             moduleId: rec.moduleId,
             priority: rec.priority,
@@ -450,10 +527,16 @@ export async function completeOnboarding(
             updatedAt: new Date(),
           })
           .onConflictDoUpdate({
-            target: [
-              personalizationRecommendations.userId,
-              personalizationRecommendations.moduleId,
-            ],
+            target:
+              actor.localUserId != null
+                ? [
+                    personalizationRecommendations.localUserId,
+                    personalizationRecommendations.moduleId,
+                  ]
+                : [
+                    personalizationRecommendations.userId,
+                    personalizationRecommendations.moduleId,
+                  ],
             set: {
               priority: rec.priority,
               reason: rec.reason,
@@ -465,18 +548,20 @@ export async function completeOnboarding(
       }
 
       const now = new Date();
-      await tx
-        .insert(onboardingProgress)
-        .values({
-          userId: actor.userId,
-          completedAt: now,
-          responses: state.answers as Record<string, unknown>,
-          updatedAt: now,
-        })
-        .onConflictDoUpdate({
-          target: onboardingProgress.userId,
-          set: { completedAt: now, updatedAt: now },
-        });
+      if (actor.userId != null) {
+        await tx
+          .insert(onboardingProgress)
+          .values({
+            userId: actor.userId,
+            completedAt: now,
+            responses: state.answers as Record<string, unknown>,
+            updatedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: onboardingProgress.userId,
+            set: { completedAt: now, updatedAt: now },
+          });
+      }
 
       if (actor.organizationId != null) {
         await tx
@@ -503,7 +588,7 @@ export async function completeOnboarding(
 
 export async function recordOnboardingSkipped(actor: OnboardingActor) {
   const db = await getReadyDb();
-  if (db) {
+  if (db && actor.userId != null) {
     try {
       await db
         .insert(onboardingProgress)
@@ -519,7 +604,6 @@ export async function recordOnboardingSkipped(actor: OnboardingActor) {
   await recordEvent(actor, "onboarding_skipped");
 }
 
-/** Dismiss a recommendation so it no longer surfaces (behavior → personalization). */
 export async function dismissRecommendation(
   actor: OnboardingActor,
   moduleId: string
@@ -532,7 +616,7 @@ export async function dismissRecommendation(
       .set({ status: "dismissed", updatedAt: new Date() })
       .where(
         and(
-          eq(personalizationRecommendations.userId, actor.userId),
+          identityWhere(personalizationRecommendations, actor),
           eq(personalizationRecommendations.moduleId, moduleId)
         )
       );
@@ -548,11 +632,6 @@ export type ModuleSignal =
   | "first_action_started"
   | "first_action_completed";
 
-/**
- * Record a behavioural signal. Behaviour adjusts PERSONALIZATION only — it never
- * affects authorization. Opening a module nudges its priority up; completing a
- * first action records a success event for analytics.
- */
 export async function recordModuleSignal(
   actor: OnboardingActor,
   moduleId: string,
@@ -570,7 +649,7 @@ export async function recordModuleSignal(
         })
         .where(
           and(
-            eq(personalizationRecommendations.userId, actor.userId),
+            identityWhere(personalizationRecommendations, actor),
             eq(personalizationRecommendations.moduleId, moduleId),
             eq(personalizationRecommendations.status, "active")
           )
@@ -582,7 +661,7 @@ export async function recordModuleSignal(
         .set({ status: "completed", updatedAt: new Date() })
         .where(
           and(
-            eq(personalizationRecommendations.userId, actor.userId),
+            identityWhere(personalizationRecommendations, actor),
             eq(personalizationRecommendations.moduleId, moduleId)
           )
         );
@@ -599,7 +678,7 @@ export async function recordModuleSignal(
 export async function getOnboardingIntelligence(windowDays = 30) {
   const db = await getReadyDb();
   if (!db) {
-    return { totals: {}, byIndustry: [], byObjective: [], funnel: [] };
+    return { totals: {}, byIndustry: [], byObjective: [], byModule: [] };
   }
   const days = Math.min(Math.max(windowDays, 1), 365);
   try {
@@ -642,7 +721,7 @@ export async function getOnboardingIntelligence(windowDays = 30) {
 
     const newUsers = await db.execute(sql`
       SELECT date_trunc('day', "created_at")::date AS "day", COUNT(*)::int AS "count"
-      FROM "users"
+      FROM "localUsers"
       WHERE "created_at" >= now() - (${days} * interval '1 day')
       GROUP BY 1
       ORDER BY 1 DESC

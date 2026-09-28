@@ -3,6 +3,7 @@ import { submitAnswer, getOnboardingState } from "../../onboarding-service";
 
 const actor = {
   userId: 1,
+  localUserId: null,
   organizationId: 1,
   sessionId: "sess-1",
   actorType: "user" as const,
@@ -31,7 +32,7 @@ describe("onboarding answer persistence (no database)", () => {
   });
 
   it("returns an empty-but-valid state when the database is unavailable", async () => {
-    const state = await getOnboardingState(1, 1);
+    const state = await getOnboardingState({ userId: 1, localUserId: null }, 1);
     expect(state.questionnaireVersion).toBe(1);
     expect(state.answers).toEqual({});
     expect(Array.isArray(state.recommendations)).toBe(true);

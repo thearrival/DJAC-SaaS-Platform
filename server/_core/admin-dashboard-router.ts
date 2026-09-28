@@ -21,9 +21,9 @@ import {
 } from "./yalla-admin-router";
 import {
   getOnboardingIntelligence,
-  getOnboardingTimeline,
-  getOnboardingResponsesForUser,
-  getOnboardingState,
+  getOnboardingTimelineForAnyId,
+  getOnboardingResponsesForAnyId,
+  getOnboardingStateForAnyId,
 } from "../onboarding-service";
 import {
   getUnifiedUsers,
@@ -567,9 +567,9 @@ export function createAdminDashboardRouter(): Router {
         return;
       }
       const [state, responses, timeline] = await Promise.all([
-        getOnboardingState(userId, null),
-        getOnboardingResponsesForUser(userId),
-        getOnboardingTimeline(userId, 200),
+        getOnboardingStateForAnyId(userId),
+        getOnboardingResponsesForAnyId(userId),
+        getOnboardingTimelineForAnyId(userId, 200),
       ]);
       res.json({ state, ...responses, timeline });
     } catch (error) {
