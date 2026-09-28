@@ -492,6 +492,81 @@ export async function recordOnboardingSkipped(actor: OnboardingActor) {
   await recordEvent(actor, "onboarding_skipped");
 }
 
+/** Dismiss a recommendation so it no longer surfaces (behavior → personalization). */
+export async function dismissRecommendation(
+  actor: OnboardingActor,
+  moduleId: string
+): Promise<{ ok: boolean }> {
+  const db = await getReadyDb();
+  if (!db) return { ok: true };
+  try {
+    await db
+      .update(personalizationRecommendations)
+      .set({ status: "dismissed", updatedAt: new Date() })
+      .where(
+        and(
+          eq(personalizationRecommendations.userId, actor.userId),
+          eq(personalizationRecommendations.moduleId, moduleId)
+        )
+      );
+    await recordEvent(actor, "recommendation_dismissed", { moduleId });
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
+
+export type ModuleSignal =
+  | "module_opened"
+  | "first_action_started"
+  | "first_action_completed";
+
+/**
+ * Record a behavioural signal. Behaviour adjusts PERSONALIZATION only — it never
+ * affects authorization. Opening a module nudges its priority up; completing a
+ * first action records a success event for analytics.
+ */
+export async function recordModuleSignal(
+  actor: OnboardingActor,
+  moduleId: string,
+  signal: ModuleSignal
+): Promise<{ ok: boolean }> {
+  const db = await getReadyDb();
+  if (!db) return { ok: true };
+  try {
+    if (signal === "module_opened") {
+      await db
+        .update(personalizationRecommendations)
+        .set({
+          priority: sql`LEAST(100, ${personalizationRecommendations.priority} + 5)`,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(personalizationRecommendations.userId, actor.userId),
+            eq(personalizationRecommendations.moduleId, moduleId),
+            eq(personalizationRecommendations.status, "active")
+          )
+        );
+    }
+    if (signal === "first_action_completed") {
+      await db
+        .update(personalizationRecommendations)
+        .set({ status: "completed", updatedAt: new Date() })
+        .where(
+          and(
+            eq(personalizationRecommendations.userId, actor.userId),
+            eq(personalizationRecommendations.moduleId, moduleId)
+          )
+        );
+    }
+    await recordEvent(actor, signal, { moduleId });
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
+
 // ── Owner-console intelligence (aggregate, tenant-safe) ───────────────────────
 
 export async function getOnboardingIntelligence(windowDays = 30) {
@@ -510,11 +585,30 @@ export async function getOnboardingIntelligence(windowDays = 30) {
       FROM "onboarding_progress"
     `);
 
-    const byObjective = await db.execute(sql`
+    const byIndustry = await db.execute(sql`
       SELECT "industry", COUNT(*)::int AS "count"
       FROM "organization_profiles_custom"
       WHERE "industry" IS NOT NULL
       GROUP BY "industry"
+      ORDER BY "count" DESC
+      LIMIT 20
+    `);
+
+    const byObjective = await db.execute(sql`
+      SELECT value AS "objective", COUNT(*)::int AS "count"
+      FROM "onboarding_responses",
+        LATERAL jsonb_array_elements_text("answer_value") AS value
+      WHERE "question_id" = 'primary_objective'
+      GROUP BY value
+      ORDER BY "count" DESC
+      LIMIT 20
+    `);
+
+    const byModule = await db.execute(sql`
+      SELECT "module_id", COUNT(*)::int AS "count"
+      FROM "personalization_recommendations"
+      WHERE "status" <> 'dismissed'
+      GROUP BY "module_id"
       ORDER BY "count" DESC
       LIMIT 20
     `);
@@ -531,11 +625,18 @@ export async function getOnboardingIntelligence(windowDays = 30) {
     return {
       windowDays: days,
       totals: totals.rows?.[0] ?? {},
-      byIndustry: byObjective.rows ?? [],
-      byObjective: [],
+      byIndustry: byIndustry.rows ?? [],
+      byObjective: byObjective.rows ?? [],
+      byModule: byModule.rows ?? [],
       funnel: funnel.rows ?? [],
     };
   } catch {
-    return { totals: {}, byIndustry: [], byObjective: [], funnel: [] };
+    return {
+      totals: {},
+      byIndustry: [],
+      byObjective: [],
+      byModule: [],
+      funnel: [],
+    };
   }
 }

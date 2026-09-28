@@ -167,6 +167,47 @@ export default function AdminOnboarding() {
         </div>
       </div>
 
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div style={cardStyle}>
+          <p className="mb-3 text-sm font-medium">Objectives</p>
+          {(data?.byObjective ?? []).length === 0 ? (
+            <p className="text-sm text-white/50">No data yet.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <tbody>
+                {data.byObjective.map((row: any) => (
+                  <tr key={row.objective} className="border-b border-white/5">
+                    <td className="py-1.5">{row.objective}</td>
+                    <td className="py-1.5 text-end text-white/70">
+                      {row.count}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+        <div style={cardStyle}>
+          <p className="mb-3 text-sm font-medium">Top recommended modules</p>
+          {(data?.byModule ?? []).length === 0 ? (
+            <p className="text-sm text-white/50">No data yet.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <tbody>
+                {data.byModule.map((row: any) => (
+                  <tr key={row.module_id} className="border-b border-white/5">
+                    <td className="py-1.5">{row.module_id}</td>
+                    <td className="py-1.5 text-end text-white/70">
+                      {row.count}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
       <div style={cardStyle}>
         <p className="mb-3 text-sm font-medium">Inspect a user's onboarding</p>
         <div className="flex items-center gap-2 max-w-md">

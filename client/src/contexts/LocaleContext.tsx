@@ -6,6 +6,7 @@ import {
   type LocaleContextValue,
 } from "./localeTypes";
 import { LOCALE_SUPPLEMENT } from "./localeSupplement";
+import { ONBOARDING_STRINGS } from "./onboardingStrings";
 
 const messages: Record<string, Record<string, string>> = {
   en: {
@@ -30033,7 +30034,10 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
       setLocale: setLocaleState,
       direction,
       t: (key: string, fallback: string) =>
-        messages[locale][key] || LOCALE_SUPPLEMENT[locale]?.[key] || fallback,
+        messages[locale][key] ||
+        ONBOARDING_STRINGS[locale]?.[key] ||
+        LOCALE_SUPPLEMENT[locale]?.[key] ||
+        fallback,
     }),
     [locale, direction]
   );

@@ -32631,6 +32631,52 @@ async function completeOnboarding(actor) {
     return { ok: false, recommendations: [] };
   }
 }
+async function dismissRecommendation(actor, moduleId) {
+  const db = await getReadyDb();
+  if (!db) return { ok: true };
+  try {
+    await db.update(personalizationRecommendations).set({ status: "dismissed", updatedAt: /* @__PURE__ */ new Date() }).where(
+      and30(
+        eq38(personalizationRecommendations.userId, actor.userId),
+        eq38(personalizationRecommendations.moduleId, moduleId)
+      )
+    );
+    await recordEvent(actor, "recommendation_dismissed", { moduleId });
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
+async function recordModuleSignal(actor, moduleId, signal) {
+  const db = await getReadyDb();
+  if (!db) return { ok: true };
+  try {
+    if (signal === "module_opened") {
+      await db.update(personalizationRecommendations).set({
+        priority: sql8`LEAST(100, ${personalizationRecommendations.priority} + 5)`,
+        updatedAt: /* @__PURE__ */ new Date()
+      }).where(
+        and30(
+          eq38(personalizationRecommendations.userId, actor.userId),
+          eq38(personalizationRecommendations.moduleId, moduleId),
+          eq38(personalizationRecommendations.status, "active")
+        )
+      );
+    }
+    if (signal === "first_action_completed") {
+      await db.update(personalizationRecommendations).set({ status: "completed", updatedAt: /* @__PURE__ */ new Date() }).where(
+        and30(
+          eq38(personalizationRecommendations.userId, actor.userId),
+          eq38(personalizationRecommendations.moduleId, moduleId)
+        )
+      );
+    }
+    await recordEvent(actor, signal, { moduleId });
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}
 async function getOnboardingIntelligence(windowDays = 30) {
   const db = await getReadyDb();
   if (!db) {
@@ -32646,11 +32692,28 @@ async function getOnboardingIntelligence(windowDays = 30) {
         COUNT(*) FILTER (WHERE "completed_at" IS NULL AND "skipped" IS NOT TRUE)::int AS "in_progress"
       FROM "onboarding_progress"
     `);
-    const byObjective = await db.execute(sql8`
+    const byIndustry = await db.execute(sql8`
       SELECT "industry", COUNT(*)::int AS "count"
       FROM "organization_profiles_custom"
       WHERE "industry" IS NOT NULL
       GROUP BY "industry"
+      ORDER BY "count" DESC
+      LIMIT 20
+    `);
+    const byObjective = await db.execute(sql8`
+      SELECT value AS "objective", COUNT(*)::int AS "count"
+      FROM "onboarding_responses",
+        LATERAL jsonb_array_elements_text("answer_value") AS value
+      WHERE "question_id" = 'primary_objective'
+      GROUP BY value
+      ORDER BY "count" DESC
+      LIMIT 20
+    `);
+    const byModule = await db.execute(sql8`
+      SELECT "module_id", COUNT(*)::int AS "count"
+      FROM "personalization_recommendations"
+      WHERE "status" <> 'dismissed'
+      GROUP BY "module_id"
       ORDER BY "count" DESC
       LIMIT 20
     `);
@@ -32665,12 +32728,19 @@ async function getOnboardingIntelligence(windowDays = 30) {
     return {
       windowDays: days,
       totals: totals.rows?.[0] ?? {},
-      byIndustry: byObjective.rows ?? [],
-      byObjective: [],
+      byIndustry: byIndustry.rows ?? [],
+      byObjective: byObjective.rows ?? [],
+      byModule: byModule.rows ?? [],
       funnel: funnel.rows ?? []
     };
   } catch {
-    return { totals: {}, byIndustry: [], byObjective: [], funnel: [] };
+    return {
+      totals: {},
+      byIndustry: [],
+      byObjective: [],
+      byModule: [],
+      funnel: []
+    };
   }
 }
 
@@ -32877,6 +32947,44 @@ var onboardingRouter = router({
       outputRef: { recommendations: result.recommendations.length }
     });
     return { ok: true, recommendations: result.recommendations };
+  }),
+  /** Dismiss a recommendation (behaviour → personalization only). */
+  dismissRecommendation: protectedProcedure.input(z37.object({ moduleId: z37.string().min(1).max(80) })).mutation(
+    async ({ ctx, input }) => dismissRecommendation(actorFromCtx(ctx), input.moduleId)
+  ),
+  /** Record a behavioural signal; adjusts personalization, never authorization. */
+  recordModuleSignal: protectedProcedure.input(
+    z37.object({
+      moduleId: z37.string().min(1).max(80),
+      signal: z37.enum([
+        "module_opened",
+        "first_action_started",
+        "first_action_completed"
+      ])
+    })
+  ).mutation(async ({ ctx, input }) => {
+    const rl = await checkRateLimit(
+      `onboard:signal:${ctx.user.id}`,
+      120,
+      ONBOARD_WINDOW_MS
+    );
+    if (!rl.allowed) {
+      throw new TRPCError30({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded."
+      });
+    }
+    void recordUserInteraction(ctx, {
+      context: "onboarding",
+      action: input.signal,
+      entityType: "module",
+      outputRef: { moduleId: input.moduleId }
+    });
+    return recordModuleSignal(
+      actorFromCtx(ctx),
+      input.moduleId,
+      input.signal
+    );
   })
 });
 

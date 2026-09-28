@@ -57,11 +57,14 @@ export function PersonalizedWorkspace() {
   const { t } = useLocale();
   const [, navigate] = useLocation();
   const [dismissed, setDismissed] = useState(false);
+  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
   const query = trpc.onboarding.getRecommendations.useQuery(undefined, {
     staleTime: 300_000,
     retry: false,
   });
+  const dismissMutation = trpc.onboarding.dismissRecommendation.useMutation();
+  const signalMutation = trpc.onboarding.recordModuleSignal.useMutation();
 
   if (dismissed || !query.data) return null;
   const { recommendations, firstAction, completedAt } = query.data;
@@ -136,24 +139,47 @@ export function PersonalizedWorkspace() {
           {t("workspace.recommended", "Recommended for you")}
         </p>
         <div className="grid gap-2 sm:grid-cols-3">
-          {top.map(rec => {
-            const meta = MODULE_META[rec.moduleId];
-            return (
-              <button
-                key={rec.moduleId}
-                type="button"
-                onClick={() => meta && navigate(meta.route)}
-                className="rounded-lg border border-border bg-card p-3 text-start transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <p className="text-sm font-medium">
-                  {t(meta?.labelKey ?? "", humanize(rec.moduleId))}
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t(`why.${rec.ruleId}`, humanize(rec.ruleId))}
-                </p>
-              </button>
-            );
-          })}
+          {top
+            .filter(rec => !dismissedIds.includes(rec.moduleId))
+            .map(rec => {
+              const meta = MODULE_META[rec.moduleId];
+              return (
+                <div key={rec.moduleId} className="flex items-stretch gap-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (meta) navigate(meta.route);
+                      signalMutation.mutate({
+                        moduleId: rec.moduleId,
+                        signal: "module_opened",
+                      });
+                    }}
+                    className="flex-1 rounded-lg border border-border bg-card p-3 text-start transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <p className="text-sm font-medium">
+                      {t(meta?.labelKey ?? "", humanize(rec.moduleId))}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {t(`why.${rec.ruleId}`, humanize(rec.ruleId))}
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t(
+                      "workspace.dismissOne",
+                      "Dismiss recommendation"
+                    )}
+                    onClick={() => {
+                      setDismissedIds(prev => [...prev, rec.moduleId]);
+                      dismissMutation.mutate({ moduleId: rec.moduleId });
+                    }}
+                    className="rounded-lg border border-border px-2 text-muted-foreground transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              );
+            })}
         </div>
         <div className="flex items-center gap-2 pt-1">
           <Button

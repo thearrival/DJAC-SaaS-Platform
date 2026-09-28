@@ -14,6 +14,8 @@ import {
   getOnboardingState,
   submitAnswer as persistAnswer,
   completeOnboarding,
+  dismissRecommendation,
+  recordModuleSignal,
   type OnboardingActor,
 } from "./onboarding-service";
 import { getQuestionnaire } from "./services/personalization/engine";
@@ -272,5 +274,49 @@ export const onboardingRouter = router({
         outputRef: { recommendations: result.recommendations.length },
       });
       return { ok: true, recommendations: result.recommendations };
+    }),
+
+  /** Dismiss a recommendation (behaviour → personalization only). */
+  dismissRecommendation: protectedProcedure
+    .input(z.object({ moduleId: z.string().min(1).max(80) }))
+    .mutation(async ({ ctx, input }) =>
+      dismissRecommendation(actorFromCtx(ctx), input.moduleId)
+    ),
+
+  /** Record a behavioural signal; adjusts personalization, never authorization. */
+  recordModuleSignal: protectedProcedure
+    .input(
+      z.object({
+        moduleId: z.string().min(1).max(80),
+        signal: z.enum([
+          "module_opened",
+          "first_action_started",
+          "first_action_completed",
+        ]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const rl = await checkRateLimit(
+        `onboard:signal:${ctx.user.id}`,
+        120,
+        ONBOARD_WINDOW_MS
+      );
+      if (!rl.allowed) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Rate limit exceeded.",
+        });
+      }
+      void recordUserInteraction(ctx, {
+        context: "onboarding",
+        action: input.signal,
+        entityType: "module",
+        outputRef: { moduleId: input.moduleId },
+      });
+      return recordModuleSignal(
+        actorFromCtx(ctx),
+        input.moduleId,
+        input.signal
+      );
     }),
 });
