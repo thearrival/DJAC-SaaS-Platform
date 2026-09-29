@@ -2148,6 +2148,10 @@ function GoogleAuthError({ t }: { t: (k: string, f: string) => string }) {
       "signup.googleErrGeneric",
       "Something went wrong during Google sign-in. Please try again."
     ),
+    google_rate_limited: t(
+      "signup.googleErrRateLimited",
+      "Too many sign-in attempts. Please wait a few minutes and try again."
+    ),
   };
 
   return (

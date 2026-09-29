@@ -16,8 +16,21 @@ import { getSupabaseClient } from "../services/supabase";
 import { signJwt } from "../services/local-jwt";
 import { broadcastSSE } from "../services/sse-bus";
 import { recordSystemAuditEvent } from "../audit-logger";
+import { checkRateLimit } from "./rateLimiter";
 import { getSessionCookieOptions } from "./cookies";
 import { logger } from "./logger";
+
+// The callback is public and writes an audit row on every call, so without a
+// limit it is both an abuse surface and an audit-log write amplifier.
+const CALLBACK_RATE_LIMIT_MAX = 20;
+const CALLBACK_RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
+
+function clientKey(req: Request): string {
+  const forwarded = req.headers["x-forwarded-for"];
+  const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+  const ip = raw?.split(",")[0]?.trim() || req.ip || "unknown";
+  return `google-cb:${ip}`;
+}
 
 /** Only allow same-origin absolute paths (blocks `//evil.com` and `https://…`). */
 export function safeRedirectTo(
@@ -51,6 +64,18 @@ export function registerGoogleOAuthRoutes(app: Express) {
 
     if (!code) {
       fail("google_no_code");
+      return;
+    }
+
+    // Throttle before touching the provider or the audit log.
+    const rl = await checkRateLimit(
+      clientKey(req),
+      CALLBACK_RATE_LIMIT_MAX,
+      CALLBACK_RATE_LIMIT_WINDOW_MS
+    ).catch(() => ({ allowed: true }));
+    if (!rl.allowed) {
+      logger.warn({ ip: clientKey(req) }, "Google OAuth callback rate limited");
+      res.redirect(302, "/login?error=google_rate_limited");
       return;
     }
 
