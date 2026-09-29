@@ -118,8 +118,7 @@ export default function FoundersLogin() {
           flexDirection: "column",
           justifyContent: "center",
           padding: "60px",
-          background:
-            "linear-gradient(135deg, #050508 0%, #050508 50%, #050508 100%)",
+          background: "var(--hero-panel-bg)",
           position: "relative",
           overflow: "hidden",
         }}

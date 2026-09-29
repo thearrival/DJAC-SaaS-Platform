@@ -856,8 +856,8 @@ export default function AdminControlCenter() {
         className="rounded-2xl border border-border p-6 shadow-xl"
         style={{
           background: isDark
-            ? "linear-gradient(90deg, #050508, #050508, #050508)"
-            : "linear-gradient(90deg, #050508, #d900ff, #050508)",
+            ? "linear-gradient(90deg, var(--djac-bg-deep), var(--djac-bg-deep), var(--djac-bg-deep))"
+            : "linear-gradient(90deg, var(--djac-bg-deep), #d900ff, var(--djac-bg-deep))",
           color: "var(--djac-text)",
         }}
       >

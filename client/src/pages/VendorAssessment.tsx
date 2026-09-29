@@ -1732,8 +1732,8 @@ export default function VendorAssessment() {
           className="djac-section-1 mb-8 overflow-hidden rounded-[28px] border border-slate-200 shadow-xl"
           style={{
             background: isDark
-              ? "linear-gradient(135deg, #050508 0%, #050508 50%, rgba(239,68,68,0.12) 100%)"
-              : "linear-gradient(135deg, #050508 0%, #050508 50%, rgba(239,68,68,0.12) 100%)",
+              ? "linear-gradient(135deg, var(--djac-bg-deep) 0%, var(--djac-bg-deep) 50%, rgba(239,68,68,0.12) 100%)"
+              : "linear-gradient(135deg, var(--djac-bg-deep) 0%, var(--djac-bg-deep) 50%, rgba(239,68,68,0.12) 100%)",
             color: "var(--djac-text)",
           }}
         >

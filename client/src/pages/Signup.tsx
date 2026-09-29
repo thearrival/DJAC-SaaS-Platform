@@ -2233,7 +2233,7 @@ function IpRegistrationSection({ C }: { C: DesignTokens }) {
             // Public registration record for this work (opens in a new tab).
             href: "https://publicrecords.copyright.gov/detailed-record/siebel_TXu002560878",
             fallbackChar: "©",
-            fallbackBg: "linear-gradient(135deg,#00d2ff,#050508)",
+            fallbackBg: "linear-gradient(135deg,#00d2ff,var(--djac-bg-deep))",
             fallbackColor: "#00d2ff",
             fallbackLabel: "U.S. COPYRIGHT",
             fallbackFontSize: 16,

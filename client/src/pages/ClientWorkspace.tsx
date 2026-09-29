@@ -768,7 +768,7 @@ export default function ClientWorkspace() {
         className="rounded-2xl border p-6 shadow-xl"
         style={{
           background: isDark
-            ? "linear-gradient(135deg, #050508 0%, #050508 40%, #050508 100%)"
+            ? "linear-gradient(135deg, var(--djac-bg-deep) 0%, var(--djac-bg-deep) 40%, var(--djac-bg-deep) 100%)"
             : "linear-gradient(135deg, #ffffff0d 0%, #ffffff0d 40%, #ffffff0d 100%)",
           borderColor: "#d900ff40",
         }}
