@@ -858,7 +858,7 @@ export default function AdminControlCenter() {
           background: isDark
             ? "linear-gradient(90deg, #050508, #050508, #050508)"
             : "linear-gradient(90deg, #050508, #d900ff, #050508)",
-          color: "#fff",
+          color: "var(--djac-text)",
         }}
       >
         <div className="flex flex-wrap items-start justify-between gap-4">

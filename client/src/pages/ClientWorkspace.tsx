@@ -1651,7 +1651,7 @@ export default function ClientWorkspace() {
                       style={{
                         backgroundColor:
                           riskPalette[previewResult.riskLevel] ?? "#7d8aa0",
-                        color: "#fff",
+                        color: "var(--djac-text)",
                       }}
                     >
                       {previewResult.riskLevel.toUpperCase()}

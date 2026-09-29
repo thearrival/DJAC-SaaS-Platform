@@ -44,7 +44,9 @@ export function WelcomeBanner() {
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <span style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>
+        <span
+          style={{ fontSize: 15, fontWeight: 700, color: "var(--djac-text)" }}
+        >
           👋 Welcome to DJAC — ready to get started?
         </span>
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" as const }}>
@@ -56,8 +58,8 @@ export function WelcomeBanner() {
               gap: 6,
               fontSize: 12,
               fontWeight: 600,
-              color: "#fff",
-              background: "rgba(255,255,255,0.15)",
+              color: "var(--djac-text)",
+              background: "var(--djac-card-hi)",
               borderRadius: 8,
               padding: "5px 10px",
               textDecoration: "none",
@@ -74,8 +76,8 @@ export function WelcomeBanner() {
               gap: 6,
               fontSize: 12,
               fontWeight: 600,
-              color: "#fff",
-              background: "rgba(255,255,255,0.15)",
+              color: "var(--djac-text)",
+              background: "var(--djac-card-hi)",
               borderRadius: 8,
               padding: "5px 10px",
               textDecoration: "none",
@@ -91,8 +93,8 @@ export function WelcomeBanner() {
               gap: 6,
               fontSize: 12,
               fontWeight: 600,
-              color: "#fff",
-              background: "rgba(255,255,255,0.15)",
+              color: "var(--djac-text)",
+              background: "var(--djac-card-hi)",
               borderRadius: 8,
               padding: "5px 10px",
               textDecoration: "none",
@@ -105,7 +107,7 @@ export function WelcomeBanner() {
       <button
         onClick={dismiss}
         style={{
-          background: "rgba(255,255,255,0.1)",
+          background: "var(--djac-card-hi)",
           border: "none",
           borderRadius: 8,
           padding: 6,

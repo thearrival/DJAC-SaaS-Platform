@@ -150,11 +150,11 @@ const STATUS_CONFIG: Record<
   },
   queued: {
     label: "Queued",
-    color: "#94a3b8",
+    color: "var(--djac-muted)",
     bg: "rgba(148,163,184,0.10)",
     border: "rgba(148,163,184,0.25)",
     icon: ({ size = 13 }) => (
-      <CircleDashed size={size} style={{ color: "#94a3b8" }} />
+      <CircleDashed size={size} style={{ color: "var(--djac-muted)" }} />
     ),
   },
 };
@@ -309,7 +309,7 @@ function EventTimeline({
               >
                 {ev.stage}
               </span>
-              <span style={{ fontSize: 10, color: "#7d8aa0" }}>
+              <span style={{ fontSize: 10, color: "var(--djac-muted)" }}>
                 {formatTs(ev.timestamp)}
               </span>
             </div>
@@ -383,7 +383,7 @@ function ScoreMini({ label, score }: { label: string; score: number }) {
       <div
         style={{
           fontSize: 9,
-          color: "#7d8aa0",
+          color: "var(--djac-muted)",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
         }}
@@ -516,13 +516,13 @@ function JobCard({
                 alignItems: "center",
               }}
             >
-              <span style={{ fontSize: 11, color: "#7d8aa0" }}>
+              <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
                 Job #{shortId(job.id)}
               </span>
               <span
                 style={{
                   fontSize: 11,
-                  color: "#7d8aa0",
+                  color: "var(--djac-muted)",
                   display: "flex",
                   alignItems: "center",
                   gap: 3,
@@ -532,7 +532,7 @@ function JobCard({
                 {formatTs(job.createdAt)}
               </span>
               {job.status !== "queued" && job.status !== "running" && (
-                <span style={{ fontSize: 11, color: "#7d8aa0" }}>
+                <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
                   Duration: {formatDuration(job.createdAt, job.updatedAt)}
                 </span>
               )}
@@ -608,7 +608,7 @@ function JobCard({
               flexWrap: "wrap",
             }}
           >
-            <span style={{ fontSize: 12, color: "#94a3b8" }}>
+            <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
               {assessment.gaps.length} gap
               {assessment.gaps.length !== 1 ? "s" : ""}:
             </span>
@@ -633,7 +633,10 @@ function JobCard({
                     {count}
                   </span>
                   <span
-                    style={{ color: "#7d8aa0", textTransform: "capitalize" }}
+                    style={{
+                      color: "var(--djac-muted)",
+                      textTransform: "capitalize",
+                    }}
                   >
                     {sev}
                   </span>
@@ -650,7 +653,11 @@ function JobCard({
             )}
             {job.persistence?.skipped && (
               <span
-                style={{ fontSize: 11, color: "#7d8aa0", marginLeft: "auto" }}
+                style={{
+                  fontSize: 11,
+                  color: "var(--djac-muted)",
+                  marginLeft: "auto",
+                }}
               >
                 Not persisted
               </span>
@@ -672,7 +679,7 @@ function JobCard({
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "#7d8aa0",
+                  color: "var(--djac-muted)",
                   fontSize: 11,
                   fontWeight: 500,
                 }}
@@ -738,7 +745,7 @@ function StatTile({
       <div
         style={{
           fontSize: 11,
-          color: "#7d8aa0",
+          color: "var(--djac-muted)",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
         }}
@@ -882,7 +889,7 @@ export default function AssessmentHistory() {
             style={{
               margin: "3px 0 0",
               fontSize: 13,
-              color: "#7d8aa0",
+              color: "var(--djac-muted)",
               maxWidth: 620,
             }}
           >
@@ -1007,7 +1014,7 @@ export default function AssessmentHistory() {
             alignItems: "center",
             gap: 10,
             padding: 60,
-            color: "#7d8aa0",
+            color: "var(--djac-muted)",
             fontSize: 14,
             justifyContent: "center",
           }}
@@ -1050,7 +1057,7 @@ export default function AssessmentHistory() {
             alignItems: "center",
             gap: 14,
             padding: "80px 0",
-            color: "#7d8aa0",
+            color: "var(--djac-muted)",
           }}
         >
           <Bot size={40} style={{ opacity: 0.25 }} />

@@ -251,7 +251,7 @@ export default function Pricing() {
       {/* ── Nav ── */}
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           backdropFilter: "blur(12px)",
           position: "sticky",
           top: 0,
@@ -308,7 +308,7 @@ export default function Pricing() {
                     padding: "7px 18px",
                     borderRadius: 8,
                     background: "linear-gradient(135deg,#d900ff,#d900ff)",
-                    color: "#fff",
+                    color: "var(--djac-text)",
                     fontSize: 13,
                     cursor: "pointer",
                     border: "none",
@@ -449,7 +449,7 @@ export default function Pricing() {
           <div
             style={{
               display: "inline-flex",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 12,
               overflow: "hidden",
               background: "var(--djac-card)",
@@ -483,7 +483,7 @@ export default function Pricing() {
                       padding: "1px 5px",
                       borderRadius: 6,
                       background: "linear-gradient(90deg,#d900ff,#d900ff)",
-                      color: "#fff",
+                      color: "var(--djac-text)",
                       fontWeight: 700,
                     }}
                   >
@@ -537,7 +537,7 @@ export default function Pricing() {
                       background: "linear-gradient(90deg,#d900ff,#d900ff)",
                       fontSize: 11,
                       fontWeight: 700,
-                      color: "#fff",
+                      color: "var(--djac-text)",
                       letterSpacing: "0.05em",
                       whiteSpace: "nowrap",
                     }}
@@ -639,7 +639,7 @@ export default function Pricing() {
                     padding: "10px 12px",
                     borderRadius: 8,
                     background: "var(--djac-card)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    border: "1px solid var(--djac-border)",
                   }}
                 >
                   {Object.entries(plan.limits).map(([k, v]) => (
@@ -756,7 +756,7 @@ export default function Pricing() {
             marginBottom: 80,
             padding: 32,
             borderRadius: 16,
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid var(--djac-border)",
             background: "var(--djac-card)",
           }}
         >
@@ -872,7 +872,7 @@ export default function Pricing() {
               <div
                 key={i}
                 style={{
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid var(--djac-border)",
                   overflow: "hidden",
                 }}
               >
@@ -972,7 +972,7 @@ export default function Pricing() {
                   padding: "13px 28px",
                   borderRadius: 10,
                   background: "linear-gradient(135deg,#d900ff,#d900ff)",
-                  color: "#fff",
+                  color: "var(--djac-text)",
                   fontSize: 15,
                   fontWeight: 700,
                   border: "none",
@@ -995,7 +995,7 @@ export default function Pricing() {
                   color: "var(--djac-muted)",
                   fontSize: 15,
                   fontWeight: 600,
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  border: "1px solid var(--djac-border)",
                   cursor: "pointer",
                 }}
               >
@@ -1009,7 +1009,7 @@ export default function Pricing() {
       {/* ── Footer ── */}
       <footer
         style={{
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: "1px solid var(--djac-border)",
           padding: "24px",
           textAlign: "center",
           fontSize: 13,

@@ -68,7 +68,7 @@ const SERIES_COLORS = [
 const cardStyle: React.CSSProperties = {
   padding: 20,
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.06)",
+  border: "1px solid var(--djac-border)",
   background: "rgba(15,15,25,0.8)",
 };
 
@@ -146,14 +146,14 @@ export default function AdminReports() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -168,7 +168,7 @@ export default function AdminReports() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -179,7 +179,7 @@ export default function AdminReports() {
             Reporting Center
           </h1>
           {report && (
-            <span style={{ fontSize: 11, color: "#64748b" }}>
+            <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               {report.title} · generated{" "}
               {new Date(report.generatedAt).toLocaleString()}
             </span>
@@ -192,9 +192,9 @@ export default function AdminReports() {
             style={{
               padding: "6px 10px",
               borderRadius: 6,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#e2e8f0",
+              background: "var(--djac-card-hi)",
+              border: "1px solid var(--djac-border)",
+              color: "var(--djac-text)",
               fontSize: 13,
             }}
           >
@@ -228,10 +228,10 @@ export default function AdminReports() {
             onClick={() => loadReport(type, days)}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -304,7 +304,9 @@ export default function AdminReports() {
         )}
 
         {loading && !report ? (
-          <div style={{ color: "#64748b", fontSize: 13 }}>Building report…</div>
+          <div style={{ color: "var(--djac-muted)", fontSize: 13 }}>
+            Building report…
+          </div>
         ) : report ? (
           <>
             <div
@@ -318,7 +320,7 @@ export default function AdminReports() {
             >
               {report.kpis.map(k => (
                 <div key={k.label} style={cardStyle}>
-                  <div style={{ fontSize: 11.5, color: "#94a3b8" }}>
+                  <div style={{ fontSize: 11.5, color: "var(--djac-muted)" }}>
                     {k.label}
                   </div>
                   <div
@@ -333,7 +335,7 @@ export default function AdminReports() {
                     {k.value}
                   </div>
                   {k.hint && (
-                    <div style={{ fontSize: 10.5, color: "#64748b" }}>
+                    <div style={{ fontSize: 10.5, color: "var(--djac-muted)" }}>
                       {k.hint}
                     </div>
                   )}
@@ -385,8 +387,8 @@ export default function AdminReports() {
                           </Pie>
                           <Tooltip
                             contentStyle={{
-                              background: "#0b0b12",
-                              border: "1px solid rgba(255,255,255,0.1)",
+                              background: "var(--djac-bg-deep)",
+                              border: "1px solid var(--djac-border)",
                               borderRadius: 8,
                               fontSize: 12,
                             }}
@@ -408,8 +410,8 @@ export default function AdminReports() {
                           />
                           <Tooltip
                             contentStyle={{
-                              background: "#0b0b12",
-                              border: "1px solid rgba(255,255,255,0.1)",
+                              background: "var(--djac-bg-deep)",
+                              border: "1px solid var(--djac-border)",
                               borderRadius: 8,
                               fontSize: 12,
                             }}
@@ -456,8 +458,8 @@ export default function AdminReports() {
                         />
                         <Tooltip
                           contentStyle={{
-                            background: "#0b0b12",
-                            border: "1px solid rgba(255,255,255,0.1)",
+                            background: "var(--djac-bg-deep)",
+                            border: "1px solid var(--djac-border)",
                             borderRadius: 8,
                             fontSize: 12,
                           }}
@@ -481,7 +483,7 @@ export default function AdminReports() {
                 {report.title} — detail
               </div>
               {report.table.rows.length === 0 ? (
-                <div style={{ fontSize: 13, color: "#64748b" }}>
+                <div style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                   No rows for this window.
                 </div>
               ) : (
@@ -494,7 +496,12 @@ export default function AdminReports() {
                 >
                   <table style={{ width: "100%", fontSize: 12.5 }}>
                     <thead>
-                      <tr style={{ color: "#64748b", textAlign: "left" }}>
+                      <tr
+                        style={{
+                          color: "var(--djac-muted)",
+                          textAlign: "left",
+                        }}
+                      >
                         {report.table.columns.map(c => (
                           <th
                             key={c}
@@ -503,7 +510,7 @@ export default function AdminReports() {
                               fontWeight: 500,
                               position: "sticky",
                               top: 0,
-                              background: "#0f0f19",
+                              background: "var(--djac-bg-deep)",
                             }}
                           >
                             {c}
@@ -516,7 +523,7 @@ export default function AdminReports() {
                         <tr
                           key={i}
                           style={{
-                            borderTop: "1px solid rgba(255,255,255,0.05)",
+                            borderTop: "1px solid var(--djac-border)",
                           }}
                         >
                           {row.map((cell, j) => (
@@ -541,9 +548,9 @@ export default function AdminReports() {
                   style={{
                     marginTop: 14,
                     paddingTop: 12,
-                    borderTop: "1px solid rgba(255,255,255,0.06)",
+                    borderTop: "1px solid var(--djac-border)",
                     fontSize: 11.5,
-                    color: "#64748b",
+                    color: "var(--djac-muted)",
                     display: "flex",
                     flexDirection: "column",
                     gap: 4,

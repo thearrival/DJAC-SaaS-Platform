@@ -194,14 +194,14 @@ export default function AdminPlatformMonitor() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#ffffff",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -220,7 +220,7 @@ export default function AdminPlatformMonitor() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
               display: "flex",
@@ -233,7 +233,7 @@ export default function AdminPlatformMonitor() {
             Platform Monitor
           </h1>
           {data && (
-            <span style={{ fontSize: 11, color: "#7d8aa0" }}>
+            <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               updated {new Date(data.generatedAt).toLocaleTimeString()}
             </span>
           )}
@@ -244,17 +244,21 @@ export default function AdminPlatformMonitor() {
             value={days}
             onChange={e => setDays(Number(e.target.value))}
             style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "var(--djac-card-hi)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 8px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               fontSize: 12,
               cursor: "pointer",
             }}
           >
             {[7, 14, 30, 60, 90].map(d => (
-              <option key={d} value={d} style={{ background: "#0b0b12" }}>
+              <option
+                key={d}
+                value={d}
+                style={{ background: "var(--djac-bg-deep)" }}
+              >
                 Last {d}d
               </option>
             ))}
@@ -279,10 +283,10 @@ export default function AdminPlatformMonitor() {
             onClick={loadData}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               display: "flex",
             }}
@@ -428,7 +432,7 @@ export default function AdminPlatformMonitor() {
                     justifyContent: "space-between",
                     marginTop: 8,
                     fontSize: 10,
-                    color: "#7d8aa0",
+                    color: "var(--djac-muted)",
                   }}
                 >
                   <span>{(t?.daily || [])[0]?.date}</span>
@@ -616,7 +620,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
         fontWeight: 700,
         letterSpacing: 1.2,
         textTransform: "uppercase",
-        color: "#7d8aa0",
+        color: "var(--djac-muted)",
         margin: "24px 0 12px",
       }}
     >
@@ -627,7 +631,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function Muted({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontSize: 13, color: "#7d8aa0", margin: 0 }}>{children}</p>
+    <p style={{ fontSize: 13, color: "var(--djac-muted)", margin: 0 }}>
+      {children}
+    </p>
   );
 }
 
@@ -658,7 +664,7 @@ function KPI({
       style={{
         padding: 20,
         borderRadius: 12,
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid var(--djac-border)",
         background: "rgba(15,15,25,0.8)",
       }}
     >
@@ -681,11 +687,11 @@ function KPI({
       <div style={{ fontSize: 26, fontWeight: 800, color, lineHeight: 1.2 }}>
         {value}
       </div>
-      <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
+      <div style={{ fontSize: 12, color: "var(--djac-muted)", marginTop: 4 }}>
         {label}
       </div>
       {sub && (
-        <div style={{ fontSize: 11, color: "#7d8aa0", marginTop: 6 }}>
+        <div style={{ fontSize: 11, color: "var(--djac-muted)", marginTop: 6 }}>
           {sub}
         </div>
       )}
@@ -709,7 +715,7 @@ function Panel({
       style={{
         padding: 20,
         borderRadius: 12,
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid var(--djac-border)",
         background: "rgba(15,15,25,0.8)",
         gridColumn: wide ? "span 2" : undefined,
         minWidth: 0,
@@ -723,7 +729,7 @@ function Panel({
           display: "flex",
           alignItems: "center",
           gap: 8,
-          color: "#ffffff",
+          color: "var(--djac-text)",
         }}
       >
         {icon} {title}
@@ -749,11 +755,11 @@ function StatRow({
         justifyContent: "space-between",
         alignItems: "center",
         padding: "7px 0",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
+        borderBottom: "1px solid var(--djac-border)",
         fontSize: 13,
       }}
     >
-      <span style={{ color: "#94a3b8" }}>{label}</span>
+      <span style={{ color: "var(--djac-muted)" }}>{label}</span>
       <span style={{ fontWeight: 600, color: tone || "#ffffff" }}>
         {typeof value === "number" ? value.toLocaleString() : value}
       </span>
@@ -780,7 +786,7 @@ function BarList({
           <span
             style={{
               fontSize: 12,
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               width: 150,
               flexShrink: 0,
               overflow: "hidden",
@@ -796,7 +802,7 @@ function BarList({
               flex: 1,
               height: 18,
               borderRadius: 4,
-              background: "rgba(255,255,255,0.04)",
+              background: "var(--djac-card-hi)",
               overflow: "hidden",
             }}
           >
@@ -813,7 +819,7 @@ function BarList({
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: "#ffffff",
+              color: "var(--djac-text)",
               minWidth: 64,
               textAlign: "right",
             }}
@@ -853,9 +859,9 @@ function Table({
                 style={{
                   textAlign: "left",
                   padding: "6px 8px",
-                  color: "#7d8aa0",
+                  color: "var(--djac-muted)",
                   fontWeight: 600,
-                  borderBottom: "1px solid rgba(255,255,255,0.08)",
+                  borderBottom: "1px solid var(--djac-border)",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -873,7 +879,7 @@ function Table({
                   style={{
                     padding: "6px 8px",
                     color: ci === 0 ? "#7d8aa0" : "#e2e8f0",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    borderBottom: "1px solid var(--djac-border)",
                     whiteSpace: "nowrap",
                   }}
                 >

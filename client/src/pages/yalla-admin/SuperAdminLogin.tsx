@@ -45,7 +45,7 @@ export default function SuperAdminLogin() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -59,7 +59,7 @@ export default function SuperAdminLogin() {
           width: "100%",
           padding: 40,
           borderRadius: 16,
-          border: "1px solid rgba(255,255,255,0.08)",
+          border: "1px solid var(--djac-border)",
           background: "rgba(15,15,25,0.95)",
         }}
       >
@@ -92,13 +92,13 @@ export default function SuperAdminLogin() {
             style={{
               fontSize: 22,
               fontWeight: 700,
-              color: "#fff",
+              color: "var(--djac-text)",
               margin: "0 0 8px",
             }}
           >
             Super Admin
           </h1>
-          <p style={{ fontSize: 13, color: "#94a3b8", margin: 0 }}>
+          <p style={{ fontSize: 13, color: "var(--djac-muted)", margin: 0 }}>
             Authorized personnel only. All actions are logged.
           </p>
         </div>
@@ -111,7 +111,7 @@ export default function SuperAdminLogin() {
             <label
               style={{
                 fontSize: 12,
-                color: "#94a3b8",
+                color: "var(--djac-muted)",
                 fontWeight: 600,
                 display: "block",
                 marginBottom: 6,
@@ -128,9 +128,9 @@ export default function SuperAdminLogin() {
                 width: "100%",
                 padding: "10px 14px",
                 borderRadius: 8,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#fff",
+                background: "var(--djac-card-hi)",
+                border: "1px solid var(--djac-border)",
+                color: "var(--djac-text)",
                 fontSize: 14,
                 outline: "none",
                 boxSizing: "border-box",
@@ -141,7 +141,7 @@ export default function SuperAdminLogin() {
             <label
               style={{
                 fontSize: 12,
-                color: "#94a3b8",
+                color: "var(--djac-muted)",
                 fontWeight: 600,
                 display: "block",
                 marginBottom: 6,
@@ -157,7 +157,7 @@ export default function SuperAdminLogin() {
                   left: 12,
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: "#7d8aa0",
+                  color: "var(--djac-muted)",
                 }}
               />
               <input
@@ -169,9 +169,9 @@ export default function SuperAdminLogin() {
                   width: "100%",
                   padding: "10px 14px 10px 34px",
                   borderRadius: 8,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "#fff",
+                  background: "var(--djac-card-hi)",
+                  border: "1px solid var(--djac-border)",
+                  color: "var(--djac-text)",
                   fontSize: 14,
                   outline: "none",
                   boxSizing: "border-box",
@@ -208,7 +208,7 @@ export default function SuperAdminLogin() {
               background: loading
                 ? "rgba(168,85,247,0.5)"
                 : "linear-gradient(135deg,#ef4444,#d900ff)",
-              color: "#fff",
+              color: "var(--djac-text)",
               fontSize: 14,
               fontWeight: 700,
               border: "none",
@@ -223,7 +223,7 @@ export default function SuperAdminLogin() {
         <p
           style={{
             fontSize: 11,
-            color: "#7d8aa0",
+            color: "var(--djac-muted)",
             textAlign: "center",
             marginTop: 20,
             marginBottom: 0,

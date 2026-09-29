@@ -98,7 +98,7 @@ export default function FoundersLogin() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
         display: "flex",
       }}
@@ -150,7 +150,7 @@ export default function FoundersLogin() {
             style={{
               fontSize: 32,
               fontWeight: 800,
-              color: "#fff",
+              color: "var(--djac-text)",
               lineHeight: 1.2,
               margin: "0 0 16px",
             }}
@@ -170,7 +170,7 @@ export default function FoundersLogin() {
           <p
             style={{
               fontSize: 15,
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               lineHeight: 1.6,
               marginBottom: 40,
               maxWidth: 380,
@@ -210,8 +210,8 @@ export default function FoundersLogin() {
                   gap: 12,
                   padding: "12px 16px",
                   borderRadius: 10,
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.04)",
+                  background: "var(--djac-card-hi)",
+                  border: "1px solid var(--djac-border)",
                 }}
               >
                 <div
@@ -231,10 +231,16 @@ export default function FoundersLogin() {
                   {item.icon}
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "var(--djac-text)",
+                    }}
+                  >
                     {item.label}
                   </div>
-                  <div style={{ fontSize: 11, color: "#7d8aa0" }}>
+                  <div style={{ fontSize: 11, color: "var(--djac-muted)" }}>
                     {item.desc}
                   </div>
                 </div>
@@ -280,13 +286,13 @@ export default function FoundersLogin() {
               style={{
                 fontSize: 24,
                 fontWeight: 700,
-                color: "#fff",
+                color: "var(--djac-text)",
                 margin: "0 0 8px",
               }}
             >
               {pendingToken ? "Two-Factor Check" : "Welcome Back"}
             </h2>
-            <p style={{ fontSize: 14, color: "#94a3b8", margin: 0 }}>
+            <p style={{ fontSize: 14, color: "var(--djac-muted)", margin: 0 }}>
               {pendingToken
                 ? "Enter the 6-digit code from your authenticator app"
                 : "Sign in to the Yalla Hack Founders Portal"}
@@ -302,7 +308,7 @@ export default function FoundersLogin() {
                 <label
                   style={{
                     fontSize: 12,
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontWeight: 600,
                     display: "block",
                     marginBottom: 6,
@@ -318,7 +324,7 @@ export default function FoundersLogin() {
                       left: 14,
                       top: "50%",
                       transform: "translateY(-50%)",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   />
                   <input
@@ -337,9 +343,9 @@ export default function FoundersLogin() {
                       width: "100%",
                       padding: "12px 14px 12px 40px",
                       borderRadius: 10,
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      color: "#fff",
+                      background: "var(--djac-card-hi)",
+                      border: "1px solid var(--djac-border)",
+                      color: "var(--djac-text)",
                       fontSize: 18,
                       letterSpacing: 6,
                       textAlign: "center",
@@ -351,7 +357,7 @@ export default function FoundersLogin() {
                 <p
                   style={{
                     fontSize: 11,
-                    color: "#64748b",
+                    color: "var(--djac-muted)",
                     margin: "6px 0 0",
                   }}
                 >
@@ -388,7 +394,7 @@ export default function FoundersLogin() {
                     mfaLoading || mfaCode.length < 6
                       ? "rgba(99,102,241,0.5)"
                       : "linear-gradient(135deg, #d900ff, #d900ff)",
-                  color: "#fff",
+                  color: "var(--djac-text)",
                   fontSize: 15,
                   fontWeight: 700,
                   border: "none",
@@ -412,7 +418,7 @@ export default function FoundersLogin() {
                 style={{
                   background: "none",
                   border: "none",
-                  color: "#94a3b8",
+                  color: "var(--djac-muted)",
                   fontSize: 12.5,
                   cursor: "pointer",
                   padding: 4,
@@ -430,7 +436,7 @@ export default function FoundersLogin() {
                 <label
                   style={{
                     fontSize: 12,
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontWeight: 600,
                     display: "block",
                     marginBottom: 6,
@@ -449,9 +455,9 @@ export default function FoundersLogin() {
                     width: "100%",
                     padding: "12px 14px",
                     borderRadius: 10,
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "#fff",
+                    background: "var(--djac-card-hi)",
+                    border: "1px solid var(--djac-border)",
+                    color: "var(--djac-text)",
                     fontSize: 14,
                     outline: "none",
                     boxSizing: "border-box",
@@ -462,7 +468,7 @@ export default function FoundersLogin() {
                 <label
                   style={{
                     fontSize: 12,
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontWeight: 600,
                     display: "block",
                     marginBottom: 6,
@@ -478,7 +484,7 @@ export default function FoundersLogin() {
                       left: 14,
                       top: "50%",
                       transform: "translateY(-50%)",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   />
                   <input
@@ -492,9 +498,9 @@ export default function FoundersLogin() {
                       width: "100%",
                       padding: "12px 14px 12px 40px",
                       borderRadius: 10,
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      color: "#fff",
+                      background: "var(--djac-card-hi)",
+                      border: "1px solid var(--djac-border)",
+                      color: "var(--djac-text)",
                       fontSize: 14,
                       outline: "none",
                       boxSizing: "border-box",
@@ -513,7 +519,7 @@ export default function FoundersLogin() {
                       transform: "translateY(-50%)",
                       background: "none",
                       border: "none",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                       cursor: "pointer",
                       padding: 4,
                     }}
@@ -551,7 +557,7 @@ export default function FoundersLogin() {
                   background: loading
                     ? "rgba(99,102,241,0.5)"
                     : "linear-gradient(135deg, #d900ff, #d900ff)",
-                  color: "#fff",
+                  color: "var(--djac-text)",
                   fontSize: 15,
                   fontWeight: 700,
                   border: "none",
@@ -568,7 +574,7 @@ export default function FoundersLogin() {
           <p
             style={{
               fontSize: 11,
-              color: "#7d8aa0",
+              color: "var(--djac-muted)",
               textAlign: "center",
               marginTop: 32,
               marginBottom: 0,

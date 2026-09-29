@@ -149,14 +149,14 @@ export default function AdminOrganizations() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -169,7 +169,7 @@ export default function AdminOrganizations() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -179,7 +179,7 @@ export default function AdminOrganizations() {
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
             Organizations
           </h1>
-          <span style={{ fontSize: 12, color: "#7d8aa0" }}>
+          <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
             {orgs.length} total
           </span>
         </div>
@@ -190,7 +190,7 @@ export default function AdminOrganizations() {
             title="Export CSV"
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
               color: filtered.length === 0 ? "#475569" : "#94a3b8",
@@ -203,10 +203,10 @@ export default function AdminOrganizations() {
             onClick={loadData}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -272,7 +272,7 @@ export default function AdminOrganizations() {
               left: 12,
               top: "50%",
               transform: "translateY(-50%)",
-              color: "#7d8aa0",
+              color: "var(--djac-muted)",
             }}
           />
           <input
@@ -286,9 +286,9 @@ export default function AdminOrganizations() {
               width: "100%",
               padding: "10px 14px 10px 36px",
               borderRadius: 8,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#fff",
+              background: "var(--djac-card-hi)",
+              border: "1px solid var(--djac-border)",
+              color: "var(--djac-text)",
               fontSize: 13,
               outline: "none",
               boxSizing: "border-box",
@@ -299,7 +299,7 @@ export default function AdminOrganizations() {
         <div
           style={{
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid var(--djac-border)",
             overflow: "hidden",
           }}
         >
@@ -307,12 +307,12 @@ export default function AdminOrganizations() {
             style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
           >
             <thead>
-              <tr style={{ background: "rgba(255,255,255,0.02)" }}>
+              <tr style={{ background: "var(--djac-card-hi)" }}>
                 <th
                   style={{
                     padding: "12px 16px",
                     textAlign: "left",
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontSize: 11,
                     textTransform: "uppercase",
                   }}
@@ -323,7 +323,7 @@ export default function AdminOrganizations() {
                   style={{
                     padding: "12px 16px",
                     textAlign: "left",
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontSize: 11,
                     textTransform: "uppercase",
                   }}
@@ -334,7 +334,7 @@ export default function AdminOrganizations() {
                   style={{
                     padding: "12px 16px",
                     textAlign: "left",
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontSize: 11,
                     textTransform: "uppercase",
                   }}
@@ -345,7 +345,7 @@ export default function AdminOrganizations() {
                   style={{
                     padding: "12px 16px",
                     textAlign: "left",
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontSize: 11,
                     textTransform: "uppercase",
                   }}
@@ -356,7 +356,7 @@ export default function AdminOrganizations() {
                   style={{
                     padding: "12px 16px",
                     textAlign: "left",
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontSize: 11,
                     textTransform: "uppercase",
                   }}
@@ -367,7 +367,7 @@ export default function AdminOrganizations() {
                   style={{
                     padding: "12px 16px",
                     textAlign: "right",
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     fontSize: 11,
                     textTransform: "uppercase",
                   }}
@@ -384,7 +384,7 @@ export default function AdminOrganizations() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     Loading...
@@ -397,7 +397,7 @@ export default function AdminOrganizations() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     No organizations found
@@ -407,11 +407,11 @@ export default function AdminOrganizations() {
                 pageFiltered.map(o => (
                   <tr
                     key={o.id}
-                    style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
+                    style={{ borderTop: "1px solid var(--djac-border)" }}
                   >
                     <td style={{ padding: "12px 16px" }}>
                       <div style={{ fontWeight: 500 }}>{o.name}</div>
-                      <div style={{ fontSize: 12, color: "#7d8aa0" }}>
+                      <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
                         ID: {o.id}
                       </div>
                     </td>
@@ -423,13 +423,18 @@ export default function AdminOrganizations() {
                     >
                       {o.plan}
                     </td>
-                    <td style={{ padding: "12px 16px", color: "#94a3b8" }}>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        color: "var(--djac-muted)",
+                      }}
+                    >
                       {o.memberCount}
                     </td>
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#7d8aa0",
+                        color: "var(--djac-muted)",
                         fontSize: 12,
                       }}
                     >
@@ -506,16 +511,16 @@ export default function AdminOrganizations() {
               style={{
                 padding: "8px 12px",
                 borderRadius: 6,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#94a3b8",
+                background: "var(--djac-card-hi)",
+                border: "1px solid var(--djac-border)",
+                color: "var(--djac-muted)",
                 cursor: page === 0 ? "not-allowed" : "pointer",
                 opacity: page === 0 ? 0.5 : 1,
               }}
             >
               <ChevronLeft size={14} />
             </button>
-            <span style={{ fontSize: 13, color: "#94a3b8" }}>
+            <span style={{ fontSize: 13, color: "var(--djac-muted)" }}>
               Page {page + 1} of {totalPages} · {filtered.length} orgs
             </span>
             <button
@@ -524,9 +529,9 @@ export default function AdminOrganizations() {
               style={{
                 padding: "8px 12px",
                 borderRadius: 6,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#94a3b8",
+                background: "var(--djac-card-hi)",
+                border: "1px solid var(--djac-border)",
+                color: "var(--djac-muted)",
                 cursor: page >= totalPages - 1 ? "not-allowed" : "pointer",
                 opacity: page >= totalPages - 1 ? 0.5 : 1,
               }}

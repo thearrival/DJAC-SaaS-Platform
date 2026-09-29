@@ -288,7 +288,7 @@ export default function ForgotPassword() {
                     background: `linear-gradient(135deg,${C.cyan},${C.purple})`,
                     border: "none",
                     borderRadius: 10,
-                    color: "#fff",
+                    color: "var(--djac-text)",
                     padding: "12px 28px",
                     fontWeight: 700,
                     fontSize: 13.5,
@@ -483,7 +483,7 @@ export default function ForgotPassword() {
                     background: resetMutation.isPending
                       ? `${C.purple}60`
                       : `linear-gradient(135deg,${C.purple},${C.cyan})`,
-                    color: "#fff",
+                    color: "var(--djac-text)",
                     fontWeight: 800,
                     fontSize: 14,
                     cursor: resetMutation.isPending ? "not-allowed" : "pointer",
@@ -686,7 +686,7 @@ export default function ForgotPassword() {
                     background: sendMutation.isPending
                       ? `${C.cyan}60`
                       : `linear-gradient(135deg,${C.cyan},${C.purple})`,
-                    color: "#fff",
+                    color: "var(--djac-text)",
                     fontWeight: 800,
                     fontSize: 14,
                     cursor: sendMutation.isPending ? "not-allowed" : "pointer",

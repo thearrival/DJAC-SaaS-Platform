@@ -1734,7 +1734,7 @@ export default function VendorAssessment() {
             background: isDark
               ? "linear-gradient(135deg, #050508 0%, #050508 50%, rgba(239,68,68,0.12) 100%)"
               : "linear-gradient(135deg, #050508 0%, #050508 50%, rgba(239,68,68,0.12) 100%)",
-            color: "#fff",
+            color: "var(--djac-text)",
           }}
         >
           <div className="grid gap-6 px-6 py-8 md:grid-cols-[1.4fr_0.8fr] md:px-8">

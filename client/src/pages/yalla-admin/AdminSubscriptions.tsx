@@ -53,7 +53,7 @@ const PLAN_COLORS = ["#d900ff", "#00d2ff", "#10b981", "#f59e0b", "#8b5cf6"];
 const cardStyle: React.CSSProperties = {
   padding: 20,
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.06)",
+  border: "1px solid var(--djac-border)",
   background: "rgba(15,15,25,0.8)",
 };
 
@@ -145,14 +145,14 @@ export default function AdminSubscriptions() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -165,7 +165,7 @@ export default function AdminSubscriptions() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -176,7 +176,7 @@ export default function AdminSubscriptions() {
             Subscriptions
           </h1>
           {updatedAt && (
-            <span style={{ fontSize: 11, color: "#64748b" }}>
+            <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               updated {updatedAt}
             </span>
           )}
@@ -185,10 +185,10 @@ export default function AdminSubscriptions() {
           onClick={loadData}
           style={{
             background: "none",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid var(--djac-border)",
             borderRadius: 6,
             padding: "6px 10px",
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
             cursor: "pointer",
           }}
         >
@@ -234,7 +234,7 @@ export default function AdminSubscriptions() {
             <div style={{ fontSize: 24, fontWeight: 800, color: "#10b981" }}>
               ${(totalMRR / 100).toLocaleString()}
             </div>
-            <div style={{ fontSize: 12, color: "#94a3b8" }}>
+            <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
               Est. Monthly Revenue
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function AdminSubscriptions() {
             <div style={{ fontSize: 24, fontWeight: 800, color: "#d900ff" }}>
               {data?.subscriptions?.length || 0}
             </div>
-            <div style={{ fontSize: 12, color: "#94a3b8" }}>
+            <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
               Total Subscriptions
             </div>
           </div>
@@ -255,7 +255,9 @@ export default function AdminSubscriptions() {
             <div style={{ fontSize: 24, fontWeight: 800, color: "#f59e0b" }}>
               {activePlanCount}
             </div>
-            <div style={{ fontSize: 12, color: "#94a3b8" }}>Active Plans</div>
+            <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
+              Active Plans
+            </div>
           </div>
           <div style={cardStyle}>
             <AlertTriangle
@@ -274,7 +276,7 @@ export default function AdminSubscriptions() {
             >
               {cancelingCount}
             </div>
-            <div style={{ fontSize: 12, color: "#94a3b8" }}>
+            <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
               Canceling at Period End
             </div>
           </div>
@@ -302,7 +304,7 @@ export default function AdminSubscriptions() {
             {statusPie.length === 0 ? (
               <div
                 style={{
-                  color: "#64748b",
+                  color: "var(--djac-muted)",
                   fontSize: 13,
                   textAlign: "center",
                   padding: "30px 0",
@@ -329,8 +331,8 @@ export default function AdminSubscriptions() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        background: "#0f0f17",
-                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: "var(--djac-bg-deep)",
+                        border: "1px solid var(--djac-border)",
                         borderRadius: 8,
                         fontSize: 12,
                       }}
@@ -363,7 +365,9 @@ export default function AdminSubscriptions() {
                           flexShrink: 0,
                         }}
                       />
-                      <span style={{ color: "#94a3b8" }}>{s.name}</span>
+                      <span style={{ color: "var(--djac-muted)" }}>
+                        {s.name}
+                      </span>
                       <span style={{ fontWeight: 700 }}>{s.value}</span>
                     </div>
                   ))}
@@ -385,7 +389,7 @@ export default function AdminSubscriptions() {
             {planPie.length === 0 ? (
               <div
                 style={{
-                  color: "#64748b",
+                  color: "var(--djac-muted)",
                   fontSize: 13,
                   textAlign: "center",
                   padding: "30px 0",
@@ -412,8 +416,8 @@ export default function AdminSubscriptions() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        background: "#0f0f17",
-                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: "var(--djac-bg-deep)",
+                        border: "1px solid var(--djac-border)",
                         borderRadius: 8,
                         fontSize: 12,
                       }}
@@ -448,7 +452,7 @@ export default function AdminSubscriptions() {
                       />
                       <span
                         style={{
-                          color: "#94a3b8",
+                          color: "var(--djac-muted)",
                           textTransform: "capitalize",
                         }}
                       >
@@ -471,9 +475,9 @@ export default function AdminSubscriptions() {
             style={{
               padding: "8px 12px",
               borderRadius: 6,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#fff",
+              background: "var(--djac-card-hi)",
+              border: "1px solid var(--djac-border)",
+              color: "var(--djac-text)",
               fontSize: 13,
             }}
           >
@@ -489,7 +493,7 @@ export default function AdminSubscriptions() {
         <div
           style={{
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid var(--djac-border)",
             overflow: "hidden",
           }}
         >
@@ -497,7 +501,7 @@ export default function AdminSubscriptions() {
             style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
           >
             <thead>
-              <tr style={{ background: "rgba(255,255,255,0.02)" }}>
+              <tr style={{ background: "var(--djac-card-hi)" }}>
                 <th style={thStyle}>Organization</th>
                 <th style={thStyle}>Plan</th>
                 <th style={thStyle}>Status</th>
@@ -513,7 +517,7 @@ export default function AdminSubscriptions() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     Loading...
@@ -526,7 +530,7 @@ export default function AdminSubscriptions() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     No subscriptions found
@@ -536,13 +540,13 @@ export default function AdminSubscriptions() {
                 filtered.map(s => (
                   <tr
                     key={s.id}
-                    style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
+                    style={{ borderTop: "1px solid var(--djac-border)" }}
                   >
                     <td style={{ padding: "12px 16px" }}>
                       <div style={{ fontWeight: 500 }}>
                         {s.organizationName || "—"}
                       </div>
-                      <div style={{ fontSize: 12, color: "#7d8aa0" }}>
+                      <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
                         {s.billingEmail}
                       </div>
                     </td>
@@ -589,7 +593,9 @@ export default function AdminSubscriptions() {
                     </td>
                     <td style={{ padding: "12px 16px" }}>
                       ${(s.amountCents / 100).toFixed(2)}
-                      <span style={{ color: "#64748b", fontSize: 11 }}>
+                      <span
+                        style={{ color: "var(--djac-muted)", fontSize: 11 }}
+                      >
                         {" "}
                         /{s.billingInterval === "annual" ? "yr" : "mo"}
                       </span>
@@ -597,7 +603,7 @@ export default function AdminSubscriptions() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#7d8aa0",
+                        color: "var(--djac-muted)",
                         fontSize: 12,
                       }}
                     >
@@ -619,7 +625,7 @@ export default function AdminSubscriptions() {
 const thStyle: React.CSSProperties = {
   padding: "12px 16px",
   textAlign: "left",
-  color: "#94a3b8",
+  color: "var(--djac-muted)",
   fontSize: 11,
   textTransform: "uppercase",
 };

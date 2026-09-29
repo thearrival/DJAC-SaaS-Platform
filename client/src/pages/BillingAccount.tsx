@@ -68,8 +68,8 @@ const STATUS_META: Record<string, { color: string }> = {
   trialing: { color: "#00d2ff" },
   past_due: { color: "#f59e0b" },
   canceled: { color: "#ef4444" },
-  incomplete: { color: "#94a3b8" },
-  paused: { color: "#94a3b8" },
+  incomplete: { color: "var(--djac-muted)" },
+  paused: { color: "var(--djac-muted)" },
 };
 
 function getPlanLabel(plan: string | null | undefined, t: Translate): string {
@@ -364,7 +364,7 @@ function OrgSetupForm({ onSuccess }: { onSuccess: () => void }) {
             padding: "13px",
             borderRadius: 10,
             background: "linear-gradient(135deg,#d900ff,#d900ff)",
-            color: "#fff",
+            color: "var(--djac-text)",
             fontSize: 14,
             fontWeight: 700,
             border: "none",
@@ -718,7 +718,7 @@ export default function BillingAccount() {
                   padding: "10px 18px",
                   borderRadius: 8,
                   background: "linear-gradient(135deg,#d900ff,#d900ff)",
-                  color: "#fff",
+                  color: "var(--djac-text)",
                   fontSize: 13,
                   fontWeight: 700,
                   border: "none",
@@ -948,7 +948,9 @@ export default function BillingAccount() {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {historyQuery.data.map(event => {
-                const s = STATUS_META[event.status] ?? { color: "#94a3b8" };
+                const s = STATUS_META[event.status] ?? {
+                  color: "var(--djac-muted)",
+                };
                 const eventStatusLabel = getStatusLabel(event.status, t);
                 return (
                   <div

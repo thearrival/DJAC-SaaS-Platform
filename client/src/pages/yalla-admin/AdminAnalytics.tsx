@@ -54,7 +54,7 @@ const ROLE_COLORS = [
 const cardStyle: React.CSSProperties = {
   padding: 20,
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.06)",
+  border: "1px solid var(--djac-border)",
   background: "rgba(15,15,25,0.8)",
 };
 
@@ -116,14 +116,14 @@ export default function AdminAnalytics() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -136,7 +136,7 @@ export default function AdminAnalytics() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -147,7 +147,7 @@ export default function AdminAnalytics() {
             Platform Analytics
           </h1>
           {updatedAt && (
-            <span style={{ fontSize: 11, color: "#64748b" }}>
+            <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               updated {updatedAt}
             </span>
           )}
@@ -156,10 +156,10 @@ export default function AdminAnalytics() {
           onClick={loadData}
           style={{
             background: "none",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid var(--djac-border)",
             borderRadius: 6,
             padding: "6px 10px",
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
             cursor: "pointer",
           }}
         >
@@ -248,7 +248,9 @@ export default function AdminAnalytics() {
               <BarChart3 size={16} /> Monthly Registrations (12 months)
             </h3>
             {loading ? (
-              <p style={{ fontSize: 13, color: "#7d8aa0" }}>Loading...</p>
+              <p style={{ fontSize: 13, color: "var(--djac-muted)" }}>
+                Loading...
+              </p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart
@@ -284,12 +286,12 @@ export default function AdminAnalytics() {
                   />
                   <Tooltip
                     contentStyle={{
-                      background: "#0f0f17",
-                      border: "1px solid rgba(255,255,255,0.12)",
+                      background: "var(--djac-bg-deep)",
+                      border: "1px solid var(--djac-border)",
                       borderRadius: 8,
                       fontSize: 12,
                     }}
-                    labelStyle={{ color: "#cbd5e1" }}
+                    labelStyle={{ color: "var(--djac-text)" }}
                   />
                   <Area
                     type="monotone"
@@ -316,9 +318,13 @@ export default function AdminAnalytics() {
               User Distribution by Role
             </h3>
             {loading ? (
-              <p style={{ fontSize: 13, color: "#7d8aa0" }}>Loading...</p>
+              <p style={{ fontSize: 13, color: "var(--djac-muted)" }}>
+                Loading...
+              </p>
             ) : rolePie.length === 0 ? (
-              <p style={{ fontSize: 13, color: "#64748b" }}>No role data</p>
+              <p style={{ fontSize: 13, color: "var(--djac-muted)" }}>
+                No role data
+              </p>
             ) : (
               <div
                 style={{
@@ -345,8 +351,8 @@ export default function AdminAnalytics() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        background: "#0f0f17",
-                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: "var(--djac-bg-deep)",
+                        border: "1px solid var(--djac-border)",
                         borderRadius: 8,
                         fontSize: 12,
                       }}
@@ -386,7 +392,7 @@ export default function AdminAnalytics() {
                         />
                         <span
                           style={{
-                            color: "#94a3b8",
+                            color: "var(--djac-muted)",
                             flex: 1,
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -396,10 +402,14 @@ export default function AdminAnalytics() {
                         >
                           {r.name.replace(/_/g, " ")}
                         </span>
-                        <span style={{ color: "#e2e8f0", fontWeight: 700 }}>
+                        <span
+                          style={{ color: "var(--djac-text)", fontWeight: 700 }}
+                        >
                           {r.value}
                         </span>
-                        <span style={{ color: "#64748b", fontSize: 11 }}>
+                        <span
+                          style={{ color: "var(--djac-muted)", fontSize: 11 }}
+                        >
                           {totalUsers > 0
                             ? Math.round((r.value / totalUsers) * 100)
                             : 0}
@@ -451,11 +461,11 @@ function KPI({
       <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1.2 }}>
         {value.toLocaleString()}
       </div>
-      <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
+      <div style={{ fontSize: 12, color: "var(--djac-muted)", marginTop: 4 }}>
         {label}
       </div>
       {sub && (
-        <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
+        <div style={{ fontSize: 11, color: "var(--djac-muted)", marginTop: 2 }}>
           {sub}
         </div>
       )}

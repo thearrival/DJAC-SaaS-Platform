@@ -111,7 +111,7 @@ const KANBAN_COLUMNS: {
 }[] = [
   {
     status: "open",
-    color: "#94a3b8",
+    color: "var(--djac-muted)",
     bg: "rgba(148,163,184,0.08)",
     border: "rgba(148,163,184,0.20)",
   },
@@ -287,7 +287,7 @@ function TaskCard({
               border: "1px solid var(--djac-border, rgba(148,163,184,0.15))",
               cursor: "pointer",
               fontSize: 11,
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
             }}
           >
             {t("remediation.edit", "Edit")}
@@ -337,8 +337,8 @@ function TaskCard({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <User size={11} style={{ color: "#94a3b8" }} />
-          <span style={{ fontSize: 11, color: "#94a3b8" }}>
+          <User size={11} style={{ color: "var(--djac-muted)" }} />
+          <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
             {assigneeName ?? t("remediation.unassigned", "Unassigned")}
           </span>
         </div>
@@ -372,7 +372,7 @@ function TaskCard({
             background: "transparent",
             cursor: "pointer",
             fontSize: 11,
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
             width: "100%",
             transition: "all 0.15s",
           }}
@@ -735,7 +735,7 @@ function StatCard({
       <div
         style={{
           fontSize: 10,
-          color: "#94a3b8",
+          color: "var(--djac-muted)",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
         }}
@@ -969,7 +969,7 @@ export default function RemediationPlanner() {
             style={{
               margin: "4px 0 0",
               fontSize: 13,
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               maxWidth: 640,
             }}
           >
@@ -1019,7 +1019,13 @@ export default function RemediationPlanner() {
                 "Some assignment data failed to load."
               )}
             </p>
-            <p style={{ margin: "3px 0 0", fontSize: 12, color: "#94a3b8" }}>
+            <p
+              style={{
+                margin: "3px 0 0",
+                fontSize: 12,
+                color: "var(--djac-muted)",
+              }}
+            >
               {supportLoadErrorMessage ??
                 t(
                   "remediation.supportLoadErrorHint",
@@ -1090,7 +1096,7 @@ export default function RemediationPlanner() {
             justifyContent: "center",
             gap: 14,
             padding: 80,
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
           }}
         >
           <Wrench size={32} style={{ color: "#050508", opacity: 0.6 }} />
@@ -1117,7 +1123,7 @@ export default function RemediationPlanner() {
             justifyContent: "center",
             padding: 80,
             gap: 10,
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
           }}
         >
           <Loader2 size={18} className="animate-spin" />
@@ -1153,7 +1159,13 @@ export default function RemediationPlanner() {
             >
               {t("remediation.emptyTitle", "No remediation tasks yet")}
             </p>
-            <p style={{ margin: "6px 0 0", fontSize: 13, color: "#94a3b8" }}>
+            <p
+              style={{
+                margin: "6px 0 0",
+                fontSize: 13,
+                color: "var(--djac-muted)",
+              }}
+            >
               {t(
                 "remediation.emptyDesc",
                 "Create tasks from gap findings in the Gap Tracker, or add one manually."

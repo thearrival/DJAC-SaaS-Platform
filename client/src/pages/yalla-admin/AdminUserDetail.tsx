@@ -74,7 +74,7 @@ interface AuthHistoryEntry {
 const cardStyle: React.CSSProperties = {
   padding: 20,
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.06)",
+  border: "1px solid var(--djac-border)",
   background: "rgba(15,15,25,0.8)",
 };
 
@@ -105,7 +105,7 @@ function StatusBadge({ status }: { status: string }) {
   const s = map[status] ?? {
     bg: "rgba(148,163,184,0.1)",
     border: "rgba(148,163,184,0.3)",
-    color: "#94a3b8",
+    color: "var(--djac-muted)",
   };
   return (
     <span
@@ -188,8 +188,8 @@ export default function AdminUserDetail() {
       <div
         style={{
           minHeight: "100vh",
-          background: "#050508",
-          color: "#e2e8f0",
+          background: "var(--djac-bg)",
+          color: "var(--djac-text)",
           padding: 40,
           fontFamily: "'Inter', sans-serif",
         }}
@@ -216,14 +216,14 @@ export default function AdminUserDetail() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -238,7 +238,7 @@ export default function AdminUserDetail() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -254,10 +254,10 @@ export default function AdminUserDetail() {
           onClick={load}
           style={{
             background: "none",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid var(--djac-border)",
             borderRadius: 6,
             padding: "6px 10px",
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
             cursor: "pointer",
           }}
         >
@@ -287,7 +287,9 @@ export default function AdminUserDetail() {
         )}
 
         {loading && !detail ? (
-          <div style={{ color: "#64748b", fontSize: 13 }}>Loading…</div>
+          <div style={{ color: "var(--djac-muted)", fontSize: 13 }}>
+            Loading…
+          </div>
         ) : detail ? (
           <>
             {/* Profile + memberships */}
@@ -322,31 +324,31 @@ export default function AdminUserDetail() {
                     margin: 0,
                   }}
                 >
-                  <dt style={{ color: "#64748b" }}>Email</dt>
-                  <dd style={{ margin: 0, color: "#e2e8f0" }}>
+                  <dt style={{ color: "var(--djac-muted)" }}>Email</dt>
+                  <dd style={{ margin: 0, color: "var(--djac-text)" }}>
                     {detail.email || "—"}
                   </dd>
-                  <dt style={{ color: "#64748b" }}>Phone</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Phone</dt>
                   <dd style={{ margin: 0 }}>{detail.phoneNumber || "—"}</dd>
-                  <dt style={{ color: "#64748b" }}>Role</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Role</dt>
                   <dd style={{ margin: 0 }}>{detail.role}</dd>
-                  <dt style={{ color: "#64748b" }}>Source</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Source</dt>
                   <dd style={{ margin: 0 }}>{detail.source}</dd>
-                  <dt style={{ color: "#64748b" }}>Company</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Company</dt>
                   <dd style={{ margin: 0 }}>{detail.companyName || "—"}</dd>
-                  <dt style={{ color: "#64748b" }}>Job title</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Job title</dt>
                   <dd style={{ margin: 0 }}>{detail.jobTitle || "—"}</dd>
-                  <dt style={{ color: "#64748b" }}>Industry</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Industry</dt>
                   <dd style={{ margin: 0 }}>{detail.industry || "—"}</dd>
-                  <dt style={{ color: "#64748b" }}>Locale</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Locale</dt>
                   <dd style={{ margin: 0 }}>{detail.preferredLocale}</dd>
-                  <dt style={{ color: "#64748b" }}>Joined</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Joined</dt>
                   <dd style={{ margin: 0 }}>
                     {detail.createdAt
                       ? new Date(detail.createdAt).toLocaleString()
                       : "—"}
                   </dd>
-                  <dt style={{ color: "#64748b" }}>Last signed in</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>Last signed in</dt>
                   <dd style={{ margin: 0 }}>
                     {detail.lastSignedIn
                       ? new Date(detail.lastSignedIn).toLocaleString()
@@ -370,7 +372,7 @@ export default function AdminUserDetail() {
                   Memberships ({detail.organizationMemberships.length})
                 </div>
                 {detail.organizationMemberships.length === 0 ? (
-                  <div style={{ fontSize: 13, color: "#64748b" }}>
+                  <div style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                     No organization memberships.
                   </div>
                 ) : (
@@ -389,13 +391,17 @@ export default function AdminUserDetail() {
                           justifyContent: "space-between",
                           padding: "8px 10px",
                           borderRadius: 8,
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.06)",
+                          background: "var(--djac-card-hi)",
+                          border: "1px solid var(--djac-border)",
                           fontSize: 13,
                         }}
                       >
-                        <span style={{ color: "#cbd5e1" }}>{m.orgName}</span>
-                        <span style={{ color: "#7d8aa0", fontSize: 12 }}>
+                        <span style={{ color: "var(--djac-text)" }}>
+                          {m.orgName}
+                        </span>
+                        <span
+                          style={{ color: "var(--djac-muted)", fontSize: 12 }}
+                        >
                           {m.role}
                           {m.joinedAt
                             ? ` · ${new Date(m.joinedAt).toLocaleDateString()}`
@@ -420,7 +426,7 @@ export default function AdminUserDetail() {
                   Auth history
                 </div>
                 <div style={{ marginTop: 10, fontSize: 12.5 }}>
-                  <div style={{ color: "#64748b", marginBottom: 6 }}>
+                  <div style={{ color: "var(--djac-muted)", marginBottom: 6 }}>
                     {authHistory.length} events ·{" "}
                     <span
                       style={{ color: failures > 0 ? "#ef4444" : "#10b981" }}
@@ -429,7 +435,9 @@ export default function AdminUserDetail() {
                     </span>
                   </div>
                   {authHistory.length === 0 ? (
-                    <div style={{ color: "#64748b" }}>No auth events.</div>
+                    <div style={{ color: "var(--djac-muted)" }}>
+                      No auth events.
+                    </div>
                   ) : (
                     <div
                       style={{
@@ -449,10 +457,12 @@ export default function AdminUserDetail() {
                             gap: 8,
                             padding: "6px 8px",
                             borderRadius: 6,
-                            background: "rgba(255,255,255,0.03)",
+                            background: "var(--djac-card-hi)",
                           }}
                         >
-                          <span style={{ color: "#cbd5e1" }}>{a.action}</span>
+                          <span style={{ color: "var(--djac-text)" }}>
+                            {a.action}
+                          </span>
                           <span
                             style={{
                               color:
@@ -462,7 +472,9 @@ export default function AdminUserDetail() {
                           >
                             {a.outcome}
                           </span>
-                          <span style={{ color: "#64748b", fontSize: 11 }}>
+                          <span
+                            style={{ color: "var(--djac-muted)", fontSize: 11 }}
+                          >
                             {a.createdAt
                               ? new Date(a.createdAt).toLocaleString()
                               : ""}
@@ -491,7 +503,7 @@ export default function AdminUserDetail() {
                 Activity timeline ({timeline.length})
               </div>
               {timeline.length === 0 ? (
-                <div style={{ fontSize: 13, color: "#64748b" }}>
+                <div style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                   No activity recorded for this user yet.
                 </div>
               ) : (
@@ -512,7 +524,7 @@ export default function AdminUserDetail() {
                         gridTemplateColumns: "72px 1fr auto",
                         gap: 12,
                         padding: "10px 4px",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        borderTop: "1px solid var(--djac-border)",
                         alignItems: "start",
                       }}
                     >
@@ -531,7 +543,7 @@ export default function AdminUserDetail() {
                         <div
                           style={{
                             fontSize: 13,
-                            color: "#e2e8f0",
+                            color: "var(--djac-text)",
                             fontFamily: "ui-monospace,monospace",
                           }}
                         >
@@ -540,7 +552,7 @@ export default function AdminUserDetail() {
                         <div
                           style={{
                             fontSize: 11.5,
-                            color: "#64748b",
+                            color: "var(--djac-muted)",
                             marginTop: 2,
                           }}
                         >
@@ -557,7 +569,7 @@ export default function AdminUserDetail() {
                       <span
                         style={{
                           fontSize: 11.5,
-                          color: "#7d8aa0",
+                          color: "var(--djac-muted)",
                           whiteSpace: "nowrap",
                         }}
                       >

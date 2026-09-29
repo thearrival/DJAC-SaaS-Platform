@@ -848,7 +848,7 @@ export default function TransferChecker() {
                   fontSize: 11,
                   fontWeight: 800,
                   background: step > 1 ? "#10b981" : C.accent,
-                  color: "#fff",
+                  color: "var(--djac-text)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -1109,7 +1109,7 @@ export default function TransferChecker() {
                     fontSize: 11,
                     fontWeight: 800,
                     background: step > 2 ? "#10b981" : C.accent,
-                    color: "#fff",
+                    color: "var(--djac-text)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -1187,7 +1187,7 @@ export default function TransferChecker() {
                     style={{
                       gap: 6,
                       background: "#10b981",
-                      color: "#fff",
+                      color: "var(--djac-text)",
                       border: "none",
                     }}
                   >

@@ -111,9 +111,9 @@ export default function AdminMFASetup() {
     width: "100%",
     padding: "12px 14px",
     borderRadius: 8,
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    color: "#fff",
+    background: "var(--djac-card-hi)",
+    border: "1px solid var(--djac-border)",
+    color: "var(--djac-text)",
     fontSize: 14,
     outline: "none",
     boxSizing: "border-box",
@@ -123,15 +123,15 @@ export default function AdminMFASetup() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
         padding: 24,
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 0",
           marginBottom: 24,
         }}
@@ -142,7 +142,7 @@ export default function AdminMFASetup() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -218,7 +218,13 @@ export default function AdminMFASetup() {
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
               2FA Is Protecting Your Account
             </h2>
-            <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 24px" }}>
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--djac-muted)",
+                margin: "0 0 24px",
+              }}
+            >
               Sign-in requires a time-based code from your authenticator app.
               Keep your backup codes somewhere safe.
             </p>
@@ -235,7 +241,7 @@ export default function AdminMFASetup() {
               <label
                 style={{
                   fontSize: 12,
-                  color: "#94a3b8",
+                  color: "var(--djac-muted)",
                   fontWeight: 600,
                 }}
               >
@@ -286,14 +292,20 @@ export default function AdminMFASetup() {
               textAlign: "center",
               padding: 32,
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: "1px solid var(--djac-border)",
             }}
           >
             <Shield size={48} style={{ color: "#d900ff", marginBottom: 16 }} />
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
               Secure Your Account
             </h2>
-            <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 24px" }}>
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--djac-muted)",
+                margin: "0 0 24px",
+              }}
+            >
               Add an extra layer of security using an authenticator app.
             </p>
             <button
@@ -303,7 +315,7 @@ export default function AdminMFASetup() {
                 padding: "12px 28px",
                 borderRadius: 10,
                 background: "linear-gradient(135deg,#d900ff,#d900ff)",
-                color: "#fff",
+                color: "var(--djac-text)",
                 fontSize: 14,
                 fontWeight: 700,
                 border: "none",
@@ -322,7 +334,7 @@ export default function AdminMFASetup() {
               textAlign: "center",
               padding: 32,
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: "1px solid var(--djac-border)",
             }}
           >
             <img
@@ -337,7 +349,13 @@ export default function AdminMFASetup() {
                 background: "#fff",
               }}
             />
-            <p style={{ fontSize: 12, color: "#7d8aa0", marginBottom: 8 }}>
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--djac-muted)",
+                marginBottom: 8,
+              }}
+            >
               Or enter manually:
             </p>
             <code
@@ -359,9 +377,9 @@ export default function AdminMFASetup() {
                   width: "100%",
                   padding: "12px",
                   borderRadius: 8,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "#fff",
+                  background: "var(--djac-card-hi)",
+                  border: "1px solid var(--djac-border)",
+                  color: "var(--djac-text)",
                   fontSize: 20,
                   textAlign: "center",
                   letterSpacing: 8,
@@ -381,7 +399,7 @@ export default function AdminMFASetup() {
                   code.length === 6
                     ? "linear-gradient(135deg,#d900ff,#d900ff)"
                     : "rgba(99,102,241,0.3)",
-                color: "#fff",
+                color: "var(--djac-text)",
                 fontSize: 14,
                 fontWeight: 700,
                 border: "none",
@@ -399,7 +417,7 @@ export default function AdminMFASetup() {
               textAlign: "center",
               padding: 32,
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: "1px solid var(--djac-border)",
             }}
           >
             <CheckCircle2
@@ -409,7 +427,13 @@ export default function AdminMFASetup() {
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
               MFA Enabled
             </h2>
-            <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 16px" }}>
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--djac-muted)",
+                margin: "0 0 16px",
+              }}
+            >
               Save these backup codes securely. They can each be used once if
               you lose access to your authenticator.
             </p>
@@ -428,11 +452,11 @@ export default function AdminMFASetup() {
                   style={{
                     padding: "8px 12px",
                     borderRadius: 6,
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "var(--djac-card-hi)",
+                    border: "1px solid var(--djac-border)",
                     fontSize: 12,
                     fontFamily: "monospace",
-                    color: "#e2e8f0",
+                    color: "var(--djac-text)",
                   }}
                 >
                   {c}
@@ -446,7 +470,7 @@ export default function AdminMFASetup() {
                 padding: "12px 28px",
                 borderRadius: 10,
                 background: "linear-gradient(135deg,#d900ff,#d900ff)",
-                color: "#fff",
+                color: "var(--djac-text)",
                 fontSize: 14,
                 fontWeight: 700,
                 border: "none",

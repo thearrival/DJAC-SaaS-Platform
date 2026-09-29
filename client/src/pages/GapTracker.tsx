@@ -974,8 +974,13 @@ export default function GapTracker() {
           border: "1px solid var(--djac-border, rgba(148,163,184,0.12))",
         }}
       >
-        <Filter size={14} style={{ color: "#94a3b8", flexShrink: 0 }} />
-        <span style={{ fontSize: 12, color: "#94a3b8", flexShrink: 0 }}>
+        <Filter
+          size={14}
+          style={{ color: "var(--djac-muted)", flexShrink: 0 }}
+        />
+        <span
+          style={{ fontSize: 12, color: "var(--djac-muted)", flexShrink: 0 }}
+        >
           {t("gapTracker.filterBy", "Filter by:")}
         </span>
 
@@ -1085,7 +1090,7 @@ export default function GapTracker() {
             alignItems: "center",
             justifyContent: "center",
             padding: 80,
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
             fontSize: 14,
             gap: 10,
           }}
@@ -1132,7 +1137,7 @@ export default function GapTracker() {
             justifyContent: "center",
             gap: 14,
             padding: "80px 0",
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
           }}
         >
           <Building2 size={40} style={{ opacity: 0.3 }} />
@@ -1178,7 +1183,7 @@ export default function GapTracker() {
       {!isLoading && !error && filteredEntries.length > 0 && (
         <>
           {(severityFilter !== "all" || jurisFilter !== "all") && (
-            <p style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--djac-muted)" }}>
               {t(
                 "gapTracker.showingFiltered",
                 "Showing vendors with matching gaps"
@@ -1209,7 +1214,7 @@ export default function GapTracker() {
               justifyContent: "center",
               gap: 10,
               padding: 60,
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               fontSize: 13,
             }}
           >

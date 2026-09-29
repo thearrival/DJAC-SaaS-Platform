@@ -64,15 +64,15 @@ const OUTCOME_COLORS: Record<string, string> = {
 
 const cardStyle: React.CSSProperties = {
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.06)",
-  background: "rgba(255,255,255,0.015)",
+  border: "1px solid var(--djac-border)",
+  background: "var(--djac-card-hi)",
   padding: 18,
 };
 
 const thStyle: React.CSSProperties = {
   padding: "12px 16px",
   textAlign: "left",
-  color: "#94a3b8",
+  color: "var(--djac-muted)",
   fontSize: 11,
   textTransform: "uppercase",
 };
@@ -323,9 +323,9 @@ export default function AdminSecurity() {
     width: "100%",
     padding: "10px 12px",
     borderRadius: 8,
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    color: "#fff",
+    background: "var(--djac-card-hi)",
+    border: "1px solid var(--djac-border)",
+    color: "var(--djac-text)",
     fontSize: 13,
     outline: "none",
     boxSizing: "border-box",
@@ -335,14 +335,14 @@ export default function AdminSecurity() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -355,7 +355,7 @@ export default function AdminSecurity() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -366,7 +366,7 @@ export default function AdminSecurity() {
             Security Monitor
           </h1>
           {updatedAt && (
-            <span style={{ fontSize: 11, color: "#64748b" }}>
+            <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               updated {updatedAt}
             </span>
           )}
@@ -399,10 +399,10 @@ export default function AdminSecurity() {
             }}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -445,7 +445,7 @@ export default function AdminSecurity() {
             {
               label: "Events (24h window)",
               value: summary.total,
-              color: "#e2e8f0",
+              color: "var(--djac-text)",
             },
             {
               label: "Failures",
@@ -474,7 +474,9 @@ export default function AdminSecurity() {
             },
           ].map(kpi => (
             <div key={kpi.label} style={cardStyle}>
-              <div style={{ fontSize: 11, color: "#94a3b8" }}>{kpi.label}</div>
+              <div style={{ fontSize: 11, color: "var(--djac-muted)" }}>
+                {kpi.label}
+              </div>
               <div
                 style={{
                   fontSize: 24,
@@ -503,7 +505,7 @@ export default function AdminSecurity() {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: "#cbd5e1",
+                color: "var(--djac-text)",
                 marginBottom: 12,
               }}
             >
@@ -540,12 +542,12 @@ export default function AdminSecurity() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#0f0f17",
-                    border: "1px solid rgba(255,255,255,0.12)",
+                    background: "var(--djac-bg-deep)",
+                    border: "1px solid var(--djac-border)",
                     borderRadius: 8,
                     fontSize: 12,
                   }}
-                  labelStyle={{ color: "#cbd5e1" }}
+                  labelStyle={{ color: "var(--djac-text)" }}
                 />
                 <Area
                   type="monotone"
@@ -564,7 +566,7 @@ export default function AdminSecurity() {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: "#cbd5e1",
+                color: "var(--djac-text)",
                 marginBottom: 12,
               }}
             >
@@ -573,7 +575,7 @@ export default function AdminSecurity() {
             {outcomePie.length === 0 ? (
               <div
                 style={{
-                  color: "#64748b",
+                  color: "var(--djac-muted)",
                   fontSize: 13,
                   padding: "40px 0",
                   textAlign: "center",
@@ -600,8 +602,8 @@ export default function AdminSecurity() {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        background: "#0f0f17",
-                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: "var(--djac-bg-deep)",
+                        border: "1px solid var(--djac-border)",
                         borderRadius: 8,
                         fontSize: 12,
                       }}
@@ -630,8 +632,12 @@ export default function AdminSecurity() {
                           flexShrink: 0,
                         }}
                       />
-                      <span style={{ color: "#94a3b8" }}>{s.name}</span>
-                      <span style={{ fontWeight: 700, color: "#e2e8f0" }}>
+                      <span style={{ color: "var(--djac-muted)" }}>
+                        {s.name}
+                      </span>
+                      <span
+                        style={{ fontWeight: 700, color: "var(--djac-text)" }}
+                      >
                         {s.value}
                       </span>
                     </div>
@@ -646,7 +652,7 @@ export default function AdminSecurity() {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: "#cbd5e1",
+                color: "var(--djac-text)",
                 marginBottom: 12,
               }}
             >
@@ -655,7 +661,7 @@ export default function AdminSecurity() {
             {topIps.length === 0 ? (
               <div
                 style={{
-                  color: "#64748b",
+                  color: "var(--djac-muted)",
                   fontSize: 13,
                   padding: "40px 0",
                   textAlign: "center",
@@ -680,7 +686,7 @@ export default function AdminSecurity() {
                       <span
                         style={{
                           fontFamily: "monospace",
-                          color: "#94a3b8",
+                          color: "var(--djac-muted)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           maxWidth: "75%",
@@ -688,7 +694,9 @@ export default function AdminSecurity() {
                       >
                         {t.ip}
                       </span>
-                      <span style={{ color: "#e2e8f0", fontWeight: 700 }}>
+                      <span
+                        style={{ color: "var(--djac-text)", fontWeight: 700 }}
+                      >
                         {t.count}
                       </span>
                     </div>
@@ -696,7 +704,7 @@ export default function AdminSecurity() {
                       style={{
                         height: 6,
                         borderRadius: 3,
-                        background: "rgba(255,255,255,0.05)",
+                        background: "var(--djac-card-hi)",
                         overflow: "hidden",
                       }}
                     >
@@ -739,7 +747,7 @@ export default function AdminSecurity() {
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "#cbd5e1",
+                  color: "var(--djac-text)",
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
@@ -750,7 +758,7 @@ export default function AdminSecurity() {
               </div>
             </div>
             {sessions.length === 0 ? (
-              <div style={{ color: "#64748b", fontSize: 13 }}>
+              <div style={{ color: "var(--djac-muted)", fontSize: 13 }}>
                 No active sessions found.
               </div>
             ) : (
@@ -804,7 +812,7 @@ export default function AdminSecurity() {
                       <div
                         style={{
                           fontSize: 11,
-                          color: "#64748b",
+                          color: "var(--djac-muted)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -850,7 +858,7 @@ export default function AdminSecurity() {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: "#cbd5e1",
+                color: "var(--djac-text)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -869,8 +877,8 @@ export default function AdminSecurity() {
                 justifyContent: "space-between",
                 padding: "10px 12px",
                 borderRadius: 8,
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: "var(--djac-card-hi)",
+                border: "1px solid var(--djac-border)",
                 marginBottom: 14,
               }}
             >
@@ -884,7 +892,7 @@ export default function AdminSecurity() {
                   <div style={{ fontSize: 12.5, fontWeight: 600 }}>
                     Two-factor authentication
                   </div>
-                  <div style={{ fontSize: 11, color: "#64748b" }}>
+                  <div style={{ fontSize: 11, color: "var(--djac-muted)" }}>
                     {mfaEnabled === null
                       ? "Checking…"
                       : mfaEnabled
@@ -923,7 +931,11 @@ export default function AdminSecurity() {
               style={{ display: "flex", flexDirection: "column", gap: 10 }}
             >
               <div
-                style={{ fontSize: 11.5, color: "#94a3b8", fontWeight: 600 }}
+                style={{
+                  fontSize: 11.5,
+                  color: "var(--djac-muted)",
+                  fontWeight: 600,
+                }}
               >
                 Change founders password
               </div>
@@ -991,7 +1003,7 @@ export default function AdminSecurity() {
                     newPassword !== confirmPassword
                       ? "rgba(255,255,255,0.06)"
                       : "linear-gradient(135deg,#d900ff,#d900ff)",
-                  color: "#fff",
+                  color: "var(--djac-text)",
                   fontSize: 13,
                   fontWeight: 700,
                   border: "none",
@@ -1061,7 +1073,11 @@ export default function AdminSecurity() {
             </button>
           ))}
           <span
-            style={{ fontSize: 11.5, color: "#64748b", marginLeft: "auto" }}
+            style={{
+              fontSize: 11.5,
+              color: "var(--djac-muted)",
+              marginLeft: "auto",
+            }}
           >
             showing {Math.min(filtered.length, 100)} of {filtered.length} events
           </span>
@@ -1071,7 +1087,7 @@ export default function AdminSecurity() {
         <div
           style={{
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid var(--djac-border)",
             overflow: "hidden",
           }}
         >
@@ -1079,7 +1095,7 @@ export default function AdminSecurity() {
             style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
           >
             <thead>
-              <tr style={{ background: "rgba(255,255,255,0.02)" }}>
+              <tr style={{ background: "var(--djac-card-hi)" }}>
                 <th style={thStyle}>Event</th>
                 <th style={thStyle}>Source</th>
                 <th style={thStyle}>Outcome</th>
@@ -1096,7 +1112,7 @@ export default function AdminSecurity() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     Loading...
@@ -1109,7 +1125,7 @@ export default function AdminSecurity() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     No events found
@@ -1119,7 +1135,7 @@ export default function AdminSecurity() {
                 filtered.slice(0, 100).map(e => (
                   <tr
                     key={`${e.source}-${e.id}`}
-                    style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
+                    style={{ borderTop: "1px solid var(--djac-border)" }}
                   >
                     <td style={{ padding: "12px 16px" }}>
                       <div
@@ -1177,7 +1193,7 @@ export default function AdminSecurity() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#7d8aa0",
+                        color: "var(--djac-muted)",
                         fontSize: 12,
                         fontFamily: "monospace",
                       }}
@@ -1187,7 +1203,7 @@ export default function AdminSecurity() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#7d8aa0",
+                        color: "var(--djac-muted)",
                         fontSize: 12,
                       }}
                     >
@@ -1196,7 +1212,7 @@ export default function AdminSecurity() {
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#7d8aa0",
+                        color: "var(--djac-muted)",
                         fontSize: 12,
                       }}
                     >

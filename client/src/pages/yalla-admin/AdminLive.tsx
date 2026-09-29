@@ -92,7 +92,7 @@ const CATEGORY_ICONS: Record<OperationalAlert["category"], React.ReactNode> = {
 const cardStyle: React.CSSProperties = {
   padding: 20,
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.06)",
+  border: "1px solid var(--djac-border)",
   background: "rgba(15,15,25,0.8)",
 };
 
@@ -107,7 +107,9 @@ function KPI({
 }) {
   return (
     <div style={cardStyle}>
-      <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 6 }}>
+      <div
+        style={{ fontSize: 12, color: "var(--djac-muted)", marginBottom: 6 }}
+      >
         {label}
       </div>
       <div
@@ -242,14 +244,14 @@ export default function AdminLive() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -264,7 +266,7 @@ export default function AdminLive() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -295,7 +297,7 @@ export default function AdminLive() {
             {sseConnected ? "SSE connected" : "polling"}
           </span>
           {updatedAt && (
-            <span style={{ fontSize: 11, color: "#64748b" }}>
+            <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               updated {updatedAt}
             </span>
           )}
@@ -304,10 +306,10 @@ export default function AdminLive() {
           onClick={load}
           style={{
             background: "none",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid var(--djac-border)",
             borderRadius: 6,
             padding: "6px 10px",
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
             cursor: "pointer",
           }}
         >
@@ -337,7 +339,9 @@ export default function AdminLive() {
         )}
 
         {loading && !metrics ? (
-          <div style={{ color: "#64748b", fontSize: 13 }}>Loading…</div>
+          <div style={{ color: "var(--djac-muted)", fontSize: 13 }}>
+            Loading…
+          </div>
         ) : (
           <>
             <div
@@ -469,7 +473,7 @@ export default function AdminLive() {
                           <div
                             style={{
                               fontSize: 12.5,
-                              color: "#cbd5e1",
+                              color: "var(--djac-text)",
                               marginTop: 4,
                             }}
                           >
@@ -481,7 +485,7 @@ export default function AdminLive() {
                               alignItems: "center",
                               gap: 6,
                               fontSize: 11,
-                              color: "#64748b",
+                              color: "var(--djac-muted)",
                               marginTop: 6,
                             }}
                           >
@@ -514,7 +518,7 @@ export default function AdminLive() {
                   Live event feed
                 </div>
                 {mergedFeed.length === 0 ? (
-                  <div style={{ fontSize: 13, color: "#64748b" }}>
+                  <div style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                     Waiting for events…
                   </div>
                 ) : (
@@ -535,7 +539,7 @@ export default function AdminLive() {
                           gridTemplateColumns: "54px 1fr auto",
                           gap: 10,
                           padding: "8px 2px",
-                          borderTop: "1px solid rgba(255,255,255,0.05)",
+                          borderTop: "1px solid var(--djac-border)",
                           alignItems: "center",
                         }}
                       >
@@ -553,7 +557,7 @@ export default function AdminLive() {
                         <span
                           style={{
                             fontSize: 12.5,
-                            color: "#cbd5e1",
+                            color: "var(--djac-text)",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
@@ -566,7 +570,7 @@ export default function AdminLive() {
                         <span
                           style={{
                             fontSize: 11,
-                            color: "#64748b",
+                            color: "var(--djac-muted)",
                             whiteSpace: "nowrap",
                           }}
                         >

@@ -113,7 +113,7 @@ export default function SuperAdminDashboard() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          background: "#050508",
+          background: "var(--djac-bg)",
         }}
       >
         <RefreshCw
@@ -129,15 +129,15 @@ export default function SuperAdminDashboard() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       {/* Header */}
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -169,10 +169,10 @@ export default function SuperAdminDashboard() {
             disabled={refreshing}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -312,7 +312,7 @@ export default function SuperAdminDashboard() {
             style={{
               padding: 20,
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: "1px solid var(--djac-border)",
               background: "rgba(15,15,25,0.8)",
             }}
           >
@@ -352,7 +352,7 @@ export default function SuperAdminDashboard() {
                 />
               </div>
             ) : (
-              <p style={{ fontSize: 13, color: "#7d8aa0" }}>
+              <p style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                 System info unavailable
               </p>
             )}
@@ -363,7 +363,7 @@ export default function SuperAdminDashboard() {
             style={{
               padding: 20,
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: "1px solid var(--djac-border)",
               background: "rgba(15,15,25,0.8)",
             }}
           >
@@ -454,7 +454,7 @@ function KPICard({
       style={{
         padding: 20,
         borderRadius: 12,
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid var(--djac-border)",
         background: "rgba(15,15,25,0.8)",
       }}
     >
@@ -485,7 +485,7 @@ function KPICard({
       <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1.2 }}>
         {value.toLocaleString()}
       </div>
-      <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
+      <div style={{ fontSize: 12, color: "var(--djac-muted)", marginTop: 4 }}>
         {label}
       </div>
     </div>
@@ -510,7 +510,7 @@ function MiniKPI({
       style={{
         padding: "14px 16px",
         borderRadius: 10,
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid var(--djac-border)",
         background: "rgba(15,15,25,0.8)",
         display: "flex",
         alignItems: "center",
@@ -547,7 +547,7 @@ function MiniKPI({
         <div
           style={{
             fontSize: 11,
-            color: "#94a3b8",
+            color: "var(--djac-muted)",
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -581,7 +581,7 @@ function HealthRow({
         fontSize: 13,
       }}
     >
-      <span style={{ color: "#94a3b8" }}>{label}</span>
+      <span style={{ color: "var(--djac-muted)" }}>{label}</span>
       <span
         style={{
           display: "flex",
@@ -620,9 +620,9 @@ function QuickLink({
         justifyContent: "space-between",
         padding: "10px 14px",
         borderRadius: 8,
-        background: "rgba(255,255,255,0.02)",
-        border: "1px solid rgba(255,255,255,0.06)",
-        color: "#e2e8f0",
+        background: "var(--djac-card-hi)",
+        border: "1px solid var(--djac-border)",
+        color: "var(--djac-text)",
         fontSize: 13,
         cursor: "pointer",
         textAlign: "left",
@@ -632,7 +632,7 @@ function QuickLink({
       <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {icon} {label}
       </span>
-      <ChevronRight size={14} style={{ color: "#7d8aa0" }} />
+      <ChevronRight size={14} style={{ color: "var(--djac-muted)" }} />
     </button>
   );
 }

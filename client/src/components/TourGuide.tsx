@@ -525,8 +525,8 @@ export function TourGuide() {
           top: 16,
           right: 16,
           zIndex: 9999,
-          background: "rgba(255,255,255,0.10)",
-          border: "1px solid rgba(255,255,255,0.18)",
+          background: "var(--djac-card-hi)",
+          border: "1px solid var(--djac-border)",
           borderRadius: 8,
           padding: "6px 12px",
           color: "rgba(255,255,255,0.80)",
@@ -567,7 +567,7 @@ export function TourGuide() {
             "0 20px 60px rgba(0,0,0,0.50), 0 0 0 1px rgba(0,247,255,0.12)",
           padding: "20px 22px",
           backdropFilter: "blur(16px)",
-          color: "#FFFFFF",
+          color: "var(--djac-text)",
           fontFamily: "inherit",
           transform: visible
             ? "translateY(0) scale(1)"
@@ -615,7 +615,7 @@ export function TourGuide() {
               flex: 1,
               marginLeft: 14,
               height: 3,
-              background: "rgba(255,255,255,0.10)",
+              background: "var(--djac-card-hi)",
               borderRadius: 2,
               overflow: "hidden",
             }}
@@ -639,7 +639,7 @@ export function TourGuide() {
             fontSize: 16,
             fontWeight: 800,
             lineHeight: 1.25,
-            color: "#FFFFFF",
+            color: "var(--djac-text)",
           }}
         >
           {t(step.titleKey, step.titleFallback)}
@@ -673,7 +673,7 @@ export function TourGuide() {
             aria-label={t("tour.back", "Previous step")}
             style={{
               background: "transparent",
-              border: "1px solid rgba(255,255,255,0.18)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 8,
               padding: "8px 14px",
               color: isFirst

@@ -118,15 +118,15 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: "#08080e",
-        borderRight: "1px solid rgba(255,255,255,0.06)",
+        background: "var(--djac-bg-deep)",
+        borderRight: "1px solid var(--djac-border)",
       }}
     >
       {/* Brand */}
       <div
         style={{
           padding: "20px 18px 16px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
         }}
       >
         <div
@@ -141,7 +141,9 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
         >
           YALLA HACK
         </div>
-        <div style={{ fontSize: 12.5, color: "#cbd5e1", marginTop: 4 }}>
+        <div
+          style={{ fontSize: 12.5, color: "var(--djac-text)", marginTop: 4 }}
+        >
           Founders Console
         </div>
       </div>
@@ -202,7 +204,7 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
                     padding: "0 5px",
                     borderRadius: 9,
                     background: "#ef4444",
-                    color: "#fff",
+                    color: "var(--djac-text)",
                     fontSize: 10,
                     fontWeight: 700,
                     display: "inline-flex",
@@ -224,7 +226,7 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
       <div
         style={{
           padding: "14px 14px 16px",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: "1px solid var(--djac-border)",
         }}
       >
         <div
@@ -246,7 +248,7 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
               justifyContent: "center",
               fontSize: 12,
               fontWeight: 700,
-              color: "#fff",
+              color: "var(--djac-text)",
               flexShrink: 0,
             }}
           >
@@ -256,7 +258,7 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
             <div
               style={{
                 fontSize: 12.5,
-                color: "#e2e8f0",
+                color: "var(--djac-text)",
                 fontWeight: 600,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -265,7 +267,9 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
             >
               {username ?? "…"}
             </div>
-            <div style={{ fontSize: 10.5, color: "#64748b" }}>Founder</div>
+            <div style={{ fontSize: 10.5, color: "var(--djac-muted)" }}>
+              Founder
+            </div>
           </div>
         </div>
         <button
@@ -294,7 +298,7 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: "#050508" }}>
+    <div style={{ minHeight: "100vh", background: "var(--djac-bg)" }}>
       {/* Desktop sidebar */}
       <aside
         className="hidden lg:block"
@@ -358,7 +362,7 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
             padding: "10px 14px",
             background: "rgba(5,5,8,0.92)",
             backdropFilter: "blur(8px)",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: "1px solid var(--djac-border)",
           }}
         >
           <button
@@ -367,14 +371,16 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
             style={{
               background: "none",
               border: "none",
-              color: "#e2e8f0",
+              color: "var(--djac-text)",
               cursor: "pointer",
               padding: 4,
             }}
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#e2e8f0" }}>
+          <span
+            style={{ fontSize: 13, fontWeight: 600, color: "var(--djac-text)" }}
+          >
             Founders Console
           </span>
         </header>

@@ -55,7 +55,7 @@ interface EngagementMetrics {
 const cardStyle: React.CSSProperties = {
   padding: 20,
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.06)",
+  border: "1px solid var(--djac-border)",
   background: "rgba(15,15,25,0.8)",
 };
 
@@ -72,7 +72,9 @@ function KPI({
 }) {
   return (
     <div style={cardStyle}>
-      <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 6 }}>
+      <div
+        style={{ fontSize: 12, color: "var(--djac-muted)", marginBottom: 6 }}
+      >
         {label}
       </div>
       <div
@@ -86,7 +88,7 @@ function KPI({
         {value}
       </div>
       {hint && (
-        <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>
+        <div style={{ fontSize: 11, color: "var(--djac-muted)", marginTop: 4 }}>
           {hint}
         </div>
       )}
@@ -142,14 +144,14 @@ export default function AdminInsights() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -164,7 +166,7 @@ export default function AdminInsights() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -175,7 +177,7 @@ export default function AdminInsights() {
             Engagement Insights
           </h1>
           {updatedAt && (
-            <span style={{ fontSize: 11, color: "#64748b" }}>
+            <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               updated {updatedAt}
             </span>
           )}
@@ -187,9 +189,9 @@ export default function AdminInsights() {
             style={{
               padding: "6px 10px",
               borderRadius: 6,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#e2e8f0",
+              background: "var(--djac-card-hi)",
+              border: "1px solid var(--djac-border)",
+              color: "var(--djac-text)",
               fontSize: 13,
             }}
           >
@@ -201,10 +203,10 @@ export default function AdminInsights() {
             onClick={loadData}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -235,7 +237,9 @@ export default function AdminInsights() {
         )}
 
         {loading && !data ? (
-          <div style={{ color: "#64748b", fontSize: 13 }}>Loading…</div>
+          <div style={{ color: "var(--djac-muted)", fontSize: 13 }}>
+            Loading…
+          </div>
         ) : data ? (
           <>
             <div
@@ -306,8 +310,8 @@ export default function AdminInsights() {
                       />
                       <Tooltip
                         contentStyle={{
-                          background: "#0b0b12",
-                          border: "1px solid rgba(255,255,255,0.1)",
+                          background: "var(--djac-bg-deep)",
+                          border: "1px solid var(--djac-border)",
                           borderRadius: 8,
                           fontSize: 12,
                         }}
@@ -359,8 +363,8 @@ export default function AdminInsights() {
                       />
                       <Tooltip
                         contentStyle={{
-                          background: "#0b0b12",
-                          border: "1px solid rgba(255,255,255,0.1)",
+                          background: "var(--djac-bg-deep)",
+                          border: "1px solid var(--djac-border)",
                           borderRadius: 8,
                           fontSize: 12,
                         }}
@@ -398,13 +402,18 @@ export default function AdminInsights() {
                   Most active users
                 </div>
                 {data.topUsers.length === 0 ? (
-                  <div style={{ fontSize: 13, color: "#64748b" }}>
+                  <div style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                     No activity in this window.
                   </div>
                 ) : (
                   <table style={{ width: "100%", fontSize: 12.5 }}>
                     <thead>
-                      <tr style={{ color: "#64748b", textAlign: "left" }}>
+                      <tr
+                        style={{
+                          color: "var(--djac-muted)",
+                          textAlign: "left",
+                        }}
+                      >
                         <th style={{ padding: "6px 0", fontWeight: 500 }}>
                           User
                         </th>
@@ -421,7 +430,7 @@ export default function AdminInsights() {
                         <tr
                           key={u.id}
                           style={{
-                            borderTop: "1px solid rgba(255,255,255,0.05)",
+                            borderTop: "1px solid var(--djac-border)",
                           }}
                         >
                           <td style={{ padding: "8px 0" }}>
@@ -452,7 +461,12 @@ export default function AdminInsights() {
                           >
                             {u.eventCount}
                           </td>
-                          <td style={{ padding: "8px 0", color: "#7d8aa0" }}>
+                          <td
+                            style={{
+                              padding: "8px 0",
+                              color: "var(--djac-muted)",
+                            }}
+                          >
                             {u.lastActiveAt
                               ? new Date(u.lastActiveAt).toLocaleString()
                               : "—"}
@@ -475,7 +489,7 @@ export default function AdminInsights() {
                   Feature adoption
                 </div>
                 {data.topFeatures.length === 0 ? (
-                  <div style={{ fontSize: 13, color: "#64748b" }}>
+                  <div style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                     No interaction events yet.
                   </div>
                 ) : (
@@ -492,14 +506,18 @@ export default function AdminInsights() {
                             marginBottom: 3,
                           }}
                         >
-                          <span style={{ color: "#cbd5e1" }}>{f.action}</span>
-                          <span style={{ color: "#94a3b8" }}>{f.count}</span>
+                          <span style={{ color: "var(--djac-text)" }}>
+                            {f.action}
+                          </span>
+                          <span style={{ color: "var(--djac-muted)" }}>
+                            {f.count}
+                          </span>
                         </div>
                         <div
                           style={{
                             height: 6,
                             borderRadius: 3,
-                            background: "rgba(255,255,255,0.06)",
+                            background: "var(--djac-card-hi)",
                             overflow: "hidden",
                           }}
                         >
@@ -530,7 +548,7 @@ export default function AdminInsights() {
                   Top organizations by activity
                 </div>
                 {data.topOrgs.length === 0 ? (
-                  <div style={{ fontSize: 13, color: "#64748b" }}>
+                  <div style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                     No org-linked activity in this window.
                   </div>
                 ) : (
@@ -540,17 +558,22 @@ export default function AdminInsights() {
                         <tr
                           key={o.id}
                           style={{
-                            borderTop: "1px solid rgba(255,255,255,0.05)",
+                            borderTop: "1px solid var(--djac-border)",
                           }}
                         >
-                          <td style={{ padding: "8px 0", color: "#cbd5e1" }}>
+                          <td
+                            style={{
+                              padding: "8px 0",
+                              color: "var(--djac-text)",
+                            }}
+                          >
                             {o.name}
                           </td>
                           <td
                             style={{
                               padding: "8px 0",
                               textAlign: "right",
-                              color: "#94a3b8",
+                              color: "var(--djac-muted)",
                             }}
                           >
                             {o.eventCount}

@@ -14,8 +14,8 @@ const ADMIN_API = "/api/admin-dashboard";
 const BASE = "/yalla-hack-owners-console";
 
 const cardStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "var(--djac-card-hi)",
+  border: "1px solid var(--djac-border)",
   borderRadius: 12,
   padding: 16,
 };

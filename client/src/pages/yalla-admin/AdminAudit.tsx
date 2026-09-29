@@ -136,7 +136,7 @@ export default function AdminAudit() {
   const thStyle: React.CSSProperties = {
     padding: "12px 16px",
     textAlign: "left",
-    color: "#94a3b8",
+    color: "var(--djac-muted)",
     fontSize: 11,
     textTransform: "uppercase",
   };
@@ -145,14 +145,14 @@ export default function AdminAudit() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -165,7 +165,7 @@ export default function AdminAudit() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -176,7 +176,7 @@ export default function AdminAudit() {
             Audit Logs
           </h1>
           {updatedAt && (
-            <span style={{ fontSize: 11, color: "#64748b" }}>
+            <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               updated {updatedAt}
             </span>
           )}
@@ -190,7 +190,7 @@ export default function AdminAudit() {
                 left: 8,
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#7d8aa0",
+                color: "var(--djac-muted)",
               }}
             />
             <input
@@ -200,9 +200,9 @@ export default function AdminAudit() {
               style={{
                 padding: "6px 10px 6px 26px",
                 borderRadius: 6,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#fff",
+                background: "var(--djac-card-hi)",
+                border: "1px solid var(--djac-border)",
+                color: "var(--djac-text)",
                 fontSize: 12,
                 outline: "none",
                 width: 160,
@@ -234,7 +234,7 @@ export default function AdminAudit() {
             title="Export CSV"
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
               color: logs.length === 0 ? "#475569" : "#94a3b8",
@@ -247,10 +247,10 @@ export default function AdminAudit() {
             onClick={loadData}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -283,7 +283,7 @@ export default function AdminAudit() {
         <div
           style={{
             fontSize: 11.5,
-            color: "#64748b",
+            color: "var(--djac-muted)",
             marginBottom: 10,
           }}
         >
@@ -300,7 +300,7 @@ export default function AdminAudit() {
         <div
           style={{
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid var(--djac-border)",
             overflow: "hidden",
           }}
         >
@@ -308,7 +308,7 @@ export default function AdminAudit() {
             style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
           >
             <thead>
-              <tr style={{ background: "rgba(255,255,255,0.02)" }}>
+              <tr style={{ background: "var(--djac-card-hi)" }}>
                 <th style={{ ...thStyle, width: 36 }}></th>
                 <th style={thStyle}>Timestamp</th>
                 <th style={thStyle}>Admin</th>
@@ -325,7 +325,7 @@ export default function AdminAudit() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     Loading...
@@ -338,7 +338,7 @@ export default function AdminAudit() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     No audit entries found
@@ -352,7 +352,7 @@ export default function AdminAudit() {
                     <tr
                       key={log.id}
                       style={{
-                        borderTop: "1px solid rgba(255,255,255,0.04)",
+                        borderTop: "1px solid var(--djac-border)",
                         background: isOpen
                           ? "rgba(255,255,255,0.02)"
                           : "transparent",
@@ -367,12 +367,12 @@ export default function AdminAudit() {
                           isOpen ? (
                             <ChevronDown
                               size={14}
-                              style={{ color: "#94a3b8" }}
+                              style={{ color: "var(--djac-muted)" }}
                             />
                           ) : (
                             <ChevronRight
                               size={14}
-                              style={{ color: "#64748b" }}
+                              style={{ color: "var(--djac-muted)" }}
                             />
                           )
                         ) : (
@@ -382,7 +382,7 @@ export default function AdminAudit() {
                       <td
                         style={{
                           padding: "12px 16px",
-                          color: "#7d8aa0",
+                          color: "var(--djac-muted)",
                           fontSize: 12,
                           whiteSpace: "nowrap",
                         }}
@@ -410,7 +410,7 @@ export default function AdminAudit() {
                       <td
                         style={{
                           padding: "12px 16px",
-                          color: "#94a3b8",
+                          color: "var(--djac-muted)",
                           fontSize: 12,
                         }}
                       >
@@ -419,7 +419,7 @@ export default function AdminAudit() {
                       <td
                         style={{
                           padding: "12px 16px",
-                          color: "#7d8aa0",
+                          color: "var(--djac-muted)",
                           fontSize: 12,
                           fontFamily: "monospace",
                         }}
@@ -433,7 +433,7 @@ export default function AdminAudit() {
                       <tr
                         key={`${log.id}-payload`}
                         style={{
-                          borderTop: "1px solid rgba(255,255,255,0.04)",
+                          borderTop: "1px solid var(--djac-border)",
                           background: "rgba(0,0,0,0.35)",
                         }}
                       >
@@ -442,7 +442,7 @@ export default function AdminAudit() {
                           <div
                             style={{
                               fontSize: 11,
-                              color: "#64748b",
+                              color: "var(--djac-muted)",
                               textTransform: "uppercase",
                               marginBottom: 6,
                               letterSpacing: 0.5,
@@ -455,10 +455,10 @@ export default function AdminAudit() {
                               margin: 0,
                               padding: "10px 12px",
                               borderRadius: 8,
-                              background: "rgba(255,255,255,0.03)",
-                              border: "1px solid rgba(255,255,255,0.06)",
+                              background: "var(--djac-card-hi)",
+                              border: "1px solid var(--djac-border)",
                               fontSize: 11.5,
-                              color: "#cbd5e1",
+                              color: "var(--djac-text)",
                               overflowX: "auto",
                               whiteSpace: "pre-wrap",
                               wordBreak: "break-word",

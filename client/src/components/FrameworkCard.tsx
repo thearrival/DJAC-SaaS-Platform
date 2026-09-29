@@ -190,7 +190,7 @@ export function FrameworkCard({
           <div
             style={{
               height: 5,
-              background: "rgba(255,255,255,0.06)",
+              background: "var(--djac-card-hi)",
               borderRadius: 99,
               overflow: "hidden",
               position: "relative",

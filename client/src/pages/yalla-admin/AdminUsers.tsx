@@ -302,15 +302,15 @@ export default function AdminUsers() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#050508",
+        background: "var(--djac-bg)",
         fontFamily: "'Inter', sans-serif",
-        color: "#e2e8f0",
+        color: "var(--djac-text)",
       }}
     >
       {/* Header */}
       <header
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--djac-border)",
           padding: "12px 24px",
           display: "flex",
           alignItems: "center",
@@ -323,7 +323,7 @@ export default function AdminUsers() {
             style={{
               background: "none",
               border: "none",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
               padding: 0,
             }}
@@ -331,7 +331,7 @@ export default function AdminUsers() {
             <ChevronLeft size={18} />
           </button>
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Users</h1>
-          <span style={{ fontSize: 12, color: "#7d8aa0" }}>
+          <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
             {total.toLocaleString()} total
           </span>
         </div>
@@ -342,7 +342,7 @@ export default function AdminUsers() {
             title="Export current page as CSV"
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
               color: users.length === 0 ? "#475569" : "#94a3b8",
@@ -355,10 +355,10 @@ export default function AdminUsers() {
             onClick={loadUsers}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 6,
               padding: "6px 10px",
-              color: "#94a3b8",
+              color: "var(--djac-muted)",
               cursor: "pointer",
             }}
           >
@@ -434,7 +434,7 @@ export default function AdminUsers() {
                 left: 12,
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#7d8aa0",
+                color: "var(--djac-muted)",
               }}
             />
             <input
@@ -448,9 +448,9 @@ export default function AdminUsers() {
                 width: "100%",
                 padding: "10px 14px 10px 36px",
                 borderRadius: 8,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#fff",
+                background: "var(--djac-card-hi)",
+                border: "1px solid var(--djac-border)",
+                color: "var(--djac-text)",
                 fontSize: 13,
                 outline: "none",
                 boxSizing: "border-box",
@@ -466,9 +466,9 @@ export default function AdminUsers() {
             style={{
               padding: "10px 14px",
               borderRadius: 8,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#fff",
+              background: "var(--djac-card-hi)",
+              border: "1px solid var(--djac-border)",
+              color: "var(--djac-text)",
               fontSize: 13,
               outline: "none",
             }}
@@ -487,9 +487,9 @@ export default function AdminUsers() {
             style={{
               padding: "10px 14px",
               borderRadius: 8,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#fff",
+              background: "var(--djac-card-hi)",
+              border: "1px solid var(--djac-border)",
+              color: "var(--djac-text)",
               fontSize: 13,
               outline: "none",
             }}
@@ -507,7 +507,7 @@ export default function AdminUsers() {
         <div
           style={{
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: "1px solid var(--djac-border)",
             overflow: "hidden",
           }}
         >
@@ -515,7 +515,7 @@ export default function AdminUsers() {
             style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
           >
             <thead>
-              <tr style={{ background: "rgba(255,255,255,0.02)" }}>
+              <tr style={{ background: "var(--djac-card-hi)" }}>
                 <th style={thStyle}>User</th>
                 <th style={thStyle}>Status</th>
                 <th style={thStyle}>Role</th>
@@ -532,7 +532,7 @@ export default function AdminUsers() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     Loading...
@@ -545,7 +545,7 @@ export default function AdminUsers() {
                     style={{
                       padding: 40,
                       textAlign: "center",
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                     }}
                   >
                     No users found
@@ -555,27 +555,37 @@ export default function AdminUsers() {
                 users.map(user => (
                   <tr
                     key={user.id}
-                    style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
+                    style={{ borderTop: "1px solid var(--djac-border)" }}
                   >
                     <td style={{ padding: "12px 16px" }}>
                       <div style={{ fontWeight: 500 }}>{user.name || "—"}</div>
-                      <div style={{ fontSize: 12, color: "#7d8aa0" }}>
+                      <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
                         {user.email || "—"}
                       </div>
                     </td>
                     <td style={{ padding: "12px 16px" }}>
                       <StatusBadge status={user.status} />
                     </td>
-                    <td style={{ padding: "12px 16px", color: "#94a3b8" }}>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        color: "var(--djac-muted)",
+                      }}
+                    >
                       {user.role}
                     </td>
-                    <td style={{ padding: "12px 16px", color: "#94a3b8" }}>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        color: "var(--djac-muted)",
+                      }}
+                    >
                       {user.orgCount}
                     </td>
                     <td
                       style={{
                         padding: "12px 16px",
-                        color: "#7d8aa0",
+                        color: "var(--djac-muted)",
                         fontSize: 12,
                       }}
                     >
@@ -629,10 +639,10 @@ export default function AdminUsers() {
                           disabled={busyIds.has(user.id)}
                           onChange={e => changeRole(user, e.target.value)}
                           style={{
-                            background: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.12)",
+                            background: "var(--djac-card-hi)",
+                            border: "1px solid var(--djac-border)",
                             borderRadius: 6,
-                            color: "#94a3b8",
+                            color: "var(--djac-muted)",
                             fontSize: 11,
                             padding: "4px 6px",
                             outline: "none",
@@ -679,16 +689,16 @@ export default function AdminUsers() {
               style={{
                 padding: "8px 12px",
                 borderRadius: 6,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#94a3b8",
+                background: "var(--djac-card-hi)",
+                border: "1px solid var(--djac-border)",
+                color: "var(--djac-muted)",
                 cursor: page === 0 ? "not-allowed" : "pointer",
                 opacity: page === 0 ? 0.5 : 1,
               }}
             >
               <ChevronLeft size={14} />
             </button>
-            <span style={{ fontSize: 13, color: "#94a3b8" }}>
+            <span style={{ fontSize: 13, color: "var(--djac-muted)" }}>
               Page {page + 1} of {totalPages}
             </span>
             <button
@@ -697,9 +707,9 @@ export default function AdminUsers() {
               style={{
                 padding: "8px 12px",
                 borderRadius: 6,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#94a3b8",
+                background: "var(--djac-card-hi)",
+                border: "1px solid var(--djac-border)",
+                color: "var(--djac-muted)",
                 cursor: page >= totalPages - 1 ? "not-allowed" : "pointer",
                 opacity: page >= totalPages - 1 ? 0.5 : 1,
               }}
@@ -727,8 +737,8 @@ export default function AdminUsers() {
         >
           <div
             style={{
-              background: "#0b0b14",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "var(--djac-bg-deep)",
+              border: "1px solid var(--djac-border)",
               borderRadius: 14,
               maxWidth: 640,
               width: "100%",
@@ -760,7 +770,7 @@ export default function AdminUsers() {
                 style={{
                   background: "none",
                   border: "none",
-                  color: "#7d8aa0",
+                  color: "var(--djac-muted)",
                   cursor: "pointer",
                   padding: 4,
                 }}
@@ -770,7 +780,7 @@ export default function AdminUsers() {
             </div>
 
             {detailLoading ? (
-              <p style={{ fontSize: 13, color: "#7d8aa0" }}>
+              <p style={{ fontSize: 13, color: "var(--djac-muted)" }}>
                 Loading details...
               </p>
             ) : detail ? (
@@ -831,7 +841,7 @@ export default function AdminUsers() {
                   style={{
                     fontSize: 13,
                     fontWeight: 700,
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     margin: "0 0 10px",
                   }}
                 >
@@ -841,7 +851,7 @@ export default function AdminUsers() {
                   <p
                     style={{
                       fontSize: 12,
-                      color: "#7d8aa0",
+                      color: "var(--djac-muted)",
                       margin: "0 0 20px",
                     }}
                   >
@@ -864,13 +874,15 @@ export default function AdminUsers() {
                           justifyContent: "space-between",
                           padding: "8px 12px",
                           borderRadius: 8,
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.06)",
+                          background: "var(--djac-card-hi)",
+                          border: "1px solid var(--djac-border)",
                           fontSize: 12,
                         }}
                       >
-                        <span style={{ color: "#e2e8f0" }}>{m.orgName}</span>
-                        <span style={{ color: "#7d8aa0" }}>
+                        <span style={{ color: "var(--djac-text)" }}>
+                          {m.orgName}
+                        </span>
+                        <span style={{ color: "var(--djac-muted)" }}>
                           {m.role} ·{" "}
                           {m.joinedAt
                             ? new Date(m.joinedAt).toLocaleDateString()
@@ -885,14 +897,20 @@ export default function AdminUsers() {
                   style={{
                     fontSize: 13,
                     fontWeight: 700,
-                    color: "#94a3b8",
+                    color: "var(--djac-muted)",
                     margin: "0 0 10px",
                   }}
                 >
                   Recent Activity
                 </h3>
                 {detail.recentActivity.length === 0 ? (
-                  <p style={{ fontSize: 12, color: "#7d8aa0", margin: 0 }}>
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: "var(--djac-muted)",
+                      margin: 0,
+                    }}
+                  >
                     No recent activity.
                   </p>
                 ) : (
@@ -911,13 +929,13 @@ export default function AdminUsers() {
                           justifyContent: "space-between",
                           fontSize: 12,
                           padding: "6px 0",
-                          borderBottom: "1px solid rgba(255,255,255,0.04)",
+                          borderBottom: "1px solid var(--djac-border)",
                         }}
                       >
-                        <span style={{ color: "#94a3b8" }}>
+                        <span style={{ color: "var(--djac-muted)" }}>
                           {a.category} / {a.action}
                         </span>
-                        <span style={{ color: "#7d8aa0" }}>
+                        <span style={{ color: "var(--djac-muted)" }}>
                           {a.createdAt
                             ? new Date(a.createdAt).toLocaleString()
                             : "—"}
@@ -953,7 +971,7 @@ export default function AdminUsers() {
         >
           <div
             style={{
-              background: "#0b0b14",
+              background: "var(--djac-bg-deep)",
               border: "1px solid rgba(239,68,68,0.3)",
               borderRadius: 14,
               maxWidth: 420,
@@ -965,9 +983,15 @@ export default function AdminUsers() {
             <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 10px" }}>
               Delete user?
             </h2>
-            <p style={{ fontSize: 13, color: "#94a3b8", margin: "0 0 20px" }}>
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--djac-muted)",
+                margin: "0 0 20px",
+              }}
+            >
               This permanently deletes{" "}
-              <strong style={{ color: "#fff" }}>
+              <strong style={{ color: "var(--djac-text)" }}>
                 {confirmDelete.name || confirmDelete.email}
               </strong>{" "}
               and their memberships, onboarding data and audit trail. This
@@ -981,9 +1005,9 @@ export default function AdminUsers() {
                 style={{
                   padding: "8px 14px",
                   borderRadius: 8,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  color: "#e2e8f0",
+                  background: "var(--djac-card-hi)",
+                  border: "1px solid var(--djac-border)",
+                  color: "var(--djac-text)",
                   fontSize: 13,
                   cursor: "pointer",
                 }}
@@ -998,7 +1022,7 @@ export default function AdminUsers() {
                   borderRadius: 8,
                   background: "rgba(239,68,68,0.9)",
                   border: "none",
-                  color: "#fff",
+                  color: "var(--djac-text)",
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: busyIds.has(confirmDelete.id)
@@ -1020,7 +1044,7 @@ export default function AdminUsers() {
 const thStyle: React.CSSProperties = {
   padding: "12px 16px",
   textAlign: "left",
-  color: "#94a3b8",
+  color: "var(--djac-muted)",
   fontWeight: 600,
   fontSize: 11,
   textTransform: "uppercase",
@@ -1069,14 +1093,14 @@ function DetailField({ label, value }: { label: string; value: string }) {
       <div
         style={{
           fontSize: 11,
-          color: "#7d8aa0",
+          color: "var(--djac-muted)",
           textTransform: "uppercase",
           marginBottom: 2,
         }}
       >
         {label}
       </div>
-      <div style={{ fontSize: 13, color: "#e2e8f0" }}>{value}</div>
+      <div style={{ fontSize: 13, color: "var(--djac-text)" }}>{value}</div>
     </div>
   );
 }

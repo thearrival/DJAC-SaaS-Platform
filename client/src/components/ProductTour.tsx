@@ -235,7 +235,7 @@ export function ProductTour() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#fff",
+              color: "var(--djac-text)",
             }}
           >
             <Icon size={18} />
