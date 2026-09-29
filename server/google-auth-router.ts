@@ -25,7 +25,7 @@ export const googleAuthRouter = router({
           message: "Supabase client not configured.",
         });
       }
-      const redirectUrl = `${ENV.appUrl}/api/trpc/googleAuth.callback?redirectTo=${encodeURIComponent(input.redirectTo ?? "/dashboard")}`;
+      const redirectUrl = `${ENV.appUrl}/api/auth/google/callback?redirectTo=${encodeURIComponent(input.redirectTo ?? "/dashboard")}`;
       const { data } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

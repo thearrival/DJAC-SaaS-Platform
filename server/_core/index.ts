@@ -12,6 +12,7 @@ import express, {
 import { createServer } from "http";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { registerGoogleOAuthRoutes } from "./google-oauth";
 import { appRouter } from "../routers";
 import { recordTrpcFailureEvent } from "../audit-logger";
 import { createContext } from "./context";
@@ -481,6 +482,7 @@ export async function createApp() {
   app.get("/api/readyz", sendReadiness);
 
   registerOAuthRoutes(app);
+  registerGoogleOAuthRoutes(app);
 
   // ─── tRPC ───────────────────────────────────────────────────────────────────
   app.use(
