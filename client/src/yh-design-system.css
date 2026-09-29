@@ -24,6 +24,10 @@
   --fill-strong: rgba(2, 8, 20, 0.08);
   --border-strong: rgba(2, 8, 20, 0.18);
   --shadow-glass: 0 10px 30px rgba(2, 8, 20, 0.12);
+  --bg-sidebar: rgba(247, 248, 251, 0.85);
+  --bg-sidebar-opaque: #f7f8fb;
+  --bg-surface-opaque: #ffffff;
+  --hero-panel-bg: linear-gradient(135deg, #ffffff 0%, #f7f8fb 100%);
   --text-primary: #0b0b12;
   --text-secondary: #475569;
   /* Keep AA contrast on the light base. */
@@ -52,6 +56,14 @@
   --fill-strong: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.2);
   --shadow-glass: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --bg-sidebar: rgba(10, 10, 15, 0.8);
+  --bg-sidebar-opaque: #0a0a0f;
+  --bg-surface-opaque: #14141e;
+  --hero-panel-bg: linear-gradient(
+    135deg,
+    rgba(30, 30, 45, 0.8) 0%,
+    rgba(10, 10, 15, 0.9) 100%
+  );
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
   /* Spec value #64748b scores 4.28:1 on --bg-base (fails WCAG AA 4.5:1 for
@@ -268,7 +280,7 @@ div:has(> div > [role="log"]) textarea:focus,
 
 /* ── 7. SIDEBAR ─────────────────────────────────────────────────────────── */
 [data-sidebar="sidebar"] {
-  background: rgba(10, 10, 15, 0.8);
+  background: var(--bg-sidebar);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-inline-end: 1px solid var(--border-glass);
@@ -280,7 +292,7 @@ div:has(> div > [role="log"]) textarea:focus,
 ) {
   /* Solid-color fallback where backdrop-filter is unsupported */
   [data-sidebar="sidebar"] {
-    background: #0a0a0f;
+    background: var(--bg-sidebar-opaque);
   }
 }
 
@@ -482,11 +494,7 @@ svg.lucide {
       color-mix(in srgb, var(--yh-cyan) 8%, transparent),
       transparent 40%
     ),
-    linear-gradient(
-      135deg,
-      rgba(30, 30, 45, 0.8) 0%,
-      rgba(10, 10, 15, 0.9) 100%
-    );
+    var(--hero-panel-bg);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
 }
@@ -511,7 +519,7 @@ svg.lucide {
   [data-slot="dialog-content"],
   [data-slot="sheet-content"],
   [data-slot="popover-content"] {
-    background: #14141e;
+    background: var(--bg-surface-opaque);
   }
 }
 
