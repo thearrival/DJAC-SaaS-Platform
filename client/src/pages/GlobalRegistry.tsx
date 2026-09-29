@@ -42,7 +42,7 @@ const REGION_COLORS: Record<string, string> = {
   "Latin America":
     "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300",
   "Global Standards":
-    "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300",
+    "bg-muted text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300",
 };
 
 const CATEGORY_ICONS: Record<string, typeof Shield> = {

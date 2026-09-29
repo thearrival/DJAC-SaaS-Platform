@@ -177,7 +177,7 @@ export default function ForgotPassword() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                DJAC Tool
+                DJAC Platform
               </span>
               <span
                 style={{ color: C.muted, fontSize: 9, letterSpacing: "0.01em" }}

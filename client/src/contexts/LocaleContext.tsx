@@ -1097,8 +1097,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.tabMatrix": "Relationship Matrix",
     "dashboard.timeCriticalBadge": "urgent reports",
     "dashboard.timetableLoadError": "Failed to load compliance timetable.",
-    "dashboard.title": "DJAC Tool",
-    "dashboard.titleAccent": "TOOL",
+    "dashboard.title": "DJAC Platform",
+    "dashboard.titleAccent": "PLATFORM",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "{count} total",
     "dashboard.totalRelPairs": "{count} pairs",
@@ -1317,7 +1317,7 @@ const messages: Record<string, Record<string, string>> = {
       "Recurring obligations and key deadlines for the selected jurisdictions.",
     "enhanced.timetableLoadError": "Failed to load timetable data.",
     "enhanced.timetableTitle": "Regulatory Timetable Impact",
-    "enhanced.title": "DJAC Tool - Enhanced Comparison",
+    "enhanced.title": "DJAC Platform - Enhanced Comparison",
     "enhanced.totalRelationships": "Total Relationships",
     "enhanced.uniqueSuffix": "unique",
     "enhanced.urgentActiveCount":
@@ -1378,7 +1378,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "Email address",
     "forgot.emailPlaceholder": "you@example.com",
     "forgot.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
+      "DJAC Platform · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "forgot.newPassword": "New password (min 8 chars)",
     "forgot.notice.body":
       "For security reasons, reset links are only valid for 1 hour.",
@@ -1456,7 +1456,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "Americas",
     "home.apac": "APAC",
     "home.badge": "✦ Enterprise Compliance Platform",
-    "home.brand": "DJAC Tool",
+    "home.brand": "DJAC Platform",
     "home.china": "China",
     "home.consultationCardSubtitle":
       "Ask for legal-technical guidance on cross-border compliance operations and market entry strategy.",
@@ -1501,7 +1501,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.footer":
       "Enterprise-grade compliance analysis for global operations.",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "DJAC Tool · Powered by Yalla Hack ·",
+    "home.footer.credits": "DJAC Platform · Powered by Yalla Hack ·",
     "home.frameworkAnalysis": "Framework Analysis",
     "home.frameworks.effective": "Effective",
     "home.frameworks.mlps": "Multi-Level Protection Scheme 2.0",
@@ -1636,7 +1636,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Unauthorised Access",
     "incident.updated": "Incident updated",
     "invite.layout.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
+      "DJAC Platform · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "invite.layout.notice":
       "Verified invitation link · TLS 1.3 · DJAC Compliance Platform",
     "inviteAccept.acceptButton": "Accept & Join",
@@ -2397,7 +2397,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Confirm new password",
     "reset.confirmPasswordPlaceholder": "Confirm new password",
     "reset.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
+      "DJAC Platform · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "reset.goToLogin": "Go to login",
     "reset.mismatch": "Passwords do not match.",
     "reset.missingToken": "Missing reset token. Use the link from your email.",
@@ -2662,7 +2662,7 @@ const messages: Record<string, Record<string, string>> = {
     "signup.proSub":
       "AI analysis, gap reports, and regulatory AI co-pilot — built for compliance teams.",
     "signup.proTitle": "Full platform access",
-    "signup.productTitle": "DJAC Tool — Global Compliance Intelligence",
+    "signup.productTitle": "DJAC Platform — Global Compliance Intelligence",
     "signup.registerPro": "Register as Professional",
     "signup.registerVisitor": "Register as Visitor",
     "signup.requestSent": "Request Sent!",
@@ -4382,8 +4382,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.tabMatrix": "مصفوفة العلاقات",
     "dashboard.timeCriticalBadge": "تقارير عاجلة",
     "dashboard.timetableLoadError": "فشل في تحميل جدول الامتثال الزمني.",
-    "dashboard.title": "أداة DJAC",
-    "dashboard.titleAccent": "الأداة",
+    "dashboard.title": "منصة DJAC",
+    "dashboard.titleAccent": "المنصة",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "{count} إجمالي",
     "dashboard.totalRelPairs": "{count} زوجا",
@@ -4598,7 +4598,7 @@ const messages: Record<string, Record<string, string>> = {
       "الالتزامات الدورية والمواعيد الرئيسية للولايات القضائية المختارة.",
     "enhanced.timetableLoadError": "تعذّر تحميل بيانات الجدول الزمني.",
     "enhanced.timetableTitle": "أثر الجدول الزمني التنظيمي",
-    "enhanced.title": "أداة DJAC - مقارنة متقدمة",
+    "enhanced.title": "منصة DJAC - مقارنة متقدمة",
     "enhanced.totalRelationships": "إجمالي العلاقات",
     "enhanced.uniqueSuffix": "فريد",
     "enhanced.urgentActiveCount":
@@ -4658,7 +4658,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "عنوان البريد الإلكتروني",
     "forgot.emailPlaceholder": "بريدك@example.com",
     "forgot.footer":
-      "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
+      "منصة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
     "forgot.newPassword": "كلمة مرور جديدة (8 أحرف كحد أدنى)",
     "forgot.notice.body":
       "لأسباب أمنية، روابط إعادة التعيين صالحة لمدة ساعة واحدة فقط.",
@@ -4735,7 +4735,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "الأمريكتان",
     "home.apac": "APAC",
     "home.badge": "✦ منصة امتثال مؤسسية",
-    "home.brand": "أداة DJAC",
+    "home.brand": "منصة DJAC",
     "home.china": "الصين",
     "home.consultationCardSubtitle":
       "اطلب إرشادًا قانونيًا وتقنيا حول عمليات الصين والسعودية واستراتيجية دخول السوق.",
@@ -4778,7 +4778,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.fieldVendor": "اسم المورّد (اختياري)",
     "home.footer": "تحليل امتثال بمستوى مؤسسي للعمليات العالمية.",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "أداة DJAC · بدعم من Yalla Hack ·",
+    "home.footer.credits": "منصة DJAC · بدعم من Yalla Hack ·",
     "home.frameworkAnalysis": "تحليل الهياكل",
     "home.frameworks.effective": "ساري منذ",
     "home.frameworks.mlps": "نظام الحماية متعددة المستويات 2.0",
@@ -4914,7 +4914,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "وصول غير مصرح",
     "incident.updated": "تم تحديث الحادثة",
     "invite.layout.footer":
-      "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
+      "منصة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
     "invite.layout.notice": "رابط دعوة موثّق · TLS 1.3 · منصة DJAC للامتثال",
     "inviteAccept.acceptButton": "قبول والانضمام",
     "inviteAccept.accepting": "جاري القبول...",
@@ -5659,7 +5659,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "تأكيد كلمة المرور الجديدة",
     "reset.confirmPasswordPlaceholder": "تأكيد كلمة المرور الجديدة",
     "reset.footer":
-      "أداة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
+      "منصة DJAC · ذكاء امتثال مؤسسي · عالمي · {{jurisdictions}} ولاية قضائية",
     "reset.goToLogin": "الانتقال إلى تسجيل الدخول",
     "reset.mismatch": "كلمتا المرور غير متطابقتين.",
     "reset.missingToken":
@@ -5914,7 +5914,7 @@ const messages: Record<string, Record<string, string>> = {
     "signup.proSub":
       "تحليل بالذكاء الاصطناعي وتقارير الفجوات ومساعد الامتثال — مصمم لفرق الامتثال.",
     "signup.proTitle": "وصول كامل للمنصة",
-    "signup.productTitle": "أداة DJAC — ذكاء الامتثال العالمي",
+    "signup.productTitle": "منصة DJAC — ذكاء الامتثال العالمي",
     "signup.registerPro": "سجّل كمحترف",
     "signup.registerVisitor": "سجّل كزائر",
     "signup.requestSent": "تم إرسال الطلب!",
@@ -7567,8 +7567,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.tabMatrix": "关系矩阵",
     "dashboard.timeCriticalBadge": "项紧急报告",
     "dashboard.timetableLoadError": "加载合规时间表失败。",
-    "dashboard.title": "DJAC 工具",
-    "dashboard.titleAccent": "工具",
+    "dashboard.title": "DJAC 平台",
+    "dashboard.titleAccent": "平台",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "共 {count} 组",
     "dashboard.totalRelPairs": "{count} 组配对",
@@ -7766,7 +7766,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.timetableDesc": "所选法域的截止日期与周期性义务一览。",
     "enhanced.timetableLoadError": "无法加载时间表数据。",
     "enhanced.timetableTitle": "监管时间表影响",
-    "enhanced.title": "DJAC 工具 - 增强对比",
+    "enhanced.title": "DJAC 平台 - 增强对比",
     "enhanced.totalRelationships": "关系总数",
     "enhanced.uniqueSuffix": "独有",
     "enhanced.urgentActiveCount": "个紧急报告或上报窗口可在本页直接协调。",
@@ -7824,7 +7824,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "电子邮件地址",
     "forgot.emailPlaceholder": "您的邮箱@example.com",
     "forgot.footer":
-      "DJAC 工具 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
+      "DJAC 平台 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
     "forgot.newPassword": "新密码（最少8个字符）",
     "forgot.notice.body": "出于安全原因，重置链接仅在 1 小时内有效。",
     "forgot.notice.header": "安全提示",
@@ -7898,7 +7898,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "美洲",
     "home.apac": "APAC",
     "home.badge": "✦ 企业合规平台",
-    "home.brand": "DJAC 工具",
+    "home.brand": "DJAC 平台",
     "home.china": "中国",
     "home.consultationCardSubtitle":
       "获取关于中沙业务与市场进入策略的法律技术建议。",
@@ -7940,7 +7940,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.footer":
       "面向全球运营的企业级合规分析。覆盖{{jurisdictions}}司法管辖区。",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "DJAC 工具 · 由 Yalla Hack 提供支持 ·",
+    "home.footer.credits": "DJAC 平台 · 由 Yalla Hack 提供支持 ·",
     "home.frameworkAnalysis": "框架分析",
     "home.frameworks.effective": "生效时间",
     "home.frameworks.mlps": "多级保护方案 2.0",
@@ -8067,7 +8067,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "未授权访问",
     "incident.updated": "事件已更新",
     "invite.layout.footer":
-      "DJAC 工具 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
+      "DJAC 平台 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
     "invite.layout.notice": "已验证的邀请码链接 · TLS 1.3 · DJAC 合规平台",
     "inviteAccept.acceptButton": "接受并加入",
     "inviteAccept.accepting": "接受中...",
@@ -8779,7 +8779,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "确认新密码",
     "reset.confirmPasswordPlaceholder": "确认新密码",
     "reset.footer":
-      "DJAC 工具 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
+      "DJAC 平台 · 企业级合规智能 · 全球 · {{jurisdictions}} 司法管辖区",
     "reset.goToLogin": "前往登录",
     "reset.mismatch": "两次输入的密码不一致。",
     "reset.missingToken": "缺少重置令牌。请使用邮件中的链接。",
@@ -9024,7 +9024,7 @@ const messages: Record<string, Record<string, string>> = {
     "signup.proBadge": "专业人员 / 决策者",
     "signup.proSub": "面向合规团队打造，提供 AI 分析、差距报告与合规 AI 助手。",
     "signup.proTitle": "完整平台访问权限",
-    "signup.productTitle": "DJAC 工具 — 全球合规智能",
+    "signup.productTitle": "DJAC 平台 — 全球合规智能",
     "signup.registerPro": "注册专业账户",
     "signup.registerVisitor": "注册访客账户",
     "signup.requestSent": "申请已提交！",
@@ -10786,8 +10786,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.timeCriticalBadge": "rapports urgents",
     "dashboard.timetableLoadError":
       "Échec du chargement du calendrier de conformité.",
-    "dashboard.title": "DJAC Tool",
-    "dashboard.titleAccent": "TOOL",
+    "dashboard.title": "DJAC Platform",
+    "dashboard.titleAccent": "PLATEFORME",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "{count} au total",
     "dashboard.totalRelPairs": "{count} paires",
@@ -11015,7 +11015,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.timetableLoadError":
       "Impossible de charger les données du calendrier.",
     "enhanced.timetableTitle": "Impact du calendrier réglementaire",
-    "enhanced.title": "Outil DJAC - Comparaison améliorée",
+    "enhanced.title": "Plateforme DJAC - Comparaison améliorée",
     "enhanced.totalRelationships": "Total des relations",
     "enhanced.uniqueSuffix": "unique",
     "enhanced.urgentActiveCount":
@@ -11077,7 +11077,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "Adresse e-mail",
     "forgot.emailPlaceholder": "you@example.com",
     "forgot.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
+      "DJAC Platform · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "forgot.newPassword": "Nouveau mot de passe (8 caractères minimum)",
     "forgot.notice.body":
       "Pour des raisons de sécurité, les liens de réinitialisation ne sont valables que pendant 1 heure.",
@@ -11165,7 +11165,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "Americas",
     "home.apac": "APAC",
     "home.badge": "✦ Plateforme de conformité d'entreprise",
-    "home.brand": "DJAC Tool",
+    "home.brand": "DJAC Platform",
     "home.china": "China",
     "home.consultationCardSubtitle":
       "Demandez des conseils juridico-techniques sur les opérations de conformité transfrontalière et la stratégie d'entrée sur le marché.",
@@ -11212,7 +11212,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.footer":
       "Analyse de conformité de niveau entreprise pour les opérations mondiales.",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "Outil DJAC · Propulsé par Yalla Hack ·",
+    "home.footer.credits": "Plateforme DJAC · Propulsé par Yalla Hack ·",
     "home.frameworkAnalysis": "Analyse des cadres",
     "home.frameworks.effective": "Effective",
     "home.frameworks.mlps": "Schéma de protection multi-niveaux 2.0",
@@ -11353,7 +11353,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Accès non autorisé",
     "incident.updated": "Incident mis à jour",
     "invite.layout.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
+      "DJAC Platform · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "invite.layout.notice":
       "Lien d'invitation vérifié · TLS 1.3 · Plateforme de conformité DJAC",
     "inviteAccept.acceptButton": "Accepter et rejoindre",
@@ -12150,7 +12150,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Confirmer le nouveau mot de passe",
     "reset.confirmPasswordPlaceholder": "Confirmer le nouveau mot de passe",
     "reset.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
+      "DJAC Platform · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Jurisdictions",
     "reset.goToLogin": "Go to login",
     "reset.mismatch": "Les mots de passe ne correspondent pas.",
     "reset.missingToken":
@@ -12429,7 +12429,8 @@ const messages: Record<string, Record<string, string>> = {
     "signup.proSub":
       "Analyse AI, rapports d’écarts et copilote réglementaire AI — conçus pour les équipes de conformité.",
     "signup.proTitle": "Accès complet à la plateforme",
-    "signup.productTitle": "Outil DJAC — Intelligence de conformité mondiale",
+    "signup.productTitle":
+      "Plateforme DJAC — Intelligence de conformité mondiale",
     "signup.registerPro": "S’inscrire en tant que professionnel",
     "signup.registerVisitor": "S’inscrire en tant que visiteur",
     "signup.requestSent": "Demande envoyée !",
@@ -14244,8 +14245,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.timeCriticalBadge": "informes urgentes",
     "dashboard.timetableLoadError":
       "No se pudo cargar el calendario de cumplimiento.",
-    "dashboard.title": "Herramienta DJAC",
-    "dashboard.titleAccent": "HERRAMIENTA",
+    "dashboard.title": "Plataforma DJAC",
+    "dashboard.titleAccent": "PLATAFORMA",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "{count} en total",
     "dashboard.totalRelPairs": "{count} pares",
@@ -14468,7 +14469,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.timetableLoadError":
       "No se pudieron cargar los datos del calendario.",
     "enhanced.timetableTitle": "Impacto del calendario normativo",
-    "enhanced.title": "Herramienta DJAC - Comparación mejorada",
+    "enhanced.title": "Plataforma DJAC - Comparación mejorada",
     "enhanced.totalRelationships": "Total de relaciones",
     "enhanced.uniqueSuffix": "únicas",
     "enhanced.urgentActiveCount":
@@ -14530,7 +14531,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "Dirección de correo electrónico",
     "forgot.emailPlaceholder": "correo@ejemplo.com",
     "forgot.footer":
-      "Herramienta DJAC · Inteligencia de cumplimiento empresarial · Global · {{jurisdictions}} jurisdicciones",
+      "Plataforma DJAC · Inteligencia de cumplimiento empresarial · Global · {{jurisdictions}} jurisdicciones",
     "forgot.newPassword": "Nueva contraseña (mín. 8 caracteres)",
     "forgot.notice.body":
       "Por motivos de seguridad, los enlaces de restablecimiento solo son válidos durante 1 hora.",
@@ -14614,7 +14615,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "Américas",
     "home.apac": "APAC",
     "home.badge": "✦ Plataforma de cumplimiento empresarial",
-    "home.brand": "DJAC Tool",
+    "home.brand": "DJAC Platform",
     "home.china": "China",
     "home.consultationCardSubtitle":
       "Solicite orientación jurídico-técnica sobre operaciones de cumplimiento transfronterizo y estrategia de entrada al mercado.",
@@ -14661,7 +14662,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.footer":
       "Análisis de cumplimiento de nivel empresarial para operaciones globales.",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "DJAC Tool · Desarrollado por Yalla Hack ·",
+    "home.footer.credits": "DJAC Platform · Desarrollado por Yalla Hack ·",
     "home.frameworkAnalysis": "Análisis de marcos",
     "home.frameworks.effective": "Vigente",
     "home.frameworks.mlps": "Multi-Level Protection Scheme 2.0",
@@ -14802,7 +14803,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Acceso no autorizado",
     "incident.updated": "Incidente actualizado",
     "invite.layout.footer":
-      "DJAC Tool · Inteligencia de Cumplimiento Empresarial · Global · {{jurisdictions}} Jurisdicciones",
+      "DJAC Platform · Inteligencia de Cumplimiento Empresarial · Global · {{jurisdictions}} Jurisdicciones",
     "invite.layout.notice":
       "Enlace de invitación verificado · TLS 1.3 · Plataforma de cumplimiento DJAC",
     "inviteAccept.acceptButton": "Aceptar y unirme",
@@ -15600,7 +15601,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Confirmar nueva contraseña",
     "reset.confirmPasswordPlaceholder": "Confirmar nueva contraseña",
     "reset.footer":
-      "DJAC Tool · Inteligencia de cumplimiento empresarial · Global · {{jurisdictions}} jurisdicciones",
+      "DJAC Platform · Inteligencia de cumplimiento empresarial · Global · {{jurisdictions}} jurisdicciones",
     "reset.goToLogin": "Ir a iniciar sesión",
     "reset.mismatch": "Las contraseñas no coinciden.",
     "reset.missingToken":
@@ -15875,7 +15876,8 @@ const messages: Record<string, Record<string, string>> = {
     "signup.proSub":
       "Análisis con AI, informes de brechas y copiloto regulatorio con AI, diseñado para equipos de cumplimiento.",
     "signup.proTitle": "Acceso completo a la plataforma",
-    "signup.productTitle": "DJAC Tool — Inteligencia global de cumplimiento",
+    "signup.productTitle":
+      "DJAC Platform — Inteligencia global de cumplimiento",
     "signup.registerPro": "Registrarse como Profesional",
     "signup.registerVisitor": "Registrarse como Visitante",
     "signup.requestSent": "¡Solicitud enviada!",
@@ -17694,8 +17696,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.timeCriticalBadge": "Dringende Berichte",
     "dashboard.timetableLoadError":
       "Fehler beim Laden des Compliance-Zeitplans.",
-    "dashboard.title": "DJAC Tool",
-    "dashboard.titleAccent": "TOOL",
+    "dashboard.title": "DJAC Platform",
+    "dashboard.titleAccent": "PLATTFORM",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "{count} gesamt",
     "dashboard.totalRelPairs": "{count} Paare",
@@ -17918,7 +17920,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.timetableLoadError":
       "Zeitplandaten konnten nicht geladen werden.",
     "enhanced.timetableTitle": "Regulatorische Zeitplan-Auswirkungen",
-    "enhanced.title": "DJAC Tool - Erweiterter Vergleich",
+    "enhanced.title": "DJAC Platform - Erweiterter Vergleich",
     "enhanced.totalRelationships": "Beziehungen insgesamt",
     "enhanced.uniqueSuffix": "eindeutig",
     "enhanced.urgentActiveCount":
@@ -17980,7 +17982,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "E-Mail-Adresse",
     "forgot.emailPlaceholder": "name@beispiel.de",
     "forgot.footer":
-      "DJAC Tool · Enterprise-Compliance-Intelligenz · Weltweit · {{jurisdictions}} Rechtsordnungen",
+      "DJAC Platform · Enterprise-Compliance-Intelligenz · Weltweit · {{jurisdictions}} Rechtsordnungen",
     "forgot.newPassword": "Neues Passwort (mind. 8 Zeichen)",
     "forgot.notice.body":
       "Aus Sicherheitsgründen sind Links zum Zurücksetzen nur 1 Stunde gültig.",
@@ -18062,7 +18064,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "Amerika",
     "home.apac": "APAC",
     "home.badge": "✦ Enterprise-Compliance-Plattform",
-    "home.brand": "DJAC Tool",
+    "home.brand": "DJAC Platform",
     "home.china": "China",
     "home.consultationCardSubtitle":
       "Fordern Sie rechtlich-technische Beratung zu grenzüberschreitenden Compliance-Abläufen und Markteintrittsstrategien an.",
@@ -18109,7 +18111,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.footer":
       "Compliance-Analyse auf Enterprise-Niveau für globale Betriebsabläufe.",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "DJAC Tool · Unterstützt von Yalla Hack ·",
+    "home.footer.credits": "DJAC Platform · Unterstützt von Yalla Hack ·",
     "home.frameworkAnalysis": "Framework-Analyse",
     "home.frameworks.effective": "In Kraft",
     "home.frameworks.mlps": "Multi-Level Protection Scheme 2.0",
@@ -18247,7 +18249,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Unbefugter Zugriff",
     "incident.updated": "Vorfall aktualisiert",
     "invite.layout.footer":
-      "DJAC Tool · Unternehmens-Compliance-Intelligenz · Global · {{jurisdictions}} Rechtsordnungen",
+      "DJAC Platform · Unternehmens-Compliance-Intelligenz · Global · {{jurisdictions}} Rechtsordnungen",
     "invite.layout.notice":
       "Verifizierter Einladungslink · TLS 1.3 · DJAC Compliance Platform",
     "inviteAccept.acceptButton": "Annehmen & Beitreten",
@@ -19044,7 +19046,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Neues Passwort bestätigen",
     "reset.confirmPasswordPlaceholder": "Neues Passwort bestätigen",
     "reset.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Rechtsordnungen",
+      "DJAC Platform · Enterprise Compliance Intelligence · Global · {{jurisdictions}} Rechtsordnungen",
     "reset.goToLogin": "Zur Anmeldung gehen",
     "reset.mismatch": "Die Passwörter stimmen nicht überein.",
     "reset.missingToken":
@@ -19314,7 +19316,7 @@ const messages: Record<string, Record<string, string>> = {
     "signup.proSub":
       "AI-Analyse, Gap-Berichte und regulatorischer AI-Co-Pilot – entwickelt für Compliance-Teams.",
     "signup.proTitle": "Voller Plattformzugriff",
-    "signup.productTitle": "DJAC Tool – Globale Compliance-Intelligenz",
+    "signup.productTitle": "DJAC Platform – Globale Compliance-Intelligenz",
     "signup.registerPro": "Als Fachkraft registrieren",
     "signup.registerVisitor": "Als Besucher registrieren",
     "signup.requestSent": "Anfrage gesendet!",
@@ -21103,8 +21105,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.timeCriticalBadge": "緊急レポート",
     "dashboard.timetableLoadError":
       "コンプライアンス予定表の読み込みに失敗しました。",
-    "dashboard.title": "DJACツール",
-    "dashboard.titleAccent": "ツール",
+    "dashboard.title": "DJACプラットフォーム",
+    "dashboard.titleAccent": "プラットフォーム",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "合計{count}件",
     "dashboard.totalRelPairs": "{count}ペア",
@@ -21322,7 +21324,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.timetableLoadError":
       "タイムテーブルデータの読み込みに失敗しました。",
     "enhanced.timetableTitle": "規制タイムテーブルの影響",
-    "enhanced.title": "DJACツール - 拡張比較",
+    "enhanced.title": "DJACプラットフォーム - 拡張比較",
     "enhanced.totalRelationships": "合計関係性",
     "enhanced.uniqueSuffix": "一意",
     "enhanced.urgentActiveCount":
@@ -21383,7 +21385,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "メールアドレス",
     "forgot.emailPlaceholder": "you@example.com",
     "forgot.footer":
-      "DJACツール · エンタープライズコンプライアンスインテリジェンス · グローバル · {{jurisdictions}}法域",
+      "DJACプラットフォーム · エンタープライズコンプライアンスインテリジェンス · グローバル · {{jurisdictions}}法域",
     "forgot.newPassword": "新しいパスワード（8文字以上）",
     "forgot.notice.body":
       "セキュリティ上の理由により、リセットリンクの有効期限は1時間のみです。",
@@ -21464,7 +21466,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "南北アメリカ",
     "home.apac": "APAC",
     "home.badge": "✦ エンタープライズコンプライアンスプラットフォーム",
-    "home.brand": "DJAC Tool",
+    "home.brand": "DJAC Platform",
     "home.china": "中国",
     "home.consultationCardSubtitle":
       "越境コンプライアンス業務および市場参入戦略に関する法務・技術ガイダンスを依頼します。",
@@ -21510,7 +21512,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.footer":
       "グローバル業務向けのエンタープライズグレードのコンプライアンス分析。",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "DJAC Tool · 提供：Yalla Hack ·",
+    "home.footer.credits": "DJAC Platform · 提供：Yalla Hack ·",
     "home.frameworkAnalysis": "フレームワーク分析",
     "home.frameworks.effective": "有効",
     "home.frameworks.mlps": "多層保護スキーム2.0",
@@ -21645,7 +21647,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "不正アクセス",
     "incident.updated": "インシデントを更新しました",
     "invite.layout.footer":
-      "DJAC Tool · Enterprise Compliance Intelligence · グローバル · {{jurisdictions}}法域",
+      "DJAC Platform · Enterprise Compliance Intelligence · グローバル · {{jurisdictions}}法域",
     "invite.layout.notice":
       "確認済み招待リンク · TLS 1.3 · DJAC コンプライアンスプラットフォーム",
     "inviteAccept.acceptButton": "承認して参加",
@@ -22411,7 +22413,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "新しいパスワードの確認",
     "reset.confirmPasswordPlaceholder": "新しいパスワードを確認",
     "reset.footer":
-      "DJACツール · エンタープライズコンプライアンスインテリジェンス · グローバル · 28の法域",
+      "DJACプラットフォーム · エンタープライズコンプライアンスインテリジェンス · グローバル · 28の法域",
     "reset.goToLogin": "ログインへ",
     "reset.mismatch": "パスワードが一致しません。",
     "reset.missingToken":
@@ -22679,7 +22681,7 @@ const messages: Record<string, Record<string, string>> = {
       "AI分析、ギャップレポート、規制対応AIコパイロット — コンプライアンスチーム向けに構築。",
     "signup.proTitle": "プラットフォームへのフルアクセス",
     "signup.productTitle":
-      "DJACツール — グローバルコンプライアンスインテリジェンス",
+      "DJACプラットフォーム — グローバルコンプライアンスインテリジェンス",
     "signup.registerPro": "プロフェッショナルとして登録",
     "signup.registerVisitor": "ビジターとして登録",
     "signup.requestSent": "リクエストを送信しました！",
@@ -24410,8 +24412,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.tabMatrix": "관계 매트릭스",
     "dashboard.timeCriticalBadge": "긴급 보고서",
     "dashboard.timetableLoadError": "컴플라이언스 일정을 불러오지 못했습니다.",
-    "dashboard.title": "DJAC 도구",
-    "dashboard.titleAccent": "도구",
+    "dashboard.title": "DJAC 플랫폼",
+    "dashboard.titleAccent": "플랫폼",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "총 {count}개",
     "dashboard.totalRelPairs": "{count}쌍",
@@ -24623,7 +24625,7 @@ const messages: Record<string, Record<string, string>> = {
     "enhanced.timetableDesc": "선택한 관할권의 반복 의무 및 주요 기한.",
     "enhanced.timetableLoadError": "일정 데이터를 불러오지 못했습니다.",
     "enhanced.timetableTitle": "규제 일정 영향",
-    "enhanced.title": "DJAC 도구 - 강화된 비교",
+    "enhanced.title": "DJAC 플랫폼 - 강화된 비교",
     "enhanced.totalRelationships": "총 관계",
     "enhanced.uniqueSuffix": "고유",
     "enhanced.urgentActiveCount":
@@ -24683,7 +24685,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "이메일 주소",
     "forgot.emailPlaceholder": "you@example.com",
     "forgot.footer":
-      "DJAC Tool · 엔터프라이즈 컴플라이언스 인텔리전스 · 글로벌 · 28개 관할권",
+      "DJAC Platform · 엔터프라이즈 컴플라이언스 인텔리전스 · 글로벌 · 28개 관할권",
     "forgot.newPassword": "새 비밀번호 (최소 8자)",
     "forgot.notice.body":
       "보안상의 이유로 재설정 링크는 1시간 동안만 유효합니다.",
@@ -24760,7 +24762,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "아메리카",
     "home.apac": "APAC",
     "home.badge": "✦ 엔터프라이즈 컴플라이언스 플랫폼",
-    "home.brand": "DJAC Tool",
+    "home.brand": "DJAC Platform",
     "home.china": "중국",
     "home.consultationCardSubtitle":
       "국경 간 컴플라이언스 운영 및 시장 진입 전략에 대한 법률·기술 지침을 요청하세요.",
@@ -24803,7 +24805,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.fieldVendor": "공급업체 이름 (선택 사항)",
     "home.footer": "글로벌 운영을 위한 엔터프라이즈급 컴플라이언스 분석.",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "DJAC Tool · Yalla Hack 제공 ·",
+    "home.footer.credits": "DJAC Platform · Yalla Hack 제공 ·",
     "home.frameworkAnalysis": "프레임워크 분석",
     "home.frameworks.effective": "적용",
     "home.frameworks.mlps": "다중등급보호체계 2.0",
@@ -24938,7 +24940,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "무단 접근",
     "incident.updated": "사고 업데이트됨",
     "invite.layout.footer":
-      "DJAC 도구 · 엔터프라이즈 컴플라이언스 인텔리전스 · 글로벌 · 28개 관할권",
+      "DJAC 플랫폼 · 엔터프라이즈 컴플라이언스 인텔리전스 · 글로벌 · 28개 관할권",
     "invite.layout.notice":
       "검증된 초대 링크 · TLS 1.3 · DJAC 컴플라이언스 플랫폼",
     "inviteAccept.acceptButton": "수락 및 참여",
@@ -25690,7 +25692,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "새 비밀번호 확인",
     "reset.confirmPasswordPlaceholder": "새 비밀번호 확인",
     "reset.footer":
-      "DJAC 도구 · 기업 컴플라이언스 인텔리전스 · 글로벌 · 28개 관할권",
+      "DJAC 플랫폼 · 기업 컴플라이언스 인텔리전스 · 글로벌 · 28개 관할권",
     "reset.goToLogin": "로그인으로 이동",
     "reset.mismatch": "비밀번호가 일치하지 않습니다.",
     "reset.missingToken": "재설정 토큰이 없습니다. 이메일의 링크를 사용하세요.",
@@ -27731,8 +27733,8 @@ const messages: Record<string, Record<string, string>> = {
     "dashboard.timeCriticalBadge": "relatórios urgentes",
     "dashboard.timetableLoadError":
       "Falha ao carregar o cronograma de conformidade.",
-    "dashboard.title": "Ferramenta DJAC",
-    "dashboard.titleAccent": "FERRAMENTA",
+    "dashboard.title": "Plataforma DJAC",
+    "dashboard.titleAccent": "PLATAFORMA",
     "dashboard.titlePrefix": "DJAC",
     "dashboard.totalPairs": "{count} no total",
     "dashboard.totalRelPairs": "{count} pares",
@@ -27953,7 +27955,7 @@ const messages: Record<string, Record<string, string>> = {
       "Obrigações recorrentes e prazos principais para as jurisdições selecionadas.",
     "enhanced.timetableLoadError": "Falha ao carregar dados do cronograma.",
     "enhanced.timetableTitle": "Impacto do Cronograma Regulatório",
-    "enhanced.title": "DJAC Tool - Comparação Aprimorada",
+    "enhanced.title": "DJAC Platform - Comparação Aprimorada",
     "enhanced.totalRelationships": "Total de Relacionamentos",
     "enhanced.uniqueSuffix": "únicos",
     "enhanced.urgentActiveCount":
@@ -28015,7 +28017,7 @@ const messages: Record<string, Record<string, string>> = {
     "forgot.emailAriaLabel": "Endereço de e-mail",
     "forgot.emailPlaceholder": "voce@exemplo.com",
     "forgot.footer":
-      "Ferramenta DJAC · Inteligência de Conformidade Empresarial · Global · {{jurisdictions}} Jurisdições",
+      "Plataforma DJAC · Inteligência de Conformidade Empresarial · Global · {{jurisdictions}} Jurisdições",
     "forgot.newPassword": "Nova senha (mín. 8 caracteres)",
     "forgot.notice.body":
       "Por motivos de segurança, os links de redefinição são válidos por apenas 1 hora.",
@@ -28099,7 +28101,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.americas": "Américas",
     "home.apac": "APAC",
     "home.badge": "✦ Plataforma de Conformidade Empresarial",
-    "home.brand": "DJAC Tool",
+    "home.brand": "DJAC Platform",
     "home.china": "China",
     "home.consultationCardSubtitle":
       "Solicite orientação técnico-jurídica sobre operações de conformidade transfronteiriça e estratégia de entrada no mercado.",
@@ -28146,7 +28148,7 @@ const messages: Record<string, Record<string, string>> = {
     "home.footer":
       "Análise de conformidade de nível empresarial para operações globais.",
     "home.footer.copyright": "(c)",
-    "home.footer.credits": "DJAC Tool · Desenvolvido por Yalla Hack ·",
+    "home.footer.credits": "DJAC Platform · Desenvolvido por Yalla Hack ·",
     "home.frameworkAnalysis": "Análise de frameworks",
     "home.frameworks.effective": "Vigente",
     "home.frameworks.mlps": "Esquema de Proteção Multinível 2.0",
@@ -28285,7 +28287,7 @@ const messages: Record<string, Record<string, string>> = {
     "incident.type.unauthorized_access": "Acesso não autorizado",
     "incident.updated": "Incidente atualizado",
     "invite.layout.footer":
-      "Ferramenta DJAC · Inteligência de Compliance Empresarial · Global · {{jurisdictions}} Jurisdições",
+      "Plataforma DJAC · Inteligência de Compliance Empresarial · Global · {{jurisdictions}} Jurisdições",
     "invite.layout.notice":
       "Link de convite verificado · TLS 1.3 · Plataforma de Compliance DJAC",
     "inviteAccept.acceptButton": "Aceitar e entrar",
@@ -29072,7 +29074,7 @@ const messages: Record<string, Record<string, string>> = {
     "reset.confirmAriaLabel": "Confirmar nova senha",
     "reset.confirmPasswordPlaceholder": "Confirmar nova senha",
     "reset.footer":
-      "DJAC Tool · Inteligência de Conformidade Empresarial · Global · {{jurisdictions}} Jurisdições",
+      "DJAC Platform · Inteligência de Conformidade Empresarial · Global · {{jurisdictions}} Jurisdições",
     "reset.goToLogin": "Ir para o login",
     "reset.mismatch": "As senhas não coincidem.",
     "reset.missingToken":
@@ -29344,7 +29346,7 @@ const messages: Record<string, Record<string, string>> = {
       "Análise de AI, relatórios de lacunas e copiloto regulatório de AI — criado para equipes de compliance.",
     "signup.proTitle": "Acesso total à plataforma",
     "signup.productTitle":
-      "Ferramenta DJAC — Inteligência Global de Compliance",
+      "Plataforma DJAC — Inteligência Global de Compliance",
     "signup.registerPro": "Registrar como Profissional",
     "signup.registerVisitor": "Registrar como Visitante",
     "signup.requestSent": "Solicitação enviada!",

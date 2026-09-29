@@ -86,7 +86,7 @@ export default function AdminOnboarding() {
           <select
             value={days}
             onChange={e => setDays(Number(e.target.value))}
-            className="rounded-md border border-white/10 bg-black/30 px-3 py-1.5 text-sm"
+            className="rounded-md border border-border bg-black/30 px-3 py-1.5 text-sm"
             aria-label="Time window"
           >
             {[7, 30, 90, 365].map(d => (
@@ -97,7 +97,7 @@ export default function AdminOnboarding() {
           </select>
           <button
             onClick={() => void load()}
-            className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-sm hover:bg-white/5"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
@@ -113,7 +113,7 @@ export default function AdminOnboarding() {
           { label: "Skipped", value: totals.skipped },
         ].map(k => (
           <div key={k.label} style={cardStyle}>
-            <p className="text-xs uppercase tracking-wide text-white/50">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
               {k.label}
             </p>
             <p className="mt-1 text-2xl font-semibold">
@@ -127,14 +127,14 @@ export default function AdminOnboarding() {
         <div style={cardStyle}>
           <p className="mb-3 text-sm font-medium">Industries</p>
           {(data?.byIndustry ?? []).length === 0 ? (
-            <p className="text-sm text-white/50">No data yet.</p>
+            <p className="text-sm text-muted-foreground">No data yet.</p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
                 {data.byIndustry.map((row: any) => (
-                  <tr key={row.industry} className="border-b border-white/5">
+                  <tr key={row.industry} className="border-b border-border">
                     <td className="py-1.5">{row.industry}</td>
-                    <td className="py-1.5 text-end text-white/70">
+                    <td className="py-1.5 text-end text-muted-foreground">
                       {row.count}
                     </td>
                   </tr>
@@ -147,16 +147,16 @@ export default function AdminOnboarding() {
         <div style={cardStyle}>
           <p className="mb-3 text-sm font-medium">Recent onboarding events</p>
           {(data?.funnel ?? []).length === 0 ? (
-            <p className="text-sm text-white/50">No events yet.</p>
+            <p className="text-sm text-muted-foreground">No events yet.</p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
                 {data.funnel.map((row: any) => (
-                  <tr key={String(row.day)} className="border-b border-white/5">
+                  <tr key={String(row.day)} className="border-b border-border">
                     <td className="py-1.5">
                       {new Date(row.day).toLocaleDateString()}
                     </td>
-                    <td className="py-1.5 text-end text-white/70">
+                    <td className="py-1.5 text-end text-muted-foreground">
                       {row.events}
                     </td>
                   </tr>
@@ -171,14 +171,14 @@ export default function AdminOnboarding() {
         <div style={cardStyle}>
           <p className="mb-3 text-sm font-medium">Objectives</p>
           {(data?.byObjective ?? []).length === 0 ? (
-            <p className="text-sm text-white/50">No data yet.</p>
+            <p className="text-sm text-muted-foreground">No data yet.</p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
                 {data.byObjective.map((row: any) => (
-                  <tr key={row.objective} className="border-b border-white/5">
+                  <tr key={row.objective} className="border-b border-border">
                     <td className="py-1.5">{row.objective}</td>
-                    <td className="py-1.5 text-end text-white/70">
+                    <td className="py-1.5 text-end text-muted-foreground">
                       {row.count}
                     </td>
                   </tr>
@@ -190,14 +190,14 @@ export default function AdminOnboarding() {
         <div style={cardStyle}>
           <p className="mb-3 text-sm font-medium">Top recommended modules</p>
           {(data?.byModule ?? []).length === 0 ? (
-            <p className="text-sm text-white/50">No data yet.</p>
+            <p className="text-sm text-muted-foreground">No data yet.</p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
                 {data.byModule.map((row: any) => (
-                  <tr key={row.module_id} className="border-b border-white/5">
+                  <tr key={row.module_id} className="border-b border-border">
                     <td className="py-1.5">{row.module_id}</td>
-                    <td className="py-1.5 text-end text-white/70">
+                    <td className="py-1.5 text-end text-muted-foreground">
                       {row.count}
                     </td>
                   </tr>
@@ -211,14 +211,16 @@ export default function AdminOnboarding() {
       <div style={cardStyle}>
         <p className="mb-3 text-sm font-medium">Personalization engagement</p>
         {(data?.engagement ?? []).length === 0 ? (
-          <p className="text-sm text-white/50">No data yet.</p>
+          <p className="text-sm text-muted-foreground">No data yet.</p>
         ) : (
           <table className="w-full text-sm">
             <tbody>
               {data.engagement.map((row: any) => (
-                <tr key={row.event_type} className="border-b border-white/5">
+                <tr key={row.event_type} className="border-b border-border">
                   <td className="py-1.5">{row.event_type}</td>
-                  <td className="py-1.5 text-end text-white/70">{row.count}</td>
+                  <td className="py-1.5 text-end text-muted-foreground">
+                    {row.count}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -234,11 +236,11 @@ export default function AdminOnboarding() {
             onChange={e => setUserId(e.target.value)}
             placeholder="User ID"
             aria-label="User ID"
-            className="w-40 rounded-md border border-white/10 bg-black/30 px-3 py-1.5 text-sm"
+            className="w-40 rounded-md border border-border bg-black/30 px-3 py-1.5 text-sm"
           />
           <button
             onClick={() => void inspect()}
-            className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-sm hover:bg-white/5"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
           >
             <Search className="h-4 w-4" /> Inspect
           </button>
@@ -253,7 +255,7 @@ export default function AdminOnboarding() {
           <div className="mt-4 space-y-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <p className="text-xs uppercase text-white/50">
+                <p className="text-xs uppercase text-muted-foreground">
                   Derived profile
                 </p>
                 <pre className="mt-1 overflow-auto rounded bg-black/30 p-2 text-xs">
@@ -261,14 +263,14 @@ export default function AdminOnboarding() {
                 </pre>
               </div>
               <div>
-                <p className="text-xs uppercase text-white/50">
+                <p className="text-xs uppercase text-muted-foreground">
                   Recommendations
                 </p>
                 <ul className="mt-1 space-y-1 text-xs">
                   {(userData.state?.recommendations ?? []).map((r: any) => (
                     <li key={r.moduleId} className="flex justify-between gap-2">
                       <span>{r.moduleId}</span>
-                      <span className="text-white/50">{r.ruleId}</span>
+                      <span className="text-muted-foreground">{r.ruleId}</span>
                     </li>
                   ))}
                 </ul>
@@ -276,10 +278,12 @@ export default function AdminOnboarding() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs uppercase text-white/50">Responses</p>
+              <p className="mb-2 text-xs uppercase text-muted-foreground">
+                Responses
+              </p>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-white/50">
+                  <tr className="text-muted-foreground">
                     <th className="text-start">Question</th>
                     <th className="text-start">Answer</th>
                     <th className="text-end">Updated</th>
@@ -287,12 +291,12 @@ export default function AdminOnboarding() {
                 </thead>
                 <tbody>
                   {(userData.responses ?? []).map((r: any) => (
-                    <tr key={r.questionId} className="border-b border-white/5">
+                    <tr key={r.questionId} className="border-b border-border">
                       <td className="py-1.5">{r.questionId}</td>
                       <td className="py-1.5">
                         {JSON.stringify(r.answerValue)}
                       </td>
-                      <td className="py-1.5 text-end text-white/60">
+                      <td className="py-1.5 text-end text-muted-foreground">
                         {new Date(r.updatedAt).toLocaleString()}
                       </td>
                     </tr>
@@ -302,12 +306,14 @@ export default function AdminOnboarding() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs uppercase text-white/50">Timeline</p>
+              <p className="mb-2 text-xs uppercase text-muted-foreground">
+                Timeline
+              </p>
               <ul className="space-y-1 text-xs">
                 {(userData.timeline ?? []).map((e: any, i: number) => (
                   <li key={i} className="flex justify-between gap-2">
                     <span>{e.eventType}</span>
-                    <span className="text-white/50">
+                    <span className="text-muted-foreground">
                       {new Date(e.createdAt).toLocaleString()}
                     </span>
                   </li>

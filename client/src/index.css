@@ -61,74 +61,79 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ── LIGHT THEME (default) ───────────────────────────────────────────────────
+   `:root` is the light palette; `.dark` (below) overrides it with the dark
+   palette. Previously BOTH blocks held the same dark values, so "light mode"
+   had no light colours at all and the toggle appeared to do nothing. Brand
+   (magenta/cyan) and status colours are intentionally shared by both themes.
+─────────────────────────────────────────────────────────────────────────── */
 :root {
-  /* ── DJAC Premium Dark Palette (brand magenta→cyan) ── */
   --radius: 0.65rem;
-  --primary: #d900ff;
+  --primary: #c100e6;
   --primary-foreground: #ffffff;
-  /* Charts (brand + status) */
-  --chart-1: #00d2ff;
-  --chart-2: #d900ff;
-  --chart-3: #10b981;
-  --chart-4: #ef4444;
-  --chart-5: #f59e0b;
+  /* Charts (brand + status — tuned for light backgrounds) */
+  --chart-1: #0091b3;
+  --chart-2: #c100e6;
+  --chart-3: #059669;
+  --chart-4: #dc2626;
+  --chart-5: #d97706;
   /* Background / text */
-  --background: #050508;
-  --foreground: #ffffff;
-  --card: rgba(30, 30, 45, 0.4);
-  --card-foreground: #ffffff;
-  --popover: rgba(20, 20, 30, 0.6);
-  --popover-foreground: #ffffff;
-  --secondary: rgba(255, 255, 255, 0.05);
-  --secondary-foreground: #94a3b8;
-  --muted: rgba(255, 255, 255, 0.05);
-  --muted-foreground: #94a3b8;
-  --accent: rgba(255, 255, 255, 0.05);
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
+  --background: #ffffff;
+  --foreground: #0b0b12;
+  --card: #ffffff;
+  --card-foreground: #0b0b12;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b12;
+  --secondary: #f1f2f6;
+  --secondary-foreground: #334155;
+  --muted: #f1f2f6;
+  --muted-foreground: #5a6478;
+  --accent: #f1f2f6;
+  --accent-foreground: #0b0b12;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: #00d2ff;
+  --border: #e3e5ec;
+  --input: #e3e5ec;
+  --ring: #0091b3;
   /* Sidebar */
-  --sidebar: rgba(10, 10, 15, 0.8);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #d900ff;
+  --sidebar: #f7f8fb;
+  --sidebar-foreground: #0b0b12;
+  --sidebar-primary: #c100e6;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 255, 255, 0.05);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #00d2ff;
+  --sidebar-accent: #eceef4;
+  --sidebar-accent-foreground: #0b0b12;
+  --sidebar-border: #e3e5ec;
+  --sidebar-ring: #0091b3;
   /* ── DJAC inline-style color tokens ── */
-  --djac-bg: #050508;
-  --djac-bg-deep: #050508;
-  --djac-card: rgba(30, 30, 45, 0.4);
-  --djac-card-hi: rgba(255, 255, 255, 0.075);
-  --djac-border: rgba(255, 255, 255, 0.08);
-  --djac-border-hi: rgba(0, 210, 255, 0.45);
-  --djac-text: #ffffff;
-  --djac-muted: #94a3b8;
-  --djac-input-bg: rgba(255, 255, 255, 0.06);
-  --djac-input-border: rgba(255, 255, 255, 0.13);
-  --djac-nav-bg: rgba(10, 10, 15, 0.8);
-  --djac-section-alt: rgba(20, 20, 30, 0.6);
+  --djac-bg: #ffffff;
+  --djac-bg-deep: #f7f8fb;
+  --djac-card: #ffffff;
+  --djac-card-hi: rgba(2, 8, 20, 0.035);
+  --djac-border: rgba(2, 8, 20, 0.1);
+  --djac-border-hi: rgba(0, 145, 179, 0.45);
+  --djac-text: #0b0b12;
+  --djac-muted: #5a6478;
+  --djac-input-bg: rgba(2, 8, 20, 0.03);
+  --djac-input-border: rgba(2, 8, 20, 0.16);
+  --djac-nav-bg: rgba(255, 255, 255, 0.85);
+  --djac-section-alt: #f7f8fb;
   /* ── DJAC accent colors (brand + status) ── */
-  --djac-cyan: #00d2ff;
-  --djac-green: #10b981;
-  --djac-red: #ef4444;
-  --djac-orange: #f59e0b;
-  --djac-yellow: #f59e0b;
-  --djac-purple: #d900ff;
+  --djac-cyan: #0091b3;
+  --djac-green: #059669;
+  --djac-red: #dc2626;
+  --djac-orange: #d97706;
+  --djac-yellow: #d97706;
+  --djac-purple: #c100e6;
   /* ── Semantic HSL channel vars — used as hsl(var(--success)) in animation components ── */
-  --success: 160 84% 39%;
+  --success: 160 84% 30%;
   --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
+  --warning: 32 95% 40%;
   --warning-foreground: 0 0% 100%;
-  --info: 190 100% 50%;
+  --info: 194 100% 35%;
   --info-foreground: 0 0% 100%;
-  /* Glow shadows */
-  --glow-cyan: 0 0 20px rgba(0, 210, 255, 0.35);
-  --glow-purple: 0 0 20px rgba(217, 0, 255, 0.35);
+  /* Glow shadows (softer on light backgrounds) */
+  --glow-cyan: 0 0 20px rgba(0, 145, 179, 0.25);
+  --glow-purple: 0 0 20px rgba(193, 0, 230, 0.25);
 }
 
 .dark {

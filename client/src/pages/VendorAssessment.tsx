@@ -1739,20 +1739,20 @@ export default function VendorAssessment() {
         >
           <div className="grid gap-6 px-6 py-8 md:grid-cols-[1.4fr_0.8fr] md:px-8">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.24em] text-white/80">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs uppercase tracking-[0.24em] text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5" />
                 Strategic Assessment Workspace
               </div>
               <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
                 {copy.title}
               </h1>
-              <p className="mt-3 max-w-3xl text-base text-white/75 md:text-lg">
+              <p className="mt-3 max-w-3xl text-base text-muted-foreground md:text-lg">
                 {copy.subtitle}
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
-              <div className="rounded-2xl border border-white/10 bg-white/8 p-4 backdrop-blur-sm">
-                <div className="flex items-center gap-2 text-white/70">
+              <div className="rounded-2xl border border-border bg-muted p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Building2 className="h-4 w-4" />
                   <span className="text-xs uppercase tracking-[0.18em]">
                     Industry
@@ -1762,8 +1762,8 @@ export default function VendorAssessment() {
                   {profile.industry || "Not selected yet"}
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/8 p-4 backdrop-blur-sm">
-                <div className="flex items-center gap-2 text-white/70">
+              <div className="rounded-2xl border border-border bg-muted p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Globe2 className="h-4 w-4" />
                   <span className="text-xs uppercase tracking-[0.18em]">
                     Target Market
@@ -1775,8 +1775,8 @@ export default function VendorAssessment() {
                     : copy.options.china}
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/8 p-4 backdrop-blur-sm">
-                <div className="flex items-center gap-2 text-white/70">
+              <div className="rounded-2xl border border-border bg-muted p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <ShieldCheck className="h-4 w-4" />
                   <span className="text-xs uppercase tracking-[0.18em]">
                     Frameworks
@@ -1796,10 +1796,10 @@ export default function VendorAssessment() {
           // ================================================================
           <div className="djac-section-2 space-y-6">
             <div className="grid gap-4 lg:grid-cols-[1.5fr_0.9fr]">
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-900 p-5 shadow-sm">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <p className="text-sm font-semibold text-foreground dark:text-slate-100">
                       Assessment completion
                     </p>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -1811,7 +1811,7 @@ export default function VendorAssessment() {
                     {completionPercentage}%
                   </Badge>
                 </div>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted dark:bg-slate-800">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500"
                     style={{ width: `${completionPercentage}%` }}
@@ -1838,7 +1838,7 @@ export default function VendorAssessment() {
                   ].map(item => (
                     <div
                       key={item.label}
-                      className={`rounded-xl border px-3 py-3 ${item.complete ? "border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300" : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400"}`}
+                      className={`rounded-xl border px-3 py-3 ${item.complete ? "border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300" : "border-slate-200 dark:border-slate-700 bg-muted dark:bg-slate-800 text-slate-500 dark:text-slate-400"}`}
                     >
                       <div className="flex items-center gap-2 text-sm font-medium">
                         {item.complete ? (
@@ -1852,8 +1852,8 @@ export default function VendorAssessment() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm">
-                <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-900 p-5 shadow-sm">
+                <div className="flex items-center gap-2 text-foreground dark:text-slate-100">
                   <FileCheck className="h-4 w-4 text-red-600" />
                   <p className="text-sm font-semibold">Insight preview</p>
                 </div>
@@ -2222,7 +2222,7 @@ export default function VendorAssessment() {
                     ))}
                   </div>
                   {infrastructure.currentCloudProviders.includes("Others") && (
-                    <div className="mt-3 space-y-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-3">
+                    <div className="mt-3 space-y-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-card dark:bg-gray-900/50 p-3">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                         {copy.fields.otherCloudProviders}
                       </label>
@@ -2360,7 +2360,7 @@ export default function VendorAssessment() {
                     ))}
                   </div>
                   {infrastructure.dataHostingLocations.includes("Others") && (
-                    <div className="mt-3 space-y-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900/50 p-3">
+                    <div className="mt-3 space-y-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-card dark:bg-gray-900/50 p-3">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                         {copy.fields.otherDataHostingLocations}
                       </label>
@@ -2695,29 +2695,29 @@ export default function VendorAssessment() {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-900 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                       Target jurisdiction
                     </p>
-                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <p className="mt-2 text-base font-semibold text-foreground dark:text-slate-100">
                       {profile.targetCountry === "SA"
                         ? copy.options.sa
                         : copy.options.china}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-900 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                       Selected frameworks
                     </p>
-                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <p className="mt-2 text-base font-semibold text-foreground dark:text-slate-100">
                       {compliance.cybersecurityFrameworks.join(", ") || "None"}
                     </p>
                   </div>
-                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-900 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                       Primary focus
                     </p>
-                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <p className="mt-2 text-base font-semibold text-foreground dark:text-slate-100">
                       {assessment.gaps[0]
                         ? localizeAssessmentText(
                             assessment.gaps[0].finding,

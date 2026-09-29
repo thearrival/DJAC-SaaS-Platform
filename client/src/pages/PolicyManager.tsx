@@ -93,7 +93,7 @@ type PolicyStatus = (typeof POLICY_STATUSES)[number];
 
 // Status → colour mapping
 const STATUS_COLORS: Record<PolicyStatus, string> = {
-  draft: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300",
+  draft: "bg-muted dark:bg-slate-800 text-slate-600 dark:text-slate-300",
   under_review: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300",
   approved:
     "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300",

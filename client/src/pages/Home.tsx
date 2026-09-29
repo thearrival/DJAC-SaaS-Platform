@@ -1425,7 +1425,7 @@ export default function Home() {
         }}
       >
         <p style={{ color: C.muted, fontSize: 13 }}>
-          {`${t("home.footer.copyright", "(c)")} ${year} ${t("home.footer.credits", "DJAC Tool · Powered by Yalla Hack ·")} ${t("home.footer", "Enterprise compliance intelligence for global operations.")}`}
+          {`${t("home.footer.copyright", "(c)")} ${year} ${t("home.footer.credits", "DJAC Platform · Powered by Yalla Hack ·")} ${t("home.footer", "Enterprise compliance intelligence for global operations.")}`}
         </p>
       </footer>
     </div>

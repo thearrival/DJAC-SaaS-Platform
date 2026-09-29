@@ -381,7 +381,7 @@ function InviteLayout({ children }: { children: React.ReactNode }) {
                   letterSpacing: "-0.02em",
                 }}
               >
-                DJAC Tool
+                DJAC Platform
               </span>
               <span
                 style={{
@@ -447,7 +447,7 @@ function InviteLayout({ children }: { children: React.ReactNode }) {
         >
           {t(
             "invite.layout.footer",
-            "DJAC Tool · Enterprise Compliance Intelligence · Global"
+            "DJAC Platform · Enterprise Compliance Intelligence · Global"
           )}
         </p>
       </div>

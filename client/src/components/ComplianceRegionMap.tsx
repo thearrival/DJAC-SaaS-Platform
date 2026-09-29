@@ -208,7 +208,7 @@ export function ComplianceRegionMap({
           )}
         </div>
 
-        <div className="rounded-xl border border-border bg-white/90 p-3 shadow-inner dark:bg-slate-950/60">
+        <div className="rounded-xl border border-border bg-muted p-3 shadow-inner dark:bg-slate-950/60">
           <svg viewBox="0 0 900 420" className="h-[340px] w-full">
             <defs>
               <linearGradient id="mapBackground" x1="0" y1="0" x2="1" y2="1">

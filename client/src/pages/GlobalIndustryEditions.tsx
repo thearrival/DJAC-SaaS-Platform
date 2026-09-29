@@ -47,7 +47,7 @@ const SECTOR_COLORS: Record<string, string> = {
   Energy:
     "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300",
   Manufacturing:
-    "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300",
+    "bg-muted text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300",
   Retail:
     "bg-pink-100 text-pink-700 border-pink-200 dark:bg-pink-900/30 dark:text-pink-300",
   Education:

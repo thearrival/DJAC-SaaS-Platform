@@ -352,7 +352,7 @@ export default function DashboardEnhanced() {
       <div className="space-y-4">
         <div>
           <h1 className="text-4xl font-bold text-foreground">
-            {t("enhanced.title", "DJAC Tool - Enhanced Comparison")}
+            {t("enhanced.title", "DJAC Platform - Enhanced Comparison")}
           </h1>
           <p className="mt-2 text-lg text-muted-foreground">
             {t(

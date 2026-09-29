@@ -879,14 +879,14 @@ export default function AdminControlCenter() {
           <div className="flex items-center gap-2">
             <Badge
               variant="secondary"
-              className="rounded-full bg-white/20 px-3 py-1 text-white"
+              className="rounded-full bg-muted px-3 py-1 text-white"
             >
               {t("admin.streamLabel", "AI Stream")}: {connectionState}
             </Badge>
             <Button
               variant="secondary"
               size="sm"
-              className="bg-white/20 text-white hover:bg-white/30"
+              className="bg-muted text-white hover:bg-muted"
               onClick={refreshAll}
               aria-busy={isAdminDataLoading}
             >
@@ -1446,7 +1446,7 @@ export default function AdminControlCenter() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="rounded-lg border border-border bg-white/90 p-3 dark:bg-slate-950/50">
+            <div className="rounded-lg border border-border bg-muted p-3 dark:bg-slate-950/50">
               <svg viewBox="0 0 560 340" className="h-[300px] w-full">
                 <defs>
                   <marker

@@ -2629,7 +2629,7 @@ export default function Signup() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                DJAC Tool
+                DJAC Platform
               </span>
               <span
                 style={{
@@ -2745,7 +2745,7 @@ export default function Signup() {
           >
             {t(
               "signup.productTitle",
-              "DJAC Tool — Global Compliance Intelligence Platform"
+              "DJAC Platform — Global Compliance Intelligence Platform"
             )}
           </p>
           <p

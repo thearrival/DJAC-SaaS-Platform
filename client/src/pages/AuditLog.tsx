@@ -146,11 +146,11 @@ const ACTION_BADGE: Record<string, { label: string; cls: string }> = {
   // Data
   report_downloaded: {
     label: "Data",
-    cls: "bg-slate-100 text-slate-800 dark:bg-slate-800/30 dark:text-slate-300 border-slate-300",
+    cls: "bg-muted text-foreground dark:bg-slate-800/30 dark:text-slate-300 border-slate-300",
   },
   compliance_data_exported: {
     label: "Data",
-    cls: "bg-slate-100 text-slate-800 dark:bg-slate-800/30 dark:text-slate-300 border-slate-300",
+    cls: "bg-muted text-foreground dark:bg-slate-800/30 dark:text-slate-300 border-slate-300",
   },
   // API Key
   api_key_created: {

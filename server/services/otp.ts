@@ -134,14 +134,14 @@ export async function sendOtp(
     <p style="color:#a1a1aa;font-size:13px;line-height:1.6;margin:0">For security reasons, never share this code with anyone.</p>
   </td></tr>
   <tr><td style="background:#fafafa;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7">
-    <p style="color:#a1a1aa;font-size:12px;margin:0">DJAC Tool — China-Saudi Compliance Intelligence<br>&copy; ${new Date().getFullYear()} DJAC. All rights reserved.</p>
+    <p style="color:#a1a1aa;font-size:12px;margin:0">DJAC Platform — China-Saudi Compliance Intelligence<br>&copy; ${new Date().getFullYear()} DJAC. All rights reserved.</p>
   </td></tr>
 </table>
 </td></tr>
 </table>
 </body></html>`;
 
-    const text = `DJAC Compliance Platform\n========================\n\nYour security verification code is: ${code}\n\nThis code expires in ${OTP_EXPIRY_MINUTES} minutes.\nUse it to ${actionLabel}.\n\nIf you did not request this code, ignore this message.\nYour account security has not been compromised.\n\nDJAC Tool — China-Saudi Compliance Intelligence`;
+    const text = `DJAC Compliance Platform\n========================\n\nYour security verification code is: ${code}\n\nThis code expires in ${OTP_EXPIRY_MINUTES} minutes.\nUse it to ${actionLabel}.\n\nIf you did not request this code, ignore this message.\nYour account security has not been compromised.\n\nDJAC Platform — China-Saudi Compliance Intelligence`;
 
     delivered = await sendEmail({ to: normalized, subject, html, text });
   } else {

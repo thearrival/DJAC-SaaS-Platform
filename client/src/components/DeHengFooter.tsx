@@ -91,7 +91,7 @@ export function DeHengFooter() {
           flexWrap: "wrap",
         }}
       >
-        <span>© {new Date().getFullYear()} DJAC Tool</span>
+        <span>© {new Date().getFullYear()} DJAC Platform</span>
         <span style={{ color: "var(--border)" }}>·</span>
         <span>
           {t("footer.tagline", "Multi-Jurisdiction Compliance Intelligence")}

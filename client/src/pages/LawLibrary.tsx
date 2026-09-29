@@ -49,7 +49,7 @@ const FW_STYLE: Record<string, string> = {
   HIPAA:
     "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300",
   "PCI-DSS":
-    "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300",
+    "bg-muted text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300",
   NIS2: "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300",
   DORA: "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300",
   "EU-AI-ACT":

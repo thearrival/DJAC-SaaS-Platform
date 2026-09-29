@@ -125,8 +125,7 @@ const FRAMEWORK_COLORS: Record<string, string> = {
     "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
   NIS2: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300",
   DORA: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300",
-  "PCI-DSS":
-    "bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-300",
+  "PCI-DSS": "bg-muted text-foreground dark:bg-slate-950 dark:text-slate-300",
 };
 
 const JURISDICTION_FLAG: Record<Jurisdiction, string> = {

@@ -107,8 +107,7 @@ const PLAN_LABELS: Record<string, string> = {
 };
 
 const PLAN_BADGE_CLASS: Record<string, string> = {
-  free_trial:
-    "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+  free_trial: "bg-muted text-slate-700 dark:bg-slate-800 dark:text-slate-300",
   starter: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
   professional:
     "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",

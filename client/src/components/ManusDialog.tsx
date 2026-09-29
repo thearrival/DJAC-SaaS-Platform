@@ -54,7 +54,7 @@ export function ManusDialog({
     >
       <DialogContent className="py-5 bg-[rgba(255,255,255,0.05)] rounded-[20px] w-[400px] shadow-[0px_4px_11px_0px_rgba(0,0,0,0.08)] border border-[rgba(0,0,0,0.08)] backdrop-blur-2xl p-0 gap-0 text-center">
         <div className="flex flex-col items-center gap-2 p-5 pt-12">
-          <div className="w-24 h-12 bg-white rounded-xl border border-[rgba(0,0,0,0.08)] flex items-center justify-center overflow-hidden px-2 py-1">
+          <div className="w-24 h-12 bg-card rounded-xl border border-[rgba(0,0,0,0.08)] flex items-center justify-center overflow-hidden px-2 py-1">
             <img
               src={logo}
               alt="App icon"

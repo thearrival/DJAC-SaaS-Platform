@@ -213,7 +213,7 @@ export default function OperationsStatus() {
     <div className="djac-page">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             {t("ops.title", "Operations Status")}
           </h1>
           <p className="text-slate-600">
@@ -272,7 +272,7 @@ export default function OperationsStatus() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-slate-900 capitalize">
+            <p className="text-2xl font-bold text-foreground capitalize">
               {streamConfigQuery.data?.queueMode ??
                 t("ops.notAvailable", "N/A")}
             </p>
@@ -289,7 +289,7 @@ export default function OperationsStatus() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg font-semibold text-slate-900 break-all">
+            <p className="text-lg font-semibold text-foreground break-all">
               {streamConfigQuery.data?.websocketPath ??
                 t("ops.notAvailable", "N/A")}
             </p>
@@ -306,7 +306,7 @@ export default function OperationsStatus() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-2xl font-bold text-foreground">
               {jobSummary.running}
             </p>
             <p className="text-xs text-slate-500 mt-1">
@@ -322,7 +322,7 @@ export default function OperationsStatus() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-2xl font-bold text-foreground">
               {jobSummary.failed}
             </p>
             <p className="text-xs text-slate-500 mt-1">
@@ -371,8 +371,8 @@ export default function OperationsStatus() {
           ) : readiness ? (
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.database", "Database")}
                   </p>
                   <Badge
@@ -391,8 +391,8 @@ export default function OperationsStatus() {
                   </p>
                 </div>
 
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.redis", "Redis")}
                   </p>
                   <Badge
@@ -411,8 +411,8 @@ export default function OperationsStatus() {
                   </p>
                 </div>
 
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.orchestrator", "AI Orchestrator")}
                   </p>
                   <Badge
@@ -531,23 +531,23 @@ export default function OperationsStatus() {
           ) : history ? (
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 text-sm">
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.storageType", "Storage Type")}
                   </p>
                   <p className="text-slate-600 mt-2">
                     {formatStorageType(history.storageType, t)}
                   </p>
                 </div>
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.storageStatus", "Storage Status")}
                   </p>
                   <Badge
                     className={
                       history.storageEnabled
                         ? "bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300 mt-2"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 mt-2"
+                        : "bg-muted dark:bg-slate-800 text-foreground dark:text-slate-200 mt-2"
                     }
                   >
                     {history.storageEnabled
@@ -555,41 +555,41 @@ export default function OperationsStatus() {
                       : t("ops.disabled", "Disabled")}
                   </Badge>
                 </div>
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.historyEntries", "History Entries")}
                   </p>
-                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                  <p className="text-2xl font-bold text-foreground mt-2">
                     {history.historyEntryCount}
                   </p>
                 </div>
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.activeJobsLabel", "Active Jobs")}
                   </p>
-                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                  <p className="text-2xl font-bold text-foreground mt-2">
                     {history.activeJobCount}
                   </p>
                 </div>
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.queuedJobsLabel", "Queued Jobs")}
                   </p>
-                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                  <p className="text-2xl font-bold text-foreground mt-2">
                     {history.queuedJobCount}
                   </p>
                 </div>
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.historyRetention", "Retention Limit")}
                   </p>
-                  <p className="text-2xl font-bold text-slate-900 mt-2">
+                  <p className="text-2xl font-bold text-foreground mt-2">
                     {history.historyRetentionLimit ??
                       t("ops.notAvailable", "N/A")}
                   </p>
                 </div>
-                <div className="rounded-md border bg-slate-50 p-3">
-                  <p className="font-medium text-slate-900">
+                <div className="rounded-md border bg-muted p-3">
+                  <p className="font-medium text-foreground">
                     {t("ops.lastWrite", "Last Write")}
                   </p>
                   <p className="text-slate-600 mt-2">
@@ -602,9 +602,9 @@ export default function OperationsStatus() {
                 </div>
               </div>
 
-              <div className="rounded-md border bg-slate-50 p-3 text-sm text-slate-700">
+              <div className="rounded-md border bg-muted p-3 text-sm text-slate-700">
                 <p>
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-foreground">
                     {t("ops.storagePath", "Storage Path")}:
                   </span>{" "}
                   {history.storagePath ?? t("ops.notAvailable", "N/A")}
@@ -660,7 +660,7 @@ export default function OperationsStatus() {
           ) : (
             <div className="overflow-x-auto rounded-md border">
               <table className="min-w-full text-sm">
-                <thead className="bg-slate-50 text-left text-slate-700">
+                <thead className="bg-muted text-left text-slate-700">
                   <tr>
                     <th className="px-3 py-2 font-medium">
                       {t("ops.job", "Job")}
