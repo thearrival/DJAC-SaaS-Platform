@@ -15,6 +15,7 @@ import * as db from "../db";
 import { getSupabaseClient } from "../services/supabase";
 import { signJwt } from "../services/local-jwt";
 import { broadcastSSE } from "../services/sse-bus";
+import { recordSystemAuditEvent } from "../audit-logger";
 import { getSessionCookieOptions } from "./cookies";
 import { logger } from "./logger";
 
@@ -36,6 +37,15 @@ export function registerGoogleOAuthRoutes(app: Express) {
 
     const fail = (reason: string) => {
       logger.error({ reason }, "Google OAuth callback failed");
+      // Audit failures too, so a broken provider/redirect is visible in the
+      // audit trail rather than only in transient function logs.
+      void recordSystemAuditEvent({
+        category: "auth",
+        action: "user.login",
+        entityType: "users",
+        outcome: "failure",
+        payload: { method: "google", reason },
+      });
       res.redirect(302, `/login?error=${encodeURIComponent(reason)}`);
     };
 
@@ -53,6 +63,10 @@ export function registerGoogleOAuthRoutes(app: Express) {
     try {
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       if (error || !data?.user) {
+        logger.error(
+          { supaError: error?.message, status: error?.status },
+          "Google code exchange failed"
+        );
         fail("google_exchange_failed");
         return;
       }
@@ -101,6 +115,16 @@ export function registerGoogleOAuthRoutes(app: Express) {
       } catch {
         /* realtime notification is best-effort */
       }
+
+      void recordSystemAuditEvent({
+        category: "auth",
+        action: "user.login",
+        entityType: "users",
+        entityId: user.id,
+        outcome: "success",
+        actorRole: user.role ?? "basic_user",
+        payload: { method: "google", email },
+      });
 
       res.redirect(302, redirectTo);
     } catch (err) {

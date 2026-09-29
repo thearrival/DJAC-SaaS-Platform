@@ -962,6 +962,7 @@ function SignInForm({
         <div style={{ flex: 1, height: 1, background: C.border }} />
       </div>
       {/* Google Sign-In */}
+      <GoogleAuthError t={t} />
       <GoogleSignInButton C={C} t={t} />
       {isExternalOAuth() && (
         <a href={getLoginUrl()} style={{ textDecoration: "none" }}>
@@ -2119,6 +2120,57 @@ function RoleRegisterForm({
 }
 
 // ─── Google Sign-In Button ──────────────────────────────────────────────────
+function GoogleAuthError({ t }: { t: (k: string, f: string) => string }) {
+  const code =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("error");
+  if (!code || !code.startsWith("google")) return null;
+
+  const messages: Record<string, string> = {
+    google_no_code: t(
+      "signup.googleErrCancelled",
+      "Google sign-in was cancelled or returned no code. Please try again."
+    ),
+    google_not_configured: t(
+      "signup.googleErrUnavailable",
+      "Google sign-in is not available right now. Please use email and password."
+    ),
+    google_exchange_failed: t(
+      "signup.googleErrFailed",
+      "We couldn't complete Google sign-in. Please try again."
+    ),
+    google_user_missing: t(
+      "signup.googleErrNoAccount",
+      "We couldn't create your account. Please contact support."
+    ),
+    google_error: t(
+      "signup.googleErrGeneric",
+      "Something went wrong during Google sign-in. Please try again."
+    ),
+  };
+
+  return (
+    <div
+      role="alert"
+      style={{
+        background: "rgba(239,68,68,0.10)",
+        border: "1px solid rgba(239,68,68,0.35)",
+        color: "#ef4444",
+        borderRadius: 10,
+        padding: "10px 12px",
+        fontSize: 12.5,
+        lineHeight: 1.5,
+        marginBottom: 10,
+        textAlign: "start",
+      }}
+    >
+      {messages[code] ??
+        t("signup.googleErrUnknown", "Sign-in failed. Please try again.")}
+    </div>
+  );
+}
+
 function GoogleSignInButton({
   C,
   t,
