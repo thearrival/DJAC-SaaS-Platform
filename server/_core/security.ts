@@ -81,8 +81,10 @@ function shouldDisableCaching(pathname: string): boolean {
 }
 
 const INLINE_SCRIPT_HASHES = [
+  "'sha256-qiqD4vBMysKIzUZl2pD2jryTmAbhwVth63kZAnORI7s='",
+  "'sha256-KF9qIvjVOFsmArTtkMqo5eo/oaf+hmrVBocrNLx2oeE='",
   "'sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc='",
-  "'sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U='",
+  "'sha256-K9Pxi9uJDKUL7vdKcTh14CF2I8fIvfQiH0BoH/Hec6U='",
   "'sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k='",
   "'sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess='",
 ];
