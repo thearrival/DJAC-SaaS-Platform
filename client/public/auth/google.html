@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Sign in with Google · DJAC Platform</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #0b0b12;
+        --muted: #5a6478;
+        --border: rgba(2, 8, 20, 0.12);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b0b12;
+          --fg: #ffffff;
+          --muted: #94a3b8;
+          --border: rgba(255, 255, 255, 0.1);
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          Inter,
+          "Segoe UI",
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 360px;
+        text-align: center;
+      }
+      .brand {
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: -0.01em;
+        margin: 0 0 4px;
+      }
+      .brand span {
+        color: #d900ff;
+      }
+      .sub {
+        margin: 0 0 22px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      #button {
+        display: flex;
+        justify-content: center;
+        min-height: 44px;
+      }
+      .spinner {
+        width: 22px;
+        height: 22px;
+        border: 2.5px solid var(--border);
+        border-top-color: #d900ff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        margin: 10px auto;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #status {
+        margin-top: 16px;
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: var(--muted);
+        min-height: 18px;
+      }
+      #status.error {
+        color: #ef4444;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1 class="brand">DJAC<span>.</span>Platform</h1>
+      <p class="sub">Continue with Google to sign in.</p>
+      <div id="button"><div class="spinner"></div></div>
+      <p id="status"></p>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+      (function () {
+        "use strict";
+        var statusEl = document.getElementById("status");
+        var buttonEl = document.getElementById("button");
+
+        function setStatus(msg, isError) {
+          statusEl.textContent = msg || "";
+          statusEl.className = isError ? "error" : "";
+        }
+
+        function finish(payload) {
+          try {
+            if (window.opener && !window.opener.closed) {
+              window.opener.postMessage(payload, window.location.origin);
+              window.close();
+              return;
+            }
+          } catch (_) {
+            /* fall through */
+          }
+          // Not a popup (or opener unreachable) — go straight to the target.
+          window.location.href = payload.redirectTo || "/dashboard";
+        }
+
+        function fail(message) {
+          setStatus(message, true);
+          finish({ type: "djac-google-auth", ok: false, error: message });
+        }
+
+        function waitForGsi() {
+          return new Promise(function (resolve, reject) {
+            var tries = 0;
+            (function poll() {
+              if (
+                window.google &&
+                window.google.accounts &&
+                window.google.accounts.id
+              ) {
+                resolve();
+                return;
+              }
+              if (++tries > 100) {
+                reject(new Error("Google Sign-In failed to load"));
+                return;
+              }
+              setTimeout(poll, 100);
+            })();
+          });
+        }
+
+        function fetchConfig() {
+          return fetch("/api/trpc/googleAuth.config", {
+            headers: { accept: "application/json" },
+          })
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (j) {
+              return j && j.result && j.result.data && j.result.data.json;
+            });
+        }
+
+        Promise.all([waitForGsi(), fetchConfig()])
+          .then(function (results) {
+            var config = results[1];
+            if (!config || !config.enabled || !config.clientId) {
+              fail("Google sign-in is not available right now.");
+              return;
+            }
+            buttonEl.innerHTML = "";
+            window.google.accounts.id.initialize({
+              client_id: config.clientId,
+              callback: function (response) {
+                if (!response || !response.credential) {
+                  fail("Google did not return a credential. Please try again.");
+                  return;
+                }
+                setStatus("Signing you in…");
+                fetch("/api/auth/google/verify", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ credential: response.credential }),
+                })
+                  .then(function (r) {
+                    return r.json().then(function (body) {
+                      return { ok: r.ok, body: body };
+                    });
+                  })
+                  .then(function (res) {
+                    if (res.ok && res.body && res.body.ok) {
+                      finish({
+                        type: "djac-google-auth",
+                        ok: true,
+                        redirectTo: res.body.redirectTo || "/dashboard",
+                      });
+                    } else {
+                      fail(
+                        "We couldn't complete Google sign-in. Please try again."
+                      );
+                    }
+                  })
+                  .catch(function () {
+                    fail(
+                      "We couldn't complete Google sign-in. Please try again."
+                    );
+                  });
+              },
+            });
+            window.google.accounts.id.renderButton(buttonEl, {
+              type: "standard",
+              theme: "outline",
+              size: "large",
+              text: "continue_with",
+              shape: "rectangular",
+              logo_alignment: "center",
+              width: 320,
+            });
+            setStatus("");
+          })
+          .catch(function () {
+            fail("Google sign-in failed to load. Please close this window.");
+          });
+      })();
+    </script>
+  </body>
+</html>
