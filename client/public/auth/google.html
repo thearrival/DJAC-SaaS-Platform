@@ -173,6 +173,10 @@
             buttonEl.innerHTML = "";
             window.google.accounts.id.initialize({
               client_id: config.clientId,
+              // Prefer FedCM: it needs no redirect URI. When the browser cannot
+              // use FedCM, Google falls back to a redirect that must be a
+              // registered redirect URI.
+              use_fedcm_for_button: true,
               callback: function (response) {
                 if (!response || !response.credential) {
                   fail("Google did not return a credential. Please try again.");
