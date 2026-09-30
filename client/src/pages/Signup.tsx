@@ -2152,6 +2152,10 @@ function GoogleAuthError({ t }: { t: (k: string, f: string) => string }) {
       "signup.googleErrRateLimited",
       "Too many sign-in attempts. Please wait a few minutes and try again."
     ),
+    google_denied: t(
+      "signup.googleErrDenied",
+      "Google sign-in was cancelled. You can try again or use email and password."
+    ),
   };
 
   return (

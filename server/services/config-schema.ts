@@ -53,6 +53,12 @@ export const parsedEnv = {
   OWNER_OPEN_ID: process.env.OWNER_OPEN_ID ?? "",
   APP_URL: (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""),
 
+  // ── Google OAuth (direct, no third-party redirect host) ───────────────────
+  // When both are set, "Continue with Google" runs entirely on APP_URL, so the
+  // user never sees *.supabase.co during sign-in.
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? "",
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ?? "",
+
   // ── Forge ─────────────────────────────────────────────────────────────────
   BUILT_IN_FORGE_API_URL: process.env.BUILT_IN_FORGE_API_URL ?? "",
   BUILT_IN_FORGE_API_KEY: process.env.BUILT_IN_FORGE_API_KEY ?? "",

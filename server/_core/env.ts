@@ -136,6 +136,8 @@ export const ENV = {
   stripeSecretKey: parsedEnv.STRIPE_SECRET_KEY,
   stripeWebhookSecret: parsedEnv.STRIPE_WEBHOOK_SECRET,
   appUrl: parsedEnv.APP_URL,
+  googleClientId: parsedEnv.GOOGLE_CLIENT_ID,
+  googleClientSecret: parsedEnv.GOOGLE_CLIENT_SECRET,
   smtpHost: parsedEnv.SMTP_HOST,
   smtpPort: parsedEnv.SMTP_PORT,
   smtpSecure: parsedEnv.SMTP_SECURE,
