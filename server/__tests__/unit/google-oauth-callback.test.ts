@@ -10,6 +10,7 @@ const getUserByOpenId = vi.fn(async () => ({
 }));
 const recordSystemAuditEvent = vi.fn(async () => {});
 const checkRateLimit = vi.fn(async () => ({ allowed: true, resetAt: 0 }));
+const createSessionToken = vi.fn(async () => "sdk.session.token");
 const exchangeCodeForSession = vi.fn(async () => ({
   data: {
     user: {
@@ -30,8 +31,10 @@ vi.mock("../../services/supabase", () => ({
   getSupabaseClient: () =>
     supabaseConfigured ? { auth: { exchangeCodeForSession } } : null,
 }));
-vi.mock("../../services/local-jwt", () => ({
-  signJwt: vi.fn(async () => "signed.jwt.token"),
+vi.mock("../../_core/sdk", () => ({
+  sdk: {
+    createSessionToken: (...a: unknown[]) => createSessionToken(...a),
+  },
 }));
 vi.mock("../../services/sse-bus", () => ({ broadcastSSE: vi.fn() }));
 vi.mock("../../audit-logger", () => ({
@@ -153,6 +156,11 @@ describe("Google OAuth callback route", () => {
     });
     expect(res.cookie).toHaveBeenCalledTimes(1);
     expect(res.redirect).toHaveBeenCalledWith(302, "/dashboard");
+    // The session must be signed by the SDK so resolveOAuthUser can verify it.
+    expect(createSessionToken).toHaveBeenCalledWith(
+      "google:supa-1",
+      expect.objectContaining({ name: expect.any(String) })
+    );
     expect(recordSystemAuditEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: "user.login", outcome: "success" })
     );

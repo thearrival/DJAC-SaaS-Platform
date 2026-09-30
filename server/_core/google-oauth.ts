@@ -13,7 +13,7 @@ import type { Express, Request, Response } from "express";
 import { COOKIE_NAME } from "../../shared/const";
 import * as db from "../db";
 import { getSupabaseClient } from "../services/supabase";
-import { signJwt } from "../services/local-jwt";
+import { sdk } from "./sdk";
 import { broadcastSSE } from "../services/sse-bus";
 import { recordSystemAuditEvent } from "../audit-logger";
 import { checkRateLimit } from "./rateLimiter";
@@ -118,16 +118,20 @@ export function registerGoogleOAuthRoutes(app: Express) {
         return;
       }
 
-      const token = await signJwt({
-        sub: user.id,
-        type: "oauth",
-        userType: user.role ?? "basic_user",
-        openId,
+      // Sign the session with the SAME mechanism the app verifies.
+      // resolveOAuthUser() -> sdk.verifySession() requires a payload containing
+      // openId + appId + name. The previous ad-hoc JWT ({sub,type,openId}) never
+      // satisfied that, so a completed Google sign-in set a cookie the app could
+      // not read and the user was bounced straight back to /login.
+      const sessionTtlMs = 1000 * 60 * 60 * 24 * 30; // 30 days
+      const token = await sdk.createSessionToken(openId, {
+        name: name || email || "User",
+        expiresInMs: sessionTtlMs,
       });
 
       res.cookie(COOKIE_NAME, token, {
         ...getSessionCookieOptions(req),
-        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        maxAge: sessionTtlMs,
       });
 
       try {
