@@ -8,12 +8,19 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { publicProcedure, router } from "./_core/trpc";
+import { ENV } from "./_core/env";
 import {
   buildGoogleAuthUrl,
   googleOAuthConfigured,
 } from "./_core/google-oauth";
 
 export const googleAuthRouter = router({
+  /** Public config for the client-side Google Identity Services button. */
+  config: publicProcedure.query(() => ({
+    enabled: googleOAuthConfigured(),
+    clientId: googleOAuthConfigured() ? ENV.googleClientId : "",
+  })),
+
   /** Get the Google OAuth URL for sign-in (built on our own domain). */
   getAuthUrl: publicProcedure
     .input(z.object({ redirectTo: z.string().optional() }))

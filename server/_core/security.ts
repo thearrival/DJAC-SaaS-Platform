@@ -96,8 +96,8 @@ function buildCsp(isProduction: boolean): string[] {
     "object-src 'none'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://fonts.gstatic.com",
-    `connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co ${FORGE_HOST}`,
-    "frame-src https://js.stripe.com https://hooks.stripe.com",
+    `connect-src 'self' wss: https://api.stripe.com https://js.stripe.com https://sentry.io https://*.sentry.io https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://oauth2.googleapis.com ${FORGE_HOST}`,
+    "frame-src https://js.stripe.com https://hooks.stripe.com https://accounts.google.com",
     "form-action 'self'",
     "frame-ancestors 'none'",
     "report-uri /api/csp-report",
@@ -105,13 +105,13 @@ function buildCsp(isProduction: boolean): string[] {
 
   if (isProduction) {
     parts.push(
-      `script-src 'self' https://js.stripe.com ${FORGE_HOST} ${INLINE_SCRIPT_HASHES.join(" ")}`
+      `script-src 'self' https://js.stripe.com https://accounts.google.com ${FORGE_HOST} ${INLINE_SCRIPT_HASHES.join(" ")}`
     );
     parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
     parts.push("upgrade-insecure-requests");
   } else {
     parts.push(
-      `script-src 'self' 'unsafe-inline' https://js.stripe.com ${FORGE_HOST}`
+      `script-src 'self' 'unsafe-inline' https://js.stripe.com https://accounts.google.com ${FORGE_HOST}`
     );
     parts.push("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
   }

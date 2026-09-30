@@ -34,6 +34,7 @@ const GOOGLE_AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_ENDPOINT =
   "https://openidconnect.googleapis.com/v1/userinfo";
+const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const STATE_TTL_MS = 10 * 60 * 1000;
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
@@ -159,6 +160,68 @@ function clientKey(req: Request): string {
   return `google-cb:${ip}`;
 }
 
+/**
+ * Create/lookup the user and establish the session cookie. Shared by the
+ * redirect callback and the Google Identity Services credential endpoint so
+ * both flows produce identical accounts and sessions.
+ */
+async function completeGoogleLogin(
+  req: Request,
+  res: Response,
+  profile: GoogleProfile
+): Promise<number | null> {
+  const openId = `google:${profile.sub}`;
+  const email = profile.email ?? "";
+  const name = profile.name ?? email ?? "User";
+
+  await db.upsertUser({
+    openId,
+    name,
+    email,
+    loginMethod: "google",
+    role: "basic_user",
+    status: "active",
+    preferredLocale: "en",
+  });
+
+  const user = await db.getUserByOpenId(openId);
+  if (!user) return null;
+
+  // Signed with the SDK so resolveOAuthUser() can verify the session.
+  const token = await sdk.createSessionToken(openId, {
+    name: name || email || "User",
+    expiresInMs: SESSION_TTL_MS,
+  });
+
+  res.cookie(COOKIE_NAME, token, {
+    ...getSessionCookieOptions(req),
+    maxAge: SESSION_TTL_MS,
+  });
+
+  try {
+    broadcastSSE("user_login", {
+      userId: user.id,
+      email,
+      method: "google",
+      ts: new Date().toISOString(),
+    });
+  } catch {
+    /* realtime notification is best-effort */
+  }
+
+  void recordSystemAuditEvent({
+    category: "auth",
+    action: "user.login",
+    entityType: "users",
+    entityId: user.id,
+    outcome: "success",
+    actorRole: user.role ?? "basic_user",
+    payload: { method: "google", email },
+  });
+
+  return user.id;
+}
+
 export function registerGoogleOAuthRoutes(app: Express) {
   app.get("/api/auth/google/callback", async (req: Request, res: Response) => {
     const code =
@@ -217,63 +280,78 @@ export function registerGoogleOAuthRoutes(app: Express) {
         return;
       }
 
-      const openId = `google:${profile.sub}`;
-      const email = profile.email ?? "";
-      const name = profile.name ?? email ?? "User";
-
-      await db.upsertUser({
-        openId,
-        name,
-        email,
-        loginMethod: "google",
-        role: "basic_user",
-        status: "active",
-        preferredLocale: "en",
-      });
-
-      const user = await db.getUserByOpenId(openId);
-      if (!user) {
+      const userId = await completeGoogleLogin(req, res, profile);
+      if (!userId) {
         fail("google_user_missing");
         return;
       }
-
-      // Signed with the SDK so resolveOAuthUser() can verify the session.
-      const token = await sdk.createSessionToken(openId, {
-        name: name || email || "User",
-        expiresInMs: SESSION_TTL_MS,
-      });
-
-      res.cookie(COOKIE_NAME, token, {
-        ...getSessionCookieOptions(req),
-        maxAge: SESSION_TTL_MS,
-      });
-
-      try {
-        broadcastSSE("user_login", {
-          userId: user.id,
-          email,
-          method: "google",
-          ts: new Date().toISOString(),
-        });
-      } catch {
-        /* realtime notification is best-effort */
-      }
-
-      void recordSystemAuditEvent({
-        category: "auth",
-        action: "user.login",
-        entityType: "users",
-        entityId: user.id,
-        outcome: "success",
-        actorRole: user.role ?? "basic_user",
-        payload: { method: "google", email },
-      });
 
       // Straight into the product — no intermediate hop.
       res.redirect(302, redirectTo);
     } catch (err) {
       logger.error({ err }, "Google OAuth callback error");
       fail("google_error");
+    }
+  });
+
+  /**
+   * Google Identity Services (popup) endpoint.
+   *
+   * The browser obtains an ID token (JWT) from Google and posts it here. We
+   * validate it with Google, then establish the session. This flow needs no
+   * redirect URI — only the authorized JavaScript origin — so it works even
+   * where Google redirect URIs are not configured.
+   */
+  app.post("/api/auth/google/verify", async (req: Request, res: Response) => {
+    const credential = (req.body as { credential?: unknown } | undefined)
+      ?.credential;
+
+    if (typeof credential !== "string" || !credential) {
+      res.status(400).json({ error: "missing_credential" });
+      return;
+    }
+    if (!googleOAuthConfigured()) {
+      res.status(500).json({ error: "not_configured" });
+      return;
+    }
+
+    const rl = await checkRateLimit(
+      clientKey(req),
+      CALLBACK_RATE_LIMIT_MAX,
+      CALLBACK_RATE_LIMIT_WINDOW_MS
+    ).catch(() => ({ allowed: true }));
+    if (!rl.allowed) {
+      res.status(429).json({ error: "rate_limited" });
+      return;
+    }
+
+    try {
+      // Google validates the signature, expiry and issuer. We must additionally
+      // confirm the token was minted for OUR client id.
+      const infoRes = await fetch(
+        `${GOOGLE_TOKENINFO_ENDPOINT}?id_token=${encodeURIComponent(credential)}`
+      );
+      if (!infoRes.ok) {
+        res.status(401).json({ error: "invalid_token" });
+        return;
+      }
+      const info = (await infoRes.json()) as GoogleProfile & { aud?: string };
+      if (info.aud !== ENV.googleClientId || !info.sub) {
+        logger.warn({ aud: info.aud }, "Google ID token audience mismatch");
+        res.status(401).json({ error: "invalid_token" });
+        return;
+      }
+
+      const userId = await completeGoogleLogin(req, res, info);
+      if (!userId) {
+        res.status(500).json({ error: "user_create_failed" });
+        return;
+      }
+
+      res.json({ ok: true, redirectTo: "/dashboard" });
+    } catch (err) {
+      logger.error({ err }, "Google credential verification failed");
+      res.status(500).json({ error: "google_error" });
     }
   });
 }

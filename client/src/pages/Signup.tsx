@@ -3,7 +3,7 @@
  * Routes: /signup  /login
  * Supports: 9 languages (full UI dictionary via useLocale) + dark & light themes.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -35,7 +35,6 @@ import {
   Hash,
   AlertCircle,
   Smartphone,
-  Chrome,
 } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
@@ -963,7 +962,7 @@ function SignInForm({
       </div>
       {/* Google Sign-In */}
       <GoogleAuthError t={t} />
-      <GoogleSignInButton C={C} t={t} />
+      <GoogleSignInButton t={t} />
       {isExternalOAuth() && (
         <a href={getLoginUrl()} style={{ textDecoration: "none" }}>
           <button
@@ -2120,6 +2119,37 @@ function RoleRegisterForm({
 }
 
 // ─── Google Sign-In Button ──────────────────────────────────────────────────
+// Google Identity Services loads its own client script once. It renders Google's
+// official button and hands us a signed ID token, which we verify server-side —
+// no redirect URI required.
+type GsiId = {
+  initialize: (config: {
+    client_id: string;
+    callback: (response: { credential?: string }) => void;
+  }) => void;
+  renderButton: (el: HTMLElement, options: Record<string, unknown>) => void;
+};
+type GsiWindow = { google?: { accounts?: { id?: GsiId } } };
+
+let gsiLoadPromise: Promise<void> | null = null;
+function loadGsi(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if ((window as unknown as GsiWindow).google?.accounts?.id) {
+    return Promise.resolve();
+  }
+  if (gsiLoadPromise) return gsiLoadPromise;
+  gsiLoadPromise = new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Google sign-in"));
+    document.head.appendChild(script);
+  });
+  return gsiLoadPromise;
+}
+
 function GoogleAuthError({ t }: { t: (k: string, f: string) => string }) {
   const code =
     typeof window === "undefined"
@@ -2179,50 +2209,112 @@ function GoogleAuthError({ t }: { t: (k: string, f: string) => string }) {
   );
 }
 
-function GoogleSignInButton({
-  C,
-  t,
-}: {
-  C: DesignTokens;
-  t: (k: string, f: string) => string;
-}) {
-  const googleUrl = trpc.googleAuth.getAuthUrl.useQuery(
-    {
-      redirectTo:
-        new URLSearchParams(window.location.search).get("r") ?? "/dashboard",
-    },
-    { enabled: false }
-  );
+function GoogleSignInButton({ t }: { t: (k: string, f: string) => string }) {
+  const configQuery = trpc.googleAuth.config.useQuery();
+  const holderRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const enabled = configQuery.data?.enabled ?? false;
+  const clientId = configQuery.data?.clientId ?? "";
+
+  useEffect(() => {
+    if (!enabled || !clientId || !holderRef.current) return;
+    let cancelled = false;
+
+    const fail = () =>
+      setError(
+        t(
+          "signup.googleErrFailed",
+          "We couldn't complete Google sign-in. Please try again."
+        )
+      );
+
+    loadGsi()
+      .then(() => {
+        if (cancelled || !holderRef.current) return;
+        const g = (window as unknown as GsiWindow).google;
+        if (!g?.accounts?.id) {
+          fail();
+          return;
+        }
+        g.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response: { credential?: string }) => {
+            if (!response?.credential) {
+              fail();
+              return;
+            }
+            try {
+              const res = await fetch("/api/auth/google/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ credential: response.credential }),
+              });
+              const data = (await res.json().catch(() => ({}))) as {
+                ok?: boolean;
+                redirectTo?: string;
+              };
+              if (res.ok && data.ok) {
+                window.location.href = data.redirectTo || "/dashboard";
+              } else {
+                fail();
+              }
+            } catch {
+              fail();
+            }
+          },
+        });
+        g.accounts.id.renderButton(holderRef.current, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "rectangular",
+          logo_alignment: "center",
+          width: 360,
+        });
+      })
+      .catch(() =>
+        setError(
+          t(
+            "signup.googleErrUnavailable",
+            "Google sign-in is not available right now. Please use email and password."
+          )
+        )
+      );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, clientId, t]);
+
+  if (!enabled) return null;
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        void googleUrl.refetch().then(r => {
-          if (r.data?.url) window.location.href = r.data.url;
-        });
-      }}
-      className="djac-btn-secondary"
-      style={{
-        width: "100%",
-        background: C.inputBg,
-        border: `1px solid ${C.border}`,
-        borderRadius: 10,
-        padding: "12px 20px",
-        color: C.text,
-        fontWeight: 700,
-        fontSize: 13,
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-        transition: "all 0.18s",
-      }}
-    >
-      <Chrome size={15} style={{ color: "#00d2ff" }} />
-      {t("signup.googleSignIn", "Continue with Google")}
-    </button>
+    <div style={{ width: "100%" }}>
+      <div
+        ref={holderRef}
+        style={{ display: "flex", justifyContent: "center", minHeight: 44 }}
+      />
+      {error && (
+        <div
+          role="alert"
+          style={{
+            marginTop: 8,
+            background: "rgba(239,68,68,0.10)",
+            border: "1px solid rgba(239,68,68,0.35)",
+            color: "#ef4444",
+            borderRadius: 10,
+            padding: "10px 12px",
+            fontSize: 12.5,
+            lineHeight: 1.5,
+          }}
+        >
+          {error}
+        </div>
+      )}
+    </div>
   );
 }
 
