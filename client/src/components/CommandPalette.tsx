@@ -22,6 +22,7 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { useLocale } from "@/contexts/useLocale";
+import { restartTour } from "@/components/TourGuide";
 import {
   Activity,
   ArrowLeftRight,
@@ -439,6 +440,28 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             </CommandGroup>
           </span>
         ))}
+
+        {(query.trim() === "" ||
+          "restart product tour onboarding help guide".includes(
+            query.trim().toLowerCase()
+          )) && (
+          <>
+            <CommandSeparator />
+            <CommandGroup heading={t("cmd.groupHelp", "Help")}>
+              <CommandItem
+                value="Restart product tour onboarding help guide"
+                onSelect={() => {
+                  onOpenChange(false);
+                  restartTour();
+                }}
+                className="gap-2.5 cursor-pointer"
+              >
+                <Sparkles className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span>{t("cmd.restartTour", "Restart product tour")}</span>
+              </CommandItem>
+            </CommandGroup>
+          </>
+        )}
       </CommandList>
     </CommandDialog>
   );

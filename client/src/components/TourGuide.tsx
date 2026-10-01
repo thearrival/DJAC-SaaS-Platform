@@ -51,6 +51,12 @@ export function clearTourPending(): void {
 export function restartTour(): void {
   localStorage.setItem(PENDING_KEY, "true");
   localStorage.removeItem(DONE_KEY);
+  // Start immediately in the current tab instead of waiting for a reload.
+  try {
+    window.dispatchEvent(new Event("djac:tour-start"));
+  } catch {
+    /* ignore */
+  }
 }
 
 function isTourPending(): boolean {
@@ -263,13 +269,19 @@ export function TourGuide() {
     else sounds.close();
   }, []);
 
-  // On mount, check if tour is pending
+  // On mount, check if tour is pending; also start on demand (restart command).
   useEffect(() => {
+    const onStart = () => startTour();
+    window.addEventListener("djac:tour-start", onStart);
+    let timer: number | undefined;
     if (isTourPending()) {
       // Small delay so the dashboard has rendered nav items
-      const timer = setTimeout(() => startTour(), 800);
-      return () => clearTimeout(timer);
+      timer = window.setTimeout(() => startTour(), 800);
     }
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener("djac:tour-start", onStart);
+    };
   }, [startTour]);
 
   // ── Viewport resize ───────────────────────────────────────────────────────
@@ -553,6 +565,9 @@ export function TourGuide() {
 
       {/* ── Tooltip card ── */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="djac-tour-title"
         style={{
           position: "fixed",
           top: tipPos.top,
@@ -634,6 +649,8 @@ export function TourGuide() {
 
         {/* Title */}
         <h3
+          id="djac-tour-title"
+          aria-live="polite"
           style={{
             margin: "0 0 8px",
             fontSize: 16,
