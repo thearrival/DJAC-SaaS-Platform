@@ -26,6 +26,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { sounds } from "@/lib/sounds";
+import { trpc } from "@/lib/trpc";
 import { useLocale } from "@/contexts/useLocale";
 import {
   ArrowLeft,
@@ -39,6 +40,8 @@ import {
 // ── localStorage keys ─────────────────────────────────────────────────────────
 const PENDING_KEY = "djac_tour_pending";
 const DONE_KEY = "djac_tour_done";
+const AUTO_KEY = "djac_tour_auto";
+const NEW_ACCOUNT_MS = 14 * 24 * 60 * 60 * 1000;
 
 export function setTourPending(): void {
   localStorage.setItem(PENDING_KEY, "true");
@@ -269,20 +272,47 @@ export function TourGuide() {
     else sounds.close();
   }, []);
 
-  // On mount, check if tour is pending; also start on demand (restart command).
+  // The current user — used to auto-arm the tour for brand-new accounts that
+  // never went through the email/password registration flow (e.g. Google SSO).
+  const meQuery = trpc.localAuth.me.useQuery(undefined, {
+    retry: false,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  // On mount, start if pending; auto-arm once for new accounts; also start on
+  // demand (the restart command).
   useEffect(() => {
     const onStart = () => startTour();
     window.addEventListener("djac:tour-start", onStart);
+
     let timer: number | undefined;
-    if (isTourPending()) {
-      // Small delay so the dashboard has rendered nav items
+    const arm = () => {
       timer = window.setTimeout(() => startTour(), 800);
+    };
+
+    if (isTourPending()) {
+      // Explicitly armed (registration or restart).
+      arm();
+    } else if (
+      localStorage.getItem(DONE_KEY) !== "true" &&
+      localStorage.getItem(AUTO_KEY) !== "true"
+    ) {
+      // Auto-arm once for a recent account so Google sign-ups are not the only
+      // cohort that never sees the tour. Never fires for anyone who finished it.
+      const user = meQuery.data as { createdAt?: string } | undefined;
+      const created = user?.createdAt ? new Date(user.createdAt).getTime() : 0;
+      if (created > 0 && Date.now() - created <= NEW_ACCOUNT_MS) {
+        localStorage.setItem(AUTO_KEY, "true");
+        arm();
+      }
     }
+
     return () => {
       if (timer) window.clearTimeout(timer);
       window.removeEventListener("djac:tour-start", onStart);
     };
-  }, [startTour]);
+  }, [startTour, meQuery.data]);
 
   // ── Viewport resize ───────────────────────────────────────────────────────
   useEffect(() => {
