@@ -886,6 +886,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.labelName", "Name")}</Label>
                 <Input
+                  aria-label="Name"
                   value={profileForm.name}
                   onChange={event =>
                     setProfileForm(prev => ({
@@ -898,6 +899,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.labelEmail", "Email")}</Label>
                 <Input
+                  aria-label="Email"
                   type="email"
                   value={profileForm.email}
                   onChange={event =>
@@ -911,6 +913,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.labelOrganization", "Organization")}</Label>
                 <Input
+                  aria-label="Organization"
                   value={profileForm.organizationName}
                   onChange={event =>
                     setProfileForm(prev => ({
@@ -925,6 +928,7 @@ export default function ClientWorkspace() {
                   {t("client.labelOrganizationType", "Organization Type")}
                 </Label>
                 <Input
+                  aria-label="Organization Type"
                   value={profileForm.organizationType}
                   onChange={event =>
                     setProfileForm(prev => ({
@@ -937,6 +941,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.labelJobTitle", "Job Title")}</Label>
                 <Input
+                  aria-label="Job Title"
                   value={profileForm.jobTitle}
                   onChange={event =>
                     setProfileForm(prev => ({
@@ -1014,6 +1019,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.vendorName", "Vendor Name")}</Label>
                 <Input
+                  aria-label="Vendor Name"
                   value={vendorForm.vendorName}
                   onChange={event =>
                     setVendorForm(prev => ({
@@ -1097,6 +1103,7 @@ export default function ClientWorkspace() {
                   {t("client.primaryContactName", "Primary Contact Name")}
                 </Label>
                 <Input
+                  aria-label="Primary Contact Name"
                   value={vendorForm.primaryContactName}
                   onChange={event =>
                     setVendorForm(prev => ({
@@ -1111,6 +1118,7 @@ export default function ClientWorkspace() {
                   {t("client.primaryContactEmail", "Primary Contact Email")}
                 </Label>
                 <Input
+                  aria-label="Primary Contact Email"
                   type="email"
                   value={vendorForm.primaryContactEmail}
                   onChange={event =>
@@ -1126,6 +1134,7 @@ export default function ClientWorkspace() {
                   {t("client.primaryContactRole", "Primary Contact Role")}
                 </Label>
                 <Input
+                  aria-label="Primary Contact Role"
                   value={vendorForm.primaryContactRole}
                   onChange={event =>
                     setVendorForm(prev => ({
@@ -1140,6 +1149,7 @@ export default function ClientWorkspace() {
                   {t("client.primaryContactPhone", "Primary Contact Phone")}
                 </Label>
                 <Input
+                  aria-label="Primary Contact Phone"
                   value={vendorForm.primaryContactPhone}
                   onChange={event =>
                     setVendorForm(prev => ({
@@ -1442,6 +1452,7 @@ export default function ClientWorkspace() {
                         {t("client.componentName", "Component Name")}
                       </Label>
                       <Input
+                        aria-label="Component Name"
                         value={component.componentName}
                         onChange={event =>
                           setVendorForm(prev => ({
@@ -1464,6 +1475,7 @@ export default function ClientWorkspace() {
                         {t("client.componentType", "Component Type")}
                       </Label>
                       <Input
+                        aria-label="Component Type"
                         value={component.componentType}
                         onChange={event =>
                           setVendorForm(prev => ({
@@ -1484,6 +1496,7 @@ export default function ClientWorkspace() {
                     <div>
                       <Label>{t("client.technology", "Technology")}</Label>
                       <Input
+                        aria-label="Technology"
                         value={component.technology}
                         onChange={event =>
                           setVendorForm(prev => ({
@@ -1501,6 +1514,7 @@ export default function ClientWorkspace() {
                     <div>
                       <Label>{t("client.dataHandling", "Data Handling")}</Label>
                       <Input
+                        aria-label="Data Handling"
                         value={component.dataHandling ?? ""}
                         onChange={event =>
                           setVendorForm(prev => ({
@@ -1770,6 +1784,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.contactName", "Contact Name")}</Label>
                 <Input
+                  aria-label="Contact Name"
                   value={consultationForm.contactName}
                   onChange={event =>
                     setConsultationForm(prev => ({
@@ -1782,6 +1797,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.contactEmail", "Contact Email")}</Label>
                 <Input
+                  aria-label="Contact Email"
                   type="email"
                   value={consultationForm.contactEmail}
                   onChange={event =>
@@ -1795,6 +1811,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.labelOrganization", "Organization")}</Label>
                 <Input
+                  aria-label="Organization"
                   value={consultationForm.organizationName}
                   onChange={event =>
                     setConsultationForm(prev => ({
@@ -1807,6 +1824,7 @@ export default function ClientWorkspace() {
               <div>
                 <Label>{t("client.topic", "Topic")}</Label>
                 <Input
+                  aria-label="Topic"
                   value={consultationForm.topic}
                   onChange={event =>
                     setConsultationForm(prev => ({
@@ -1850,6 +1868,7 @@ export default function ClientWorkspace() {
                   {t("client.vendorNameOptional", "Vendor Name (Optional)")}
                 </Label>
                 <Input
+                  aria-label="Vendor Name (Optional)"
                   value={consultationForm.vendorName}
                   onChange={event =>
                     setConsultationForm(prev => ({

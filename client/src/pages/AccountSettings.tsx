@@ -214,7 +214,12 @@ function ProfileTab() {
             </div>
             <div className="space-y-1.5">
               <Label>{t("accountSettings.fieldEmail", "Email")}</Label>
-              <Input value={user?.email ?? ""} disabled className="bg-muted" />
+              <Input
+                value={user?.email ?? ""}
+                disabled
+                className="bg-muted"
+                aria-label={t("accountSettings.fieldEmail", "Email")}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{t("accountSettings.fieldJobTitle", "Job Title")}</Label>
@@ -255,7 +260,9 @@ function ProfileTab() {
                 value={preferredLocale}
                 onValueChange={v => setPreferredLocale(v as AppLocale)}
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  aria-label={t("accountSettings.fieldIndustry", "Industry")}
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

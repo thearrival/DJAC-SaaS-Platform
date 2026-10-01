@@ -222,7 +222,10 @@ export default function GlobalRegistry() {
               />
             </div>
             <Select value={regionFilter} onValueChange={setRegionFilter}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger
+                className="w-[160px]"
+                aria-label="Filter by region"
+              >
                 <SelectValue placeholder="All Regions" />
               </SelectTrigger>
               <SelectContent>
@@ -240,7 +243,10 @@ export default function GlobalRegistry() {
               value={jurisdictionFilter}
               onValueChange={setJurisdictionFilter}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger
+                className="w-[180px]"
+                aria-label="Filter by jurisdiction"
+              >
                 <SelectValue placeholder="All Jurisdictions" />
               </SelectTrigger>
               <SelectContent>
@@ -253,7 +259,10 @@ export default function GlobalRegistry() {
               </SelectContent>
             </Select>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger
+                className="w-[180px]"
+                aria-label="Filter by category"
+              >
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
