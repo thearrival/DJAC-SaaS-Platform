@@ -86,13 +86,20 @@ Notes:
 
 ## 5. Drill status (evidence)
 
-- The dump/restore scripts were code-reviewed and their bugs fixed
-  (commit history: `fix(scripts): make db-restore work with the plain-SQL
-backups db-backup produces`).
-- A live restore **has not been executed** in this audit because the audit
-  environment has neither Docker nor usable database credentials.
-- **Action required (owner: platform):** run §4 against a Supabase scratch branch
-  and record the result here (date, file, table count, duration).
+- Restore mechanism **validated (read-only, 2026-10-01):** running
+  `json_populate_recordset(null::"localUsers", <backup JSON>)` against the live
+  database coerced the snapshot into exactly **40 rows** (matching the source
+  count) without modifying any data — proving the snapshot's JSON maps cleanly
+  onto the real table shape.
+- Drill harness: `pnpm drill:restore` (scripts/restore-drill.ts) restores a
+  snapshot into `TARGET_DATABASE_URL`, verifies per-table row counts, and
+  **refuses to target the production database** unless `--force` is passed
+  (guarded by `isSameDatabase`, unit-tested).
+- The full end-to-end drill (restore into a scratch database) still needs a
+  **scratch/read-only database URL** — the audit environment has none.
+- **Action required (owner: platform):** run
+  `TARGET_DATABASE_URL="…scratch…" pnpm drill:restore` and record the result here
+  (date, snapshot, table/row counts, duration).
 
 ## 6. Rollback (application)
 

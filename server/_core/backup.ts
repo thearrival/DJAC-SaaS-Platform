@@ -52,6 +52,27 @@ export function backupFileName(generatedAt: string): string {
 }
 
 /**
+ * True when two connection strings point at the same database (host + database
+ * name). Used to stop a restore drill from ever targeting production.
+ */
+export function isSameDatabase(
+  a: string | undefined,
+  b: string | undefined
+): boolean {
+  if (!a || !b) return false;
+  try {
+    const ua = new URL(a);
+    const ub = new URL(b);
+    return (
+      ua.hostname === ub.hostname &&
+      ua.pathname.replace(/\/$/, "") === ub.pathname.replace(/\/$/, "")
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Given the stored backup names, return the ones beyond the retention window
  * (oldest first). Pure and directly testable.
  */

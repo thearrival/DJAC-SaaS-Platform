@@ -34,7 +34,8 @@
     "db:seed": "node scripts/seed-compliance.mjs",
     "create-admin": "node scripts/create-admin.mjs",
     "yalla-admin:link": "node scripts/generate-yalla-admin-link.mjs",
-    "prepare": "husky"
+    "prepare": "husky",
+    "drill:restore": "tsx scripts/restore-drill.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   backupFileName,
   selectStaleBackups,
+  isSameDatabase,
   BACKUP_KEEP,
   BACKUP_TABLES,
 } from "../../_core/backup";
@@ -42,5 +43,35 @@ describe("backup retention", () => {
     expect(BACKUP_KEEP).toBeGreaterThanOrEqual(7);
     expect(BACKUP_TABLES).toContain("organizations");
     expect(BACKUP_TABLES).toContain("onboarding_responses");
+  });
+});
+
+describe("restore-drill production guard", () => {
+  const prod =
+    "postgresql://postgres:pw@db.gcsoeumdjrejfxuovfcw.supabase.co:5432/postgres";
+
+  it("detects the same database across differing query strings", () => {
+    expect(isSameDatabase(prod, prod + "?sslmode=require")).toBe(true);
+  });
+
+  it("treats a different host or database as distinct", () => {
+    expect(
+      isSameDatabase(
+        prod,
+        "postgresql://postgres:pw@db.gcsoeumdjrejfxuovfcw.supabase.co:5432/scratch"
+      )
+    ).toBe(false);
+    expect(
+      isSameDatabase(
+        prod,
+        "postgresql://postgres:pw@scratch.example.com:5432/postgres"
+      )
+    ).toBe(false);
+  });
+
+  it("is false when either side is missing or unparseable", () => {
+    expect(isSameDatabase(undefined, prod)).toBe(false);
+    expect(isSameDatabase(prod, undefined)).toBe(false);
+    expect(isSameDatabase("not-a-url", prod)).toBe(false);
   });
 });
