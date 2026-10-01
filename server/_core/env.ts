@@ -28,7 +28,7 @@ const parseDevRole = (
 };
 
 // ── Utility: AI queue-mode resolver ───────────────────────────────────────
-function parseQueueMode(
+export function parseQueueMode(
   value: string | undefined
 ): "in_memory" | "redis" | undefined {
   if (value === "redis" || value === "in_memory") return value;
@@ -41,9 +41,11 @@ export function resolveAiQueueMode(
 ): "in_memory" | "redis" {
   const explicitMode = parseQueueMode(value);
   const hasRedis = Boolean((options.redisUrl ?? "").trim());
-  if (options.isProduction && hasRedis) return "redis";
-  if (explicitMode) return explicitMode;
-  return "in_memory";
+  // Redis queue mode is impossible without a Redis URL — an explicit "redis"
+  // must never win over reality, or the queue silently degrades.
+  if (!hasRedis) return "in_memory";
+  if (options.isProduction) return "redis";
+  return explicitMode ?? "in_memory";
 }
 
 // ── Utility: Stripe billing config evaluator ──────────────────────────────

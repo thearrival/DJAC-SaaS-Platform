@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { parseQueueMode, resolveAiQueueMode } from "../../_core/env";
 
 const STRIPE_PRICE_ENV_KEYS = [
   "STRIPE_PRICE_STARTER_MONTHLY",
@@ -51,24 +52,6 @@ function evaluateStripeBillingConfig(env: StripeEnvLike) {
     missing,
     configuredPriceCount: configuredPriceKeys.length,
   };
-}
-
-function parseQueueMode(
-  value: string | undefined
-): "in_memory" | "redis" | undefined {
-  if (value === "redis" || value === "in_memory") return value;
-  return undefined;
-}
-
-function resolveAiQueueMode(
-  value: string | undefined,
-  options: { isProduction: boolean; redisUrl?: string }
-): "in_memory" | "redis" {
-  const explicitMode = parseQueueMode(value);
-  const hasRedis = Boolean((options.redisUrl ?? "").trim());
-  if (options.isProduction && hasRedis) return "redis";
-  if (explicitMode) return explicitMode;
-  return "in_memory";
 }
 
 const parseDevRole = (
@@ -285,6 +268,16 @@ describe("resolveAiQueueMode", () => {
         redisUrl: "redis://localhost:6379",
       })
     ).toBe("redis");
+  });
+
+  it("never returns 'redis' when no REDIS_URL is configured", () => {
+    // An explicit "redis" without a URL would run a redis queue with no Redis.
+    expect(
+      resolveAiQueueMode("redis", { isProduction: true, redisUrl: "" })
+    ).toBe("in_memory");
+    expect(
+      resolveAiQueueMode("redis", { isProduction: true, redisUrl: "  " })
+    ).toBe("in_memory");
   });
 });
 
