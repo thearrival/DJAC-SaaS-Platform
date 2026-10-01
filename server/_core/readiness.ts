@@ -16,6 +16,8 @@ type ScalingReadinessInput = {
   databasePoolSize: number;
   allowInMemoryPersistenceFallback: boolean;
   aiQueueMode: "in_memory" | "redis";
+  /** True on serverless (Vercel): per-instance pools must stay small. */
+  serverless: boolean;
 };
 
 export function evaluateScalingReadiness(input: ScalingReadinessInput) {
@@ -23,13 +25,21 @@ export function evaluateScalingReadiness(input: ScalingReadinessInput) {
 
   if (!input.hasRedis) {
     warnings.push(
-      "Redis-backed shared infrastructure is required for multi-instance scale-out."
+      "Redis-backed shared infrastructure is recommended for multi-instance scale-out (rate limiting falls back to Postgres)."
     );
   }
 
-  if (input.databasePoolSize < 20) {
+  if (input.serverless) {
+    // Serverless scales out into many short-lived instances; a large
+    // per-instance pool exhausts the shared connection pooler.
+    if (input.databasePoolSize > 5) {
+      warnings.push(
+        `DATABASE_POOL_SIZE=${input.databasePoolSize} is high for a serverless deployment; keep it small (1-5) so instances do not exhaust the shared connection pooler.`
+      );
+    }
+  } else if (input.databasePoolSize < 20) {
     warnings.push(
-      `DATABASE_POOL_SIZE=${input.databasePoolSize} is below the recommended high-scale baseline of 20.`
+      `DATABASE_POOL_SIZE=${input.databasePoolSize} is below the recommended baseline of 20 for a long-lived server.`
     );
   }
 
@@ -39,7 +49,11 @@ export function evaluateScalingReadiness(input: ScalingReadinessInput) {
     );
   }
 
-  if (input.aiQueueMode !== "redis") {
+  if (input.aiQueueMode === "redis" && !input.hasRedis) {
+    warnings.push(
+      "AI queue mode is 'redis' but REDIS_URL is not configured; the AI queue will fall back to in-memory."
+    );
+  } else if (input.aiQueueMode !== "redis" && !input.serverless) {
     warnings.push(
       "AI queue mode should use Redis to avoid single-instance bottlenecks."
     );
@@ -49,8 +63,10 @@ export function evaluateScalingReadiness(input: ScalingReadinessInput) {
     readyForHighScale: input.isProduction && warnings.length === 0,
     warnings,
     recommended: {
-      redisRequired: true,
-      minDatabasePoolSize: 20,
+      redisRequired: !input.serverless,
+      minDatabasePoolSize: input.serverless ? 1 : 20,
+      maxDatabasePoolSize: input.serverless ? 5 : null,
+      serverless: input.serverless,
       preferredAiQueueMode: "redis" as const,
     },
   };
@@ -257,6 +273,7 @@ export async function getSystemReadiness() {
     databasePoolSize: ENV.databasePoolSize,
     allowInMemoryPersistenceFallback: ENV.allowInMemoryPersistenceFallback,
     aiQueueMode: ENV.aiQueueMode,
+    serverless: Boolean(process.env.VERCEL),
   });
 
   const ok =

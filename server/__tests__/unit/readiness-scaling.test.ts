@@ -1,77 +1,39 @@
 import { describe, it, expect } from "vitest";
+import { evaluateScalingReadiness } from "../../_core/readiness";
 
 describe("evaluateScalingReadiness", () => {
-  const evaluateScalingReadiness = (input: {
-    isProduction: boolean;
-    hasRedis: boolean;
-    databasePoolSize: number;
-    allowInMemoryPersistenceFallback: boolean;
-    aiQueueMode: "in_memory" | "redis";
-  }) => {
-    const warnings: string[] = [];
-    if (!input.hasRedis) {
-      warnings.push(
-        "Redis-backed shared infrastructure is required for multi-instance scale-out."
-      );
-    }
-    if (input.databasePoolSize < 20) {
-      warnings.push(
-        `DATABASE_POOL_SIZE=${input.databasePoolSize} is below the recommended high-scale baseline of 20.`
-      );
-    }
-    if (input.allowInMemoryPersistenceFallback) {
-      warnings.push(
-        "In-memory persistence fallback should be disabled for large-scale production traffic."
-      );
-    }
-    if (input.aiQueueMode !== "redis") {
-      warnings.push(
-        "AI queue mode should use Redis to avoid single-instance bottlenecks."
-      );
-    }
-    return {
-      readyForHighScale: input.isProduction && warnings.length === 0,
-      warnings,
-      recommended: {
-        redisRequired: true,
-        minDatabasePoolSize: 20,
-        preferredAiQueueMode: "redis" as const,
-      },
-    };
+  const base = {
+    isProduction: true,
+    hasRedis: true,
+    allowInMemoryPersistenceFallback: false,
+    aiQueueMode: "redis" as const,
+    serverless: false,
   };
 
-  it("should return ready for optimal production config", () => {
+  it("is ready for a long-lived server with the recommended pool", () => {
     const result = evaluateScalingReadiness({
-      isProduction: true,
-      hasRedis: true,
+      ...base,
       databasePoolSize: 20,
-      allowInMemoryPersistenceFallback: false,
-      aiQueueMode: "redis",
     });
     expect(result.readyForHighScale).toBe(true);
     expect(result.warnings).toHaveLength(0);
   });
 
-  it("should warn when Redis is missing", () => {
+  it("warns when Redis is missing", () => {
     const result = evaluateScalingReadiness({
-      isProduction: true,
+      ...base,
       hasRedis: false,
       databasePoolSize: 20,
-      allowInMemoryPersistenceFallback: false,
-      aiQueueMode: "redis",
+      aiQueueMode: "in_memory",
     });
     expect(result.readyForHighScale).toBe(false);
-    expect(result.warnings.length).toBeGreaterThanOrEqual(1);
     expect(result.warnings[0]).toContain("Redis");
   });
 
-  it("should warn when pool size is below 20", () => {
+  it("warns when a long-lived server pool is below 20", () => {
     const result = evaluateScalingReadiness({
-      isProduction: true,
-      hasRedis: true,
+      ...base,
       databasePoolSize: 5,
-      allowInMemoryPersistenceFallback: false,
-      aiQueueMode: "redis",
     });
     expect(result.readyForHighScale).toBe(false);
     expect(result.warnings.some(w => w.includes("DATABASE_POOL_SIZE=5"))).toBe(
@@ -79,62 +41,71 @@ describe("evaluateScalingReadiness", () => {
     );
   });
 
-  it("should warn when in-memory fallback is enabled in production", () => {
+  it("does NOT warn about a small pool on serverless", () => {
+    // Serverless needs a small per-instance pool; the long-lived baseline of 20
+    // would re-break the shared connection pooler.
     const result = evaluateScalingReadiness({
-      isProduction: true,
-      hasRedis: true,
+      ...base,
+      serverless: true,
+      databasePoolSize: 2,
+    });
+    expect(result.warnings.some(w => w.includes("DATABASE_POOL_SIZE"))).toBe(
+      false
+    );
+    expect(result.recommended.maxDatabasePoolSize).toBe(5);
+  });
+
+  it("warns when a serverless pool is too large", () => {
+    const result = evaluateScalingReadiness({
+      ...base,
+      serverless: true,
+      databasePoolSize: 25,
+    });
+    expect(result.warnings.some(w => w.includes("serverless"))).toBe(true);
+    expect(result.readyForHighScale).toBe(false);
+  });
+
+  it("warns when in-memory fallback is enabled in production", () => {
+    const result = evaluateScalingReadiness({
+      ...base,
       databasePoolSize: 20,
       allowInMemoryPersistenceFallback: true,
-      aiQueueMode: "redis",
     });
     expect(result.readyForHighScale).toBe(false);
     expect(result.warnings.some(w => w.includes("In-memory"))).toBe(true);
   });
 
-  it("should warn when AI queue mode is not redis", () => {
+  it("warns when AI queue mode is redis but Redis is not configured", () => {
     const result = evaluateScalingReadiness({
-      isProduction: true,
-      hasRedis: true,
+      ...base,
+      hasRedis: false,
       databasePoolSize: 20,
-      allowInMemoryPersistenceFallback: false,
-      aiQueueMode: "in_memory",
-    });
-    expect(result.readyForHighScale).toBe(false);
-    expect(result.warnings.some(w => w.includes("AI queue"))).toBe(true);
-  });
-
-  it("should never be ready for high scale outside production", () => {
-    const result = evaluateScalingReadiness({
-      isProduction: false,
-      hasRedis: true,
-      databasePoolSize: 20,
-      allowInMemoryPersistenceFallback: false,
       aiQueueMode: "redis",
     });
+    expect(
+      result.warnings.some(w => w.includes("REDIS_URL is not configured"))
+    ).toBe(true);
+  });
+
+  it("never reports readiness outside production", () => {
+    const result = evaluateScalingReadiness({
+      ...base,
+      isProduction: false,
+      databasePoolSize: 20,
+    });
     expect(result.readyForHighScale).toBe(false);
   });
 
-  it("should accumulate multiple warnings", () => {
+  it("provides serverless-aware recommendations", () => {
     const result = evaluateScalingReadiness({
-      isProduction: true,
-      hasRedis: false,
+      ...base,
+      serverless: true,
       databasePoolSize: 2,
-      allowInMemoryPersistenceFallback: true,
-      aiQueueMode: "in_memory",
     });
-    expect(result.warnings.length).toBe(4);
-  });
-
-  it("should provide recommended values", () => {
-    const result = evaluateScalingReadiness({
-      isProduction: false,
-      hasRedis: false,
-      databasePoolSize: 1,
-      allowInMemoryPersistenceFallback: true,
-      aiQueueMode: "in_memory",
-    });
-    expect(result.recommended.redisRequired).toBe(true);
-    expect(result.recommended.minDatabasePoolSize).toBe(20);
+    expect(result.recommended.serverless).toBe(true);
+    expect(result.recommended.minDatabasePoolSize).toBe(1);
+    expect(result.recommended.maxDatabasePoolSize).toBe(5);
+    expect(result.recommended.redisRequired).toBe(false);
     expect(result.recommended.preferredAiQueueMode).toBe("redis");
   });
 });
