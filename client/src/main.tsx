@@ -8,6 +8,20 @@ import superjson from "superjson";
 import App from "./App";
 import "./index.css";
 
+// Google OAuth returns the authorization code to the redirect URI registered in
+// Google Cloud, which for this client is the site root (`/`). Forward it to the
+// server callback that exchanges it and establishes the session.
+if (typeof window !== "undefined") {
+  const params = new URLSearchParams(window.location.search);
+  if (
+    window.location.pathname === "/" &&
+    params.has("code") &&
+    params.has("state")
+  ) {
+    window.location.replace(`/api/auth/google/callback?${params.toString()}`);
+  }
+}
+
 const injectAnalyticsScript = () => {
   const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT as
     | string

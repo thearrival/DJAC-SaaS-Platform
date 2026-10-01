@@ -55,8 +55,15 @@ export function googleOAuthConfigured(): boolean {
   return Boolean(ENV.googleClientId && ENV.googleClientSecret);
 }
 
-export function googleCallbackUrl(): string {
-  return `${ENV.appUrl}/api/auth/google/callback`;
+/**
+ * The redirect URI registered for this OAuth client in Google Cloud. The owner
+ * registered the site root (`https://<app>/`), so Google returns the
+ * authorization code there and the SPA forwards it to
+ * /api/auth/google/callback. Google requires the authorize request AND the
+ * token exchange to use this exact value.
+ */
+export function googleRedirectUri(): string {
+  return `${ENV.appUrl}/`;
 }
 
 function signState(redirectTo: string): string {
@@ -99,7 +106,7 @@ export function verifyGoogleState(state: unknown): string | null {
 export function buildGoogleAuthUrl(redirectTo: string): string {
   const params = new URLSearchParams({
     client_id: ENV.googleClientId,
-    redirect_uri: googleCallbackUrl(),
+    redirect_uri: googleRedirectUri(),
     response_type: "code",
     scope: "openid email profile",
     access_type: "online",
@@ -127,7 +134,7 @@ async function exchangeCodeForProfile(
       code,
       client_id: ENV.googleClientId,
       client_secret: ENV.googleClientSecret,
-      redirect_uri: googleCallbackUrl(),
+      redirect_uri: googleRedirectUri(),
       grant_type: "authorization_code",
     }),
   });

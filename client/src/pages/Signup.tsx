@@ -2186,105 +2186,53 @@ function GoogleSignInButton({
   t: (k: string, f: string) => string;
 }) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // The popup posts back here when the sign-in finishes. Keeping the flow in a
-  // separate document means the strict inline-script CSP on this page is never
-  // relaxed, and no Google redirect URI is required.
-  useEffect(() => {
-    const onMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-      const data = event.data as
-        | { type?: string; ok?: boolean; redirectTo?: string }
-        | undefined;
-      if (!data || data.type !== "djac-google-auth") return;
-      setBusy(false);
-      if (data.ok) {
-        window.location.href = data.redirectTo || "/dashboard";
-      } else {
-        setError(
-          t(
-            "signup.googleErrFailed",
-            "We couldn't complete Google sign-in. Please try again."
-          )
-        );
-      }
-    };
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [t]);
+  const googleUrl = trpc.googleAuth.getAuthUrl.useQuery(
+    {
+      redirectTo:
+        new URLSearchParams(window.location.search).get("r") ?? "/dashboard",
+    },
+    { enabled: false }
+  );
 
   return (
-    <div style={{ width: "100%" }}>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => {
-          setError(null);
-          setBusy(true);
-          const popup = window.open(
-            "/auth/google.html",
-            "djac-google-signin",
-            "width=500,height=640,menubar=no,toolbar=no,status=no"
-          );
-          if (!popup) {
-            setBusy(false);
-            setError(
-              t(
-                "signup.googleErrPopup",
-                "Please allow pop-ups for this site to continue with Google."
-              )
-            );
-            return;
-          }
-          // If the user closes the popup without finishing, reset the button.
-          const timer = window.setInterval(() => {
-            if (popup.closed) {
-              window.clearInterval(timer);
+    <button
+      type="button"
+      disabled={busy}
+      onClick={() => {
+        setBusy(true);
+        void googleUrl
+          .refetch()
+          .then(r => {
+            if (r.data?.url) {
+              window.location.href = r.data.url;
+            } else {
               setBusy(false);
             }
-          }, 700);
-        }}
-        className="djac-btn-secondary"
-        style={{
-          width: "100%",
-          background: C.inputBg,
-          border: `1px solid ${C.border}`,
-          borderRadius: 10,
-          padding: "12px 20px",
-          color: C.text,
-          fontWeight: 700,
-          fontSize: 13,
-          cursor: busy ? "wait" : "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-          transition: "all 0.18s",
-          opacity: busy ? 0.7 : 1,
-        }}
-      >
-        <Chrome size={15} style={{ color: C.cyan }} />
-        {t("signup.googleSignIn", "Continue with Google")}
-      </button>
-      {error && (
-        <div
-          role="alert"
-          style={{
-            marginTop: 8,
-            background: "rgba(239,68,68,0.10)",
-            border: "1px solid rgba(239,68,68,0.35)",
-            color: "#ef4444",
-            borderRadius: 10,
-            padding: "10px 12px",
-            fontSize: 12.5,
-            lineHeight: 1.5,
-          }}
-        >
-          {error}
-        </div>
-      )}
-    </div>
+          })
+          .catch(() => setBusy(false));
+      }}
+      className="djac-btn-secondary"
+      style={{
+        width: "100%",
+        background: C.inputBg,
+        border: `1px solid ${C.border}`,
+        borderRadius: 10,
+        padding: "12px 20px",
+        color: C.text,
+        fontWeight: 700,
+        fontSize: 13,
+        cursor: busy ? "wait" : "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        transition: "all 0.18s",
+        opacity: busy ? 0.7 : 1,
+      }}
+    >
+      <Chrome size={15} style={{ color: C.cyan }} />
+      {t("signup.googleSignIn", "Continue with Google")}
+    </button>
   );
 }
 

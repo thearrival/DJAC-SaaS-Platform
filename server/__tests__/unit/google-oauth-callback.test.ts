@@ -121,8 +121,9 @@ describe("Google OAuth direct flow", () => {
   it("builds the authorize URL on OUR domain, not a third-party host", () => {
     const url = new URL(buildGoogleAuthUrl("/dashboard"));
     expect(url.host).toBe("accounts.google.com");
+    // The redirect URI must be the one registered in Google Cloud (the root).
     expect(url.searchParams.get("redirect_uri")).toBe(
-      `${process.env.APP_URL || "http://localhost:3000"}/api/auth/google/callback`
+      `${process.env.APP_URL || "http://localhost:3000"}/`
     );
     expect(url.searchParams.get("redirect_uri")).not.toContain("supabase.co");
     expect(url.searchParams.get("state")).toBeTruthy();
