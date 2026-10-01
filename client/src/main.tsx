@@ -6,6 +6,8 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
+import { loadLocaleCatalog } from "./contexts/LocaleContext";
+import { setPreloadedCatalog } from "./contexts/localeBoot";
 import "./index.css";
 
 // Google OAuth returns the authorization code to the redirect URI registered in
@@ -142,7 +144,7 @@ if (typeof window !== "undefined") {
   });
 }
 
-try {
+const renderApp = () => {
   createRoot(getAppRoot()).render(
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
@@ -150,6 +152,31 @@ try {
       </QueryClientProvider>
     </trpc.Provider>
   );
+};
+
+// Preload the stored locale's catalog before the first paint so non-English
+// users don't see a flash of English while the chunk downloads.
+const bootLocale = (() => {
+  try {
+    return window.localStorage.getItem("djac-locale") ?? "en";
+  } catch {
+    return "en";
+  }
+})();
+
+const boot = async () => {
+  try {
+    if (bootLocale && bootLocale !== "en") {
+      setPreloadedCatalog(await loadLocaleCatalog(bootLocale));
+    }
+  } catch {
+    /* fall back to the bundled English catalog */
+  }
+  renderApp();
+};
+
+try {
+  void boot();
 } catch {
   renderStartupFallback(
     "Please refresh the page or update your browser and try again."

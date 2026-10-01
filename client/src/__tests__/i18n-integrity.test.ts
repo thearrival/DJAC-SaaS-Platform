@@ -31,26 +31,25 @@ const REQUIRED_CHROME_KEYS = [
   "theme.dark",
 ];
 
-const src = fs.readFileSync(
-  path.resolve(process.cwd(), "client/src/contexts/LocaleContext.tsx"),
-  "utf8"
-);
+const localesDir = path.resolve(process.cwd(), "client/src/locales");
 
-/** Extract the raw source of a single top-level locale block. */
+/** Raw source of a single locale's catalog module. */
 function localeBlock(locale: string): string {
-  const marker = `\n  ${locale}: {`;
-  const start = src.indexOf(marker);
-  if (start === -1) return "";
-  const rest = src.slice(start + marker.length);
-  const nextMatch = rest.match(/\n {2}(en|ar|zh|fr|es|de|ja|ko|pt): \{/);
-  return nextMatch ? rest.slice(0, nextMatch.index) : rest;
+  const file = path.join(localesDir, `${locale}.ts`);
+  return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
 }
 
 describe("i18n integrity", () => {
   it("defines all nine first-class locales exactly once", () => {
     for (const locale of LOCALES) {
-      const occurrences = src.split(`\n  ${locale}: {`).length - 1;
-      expect(occurrences, `locale "${locale}" block count`).toBe(1);
+      const content = localeBlock(locale);
+      expect(
+        content.length,
+        `locale "${locale}" module exists and is non-empty`
+      ).toBeGreaterThan(0);
+      // Exactly one catalog object per locale module.
+      const declarations = content.split("const messages").length - 1;
+      expect(declarations, `locale "${locale}" catalog count`).toBe(1);
     }
   });
 
