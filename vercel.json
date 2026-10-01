@@ -14,6 +14,10 @@
   },
   "crons": [
     {
+      "path": "/api/cron/backup",
+      "schedule": "0 3 * * *"
+    },
+    {
       "path": "/api/cron/deadlines",
       "schedule": "0 6 * * *"
     },

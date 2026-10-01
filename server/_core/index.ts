@@ -33,6 +33,7 @@ import { startReportScheduler } from "../report-scheduler";
 import { startOtpCleanupScheduler } from "../services/otp-cleanup";
 import { closeAssessmentQueue } from "../ai/queueFactory";
 import { ensureMigrated } from "./auto-migrate";
+import { runDatabaseBackup } from "./backup";
 import { ENV } from "./env";
 import { parsedEnv } from "../services/config-schema";
 import { closeDbPool, getDbPoolStats } from "../db";
@@ -342,6 +343,14 @@ export async function createApp() {
     "/api/cron/trials",
     requireCronSecret,
     runCron("trials", runReminderCheck)
+  );
+  app.post(
+    "/api/cron/backup",
+    requireCronSecret,
+    runCron("backup", async () => {
+      const result = await runDatabaseBackup();
+      if (!result.ok) throw new Error(result.error ?? "backup failed");
+    })
   );
 
   // ─── CSP report collector (browsers send application/csp-report, not JSON) ──
