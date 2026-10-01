@@ -192,11 +192,53 @@ function checkBillingReadiness(): ServiceReadiness {
   };
 }
 
+/**
+ * Integration configuration visibility. These are opt-in capabilities, so they
+ * do not affect the overall `ok` verdict — but an operator monitoring the
+ * platform should see at a glance which external integrations are wired up.
+ */
+function checkIntegrations() {
+  const configured = (v: string | undefined) => Boolean(v && v.trim());
+
+  const googleSso =
+    configured(ENV.googleClientId) && configured(ENV.googleClientSecret);
+  const supabase =
+    configured(ENV.supabaseUrl) && configured(ENV.supabaseAnonKey);
+  const email = configured(ENV.smtpHost) && configured(ENV.smtpUser);
+  const observability = configured(ENV.sentryDsn);
+
+  return {
+    googleSso: {
+      configured: googleSso,
+      details: googleSso
+        ? "Google sign-in configured (client id + secret present)."
+        : "Google sign-in not configured.",
+    },
+    supabase: {
+      configured: supabase,
+      details: supabase
+        ? "Supabase URL + anon key present."
+        : "Supabase environment variables not configured.",
+    },
+    email: {
+      configured: email,
+      details: email
+        ? "SMTP configured for transactional email and OTP delivery."
+        : "SMTP not configured.",
+    },
+    observability: {
+      configured: observability,
+      details: observability
+        ? "Sentry error reporting configured."
+        : "Sentry not configured.",
+    },
+  };
+}
+
 export async function getSystemReadiness() {
   const database = await checkDatabaseReadiness();
   const redis = await checkRedisReadiness();
   const billing = checkBillingReadiness();
-
   const aiOrchestrator = {
     enabled: ENV.aiOrchestratorEnabled,
     ready:
@@ -233,5 +275,6 @@ export async function getSystemReadiness() {
       billing,
       aiOrchestrator,
     },
+    integrations: checkIntegrations(),
   };
 }

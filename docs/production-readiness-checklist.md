@@ -6,18 +6,38 @@ history and the live verification matrix.
 
 ---
 
+## 0. Engineering status — verified on the live platform
+
+| Area                                                                            | Status   |
+| ------------------------------------------------------------------------------- | -------- |
+| Auth: local (email/password) + Google SSO (branded domain, SDK-signed sessions) | verified |
+| Theming: light/dark across every surface incl. the owner console                | verified |
+| i18n: 9 locales; lazy-loaded catalogs (entry chunk 1.56 MB → 0.20 MB)           | verified |
+| Onboarding: questionnaire, personalization, owner console, product tour         | verified |
+| Accessibility: axe gate on public + authenticated pages, 0 critical/serious     | verified |
+| Security: strict hash-synced CSP, 0 dependency vulns, rate limiting             | verified |
+| Reliability: serverless DB pool capped; service worker network-first            | verified |
+| Observability: `/api/health`, `/api/readyz`, client-error telemetry             | verified |
+| Performance: TTFB ~50–80 ms, FCP 156–540 ms warm (~1.0 s cold)                  | verified |
+
+Gate: `pnpm verify:all` (681 unit/integration) + Playwright E2E + axe.
+`GET /api/readyz` reports per-integration configuration under `integrations`
+(googleSso, supabase, email, observability) plus core services (database,
+redis, billing, aiOrchestrator).
+
 ## 1. What is needed to declare RELEASE READY (owner inputs)
 
 ### 1.1 Rotate leaked secrets (security — do first)
 
 The following were committed to git history at some point and must be rotated:
 
-| Secret                             | Where                              | Action                                                    |
-| ---------------------------------- | ---------------------------------- | --------------------------------------------------------- |
-| SMTP password                      | former `test_smtp*.py`             | Rotate the mailbox password; update `SMTP_PASS` in Vercel |
-| i18n job token (`e77a06bf…`)       | former `api/i18n-job.js` (deleted) | Consider already dead; regenerate/ignore                  |
-| Hostinger API key (shared in chat) | —                                  | Revoke + reissue in hPanel → Profile → API                |
-| `YALLA_ADMIN_SECRET`               | if ever shared                     | Rotate in Vercel                                          |
+| Secret                             | Where                              | Action                                                               |
+| ---------------------------------- | ---------------------------------- | -------------------------------------------------------------------- |
+| SMTP password                      | former `test_smtp*.py`             | Rotate the mailbox password; update `SMTP_PASS` in Vercel            |
+| i18n job token (`e77a06bf…`)       | former `api/i18n-job.js` (deleted) | Consider already dead; regenerate/ignore                             |
+| Hostinger API key (shared in chat) | —                                  | Revoke + reissue in hPanel → Profile → API                           |
+| Google OAuth client secret         | shared in chat (Google Cloud)      | Rotate in Google Cloud, then update `GOOGLE_CLIENT_SECRET` in Vercel |
+| `YALLA_ADMIN_SECRET`               | if ever shared                     | Rotate in Vercel                                                     |
 
 Then (optional but recommended) purge history with `git filter-repo` and force-push.
 
@@ -38,10 +58,13 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
 
 ### 1.4 Regulatory provenance (compliance integrity)
 
-- Provide, per framework/law, a verified **source URL**, **version**,
-  **effective date**, and **last-verified date** (CSV/Sheet is fine), or
-  authorize the schema/fields and a review workflow. I will not fabricate
-  legal sources.
+- The registry is **implemented** (`shared/regulatory-provenance.ts`) with a
+  `verified` → `pending_review` → `stale` lifecycle, wired into
+  `/api/trpc/compliance.globalRegistrySummary`, and guarded by tests that
+  reject unverified claims. Every claim currently resolves to `unverified`.
+- Remaining (data): provide, per framework/law, a verified **source URL**,
+  **version**, **effective date**, and **last-verified reviewer** — then add
+  the entries to `PROVENANCE_REGISTRY`. No legal sources are fabricated.
 
 ### 1.5 Product decisions (confirm)
 
@@ -70,6 +93,7 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | billing                             | present                             |
 | `SMTP_*`                                      | email                               | present (rotate pass)               |
 | `SENTRY_DSN`                                  | monitoring                          | present                             |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`   | Google SSO                          | present (rotate secret)             |
 | `REDIS_URL`                                   | distributed rate limiting           | OPTIONAL (Postgres fallback active) |
 | `AGENT_SWARM_TOKEN`                           | auth for AI swarm egress            | **MISSING (only if swarm used)**    |
 
