@@ -481,6 +481,33 @@ export async function createApp() {
   app.get("/api/readiness", sendReadiness);
   app.get("/api/readyz", sendReadiness);
 
+  // ─── Client error telemetry ───────────────────────────────────────────────
+  // The client ErrorBoundary reports crashes here so a failure that only shows
+  // as "Something went wrong" in the UI is still visible in the logs.
+  app.post("/api/client-error", (req: Request, res: Response) => {
+    try {
+      const body = (req.body ?? {}) as Record<string, unknown>;
+      const clip = (v: unknown, n: number) =>
+        typeof v === "string" ? v.slice(0, n) : undefined;
+      logger.error(
+        {
+          clientError: {
+            id: clip(body.id, 40),
+            message: clip(body.message, 800),
+            stack: clip(body.stack, 2000),
+            componentStack: clip(body.componentStack, 2000),
+            url: clip(body.url, 300),
+            ua: clip(req.headers["user-agent"], 200),
+          },
+        },
+        "Client error reported"
+      );
+    } catch {
+      /* telemetry must never fail the request */
+    }
+    res.status(204).end();
+  });
+
   registerOAuthRoutes(app);
   registerGoogleOAuthRoutes(app);
 

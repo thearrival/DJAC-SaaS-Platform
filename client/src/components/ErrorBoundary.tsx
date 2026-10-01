@@ -29,6 +29,25 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, info: { componentStack: string }) {
     // Log to console always; in production this helps support diagnose issues
     console.error("[ErrorBoundary]", error, info.componentStack);
+    // Report to the server so a crash is visible in logs, not just the UI.
+    try {
+      void fetch("/api/client-error", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          id: this.state.errorId,
+          message: error?.message,
+          stack: error?.stack,
+          componentStack: info?.componentStack,
+          url: typeof window !== "undefined" ? window.location.href : "",
+        }),
+      }).catch(() => {
+        /* best-effort */
+      });
+    } catch {
+      /* best-effort */
+    }
   }
 
   render() {
