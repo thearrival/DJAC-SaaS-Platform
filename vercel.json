@@ -33,7 +33,10 @@
     },
     {
       "src": "/(sitemap.xml|sw.js|manifest.webmanifest|robots.txt)",
-      "dest": "/$1"
+      "dest": "/$1",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
     },
     {
       "src": "/assets/(.*)",
