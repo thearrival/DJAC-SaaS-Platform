@@ -340,6 +340,13 @@ export function TourGuide() {
       if (el) {
         el.scrollIntoView({ block: "nearest", behavior: "smooth" });
         const rect = el.getBoundingClientRect();
+        // Hidden targets (e.g. the collapsed sidebar on mobile) have no size —
+        // treat them as "not found" so the tooltip centres cleanly instead of
+        // drawing a spotlight around nothing.
+        if (rect.width === 0 || rect.height === 0) {
+          setTargetRect(null);
+          return;
+        }
         setTargetRect({
           top: rect.top,
           left: rect.left,
