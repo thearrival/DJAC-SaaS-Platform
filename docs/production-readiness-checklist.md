@@ -51,14 +51,16 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
 
 ### 1.3 Backup & Disaster Recovery (data integrity)
 
-- **Implemented:** `.github/workflows/db-backup.yml` runs a daily off-site
-  `pg_dump` to GitHub Actions artifacts (30-day retention). Add the
-  `DATABASE_URL` repository secret (direct/session connection) to activate it.
-  See `docs/disaster-recovery.md` §3.
+- **Implemented & verified:** `/api/cron/backup` runs daily at 03:00 UTC and
+  snapshots the critical tables to a private Supabase Storage bucket (last 14
+  copies). It needs no runner or repository secret and is already active. A
+  manual trigger produced a valid ~42 KB snapshot (9 tables / 93 rows).
+- **Implemented:** `.github/workflows/db-backup.yml` adds a full off-site
+  `pg_dump` to GitHub Actions artifacts (30-day retention).
 - **Remaining (owner):**
-  - Add the `DATABASE_URL` GitHub secret so the daily backup runs.
-  - Provide a **scratch/read-only Postgres URL** (e.g. a Supabase branch) so the
-    restore drill in `docs/disaster-recovery.md` §4 can be executed and recorded.
+  - Add the `DATABASE_URL` GitHub secret to activate the full off-site dump.
+  - Provide a **scratch/read-only Postgres URL** so the restore drill in
+    `docs/disaster-recovery.md` §4 can be executed and recorded.
   - For ≤1 h RPO, enable Supabase PITR when the plan allows.
 
 ### 1.4 Regulatory provenance (compliance integrity)

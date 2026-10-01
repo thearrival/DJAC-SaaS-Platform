@@ -1,6 +1,6 @@
 # Disaster Recovery & Backup Runbook
 
-Status: procedure defined; **restore drill not yet executed** (see §5).
+Status: automated backups **live** (autonomous serverless snapshot daily, verified); **restore drill not yet executed** (see §5).
 
 ## 1. Scope
 
@@ -17,20 +17,39 @@ serverless deployment (`app.yalla-hack.ae`) plus static SPA. Object storage
 
 ## 3. Backups
 
-### 3.1 Off-site scheduled dump (implemented)
+### 3.1 Serverless snapshot (autonomous — implemented & verified)
 
-`.github/workflows/db-backup.yml` runs **daily at 03:00 UTC** (and on demand via
-`workflow_dispatch`): it dumps the production database with `pg_dump`
-(PostgreSQL 17 client) and uploads a gzipped artifact to GitHub Actions — an
-**off-site copy independent of the database host** — retained 30 days. It fails
-loudly if the dump is empty.
+`/api/cron/backup` runs **daily at 03:00 UTC** (Vercel cron, `CRON_SECRET`-gated).
+It snapshots the business-critical tables to a private Supabase Storage bucket
+(`backups`) as JSON and retains the last 14 copies. No runner or repository
+secret is required — it runs inside the app with existing env, so the backup
+safety net is active with zero owner action.
+
+- **Tables:** localUsers, users, organizations, organizationMembers,
+  organizationProfilesCustom, onboarding_responses, onboarding_events,
+  onboarding_profile_history, personalization_recommendations (≤5000 rows each).
+- **Verified:** a manual trigger produced `backups/djac-<ts>.json`
+  (~42 KB; 9 tables / 93 rows at time of writing), content confirmed valid JSON.
+- **Manual trigger:** `curl -X POST -H "Authorization: Bearer $CRON_SECRET" \
+https://app.yalla-hack.ae/api/cron/backup`
+- **Restore:** download the object from the `backups` bucket and re-insert the
+  rows per table (`INSERT … ON CONFLICT DO NOTHING`) into a scratch database,
+  then verify before promoting. This is a logical row export, not a full dump —
+  reference/seed tables are reproducible from the repo.
+
+### 3.2 Off-site full dump (GitHub Actions — needs a repo secret)
+
+`.github/workflows/db-backup.yml` runs **daily at 03:00 UTC** (and on demand):
+it dumps the whole database with `pg_dump` (PostgreSQL 17 client) and uploads a
+gzipped artifact to GitHub Actions — an **off-site copy independent of the
+database host** — retained 30 days. Fails loudly on an empty dump.
 
 - **Requires:** repository secret `DATABASE_URL` — a direct (port 5432) or
   **session**-pooler connection string. Do **not** use transaction-mode pooling
   (port 6543) for `pg_dump`.
 - **Restore:** download the artifact from the workflow run and follow §4.
 
-### 3.2 Self-hosted script (for a long-lived host)
+### 3.3 Self-hosted script (for a long-lived host)
 
 - `scripts/db-backup.mjs` (`pg_dump --clean --if-exists --no-owner --no-acl`),
   writes `backup/djac-saas-<timestamp>.sql`, keeps the last 7 files.
