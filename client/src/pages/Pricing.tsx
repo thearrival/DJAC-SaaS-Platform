@@ -39,6 +39,8 @@ interface PlanConfig {
   tagline: string;
   icon: React.ReactNode;
   color: string;
+  /** Accessible variant of `color` for small text on light-tinted surfaces. */
+  textColor: string;
   borderColor: string;
   bgColor: string;
   popular?: boolean;
@@ -60,6 +62,7 @@ const PLANS: PlanConfig[] = [
     tagline: "Perfect for startups and early-stage compliance.",
     icon: <Zap size={22} />,
     color: "#00d2ff",
+    textColor: "#006b85",
     borderColor: "border-cyan-500/40",
     bgColor: "from-cyan-500/10 to-transparent",
     prices: {
@@ -92,6 +95,7 @@ const PLANS: PlanConfig[] = [
     tagline: "For growing compliance teams and enterprises.",
     icon: <Shield size={22} />,
     color: "#d900ff",
+    textColor: "#b000d6",
     borderColor: "border-purple-500/60",
     bgColor: "from-purple-500/15 to-transparent",
     popular: true,
@@ -127,6 +131,7 @@ const PLANS: PlanConfig[] = [
     tagline: "Custom deployment for large organizations.",
     icon: <Building2 size={22} />,
     color: "#f59e0b",
+    textColor: "#92400e",
     borderColor: "border-amber-500/40",
     bgColor: "from-amber-500/10 to-transparent",
     prices: {
@@ -406,7 +411,7 @@ export default function Pricing() {
               background: "rgba(168,85,247,0.12)",
               border: "1px solid rgba(168,85,247,0.35)",
               fontSize: 12,
-              color: "#d900ff",
+              color: "#b000d6",
               marginBottom: 20,
             }}
           >
@@ -650,7 +655,7 @@ export default function Pricing() {
                         padding: "2px 8px",
                         borderRadius: 6,
                         background: `${plan.color}18`,
-                        color: plan.color,
+                        color: plan.textColor,
                         border: `1px solid ${plan.color}30`,
                       }}
                     >
@@ -1021,7 +1026,7 @@ export default function Pricing() {
         {t("pricing.footerPowered", "Powered by Yalla-Hack.")} &nbsp;
         <a
           href="mailto:support@yalla-hack.net"
-          style={{ color: "rgba(168,85,247,0.6)" }}
+          style={{ color: "#b000d6", textDecoration: "underline" }}
         >
           support@yalla-hack.net
         </a>
