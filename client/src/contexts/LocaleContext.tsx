@@ -830,6 +830,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "No results found.",
     "cmd.placeholder": "Search pages, features…",
     "cmd.title": "Command Palette",
+    "cmd.groupHelp": "Help",
+    "cmd.restartTour": "Restart product tour",
     "common.all": "All",
     "common.cancel": "Cancel",
     "common.delete": "Delete",
@@ -2619,6 +2621,22 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "Forgot password?",
     "signup.fullName": "Full name",
     "signup.googleSignIn": "Continue with Google",
+    "signup.googleErrCancelled":
+      "Google sign-in was cancelled or returned no code. Please try again.",
+    "signup.googleErrUnavailable":
+      "Google sign-in is not available right now. Please use email and password.",
+    "signup.googleErrFailed":
+      "We couldn't complete Google sign-in. Please try again.",
+    "signup.googleErrNoAccount":
+      "We couldn't create your account. Please contact support.",
+    "signup.googleErrGeneric":
+      "Something went wrong during Google sign-in. Please try again.",
+    "signup.googleErrRateLimited":
+      "Too many sign-in attempts. Please wait a few minutes and try again.",
+    "signup.googleErrDenied":
+      "Google sign-in was cancelled. You can try again or use email and password.",
+    "signup.googleErrPopup":
+      "Please allow pop-ups for this site to continue with Google.",
     "signup.govNote":
       "Government accounts are subject to additional verification.",
     "signup.haveAccount": "Already have an account?",
@@ -4119,6 +4137,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "لا توجد نتائج.",
     "cmd.placeholder": "البحث في الصفحات والميزات…",
     "cmd.title": "لوحة الأوامر",
+    "cmd.groupHelp": "المساعدة",
+    "cmd.restartTour": "إعادة تشغيل جولة المنتج",
     "common.all": "الكل",
     "common.cancel": "إلغاء",
     "common.delete": "حذف",
@@ -5874,6 +5894,21 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "نسيت كلمة المرور؟",
     "signup.fullName": "الاسم الكامل",
     "signup.googleSignIn": "المتابعة عبر Google",
+    "signup.googleErrCancelled":
+      "تم إلغاء تسجيل الدخول عبر Google أو لم يُرجع رمزًا. حاول مرة أخرى.",
+    "signup.googleErrUnavailable":
+      "تسجيل الدخول عبر Google غير متاح الآن. يُرجى استخدام البريد الإلكتروني وكلمة المرور.",
+    "signup.googleErrFailed":
+      "تعذّر إكمال تسجيل الدخول عبر Google. حاول مرة أخرى.",
+    "signup.googleErrNoAccount": "تعذّر إنشاء حسابك. يُرجى التواصل مع الدعم.",
+    "signup.googleErrGeneric":
+      "حدث خطأ أثناء تسجيل الدخول عبر Google. حاول مرة أخرى.",
+    "signup.googleErrRateLimited":
+      "محاولات تسجيل دخول كثيرة جدًا. يُرجى الانتظار بضع دقائق والمحاولة مجددًا.",
+    "signup.googleErrDenied":
+      "تم إلغاء تسجيل الدخول عبر Google. يمكنك المحاولة مجددًا أو استخدام البريد الإلكتروني وكلمة المرور.",
+    "signup.googleErrPopup":
+      "يُرجى السماح بالنوافذ المنبثقة لهذا الموقع للمتابعة عبر Google.",
     "signup.govNote": "تخضع حسابات الجهات الحكومية لتحقق إضافي.",
     "signup.haveAccount": "لديك حساب بالفعل؟",
     "signup.heroDesc":
@@ -7315,6 +7350,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "未找到结果。",
     "cmd.placeholder": "搜索页面、功能…",
     "cmd.title": "命令面板",
+    "cmd.groupHelp": "帮助",
+    "cmd.restartTour": "重新开始产品导览",
     "common.all": "全部",
     "common.cancel": "取消",
     "common.delete": "删除",
@@ -8985,6 +9022,14 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "忘记密码？",
     "signup.fullName": "全名",
     "signup.googleSignIn": "使用 Google 继续",
+    "signup.googleErrCancelled": "Google 登录已取消或未返回验证码。请重试。",
+    "signup.googleErrUnavailable": "Google 登录目前不可用。请使用邮箱和密码。",
+    "signup.googleErrFailed": "我们无法完成 Google 登录。请重试。",
+    "signup.googleErrNoAccount": "我们无法创建您的账户。请联系支持团队。",
+    "signup.googleErrGeneric": "Google 登录过程中出现问题。请重试。",
+    "signup.googleErrRateLimited": "登录尝试次数过多。请等待几分钟后重试。",
+    "signup.googleErrDenied": "Google 登录已取消。您可以重试或使用邮箱和密码。",
+    "signup.googleErrPopup": "请允许此站点弹出窗口，以便继续使用 Google。",
     "signup.govNote": "政府账户需进行额外验证。",
     "signup.haveAccount": "已有账户？",
     "signup.heroDesc":
@@ -10502,6 +10547,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "Aucun résultat trouvé.",
     "cmd.placeholder": "Rechercher des pages, des fonctionnalités…",
     "cmd.title": "Palette de commandes",
+    "cmd.groupHelp": "Aide",
+    "cmd.restartTour": "Redémarrer la visite guidée",
     "common.all": "All",
     "common.cancel": "Cancel",
     "common.delete": "Delete",
@@ -12385,6 +12432,22 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "Mot de passe oublié ?",
     "signup.fullName": "Full name",
     "signup.googleSignIn": "Continuer avec Google",
+    "signup.googleErrCancelled":
+      "La connexion Google a été annulée ou n'a renvoyé aucun code. Veuillez réessayer.",
+    "signup.googleErrUnavailable":
+      "La connexion Google n'est pas disponible pour le moment. Utilisez l'e-mail et le mot de passe.",
+    "signup.googleErrFailed":
+      "Nous n'avons pas pu terminer la connexion Google. Veuillez réessayer.",
+    "signup.googleErrNoAccount":
+      "Nous n'avons pas pu créer votre compte. Contactez le support.",
+    "signup.googleErrGeneric":
+      "Une erreur est survenue lors de la connexion Google. Veuillez réessayer.",
+    "signup.googleErrRateLimited":
+      "Trop de tentatives de connexion. Patientez quelques minutes et réessayez.",
+    "signup.googleErrDenied":
+      "La connexion Google a été annulée. Réessayez ou utilisez l'e-mail et le mot de passe.",
+    "signup.googleErrPopup":
+      "Autorisez les fenêtres pop-up pour ce site afin de continuer avec Google.",
     "signup.govNote":
       "Les comptes gouvernementaux sont soumis à une vérification supplémentaire.",
     "signup.haveAccount": "Vous avez déjà un compte ?",
@@ -13966,6 +14029,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "No se encontraron resultados.",
     "cmd.placeholder": "Buscar páginas, funciones…",
     "cmd.title": "Paleta de comandos",
+    "cmd.groupHelp": "Ayuda",
+    "cmd.restartTour": "Reiniciar el recorrido del producto",
     "common.all": "Todos",
     "common.cancel": "Cancelar",
     "common.delete": "Eliminar",
@@ -15833,6 +15898,22 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "¿Olvidó su contraseña?",
     "signup.fullName": "Nombre completo",
     "signup.googleSignIn": "Continuar con Google",
+    "signup.googleErrCancelled":
+      "Se canceló el inicio de sesión con Google o no devolvió ningún código. Inténtalo de nuevo.",
+    "signup.googleErrUnavailable":
+      "El inicio de sesión con Google no está disponible ahora. Usa el correo y la contraseña.",
+    "signup.googleErrFailed":
+      "No pudimos completar el inicio de sesión con Google. Inténtalo de nuevo.",
+    "signup.googleErrNoAccount":
+      "No pudimos crear tu cuenta. Contacta con soporte.",
+    "signup.googleErrGeneric":
+      "Algo salió mal durante el inicio de sesión con Google. Inténtalo de nuevo.",
+    "signup.googleErrRateLimited":
+      "Demasiados intentos de inicio de sesión. Espera unos minutos e inténtalo de nuevo.",
+    "signup.googleErrDenied":
+      "Se canceló el inicio de sesión con Google. Puedes intentarlo de nuevo o usar correo y contraseña.",
+    "signup.googleErrPopup":
+      "Permite las ventanas emergentes de este sitio para continuar con Google.",
     "signup.govNote":
       "Las cuentas gubernamentales están sujetas a verificación adicional.",
     "signup.haveAccount": "¿Ya tiene una cuenta?",
@@ -17417,6 +17498,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "Keine Ergebnisse gefunden.",
     "cmd.placeholder": "Seiten, Funktionen durchsuchen…",
     "cmd.title": "Befehlspalette",
+    "cmd.groupHelp": "Hilfe",
+    "cmd.restartTour": "Produkttour neu starten",
     "common.all": "Alle",
     "common.cancel": "Abbrechen",
     "common.delete": "Löschen",
@@ -19272,6 +19355,22 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "Passwort vergessen?",
     "signup.fullName": "Vollständiger Name",
     "signup.googleSignIn": "Mit Google fortfahren",
+    "signup.googleErrCancelled":
+      "Die Google-Anmeldung wurde abgebrochen oder hat keinen Code zurückgegeben. Bitte erneut versuchen.",
+    "signup.googleErrUnavailable":
+      "Die Google-Anmeldung ist derzeit nicht verfügbar. Bitte E-Mail und Passwort verwenden.",
+    "signup.googleErrFailed":
+      "Die Google-Anmeldung konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
+    "signup.googleErrNoAccount":
+      "Ihr Konto konnte nicht erstellt werden. Bitte den Support kontaktieren.",
+    "signup.googleErrGeneric":
+      "Bei der Google-Anmeldung ist ein Fehler aufgetreten. Bitte erneut versuchen.",
+    "signup.googleErrRateLimited":
+      "Zu viele Anmeldeversuche. Bitte einige Minuten warten und erneut versuchen.",
+    "signup.googleErrDenied":
+      "Die Google-Anmeldung wurde abgebrochen. Erneut versuchen oder E-Mail und Passwort verwenden.",
+    "signup.googleErrPopup":
+      "Bitte Pop-ups für diese Website zulassen, um mit Google fortzufahren.",
     "signup.govNote":
       "Regierungskonten unterliegen einer zusätzlichen Überprüfung.",
     "signup.haveAccount": "Sie haben bereits ein Konto?",
@@ -20834,6 +20933,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "結果が見つかりません。",
     "cmd.placeholder": "ページ、機能を検索…",
     "cmd.title": "コマンドパレット",
+    "cmd.groupHelp": "ヘルプ",
+    "cmd.restartTour": "製品ツアーを再開",
     "common.all": "すべて",
     "common.cancel": "キャンセル",
     "common.delete": "削除",
@@ -22638,6 +22739,22 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "パスワードをお忘れですか？",
     "signup.fullName": "氏名",
     "signup.googleSignIn": "Googleで続行",
+    "signup.googleErrCancelled":
+      "Google ログインがキャンセルされたか、コードが返されませんでした。もう一度お試しください。",
+    "signup.googleErrUnavailable":
+      "現在 Google ログインはご利用いただけません。メールアドレスとパスワードをご利用ください。",
+    "signup.googleErrFailed":
+      "Google ログインを完了できませんでした。もう一度お試しください。",
+    "signup.googleErrNoAccount":
+      "アカウントを作成できませんでした。サポートにお問い合わせください。",
+    "signup.googleErrGeneric":
+      "Google ログイン中にエラーが発生しました。もう一度お試しください。",
+    "signup.googleErrRateLimited":
+      "サインインの試行回数が多すぎます。数分待ってから再試行してください。",
+    "signup.googleErrDenied":
+      "Google ログインがキャンセルされました。再試行するか、メールアドレスとパスワードをご利用ください。",
+    "signup.googleErrPopup":
+      "Google を続行するには、このサイトのポップアップを許可してください。",
     "signup.govNote": "政府機関アカウントは追加の確認が必要です。",
     "signup.haveAccount": "すでにアカウントをお持ちですか？",
     "signup.heroDesc":
@@ -24152,6 +24269,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "결과를 찾을 수 없습니다.",
     "cmd.placeholder": "페이지, 기능 검색...",
     "cmd.title": "명령 팔레트",
+    "cmd.groupHelp": "도움말",
+    "cmd.restartTour": "제품 투어 다시 시작",
     "common.all": "전체",
     "common.cancel": "취소",
     "common.delete": "삭제",
@@ -25914,6 +26033,22 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "비밀번호를 잊으셨나요?",
     "signup.fullName": "전체 이름",
     "signup.googleSignIn": "Google로 계속하기",
+    "signup.googleErrCancelled":
+      "Google 로그인이 취소되었거나 코드가 반환되지 않았습니다. 다시 시도하세요.",
+    "signup.googleErrUnavailable":
+      "현재 Google 로그인을 사용할 수 없습니다. 이메일과 비밀번호를 사용하세요.",
+    "signup.googleErrFailed":
+      "Google 로그인을 완료하지 못했습니다. 다시 시도하세요.",
+    "signup.googleErrNoAccount":
+      "계정을 만들지 못했습니다. 지원팀에 문의하세요.",
+    "signup.googleErrGeneric":
+      "Google 로그인 중 문제가 발생했습니다. 다시 시도하세요.",
+    "signup.googleErrRateLimited":
+      "로그인 시도가 너무 많습니다. 몇 분 후 다시 시도하세요.",
+    "signup.googleErrDenied":
+      "Google 로그인이 취소되었습니다. 다시 시도하거나 이메일과 비밀번호를 사용하세요.",
+    "signup.googleErrPopup":
+      "Google로 계속하려면 이 사이트의 팝업을 허용하세요.",
     "signup.govNote": "정부 계정은 추가 확인이 필요합니다.",
     "signup.haveAccount": "이미 계정이 있으신가요?",
     "signup.heroDesc":
@@ -27455,6 +27590,8 @@ const messages: Record<string, Record<string, string>> = {
     "cmd.noResults": "Nenhum resultado encontrado.",
     "cmd.placeholder": "Pesquisar páginas, recursos…",
     "cmd.title": "Paleta de Comandos",
+    "cmd.groupHelp": "Ajuda",
+    "cmd.restartTour": "Reiniciar o tour do produto",
     "common.all": "Todos",
     "common.cancel": "Cancelar",
     "common.delete": "Excluir",
@@ -29303,6 +29440,22 @@ const messages: Record<string, Record<string, string>> = {
     "signup.forgotPassword": "Esqueceu a senha?",
     "signup.fullName": "Nome completo",
     "signup.googleSignIn": "Continuar com o Google",
+    "signup.googleErrCancelled":
+      "O login com Google foi cancelado ou não retornou nenhum código. Tente novamente.",
+    "signup.googleErrUnavailable":
+      "O login com Google não está disponível no momento. Use e-mail e senha.",
+    "signup.googleErrFailed":
+      "Não foi possível concluir o login com Google. Tente novamente.",
+    "signup.googleErrNoAccount":
+      "Não foi possível criar sua conta. Entre em contato com o suporte.",
+    "signup.googleErrGeneric":
+      "Algo deu errado durante o login com Google. Tente novamente.",
+    "signup.googleErrRateLimited":
+      "Muitas tentativas de login. Aguarde alguns minutos e tente novamente.",
+    "signup.googleErrDenied":
+      "O login com Google foi cancelado. Tente novamente ou use e-mail e senha.",
+    "signup.googleErrPopup":
+      "Permita pop-ups para este site para continuar com o Google.",
     "signup.govNote":
       "Contas governamentais estão sujeitas a verificação adicional.",
     "signup.haveAccount": "Já tem uma conta?",
