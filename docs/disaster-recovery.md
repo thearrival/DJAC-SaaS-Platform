@@ -17,16 +17,29 @@ serverless deployment (`app.yalla-hack.ae`) plus static SPA. Object storage
 
 ## 3. Backups
 
-- Script: `scripts/db-backup.mjs` (`pg_dump --clean --if-exists --no-owner --no-acl`).
-- Output: `backup/djac-saas-<timestamp>.sql`; **keeps the last 7 files**.
-- Requires `DATABASE_URL` and `pg_dump` on the host that runs it.
-- Verification helper: `scripts/yh-backup-check.sh` (+ `install-yh-backup-check-cron.sh`).
+### 3.1 Off-site scheduled dump (implemented)
 
-> ⚠️ **Gap:** backups are written to local disk on the host that runs the script.
-> They are not encrypted and there is no confirmed off-site copy or schedule for
-> the Vercel deployment. Supabase's own automated backups (dashboard →
-> Database → Backups / PITR) should be treated as the primary source of truth
-> until an off-site dump pipeline is in place.
+`.github/workflows/db-backup.yml` runs **daily at 03:00 UTC** (and on demand via
+`workflow_dispatch`): it dumps the production database with `pg_dump`
+(PostgreSQL 17 client) and uploads a gzipped artifact to GitHub Actions — an
+**off-site copy independent of the database host** — retained 30 days. It fails
+loudly if the dump is empty.
+
+- **Requires:** repository secret `DATABASE_URL` — a direct (port 5432) or
+  **session**-pooler connection string. Do **not** use transaction-mode pooling
+  (port 6543) for `pg_dump`.
+- **Restore:** download the artifact from the workflow run and follow §4.
+
+### 3.2 Self-hosted script (for a long-lived host)
+
+- `scripts/db-backup.mjs` (`pg_dump --clean --if-exists --no-owner --no-acl`),
+  writes `backup/djac-saas-<timestamp>.sql`, keeps the last 7 files.
+- Verification helper: `scripts/yh-backup-check.sh`.
+- Only useful on a host with a persistent disk (not Vercel serverless).
+
+> Supabase's own automated backups / PITR (dashboard → Database → Backups)
+> remain the primary source of truth once enabled; §3.1 is the plan-independent
+> safety net until then.
 
 ## 4. Restore procedure
 
@@ -86,8 +99,10 @@ verified restorable backup**. This must be resolved before go-live:
 
 - **Option A (recommended):** enable Supabase daily backups / PITR (plan
   dependent) in Dashboard → Database → Backups.
-- **Option B:** run `scripts/db-backup.mjs` on a schedule to **off-site** storage
-  (S3/R2, not the app host) and verify with `scripts/yh-backup-check.sh`.
+- **Option B (implemented):** `.github/workflows/db-backup.yml` runs a daily
+  off-site `pg_dump` to GitHub Actions artifacts (30-day retention). Add the
+  `DATABASE_URL` repository secret to activate it. Verify with
+  `scripts/yh-backup-check.sh` where a host is available.
 - Either way, record a restore-drill date here once executed.
 
 ## 8. Responsible parties

@@ -1,0 +1,70 @@
+name: Database Backup
+
+# Daily off-site logical backup of the production Postgres database.
+#
+# Why this exists: Supabase PITR is off on the current plan and the existing
+# `scripts/db-backup.mjs` writes to the host's local disk (useless on Vercel
+# serverless). This workflow produces a gzipped SQL dump and stores it as a
+# GitHub Actions artifact — an off-site copy independent of the database host —
+# with 30-day retention.
+#
+# Requires repository secret DATABASE_URL: a direct (session, port 5432) or
+# session-pooler connection string for the production database. Transaction-mode
+# pooling must NOT be used for pg_dump.
+#
+# Restore: download the artifact and follow docs/disaster-recovery.md §4.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Off-site DB dump
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify DATABASE_URL secret is configured
+        env:
+          HAS_DB_URL: ${{ secrets.DATABASE_URL != '' }}
+        run: |
+          if [ "$HAS_DB_URL" != "true" ]; then
+            echo "::error::DATABASE_URL secret is not set. Add it in Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          pg_dump --version
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          mkdir -p backup
+          FILE="backup/djac-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
+          pg_dump "$DATABASE_URL" --no-owner --no-privileges --clean --if-exists \
+            | gzip > "$FILE"
+          ls -lh "$FILE"
+          # Fail loudly if the dump is suspiciously small (e.g. empty).
+          SIZE=$(stat -c%s "$FILE")
+          if [ "$SIZE" -lt 1024 ]; then
+            echo "::error::Backup looks empty ($SIZE bytes)"
+            exit 1
+          fi
+
+      - name: Upload off-site backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: djac-db-backup-${{ github.run_number }}
+          path: backup/*.sql.gz
+          retention-days: 30
+          if-no-files-found: error
