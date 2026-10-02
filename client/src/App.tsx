@@ -9,6 +9,7 @@ import { LocaleProvider } from "./contexts/LocaleContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
 import { resolveDefaultThemeForPath } from "@shared/themePolicy";
+import { robotsDirectiveForPath } from "./lib/seoPolicy";
 
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
 const ParticleField = lazy(() =>
@@ -562,6 +563,16 @@ function Router() {
 function ThemedAppShell() {
   const [location] = useLocation();
   const defaultTheme = resolveDefaultThemeForPath(location);
+
+  useEffect(() => {
+    let tag = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    if (!tag) {
+      tag = document.createElement("meta");
+      tag.setAttribute("name", "robots");
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute("content", robotsDirectiveForPath(location));
+  }, [location]);
 
   return (
     <ThemeProvider defaultTheme={defaultTheme} switchable>
