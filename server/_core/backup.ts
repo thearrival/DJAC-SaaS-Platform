@@ -32,7 +32,7 @@ export const BACKUP_TABLES = [
   "users",
   "organizations",
   "organizationMembers",
-  "organizationProfilesCustom",
+  "organization_profiles_custom",
   "onboarding_responses",
   "onboarding_events",
   "onboarding_profile_history",
