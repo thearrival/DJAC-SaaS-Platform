@@ -123,26 +123,28 @@ Green (`pnpm verify:all` 696 passed) and live:
 
 ## L. Remaining issues (findings)
 
-| ID            | Finding                                                                                        | Severity | Status                                                                                                   |
-| ------------- | ---------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| DJAC-SEC-001  | `axios` 1.19 advisories                                                                        | High     | **FIXED (staged, undeployed)**                                                                           |
-| DJAC-DATA-001 | `smoke:runtime` left 20 test users in prod                                                     | Medium   | **CLEANED + tool added**                                                                                 |
-| DJAC-OPS-001  | i18n report broken by catalog split                                                            | Low      | **FIXED**                                                                                                |
-| DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20                                                   | Low      | **FIXED**                                                                                                |
-| DJAC-SEC-002  | test fixtures matched `sk_live_` pattern                                                       | Info     | **FIXED**                                                                                                |
-| DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)                                               | Info     | Documented                                                                                               |
-| DJAC-SEC-003  | Shared secrets rotation                                                                        | High     | PARTIAL — Google secret rotated 2026-10-02; SMTP/Hostinger pending                                       |
-| DJAC-DR-001   | Restore drill                                                                                  | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**                                                  |
-| DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`)                                    | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`)                                           |
-| DJAC-DR-002   | Supabase PITR off; no backup timestamps historically                                           | Medium   | BLOCKED (plan)                                                                                           |
-| DJAC-REG-001  | Regulatory provenance unverified                                                               | Medium   | **MITIGATED** — sources now visibly labeled in-product; data population still owner-gated                |
-| DJAC-SEC-004  | Private app routes indexable (`index, follow` on every route)                                  | Low      | **FIXED** — robots.txt expanded + client robots-meta policy + test                                       |
-| DJAC-DATA-002 | Production test-account residue (OTP/A-Z users, Stripe E2E org, orphan smoke org, "Live Test") | Low      | PARTIAL — Group A + orphan smoke purged 2026-10-02; "Live Test" (@yalla-hack.com) kept by owner decision |
+| ID            | Finding                                                                                        | Severity | Status                                                                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DJAC-SEC-001  | `axios` 1.19 advisories                                                                        | High     | **FIXED (staged, undeployed)**                                                                                                                           |
+| DJAC-DATA-001 | `smoke:runtime` left 20 test users in prod                                                     | Medium   | **CLEANED + tool added**                                                                                                                                 |
+| DJAC-OPS-001  | i18n report broken by catalog split                                                            | Low      | **FIXED**                                                                                                                                                |
+| DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20                                                   | Low      | **FIXED**                                                                                                                                                |
+| DJAC-SEC-002  | test fixtures matched `sk_live_` pattern                                                       | Info     | **FIXED**                                                                                                                                                |
+| DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)                                               | Info     | Documented                                                                                                                                               |
+| DJAC-SEC-003  | Shared secrets rotation                                                                        | High     | **RESOLVED** — Google + SMTP password rotated 2026-10-02, `SMTP_PASS` updated & email re-verified; Hostinger key revoke pending (hygiene, unused by app) |
+| DJAC-DR-001   | Restore drill                                                                                  | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**                                                                                                  |
+| DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`)                                    | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`)                                                                                           |
+| DJAC-DR-002   | Supabase PITR off; no backup timestamps historically                                           | Medium   | BLOCKED (plan)                                                                                                                                           |
+| DJAC-REG-001  | Regulatory provenance unverified                                                               | Medium   | **MITIGATED** — sources now visibly labeled in-product; data population still owner-gated                                                                |
+| DJAC-SEC-004  | Private app routes indexable (`index, follow` on every route)                                  | Low      | **FIXED** — robots.txt expanded + client robots-meta policy + test                                                                                       |
+| DJAC-DATA-002 | Production test-account residue (OTP/A-Z users, Stripe E2E org, orphan smoke org, "Live Test") | Low      | PARTIAL — Group A + orphan smoke purged 2026-10-02; "Live Test" (@yalla-hack.com) kept by owner decision                                                 |
 
 ## M. Production blockers (unresolved)
 
-1. **DJAC-SEC-003:** Google client secret **rotated 2026-10-02**; SMTP password
-   and Hostinger API key rotation still pending (owner provider consoles).
+1. **Regulatory provenance (DJAC-REG-001)** — the only true blocker; needs a
+   named human reviewer's citations (checklist §1.4).
+   - DJAC-SEC-003 **resolved 2026-10-02**: Google client secret + SMTP password
+     rotated; `SMTP_PASS` updated in Vercel and email delivery re-verified.
    - i18n job token: **dead** — its endpoint file was removed (0 references); no action needed.
    - Hostinger API key: **not used by the running app** (only a test-script
      assertion references it); revoke in hPanel for hygiene.
@@ -163,9 +165,10 @@ DJAC-BKP-001 — wrong backup table name — fixed.)_
 - **Live/sandbox Stripe charge + webhook replay** — needs Stripe sandbox keys.
 - **Email delivery — VERIFIED 2026-10-02.** A production `localAuth.sendOtp`
   (purpose `register`) to `hello@yalla-hack.com` was delivered (`DJAC — Verify
-Your Account`) and read back from the live mailbox via the Hostinger Mail API.
+Your Account`) and read back from the live mailbox via the Hostinger Mail API,
+  and **re-verified after the SMTP password rotation** (delivered 20:51Z).
 - **AI/Forge connectivity + cost controls proof** — needs provider credentials.
-- **Secret rotation** — owner Google Cloud / provider consoles.
+- **Secret rotation — DONE 2026-10-02** (Google client secret + SMTP password).
 - **Supabase PITR / off-site pg_dump activation** — plan + `DATABASE_URL` GitHub secret.
 - **Broad visual/response sweep across all routes/roles** — needs authenticated owner creds.
 - **Repeat restore drill against a separate scratch database** (schema drill passed).
@@ -189,20 +192,20 @@ Your Account`) and read back from the live mailbox via the Hostinger Mail API.
 **Rationale (evidence-based):** while the platform is live and the vast
 majority of controls are verified, the mandate’s release gate is not met:
 
-- **some shared secrets remain unrotated** (DJAC-SEC-003 — SMTP/Hostinger; the
-  Google client secret was rotated 2026-10-02),
-- **regulatory provenance is unverified** (DJAC-REG-001) — mitigated by an
-  in-product “source verification in progress / not legal advice” notice driven
-  by the real provenance counts; the citation data itself still awaits
-  owner-supplied sources.
+- **regulatory provenance is unverified** (DJAC-REG-001) — the sole remaining
+  blocker: mitigated by an in-product “source verification in progress / not
+  legal advice” notice driven by the real provenance counts, but the citation
+  data itself still awaits owner-supplied, human-reviewed sources.
 
-_(Blockers cleared this engagement: undeloyed security fix — `330ffa2`;
+_(Blockers cleared this engagement: undeloyed security fix — `330ffa2`; Google
+client secret + SMTP password rotated and email re-verified — 2026-10-02;
 restore drill — executed 2026-10-02 with all counts matching.)_
 
-**Fastest path to PRODUCTION READY** (all small, mostly owner-actions):
+**Fastest path to PRODUCTION READY** (one owner action):
 
-1. Rotate the Google client secret (and the earlier shared secrets).
-2. Enable Supabase PITR **or** add the `DATABASE_URL` GitHub secret for off-site dumps.
-3. Populate the provenance registry (or accept the “unverified” labeling).
+1. Populate the provenance registry with human-reviewed official sources (or
+   accept the in-product “unverified” labeling).
+2. Optional: enable Supabase PITR **or** add the `DATABASE_URL` GitHub secret for
+   off-site dumps.
 
 Nothing above requires re-architecture.

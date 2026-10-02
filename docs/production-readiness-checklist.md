@@ -27,17 +27,15 @@ redis, billing, aiOrchestrator).
 
 ## 1. What is needed to declare RELEASE READY (owner inputs)
 
-### 1.1 Rotate leaked secrets (security — do first)
+### 1.1 Rotate leaked secrets (security) — done 2026-10-02
 
-The following were committed to git history at some point and must be rotated:
-
-| Secret                             | Where                              | Action                                                               |
-| ---------------------------------- | ---------------------------------- | -------------------------------------------------------------------- |
-| SMTP password                      | former `test_smtp*.py`             | Rotate the mailbox password; update `SMTP_PASS` in Vercel            |
-| i18n job token (`e77a06bf…`)       | former `api/i18n-job.js` (deleted) | Consider already dead; regenerate/ignore                             |
-| Hostinger API key (shared in chat) | —                                  | Revoke + reissue in hPanel → Profile → API                           |
-| Google OAuth client secret         | shared in chat (Google Cloud)      | Rotate in Google Cloud, then update `GOOGLE_CLIENT_SECRET` in Vercel |
-| `YALLA_ADMIN_SECRET`               | if ever shared                     | Rotate in Vercel                                                     |
+| Secret                             | Where                              | Status                                                                  |
+| ---------------------------------- | ---------------------------------- | ----------------------------------------------------------------------- |
+| SMTP password                      | former `test_smtp*.py`             | ✅ rotated 2026-10-02; `SMTP_PASS` updated in Vercel; email re-verified |
+| i18n job token (`e77a06bf…`)       | former `api/i18n-job.js` (deleted) | ✅ dead — endpoint removed (0 references)                               |
+| Hostinger API key (shared in chat) | —                                  | ⏳ revoke in hPanel (not used by the running app)                       |
+| Google OAuth client secret         | shared in chat (Google Cloud)      | ✅ rotated 2026-10-02; `GOOGLE_CLIENT_SECRET` updated                   |
+| `YALLA_ADMIN_SECRET`               | if ever shared                     | ✅ distinct `YALLA_ADMIN_JWT_SECRET` set 2026-10-02                     |
 
 Then (optional but recommended) purge history with `git filter-repo` and force-push.
 
