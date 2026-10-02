@@ -6,6 +6,7 @@ import { sql, SQL } from "drizzle-orm";
 import { getDb } from "../db";
 import { ENV } from "../_core/env";
 import { ensureOnboardingSchema } from "./onboarding-schema";
+import { ensureForeignKeyIndexes } from "./fk-indexes";
 
 let migrationApplied = false;
 
@@ -55,6 +56,10 @@ export async function ensureMigrated(): Promise<void> {
   // occasionally aborting) migration sequence below, so these tables always
   // exist even if a later statement fails.
   await ensureOnboardingSchema(db);
+
+  // Add the missing foreign-key indexes (idempotent) so tenant-scoped queries
+  // and FK cascades do not degrade into sequential scans at scale.
+  await ensureForeignKeyIndexes(db);
 
   try {
     // Migration 0001: admin tables + performance indexes + verifiedAt
