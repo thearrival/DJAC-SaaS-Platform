@@ -142,6 +142,127 @@ export const FK_INDEXES: ForeignKeyIndex[] = [
     table: "complianceDeadlines",
     columns: ["assignedToUserId"],
   },
+  // Remaining FK columns (full coverage so no cascade does a seq scan).
+  {
+    name: "assessmentGaps_controlId_idx",
+    table: "assessmentGaps",
+    columns: ["controlId"],
+  },
+  {
+    name: "aiAgentRuns_createdByUserId_idx",
+    table: "aiAgentRuns",
+    columns: ["createdByUserId"],
+  },
+  {
+    name: "billingEvents_subscriptionId_idx",
+    table: "billingEvents",
+    columns: ["subscriptionId"],
+  },
+  {
+    name: "complianceExposureMappings_controlId_idx",
+    table: "complianceExposureMappings",
+    columns: ["controlId"],
+  },
+  {
+    name: "complianceExposureMappings_frameworkId_idx",
+    table: "complianceExposureMappings",
+    columns: ["frameworkId"],
+  },
+  {
+    name: "complianceExposureMappings_vulnerabilityId_idx",
+    table: "complianceExposureMappings",
+    columns: ["vulnerabilityId"],
+  },
+  {
+    name: "complianceSimulations_createdByUserId_idx",
+    table: "complianceSimulations",
+    columns: ["createdByUserId"],
+  },
+  {
+    name: "consultationRequests_assignedAdminUserId_idx",
+    table: "consultationRequests",
+    columns: ["assignedAdminUserId"],
+  },
+  {
+    name: "consultationRequests_userId_idx",
+    table: "consultationRequests",
+    columns: ["userId"],
+  },
+  {
+    name: "controlMappings_sourceControlId_idx",
+    table: "controlMappings",
+    columns: ["sourceControlId"],
+  },
+  {
+    name: "controlMappings_targetControlId_idx",
+    table: "controlMappings",
+    columns: ["targetControlId"],
+  },
+  {
+    name: "ctemAssets_vendorId_idx",
+    table: "ctemAssets",
+    columns: ["vendorId"],
+  },
+  {
+    name: "ctemAttackSimulations_assetId_idx",
+    table: "ctemAttackSimulations",
+    columns: ["assetId"],
+  },
+  {
+    name: "ctemRiskScores_assetId_idx",
+    table: "ctemRiskScores",
+    columns: ["assetId"],
+  },
+  {
+    name: "regulatorOversightTargets_grantedByAdminId_idx",
+    table: "regulatorOversightTargets",
+    columns: ["grantedByAdminId"],
+  },
+  {
+    name: "regulatorOversightTargets_regulatorOrgId_idx",
+    table: "regulatorOversightTargets",
+    columns: ["regulatorOrgId"],
+  },
+  {
+    name: "regulatorOversightTargets_targetOrgId_idx",
+    table: "regulatorOversightTargets",
+    columns: ["targetOrgId"],
+  },
+  {
+    name: "reportShares_createdByUserId_idx",
+    table: "reportShares",
+    columns: ["createdByUserId"],
+  },
+  {
+    name: "rolePermissions_grantedByUserId_idx",
+    table: "rolePermissions",
+    columns: ["grantedByUserId"],
+  },
+  {
+    name: "rolePermissions_localUserId_idx",
+    table: "rolePermissions",
+    columns: ["localUserId"],
+  },
+  {
+    name: "rolePermissions_userId_idx",
+    table: "rolePermissions",
+    columns: ["userId"],
+  },
+  {
+    name: "vendorShares_allowedOrgId_idx",
+    table: "vendorShares",
+    columns: ["allowedOrgId"],
+  },
+  {
+    name: "vendorShares_createdByUserId_idx",
+    table: "vendorShares",
+    columns: ["createdByUserId"],
+  },
+  {
+    name: "vendorShares_vendorId_idx",
+    table: "vendorShares",
+    columns: ["vendorId"],
+  },
 ];
 
 /**
