@@ -63,6 +63,15 @@ export const parsedEnv = {
   BUILT_IN_FORGE_API_URL: process.env.BUILT_IN_FORGE_API_URL ?? "",
   BUILT_IN_FORGE_API_KEY: process.env.BUILT_IN_FORGE_API_KEY ?? "",
 
+  // ── DeepSeek (optional; preferred LLM provider when configured) ───────────
+  // OpenAI-compatible. When DEEPSEEK_API_KEY is set it takes priority over
+  // Forge for all LLM calls (compliance chat, AI agents, report generation).
+  DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY ?? "",
+  DEEPSEEK_BASE_URL: (
+    process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com"
+  ).replace(/\/$/, ""),
+  DEEPSEEK_MODEL: strEnv(process.env.DEEPSEEK_MODEL, "deepseek-chat"),
+
   // ── Dev auth bypass ───────────────────────────────────────────────────────
   DEV_AUTH_BYPASS: _isDevelopment && process.env.DEV_AUTH_BYPASS === "true",
   DEV_AUTH_OPEN_ID: process.env.DEV_AUTH_OPEN_ID ?? "local-dev-user",

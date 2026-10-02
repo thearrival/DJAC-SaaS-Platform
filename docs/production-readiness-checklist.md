@@ -129,6 +129,7 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | billing                             | present                                           |
 | `SMTP_*`                                      | email                               | present (rotate pass)                             |
 | `SENTRY_DSN`                                  | monitoring                          | present                                           |
+| `DEEPSEEK_API_KEY`                            | AI provider (chat, agents)          | optional — preferred; falls back to Forge         |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`   | Google SSO                          | present (rotate secret)                           |
 | `REDIS_URL`                                   | distributed rate limiting           | OPTIONAL (Postgres fallback active)               |
 | `AGENT_SWARM_TOKEN`                           | auth for AI swarm egress            | **MISSING (only if swarm used)**                  |

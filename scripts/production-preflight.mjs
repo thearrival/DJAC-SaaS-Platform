@@ -239,6 +239,12 @@ addRecommended(
 );
 
 addRecommended(
+  "LLM_PROVIDER",
+  has("DEEPSEEK_API_KEY") || has("BUILT_IN_FORGE_API_KEY"),
+  "An LLM provider key is required for the AI compliance chat and AI agents (DEEPSEEK_API_KEY preferred; falls back to BUILT_IN_FORGE_API_KEY)."
+);
+
+addRecommended(
   "SMTP_HOST",
   has("SMTP_HOST"),
   "SMTP_HOST is recommended for trial reminders and report delivery."

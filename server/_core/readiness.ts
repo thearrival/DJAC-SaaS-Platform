@@ -222,6 +222,8 @@ function checkIntegrations() {
     configured(ENV.supabaseUrl) && configured(ENV.supabaseAnonKey);
   const email = configured(ENV.smtpHost) && configured(ENV.smtpUser);
   const observability = configured(ENV.sentryDsn);
+  const deepseek = configured(ENV.deepseekApiKey);
+  const forge = configured(ENV.forgeApiKey);
 
   return {
     googleSso: {
@@ -248,6 +250,14 @@ function checkIntegrations() {
         ? "Sentry error reporting configured."
         : "Sentry not configured.",
     },
+    llm: {
+      configured: deepseek || forge,
+      details: deepseek
+        ? `LLM provider: DeepSeek (${ENV.deepseekModel}).`
+        : forge
+          ? "LLM provider: Forge gateway."
+          : "No LLM provider configured (set DEEPSEEK_API_KEY or BUILT_IN_FORGE_API_KEY).",
+    },
   };
 }
 
@@ -265,6 +275,7 @@ export async function getSystemReadiness() {
     queueMode: ENV.aiQueueMode,
     websocketPath: ENV.aiWebsocketPath,
     agentSwarmConfigured: ENV.agentSwarmBaseUrl.trim().length > 0,
+    llmProvider: ENV.deepseekApiKey ? "deepseek" : "forge",
   };
 
   const scaling = evaluateScalingReadiness({

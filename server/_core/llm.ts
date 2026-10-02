@@ -214,16 +214,51 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
-
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
+type LlmProvider = {
+  name: "deepseek" | "forge";
+  url: string;
+  apiKey: string;
+  model: string;
+  maxTokensLimit: number;
+  supportsThinking: boolean;
 };
+
+/**
+ * Select the active LLM provider. DeepSeek (when `DEEPSEEK_API_KEY` is set)
+ * takes priority; otherwise we fall back to the built-in Forge gateway. Both
+ * speak the OpenAI chat-completions protocol.
+ */
+export function resolveLlmProvider(): LlmProvider {
+  if (ENV.deepseekApiKey) {
+    return {
+      name: "deepseek",
+      url: `${ENV.deepseekBaseUrl}/chat/completions`,
+      apiKey: ENV.deepseekApiKey,
+      model: ENV.deepseekModel || "deepseek-chat",
+      maxTokensLimit: 8192,
+      supportsThinking: false,
+    };
+  }
+
+  const forgeUrl =
+    ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+      ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+      : "https://forge.manus.im/v1/chat/completions";
+
+  return {
+    name: "forge",
+    url: forgeUrl,
+    apiKey: ENV.forgeApiKey,
+    model: "gemini-2.5-flash",
+    maxTokensLimit: 32768,
+    supportsThinking: true,
+  };
+}
+
+/** Human-readable provider label for readiness/telemetry. */
+export function llmProviderName(): string {
+  return resolveLlmProvider().name;
+}
 
 const normalizeResponseFormat = ({
   responseFormat,
@@ -271,7 +306,12 @@ const normalizeResponseFormat = ({
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
+  const provider = resolveLlmProvider();
+  if (!provider.apiKey) {
+    throw new Error(
+      "No LLM provider configured: set DEEPSEEK_API_KEY (or BUILT_IN_FORGE_API_KEY)."
+    );
+  }
 
   const {
     messages,
@@ -287,7 +327,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: provider.model,
     messages: messages.map(normalizeMessage),
   };
 
@@ -308,11 +348,14 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     typeof requestedMaxTokens === "number" &&
     Number.isFinite(requestedMaxTokens) &&
     requestedMaxTokens > 0
-      ? Math.min(Math.floor(requestedMaxTokens), 32768)
-      : 32768;
-  payload.thinking = {
-    budget_tokens: 128,
-  };
+      ? Math.min(Math.floor(requestedMaxTokens), provider.maxTokensLimit)
+      : provider.maxTokensLimit;
+
+  if (provider.supportsThinking) {
+    payload.thinking = {
+      budget_tokens: 128,
+    };
+  }
 
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
@@ -321,15 +364,23 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     output_schema,
   });
 
-  if (normalizedResponseFormat) {
-    payload.response_format = normalizedResponseFormat;
+  // DeepSeek supports json_object but not json_schema; degrade gracefully so
+  // callers still get JSON rather than a rejected request.
+  const effectiveResponseFormat =
+    provider.name === "deepseek" &&
+    normalizedResponseFormat?.type === "json_schema"
+      ? ({ type: "json_object" } as const)
+      : normalizedResponseFormat;
+
+  if (effectiveResponseFormat) {
+    payload.response_format = effectiveResponseFormat;
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetch(provider.url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${provider.apiKey}`,
     },
     body: JSON.stringify(payload),
   });
