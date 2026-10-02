@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
@@ -294,9 +294,36 @@ export default function Dashboard() {
   });
   const moduleSummary = moduleSummaryQuery.data;
 
-  const frameworks = frameworksQuery.data;
-  const matrix = matrixQuery.data;
+  // Jurisdiction scoping: show only the frameworks/matrix relevant to the
+  // user's selected market instead of every jurisdiction at once.
+  const [jurisdictionFilter, setJurisdictionFilter] = useState<string>("all");
+
+  const allFrameworks = frameworksQuery.data;
+  const allMatrix = matrixQuery.data;
   const timetable = timetableQuery.data;
+
+  const jurisdictionOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const f of allFrameworks ?? []) if (f.country) set.add(f.country);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allFrameworks]);
+
+  const frameworks = useMemo(() => {
+    if (!allFrameworks || jurisdictionFilter === "all") return allFrameworks;
+    return allFrameworks.filter(f => f.country === jurisdictionFilter);
+  }, [allFrameworks, jurisdictionFilter]);
+
+  const scopedCodes = useMemo(
+    () => new Set((frameworks ?? []).map(f => f.code)),
+    [frameworks]
+  );
+
+  const matrix = useMemo(() => {
+    if (!allMatrix || jurisdictionFilter === "all") return allMatrix;
+    return allMatrix.filter(
+      row => scopedCodes.has(row.source) || scopedCodes.has(row.target)
+    );
+  }, [allMatrix, jurisdictionFilter, scopedCodes]);
   const fwLoading = frameworksQuery.isLoading;
   const frameworksError = frameworksQuery.error;
   const matrixError = matrixQuery.error;
@@ -538,6 +565,38 @@ export default function Dashboard() {
                 "Monitor and detect compliance drift across global cross-border operations"
               )}
             </p>
+            <label
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                marginTop: 12,
+                fontSize: 12,
+                color: C.muted,
+              }}
+            >
+              {t("admin.jurisdictions", "Jurisdictions")}:
+              <select
+                aria-label={t("admin.jurisdictions", "Jurisdictions")}
+                value={jurisdictionFilter}
+                onChange={e => setJurisdictionFilter(e.target.value)}
+                style={{
+                  background: "transparent",
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 8,
+                  color: C.text,
+                  fontSize: 12,
+                  padding: "6px 10px",
+                }}
+              >
+                <option value="all">{t("common.all", "All")}</option>
+                {jurisdictionOptions.map(c => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
           <div style={{ display: "flex", gap: 9, flexWrap: "wrap" }}>
             {[
