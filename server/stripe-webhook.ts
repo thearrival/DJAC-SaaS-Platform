@@ -28,6 +28,7 @@ import { getDb } from "./db";
 import { organizations, subscriptions, billingEvents } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { getStripe, PRICE_CATALOG } from "./billing";
+import { emailService } from "./email/service";
 
 type StripeSubscriptionStatus =
   | "trialing"
@@ -259,6 +260,30 @@ export async function processStripeEvent(
         .update(billingEvents)
         .set({ status: "success" })
         .where(eq(billingEvents.stripeEventId, event.id));
+
+      // Confirmation email to the customer (fire-and-forget — never fails the webhook).
+      const customerEmail =
+        (session.customer_details?.email as string | undefined) ??
+        (session.customer_email as string | undefined) ??
+        null;
+      if (customerEmail) {
+        const [orgRow] = await db
+          .select({ name: organizations.name })
+          .from(organizations)
+          .where(eq(organizations.id, orgId))
+          .limit(1);
+        void emailService
+          .sendSubscriptionConfirmed(
+            {
+              name:
+                (session.customer_details?.name as string | undefined) ?? null,
+              email: customerEmail,
+            },
+            `${plan} (${interval})`,
+            orgRow?.name ?? null
+          )
+          .catch(() => {});
+      }
       break;
     }
 

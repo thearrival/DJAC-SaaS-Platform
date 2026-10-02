@@ -207,6 +207,44 @@ export const emailService = {
       "security-alert"
     );
   },
+
+  /** Sent after a successful password change (security notification). */
+  async sendPasswordChanged(user: EmailUser, when: string) {
+    const html = baseTemplate(`
+      <h2>Your password was changed</h2>
+      <p>The password for your DJAC account <strong>${user.email || "unknown"}</strong> was changed on ${when}.</p>
+      <p>If you made this change, no action is needed. If you did not, reset your password immediately and contact support.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/forgot-password" class="btn" style="background:#dc2626;">Reset Password →</a>
+      <p style="margin-top:12px;font-size:11px;color:#94a3b8;">Automated security notification. Contact hello@yalla-hack.com for support.</p>
+    `);
+    return send(
+      user,
+      "Your DJAC password was changed",
+      html,
+      "password-changed"
+    );
+  },
+
+  /** Sent after a subscription becomes active (Stripe checkout completed). */
+  async sendSubscriptionConfirmed(
+    user: EmailUser,
+    planName: string,
+    orgName?: string | null
+  ) {
+    const html = baseTemplate(`
+      <h2>Subscription confirmed</h2>
+      <p>Thanks, ${user.name || "there"}! Your <strong>${planName}</strong> subscription${orgName ? ` for <strong>${orgName}</strong>` : ""} is now active.</p>
+      <p>You have full access to DJAC&rsquo;s compliance, risk, vendor, audit and reporting modules across every supported jurisdiction.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/billing" class="btn">Manage Billing →</a>
+      <p style="margin-top:12px;font-size:11px;color:#94a3b8;">Your receipt is available in billing settings.</p>
+    `);
+    return send(
+      user,
+      "Your DJAC subscription is active",
+      html,
+      "subscription-confirmed"
+    );
+  },
 };
 
 async function send(

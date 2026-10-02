@@ -34,6 +34,7 @@ import { sendEmail } from "./email";
 import { recordAuditEvent } from "./audit-logger";
 import { broadcastSSE } from "./services/sse-bus";
 import { notifyLogin } from "./services/login-notification";
+import { emailService } from "./email/service";
 import { APP_LOCALES, hasMinRole } from "../shared/const";
 import {
   LOCAL_AUTH_COOKIE,
@@ -612,6 +613,13 @@ export const localAuthRouter = router({
 
       const newHash = await bcrypt.hash(input.newPassword, BCRYPT_ROUNDS);
       await updateLocalUserPassword(userId, newHash);
+      // Security notification (fire-and-forget — never blocks the response).
+      void emailService
+        .sendPasswordChanged(
+          { name: user.name ?? null, email: user.email ?? null },
+          new Date().toISOString()
+        )
+        .catch(() => {});
       void recordAuditEvent(ctx, {
         category: "auth",
         action: "password.change",
