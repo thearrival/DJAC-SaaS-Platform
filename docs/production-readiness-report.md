@@ -52,15 +52,15 @@ integration reporting; AI-queue mode correctness.
 
 ## D. Security
 
-| Item                     | Status                      | Evidence                                                                                  |
-| ------------------------ | --------------------------- | ----------------------------------------------------------------------------------------- |
-| Dependency vulns         | VERIFIED (after staged fix) | `pnpm audit --prod` currently **12 axios advisories → 0 after staged upgrade to ≥1.20.0** |
-| Secret exposure (tree)   | VERIFIED                    | scan clean; two test fixtures used `sk_live_`/`whsec_` patterns (fake) — corrected        |
-| CSP                      | VERIFIED                    | strict hash-synced; `accounts.google.com` absent from main app                            |
-| Internal backdoor routes | VERIFIED                    | `/api/_*` → 404                                                                           |
-| Rate limiting            | TEST-VERIFIED               | `rate-limiter*.test.ts` pass                                                              |
-| AuthN/Z                  | TEST-VERIFIED + VERIFIED    | 96 security tests pass; Google login live                                                 |
-| Secret rotation          | BLOCKED                     | Google client secret + others shared out-of-band; rotation is owner-only                  |
+| Item                     | Status                   | Evidence                                                                           |
+| ------------------------ | ------------------------ | ---------------------------------------------------------------------------------- |
+| Dependency vulns         | VERIFIED (deployed)      | `pnpm audit --prod` **0** after axios ≥1.20.0 upgrade (deployed `330ffa2`)         |
+| Secret exposure (tree)   | VERIFIED                 | scan clean; two test fixtures used `sk_live_`/`whsec_` patterns (fake) — corrected |
+| CSP                      | VERIFIED                 | strict hash-synced; `accounts.google.com` absent from main app                     |
+| Internal backdoor routes | VERIFIED                 | `/api/_*` → 404                                                                    |
+| Rate limiting            | TEST-VERIFIED            | `rate-limiter*.test.ts` pass                                                       |
+| AuthN/Z                  | TEST-VERIFIED + VERIFIED | 96 security tests pass; Google login live                                          |
+| Secret rotation          | BLOCKED                  | Google client secret + others shared out-of-band; rotation is owner-only           |
 
 ## E. Database & API
 
@@ -94,10 +94,9 @@ integration reporting; AI-queue mode correctness.
 - Webhook signature + idempotency + entitlements: TEST-VERIFIED.
 - Live/sandbox charge flow: **BLOCKED** (no sandbox run performed).
 
-## I. Staged changes (implemented, tested, NOT yet committed/deployed)
+## I. Fixes applied (committed & deployed — `330ffa2`)
 
-Per §7 (do not commit without authorization), these fixes are on disk, green
-(`pnpm verify:all` 696 passed), and awaiting authorization to commit + deploy:
+Green (`pnpm verify:all` 696 passed) and live:
 
 - **`axios` ^1.18.0 → ^1.20.0** — clears 12 production advisories (security).
 - `scripts/i18n-report.mjs` — repaired after the catalog split (now 9 locales / 100 %).
@@ -139,12 +138,12 @@ Per §7 (do not commit without authorization), these fixes are on disk, green
 
 ## M. Production blockers (unresolved)
 
-1. **DJAC-SEC-001 (until deployed):** the axios security upgrade is staged but
-   not live → production still runs the vulnerable version.
-2. **DJAC-SEC-003:** leaked/shared secrets not yet rotated (Google client secret;
+1. **DJAC-SEC-003:** leaked/shared secrets not yet rotated (Google client secret;
    earlier SMTP/i18n/Hostinger).
-3. **DJAC-DR-001:** recovery is **not proven** — the restore drill has not been
+2. **DJAC-DR-001:** recovery is **not proven** — the restore drill has not been
    executed against a scratch database.
+
+_(DJAC-SEC-001 — undeloyed axios fix — is resolved: deployed in `330ffa2`.)_
 
 ## N. Unverified items (and what unlocks each)
 
@@ -175,11 +174,12 @@ Per §7 (do not commit without authorization), these fixes are on disk, green
 **Rationale (evidence-based):** while the platform is live and the vast
 majority of controls are verified, the mandate’s release gate is not met:
 
-- a **known security fix is not deployed** (DJAC-SEC-001),
 - **recovery is not demonstrated** (DJAC-DR-001 — “a backup existing does not
   prove recoverability”),
 - **shared secrets are not rotated** (DJAC-SEC-003),
 - **regulatory provenance is unverified** (DJAC-REG-001).
+
+_(The undeloyed-security-fix blocker was cleared in `330ffa2`.)_
 
 **Fastest path to PRODUCTION READY** (all small, mostly owner-actions):
 
