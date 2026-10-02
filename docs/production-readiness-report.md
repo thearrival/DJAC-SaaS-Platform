@@ -123,37 +123,38 @@ Green (`pnpm verify:all` 696 passed) and live:
 
 ## L. Remaining issues (findings)
 
-| ID            | Finding                                              | Severity | Status                         |
-| ------------- | ---------------------------------------------------- | -------- | ------------------------------ |
-| DJAC-SEC-001  | `axios` 1.19 advisories                              | High     | **FIXED (staged, undeployed)** |
-| DJAC-DATA-001 | `smoke:runtime` left 20 test users in prod           | Medium   | **CLEANED + tool added**       |
-| DJAC-OPS-001  | i18n report broken by catalog split                  | Low      | **FIXED**                      |
-| DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20         | Low      | **FIXED**                      |
-| DJAC-SEC-002  | test fixtures matched `sk_live_` pattern             | Info     | **FIXED**                      |
-| DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)     | Info     | Documented                     |
-| DJAC-SEC-003  | Google client secret shared out-of-band              | High     | BLOCKED (owner rotation)       |
-| DJAC-DR-001   | Restore drill not executed                           | High     | BLOCKED (needs scratch DB)     |
-| DJAC-DR-002   | Supabase PITR off; no backup timestamps historically | Medium   | BLOCKED (plan)                 |
-| DJAC-REG-001  | Regulatory provenance unverified                     | Medium   | BLOCKED (owner data)           |
+| ID            | Finding                                                     | Severity | Status                                                         |
+| ------------- | ----------------------------------------------------------- | -------- | -------------------------------------------------------------- |
+| DJAC-SEC-001  | `axios` 1.19 advisories                                     | High     | **FIXED (staged, undeployed)**                                 |
+| DJAC-DATA-001 | `smoke:runtime` left 20 test users in prod                  | Medium   | **CLEANED + tool added**                                       |
+| DJAC-OPS-001  | i18n report broken by catalog split                         | Low      | **FIXED**                                                      |
+| DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20                | Low      | **FIXED**                                                      |
+| DJAC-SEC-002  | test fixtures matched `sk_live_` pattern                    | Info     | **FIXED**                                                      |
+| DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)            | Info     | Documented                                                     |
+| DJAC-SEC-003  | Google client secret shared out-of-band                     | High     | BLOCKED (owner rotation)                                       |
+| DJAC-DR-001   | Restore drill                                               | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**        |
+| DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`) | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`) |
+| DJAC-DR-002   | Supabase PITR off; no backup timestamps historically        | Medium   | BLOCKED (plan)                                                 |
+| DJAC-REG-001  | Regulatory provenance unverified                            | Medium   | BLOCKED (owner data)                                           |
 
 ## M. Production blockers (unresolved)
 
 1. **DJAC-SEC-003:** leaked/shared secrets not yet rotated (Google client secret;
    earlier SMTP/i18n/Hostinger).
-2. **DJAC-DR-001:** recovery is **not proven** — the restore drill has not been
-   executed against a scratch database.
 
-_(DJAC-SEC-001 — undeloyed axios fix — is resolved: deployed in `330ffa2`.)_
+_(DJAC-SEC-001 — undeloyed axios fix — resolved in `330ffa2`. DJAC-DR-001 —
+restore drill — resolved: executed 2026-10-02 with all row counts matching.
+DJAC-BKP-001 — wrong backup table name — fixed.)_
 
 ## N. Unverified items (and what unlocks each)
 
-- **Restore drill execution** — needs a scratch/read-only Postgres URL.
 - **Live/sandbox Stripe charge + webhook replay** — needs Stripe sandbox keys.
 - **Email delivery confirmation** — needs a mailbox/allowlisted recipient.
 - **AI/Forge connectivity + cost controls proof** — needs provider credentials.
 - **Secret rotation** — owner Google Cloud / provider consoles.
 - **Supabase PITR / off-site pg_dump activation** — plan + `DATABASE_URL` GitHub secret.
 - **Broad visual/response sweep across all routes/roles** — needs authenticated owner creds.
+- **Repeat restore drill against a separate scratch database** (schema drill passed).
 
 ## O. Operational handover (prepared)
 
@@ -174,20 +175,16 @@ _(DJAC-SEC-001 — undeloyed axios fix — is resolved: deployed in `330ffa2`.)_
 **Rationale (evidence-based):** while the platform is live and the vast
 majority of controls are verified, the mandate’s release gate is not met:
 
-- **recovery is not demonstrated** (DJAC-DR-001 — “a backup existing does not
-  prove recoverability”),
 - **shared secrets are not rotated** (DJAC-SEC-003),
 - **regulatory provenance is unverified** (DJAC-REG-001).
 
-_(The undeloyed-security-fix blocker was cleared in `330ffa2`.)_
+_(Blockers cleared this engagement: undeloyed security fix — `330ffa2`;
+restore drill — executed 2026-10-02 with all counts matching.)_
 
 **Fastest path to PRODUCTION READY** (all small, mostly owner-actions):
 
-1. Authorize commit + deploy of the staged fixes (clears DJAC-SEC-001).
-2. Rotate the Google client secret (and the earlier shared secrets).
-3. Provide a scratch DB URL → execute + record the restore drill.
-4. Enable Supabase PITR **or** add the `DATABASE_URL` GitHub secret for off-site dumps.
-5. Populate the provenance registry (or accept the “unverified” labeling).
+1. Rotate the Google client secret (and the earlier shared secrets).
+2. Enable Supabase PITR **or** add the `DATABASE_URL` GitHub secret for off-site dumps.
+3. Populate the provenance registry (or accept the “unverified” labeling).
 
-Nothing above requires re-architecture; items 1, 3 are code/ops I can execute
-immediately once authorized or supplied.
+Nothing above requires re-architecture.

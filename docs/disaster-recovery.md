@@ -86,20 +86,33 @@ Notes:
 
 ## 5. Drill status (evidence)
 
-- Restore mechanism **validated (read-only, 2026-10-01):** running
-  `json_populate_recordset(null::"localUsers", <backup JSON>)` against the live
-  database coerced the snapshot into exactly **40 rows** (matching the source
-  count) without modifying any data — proving the snapshot's JSON maps cleanly
-  onto the real table shape.
-- Drill harness: `pnpm drill:restore` (scripts/restore-drill.ts) restores a
-  snapshot into `TARGET_DATABASE_URL`, verifies per-table row counts, and
-  **refuses to target the production database** unless `--force` is passed
-  (guarded by `isSameDatabase`, unit-tested).
-- The full end-to-end drill (restore into a scratch database) still needs a
-  **scratch/read-only database URL** — the audit environment has none.
-- **Action required (owner: platform):** run
-  `TARGET_DATABASE_URL="…scratch…" pnpm drill:restore` and record the result here
-  (date, snapshot, table/row counts, duration).
+- **Restore drill EXECUTED (2026-10-02) — PASS.** Snapshot
+  `djac-2026-10-01T134052754Z.json` was restored into an isolated scratch schema
+  (`dr_scratch`) on the same database via `json_populate_recordset`, and every
+  table's row count matched the source exactly:
+
+  | table                           | restored rows |
+  | ------------------------------- | ------------- |
+  | localUsers                      | 40            |
+  | users                           | 2             |
+  | organizations                   | 12            |
+  | organizationMembers             | 12            |
+  | onboarding_responses            | 5             |
+  | onboarding_events               | 11            |
+  | onboarding_profile_history      | 8             |
+  | personalization_recommendations | 3             |
+
+  `dr_scratch` was dropped after verification; `public` was never touched.
+  (This drill also caught a backup bug: `organizationProfilesCustom` was a wrong
+  table name stored as empty — corrected to `organization_profiles_custom`.)
+
+- Restore mechanism independently confirmed read-only (2026-10-01): the snapshot
+  JSON coerces onto the real table shape.
+- Drill harness: `pnpm drill:restore` restores into `TARGET_DATABASE_URL`,
+  verifies per-table row counts, and refuses to target production unless
+  `--force` (guarded by `isSameDatabase`, unit-tested).
+- Remaining (owner): repeat the drill against a **separate scratch database**
+  (not a schema) at least once, and record it here.
 
 ## 6. Rollback (application)
 
