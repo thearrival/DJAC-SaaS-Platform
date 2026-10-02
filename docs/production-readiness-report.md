@@ -123,20 +123,21 @@ Green (`pnpm verify:all` 696 passed) and live:
 
 ## L. Remaining issues (findings)
 
-| ID            | Finding                                                       | Severity | Status                                                                                    |
-| ------------- | ------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| DJAC-SEC-001  | `axios` 1.19 advisories                                       | High     | **FIXED (staged, undeployed)**                                                            |
-| DJAC-DATA-001 | `smoke:runtime` left 20 test users in prod                    | Medium   | **CLEANED + tool added**                                                                  |
-| DJAC-OPS-001  | i18n report broken by catalog split                           | Low      | **FIXED**                                                                                 |
-| DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20                  | Low      | **FIXED**                                                                                 |
-| DJAC-SEC-002  | test fixtures matched `sk_live_` pattern                      | Info     | **FIXED**                                                                                 |
-| DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)              | Info     | Documented                                                                                |
-| DJAC-SEC-003  | Shared secrets rotation                                       | High     | PARTIAL — Google secret rotated 2026-10-02; SMTP/Hostinger pending                        |
-| DJAC-DR-001   | Restore drill                                                 | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**                                   |
-| DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`)   | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`)                            |
-| DJAC-DR-002   | Supabase PITR off; no backup timestamps historically          | Medium   | BLOCKED (plan)                                                                            |
-| DJAC-REG-001  | Regulatory provenance unverified                              | Medium   | **MITIGATED** — sources now visibly labeled in-product; data population still owner-gated |
-| DJAC-SEC-004  | Private app routes indexable (`index, follow` on every route) | Low      | **FIXED** — robots.txt expanded + client robots-meta policy + test                        |
+| ID            | Finding                                                                                        | Severity | Status                                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| DJAC-SEC-001  | `axios` 1.19 advisories                                                                        | High     | **FIXED (staged, undeployed)**                                                                           |
+| DJAC-DATA-001 | `smoke:runtime` left 20 test users in prod                                                     | Medium   | **CLEANED + tool added**                                                                                 |
+| DJAC-OPS-001  | i18n report broken by catalog split                                                            | Low      | **FIXED**                                                                                                |
+| DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20                                                   | Low      | **FIXED**                                                                                                |
+| DJAC-SEC-002  | test fixtures matched `sk_live_` pattern                                                       | Info     | **FIXED**                                                                                                |
+| DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)                                               | Info     | Documented                                                                                               |
+| DJAC-SEC-003  | Shared secrets rotation                                                                        | High     | PARTIAL — Google secret rotated 2026-10-02; SMTP/Hostinger pending                                       |
+| DJAC-DR-001   | Restore drill                                                                                  | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**                                                  |
+| DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`)                                    | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`)                                           |
+| DJAC-DR-002   | Supabase PITR off; no backup timestamps historically                                           | Medium   | BLOCKED (plan)                                                                                           |
+| DJAC-REG-001  | Regulatory provenance unverified                                                               | Medium   | **MITIGATED** — sources now visibly labeled in-product; data population still owner-gated                |
+| DJAC-SEC-004  | Private app routes indexable (`index, follow` on every route)                                  | Low      | **FIXED** — robots.txt expanded + client robots-meta policy + test                                       |
+| DJAC-DATA-002 | Production test-account residue (OTP/A-Z users, Stripe E2E org, orphan smoke org, "Live Test") | Low      | PARTIAL — Group A + orphan smoke purged 2026-10-02; "Live Test" (@yalla-hack.com) kept by owner decision |
 
 ## M. Production blockers (unresolved)
 
@@ -145,6 +146,13 @@ Green (`pnpm verify:all` 696 passed) and live:
    - i18n job token: **dead** — its endpoint file was removed (0 references); no action needed.
    - Hostinger API key: **not used by the running app** (only a test-script
      assertion references it); revoke in hPanel for hygiene.
+
+_(DJAC-DATA-002 — production test-account residue — audited 2026-10-02:
+`smoke:cleanup` was fixed to remove the whole smoke graph (organizations,
+members, onboarding rows, `userInteractionLogs` that FK-blocked the org delete),
+the orphan `Smoke Runtime Organization` was removed, and the owner authorised
+purging Group A (`localUsers` 29/30/31 + `Stripe E2E Organization`, 20 rows).
+The `@yalla-hack.com` "Live Test" accounts were retained by owner decision.)_
 
 _(DJAC-SEC-001 — undeloyed axios fix — resolved in `330ffa2`. DJAC-DR-001 —
 restore drill — resolved: executed 2026-10-02 with all row counts matching.
