@@ -38,3 +38,22 @@ export function initialiseSentry(): void {
 export function sentryErrorHandler() {
   return Sentry.expressErrorHandler();
 }
+
+/**
+ * Report a handled error to Sentry without throwing.
+ *
+ * For failures the craft intentionally swallows (e.g. transactional email
+ * delivery, which must never break the request), this ensures the failure is
+ * still visible to operators instead of only appearing in logs. No-op when
+ * Sentry is not configured.
+ */
+export function captureError(
+  error: unknown,
+  context?: Record<string, unknown>
+): void {
+  try {
+    Sentry.captureException(error, context ? { extra: context } : undefined);
+  } catch {
+    // Telemetry must never throw.
+  }
+}

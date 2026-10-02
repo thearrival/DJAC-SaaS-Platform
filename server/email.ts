@@ -7,6 +7,7 @@ import nodemailer from "nodemailer";
 import { sql } from "drizzle-orm";
 import { ENV } from "./_core/env";
 import { getDb } from "./db";
+import { captureError } from "./_core/sentry";
 
 export interface EmailPayload {
   to: string;
@@ -98,6 +99,11 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
       `[EMAIL] Failed to send to ${payload.to}:`,
       (err as Error).message
     );
+    captureError(err, {
+      area: "email",
+      to: payload.to,
+      subject: payload.subject,
+    });
     // Log the content so it can be retrieved from logs if needed
     console.info(
       `[EMAIL] Content (not delivered): ${payload.subject} — ${payload.text ?? ""}`.slice(

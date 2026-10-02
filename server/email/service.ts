@@ -11,6 +11,7 @@
  */
 
 import { createTransport } from "nodemailer";
+import { captureError } from "../_core/sentry";
 import { sql } from "drizzle-orm";
 import type { User } from "../../drizzle/schema";
 import type { Organization } from "../../drizzle/schema";
@@ -244,6 +245,7 @@ async function send(
     });
   } catch (e) {
     console.error(`[Email] Failed to send ${template}:`, e);
+    captureError(e, { area: "email", template, recipient: email });
     await logEmailDelivery({
       template,
       recipient: email,
@@ -288,6 +290,7 @@ async function sendTo(
     });
   } catch (e) {
     console.error(`[Email] Failed to send ${template}:`, e);
+    captureError(e, { area: "email", template, recipient: email });
     await logEmailDelivery({
       template,
       recipient: email,
