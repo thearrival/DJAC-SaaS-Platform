@@ -36,7 +36,8 @@
     "yalla-admin:link": "node scripts/generate-yalla-admin-link.mjs",
     "prepare": "husky",
     "drill:restore": "tsx scripts/restore-drill.ts",
-    "smoke:cleanup": "node scripts/smoke-cleanup.mjs"
+    "smoke:cleanup": "node scripts/smoke-cleanup.mjs",
+    "provenance:signoff": "tsx scripts/provenance-signoff.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",

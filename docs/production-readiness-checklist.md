@@ -76,11 +76,17 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
   the issuing authority's own domain (EUR-Lex ELI returns 202; HHS blocks
   automated fetch with 403). This is an availability/correctness check — it is
   **not** the human legal review that `verified` represents.
+- **Version + effective-date candidates sourced 2026-10-02** for all 107
+  frameworks (derived from the official publication designations). These are
+  candidates for the reviewer to confirm, not verified facts.
 - **Remaining (human step):** the designated reviewer confirms each source,
-  version, and effective date, then flips the entry to `status: "verified"` with
-  their name (`verifiedBy`) and review date (`lastVerified`). Only then does the
-  UI stop showing the "verification in progress" notice. No legal source is
-  fabricated, and no machine may self-attest a human review.
+  version, and effective date, then runs
+  `pnpm provenance:signoff -- --reviewer "Nelson Chan" --confirm`. That flips
+  `pending_review` → `verified`, recording the reviewer name and date; only then
+  does the UI stop showing the "verification in progress" notice. The tool
+  refuses to run without `--reviewer`/`--confirm` and refuses if any citation is
+  missing a source/version/effective date — it never invents data, and no
+  machine may self-attest a human review.
 
 ### 1.5 Product decisions (confirm)
 
