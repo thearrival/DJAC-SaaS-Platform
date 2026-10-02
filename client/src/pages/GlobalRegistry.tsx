@@ -26,6 +26,7 @@ import {
   MapPin,
   LoaderCircle,
   Network,
+  AlertTriangle,
 } from "lucide-react";
 
 const REGION_COLORS: Record<string, string> = {
@@ -195,6 +196,20 @@ export default function GlobalRegistry() {
             value={summary.agents}
             icon={BookOpen}
           />
+        </div>
+      )}
+
+      {summary?.provenance && !summary.provenance.fullyVerified && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-foreground">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+          <p className="leading-relaxed">
+            <strong>Source verification is in progress.</strong>{" "}
+            {summary.provenance.verified} of {summary.provenance.total}{" "}
+            framework citations currently carry a verified official source.
+            Regulatory content here supports compliance planning only — it is
+            not legal advice and must be confirmed against the official
+            regulator before reliance.
+          </p>
         </div>
       )}
 
