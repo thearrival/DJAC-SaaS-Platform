@@ -72,6 +72,10 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
   Act, NIS2, DORA, PIPEDA, LGPD) are recorded as `pending_review` with
   **Nelson Chan** as the `DESIGNATED_REVIEWER`. Drafts are NOT citable and do
   not count toward `fullyVerified`.
+- **Machine source-check 2026-10-02 (automated fetch):** all 11 URLs resolve to
+  the issuing authority's own domain (EUR-Lex ELI returns 202; HHS blocks
+  automated fetch with 403). This is an availability/correctness check — it is
+  **not** the human legal review that `verified` represents.
 - **Remaining (human step):** the designated reviewer confirms each source,
   version, and effective date, then flips the entry to `status: "verified"` with
   their name (`verifiedBy`) and review date (`lastVerified`). Only then does the
