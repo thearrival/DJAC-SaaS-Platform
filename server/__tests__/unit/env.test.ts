@@ -339,8 +339,8 @@ describe("evaluateStripeBillingConfig", () => {
 
   it("should return enabled and ready when all fields are set", () => {
     const result = evaluateStripeBillingConfig({
-      STRIPE_SECRET_KEY: "sk_live_xxx",
-      STRIPE_WEBHOOK_SECRET: "whsec_xxx",
+      STRIPE_SECRET_KEY: "sk_test_xxx",
+      STRIPE_WEBHOOK_SECRET: "whsec_test_xxx",
       STRIPE_PRICE_STARTER_MONTHLY: "price_starter_monthly",
       STRIPE_PRICE_STARTER_QUARTERLY: "price_starter_quarterly",
       STRIPE_PRICE_STARTER_BIANNUAL: "price_starter_biannual",
@@ -361,7 +361,7 @@ describe("evaluateStripeBillingConfig", () => {
 
   it("should report partially configured when secret key is missing", () => {
     const result = evaluateStripeBillingConfig({
-      STRIPE_WEBHOOK_SECRET: "whsec_xxx",
+      STRIPE_WEBHOOK_SECRET: "whsec_test_xxx",
       STRIPE_PRICE_STARTER_MONTHLY: "price_starter_monthly",
     });
     expect(result.enabled).toBe(true);
@@ -372,7 +372,7 @@ describe("evaluateStripeBillingConfig", () => {
 
   it("should report partially configured when webhook secret is missing", () => {
     const result = evaluateStripeBillingConfig({
-      STRIPE_SECRET_KEY: "sk_live_xxx",
+      STRIPE_SECRET_KEY: "sk_test_xxx",
       STRIPE_PRICE_STARTER_MONTHLY: "price_starter_monthly",
     });
     expect(result.enabled).toBe(true);
@@ -383,8 +383,8 @@ describe("evaluateStripeBillingConfig", () => {
 
   it("should report missing price IDs when not configured", () => {
     const result = evaluateStripeBillingConfig({
-      STRIPE_SECRET_KEY: "sk_live_xxx",
-      STRIPE_WEBHOOK_SECRET: "whsec_xxx",
+      STRIPE_SECRET_KEY: "sk_test_xxx",
+      STRIPE_WEBHOOK_SECRET: "whsec_test_xxx",
     });
     expect(result.enabled).toBe(true);
     expect(result.ready).toBe(false);

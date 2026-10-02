@@ -171,7 +171,7 @@ describe("evaluateStripeBillingConfig", () => {
   it("should detect partial configuration with missing keys", () => {
     const result = evaluateStripeBillingConfig({
       STRIPE_SECRET_KEY: "sk_test_xxx",
-      STRIPE_WEBHOOK_SECRET: "whsec_xxx",
+      STRIPE_WEBHOOK_SECRET: "whsec_test_xxx",
     });
     expect(result.enabled).toBe(true);
     expect(result.ready).toBe(false);
@@ -185,7 +185,7 @@ describe("evaluateStripeBillingConfig", () => {
   it("should be ready when all Stripe config is present", () => {
     const env: StripeEnvLike = {
       STRIPE_SECRET_KEY: "sk_test_xxx",
-      STRIPE_WEBHOOK_SECRET: "whsec_xxx",
+      STRIPE_WEBHOOK_SECRET: "whsec_test_xxx",
     };
     for (const key of STRIPE_PRICE_ENV_KEYS) {
       env[key] = `price_${key.toLowerCase()}`;
@@ -200,7 +200,7 @@ describe("evaluateStripeBillingConfig", () => {
 
   it("should report partially configured when only secret key is missing", () => {
     const env: StripeEnvLike = {
-      STRIPE_WEBHOOK_SECRET: "whsec_xxx",
+      STRIPE_WEBHOOK_SECRET: "whsec_test_xxx",
     };
     for (const key of STRIPE_PRICE_ENV_KEYS) {
       env[key] = `price_${key.toLowerCase()}`;
@@ -223,7 +223,7 @@ describe("evaluateStripeBillingConfig", () => {
   it("should count only non-empty price keys", () => {
     const env: StripeEnvLike = {
       STRIPE_SECRET_KEY: "sk_test_xxx",
-      STRIPE_WEBHOOK_SECRET: "whsec_xxx",
+      STRIPE_WEBHOOK_SECRET: "whsec_test_xxx",
       STRIPE_PRICE_STARTER_MONTHLY: "price_starter_monthly",
       STRIPE_PRICE_PRO_MONTHLY: "price_pro_monthly",
     };

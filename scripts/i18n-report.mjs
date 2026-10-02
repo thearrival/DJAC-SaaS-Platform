@@ -2,7 +2,9 @@
 /**
  * i18n report — localization coverage + translator handoff.
  *
- * Parses client/src/contexts/LocaleContext.tsx and reports, per locale:
+ * Reads the per-locale catalogs in client/src/locales/<locale>.ts (the single
+ * source of truth since the catalogs were split out of LocaleContext) and
+ * reports, per locale:
  *   • how many keys are translated,
  *   • coverage vs. English,
  *   • the exact list of missing keys (with the English source string),
@@ -17,30 +19,19 @@ import fs from "node:fs";
 import path from "node:path";
 
 const LOCALES = ["en", "ar", "zh", "fr", "es", "de", "ja", "ko", "pt"];
-const SOURCE = path.resolve(
-  process.cwd(),
-  "client/src/contexts/LocaleContext.tsx"
-);
+const LOCALES_DIR = path.resolve(process.cwd(), "client/src/locales");
 const OUT_DIR = path.resolve(process.cwd(), "i18n-missing");
 const asJson = process.argv.includes("--json");
 
-const src = fs.readFileSync(SOURCE, "utf8");
-
-/** Raw source of a single top-level locale block. */
-function block(locale) {
-  const marker = `\n  ${locale}: {`;
-  const start = src.indexOf(marker);
-  if (start === -1) return "";
-  const rest = src.slice(start + marker.length);
-  const next = rest.match(/\n {2}(en|ar|zh|fr|es|de|ja|ko|pt): \{/);
-  return next ? rest.slice(0, next.index) : rest;
-}
-
-/** Map of key -> raw quoted value for a locale. */
+/** Map of key -> raw quoted value for a locale. Handles multi-line values. */
 function entries(locale) {
+  const file = path.join(LOCALES_DIR, `${locale}.ts`);
+  if (!fs.existsSync(file)) return new Map();
+  const src = fs.readFileSync(file, "utf8");
   const out = new Map();
-  for (const m of block(locale).matchAll(
-    /^\s*"([^"]+)"\s*:\s*("(?:[^"\\]|\\.)*")/gm
+  // `\s*` spans newlines, so prettier-wrapped ("key":\n  "value") entries match.
+  for (const m of src.matchAll(
+    /"((?:[^"\\]|\\.)+)"\s*:\s*("(?:[^"\\]|\\.)*")/g
   )) {
     out.set(m[1], m[2]);
   }
@@ -75,7 +66,7 @@ for (const locale of LOCALES) {
 
 if (asJson) {
   console.log(
-    JSON.stringify({ source: SOURCE, report, missingTotal }, null, 2)
+    JSON.stringify({ source: LOCALES_DIR, report, missingTotal }, null, 2)
   );
 } else {
   console.log("=== DJAC i18n coverage ===\n");

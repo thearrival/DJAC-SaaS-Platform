@@ -226,8 +226,10 @@ if (stripeAnyConfigured) {
 const databasePoolSize = Number.parseInt(get("DATABASE_POOL_SIZE") || "0", 10);
 addRecommended(
   "DATABASE_POOL_SIZE",
-  Number.isFinite(databasePoolSize) && databasePoolSize >= 20,
-  "DATABASE_POOL_SIZE >= 20 is recommended for production scale."
+  Number.isFinite(databasePoolSize) &&
+    databasePoolSize >= 1 &&
+    databasePoolSize <= 5,
+  "DATABASE_POOL_SIZE should be 1-5 for this serverless (Vercel) deployment; a larger per-instance pool exhausts the shared connection pooler."
 );
 
 addRecommended(
