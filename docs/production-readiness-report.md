@@ -135,19 +135,22 @@ Green (`pnpm verify:all` 696 passed) and live:
 | DJAC-DR-001   | Restore drill                                                                                  | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**                                                                                                  |
 | DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`)                                    | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`)                                                                                           |
 | DJAC-DR-002   | Supabase PITR off; no backup timestamps historically                                           | Medium   | BLOCKED (plan)                                                                                                                                           |
-| DJAC-REG-001  | Regulatory provenance unverified                                                               | Medium   | IN PROGRESS — 11 official source drafts added as `pending_review` (reviewer: Nelson Chan); sign-off is human-gated                                       |
+| DJAC-REG-001  | Regulatory provenance unverified                                                               | Medium   | **RESOLVED** — owner sign-off 2026-10-02 (`verifiedBy: "Esmail"`); 107/107 verified, live `fullyVerified: true`                                          |
 | DJAC-SEC-004  | Private app routes indexable (`index, follow` on every route)                                  | Low      | **FIXED** — robots.txt expanded + client robots-meta policy + test                                                                                       |
 | DJAC-DATA-002 | Production test-account residue (OTP/A-Z users, Stripe E2E org, orphan smoke org, "Live Test") | Low      | PARTIAL — Group A + orphan smoke purged 2026-10-02; "Live Test" (@yalla-hack.com) kept by owner decision                                                 |
 
 ## M. Production blockers (unresolved)
 
-1. **Regulatory provenance (DJAC-REG-001)** — the only true blocker; needs a
-   named human reviewer's citations (checklist §1.4).
-   - DJAC-SEC-003 **resolved 2026-10-02**: Google client secret + SMTP password
-     rotated; `SMTP_PASS` updated in Vercel and email delivery re-verified.
-   - i18n job token: **dead** — its endpoint file was removed (0 references); no action needed.
-   - Hostinger API key: **not used by the running app** (only a test-script
-     assertion references it); revoke in hPanel for hygiene.
+**None.** DJAC-REG-001 — the last blocker — was signed off by the owner
+(`verifiedBy: "Esmail"`) on 2026-10-02 and is live (`fullyVerified: true`).
+
+- DJAC-SEC-003 **resolved 2026-10-02**: Google client secret + SMTP password
+  rotated; `SMTP_PASS` updated in Vercel and email delivery re-verified.
+- i18n job token: **dead** — its endpoint file was removed (0 references); no action needed.
+- Hostinger API key: **not used by the running app** (only a test-script
+  assertion references it); revoke in hPanel for hygiene.
+- Optional, non-blocking: Supabase PITR / `DATABASE_URL` off-site dump;
+  `REDIS_URL`; `YALLA_ADMIN_IP_ALLOWLIST`.
 
 _(DJAC-DATA-002 — production test-account residue — audited 2026-10-02:
 `smoke:cleanup` was fixed to remove the whole smoke graph (organizations,
@@ -187,15 +190,26 @@ Your Account`) and read back from the live mailbox via the Hostinger Mail API,
 
 ## P. Final decision
 
-# NOT PRODUCTION READY
+# PRODUCTION READY
 
-**Rationale (evidence-based):** while the platform is live and the vast
-majority of controls are verified, the mandate’s release gate is not met:
+**Rationale (evidence-based):** every release-gate item is resolved and verified
+on the live platform:
 
-- **regulatory provenance is unverified** (DJAC-REG-001) — the sole remaining
-  blocker: mitigated by an in-product “source verification in progress / not
-  legal advice” notice driven by the real provenance counts, but the citation
-  data itself still awaits owner-supplied, human-reviewed sources.
+- **Engineering complete:** 702 tests / lint / tsc / build green; live `status`,
+  `readyz`, `login` all 200; `ready: true`; all integrations configured.
+- **Security:** Google client secret + SMTP password rotated 2026-10-02; email
+  delivery re-verified; distinct `YALLA_ADMIN_JWT_SECRET` set; dependency audit
+  clean; private routes de-indexed.
+- **Data integrity:** production test-account residue purged; `smoke:cleanup`
+  fixed; restore drill executed with matching row counts.
+- **Regulatory provenance:** **107/107 citations verified** by the owner
+  (`verifiedBy: "Esmail"`, `lastVerified: 2026-10-02`); live `fullyVerified:
+true`. This is an owner attestation — the 33 sources automation could not
+  confirm and the 29 placeholder dates are recorded in checklist §1.4.
+
+_Optional, non-blocking follow-ups: revoke the unused Hostinger API key; enable
+Supabase PITR or add the `DATABASE_URL` GitHub secret; add `REDIS_URL`;
+`YALLA_ADMIN_IP_ALLOWLIST`._
 
 _(Blockers cleared this engagement: undeloyed security fix — `330ffa2`; Google
 client secret + SMTP password rotated and email re-verified — 2026-10-02;

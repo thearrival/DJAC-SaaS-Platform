@@ -1,7 +1,9 @@
 # DJAC — Production Readiness Checklist & Go-Live Runbook
 
-Status: **Engineering complete, P0 = 0.** Release is gated only on the
-owner-side inputs in §1. Evidence for every engineering fix is in the git
+Status: **PRODUCTION READY (2026-10-02).** All engineering gates _and_ the
+owner-side inputs in §1 are satisfied — secrets rotated, email re-verified, and
+regulatory provenance signed off (107/107, `verifiedBy: "Esmail"`, live
+`fullyVerified: true`). Evidence for every engineering fix is in the git
 history and the live verification matrix.
 
 ---
@@ -25,7 +27,7 @@ Gate: `pnpm verify:all` (681 unit/integration) + Playwright E2E + axe.
 (googleSso, supabase, email, observability) plus core services (database,
 redis, billing, aiOrchestrator).
 
-## 1. What is needed to declare RELEASE READY (owner inputs)
+## 1. Owner inputs — all satisfied 2026-10-02
 
 ### 1.1 Rotate leaked secrets (security) — done 2026-10-02
 
