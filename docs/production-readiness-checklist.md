@@ -79,6 +79,18 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
 - **Version + effective-date candidates sourced 2026-10-02** for all 107
   frameworks (derived from the official publication designations). These are
   candidates for the reviewer to confirm, not verified facts.
+- **Reviewer priority list (from the 2026-10-02 machine audit).** Automation
+  could not confirm these; they are NOT known-wrong, just unverifiable by a
+  bot and therefore needing a human eye:
+  - **Sources (33):** all 7 ISO/IEC standards (`iso.org` is behind Cloudflare),
+    the U.S. bot-blocked domains (HHS, DoD/CMMC, FBI/CJIS, SEC, NERC, SWIFT),
+    and 11 government domains unreachable from CI — `nca.gov.sa`,
+    `cst.gov.sa`, `csc.gov.ae`, `qcb.gov.qa`, `citca.gov.kw`,
+    `cert-in.org.in`, `kominfo.go.id`, `mic.gov.vn`, `mcit.gov.eg`,
+    `inai.org.mx`, `sic.gov.co`.
+  - **Placeholder effective dates (29):** Jan-01 values derived from the
+    publication designation (e.g. COBIT-2019, CIS Benchmarks, NERC-CIP,
+    HITRUST, SPDX) — confirm the actual effective date.
 - **Remaining (human step):** the designated reviewer confirms each source,
   version, and effective date, then runs
   `pnpm provenance:signoff -- --reviewer "Nelson Chan" --confirm`. That flips
