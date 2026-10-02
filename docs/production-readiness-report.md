@@ -60,7 +60,7 @@ integration reporting; AI-queue mode correctness.
 | Internal backdoor routes | VERIFIED                 | `/api/_*` → 404                                                                    |
 | Rate limiting            | TEST-VERIFIED            | `rate-limiter*.test.ts` pass                                                       |
 | AuthN/Z                  | TEST-VERIFIED + VERIFIED | 96 security tests pass; Google login live                                          |
-| Secret rotation          | BLOCKED                  | Google client secret + others shared out-of-band; rotation is owner-only           |
+| Secret rotation          | PARTIAL                  | Google client secret rotated 2026-10-02; SMTP/Hostinger pending (owner consoles)   |
 
 ## E. Database & API
 
@@ -131,7 +131,7 @@ Green (`pnpm verify:all` 696 passed) and live:
 | DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20                | Low      | **FIXED**                                                                                 |
 | DJAC-SEC-002  | test fixtures matched `sk_live_` pattern                    | Info     | **FIXED**                                                                                 |
 | DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)            | Info     | Documented                                                                                |
-| DJAC-SEC-003  | Google client secret shared out-of-band                     | High     | BLOCKED (owner rotation)                                                                  |
+| DJAC-SEC-003  | Shared secrets rotation                                     | High     | PARTIAL — Google secret rotated 2026-10-02; SMTP/Hostinger pending                        |
 | DJAC-DR-001   | Restore drill                                               | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**                                   |
 | DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`) | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`)                            |
 | DJAC-DR-002   | Supabase PITR off; no backup timestamps historically        | Medium   | BLOCKED (plan)                                                                            |
@@ -139,8 +139,8 @@ Green (`pnpm verify:all` 696 passed) and live:
 
 ## M. Production blockers (unresolved)
 
-1. **DJAC-SEC-003:** leaked/shared secrets not yet rotated (Google client secret;
-   earlier SMTP/i18n/Hostinger).
+1. **DJAC-SEC-003:** Google client secret **rotated 2026-10-02**; SMTP password
+   and Hostinger API key rotation still pending (owner provider consoles).
 
 _(DJAC-SEC-001 — undeloyed axios fix — resolved in `330ffa2`. DJAC-DR-001 —
 restore drill — resolved: executed 2026-10-02 with all row counts matching.
@@ -175,7 +175,8 @@ DJAC-BKP-001 — wrong backup table name — fixed.)_
 **Rationale (evidence-based):** while the platform is live and the vast
 majority of controls are verified, the mandate’s release gate is not met:
 
-- **shared secrets are not rotated** (DJAC-SEC-003),
+- **some shared secrets remain unrotated** (DJAC-SEC-003 — SMTP/Hostinger; the
+  Google client secret was rotated 2026-10-02),
 - **regulatory provenance is unverified** (DJAC-REG-001) — mitigated by an
   in-product “source verification in progress / not legal advice” notice driven
   by the real provenance counts; the citation data itself still awaits
