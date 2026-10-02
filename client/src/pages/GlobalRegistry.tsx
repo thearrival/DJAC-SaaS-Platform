@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { trpc } from "@/lib/trpc";
+import { DESIGNATED_REVIEWER } from "@shared/regulatory-provenance";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -205,8 +206,15 @@ export default function GlobalRegistry() {
           <p className="leading-relaxed">
             <strong>Source verification is in progress.</strong>{" "}
             {summary.provenance.verified} of {summary.provenance.total}{" "}
-            framework citations currently carry a verified official source.
-            Regulatory content here supports compliance planning only — it is
+            framework citations currently carry a verified official source
+            {summary.provenance.pendingReview > 0 && (
+              <>
+                ; {summary.provenance.pendingReview} official source drafts are
+                awaiting sign-off by the designated reviewer (
+                {DESIGNATED_REVIEWER})
+              </>
+            )}
+            . Regulatory content here supports compliance planning only — it is
             not legal advice and must be confirmed against the official
             regulator before reliance.
           </p>

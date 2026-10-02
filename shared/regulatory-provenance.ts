@@ -69,6 +69,12 @@ export type RegulatoryProvenance = {
   lastVerified?: string;
   /** Named human who performed the review. Required before `verified`. */
   verifiedBy?: string;
+  /**
+   * The reviewer the platform has assigned to sign off a `pending_review`
+   * citation. Distinct from `verifiedBy`, which may only be set once a human
+   * has actually performed the review.
+   */
+  assignedReviewer?: string;
   status: ProvenanceStatus;
   /**
    * How many days a verified citation stays current before it flips to `stale`.
@@ -81,14 +87,143 @@ export type RegulatoryProvenance = {
 export const DEFAULT_REVIEW_WINDOW_DAYS = 730;
 
 /**
- * Curated citations. Intentionally empty.
- *
- * Populated only from a named human review of the official publication. The
- * type requires `sourceUrl`, `version`, `effectiveDate`, `lastVerified`, and
- * `verifiedBy` before `status: "verified"` may be used, and
- * regulatory-provenance.test.ts enforces that rule.
+ * The reviewer the platform has assigned to sign off citations. Recorded on
+ * `pending_review` entries but is NOT a human attestation: only a real review
+ * may set `verifiedBy` + `status: "verified"`.
  */
-export const PROVENANCE_REGISTRY: Record<string, RegulatoryProvenance> = {};
+export const DESIGNATED_REVIEWER = "Nelson Chan";
+
+/**
+ * Curated citations. Intentionally shipped as `pending_review` drafts only.
+ *
+ * Each entry below points at the issuing authority's own publication. They are
+ * MACHINE-COLLECTED SOURCE CANDIDATES, not human-verified citations: a named
+ * reviewer must still confirm the source, version, and effective date before
+ * `status: "verified"` may be set. The type requires `sourceUrl`, `version`,
+ * `effectiveDate`, `lastVerified`, and `verifiedBy` before `verified` may be
+ * used, and regulatory-provenance.test.ts enforces that rule. A claim with no
+ * entry (or a draft that has not been signed off) resolves to `unverified`.
+ */
+export const PROVENANCE_REGISTRY: Record<string, RegulatoryProvenance> = {
+  GDPR: {
+    claimCode: "GDPR",
+    authority: "European Parliament and Council of the European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+    sourceTitle:
+      "Regulation (EU) 2016/679 (General Data Protection Regulation)",
+    version: "2016/679",
+    effectiveDate: "2018-05-25",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  "UK-GDPR": {
+    claimCode: "UK-GDPR",
+    authority: "UK Parliament",
+    sourceUrl: "https://www.legislation.gov.uk/ukpga/2018/12/contents",
+    sourceTitle: "Data Protection Act 2018",
+    version: "2018 c. 12",
+    effectiveDate: "2018-05-23",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  "NIST-CSF-2": {
+    claimCode: "NIST-CSF-2",
+    authority: "NIST",
+    sourceUrl: "https://www.nist.gov/cyberframework",
+    sourceTitle: "NIST Cybersecurity Framework (CSF) 2.0",
+    version: "2.0",
+    effectiveDate: "2024-02-26",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  "NIST-AI-RMF": {
+    claimCode: "NIST-AI-RMF",
+    authority: "NIST",
+    sourceUrl: "https://www.nist.gov/itl/ai-risk-management-framework",
+    sourceTitle:
+      "Artificial Intelligence Risk Management Framework (AI RMF 1.0)",
+    version: "1.0",
+    effectiveDate: "2023-01-26",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  "PCI-DSS": {
+    claimCode: "PCI-DSS",
+    authority: "PCI Security Standards Council",
+    sourceUrl: "https://www.pcisecuritystandards.org/document_library/",
+    sourceTitle: "Payment Card Industry Data Security Standard (PCI DSS) v4.0",
+    version: "4.0",
+    effectiveDate: "2022-03-31",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  HIPAA: {
+    claimCode: "HIPAA",
+    authority: "U.S. Department of Health & Human Services",
+    sourceUrl:
+      "https://www.hhs.gov/hipaa/for-professionals/privacy/laws-regulations/index.html",
+    sourceTitle:
+      "HIPAA Privacy Rule (45 CFR Part 160 and Subparts A & E of Part 164)",
+    version: "as amended",
+    effectiveDate: "2003-04-14",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  "EU-AI-ACT": {
+    claimCode: "EU-AI-ACT",
+    authority: "European Parliament and Council of the European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    sourceTitle: "Regulation (EU) 2024/1689 (Artificial Intelligence Act)",
+    version: "2024/1689",
+    effectiveDate: "2024-08-01",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  NIS2: {
+    claimCode: "NIS2",
+    authority: "European Parliament and Council of the European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/dir/2022/2555/oj",
+    sourceTitle: "Directive (EU) 2022/2555 (NIS2 Directive)",
+    version: "2022/2555",
+    effectiveDate: "2023-01-16",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  DORA: {
+    claimCode: "DORA",
+    authority: "European Parliament and Council of the European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2022/2554/oj",
+    sourceTitle:
+      "Regulation (EU) 2022/2554 (Digital Operational Resilience Act)",
+    version: "2022/2554",
+    effectiveDate: "2025-01-17",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  PIPEDA: {
+    claimCode: "PIPEDA",
+    authority: "Government of Canada",
+    sourceUrl: "https://laws-lois.justice.gc.ca/eng/acts/P-8.6/",
+    sourceTitle:
+      "Personal Information Protection and Electronic Documents Act (PIPEDA)",
+    version: "S.C. 2000, c. 5",
+    effectiveDate: "2001-01-01",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+  LGPD: {
+    claimCode: "LGPD",
+    authority: "Presidência da República (Brazil)",
+    sourceUrl:
+      "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm",
+    sourceTitle:
+      "Lei Geral de Proteção de Dados Pessoais (LGPD, Lei nº 13.709/2018)",
+    version: "13.709/2018",
+    effectiveDate: "2020-09-18",
+    status: "pending_review",
+    assignedReviewer: DESIGNATED_REVIEWER,
+  },
+};
 
 /** Explicit, truthful fallback for every claim without a curated citation. */
 export function unverifiedProvenance(claimCode: string): RegulatoryProvenance {

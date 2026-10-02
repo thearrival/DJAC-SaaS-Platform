@@ -66,10 +66,17 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
 - The registry is **implemented** (`shared/regulatory-provenance.ts`) with a
   `verified` → `pending_review` → `stale` lifecycle, wired into
   `/api/trpc/compliance.globalRegistrySummary`, and guarded by tests that
-  reject unverified claims. Every claim currently resolves to `unverified`.
-- Remaining (data): provide, per framework/law, a verified **source URL**,
-  **version**, **effective date**, and **last-verified reviewer** — then add
-  the entries to `PROVENANCE_REGISTRY`. No legal sources are fabricated.
+  reject unverified claims.
+- **Drafted sources added 2026-10-02.** Real official sources for the major
+  frameworks (GDPR, UK-GDPR, NIST CSF 2.0, NIST AI RMF, PCI DSS, HIPAA, EU AI
+  Act, NIS2, DORA, PIPEDA, LGPD) are recorded as `pending_review` with
+  **Nelson Chan** as the `DESIGNATED_REVIEWER`. Drafts are NOT citable and do
+  not count toward `fullyVerified`.
+- **Remaining (human step):** the designated reviewer confirms each source,
+  version, and effective date, then flips the entry to `status: "verified"` with
+  their name (`verifiedBy`) and review date (`lastVerified`). Only then does the
+  UI stop showing the "verification in progress" notice. No legal source is
+  fabricated, and no machine may self-attest a human review.
 
 ### 1.5 Product decisions (confirm)
 
