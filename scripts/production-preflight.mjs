@@ -270,6 +270,44 @@ if (has("SMTP_HOST")) {
   );
 }
 
+addRecommended(
+  "REDIS_URL",
+  has("REDIS_URL"),
+  "REDIS_URL is recommended for distributed rate limiting (a Postgres fallback is active without it)."
+);
+
+addRecommended(
+  "YALLA_ADMIN_JWT_SECRET",
+  has("YALLA_ADMIN_JWT_SECRET"),
+  "Set a distinct YALLA_ADMIN_JWT_SECRET so owner-console sessions do not share JWT_SECRET."
+);
+
+addRecommended(
+  "YALLA_ADMIN_IP_ALLOWLIST",
+  has("YALLA_ADMIN_IP_ALLOWLIST"),
+  "YALLA_ADMIN_IP_ALLOWLIST restricts the owner console to known IPs/CIDRs."
+);
+
+addRecommended(
+  "GOOGLE_CLIENT_ID",
+  has("GOOGLE_CLIENT_ID"),
+  "GOOGLE_CLIENT_ID enables Google SSO."
+);
+
+if (has("GOOGLE_CLIENT_ID")) {
+  addRequired(
+    "GOOGLE_CLIENT_SECRET_WITH_ID",
+    has("GOOGLE_CLIENT_SECRET"),
+    "GOOGLE_CLIENT_SECRET is required when GOOGLE_CLIENT_ID is configured."
+  );
+}
+
+addRequired(
+  "CRON_SECRET",
+  has("CRON_SECRET"),
+  "CRON_SECRET is required to authenticate the scheduled cron endpoints."
+);
+
 function statusLabel(check) {
   if (check.ok) {
     return check.severity === "required" ? "PASS" : "OK";
