@@ -161,7 +161,9 @@ DJAC-BKP-001 — wrong backup table name — fixed.)_
 ## N. Unverified items (and what unlocks each)
 
 - **Live/sandbox Stripe charge + webhook replay** — needs Stripe sandbox keys.
-- **Email delivery confirmation** — needs a mailbox/allowlisted recipient.
+- **Email delivery — VERIFIED 2026-10-02.** A production `localAuth.sendOtp`
+  (purpose `register`) to `hello@yalla-hack.com` was delivered (`DJAC — Verify
+Your Account`) and read back from the live mailbox via the Hostinger Mail API.
 - **AI/Forge connectivity + cost controls proof** — needs provider credentials.
 - **Secret rotation** — owner Google Cloud / provider consoles.
 - **Supabase PITR / off-site pg_dump activation** — plan + `DATABASE_URL` GitHub secret.
