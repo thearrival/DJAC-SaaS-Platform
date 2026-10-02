@@ -123,19 +123,19 @@ Green (`pnpm verify:all` 696 passed) and live:
 
 ## L. Remaining issues (findings)
 
-| ID            | Finding                                                     | Severity | Status                                                         |
-| ------------- | ----------------------------------------------------------- | -------- | -------------------------------------------------------------- |
-| DJAC-SEC-001  | `axios` 1.19 advisories                                     | High     | **FIXED (staged, undeployed)**                                 |
-| DJAC-DATA-001 | `smoke:runtime` left 20 test users in prod                  | Medium   | **CLEANED + tool added**                                       |
-| DJAC-OPS-001  | i18n report broken by catalog split                         | Low      | **FIXED**                                                      |
-| DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20                | Low      | **FIXED**                                                      |
-| DJAC-SEC-002  | test fixtures matched `sk_live_` pattern                    | Info     | **FIXED**                                                      |
-| DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)            | Info     | Documented                                                     |
-| DJAC-SEC-003  | Google client secret shared out-of-band                     | High     | BLOCKED (owner rotation)                                       |
-| DJAC-DR-001   | Restore drill                                               | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**        |
-| DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`) | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`) |
-| DJAC-DR-002   | Supabase PITR off; no backup timestamps historically        | Medium   | BLOCKED (plan)                                                 |
-| DJAC-REG-001  | Regulatory provenance unverified                            | Medium   | BLOCKED (owner data)                                           |
+| ID            | Finding                                                     | Severity | Status                                                                                    |
+| ------------- | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| DJAC-SEC-001  | `axios` 1.19 advisories                                     | High     | **FIXED (staged, undeployed)**                                                            |
+| DJAC-DATA-001 | `smoke:runtime` left 20 test users in prod                  | Medium   | **CLEANED + tool added**                                                                  |
+| DJAC-OPS-001  | i18n report broken by catalog split                         | Low      | **FIXED**                                                                                 |
+| DJAC-OPS-002  | preflight advised serverless-unsafe pool ≥20                | Low      | **FIXED**                                                                                 |
+| DJAC-SEC-002  | test fixtures matched `sk_live_` pattern                    | Info     | **FIXED**                                                                                 |
+| DJAC-AI-001   | DeepSeek assumed but not integrated (Forge used)            | Info     | Documented                                                                                |
+| DJAC-SEC-003  | Google client secret shared out-of-band                     | High     | BLOCKED (owner rotation)                                                                  |
+| DJAC-DR-001   | Restore drill                                               | High     | **RESOLVED — executed 2026-10-02 (all counts matched)**                                   |
+| DJAC-BKP-001  | Backup used wrong table name (`organizationProfilesCustom`) | Medium   | **FIXED** (drill found it; now `organization_profiles_custom`)                            |
+| DJAC-DR-002   | Supabase PITR off; no backup timestamps historically        | Medium   | BLOCKED (plan)                                                                            |
+| DJAC-REG-001  | Regulatory provenance unverified                            | Medium   | **MITIGATED** — sources now visibly labeled in-product; data population still owner-gated |
 
 ## M. Production blockers (unresolved)
 
@@ -176,7 +176,10 @@ DJAC-BKP-001 — wrong backup table name — fixed.)_
 majority of controls are verified, the mandate’s release gate is not met:
 
 - **shared secrets are not rotated** (DJAC-SEC-003),
-- **regulatory provenance is unverified** (DJAC-REG-001).
+- **regulatory provenance is unverified** (DJAC-REG-001) — mitigated by an
+  in-product “source verification in progress / not legal advice” notice driven
+  by the real provenance counts; the citation data itself still awaits
+  owner-supplied sources.
 
 _(Blockers cleared this engagement: undeloyed security fix — `330ffa2`;
 restore drill — executed 2026-10-02 with all counts matching.)_
