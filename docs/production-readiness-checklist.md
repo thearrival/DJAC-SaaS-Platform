@@ -91,18 +91,27 @@ Then (optional but recommended) purge history with `git filter-repo` and force-p
 
 ## 2. Required Vercel environment variables (presence check)
 
-| Var                                           | Purpose                             | Status                              |
-| --------------------------------------------- | ----------------------------------- | ----------------------------------- |
-| `JWT_SECRET` (≥32 chars)                      | sessions                            | present (encrypted)                 |
-| `DATABASE_URL`                                | Postgres                            | present                             |
-| `APP_URL` / `APP_DOMAIN`                      | absolute links                      | present                             |
-| `CRON_SECRET`                                 | cron auth + internal `/api/_*` gate | present                             |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | billing                             | present                             |
-| `SMTP_*`                                      | email                               | present (rotate pass)               |
-| `SENTRY_DSN`                                  | monitoring                          | present                             |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`   | Google SSO                          | present (rotate secret)             |
-| `REDIS_URL`                                   | distributed rate limiting           | OPTIONAL (Postgres fallback active) |
-| `AGENT_SWARM_TOKEN`                           | auth for AI swarm egress            | **MISSING (only if swarm used)**    |
+| Var                                           | Purpose                             | Status                                |
+| --------------------------------------------- | ----------------------------------- | ------------------------------------- |
+| `JWT_SECRET` (≥32 chars)                      | sessions                            | present (encrypted)                   |
+| `DATABASE_URL`                                | Postgres                            | present                               |
+| `APP_URL` / `APP_DOMAIN`                      | absolute links                      | present                               |
+| `CRON_SECRET`                                 | cron auth + internal `/api/_*` gate | present                               |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | billing                             | present                               |
+| `SMTP_*`                                      | email                               | present (rotate pass)                 |
+| `SENTRY_DSN`                                  | monitoring                          | present                               |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`   | Google SSO                          | present (rotate secret)               |
+| `REDIS_URL`                                   | distributed rate limiting           | OPTIONAL (Postgres fallback active)   |
+| `AGENT_SWARM_TOKEN`                           | auth for AI swarm egress            | **MISSING (only if swarm used)**      |
+| `YALLA_ADMIN_JWT_SECRET`                      | owner-console session signing       | optional (falls back to `JWT_SECRET`) |
+| `YALLA_ADMIN_IP_ALLOWLIST`                    | owner-console IP restriction        | optional (empty = allow all IPs)      |
+
+**Config audit (verified):** every environment variable the runtime reads is
+either set in Vercel production or has a safe default — no required variable is
+missing. Two optional defense-in-depth items remain: set a distinct
+`YALLA_ADMIN_JWT_SECRET` (currently reuses `JWT_SECRET`) and a
+`YALLA_ADMIN_IP_ALLOWLIST` (currently any IP may reach the owner console, which
+is still gated by password, session gate, and rate limiting).
 
 ---
 
