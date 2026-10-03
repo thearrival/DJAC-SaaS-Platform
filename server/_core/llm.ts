@@ -223,32 +223,41 @@ type LlmProvider = {
   supportsThinking: boolean;
 };
 
+/** The env slice the provider resolver depends on (kept minimal for tests). */
+export type LlmEnv = {
+  deepseekApiKey: string;
+  deepseekBaseUrl: string;
+  deepseekModel: string;
+  forgeApiUrl: string;
+  forgeApiKey: string;
+};
+
 /**
  * Select the active LLM provider. DeepSeek (when `DEEPSEEK_API_KEY` is set)
  * takes priority; otherwise we fall back to the built-in Forge gateway. Both
  * speak the OpenAI chat-completions protocol.
  */
-export function resolveLlmProvider(): LlmProvider {
-  if (ENV.deepseekApiKey) {
+export function resolveLlmProvider(env: LlmEnv = ENV): LlmProvider {
+  if (env.deepseekApiKey) {
     return {
       name: "deepseek",
-      url: `${ENV.deepseekBaseUrl}/chat/completions`,
-      apiKey: ENV.deepseekApiKey,
-      model: ENV.deepseekModel || "deepseek-chat",
+      url: `${env.deepseekBaseUrl.replace(/\/$/, "")}/chat/completions`,
+      apiKey: env.deepseekApiKey,
+      model: env.deepseekModel || "deepseek-chat",
       maxTokensLimit: 8192,
       supportsThinking: false,
     };
   }
 
   const forgeUrl =
-    ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-      ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+    env.forgeApiUrl && env.forgeApiUrl.trim().length > 0
+      ? `${env.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
       : "https://forge.manus.im/v1/chat/completions";
 
   return {
     name: "forge",
     url: forgeUrl,
-    apiKey: ENV.forgeApiKey,
+    apiKey: env.forgeApiKey,
     model: "gemini-2.5-flash",
     maxTokensLimit: 32768,
     supportsThinking: true,
