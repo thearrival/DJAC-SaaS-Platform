@@ -207,6 +207,20 @@ export default function OnboardingQuestionnaire() {
           {t("onboarding.step", "Step")} {index + 1} / {questions.length}
         </p>
         <Progress value={progress} className="h-1.5" />
+        <div className="flex items-center gap-1.5 pt-1" aria-hidden="true">
+          {questions.map((q, i) => (
+            <span
+              key={q.id}
+              className={`h-1 flex-1 rounded-full transition-colors ${
+                i < index
+                  ? "bg-primary"
+                  : i === index
+                    ? "bg-primary/60"
+                    : "bg-border"
+              }`}
+            />
+          ))}
+        </div>
       </div>
 
       <h1 className="text-xl font-semibold">
@@ -218,7 +232,10 @@ export default function OnboardingQuestionnaire() {
         </p>
       )}
 
-      <div className="mt-5 grid gap-2">
+      <div
+        key={current.id}
+        className="mt-5 grid gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300"
+      >
         {current.options.map(opt => {
           const active = selectedValues.includes(opt.value);
           return (
