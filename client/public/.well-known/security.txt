@@ -1,5 +1,4 @@
-Contact: mailto:security@yalla-hack.net
-Expires: 2027-01-01T00:00:00.000Z
+Contact: mailto:hello@yalla-hack.com
+Expires: 2027-12-31T23:59:59.000Z
 Preferred-Languages: en, ar, zh
-Policy: https://app.yalla-hack.ae/privacy
 Canonical: https://app.yalla-hack.ae/.well-known/security.txt
