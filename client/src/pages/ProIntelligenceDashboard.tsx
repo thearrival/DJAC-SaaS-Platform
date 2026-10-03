@@ -19,6 +19,7 @@ import { useTheme } from "@/contexts/useTheme";
 import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SinoGulfHeatmap } from "@/components/SinoGulfHeatmap";
+import { Globe3D } from "@/components/Globe3D";
 import { AIOrchestrationFeed } from "@/components/AIOrchestrationFeed";
 import { RegulatoryPulseMatrix } from "@/components/RegulatoryPulseMatrix";
 import { Badge } from "@/components/ui/badge";
@@ -1444,6 +1445,20 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
         <div className="djac-section-2b">
           <TickerTape isDark={isDark} color={C.cyan} />
         </div>
+
+        {/* ── 3D Globe: regulatory hubs + corridors ─────────────────── */}
+        <section
+          className="djac-section-2c"
+          aria-label={t("proIntel.globeSection", "3D Regulatory Globe")}
+        >
+          <SectionLabel
+            icon={Globe2}
+            label={t("proIntel.badgeGlobe", "Global Regulatory Network")}
+            color={C.cyan}
+            sublabel="Regulatory hubs and cross-border corridors"
+          />
+          <Globe3D />
+        </section>
 
         {/* ── Row 1: Heatmap ────────────────────────────────────────── */}
         <section
