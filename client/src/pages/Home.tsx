@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import type React from "react";
 import { toast as sonnerToast } from "sonner";
 import { Link } from "wouter";
+import { GlobalCoverageExplorer } from "@/components/GlobalCoverageExplorer";
 
 export default function Home() {
   usePageTitle("Home");
@@ -619,6 +620,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <GlobalCoverageExplorer />
 
       {/* WHAT WE DO */}
       <section
