@@ -22,7 +22,7 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
 
 ### 为什么选择 DJAC？
 - **28 司法管辖区** — PIPL、PDPL、CSL、DSL、GDPR、ISO 27001、SOC 2、NIST CSF、HIPAA等
-- **AI驱动分析** — Gemini驱动的8阶段合规评估流水线
+- **AI驱动分析** — DeepSeek驱动的8阶段合规评估流水线
 - **实时监控** — 持续合规跟踪，自动差距检测
 - **跨境智能** — 数据传输合规检查器和监管变化监控
 - **供应商风险管理** — 跨所有选定框架的自动第三方评估
@@ -57,14 +57,14 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
         id: "architecture",
         title: "平台架构",
         summary:
-          "DJAC运行在云原生架构上，采用React 19、Express + tRPC、Supabase上的PostgreSQL、Redis和Google Gemini。",
+          "DJAC运行在云原生架构上，采用React 19、Express + tRPC、Supabase上的PostgreSQL、Redis和Google DeepSeek。",
         content: `### 系统架构
 DJAC采用现代单体仓库（monorepo）架构：
 
 **前端**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4 + shadcn/ui  
 **后端**: Express 4 + tRPC 11（200+个API程序）+ Drizzle ORM  
 **数据库**: Supabase上的PostgreSQL 17（AWS东京，ap-northeast-2）  
-**AI引擎**: Google Gemini，8阶段评估流水线  
+**AI引擎**: Google DeepSeek，8阶段评估流水线  
 **队列**: 内存 / Redis（支持BullMQ）  
 **身份验证**: 三路径（Clerk OAuth + Supabase Auth + 本地JWT）  
 **计费**: Stripe（5个计划 × 4个周期）  
@@ -76,12 +76,12 @@ DJAC采用现代单体仓库（monorepo）架构：
 3. 摄入模块解析文档并规范化文本
 4. 提取器识别结构化事实（键-值-证据三元组）
 5. RAG上下文从数据库检索相关合规控制项
-6. 法官（Gemini）对照控制项评估合规性
+6. 法官（DeepSeek）对照控制项评估合规性
 7. 合成器将发现结果合并为跨框架报告
 8. 验证器确保模式一致性和数据完整性
 9. 报告器生成最终格式化输出（PDF/DOCX/JSON）`,
         diagram:
-          "[User] → [Gatekeeper] → [Intake] → [Extractor] → [RAG] → [Judge (Gemini)] → [Synthesizer] → [Validator] → [Reporter] → [PDF / DOCX / JSON]",
+          "[User] → [Gatekeeper] → [Intake] → [Extractor] → [RAG] → [Judge (DeepSeek)] → [Synthesizer] → [Validator] → [Reporter] → [PDF / DOCX / JSON]",
       },
       {
         id: "roles",
@@ -128,13 +128,13 @@ DJAC采用现代单体仓库（monorepo）架构：
         id: "ai-overview",
         title: "AI引擎概述",
         summary:
-          "DJAC的8阶段AI流水线使用Gemini同时评估多个框架下的供应商合规性。",
+          "DJAC的8阶段AI流水线使用DeepSeek同时评估多个框架下的供应商合规性。",
         content: `### 8阶段流水线
 1. **守门人** — 输入验证、注入检测、数据清理
 2. **摄入** — 文档解析、文本规范化、语言检测
 3. **提取器** — 将结构化事实提取为键-值-证据三元组
 4. **RAG上下文** — 检索增强生成：从PostgreSQL提取相关合规控制项
-5. **法官（Gemini）** — 对照适用控制要求评估每项事实
+5. **法官（DeepSeek）** — 对照适用控制要求评估每项事实
 6. **合成器** — 合并发现结果，生成跨框架比较
 7. **验证器** — 模式验证、跨字段一致性、失败重试
 8. **报告器** — 最终格式化输出（PDF、DOCX或JSON）
@@ -157,7 +157,7 @@ DJAC采用现代单体仓库（monorepo）架构：
 1. **文档解析** — 从供应商文档中提取事实
 2. **语义搜索** — 将事实与1,000+个合规控制项匹配
 3. **相关性评分** — 按管辖和主题相关性对控制项排序
-4. **上下文组装** — 为Gemini构建聚焦的上下文窗口
+4. **上下文组装** — 为DeepSeek构建聚焦的上下文窗口
 5. **有依据的响应** — AI仅基于检索到的控制项评估（不产生幻觉）
 
 ### 优势

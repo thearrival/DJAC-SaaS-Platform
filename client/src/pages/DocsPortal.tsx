@@ -144,7 +144,7 @@ const HOME_FEATURES: Record<
     {
       icon: "zap",
       title: "AI Compliance Engine",
-      desc: "8-stage Gemini assessment pipeline with RAG context retrieval",
+      desc: "8-stage DeepSeek assessment pipeline with RAG context retrieval",
       link: "/docs/ai-engine/ai-overview",
     },
     {
@@ -182,7 +182,7 @@ const HOME_FEATURES: Record<
     {
       icon: "zap",
       title: "محرك الامتثال الذكي",
-      desc: "خط أنابيب تقييم Gemini من 8 مراحل مع استرجاع سياق RAG",
+      desc: "خط أنابيب تقييم DeepSeek من 8 مراحل مع استرجاع سياق RAG",
       link: "/docs/ai-engine/ai-overview",
     },
     {
@@ -220,7 +220,7 @@ const HOME_FEATURES: Record<
     {
       icon: "zap",
       title: "AI合规引擎",
-      desc: "基于Gemini的8阶段评估流水线，带RAG上下文检索",
+      desc: "基于DeepSeek的8阶段评估流水线，带RAG上下文检索",
       link: "/docs/ai-engine/ai-overview",
     },
     {
@@ -599,7 +599,7 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 
 ### Why DJAC?
 - **${COVERAGE.jurisdictions} Jurisdictions** — PIPL, PDPL, CSL, DSL, GDPR, ISO 27001, SOC 2, NIST CSF, HIPAA, and more
-- **AI-Powered Analysis** — Gemini driven 8-stage compliance assessment pipeline
+- **AI-Powered Analysis** — DeepSeek driven 8-stage compliance assessment pipeline
 - **Real-Time Monitoring** — Continuous compliance tracking with automated gap detection
 - **Cross-Border Intelligence** — Data transfer compliance checker and regulatory change monitoring
 - **Vendor Risk Management** — Automated third-party assessments across all selected frameworks
@@ -634,14 +634,14 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
           id: "architecture",
           title: "Platform Architecture",
           summary:
-            "DJAC runs on a cloud-native architecture with React 19, Express + tRPC, PostgreSQL on Supabase, Redis, and Google Gemini.",
+            "DJAC runs on a cloud-native architecture with React 19, Express + tRPC, PostgreSQL on Supabase, Redis, and Google DeepSeek.",
           content: `### System Architecture
 DJAC employs a modern monorepo architecture:
 
 **Frontend**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4 + shadcn/ui  
 **Backend**: Express 4 + tRPC 11 (200+ API procedures) + Drizzle ORM  
 **Database**: PostgreSQL 17 on Supabase (AWS Tokyo, ap-northeast-2)  
-**AI Engine**: Google Gemini with 8-stage assessment pipeline  
+**AI Engine**: Google DeepSeek with 8-stage assessment pipeline  
 **Queue**: In-memory / Redis (BullMQ-ready)  
 **Auth**: Triple-path (Clerk OAuth + Supabase Auth + Local JWT)  
 **Billing**: Stripe (5 plans × 4 intervals)  
@@ -653,12 +653,12 @@ DJAC employs a modern monorepo architecture:
 3. Intake parses documents and normalizes text
 4. Extractor identifies structured facts (key-value-evidence triples)
 5. RAG Context retrieves relevant compliance controls from DB
-6. Judge (Gemini) evaluates compliance against controls
+6. Judge (DeepSeek) evaluates compliance against controls
 7. Synthesizer merges findings into cross-framework report
 8. Validator ensures schema consistency and data integrity
 9. Reporter generates final formatted output (PDF/DOCX/JSON)`,
           diagram:
-            "[User] → [Gatekeeper] → [Intake] → [Extractor] → [RAG] → [Judge (Gemini)] → [Synthesizer] → [Validator] → [Reporter] → [PDF / DOCX / JSON]",
+            "[User] → [Gatekeeper] → [Intake] → [Extractor] → [RAG] → [Judge (DeepSeek)] → [Synthesizer] → [Validator] → [Reporter] → [PDF / DOCX / JSON]",
         },
         {
           id: "roles",
@@ -705,13 +705,13 @@ Each of the 30+ modules has 6 permission flags:
           id: "ai-overview",
           title: "AI Engine Overview",
           summary:
-            "DJAC's 8-stage AI pipeline uses Gemini to assess vendor compliance across multiple frameworks simultaneously.",
+            "DJAC's 8-stage AI pipeline uses DeepSeek to assess vendor compliance across multiple frameworks simultaneously.",
           content: `### The 8-Stage Pipeline
 1. **Gatekeeper** — Input validation, injection detection, data sanitization
 2. **Intake** — Document parsing, text normalization, language detection
 3. **Extractor** — Structured fact extraction into key-value-evidence triples
 4. **RAG Context** — Retrieval-Augmented Generation: pulls relevant compliance controls from PostgreSQL
-5. **Judge (Gemini)** — Evaluates each fact against applicable control requirements
+5. **Judge (DeepSeek)** — Evaluates each fact against applicable control requirements
 6. **Synthesizer** — Merges findings, generates cross-framework comparison
 7. **Validator** — Schema validation, cross-field consistency, retry on failure
 8. **Reporter** — Final formatted output in PDF, DOCX, or JSON
@@ -735,7 +735,7 @@ Each of the 30+ modules has 6 permission flags:
 1. **Document Parsing** — Extracted facts from vendor documents
 2. **Semantic Search** — Matches facts against 1,000+ compliance controls
 3. **Relevance Scoring** — Ranks controls by jurisdictional and topical relevance
-4. **Context Assembly** — Builds a focused context window for Gemini
+4. **Context Assembly** — Builds a focused context window for DeepSeek
 5. **Grounded Response** — AI evaluates based ONLY on retrieved controls (no hallucination)
 
 ### Benefits
@@ -1440,7 +1440,7 @@ DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسس�
 
 ### لماذا DJAC؟
 - **${COVERAGE.jurisdictions} ولاية قضائية** — PIPL، PDPL، CSL، DSL، GDPR، ISO 27001، SOC 2 وغيرها
-- **تحليل بالذكاء الاصطناعي** — تقييم امتثال من 8 مراحل مدعوم بـ Gemini
+- **تحليل بالذكاء الاصطناعي** — تقييم امتثال من 8 مراحل مدعوم بـ DeepSeek
 - **مراقبة مستمرة** — تتبع الامتثال مع اكتشاف الفجوات تلقائياً
 - **ذكاء عابر للحدود** — فحص نقل البيانات ومراقبة التغييرات التنظيمية
 - **إدارة مخاطر الموردين** — تقييمات تلقائية عبر جميع الأطر
@@ -1469,7 +1469,7 @@ DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسس�
 **الواجهة**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4
 **الخادم**: Express 4 + tRPC 11 (200+ إجراء API)
 **قاعدة البيانات**: PostgreSQL 17 على Supabase
-**محرك AI**: Google Gemini مع 8 مراحل تقييم
+**محرك AI**: Google DeepSeek مع 8 مراحل تقييم
 **المصادقة**: ثلاثي المسار (Clerk OAuth + Supabase Auth + JWT محلي)
 **الفوترة**: Stripe (5 خطط × 4 فترات)
 **الاستضافة**: Vercel (بدون خادم) + Docker`,
@@ -1485,13 +1485,13 @@ DJAC (الامتثال القانوني الآلي) هي منصة SaaS مؤسس�
         id: "ai-overview",
         title: "نظرة عامة على محرك AI",
         summary:
-          "يستخدم خط أنابيب AI المكون من 8 مراحل Gemini لتقييم امتثال الموردين عبر أطر متعددة في وقت واحد.",
+          "يستخدم خط أنابيب AI المكون من 8 مراحل DeepSeek لتقييم امتثال الموردين عبر أطر متعددة في وقت واحد.",
         content: `### خط الأنابيب ذو 8 مراحل
 1. **البواب** — التحقق من المدخلات، كشف الحقن
 2. **الاستيعاب** — تحليل المستندات، تطبيع النص
 3. **المستخرج** — استخراج الحقائق المنظمة
 4. **سياق RAG** — استرجاع ضوابط الامتثال ذات الصلة
-5. **الحكم (Gemini)** — تقييم الحقائق مقابل الضوابط
+5. **الحكم (DeepSeek)** — تقييم الحقائق مقابل الضوابط
 6. **المركب** — دمج النتائج عبر الأطر
 7. **المدقق** — التحقق من اتساق المخطط
 8. **المراسل** — إخراج نهائي (PDF/DOCX/JSON)`,
@@ -1724,7 +1724,7 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
 
 ### 为什么选择 DJAC？
 - **${COVERAGE.jurisdictions} 司法管辖区** — PIPL、PDPL、CSL、DSL、GDPR、ISO 27001、SOC 2等
-- **AI驱动分析** — Gemini驱动的8阶段合规评估流程
+- **AI驱动分析** — DeepSeek驱动的8阶段合规评估流程
 - **实时监控** — 持续合规跟踪，自动检测差距
 - **跨境智能** — 数据传输合规检查器和监管变化监控
 - **供应商风险管理** — 跨所有选定框架的自动第三方评估
@@ -1748,12 +1748,12 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
         id: "architecture",
         title: "平台架构",
         summary:
-          "DJAC在云原生架构上运行，使用React 19、Express + tRPC、PostgreSQL（Supabase）、Redis和Google Gemini。",
+          "DJAC在云原生架构上运行，使用React 19、Express + tRPC、PostgreSQL（Supabase）、Redis和Google DeepSeek。",
         content: `### 系统架构
 **前端**: React 19 + TypeScript + Vite 7 + Tailwind CSS 4
 **后端**: Express 4 + tRPC 11（200+ API程序）
 **数据库**: PostgreSQL 17 on Supabase
-**AI引擎**: Google Gemini，8阶段评估流程
+**AI引擎**: Google DeepSeek，8阶段评估流程
 **身份验证**: 三路径（Clerk OAuth + Supabase Auth + 本地JWT）
 **计费**: Stripe（5个计划 × 4个周期）
 **托管**: Vercel（无服务器）+ Docker`,
@@ -1768,13 +1768,14 @@ DJAC（法定自动化合规）是一个企业级SaaS平台，可自动化处理
       {
         id: "ai-overview",
         title: "AI引擎概述",
-        summary: "DJAC的8阶段AI流程使用Gemini同时评估多个框架的供应商合规性。",
+        summary:
+          "DJAC的8阶段AI流程使用DeepSeek同时评估多个框架的供应商合规性。",
         content: `### 8阶段流程
 1. **守门人** — 输入验证、注入检测
 2. **摄入** — 文档解析、文本规范化
 3. **提取器** — 结构化事实提取
 4. **RAG上下文** — 检索增强生成：从PostgreSQL提取相关合规控制
-5. **法官（Gemini）** — 评估事实与适用控制要求
+5. **法官（DeepSeek）** — 评估事实与适用控制要求
 6. **合成器** — 合并发现结果，生成跨框架比较
 7. **验证器** — 模式验证、跨字段一致性
 8. **报告器** — 最终格式化输出（PDF/DOCX/JSON）`,

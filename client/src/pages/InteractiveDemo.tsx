@@ -61,16 +61,16 @@ type Scenario = {
 const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     question: "How many jurisdictions does DJAC support?",
-    options: ["12", "19", "28", "5"],
+    options: ["12", "19", `${COVERAGE.jurisdictions}`, "5"],
     correct: 2,
     explanation: `DJAC covers ${COVERAGE.jurisdictions} jurisdictions across APAC, EMEA, North America, and Africa — including China (PIPL, CSL, DSL), Saudi Arabia (PDPL), UAE, EU (GDPR), and more.`,
   },
   {
     question: "What AI model powers DJAC's compliance assessments?",
-    options: ["Claude", "GPT-4o", "Gemini", "Llama"],
+    options: ["Claude", "GPT-4o", "DeepSeek", "Llama"],
     correct: 2,
     explanation:
-      "DJAC uses Google's Gemini (gemini-2.5-flash) in an 8-stage assessment pipeline: Gatekeeper → Intake → Extractor → RAG Context → Judge → Synthesizer → Validator → Reporter.",
+      "DJAC runs a multi-model AI layer — DeepSeek in production — through an 8-stage assessment pipeline: Gatekeeper → Intake → Extractor → RAG Context → Judge → Synthesizer → Validator → Reporter.",
   },
   {
     question: "What is PIPL's maximum penalty for non-compliance?",

@@ -1115,7 +1115,7 @@ export default function DJACHero() {
               <FeatureCard
                 icon={<Shield size={24} color="#00d2ff" />}
                 title="AI Assessment Engine"
-                description="Multi-model orchestration across Gemini, Claude, and Gemini. Parallel framework analysis with automatic gap detection and remediation scoring."
+                description="Multi-model orchestration across DeepSeek, Gemini, and Claude. Parallel framework analysis with automatic gap detection and remediation scoring."
                 accent="#00d2ff"
                 items={[
                   "GDPR · CCPA · LGPD · PIPL simultaneous scan",
