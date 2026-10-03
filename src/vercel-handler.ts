@@ -93,6 +93,9 @@ export default async function handler(req: any, res: any) {
         uptime: process.uptime(),
         dbConnected: !!db,
         env: ENV.isProduction ? "production" : "development",
+        commit:
+          process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT ?? null,
+        version: process.env.APP_VERSION ?? "unknown",
       });
     } catch (e) {
       res
