@@ -8,6 +8,12 @@ import { FrameworkRelationshipOrb } from "@/components/FrameworkRelationshipOrb"
 import { LiveThreatFeed } from "@/components/LiveThreatFeed";
 import { VendorRiskGauge } from "@/components/VendorRiskGauge";
 import { ComplianceMatrix } from "@/components/ComplianceMatrix";
+import {
+  jurisdictionOptionsFor,
+  filterByJurisdiction,
+  filterMatrixByCodes,
+  ALL_JURISDICTIONS,
+} from "@/lib/jurisdictionScope";
 import { ComplianceHealthScore } from "@/components/ComplianceHealthScore";
 import { trpc } from "@/lib/trpc";
 import {
@@ -302,28 +308,31 @@ export default function Dashboard() {
   const allMatrix = matrixQuery.data;
   const timetable = timetableQuery.data;
 
-  const jurisdictionOptions = useMemo(() => {
-    const set = new Set<string>();
-    for (const f of allFrameworks ?? []) if (f.country) set.add(f.country);
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allFrameworks]);
+  const jurisdictionOptions = useMemo(
+    () => jurisdictionOptionsFor(allFrameworks ?? []),
+    [allFrameworks]
+  );
 
-  const frameworks = useMemo(() => {
-    if (!allFrameworks || jurisdictionFilter === "all") return allFrameworks;
-    return allFrameworks.filter(f => f.country === jurisdictionFilter);
-  }, [allFrameworks, jurisdictionFilter]);
+  const frameworks = useMemo(
+    () =>
+      allFrameworks
+        ? filterByJurisdiction(allFrameworks, jurisdictionFilter)
+        : allFrameworks,
+    [allFrameworks, jurisdictionFilter]
+  );
 
   const scopedCodes = useMemo(
     () => new Set((frameworks ?? []).map(f => f.code)),
     [frameworks]
   );
 
-  const matrix = useMemo(() => {
-    if (!allMatrix || jurisdictionFilter === "all") return allMatrix;
-    return allMatrix.filter(
-      row => scopedCodes.has(row.source) || scopedCodes.has(row.target)
-    );
-  }, [allMatrix, jurisdictionFilter, scopedCodes]);
+  const matrix = useMemo(
+    () =>
+      allMatrix && jurisdictionFilter !== ALL_JURISDICTIONS
+        ? filterMatrixByCodes(allMatrix, scopedCodes)
+        : allMatrix,
+    [allMatrix, jurisdictionFilter, scopedCodes]
+  );
   const fwLoading = frameworksQuery.isLoading;
   const frameworksError = frameworksQuery.error;
   const matrixError = matrixQuery.error;
