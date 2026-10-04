@@ -91,7 +91,10 @@ to `email_log`; failures now report to **Sentry**.
 
 ## 7. Payments (Stripe, live)
 
-- 12 configured price IDs (`STRIPE_PRICE_*`), matching the live account.
+- 12 configured price IDs (`STRIPE_PRICE_*`), **validated against the live account
+  by `/api/readyz`** (cached). A real misconfiguration — the env pointed at price
+  IDs that did not exist in the live account, so checkout would have failed — was
+  found by this check and corrected on 2026-10-04.
 - Webhook `https://app.yalla-hack.ae/api/webhooks/stripe` subscribes to:
   `checkout.session.completed`, `invoice.payment_succeeded`,
   `invoice.payment_failed`, `customer.subscription.updated`,
