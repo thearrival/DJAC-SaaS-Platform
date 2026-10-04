@@ -245,6 +245,31 @@ export const emailService = {
       "subscription-confirmed"
     );
   },
+
+  /**
+   * Security alert to the operator on every founder-console sign-in (defence in
+   * depth in place of an IP allowlist — the owner is notified of all access).
+   */
+  async sendAdminLoginAlert(ip: string, userAgent: string, when: string) {
+    const html = baseTemplate(`
+      <h2>Owner console sign-in</h2>
+      <p>A successful sign-in to the DJAC owner console was recorded.</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:16px 0;">
+        <table style="width:100%;font-size:13px;color:#334155;border-collapse:collapse;">
+          <tr><td style="padding:4px 8px 4px 0;color:#64748b;">Time</td><td style="padding:4px 0;">${when}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:#64748b;">IP address</td><td style="padding:4px 0;">${ip}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:#64748b;">Device</td><td style="padding:4px 0;font-size:12px;">${userAgent}</td></tr>
+        </table>
+      </div>
+      <p>If this wasn&rsquo;t you, revoke the admin session and rotate the admin credentials immediately.</p>
+    `);
+    return sendTo(
+      "hello@yalla-hack.com",
+      "DJAC owner console sign-in",
+      html,
+      "admin-login-alert"
+    );
+  },
 };
 
 async function send(

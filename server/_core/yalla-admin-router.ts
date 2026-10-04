@@ -61,6 +61,7 @@ import {
 } from "../control-center-store";
 import { ENV } from "./env";
 import { logger } from "./logger";
+import { emailService } from "../email/service";
 import { sql } from "drizzle-orm";
 import {
   checkRateLimit,
@@ -313,6 +314,15 @@ async function createAdminSession(
     mfa: opts.mfaVia ?? false,
     ts: new Date().toISOString(),
   });
+
+  // Notify the operator of every founder-console sign-in (defence in depth).
+  void emailService
+    .sendAdminLoginAlert(
+      ip,
+      String(req.headers["user-agent"] ?? "unknown"),
+      new Date().toISOString()
+    )
+    .catch(() => {});
 
   res.cookie(COOKIE_NAME, token, cookieOptions(req));
   if (opts.setGateCookie) setGateCookie(req, res);
