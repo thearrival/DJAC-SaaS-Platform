@@ -137,7 +137,9 @@ AI: `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL`, `DEEPSEEK_MODEL`,
 
 Ops: `SENTRY_DSN`, `INTERACTION_RETENTION_*`, `REPORT_TEMPLATE_NAME`.
 
-Optional / not yet set: `REDIS_URL`, `YALLA_ADMIN_IP_ALLOWLIST`.
+Optional / not yet set: none required. `REDIS_URL` is provisioned (Upstash,
+2026-10-04). `YALLA_ADMIN_IP_ALLOWLIST` is intentionally **unused** — admin
+security uses per-login alert emails instead (see §4/§11).
 
 ## 10. Security posture
 
@@ -158,6 +160,8 @@ Optional / not yet set: `REDIS_URL`, `YALLA_ADMIN_IP_ALLOWLIST`.
 - **Health Monitor** GitHub workflow (every 30 min) probes the site and opens/
   closes a labelled issue on failure.
 - Sentry error monitoring (server + client); email failures alert.
+- **Owner-console sign-in alerts** — every successful founder login emails
+  `hello@yalla-hack.com` with IP, device, and time.
 
 ## 12. CI/CD
 
@@ -183,16 +187,13 @@ Optional / not yet set: `REDIS_URL`, `YALLA_ADMIN_IP_ALLOWLIST`.
 ## 15. Pending actions (owner)
 
 1. **Rotate** the Stripe live secret key and the DeepSeek key (both were shared in
-   chat), then update in Vercel.
-2. **Redis (optional):** the Vercel "Upstash for Redis" integration required
-   browser **terms acceptance** — accept at
-   `https://vercel.com/yalla-hack-s-projects/~/integrations/accept-terms/upstash`
-   OR create a DB at upstash.com and set `REDIS_URL`. (Postgres fallback works
-   meanwhile.)
-3. **IP allowlist (optional):** confirm a **static** IP/CIDR before enabling
-   `YALLA_ADMIN_IP_ALLOWLIST` (observed admin IPs vary, so a strict list can lock
-   you out).
-4. Optional: `APP_VERSION`, off-site `DATABASE_URL` GitHub secret, Supabase PITR.
+   chat). New values must be set in Vercel — the platform currently runs on the
+   prior (still-valid) values.
+2. Optional: `APP_VERSION`, off-site `DATABASE_URL` GitHub secret, Supabase PITR.
+
+_Done: `REDIS_URL` provisioned (Upstash). Admin IP allowlist intentionally
+skipped — replaced by per-login alert emails (owner is emailed on every console
+sign-in)._
 
 ## 16. Key commands
 
