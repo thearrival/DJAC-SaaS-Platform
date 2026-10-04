@@ -186,14 +186,11 @@ security uses per-login alert emails instead (see §4/§11).
 
 ## 15. Pending actions (owner)
 
-1. **Rotate** the Stripe live secret key and the DeepSeek key (both were shared in
-   chat). New values must be set in Vercel — the platform currently runs on the
-   prior (still-valid) values.
-2. Optional: `APP_VERSION`, off-site `DATABASE_URL` GitHub secret, Supabase PITR.
+- Optional only: `APP_VERSION`, off-site `DATABASE_URL` GitHub secret, Supabase PITR.
 
-_Done: `REDIS_URL` provisioned (Upstash). Admin IP allowlist intentionally
-skipped — replaced by per-login alert emails (owner is emailed on every console
-sign-in)._
+_Done: Stripe + DeepSeek keys **rotated and updated in Vercel** (verified live
+2026-10-04); `REDIS_URL` provisioned (Upstash); admin sign-in alert emails in
+place (IP allowlist intentionally unused)._
 
 ## 16. Key commands
 
