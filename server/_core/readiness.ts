@@ -208,6 +208,44 @@ function checkBillingReadiness(): ServiceReadiness {
   };
 }
 
+type PriceValidation = { checked: boolean; count: number; invalid: string[] };
+let priceValidationCache: { at: number; result: PriceValidation } | null = null;
+
+/**
+ * Validate the configured STRIPE_PRICE_* ids against the live Stripe account
+ * (cached 10 min). Network errors are ignored (fail-open) — only a definitive
+ * 404/4xx from Stripe marks a price id invalid.
+ */
+async function validateStripePrices(
+  secret: string,
+  priceIds: string[]
+): Promise<PriceValidation> {
+  const now = Date.now();
+  if (priceValidationCache && now - priceValidationCache.at < 600_000) {
+    return priceValidationCache.result;
+  }
+  const invalid: string[] = [];
+  await Promise.all(
+    priceIds.map(async id => {
+      try {
+        const r = await fetch(
+          `https://api.stripe.com/v1/prices/${encodeURIComponent(id)}`,
+          {
+            headers: { Authorization: `Bearer ${secret}` },
+            signal: AbortSignal.timeout(8000),
+          }
+        );
+        if (r.status >= 400 && r.status < 500) invalid.push(id);
+      } catch {
+        // network/other error — do not flag as invalid
+      }
+    })
+  );
+  const result = { checked: true, count: priceIds.length, invalid };
+  priceValidationCache = { at: now, result };
+  return result;
+}
+
 /**
  * Integration configuration visibility. These are opt-in capabilities, so they
  * do not affect the overall `ok` verdict — but an operator monitoring the
@@ -265,6 +303,34 @@ export async function getSystemReadiness() {
   const database = await checkDatabaseReadiness();
   const redis = await checkRedisReadiness();
   const billing = checkBillingReadiness();
+  const priceIds = [
+    parsedEnv.STRIPE_PRICE_STARTER_MONTHLY,
+    parsedEnv.STRIPE_PRICE_STARTER_QUARTERLY,
+    parsedEnv.STRIPE_PRICE_STARTER_BIANNUAL,
+    parsedEnv.STRIPE_PRICE_STARTER_ANNUAL,
+    parsedEnv.STRIPE_PRICE_PRO_MONTHLY,
+    parsedEnv.STRIPE_PRICE_PRO_QUARTERLY,
+    parsedEnv.STRIPE_PRICE_PRO_BIANNUAL,
+    parsedEnv.STRIPE_PRICE_PRO_ANNUAL,
+    parsedEnv.STRIPE_PRICE_ENTERPRISE_MONTHLY,
+    parsedEnv.STRIPE_PRICE_ENTERPRISE_QUARTERLY,
+    parsedEnv.STRIPE_PRICE_ENTERPRISE_BIANNUAL,
+    parsedEnv.STRIPE_PRICE_ENTERPRISE_ANNUAL,
+  ].filter((v): v is string => Boolean(v && v.trim()));
+  if (
+    billing.enabled &&
+    billing.ready &&
+    ENV.stripeSecretKey &&
+    priceIds.length
+  ) {
+    const v = await validateStripePrices(ENV.stripeSecretKey, priceIds);
+    if (v.invalid.length) {
+      billing.ready = false;
+      billing.details = `Stripe price id(s) not found in the live account: ${v.invalid.join(", ")}.`;
+    } else if (v.checked) {
+      billing.details = `Stripe billing ready — ${v.count} price ids validated against the live account.`;
+    }
+  }
   const aiOrchestrator = {
     enabled: ENV.aiOrchestratorEnabled,
     ready:
