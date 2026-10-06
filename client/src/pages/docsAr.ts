@@ -1,4 +1,4 @@
-import type { DocSection } from "./DocsPortal";
+import type { DocSection } from "./docsContent";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Arabic (ar) — Complete documentation data (11 sections, 24 pages)
