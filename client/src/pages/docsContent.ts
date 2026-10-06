@@ -49,7 +49,7 @@ DJAC (De Jure Automated Compliance) is an enterprise SaaS platform that automate
 - **Vendor Risk Management** — Automated third-party assessments across all selected frameworks
 - **Enterprise-Grade Security** — AES-256 encryption, RBAC, audit trails, SOC 2 ready
 
-> **tip** The DJAC interface is available in 9 languages — switch anytime from the header locale menu. This documentation is published in English, Arabic, and Chinese; other interface languages see the English version here.
+> **tip** The DJAC interface is available in 9 languages — switch anytime from the header locale menu. This documentation is published in all 9 languages too.
 
 ### Quick Start (5 minutes)
 1. **Create your organization** — Set up your company profile and billing
