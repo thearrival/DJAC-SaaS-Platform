@@ -157,6 +157,11 @@ export default defineConfig(({ mode }) => {
               return "crypto-libs";
             }
 
+            // three.js (3D globe) — large; only loaded on the Pro-Intelligence page.
+            if (id.includes("node_modules/three")) {
+              return "three";
+            }
+
             // Catch-all: generic vendor chunk, separate from React-critical
             return "vendor";
           },
