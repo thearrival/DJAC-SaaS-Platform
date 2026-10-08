@@ -1,39 +1,66 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
 export type GlobeMarker = {
+  id?: string;
   location: [number, number];
   size?: number;
+  value?: number;
   label?: string;
 };
 export type GlobeArc = { from: [number, number]; to: [number, number] };
+export type GlobeSelection = {
+  type: "hub" | "arc";
+  id: string;
+  label: string;
+  value?: number;
+};
 
-/** Key regulatory hubs (lat, lng). */
+/** Fallback hubs (used when no data-driven markers are supplied). */
 export const GLOBE_MARKERS: GlobeMarker[] = [
-  { location: [39.9, 116.4], size: 1.0, label: "Beijing" },
-  { location: [22.3, 114.2], size: 0.7 },
-  { location: [24.7, 46.7], size: 1.0, label: "Riyadh" },
-  { location: [25.2, 55.3], size: 0.8, label: "Dubai" },
-  { location: [50.85, 4.35], size: 0.9, label: "Brussels" },
-  { location: [38.9, -77.0], size: 0.9, label: "Washington" },
-  { location: [51.5, -0.12], size: 0.7, label: "London" },
-  { location: [1.35, 103.8], size: 0.7, label: "Singapore" },
-  { location: [35.68, 139.7], size: 0.6 },
-  { location: [-33.87, 151.2], size: 0.6 },
-  { location: [-23.55, -46.63], size: 0.6 },
-  { location: [-1.29, 36.82], size: 0.6 },
+  { id: "China", location: [39.9, 116.4], size: 0.8, label: "China", value: 3 },
+  {
+    id: "Saudi Arabia",
+    location: [24.7, 46.7],
+    size: 1.0,
+    label: "Saudi Arabia",
+    value: 6,
+  },
+  {
+    id: "European Union",
+    location: [50.85, 4.35],
+    size: 1.0,
+    label: "European Union",
+    value: 10,
+  },
+  {
+    id: "United States",
+    location: [38.9, -77.0],
+    size: 1.2,
+    label: "United States",
+    value: 21,
+  },
+  {
+    id: "Singapore",
+    location: [1.35, 103.8],
+    size: 0.6,
+    label: "Singapore",
+    value: 3,
+  },
 ];
 
-/** Cross-border regulatory corridors. */
 export const GLOBE_ARCS: GlobeArc[] = [
-  { from: [39.9, 116.4], to: [24.7, 46.7] }, // China → Saudi
-  { from: [39.9, 116.4], to: [50.85, 4.35] }, // China → EU
-  { from: [24.7, 46.7], to: [50.85, 4.35] }, // Saudi → EU
-  { from: [50.85, 4.35], to: [38.9, -77.0] }, // EU → US
-  { from: [25.2, 55.3], to: [1.35, 103.8] }, // UAE → Singapore
-  { from: [38.9, -77.0], to: [-23.55, -46.63] }, // US → Brazil
-  { from: [39.9, 116.4], to: [1.35, 103.8] }, // China → Singapore
+  { from: [39.9, 116.4], to: [24.7, 46.7] },
+  { from: [39.9, 116.4], to: [50.85, 4.35] },
+  { from: [24.7, 46.7], to: [50.85, 4.35] },
+  { from: [50.85, 4.35], to: [38.9, -77.0] },
+  { from: [25.2, 55.3], to: [1.35, 103.8] },
+  { from: [38.9, -77.0], to: [-23.55, -46.63] },
 ];
 
 const RADIUS = 1;
@@ -48,15 +75,11 @@ function toVec(lat: number, lng: number, r: number): THREE.Vector3 {
   );
 }
 
-function makeLabel(text: string): {
-  sprite: THREE.Sprite;
-  texture: THREE.Texture;
-} {
+function makeLabel(text: string) {
   const canvas = document.createElement("canvas");
   canvas.width = 256;
   canvas.height = 64;
   const ctx = canvas.getContext("2d")!;
-  ctx.clearRect(0, 0, 256, 64);
   ctx.font = "600 30px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#c7e6ff";
   ctx.textAlign = "center";
@@ -72,58 +95,71 @@ function makeLabel(text: string): {
       depthTest: true,
     })
   );
-  sprite.scale.set(0.3, 0.075, 1);
+  sprite.scale.set(0.34, 0.085, 1);
   return { sprite, texture };
 }
 
-/**
- * Full 3D globe (three.js): real country outlines, fresnel atmosphere, a
- * starfield, glowing regulatory hubs with labels, and animated cross-border
- * corridor pulses. Orbit + auto-rotate. Country data is a static same-origin
- * asset (no external textures); everything else is code-generated.
- */
+/** Brightness ramp for hub color by relative count. */
+function hubColor(t: number): THREE.Color {
+  return new THREE.Color().setHSL(0.52 - 0.12 * t, 0.9, 0.55 + 0.1 * t);
+}
+
 export function Globe3D({
   markers = GLOBE_MARKERS,
   arcs = GLOBE_ARCS,
+  onSelect,
   className,
 }: {
   markers?: GlobeMarker[];
   arcs?: GlobeArc[];
+  onSelect?: (sel: GlobeSelection) => void;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [tip, setTip] = useState<{
+    x: number;
+    y: number;
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const size = el.clientWidth || 520;
     let cancelled = false;
+    const disposables: Array<{ dispose: () => void }> = [];
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
     camera.position.set(0, 0.45, 3.05);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(size, size, false);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.display = "block";
     el.appendChild(renderer.domElement);
 
     scene.add(new THREE.AmbientLight(0x93b8ff, 1.0));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.35);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
     keyLight.position.set(3, 2, 4);
     scene.add(keyLight);
-    const rim = new THREE.PointLight(0x00d2ff, 2.4, 14);
-    rim.position.set(-3, -1.5, -2);
-    scene.add(rim);
+    const rimLight = new THREE.PointLight(0x00d2ff, 2.2, 14);
+    rimLight.position.set(-3, -1.5, -2);
+    scene.add(rimLight);
 
     const globe = new THREE.Group();
     scene.add(globe);
 
-    // ── Starfield ─────────────────────────────────────────────────────────────
+    // Starfield
     const starCount = 1400;
     const starPos = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
@@ -136,20 +172,19 @@ export function Globe3D({
     }
     const starGeo = new THREE.BufferGeometry();
     starGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
-    const stars = new THREE.Points(
-      starGeo,
-      new THREE.PointsMaterial({
-        color: 0x9fc7ff,
-        size: 0.05,
-        sizeAttenuation: true,
-        transparent: true,
-        opacity: 0.7,
-        depthWrite: false,
-      })
-    );
+    const starMat = new THREE.PointsMaterial({
+      color: 0x9fc7ff,
+      size: 0.05,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.7,
+      depthWrite: false,
+    });
+    const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
+    disposables.push(starGeo, starMat);
 
-    // ── Earth + graticule ─────────────────────────────────────────────────────
+    // Earth
     const earth = new THREE.Mesh(
       new THREE.SphereGeometry(RADIUS, 64, 64),
       new THREE.MeshPhongMaterial({
@@ -160,19 +195,8 @@ export function Globe3D({
       })
     );
     globe.add(earth);
-    globe.add(
-      new THREE.Mesh(
-        new THREE.SphereGeometry(RADIUS * 1.0012, 48, 32),
-        new THREE.MeshBasicMaterial({
-          color: 0x123163,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.12,
-        })
-      )
-    );
 
-    // ── Fresnel atmosphere ─────────────────────────────────────────────────────
+    // Fresnel atmosphere
     scene.add(
       new THREE.Mesh(
         new THREE.SphereGeometry(RADIUS * 1.2, 64, 64),
@@ -194,9 +218,7 @@ export function Globe3D({
       )
     );
 
-    // ── Country outlines (async, same-origin asset) ────────────────────────────
-    let outlineGeo: THREE.BufferGeometry | null = null;
-    const disposeOutlines: Array<() => void> = [];
+    // Country outlines (same-origin asset)
     fetch("/world-110m.geo.json")
       .then(r => (r.ok ? r.json() : null))
       .then(geo => {
@@ -221,58 +243,63 @@ export function Globe3D({
                 : [];
           for (const poly of polys) for (const ring of poly) addRing(ring);
         }
-        outlineGeo = new THREE.BufferGeometry();
-        outlineGeo.setAttribute(
-          "position",
-          new THREE.Float32BufferAttribute(pts, 3)
-        );
-        const material = new THREE.LineBasicMaterial({
+        const og = new THREE.BufferGeometry();
+        og.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+        const om = new THREE.LineBasicMaterial({
           color: 0x3b82f6,
           transparent: true,
           opacity: 0.6,
         });
-        const outlines = new THREE.LineSegments(outlineGeo, material);
-        globe.add(outlines);
-        disposeOutlines.push(() => {
-          outlineGeo?.dispose();
-          material.dispose();
-          globe.remove(outlines);
-        });
+        globe.add(new THREE.LineSegments(og, om));
+        disposables.push(og, om);
       })
       .catch(() => {});
 
-    // ── Hubs (+ labels) ────────────────────────────────────────────────────────
+    // Hubs (+ labels) — pickable
+    const pickables: THREE.Object3D[] = [];
     const labelTextures: THREE.Texture[] = [];
+    const maxVal = Math.max(1, ...markers.map(m => m.value ?? 1));
     for (const m of markers) {
       const pos = toVec(m.location[0], m.location[1], RADIUS);
-      const s = m.size ?? 0.7;
+      const s = m.size ?? 0.6;
+      const t = Math.min(1, (m.value ?? 1) / maxVal);
+      const color = hubColor(t);
       const dot = new THREE.Mesh(
-        new THREE.SphereGeometry(0.006 + 0.009 * s, 12, 12),
-        new THREE.MeshBasicMaterial({ color: 0x8df0ff })
+        new THREE.SphereGeometry(0.007 + 0.011 * s, 14, 14),
+        new THREE.MeshBasicMaterial({ color })
       );
       dot.position.copy(pos);
+      dot.userData = {
+        type: "hub",
+        id: m.id ?? m.label ?? "",
+        label: m.label ?? m.id ?? "",
+        value: m.value,
+      };
       globe.add(dot);
+      pickables.push(dot);
+
       const halo = new THREE.Mesh(
-        new THREE.SphereGeometry(0.017 + 0.032 * s, 12, 12),
+        new THREE.SphereGeometry(0.02 + 0.045 * s, 14, 14),
         new THREE.MeshBasicMaterial({
-          color: 0x00d2ff,
+          color,
           transparent: true,
-          opacity: 0.2,
+          opacity: 0.22,
           blending: THREE.AdditiveBlending,
           depthWrite: false,
         })
       );
       halo.position.copy(pos);
       globe.add(halo);
+
       if (m.label) {
         const { sprite, texture } = makeLabel(m.label);
-        sprite.position.copy(pos.clone().multiplyScalar(1.06));
+        sprite.position.copy(pos.clone().multiplyScalar(1.07));
         globe.add(sprite);
         labelTextures.push(texture);
       }
     }
 
-    // ── Corridor arcs + travelling pulses ──────────────────────────────────────
+    // Corridor arcs — glowing tube + travelling pulse; pickable via a fat tube
     const pulses: {
       mesh: THREE.Mesh;
       curve: THREE.QuadraticBezierCurve3;
@@ -290,18 +317,27 @@ export function Globe3D({
         .normalize()
         .multiplyScalar(RADIUS + dist * 0.42);
       const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-      globe.add(
-        new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints(curve.getPoints(72)),
-          new THREE.LineBasicMaterial({
-            color: 0x38bdf8,
-            transparent: true,
-            opacity: 0.5,
-          })
-        )
-      );
+
+      const tubeGeo = new THREE.TubeGeometry(curve, 72, 0.004, 8, false);
+      const tubeMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.65,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const tube = new THREE.Mesh(tubeGeo, tubeMat);
+      tube.userData = {
+        type: "arc",
+        id: `${a.from.join(",")}-${a.to.join(",")}`,
+        label: "Cross-border corridor",
+      };
+      globe.add(tube);
+      pickables.push(tube);
+      disposables.push(tubeGeo, tubeMat);
+
       const pulse = new THREE.Mesh(
-        new THREE.SphereGeometry(0.011, 8, 8),
+        new THREE.SphereGeometry(0.012, 8, 8),
         new THREE.MeshBasicMaterial({ color: 0x9be9ff })
       );
       globe.add(pulse);
@@ -313,7 +349,7 @@ export function Globe3D({
       });
     }
 
-    // ── Controls ───────────────────────────────────────────────────────────────
+    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableZoom = false;
     controls.enablePan = false;
@@ -321,11 +357,84 @@ export function Globe3D({
     controls.dampingFactor = 0.08;
     controls.rotateSpeed = 0.5;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.65;
+    controls.autoRotateSpeed = 0.6;
     controls.minPolarAngle = Math.PI * 0.15;
     controls.maxPolarAngle = Math.PI * 0.85;
 
-    // ── Loop ───────────────────────────────────────────────────────────────────
+    // Bloom post-processing
+    const composer = new EffectComposer(renderer);
+    composer.setSize(size, size);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(size, size),
+      0.75,
+      0.55,
+      0.82
+    );
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+
+    // Interaction
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let downPos: { x: number; y: number } | null = null;
+
+    const toNdc = (e: PointerEvent) => {
+      const r = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+      pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+      return r;
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      const r = toNdc(e);
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObjects(pickables, false)[0];
+      if (hit) {
+        renderer.domElement.style.cursor = "pointer";
+        const d = hit.object.userData as {
+          label: string;
+          value?: number;
+          type: string;
+        };
+        setTip({
+          x: e.clientX - r.left,
+          y: e.clientY - r.top,
+          text:
+            d.type === "hub" && d.value != null
+              ? `${d.label} · ${d.value} framework${d.value === 1 ? "" : "s"}`
+              : d.label,
+        });
+      } else {
+        renderer.domElement.style.cursor = "grab";
+        setTip(null);
+      }
+    };
+    const onPointerLeave = () => setTip(null);
+    const onPointerDown = (e: PointerEvent) => {
+      downPos = { x: e.clientX, y: e.clientY };
+    };
+    const onPointerUp = (e: PointerEvent) => {
+      if (!downPos) return;
+      const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
+      downPos = null;
+      if (moved > 5) return; // treat as drag, not click
+      toNdc(e);
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObjects(pickables, false)[0];
+      if (hit && onSelect) {
+        const d = hit.object.userData as GlobeSelection;
+        onSelect({ type: d.type, id: d.id, label: d.label, value: d.value });
+      }
+    };
+
+    const canvas = renderer.domElement;
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerleave", onPointerLeave);
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointerup", onPointerUp);
+
+    // Loop
     let raf = 0;
     const clock = new THREE.Clock();
     const animate = () => {
@@ -336,7 +445,7 @@ export function Globe3D({
       }
       stars.rotation.y += dt * 0.005;
       controls.update();
-      renderer.render(scene, camera);
+      composer.render();
       raf = requestAnimationFrame(animate);
     };
     raf = requestAnimationFrame(animate);
@@ -344,6 +453,8 @@ export function Globe3D({
     const resize = () => {
       const w = el.clientWidth || size;
       renderer.setSize(w, w, false);
+      composer.setSize(w, w);
+      bloom.setSize(w, w);
     };
     const ro = new ResizeObserver(resize);
     ro.observe(el);
@@ -353,8 +464,12 @@ export function Globe3D({
       cancelAnimationFrame(raf);
       ro.disconnect();
       controls.dispose();
-      disposeOutlines.forEach(fn => fn());
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerleave", onPointerLeave);
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointerup", onPointerUp);
       labelTextures.forEach(t => t.dispose());
+      composer.dispose();
       scene.traverse(obj => {
         const o = obj as THREE.Mesh;
         o.geometry?.dispose?.();
@@ -362,25 +477,46 @@ export function Globe3D({
         if (Array.isArray(mat)) mat.forEach(m => m.dispose());
         else mat?.dispose?.();
       });
+      disposables.forEach(d => d.dispose());
       renderer.dispose();
       if (renderer.domElement.parentNode)
         renderer.domElement.parentNode.removeChild(renderer.domElement);
     };
-  }, [markers, arcs]);
+  }, [markers, arcs, onSelect]);
 
   return (
     <div
       ref={ref}
-      role="img"
-      aria-label="Interactive 3D globe of DJAC regulatory hubs and cross-border corridors"
       className={className}
       style={{
+        position: "relative",
         width: "100%",
         aspectRatio: "1 / 1",
         maxWidth: 520,
         margin: "0 auto",
         touchAction: "none",
       }}
-    />
+    >
+      {tip && (
+        <div
+          role="tooltip"
+          style={{
+            position: "absolute",
+            left: Math.min(tip.x + 12, 360),
+            top: Math.max(tip.y - 10, 4),
+            pointerEvents: "none",
+            background: "rgba(2,10,25,0.92)",
+            border: "1px solid rgba(56,189,248,0.45)",
+            borderRadius: 8,
+            padding: "4px 9px",
+            fontSize: 11,
+            color: "#c7e6ff",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {tip.text}
+        </div>
+      )}
+    </div>
   );
 }

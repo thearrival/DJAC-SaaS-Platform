@@ -20,6 +20,7 @@ import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SinoGulfHeatmap } from "@/components/SinoGulfHeatmap";
 import { Globe3D } from "@/components/Globe3D";
+import { buildMarkersFromCounts } from "@/components/globeData";
 import { AIOrchestrationFeed } from "@/components/AIOrchestrationFeed";
 import { RegulatoryPulseMatrix } from "@/components/RegulatoryPulseMatrix";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,7 @@ import {
   Radio,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useLocation } from "wouter";
 
 type ThreatLevel = "NORMAL" | "ELEVATED" | "HIGH" | "CRITICAL";
 
@@ -961,6 +963,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const { t } = useLocale();
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [, navigate] = useLocation();
 
   // Live clock
   const [now, setNow] = useState(() => new Date());
@@ -1000,6 +1003,19 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const matrixQuery = trpc.compliance.matrix.useQuery(undefined, {
     staleTime: 60_000,
   });
+
+  // Real, per-jurisdiction framework counts → data-driven globe hubs.
+  const globalFwQuery = trpc.compliance.globalFrameworks.useQuery(undefined, {
+    staleTime: 300_000,
+    refetchOnWindowFocus: false,
+  });
+  const globeMarkers = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const f of globalFwQuery.data ?? []) {
+      counts[f.jurisdiction] = (counts[f.jurisdiction] ?? 0) + 1;
+    }
+    return buildMarkersFromCounts(counts);
+  }, [globalFwQuery.data]);
 
   const liveJobCount = useMemo(() => {
     if (!jobsQuery.data) return 0;
@@ -1457,7 +1473,16 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             color={C.cyan}
             sublabel="Regulatory hubs and cross-border corridors"
           />
-          <Globe3D />
+          <Globe3D
+            markers={globeMarkers.length > 0 ? globeMarkers : undefined}
+            onSelect={sel => {
+              navigate(
+                sel.type === "arc"
+                  ? "/cross-border-data-flow"
+                  : "/global-registry"
+              );
+            }}
+          />
         </section>
 
         {/* ── Row 1: Heatmap ────────────────────────────────────────── */}
