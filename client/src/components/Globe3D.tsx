@@ -121,6 +121,11 @@ export function Globe3D({
     y: number;
     text: string;
   } | null>(null);
+  // Keep the callback in a ref so a re-rendering parent never rebuilds the scene.
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+  const tourRef = useRef(false);
+  const [touring, setTouring] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -412,6 +417,25 @@ export function Globe3D({
     controls.minPolarAngle = Math.PI * 0.15;
     controls.maxPolarAngle = Math.PI * 0.85;
 
+    // Auto-cycling spotlight tour
+    let tourIdx = 0;
+    const tourTimer = window.setInterval(() => {
+      if (!tourRef.current || markers.length === 0) return;
+      const m = markers[tourIdx % markers.length];
+      tourIdx++;
+      emphasizeHub(m.location);
+      spawnRing(
+        toVec(m.location[0], m.location[1], RADIUS),
+        new THREE.Color(0x7dd3fc)
+      );
+      onSelectRef.current?.({
+        type: "hub",
+        id: m.id ?? m.label ?? "",
+        label: m.label ?? m.id ?? "",
+        value: m.value,
+      });
+    }, 3500);
+
     // Bloom post-processing
     const composer = new EffectComposer(renderer);
     composer.setSize(size, size);
@@ -473,7 +497,7 @@ export function Globe3D({
       toNdc(e);
       raycaster.setFromCamera(pointer, camera);
       const hit = raycaster.intersectObjects(pickables, false)[0];
-      if (hit && onSelect) {
+      if (hit && onSelectRef.current) {
         const d = hit.object.userData as GlobeSelection & {
           location?: [number, number];
         };
@@ -490,7 +514,12 @@ export function Globe3D({
         } else {
           emphasizeHub(null);
         }
-        onSelect({ type: d.type, id: d.id, label: d.label, value: d.value });
+        onSelectRef.current({
+          type: d.type,
+          id: d.id,
+          label: d.label,
+          value: d.value,
+        });
       } else if (!hit) {
         emphasizeHub(null);
       }
@@ -542,6 +571,7 @@ export function Globe3D({
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      window.clearInterval(tourTimer);
       ro.disconnect();
       controls.dispose();
       canvas.removeEventListener("pointermove", onPointerMove);
@@ -566,7 +596,7 @@ export function Globe3D({
       if (renderer.domElement.parentNode)
         renderer.domElement.parentNode.removeChild(renderer.domElement);
     };
-  }, [markers, arcs, onSelect]);
+  }, [markers, arcs]);
 
   const downloadPng = () => {
     const canvas = ref.current?.querySelector(
@@ -661,6 +691,30 @@ export function Globe3D({
         }}
       >
         PNG
+      </button>
+
+      {/* Tour toggle */}
+      <button
+        type="button"
+        onClick={() => {
+          tourRef.current = !tourRef.current;
+          setTouring(tourRef.current);
+        }}
+        aria-pressed={touring}
+        style={{
+          position: "absolute",
+          right: 8,
+          top: 8,
+          background: touring ? "rgba(0,210,255,0.2)" : "rgba(2,10,25,0.6)",
+          border: "1px solid rgba(56,189,248,0.35)",
+          borderRadius: 8,
+          color: "#9bd6ff",
+          fontSize: 11,
+          padding: "4px 9px",
+          cursor: "pointer",
+        }}
+      >
+        {touring ? "■ Tour" : "▶ Tour"}
       </button>
     </div>
   );

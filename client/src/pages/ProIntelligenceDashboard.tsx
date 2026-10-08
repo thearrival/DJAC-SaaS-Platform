@@ -957,6 +957,24 @@ function AIJobsActivity({
   );
 }
 
+// ── Animated count-up for the jurisdiction panel ──────────────────────────────
+function CountUp({ value }: { value: number }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const start = performance.now();
+    const dur = 550;
+    const step = (t: number) => {
+      const p = Math.min(1, (t - start) / dur);
+      setN(Math.round(value * p));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <>{n}</>;
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   usePageTitle("Pro Intelligence");
@@ -1532,7 +1550,10 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                     {globeSel.label}
                   </h3>
                   <span style={{ fontSize: 12, color: C.cyan }}>
-                    {globeSel.value ?? selectedFrameworks.length} frameworks
+                    <CountUp
+                      value={globeSel.value ?? selectedFrameworks.length}
+                    />{" "}
+                    frameworks
                   </span>
                   <button
                     type="button"
