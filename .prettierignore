@@ -35,3 +35,6 @@ pnpm-lock.yaml
 # OS files
 .DS_Store
 Thumbs.db
+
+# Bundled geography data (minified GeoJSON asset)
+client/public/*.geo.json
