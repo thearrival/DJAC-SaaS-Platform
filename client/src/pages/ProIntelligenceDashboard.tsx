@@ -1017,6 +1017,18 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     return buildMarkersFromCounts(counts);
   }, [globalFwQuery.data]);
 
+  const [globeSel, setGlobeSel] = useState<{
+    id: string;
+    label: string;
+    value?: number;
+  } | null>(null);
+  const selectedFrameworks = useMemo(() => {
+    if (!globeSel) return [];
+    return (globalFwQuery.data ?? [])
+      .filter(f => f.jurisdiction === globeSel.id)
+      .slice(0, 8);
+  }, [globalFwQuery.data, globeSel]);
+
   const liveJobCount = useMemo(() => {
     if (!jobsQuery.data) return 0;
     return jobsQuery.data.filter(
@@ -1473,16 +1485,96 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             color={C.cyan}
             sublabel="Regulatory hubs and cross-border corridors"
           />
-          <Globe3D
-            markers={globeMarkers.length > 0 ? globeMarkers : undefined}
-            onSelect={sel => {
-              navigate(
-                sel.type === "arc"
-                  ? "/cross-border-data-flow"
-                  : "/global-registry"
-              );
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: globeSel
+                ? "minmax(0,1.1fr) minmax(0,0.9fr)"
+                : "1fr",
+              gap: 18,
+              alignItems: "center",
             }}
-          />
+          >
+            <Globe3D
+              markers={globeMarkers.length > 0 ? globeMarkers : undefined}
+              onSelect={sel => {
+                if (sel.type === "arc") {
+                  navigate("/cross-border-data-flow");
+                } else {
+                  setGlobeSel({
+                    id: sel.id,
+                    label: sel.label,
+                    value: sel.value,
+                  });
+                }
+              }}
+            />
+            {globeSel && (
+              <div
+                style={{
+                  border: `1px solid ${C.cyan}33`,
+                  background: "rgba(2,10,25,0.55)",
+                  borderRadius: 14,
+                  padding: "18px 20px",
+                  color: "#dbeafe",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 10,
+                    marginBottom: 12,
+                  }}
+                >
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
+                    {globeSel.label}
+                  </h3>
+                  <span style={{ fontSize: 12, color: C.cyan }}>
+                    {globeSel.value ?? selectedFrameworks.length} frameworks
+                  </span>
+                </div>
+                <ul
+                  style={{
+                    listStyle: "none",
+                    margin: 0,
+                    padding: 0,
+                    display: "grid",
+                    gap: 8,
+                  }}
+                >
+                  {selectedFrameworks.map(f => (
+                    <li
+                      key={f.code}
+                      style={{ display: "flex", gap: 8, fontSize: 13 }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "ui-monospace, monospace",
+                          fontSize: 11,
+                          color: C.cyan,
+                          minWidth: 78,
+                        }}
+                      >
+                        {f.code}
+                      </span>
+                      <span style={{ color: "#9fb4d4" }}>{f.name}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div style={{ marginTop: 14 }}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/global-registry")}
+                  >
+                    Open in Global Registry
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
 
         {/* ── Row 1: Heatmap ────────────────────────────────────────── */}

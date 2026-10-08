@@ -349,6 +349,33 @@ export function Globe3D({
       });
     }
 
+    // Expanding pulse rings (spawned when a hub is selected)
+    const rings: {
+      mesh: THREE.Mesh;
+      mat: THREE.MeshBasicMaterial;
+      geo: THREE.RingGeometry;
+      t: number;
+    }[] = [];
+    const spawnRing = (pos: THREE.Vector3, color: THREE.Color) => {
+      const geo = new THREE.RingGeometry(0.018, 0.026, 48);
+      const mat = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.9,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const ring = new THREE.Mesh(geo, mat);
+      ring.position.copy(pos);
+      ring.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 0, 1),
+        pos.clone().normalize()
+      );
+      globe.add(ring);
+      rings.push({ mesh: ring, mat, geo, t: 0 });
+    };
+
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableZoom = false;
@@ -424,6 +451,16 @@ export function Globe3D({
       const hit = raycaster.intersectObjects(pickables, false)[0];
       if (hit && onSelect) {
         const d = hit.object.userData as GlobeSelection;
+        if (d.type === "hub") {
+          const mesh = hit.object as THREE.Mesh;
+          const mat = mesh.material as THREE.MeshBasicMaterial;
+          spawnRing(
+            mesh.position.clone(),
+            mat instanceof THREE.MeshBasicMaterial
+              ? mat.color
+              : new THREE.Color(0x00d2ff)
+          );
+        }
         onSelect({ type: d.type, id: d.id, label: d.label, value: d.value });
       }
     };
@@ -444,6 +481,18 @@ export function Globe3D({
         p.mesh.position.copy(p.curve.getPoint(p.t));
       }
       stars.rotation.y += dt * 0.005;
+      for (let i = rings.length - 1; i >= 0; i--) {
+        const r = rings[i];
+        r.t += dt * 1.6;
+        r.mesh.scale.setScalar(1 + r.t * 4);
+        r.mat.opacity = Math.max(0, 0.9 * (1 - r.t));
+        if (r.t >= 1) {
+          globe.remove(r.mesh);
+          r.geo.dispose();
+          r.mat.dispose();
+          rings.splice(i, 1);
+        }
+      }
       controls.update();
       composer.render();
       raf = requestAnimationFrame(animate);
@@ -469,6 +518,10 @@ export function Globe3D({
       canvas.removeEventListener("pointerdown", onPointerDown);
       canvas.removeEventListener("pointerup", onPointerUp);
       labelTextures.forEach(t => t.dispose());
+      rings.forEach(r => {
+        r.geo.dispose();
+        r.mat.dispose();
+      });
       composer.dispose();
       scene.traverse(obj => {
         const o = obj as THREE.Mesh;
