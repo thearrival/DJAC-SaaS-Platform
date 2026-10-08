@@ -138,6 +138,7 @@ export function Globe3D({
       antialias: true,
       alpha: true,
       powerPreference: "high-performance",
+      preserveDrawingBuffer: true,
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(size, size, false);
@@ -567,6 +568,17 @@ export function Globe3D({
     };
   }, [markers, arcs, onSelect]);
 
+  const downloadPng = () => {
+    const canvas = ref.current?.querySelector(
+      "canvas"
+    ) as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "djac-global-regulatory-network.png";
+    a.click();
+  };
+
   return (
     <div
       ref={ref}
@@ -600,6 +612,56 @@ export function Globe3D({
           {tip.text}
         </div>
       )}
+
+      {/* Legend */}
+      <div
+        style={{
+          position: "absolute",
+          left: 8,
+          bottom: 8,
+          fontSize: 10,
+          color: "#8fb4d6",
+          lineHeight: 1.5,
+          pointerEvents: "none",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span>few</span>
+          <span
+            style={{
+              display: "inline-block",
+              width: 54,
+              height: 6,
+              borderRadius: 3,
+              background:
+                "linear-gradient(90deg, hsl(188,90%,55%), hsl(173,90%,62%))",
+            }}
+          />
+          <span>many</span>
+        </div>
+        <div>Hub size/colour = frameworks per jurisdiction</div>
+      </div>
+
+      {/* Snapshot */}
+      <button
+        type="button"
+        onClick={downloadPng}
+        aria-label="Download globe as PNG"
+        style={{
+          position: "absolute",
+          right: 8,
+          bottom: 8,
+          background: "rgba(2,10,25,0.6)",
+          border: "1px solid rgba(56,189,248,0.35)",
+          borderRadius: 8,
+          color: "#9bd6ff",
+          fontSize: 11,
+          padding: "4px 9px",
+          cursor: "pointer",
+        }}
+      >
+        PNG
+      </button>
     </div>
   );
 }
