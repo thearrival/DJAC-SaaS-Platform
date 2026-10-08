@@ -257,6 +257,12 @@ export function Globe3D({
 
     // Hubs (+ labels) — pickable
     const pickables: THREE.Object3D[] = [];
+    const hubObjects: { dot: THREE.Mesh; loc: [number, number] }[] = [];
+    const arcObjects: {
+      from: [number, number];
+      to: [number, number];
+      mat: THREE.MeshBasicMaterial;
+    }[] = [];
     const labelTextures: THREE.Texture[] = [];
     const maxVal = Math.max(1, ...markers.map(m => m.value ?? 1));
     for (const m of markers) {
@@ -274,9 +280,11 @@ export function Globe3D({
         id: m.id ?? m.label ?? "",
         label: m.label ?? m.id ?? "",
         value: m.value,
+        location: m.location,
       };
       globe.add(dot);
       pickables.push(dot);
+      hubObjects.push({ dot, loc: m.location });
 
       const halo = new THREE.Mesh(
         new THREE.SphereGeometry(0.02 + 0.045 * s, 14, 14),
@@ -334,6 +342,7 @@ export function Globe3D({
       };
       globe.add(tube);
       pickables.push(tube);
+      arcObjects.push({ from: a.from, to: a.to, mat: tubeMat });
       disposables.push(tubeGeo, tubeMat);
 
       const pulse = new THREE.Mesh(
@@ -348,6 +357,20 @@ export function Globe3D({
         speed: 0.14 + Math.random() * 0.12,
       });
     }
+
+    // Emphasis: brighten corridors touching a selected hub + enlarge the node.
+    const sameLoc = (a: [number, number], b: [number, number]) =>
+      Math.abs(a[0] - b[0]) < 0.5 && Math.abs(a[1] - b[1]) < 0.5;
+    const emphasizeHub = (loc: [number, number] | null) => {
+      for (const ao of arcObjects) {
+        const on = !loc || sameLoc(ao.from, loc) || sameLoc(ao.to, loc);
+        ao.mat.opacity = on ? 0.95 : 0.1;
+        ao.mat.color.set(on ? 0x7dd3fc : 0x1e3a8a);
+      }
+      for (const ho of hubObjects) {
+        ho.dot.scale.setScalar(loc && sameLoc(ho.loc, loc) ? 2.2 : 1);
+      }
+    };
 
     // Expanding pulse rings (spawned when a hub is selected)
     const rings: {
@@ -450,18 +473,25 @@ export function Globe3D({
       raycaster.setFromCamera(pointer, camera);
       const hit = raycaster.intersectObjects(pickables, false)[0];
       if (hit && onSelect) {
-        const d = hit.object.userData as GlobeSelection;
-        if (d.type === "hub") {
+        const d = hit.object.userData as GlobeSelection & {
+          location?: [number, number];
+        };
+        if (d.type === "hub" && d.location) {
           const mesh = hit.object as THREE.Mesh;
           const mat = mesh.material as THREE.MeshBasicMaterial;
+          emphasizeHub(d.location);
           spawnRing(
             mesh.position.clone(),
             mat instanceof THREE.MeshBasicMaterial
               ? mat.color
               : new THREE.Color(0x00d2ff)
           );
+        } else {
+          emphasizeHub(null);
         }
         onSelect({ type: d.type, id: d.id, label: d.label, value: d.value });
+      } else if (!hit) {
+        emphasizeHub(null);
       }
     };
 

@@ -1534,6 +1534,23 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   <span style={{ fontSize: 12, color: C.cyan }}>
                     {globeSel.value ?? selectedFrameworks.length} frameworks
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setGlobeSel(null)}
+                    aria-label="Close jurisdiction panel"
+                    style={{
+                      marginInlineStart: "auto",
+                      background: "transparent",
+                      border: "none",
+                      color: "#9fb4d4",
+                      cursor: "pointer",
+                      fontSize: 18,
+                      lineHeight: 1,
+                      padding: 0,
+                    }}
+                  >
+                    ×
+                  </button>
                 </div>
                 <ul
                   style={{
