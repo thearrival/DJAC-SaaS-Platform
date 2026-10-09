@@ -1085,6 +1085,20 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
       ).sort(),
     []
   );
+  const visibleCorridorCount = useMemo(
+    () =>
+      GLOBE_ARCS.filter(a => {
+        const eff = whatIf && a.status === "approval" ? "blocked" : a.status;
+        if (corridorFilter !== "all" && eff !== corridorFilter) return false;
+        if (
+          categoryFilter !== "all" &&
+          !(a.dataCategories ?? []).includes(categoryFilter)
+        )
+          return false;
+        return true;
+      }).length,
+    [corridorFilter, categoryFilter, whatIf]
+  );
   const selectedFrameworks = useMemo(() => {
     if (!globeSel) return [];
     return (globalFwQuery.data ?? [])
@@ -1851,6 +1865,33 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             >
               {t("proIntel.exportCsv", "Export CSV")}
             </button>
+            {(corridorFilter !== "all" ||
+              categoryFilter !== "all" ||
+              whatIf) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCorridorFilter("all");
+                  setCategoryFilter("all");
+                  setWhatIf(false);
+                }}
+                style={{
+                  fontSize: 11,
+                  padding: "3px 10px",
+                  borderRadius: 999,
+                  cursor: "pointer",
+                  border: "1px solid rgba(148,163,184,0.3)",
+                  background: "rgba(2,10,25,0.5)",
+                  color: "#9fb4d4",
+                }}
+              >
+                {t("proIntel.resetFilters", "Reset filters")}
+              </button>
+            )}
+            <span style={{ fontSize: 11, color: "#94a3b8" }}>
+              {t("proIntel.showing", "Showing")} {visibleCorridorCount}/
+              {GLOBE_ARCS.length}
+            </span>
           </div>
           <div
             style={{
