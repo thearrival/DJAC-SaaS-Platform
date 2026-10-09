@@ -987,6 +987,30 @@ const CORRIDOR_STATUS_META: Record<
   blocked: { label: "Blocked", color: "#ef4444" },
 };
 
+type GlobeViewPreset = {
+  name: string;
+  regionFilter: string;
+  corridorFilter: CorridorStatus | "all";
+  categoryFilter: string;
+  highRiskOnly: boolean;
+  whatIf: boolean;
+  showLabels: boolean;
+  autoRotate: boolean;
+};
+
+const GLOBE_PRESET_KEY = "djac.globe.presets.v1";
+
+function loadGlobePresets(): GlobeViewPreset[] {
+  try {
+    const raw = localStorage.getItem(GLOBE_PRESET_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as GlobeViewPreset[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 function exportCorridorsCsv() {
   const rows: string[][] = [
     ["Corridor", "From", "To", "Status", "Volume", "Data categories"],
@@ -1125,6 +1149,39 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const [compare, setCompare] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [highRiskOnly, setHighRiskOnly] = useState(false);
+  const [presets, setPresets] = useState<GlobeViewPreset[]>(loadGlobePresets);
+  const persistPresets = (next: GlobeViewPreset[]) => {
+    setPresets(next);
+    try {
+      localStorage.setItem(GLOBE_PRESET_KEY, JSON.stringify(next));
+    } catch {
+      /* ignore quota / private-mode errors */
+    }
+  };
+  const savePreset = () => {
+    persistPresets([
+      ...presets,
+      {
+        name: `View ${presets.length + 1}`,
+        regionFilter,
+        corridorFilter,
+        categoryFilter,
+        highRiskOnly,
+        whatIf,
+        showLabels,
+        autoRotate,
+      },
+    ]);
+  };
+  const applyPreset = (p: GlobeViewPreset) => {
+    setRegionFilter(p.regionFilter);
+    setCorridorFilter(p.corridorFilter);
+    setCategoryFilter(p.categoryFilter);
+    setHighRiskOnly(p.highRiskOnly);
+    setWhatIf(p.whatIf);
+    setShowLabels(p.showLabels);
+    setAutoRotate(p.autoRotate);
+  };
   const corridorCategories = useMemo(
     () =>
       Array.from(
@@ -2264,6 +2321,21 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             >
               {t("proIntel.highRisk", "High-risk only")}
             </button>
+            <button
+              type="button"
+              onClick={savePreset}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: "1px solid rgba(148,163,184,0.3)",
+                background: "rgba(2,10,25,0.5)",
+                color: "#9fb4d4",
+              }}
+            >
+              {t("proIntel.saveView", "Save view")}
+            </button>
             {(corridorFilter !== "all" ||
               categoryFilter !== "all" ||
               whatIf ||
@@ -2299,6 +2371,71 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               {GLOBE_ARCS.length}
             </span>
           </div>
+          {presets.length > 0 && (
+            <div
+              style={{
+                marginTop: 8,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 6,
+                alignItems: "center",
+              }}
+              role="group"
+              aria-label={t("proIntel.savedViews", "Saved views")}
+            >
+              <span style={{ fontSize: 11, color: "#94a3b8" }}>
+                {t("proIntel.savedViews", "Saved views")}:
+              </span>
+              {presets.map((p, i) => (
+                <span
+                  key={`${p.name}-${i}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    fontSize: 11,
+                    borderRadius: 999,
+                    border: "1px solid rgba(148,163,184,0.3)",
+                    background: "rgba(2,10,25,0.5)",
+                    padding: "2px 6px 2px 10px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => applyPreset(p)}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "#cfe3ff",
+                      cursor: "pointer",
+                      fontSize: 11,
+                      padding: 0,
+                    }}
+                  >
+                    {p.name}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Delete ${p.name}`}
+                    onClick={() =>
+                      persistPresets(presets.filter((_, j) => j !== i))
+                    }
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "#9fb4d4",
+                      cursor: "pointer",
+                      fontSize: 13,
+                      lineHeight: 1,
+                      padding: 0,
+                    }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
           <div
             style={{
               marginTop: 8,
