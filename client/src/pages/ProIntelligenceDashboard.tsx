@@ -1077,6 +1077,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     "all"
   );
   const [whatIf, setWhatIf] = useState(false);
+  const [timelapse, setTimelapse] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const corridorCategories = useMemo(
     () =>
@@ -1625,6 +1626,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               filterStatus={corridorFilter}
               filterCategory={categoryFilter === "all" ? null : categoryFilter}
               whatIf={whatIf}
+              timelapse={timelapse}
               selectedArc={selectedArc}
               onSelect={sel => {
                 setGlobeSel({
@@ -1852,7 +1854,6 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               aria-pressed={whatIf}
               onClick={() => setWhatIf(v => !v)}
               style={{
-                marginInlineStart: "auto",
                 fontSize: 11,
                 padding: "3px 10px",
                 borderRadius: 999,
@@ -1867,6 +1868,24 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               }}
             >
               {t("proIntel.whatIf", "What-if: stricter rules")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={timelapse}
+              onClick={() => setTimelapse(v => !v)}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: `1px solid ${
+                  timelapse ? C.cyan : "rgba(148,163,184,0.3)"
+                }`,
+                background: timelapse ? `${C.cyan}22` : "rgba(2,10,25,0.5)",
+                color: timelapse ? C.cyan : "#9fb4d4",
+              }}
+            >
+              {t("proIntel.timelapse", "Time-lapse")}
             </button>
             <button
               type="button"
@@ -1885,13 +1904,15 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             </button>
             {(corridorFilter !== "all" ||
               categoryFilter !== "all" ||
-              whatIf) && (
+              whatIf ||
+              timelapse) && (
               <button
                 type="button"
                 onClick={() => {
                   setCorridorFilter("all");
                   setCategoryFilter("all");
                   setWhatIf(false);
+                  setTimelapse(false);
                 }}
                 style={{
                   fontSize: 11,

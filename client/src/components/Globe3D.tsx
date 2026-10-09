@@ -180,6 +180,7 @@ export function Globe3D({
   filterStatus,
   filterCategory,
   whatIf,
+  timelapse,
   selectedArc,
   onSelect,
   className,
@@ -190,6 +191,7 @@ export function Globe3D({
   filterStatus?: CorridorStatus | "all";
   filterCategory?: string | null;
   whatIf?: boolean;
+  timelapse?: boolean;
   selectedArc?: { from: [number, number]; to: [number, number] } | null;
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
@@ -220,6 +222,8 @@ export function Globe3D({
   >(() => {});
   const whatIfRef = useRef(false);
   const applyWhatIfRef = useRef<() => void>(() => {});
+  const timelapseStartRef = useRef<number | null>(null);
+  const arcFullRevealRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const el = ref.current;
@@ -370,6 +374,7 @@ export function Globe3D({
       status?: CorridorStatus;
       baseStatus?: CorridorStatus;
       categories?: string[];
+      fullCount: number;
     }[] = [];
     const labelTextures: THREE.Texture[] = [];
     const maxVal = Math.max(1, ...markers.map(m => m.value ?? 1));
@@ -463,6 +468,7 @@ export function Globe3D({
         status: a.status,
         baseStatus: a.status,
         categories: a.dataCategories,
+        fullCount: tubeGeo.index ? tubeGeo.index.count : 0,
       });
       disposables.push(tubeGeo, tubeMat);
 
@@ -548,6 +554,13 @@ export function Globe3D({
     applyWhatIfRef.current = applyWhatIf;
     whatIfRef.current = whatIf ?? false;
     applyWhatIf();
+
+    // Time-lapse reveal: reset to fully drawn; animation happens in the loop.
+    const resetReveal = () =>
+      arcObjects.forEach(ao => ao.tube.geometry.setDrawRange(0, ao.fullCount));
+    arcFullRevealRef.current = resetReveal;
+    timelapseStartRef.current = timelapse ? performance.now() / 1000 : null;
+    if (!timelapse) resetReveal();
 
     // Expanding pulse rings (spawned when a hub is selected)
     const rings: {
@@ -733,6 +746,13 @@ export function Globe3D({
         p.mesh.position.copy(p.curve.getPoint(p.t));
       }
       if (!reduceMotion) stars.rotation.y += dt * 0.005;
+      if (timelapseStartRef.current != null) {
+        const elapsed = performance.now() / 1000 - timelapseStartRef.current;
+        arcObjects.forEach((ao, i) => {
+          const r = Math.max(0, Math.min(1, (elapsed - i * 0.35) / 0.7));
+          ao.tube.geometry.setDrawRange(0, Math.floor(ao.fullCount * r));
+        });
+      }
       for (let i = rings.length - 1; i >= 0; i--) {
         const r = rings[i];
         r.t += dt * 1.6;
@@ -840,6 +860,12 @@ export function Globe3D({
     categoryFilterRef.current = filterCategory ?? null;
     refreshArcsRef.current();
   }, [filterCategory]);
+
+  // Controlled time-lapse reveal.
+  useEffect(() => {
+    timelapseStartRef.current = timelapse ? performance.now() / 1000 : null;
+    if (!timelapse) arcFullRevealRef.current();
+  }, [timelapse]);
 
   // Controlled "what-if" stress test.
   useEffect(() => {
