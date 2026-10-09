@@ -26,6 +26,8 @@ export type GlobeSelection = {
   id: string;
   label: string;
   value?: number;
+  status?: CorridorStatus;
+  dataCategories?: string[];
 };
 
 /** Fallback hubs (used when no data-driven markers are supplied). */
@@ -166,12 +168,14 @@ export function Globe3D({
   markers = GLOBE_MARKERS,
   arcs = GLOBE_ARCS,
   selectedId,
+  filterStatus,
   onSelect,
   className,
 }: {
   markers?: GlobeMarker[];
   arcs?: GlobeArc[];
   selectedId?: string | null;
+  filterStatus?: CorridorStatus | "all";
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
 }) {
@@ -188,6 +192,9 @@ export function Globe3D({
   const [touring, setTouring] = useState(false);
   const resetRef = useRef<() => void>(() => {});
   const emphasizeRef = useRef<(loc: [number, number] | null) => void>(() => {});
+  const hubLocRef = useRef<[number, number] | null>(null);
+  const filterRef = useRef<CorridorStatus | "all">("all");
+  const refreshArcsRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const el = ref.current;
@@ -334,6 +341,8 @@ export function Globe3D({
       from: [number, number];
       to: [number, number];
       mat: THREE.MeshBasicMaterial;
+      tube: THREE.Mesh;
+      status?: CorridorStatus;
     }[] = [];
     const labelTextures: THREE.Texture[] = [];
     const maxVal = Math.max(1, ...markers.map(m => m.value ?? 1));
@@ -416,7 +425,13 @@ export function Globe3D({
       };
       globe.add(tube);
       pickables.push(tube);
-      arcObjects.push({ from: a.from, to: a.to, mat: tubeMat });
+      arcObjects.push({
+        from: a.from,
+        to: a.to,
+        mat: tubeMat,
+        tube,
+        status: a.status,
+      });
       disposables.push(tubeGeo, tubeMat);
 
       const pulse = new THREE.Mesh(
@@ -435,16 +450,29 @@ export function Globe3D({
     // Emphasis: brighten corridors touching a selected hub + enlarge the node.
     const sameLoc = (a: [number, number], b: [number, number]) =>
       Math.abs(a[0] - b[0]) < 0.5 && Math.abs(a[1] - b[1]) < 0.5;
-    const emphasizeHub = (loc: [number, number] | null) => {
+    const refreshArcs = () => {
       for (const ao of arcObjects) {
-        const on = !loc || sameLoc(ao.from, loc) || sameLoc(ao.to, loc);
-        ao.mat.opacity = on ? 0.95 : 0.1;
+        const emOn =
+          !hubLocRef.current ||
+          sameLoc(ao.from, hubLocRef.current) ||
+          sameLoc(ao.to, hubLocRef.current);
+        const fOn =
+          filterRef.current === "all" || ao.status === filterRef.current;
+        ao.tube.visible = fOn;
+        ao.mat.opacity = emOn ? 0.9 : 0.08;
       }
+    };
+    refreshArcsRef.current = refreshArcs;
+    const emphasizeHub = (loc: [number, number] | null) => {
+      hubLocRef.current = loc;
+      refreshArcs();
       for (const ho of hubObjects) {
         ho.dot.scale.setScalar(loc && sameLoc(ho.loc, loc) ? 2.2 : 1);
       }
     };
     emphasizeRef.current = emphasizeHub;
+    filterRef.current = filterStatus ?? "all";
+    refreshArcs();
 
     // Expanding pulse rings (spawned when a hub is selected)
     const rings: {
@@ -535,7 +563,10 @@ export function Globe3D({
     const onPointerMove = (e: PointerEvent) => {
       const r = toNdc(e);
       raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects(pickables, false)[0];
+      const hit = raycaster.intersectObjects(
+        pickables.filter(o => o.visible !== false),
+        false
+      )[0];
       if (hit) {
         renderer.domElement.style.cursor = "pointer";
         const d = hit.object.userData as {
@@ -569,7 +600,10 @@ export function Globe3D({
       if (moved > 5) return; // treat as drag, not click
       toNdc(e);
       raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects(pickables, false)[0];
+      const hit = raycaster.intersectObjects(
+        pickables.filter(o => o.visible !== false),
+        false
+      )[0];
       if (hit && onSelectRef.current) {
         const d = hit.object.userData as GlobeSelection & {
           location?: [number, number];
@@ -592,6 +626,8 @@ export function Globe3D({
           id: d.id,
           label: d.label,
           value: d.value,
+          status: d.status,
+          dataCategories: d.dataCategories,
         });
       } else if (!hit) {
         emphasizeHub(null);
@@ -707,6 +743,12 @@ export function Globe3D({
     const m = markers.find(x => (x.id ?? x.label) === selectedId);
     emphasizeRef.current(m ? m.location : null);
   }, [selectedId, markers]);
+
+  // Controlled corridor-status filter.
+  useEffect(() => {
+    filterRef.current = filterStatus ?? "all";
+    refreshArcsRef.current();
+  }, [filterStatus]);
 
   const downloadPng = () => {
     const canvas = ref.current?.querySelector(

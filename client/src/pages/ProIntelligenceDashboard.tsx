@@ -19,7 +19,7 @@ import { useTheme } from "@/contexts/useTheme";
 import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SinoGulfArchitecture } from "@/components/SinoGulfArchitecture";
-import { Globe3D } from "@/components/Globe3D";
+import { Globe3D, type CorridorStatus } from "@/components/Globe3D";
 import { buildMarkersFromCounts } from "@/components/globeData";
 import { AIOrchestrationFeed } from "@/components/AIOrchestrationFeed";
 import { RegulatoryPulseMatrix } from "@/components/RegulatoryPulseMatrix";
@@ -975,6 +975,15 @@ function CountUp({ value }: { value: number }) {
   return <>{n}</>;
 }
 
+const CORRIDOR_STATUS_META: Record<
+  CorridorStatus,
+  { label: string; color: string }
+> = {
+  cleared: { label: "Cleared", color: "#10b981" },
+  approval: { label: "Approval required", color: "#f59e0b" },
+  blocked: { label: "Blocked", color: "#ef4444" },
+};
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   usePageTitle("Pro Intelligence");
@@ -1036,10 +1045,16 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   }, [globalFwQuery.data]);
 
   const [globeSel, setGlobeSel] = useState<{
+    type: "hub" | "arc";
     id: string;
     label: string;
     value?: number;
+    status?: CorridorStatus;
+    dataCategories?: string[];
   } | null>(null);
+  const [corridorFilter, setCorridorFilter] = useState<CorridorStatus | "all">(
+    "all"
+  );
   const selectedFrameworks = useMemo(() => {
     if (!globeSel) return [];
     return (globalFwQuery.data ?? [])
@@ -1052,7 +1067,12 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     const j = new URLSearchParams(window.location.search).get("jurisdiction");
     if (j && globeMarkers.some(m => (m.id ?? m.label) === j)) {
       const m = globeMarkers.find(x => (x.id ?? x.label) === j);
-      setGlobeSel({ id: j, label: m?.label ?? j, value: m?.value });
+      setGlobeSel({
+        type: "hub",
+        id: j,
+        label: m?.label ?? j,
+        value: m?.value,
+      });
     }
   }, [globeMarkers]);
   // …and reflect the selection back into the URL so views are shareable.
@@ -1531,23 +1551,27 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
           >
             <Globe3D
               markers={globeMarkers.length > 0 ? globeMarkers : undefined}
-              selectedId={globeSel?.id ?? null}
+              selectedId={globeSel?.type === "hub" ? globeSel.id : null}
+              filterStatus={corridorFilter}
               onSelect={sel => {
-                if (sel.type === "arc") {
-                  navigate("/cross-border-data-flow");
-                } else {
-                  setGlobeSel({
-                    id: sel.id,
-                    label: sel.label,
-                    value: sel.value,
-                  });
-                }
+                setGlobeSel({
+                  type: sel.type,
+                  id: sel.id,
+                  label: sel.label,
+                  value: sel.value,
+                  status: sel.status,
+                  dataCategories: sel.dataCategories,
+                });
               }}
             />
             {globeSel && (
               <div
                 style={{
-                  border: `1px solid ${C.cyan}33`,
+                  border: `1px solid ${
+                    globeSel.type === "arc" && globeSel.status
+                      ? CORRIDOR_STATUS_META[globeSel.status].color
+                      : C.cyan
+                  }55`,
                   background: "rgba(2,10,25,0.55)",
                   borderRadius: 14,
                   padding: "18px 20px",
@@ -1566,16 +1590,27 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
                     {globeSel.label}
                   </h3>
-                  <span style={{ fontSize: 12, color: C.cyan }}>
-                    <CountUp
-                      value={globeSel.value ?? selectedFrameworks.length}
-                    />{" "}
-                    frameworks
-                  </span>
+                  {globeSel.type === "hub" ? (
+                    <span style={{ fontSize: 12, color: C.cyan }}>
+                      <CountUp
+                        value={globeSel.value ?? selectedFrameworks.length}
+                      />{" "}
+                      frameworks
+                    </span>
+                  ) : globeSel.status ? (
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: CORRIDOR_STATUS_META[globeSel.status].color,
+                      }}
+                    >
+                      {CORRIDOR_STATUS_META[globeSel.status].label}
+                    </span>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => setGlobeSel(null)}
-                    aria-label="Close jurisdiction panel"
+                    aria-label="Close panel"
                     style={{
                       marginInlineStart: "auto",
                       background: "transparent",
@@ -1590,42 +1625,95 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                     ×
                   </button>
                 </div>
-                <ul
+
+                {globeSel.type === "hub" ? (
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      margin: 0,
+                      padding: 0,
+                      display: "grid",
+                      gap: 8,
+                    }}
+                  >
+                    {selectedFrameworks.map(f => (
+                      <li
+                        key={f.code}
+                        style={{ display: "flex", gap: 8, fontSize: 13 }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "ui-monospace, monospace",
+                            fontSize: 11,
+                            color: C.cyan,
+                            minWidth: 78,
+                          }}
+                        >
+                          {f.code}
+                        </span>
+                        <span style={{ color: "#9fb4d4" }}>{f.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div>
+                    {globeSel.dataCategories?.length ? (
+                      <div style={{ marginBottom: 10 }}>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                            color: "#94a3b8",
+                          }}
+                        >
+                          {t("proIntel.dataCategories", "Data categories")}
+                        </div>
+                        <div style={{ fontSize: 13, marginTop: 2 }}>
+                          {globeSel.dataCategories.join(", ")}
+                        </div>
+                      </div>
+                    ) : null}
+                    <p
+                      style={{
+                        fontSize: 12,
+                        color: "#9fb4d4",
+                        margin: "0 0 4px",
+                      }}
+                    >
+                      {t(
+                        "proIntel.corridorHint",
+                        "Cross-border data corridor between regulatory hubs."
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                <div
                   style={{
-                    listStyle: "none",
-                    margin: 0,
-                    padding: 0,
-                    display: "grid",
+                    marginTop: 14,
+                    display: "flex",
                     gap: 8,
+                    flexWrap: "wrap",
                   }}
                 >
-                  {selectedFrameworks.map(f => (
-                    <li
-                      key={f.code}
-                      style={{ display: "flex", gap: 8, fontSize: 13 }}
+                  {globeSel.type === "hub" ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate("/global-registry")}
                     >
-                      <span
-                        style={{
-                          fontFamily: "ui-monospace, monospace",
-                          fontSize: 11,
-                          color: C.cyan,
-                          minWidth: 78,
-                        }}
-                      >
-                        {f.code}
-                      </span>
-                      <span style={{ color: "#9fb4d4" }}>{f.name}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate("/global-registry")}
-                  >
-                    Open in Global Registry
-                  </Button>
+                      Open in Global Registry
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate("/cross-border-data-flow")}
+                    >
+                      Open analysis
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -1638,6 +1726,54 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                 </div>
               </div>
             )}
+          </div>
+          <div
+            style={{
+              marginTop: 14,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              alignItems: "center",
+            }}
+            role="group"
+            aria-label={t("proIntel.corridorFilter", "Filter corridors")}
+          >
+            <span style={{ fontSize: 11, color: "#94a3b8" }}>
+              {t("proIntel.corridors", "Corridors")}:
+            </span>
+            {(
+              [
+                ["all", "All"],
+                ["cleared", "Cleared"],
+                ["approval", "Approval"],
+                ["blocked", "Blocked"],
+              ] as const
+            ).map(([v, label]) => {
+              const active = corridorFilter === v;
+              const col =
+                v === "all"
+                  ? C.cyan
+                  : CORRIDOR_STATUS_META[v as CorridorStatus].color;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setCorridorFilter(v)}
+                  style={{
+                    fontSize: 11,
+                    padding: "3px 10px",
+                    borderRadius: 999,
+                    cursor: "pointer",
+                    border: `1px solid ${active ? col : "rgba(148,163,184,0.3)"}`,
+                    background: active ? `${col}22` : "rgba(2,10,25,0.5)",
+                    color: active ? col : "#9fb4d4",
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
           {globeMarkers.length > 0 && (
             <div
@@ -1662,6 +1798,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                       aria-pressed={active}
                       onClick={() =>
                         setGlobeSel({
+                          type: "hub",
                           id,
                           label: m.label ?? id,
                           value: m.value,
