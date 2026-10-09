@@ -51,13 +51,17 @@ const SHORT: Record<string, string> = {
 
 /** Build globe markers from real frameworks, with per-jurisdiction counts. */
 export function buildMarkersFromFrameworks(
-  frameworks: { jurisdiction: string; code: string }[]
+  frameworks: { jurisdiction: string; code: string; region?: string }[]
 ): GlobeMarker[] {
-  const byJ: Record<string, { count: number; codes: string[] }> = {};
+  const byJ: Record<
+    string,
+    { count: number; codes: string[]; region?: string }
+  > = {};
   for (const f of frameworks) {
     if (!JURISDICTION_COORDS[f.jurisdiction]) continue;
     const e = (byJ[f.jurisdiction] ??= { count: 0, codes: [] });
     e.count++;
+    if (f.region) e.region = f.region;
     if (e.codes.length < 3) e.codes.push(f.code);
   }
   const entries = Object.entries(byJ);
@@ -71,6 +75,7 @@ export function buildMarkersFromFrameworks(
       size: 0.35 + 0.85 * (v.count / max),
       label: SHORT[jurisdiction] ?? jurisdiction,
       topFrameworks: v.codes,
+      region: v.region,
     };
   });
 }

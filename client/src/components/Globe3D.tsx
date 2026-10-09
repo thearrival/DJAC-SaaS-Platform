@@ -13,6 +13,7 @@ export type GlobeMarker = {
   value?: number;
   label?: string;
   topFrameworks?: string[];
+  region?: string;
 };
 export type CorridorStatus = "cleared" | "approval" | "blocked";
 export type GlobeArc = {
@@ -179,6 +180,7 @@ export function Globe3D({
   selectedId,
   filterStatus,
   filterCategory,
+  filterRegion,
   whatIf,
   timelapse,
   selectedArc,
@@ -190,6 +192,7 @@ export function Globe3D({
   selectedId?: string | null;
   filterStatus?: CorridorStatus | "all";
   filterCategory?: string | null;
+  filterRegion?: string | null;
   whatIf?: boolean;
   timelapse?: boolean;
   selectedArc?: { from: [number, number]; to: [number, number] } | null;
@@ -216,6 +219,8 @@ export function Globe3D({
   } | null>(null);
   const filterRef = useRef<CorridorStatus | "all">("all");
   const categoryFilterRef = useRef<string | null>(null);
+  const regionFilterRef = useRef<string | null>(null);
+  const applyRegionRef = useRef<() => void>(() => {});
   const refreshArcsRef = useRef<() => void>(() => {});
   const emphasizeArcRef = useRef<
     (arc: { from: [number, number]; to: [number, number] } | null) => void
@@ -365,7 +370,13 @@ export function Globe3D({
 
     // Hubs (+ labels) — pickable
     const pickables: THREE.Object3D[] = [];
-    const hubObjects: { dot: THREE.Mesh; loc: [number, number] }[] = [];
+    const hubObjects: {
+      dot: THREE.Mesh;
+      halo: THREE.Mesh;
+      sprite?: THREE.Sprite;
+      loc: [number, number];
+      region?: string;
+    }[] = [];
     const arcObjects: {
       from: [number, number];
       to: [number, number];
@@ -398,7 +409,6 @@ export function Globe3D({
       };
       globe.add(dot);
       pickables.push(dot);
-      hubObjects.push({ dot, loc: m.location });
 
       const halo = new THREE.Mesh(
         new THREE.SphereGeometry(0.02 + 0.045 * s, 14, 14),
@@ -413,13 +423,36 @@ export function Globe3D({
       halo.position.copy(pos);
       globe.add(halo);
 
+      let sprite: THREE.Sprite | undefined;
       if (m.label) {
-        const { sprite, texture } = makeLabel(m.label);
+        const made = makeLabel(m.label);
+        sprite = made.sprite;
         sprite.position.copy(pos.clone().multiplyScalar(1.07));
         globe.add(sprite);
-        labelTextures.push(texture);
+        labelTextures.push(made.texture);
       }
+      hubObjects.push({
+        dot,
+        halo,
+        sprite,
+        loc: m.location,
+        region: m.region,
+      });
     }
+
+    // Region filter: hide hubs outside the selected region.
+    const applyRegion = () => {
+      const r = regionFilterRef.current;
+      for (const ho of hubObjects) {
+        const on = !r || ho.region === r;
+        ho.dot.visible = on;
+        ho.halo.visible = on;
+        if (ho.sprite) ho.sprite.visible = on;
+      }
+    };
+    applyRegionRef.current = applyRegion;
+    regionFilterRef.current = filterRegion ?? null;
+    applyRegion();
 
     // Corridor arcs — glowing tube + travelling pulse; pickable via a fat tube
     const pulses: {
@@ -897,6 +930,12 @@ export function Globe3D({
     timelapseStartRef.current = timelapse ? performance.now() / 1000 : null;
     if (!timelapse) arcFullRevealRef.current();
   }, [timelapse]);
+
+  // Controlled region filter.
+  useEffect(() => {
+    regionFilterRef.current = filterRegion ?? null;
+    applyRegionRef.current();
+  }, [filterRegion]);
 
   // Controlled "what-if" stress test.
   useEffect(() => {

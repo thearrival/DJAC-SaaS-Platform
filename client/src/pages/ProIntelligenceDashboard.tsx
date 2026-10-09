@@ -1064,6 +1064,13 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     () => buildMarkersFromFrameworks(globalFwQuery.data ?? []),
     [globalFwQuery.data]
   );
+  const globeRegions = useMemo(
+    () =>
+      Array.from(
+        new Set(globeMarkers.map(m => m.region).filter(Boolean))
+      ).sort() as string[],
+    [globeMarkers]
+  );
 
   const [globeSel, setGlobeSel] = useState<{
     type: "hub" | "arc";
@@ -1078,6 +1085,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   );
   const [whatIf, setWhatIf] = useState(false);
   const [timelapse, setTimelapse] = useState(false);
+  const [regionFilter, setRegionFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const corridorCategories = useMemo(
     () =>
@@ -1138,6 +1146,8 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     }
     const cat = sp.get("category");
     if (cat) setCategoryFilter(cat);
+    const rg = sp.get("region");
+    if (rg) setRegionFilter(rg);
     if (sp.get("whatif") === "1") setWhatIf(true);
   }, [globeMarkers]);
   // …and reflect selection + filters back into the URL so views are shareable.
@@ -1150,9 +1160,10 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     set("jurisdiction", globeSel?.type === "hub" ? globeSel.id : null);
     set("status", corridorFilter !== "all" ? corridorFilter : null);
     set("category", categoryFilter !== "all" ? categoryFilter : null);
+    set("region", regionFilter !== "all" ? regionFilter : null);
     set("whatif", whatIf ? "1" : null);
     window.history.replaceState({}, "", url.toString());
-  }, [globeSel, corridorFilter, categoryFilter, whatIf]);
+  }, [globeSel, corridorFilter, categoryFilter, regionFilter, whatIf]);
 
   const liveJobCount = useMemo(() => {
     if (!jobsQuery.data) return 0;
@@ -1625,6 +1636,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               selectedId={globeSel?.type === "hub" ? globeSel.id : null}
               filterStatus={corridorFilter}
               filterCategory={categoryFilter === "all" ? null : categoryFilter}
+              filterRegion={regionFilter === "all" ? null : regionFilter}
               whatIf={whatIf}
               timelapse={timelapse}
               selectedArc={selectedArc}
@@ -1905,7 +1917,8 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             {(corridorFilter !== "all" ||
               categoryFilter !== "all" ||
               whatIf ||
-              timelapse) && (
+              timelapse ||
+              regionFilter !== "all") && (
               <button
                 type="button"
                 onClick={() => {
@@ -1913,6 +1926,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   setCategoryFilter("all");
                   setWhatIf(false);
                   setTimelapse(false);
+                  setRegionFilter("all");
                 }}
                 style={{
                   fontSize: 11,
@@ -1967,6 +1981,45 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   }}
                 >
                   {cat === "all" ? t("common.all", "All") : cat}
+                </button>
+              );
+            })}
+          </div>
+          <div
+            style={{
+              marginTop: 8,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              alignItems: "center",
+            }}
+            role="group"
+            aria-label={t("proIntel.regionFilter", "Filter by region")}
+          >
+            <span style={{ fontSize: 11, color: "#94a3b8" }}>
+              {t("proIntel.region", "Region")}:
+            </span>
+            {["all", ...globeRegions].map(r => {
+              const active = regionFilter === r;
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setRegionFilter(r)}
+                  style={{
+                    fontSize: 11,
+                    padding: "3px 10px",
+                    borderRadius: 999,
+                    cursor: "pointer",
+                    border: `1px solid ${
+                      active ? C.cyan : "rgba(148,163,184,0.3)"
+                    }`,
+                    background: active ? `${C.cyan}22` : "rgba(2,10,25,0.5)",
+                    color: active ? C.cyan : "#9fb4d4",
+                  }}
+                >
+                  {r === "all" ? t("common.all", "All") : r}
                 </button>
               );
             })}
