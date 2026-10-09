@@ -1114,6 +1114,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const [whatIf, setWhatIf] = useState(false);
   const [timelapse, setTimelapse] = useState(false);
   const [regionFilter, setRegionFilter] = useState<string>("all");
+  const [showLabels, setShowLabels] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const corridorCategories = useMemo(
     () =>
@@ -1727,6 +1728,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               filterRegion={regionFilter === "all" ? null : regionFilter}
               whatIf={whatIf}
               timelapse={timelapse}
+              showLabels={showLabels}
               selectedArc={selectedArc}
               onSelect={sel => {
                 setGlobeSel({
@@ -2031,6 +2033,24 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               }}
             >
               {t("proIntel.copySummary", "Copy summary")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={showLabels}
+              onClick={() => setShowLabels(v => !v)}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: `1px solid ${
+                  showLabels ? C.cyan : "rgba(148,163,184,0.3)"
+                }`,
+                background: showLabels ? `${C.cyan}22` : "rgba(2,10,25,0.5)",
+                color: showLabels ? C.cyan : "#9fb4d4",
+              }}
+            >
+              {t("proIntel.labels", "Labels")}
             </button>
             {(corridorFilter !== "all" ||
               categoryFilter !== "all" ||

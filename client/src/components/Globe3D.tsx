@@ -183,6 +183,7 @@ export function Globe3D({
   filterRegion,
   whatIf,
   timelapse,
+  showLabels,
   selectedArc,
   onSelect,
   className,
@@ -195,6 +196,7 @@ export function Globe3D({
   filterRegion?: string | null;
   whatIf?: boolean;
   timelapse?: boolean;
+  showLabels?: boolean;
   selectedArc?: { from: [number, number]; to: [number, number] } | null;
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
@@ -221,6 +223,7 @@ export function Globe3D({
   const categoryFilterRef = useRef<string | null>(null);
   const regionFilterRef = useRef<string | null>(null);
   const applyRegionRef = useRef<() => void>(() => {});
+  const showLabelsRef = useRef(true);
   const refreshArcsRef = useRef<() => void>(() => {});
   const emphasizeArcRef = useRef<
     (arc: { from: [number, number]; to: [number, number] } | null) => void
@@ -447,11 +450,12 @@ export function Globe3D({
         const on = !r || ho.region === r;
         ho.dot.visible = on;
         ho.halo.visible = on;
-        if (ho.sprite) ho.sprite.visible = on;
+        if (ho.sprite) ho.sprite.visible = on && showLabelsRef.current;
       }
     };
     applyRegionRef.current = applyRegion;
     regionFilterRef.current = filterRegion ?? null;
+    showLabelsRef.current = showLabels ?? true;
     applyRegion();
 
     // Corridor arcs — glowing tube + travelling pulse; pickable via a fat tube
@@ -936,6 +940,12 @@ export function Globe3D({
     regionFilterRef.current = filterRegion ?? null;
     applyRegionRef.current();
   }, [filterRegion]);
+
+  // Controlled label visibility.
+  useEffect(() => {
+    showLabelsRef.current = showLabels ?? true;
+    applyRegionRef.current();
+  }, [showLabels]);
 
   // Controlled "what-if" stress test.
   useEffect(() => {
