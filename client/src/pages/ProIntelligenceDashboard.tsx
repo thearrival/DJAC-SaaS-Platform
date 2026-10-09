@@ -1087,6 +1087,14 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
       .slice(0, 8);
   }, [globalFwQuery.data, globeSel]);
 
+  const selectedArc = useMemo(
+    () =>
+      globeSel?.type === "arc"
+        ? (GLOBE_ARCS.find(a => a.label === globeSel.label) ?? null)
+        : null,
+    [globeSel]
+  );
+
   // Deep-link: apply ?jurisdiction=… on load…
   useEffect(() => {
     const j = new URLSearchParams(window.location.search).get("jurisdiction");
@@ -1579,6 +1587,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               selectedId={globeSel?.type === "hub" ? globeSel.id : null}
               filterStatus={corridorFilter}
               whatIf={whatIf}
+              selectedArc={selectedArc}
               onSelect={sel => {
                 setGlobeSel({
                   type: sel.type,

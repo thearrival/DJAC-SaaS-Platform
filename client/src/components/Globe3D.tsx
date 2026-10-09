@@ -178,6 +178,7 @@ export function Globe3D({
   selectedId,
   filterStatus,
   whatIf,
+  selectedArc,
   onSelect,
   className,
 }: {
@@ -186,6 +187,7 @@ export function Globe3D({
   selectedId?: string | null;
   filterStatus?: CorridorStatus | "all";
   whatIf?: boolean;
+  selectedArc?: { from: [number, number]; to: [number, number] } | null;
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
 }) {
@@ -203,8 +205,15 @@ export function Globe3D({
   const resetRef = useRef<() => void>(() => {});
   const emphasizeRef = useRef<(loc: [number, number] | null) => void>(() => {});
   const hubLocRef = useRef<[number, number] | null>(null);
+  const arcRef = useRef<{
+    from: [number, number];
+    to: [number, number];
+  } | null>(null);
   const filterRef = useRef<CorridorStatus | "all">("all");
   const refreshArcsRef = useRef<() => void>(() => {});
+  const emphasizeArcRef = useRef<
+    (arc: { from: [number, number]; to: [number, number] } | null) => void
+  >(() => {});
   const whatIfRef = useRef(false);
   const applyWhatIfRef = useRef<() => void>(() => {});
 
@@ -463,30 +472,53 @@ export function Globe3D({
       });
     }
 
-    // Emphasis: brighten corridors touching a selected hub + enlarge the node.
+    // Emphasis: highlight a selected hub (and touching corridors) OR a selected
+    // corridor (and its two endpoint hubs).
     const sameLoc = (a: [number, number], b: [number, number]) =>
       Math.abs(a[0] - b[0]) < 0.5 && Math.abs(a[1] - b[1]) < 0.5;
+    const arcMatches = (
+      ao: { from: [number, number]; to: [number, number] },
+      arc: { from: [number, number]; to: [number, number] }
+    ) =>
+      (sameLoc(ao.from, arc.from) && sameLoc(ao.to, arc.to)) ||
+      (sameLoc(ao.from, arc.to) && sameLoc(ao.to, arc.from));
     const refreshArcs = () => {
+      const arc = arcRef.current;
       for (const ao of arcObjects) {
-        const emOn =
-          !hubLocRef.current ||
-          sameLoc(ao.from, hubLocRef.current) ||
-          sameLoc(ao.to, hubLocRef.current);
+        const emOn = arc
+          ? arcMatches(ao, arc)
+          : !hubLocRef.current ||
+            sameLoc(ao.from, hubLocRef.current) ||
+            sameLoc(ao.to, hubLocRef.current);
         const fOn =
           filterRef.current === "all" || ao.status === filterRef.current;
         ao.tube.visible = fOn;
-        ao.mat.opacity = emOn ? 0.9 : 0.08;
+        ao.mat.opacity = emOn ? 0.95 : 0.08;
       }
     };
     refreshArcsRef.current = refreshArcs;
     const emphasizeHub = (loc: [number, number] | null) => {
       hubLocRef.current = loc;
+      arcRef.current = null;
       refreshArcs();
       for (const ho of hubObjects) {
         ho.dot.scale.setScalar(loc && sameLoc(ho.loc, loc) ? 2.2 : 1);
       }
     };
+    const emphasizeArc = (
+      arc: { from: [number, number]; to: [number, number] } | null
+    ) => {
+      arcRef.current = arc;
+      hubLocRef.current = null;
+      refreshArcs();
+      for (const ho of hubObjects) {
+        const hl =
+          arc && (sameLoc(ho.loc, arc.from) || sameLoc(ho.loc, arc.to));
+        ho.dot.scale.setScalar(hl ? 2.2 : 1);
+      }
+    };
     emphasizeRef.current = emphasizeHub;
+    emphasizeArcRef.current = emphasizeArc;
     filterRef.current = filterStatus ?? "all";
     refreshArcs();
 
@@ -776,6 +808,11 @@ export function Globe3D({
     const m = markers.find(x => (x.id ?? x.label) === selectedId);
     emphasizeRef.current(m ? m.location : null);
   }, [selectedId, markers]);
+
+  // Controlled corridor selection → highlight its endpoints.
+  useEffect(() => {
+    emphasizeArcRef.current(selectedArc ?? null);
+  }, [selectedArc]);
 
   // Controlled corridor-status filter.
   useEffect(() => {
