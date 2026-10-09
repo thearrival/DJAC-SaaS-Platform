@@ -18,7 +18,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/useTheme";
 import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { SinoGulfHeatmap } from "@/components/SinoGulfHeatmap";
+import { SinoGulfArchitecture } from "@/components/SinoGulfArchitecture";
 import { Globe3D } from "@/components/Globe3D";
 import { buildMarkersFromCounts } from "@/components/globeData";
 import { AIOrchestrationFeed } from "@/components/AIOrchestrationFeed";
@@ -1702,7 +1702,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             color={C.cyan}
             sublabel="Sino-Gulf cross-border data architecture"
           />
-          <SinoGulfHeatmap />
+          <SinoGulfArchitecture />
         </section>
 
         {/* ── Row 2: Pipeline + Pulse ───────────────────────────────── */}
