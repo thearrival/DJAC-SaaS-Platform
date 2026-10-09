@@ -218,6 +218,7 @@ export function Globe3D({
   onSelectRef.current = onSelect;
   const tourRef = useRef(false);
   const [touring, setTouring] = useState(false);
+  const [tourCaption, setTourCaption] = useState<string | null>(null);
   const resetRef = useRef<() => void>(() => {});
   const emphasizeRef = useRef<(loc: [number, number] | null) => void>(() => {});
   const hubLocRef = useRef<[number, number] | null>(null);
@@ -690,6 +691,10 @@ export function Globe3D({
         toVec(m.location[0], m.location[1], RADIUS),
         new THREE.Color(0x7dd3fc)
       );
+      const cnt = m.value ?? 0;
+      setTourCaption(
+        `${m.label ?? m.id ?? ""} · ${cnt} framework${cnt === 1 ? "" : "s"}`
+      );
       onSelectRef.current?.({
         type: "hub",
         id: m.id ?? m.label ?? "",
@@ -1143,6 +1148,7 @@ export function Globe3D({
         onClick={() => {
           tourRef.current = !tourRef.current;
           setTouring(tourRef.current);
+          if (!tourRef.current) setTourCaption(null);
         }}
         aria-pressed={touring}
         style={{
@@ -1160,6 +1166,28 @@ export function Globe3D({
       >
         {touring ? "■ Tour" : "▶ Tour"}
       </button>
+
+      {/* Tour caption */}
+      {touring && tourCaption && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            bottom: 10,
+            background: "rgba(2,10,25,0.82)",
+            border: "1px solid rgba(56,189,248,0.35)",
+            borderRadius: 8,
+            padding: "5px 12px",
+            color: "#cfe3ff",
+            fontSize: 12,
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {tourCaption}
+        </div>
+      )}
     </div>
   );
 }
