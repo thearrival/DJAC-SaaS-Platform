@@ -1077,6 +1077,14 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     "all"
   );
   const [whatIf, setWhatIf] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const corridorCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(GLOBE_ARCS.flatMap(a => a.dataCategories ?? []))
+      ).sort(),
+    []
+  );
   const selectedFrameworks = useMemo(() => {
     if (!globeSel) return [];
     return (globalFwQuery.data ?? [])
@@ -1583,6 +1591,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               markers={globeMarkers.length > 0 ? globeMarkers : undefined}
               selectedId={globeSel?.type === "hub" ? globeSel.id : null}
               filterStatus={corridorFilter}
+              filterCategory={categoryFilter === "all" ? null : categoryFilter}
               whatIf={whatIf}
               selectedArc={selectedArc}
               onSelect={sel => {
@@ -1842,6 +1851,45 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             >
               {t("proIntel.exportCsv", "Export CSV")}
             </button>
+          </div>
+          <div
+            style={{
+              marginTop: 8,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              alignItems: "center",
+            }}
+            role="group"
+            aria-label={t("proIntel.categoryFilter", "Filter by data category")}
+          >
+            <span style={{ fontSize: 11, color: "#94a3b8" }}>
+              {t("proIntel.dataType", "Data type")}:
+            </span>
+            {["all", ...corridorCategories].map(cat => {
+              const active = categoryFilter === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setCategoryFilter(cat)}
+                  style={{
+                    fontSize: 11,
+                    padding: "3px 10px",
+                    borderRadius: 999,
+                    cursor: "pointer",
+                    border: `1px solid ${
+                      active ? C.cyan : "rgba(148,163,184,0.3)"
+                    }`,
+                    background: active ? `${C.cyan}22` : "rgba(2,10,25,0.5)",
+                    color: active ? C.cyan : "#9fb4d4",
+                  }}
+                >
+                  {cat === "all" ? t("common.all", "All") : cat}
+                </button>
+              );
+            })}
           </div>
           {whatIf && (
             <p style={{ margin: "8px 0 0", fontSize: 11.5, color: "#fca5a5" }}>

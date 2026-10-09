@@ -178,6 +178,7 @@ export function Globe3D({
   arcs = GLOBE_ARCS,
   selectedId,
   filterStatus,
+  filterCategory,
   whatIf,
   selectedArc,
   onSelect,
@@ -187,6 +188,7 @@ export function Globe3D({
   arcs?: GlobeArc[];
   selectedId?: string | null;
   filterStatus?: CorridorStatus | "all";
+  filterCategory?: string | null;
   whatIf?: boolean;
   selectedArc?: { from: [number, number]; to: [number, number] } | null;
   onSelect?: (sel: GlobeSelection) => void;
@@ -211,6 +213,7 @@ export function Globe3D({
     to: [number, number];
   } | null>(null);
   const filterRef = useRef<CorridorStatus | "all">("all");
+  const categoryFilterRef = useRef<string | null>(null);
   const refreshArcsRef = useRef<() => void>(() => {});
   const emphasizeArcRef = useRef<
     (arc: { from: [number, number]; to: [number, number] } | null) => void
@@ -366,6 +369,7 @@ export function Globe3D({
       tube: THREE.Mesh;
       status?: CorridorStatus;
       baseStatus?: CorridorStatus;
+      categories?: string[];
     }[] = [];
     const labelTextures: THREE.Texture[] = [];
     const maxVal = Math.max(1, ...markers.map(m => m.value ?? 1));
@@ -458,6 +462,7 @@ export function Globe3D({
         tube,
         status: a.status,
         baseStatus: a.status,
+        categories: a.dataCategories,
       });
       disposables.push(tubeGeo, tubeMat);
 
@@ -494,7 +499,10 @@ export function Globe3D({
             sameLoc(ao.to, hubLocRef.current);
         const fOn =
           filterRef.current === "all" || ao.status === filterRef.current;
-        ao.tube.visible = fOn;
+        const cOn =
+          !categoryFilterRef.current ||
+          (ao.categories?.includes(categoryFilterRef.current) ?? false);
+        ao.tube.visible = fOn && cOn;
         ao.mat.opacity = emOn ? 0.95 : 0.08;
       }
     };
@@ -826,6 +834,12 @@ export function Globe3D({
     filterRef.current = filterStatus ?? "all";
     refreshArcsRef.current();
   }, [filterStatus]);
+
+  // Controlled corridor data-category filter.
+  useEffect(() => {
+    categoryFilterRef.current = filterCategory ?? null;
+    refreshArcsRef.current();
+  }, [filterCategory]);
 
   // Controlled "what-if" stress test.
   useEffect(() => {
