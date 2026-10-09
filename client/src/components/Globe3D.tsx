@@ -227,6 +227,7 @@ export function Globe3D({
   const applyRegionRef = useRef<() => void>(() => {});
   const showLabelsRef = useRef(true);
   const setAutoRotateRef = useRef<(v: boolean) => void>(() => {});
+  const rotateRef = useRef<(dx: number, dy: number) => void>(() => {});
   const refreshArcsRef = useRef<() => void>(() => {});
   const emphasizeArcRef = useRef<
     (arc: { from: [number, number]; to: [number, number] } | null) => void
@@ -655,6 +656,10 @@ export function Globe3D({
     setAutoRotateRef.current = (v: boolean) => {
       controls.autoRotate = v && !reduceMotion;
     };
+    rotateRef.current = (dx: number, dy: number) => {
+      globe.rotation.y += dx;
+      globe.rotation.x = Math.max(-0.6, Math.min(0.6, globe.rotation.x + dy));
+    };
     controls.autoRotateSpeed = 0.6;
     controls.minPolarAngle = Math.PI * 0.15;
     controls.maxPolarAngle = Math.PI * 0.85;
@@ -979,6 +984,23 @@ export function Globe3D({
     <div
       ref={ref}
       className={className}
+      tabIndex={0}
+      onKeyDown={e => {
+        const step = 0.12;
+        if (e.key === "ArrowLeft") {
+          rotateRef.current(-step, 0);
+          e.preventDefault();
+        } else if (e.key === "ArrowRight") {
+          rotateRef.current(step, 0);
+          e.preventDefault();
+        } else if (e.key === "ArrowUp") {
+          rotateRef.current(0, -0.08);
+          e.preventDefault();
+        } else if (e.key === "ArrowDown") {
+          rotateRef.current(0, 0.08);
+          e.preventDefault();
+        }
+      }}
       style={{
         position: "relative",
         width: "100%",
@@ -986,6 +1008,7 @@ export function Globe3D({
         maxWidth: 520,
         margin: "0 auto",
         touchAction: "none",
+        outline: "none",
       }}
     >
       {tip && (
