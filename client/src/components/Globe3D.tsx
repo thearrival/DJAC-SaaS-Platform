@@ -428,6 +428,18 @@ export function Globe3D({
       t: number;
       speed: number;
     }[] = [];
+    const nearestLabel = (loc: [number, number]) => {
+      let best = "";
+      let bestD = Infinity;
+      for (const m of markers) {
+        const d = (m.location[0] - loc[0]) ** 2 + (m.location[1] - loc[1]) ** 2;
+        if (d < bestD) {
+          bestD = d;
+          best = m.label ?? m.id ?? "";
+        }
+      }
+      return best;
+    };
     for (const a of arcs) {
       const start = toVec(a.from[0], a.from[1], RADIUS);
       const end = toVec(a.to[0], a.to[1], RADIUS);
@@ -456,7 +468,10 @@ export function Globe3D({
         id: `${a.from.join(",")}-${a.to.join(",")}`,
         label: a.label ?? "Cross-border corridor",
         status: a.status,
+        volume: a.volume,
         dataCategories: a.dataCategories,
+        fromLabel: nearestLabel(a.from),
+        toLabel: nearestLabel(a.to),
       };
       globe.add(tube);
       pickables.push(tube);
@@ -663,19 +678,35 @@ export function Globe3D({
           type: string;
           status?: CorridorStatus;
           topFrameworks?: string[];
+          volume?: string;
+          dataCategories?: string[];
+          fromLabel?: string;
+          toLabel?: string;
         };
-        const st = d.status ? ` · ${CORRIDOR_LABEL[d.status]}` : "";
-        const hubLine =
-          d.type === "hub" && d.value != null
-            ? `${d.label} · ${d.value} framework${d.value === 1 ? "" : "s"}` +
-              (d.topFrameworks?.length
-                ? `\n${d.topFrameworks.join(" · ")}`
-                : "")
-            : `${d.label}${st}`;
+        let text: string;
+        if (d.type === "hub" && d.value != null) {
+          text =
+            `${d.label} · ${d.value} framework${d.value === 1 ? "" : "s"}` +
+            (d.topFrameworks?.length ? `\n${d.topFrameworks.join(" · ")}` : "");
+        } else {
+          const parts = [d.label];
+          if (d.fromLabel || d.toLabel) {
+            parts.push(`${d.fromLabel} \u2192 ${d.toLabel}`);
+          }
+          const meta = [
+            d.status ? CORRIDOR_LABEL[d.status] : "",
+            d.volume ? `${d.volume} volume` : "",
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          if (meta) parts.push(meta);
+          if (d.dataCategories?.length) parts.push(d.dataCategories.join(", "));
+          text = parts.join("\n");
+        }
         setTip({
           x: e.clientX - r.left,
           y: e.clientY - r.top,
-          text: hubLine,
+          text,
         });
       } else {
         renderer.domElement.style.cursor = "grab";
