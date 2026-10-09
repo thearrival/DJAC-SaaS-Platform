@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { trpc } from "@/lib/trpc";
 import { DESIGNATED_REVIEWER } from "@shared/regulatory-provenance";
@@ -108,6 +108,13 @@ export default function GlobalRegistry() {
   const [jurisdictionFilter, setJurisdictionFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("frameworks");
+
+  // Deep-link: pre-filter by jurisdiction from ?jurisdiction=… (e.g. from the
+  // Pro-Intelligence globe).
+  useEffect(() => {
+    const j = new URLSearchParams(window.location.search).get("jurisdiction");
+    if (j) setJurisdictionFilter(j);
+  }, []);
 
   const frameworks = frameworksQ.data ?? [];
 

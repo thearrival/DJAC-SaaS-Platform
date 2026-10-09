@@ -1876,7 +1876,13 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate("/global-registry")}
+                      onClick={() =>
+                        navigate(
+                          `/global-registry?jurisdiction=${encodeURIComponent(
+                            globeSel.id
+                          )}`
+                        )
+                      }
                     >
                       Open in Global Registry
                     </Button>
