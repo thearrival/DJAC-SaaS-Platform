@@ -1055,6 +1055,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const [corridorFilter, setCorridorFilter] = useState<CorridorStatus | "all">(
     "all"
   );
+  const [whatIf, setWhatIf] = useState(false);
   const selectedFrameworks = useMemo(() => {
     if (!globeSel) return [];
     return (globalFwQuery.data ?? [])
@@ -1553,6 +1554,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               markers={globeMarkers.length > 0 ? globeMarkers : undefined}
               selectedId={globeSel?.type === "hub" ? globeSel.id : null}
               filterStatus={corridorFilter}
+              whatIf={whatIf}
               onSelect={sel => {
                 setGlobeSel({
                   type: sel.type,
@@ -1774,7 +1776,36 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                 </button>
               );
             })}
+            <button
+              type="button"
+              aria-pressed={whatIf}
+              onClick={() => setWhatIf(v => !v)}
+              style={{
+                marginInlineStart: "auto",
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: `1px solid ${
+                  whatIf ? "#ef4444" : "rgba(148,163,184,0.3)"
+                }`,
+                background: whatIf
+                  ? "rgba(239,68,68,0.15)"
+                  : "rgba(2,10,25,0.5)",
+                color: whatIf ? "#fca5a5" : "#9fb4d4",
+              }}
+            >
+              {t("proIntel.whatIf", "What-if: stricter rules")}
+            </button>
           </div>
+          {whatIf && (
+            <p style={{ margin: "8px 0 0", fontSize: 11.5, color: "#fca5a5" }}>
+              {t(
+                "proIntel.whatIfCaption",
+                "Stress test: approval-required corridors are shown as blocked."
+              )}
+            </p>
+          )}
           {globeMarkers.length > 0 && (
             <div
               style={{

@@ -169,6 +169,7 @@ export function Globe3D({
   arcs = GLOBE_ARCS,
   selectedId,
   filterStatus,
+  whatIf,
   onSelect,
   className,
 }: {
@@ -176,6 +177,7 @@ export function Globe3D({
   arcs?: GlobeArc[];
   selectedId?: string | null;
   filterStatus?: CorridorStatus | "all";
+  whatIf?: boolean;
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
 }) {
@@ -195,6 +197,8 @@ export function Globe3D({
   const hubLocRef = useRef<[number, number] | null>(null);
   const filterRef = useRef<CorridorStatus | "all">("all");
   const refreshArcsRef = useRef<() => void>(() => {});
+  const whatIfRef = useRef(false);
+  const applyWhatIfRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const el = ref.current;
@@ -343,6 +347,7 @@ export function Globe3D({
       mat: THREE.MeshBasicMaterial;
       tube: THREE.Mesh;
       status?: CorridorStatus;
+      baseStatus?: CorridorStatus;
     }[] = [];
     const labelTextures: THREE.Texture[] = [];
     const maxVal = Math.max(1, ...markers.map(m => m.value ?? 1));
@@ -431,6 +436,7 @@ export function Globe3D({
         mat: tubeMat,
         tube,
         status: a.status,
+        baseStatus: a.status,
       });
       disposables.push(tubeGeo, tubeMat);
 
@@ -473,6 +479,23 @@ export function Globe3D({
     emphasizeRef.current = emphasizeHub;
     filterRef.current = filterStatus ?? "all";
     refreshArcs();
+
+    // "What-if": simulate stricter rules — approval-required lanes as blocked.
+    const applyWhatIf = () => {
+      for (const ao of arcObjects) {
+        const eff: CorridorStatus | undefined =
+          whatIfRef.current && ao.baseStatus === "approval"
+            ? "blocked"
+            : ao.baseStatus;
+        ao.status = eff;
+        ao.tube.userData.status = eff;
+        ao.mat.color.set(eff ? CORRIDOR_COLOR[eff] : 0x38bdf8);
+      }
+      refreshArcs();
+    };
+    applyWhatIfRef.current = applyWhatIf;
+    whatIfRef.current = whatIf ?? false;
+    applyWhatIf();
 
     // Expanding pulse rings (spawned when a hub is selected)
     const rings: {
@@ -749,6 +772,12 @@ export function Globe3D({
     filterRef.current = filterStatus ?? "all";
     refreshArcsRef.current();
   }, [filterStatus]);
+
+  // Controlled "what-if" stress test.
+  useEffect(() => {
+    whatIfRef.current = whatIf ?? false;
+    applyWhatIfRef.current();
+  }, [whatIf]);
 
   const downloadPng = () => {
     const canvas = ref.current?.querySelector(
