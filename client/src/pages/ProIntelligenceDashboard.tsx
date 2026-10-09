@@ -1108,6 +1108,14 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
       }).length,
     [corridorFilter, categoryFilter, whatIf]
   );
+  const globeKpis = useMemo(() => {
+    const c = { cleared: 0, approval: 0, blocked: 0 };
+    for (const a of GLOBE_ARCS) {
+      const eff = whatIf && a.status === "approval" ? "blocked" : a.status;
+      if (eff) c[eff as keyof typeof c]++;
+    }
+    return { hubs: globeMarkers.length, corridors: GLOBE_ARCS.length, ...c };
+  }, [globeMarkers.length, whatIf]);
   const selectedFrameworks = useMemo(() => {
     if (!globeSel) return [];
     return (globalFwQuery.data ?? [])
@@ -1621,6 +1629,49 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             color={C.cyan}
             sublabel="Regulatory hubs and cross-border corridors"
           />
+          <div
+            style={{
+              display: "flex",
+              gap: 18,
+              flexWrap: "wrap",
+              margin: "2px 0 12px",
+            }}
+          >
+            {[
+              {
+                v: globeKpis.hubs,
+                l: t("proIntel.kpiHubs", "Hubs"),
+                c: C.cyan,
+              },
+              {
+                v: globeKpis.corridors,
+                l: t("proIntel.kpiCorridors", "Corridors"),
+                c: "#94a3b8",
+              },
+              {
+                v: globeKpis.cleared,
+                l: t("proIntel.kpiCleared", "Cleared"),
+                c: "#10b981",
+              },
+              {
+                v: globeKpis.approval,
+                l: t("proIntel.kpiApproval", "Approval"),
+                c: "#f59e0b",
+              },
+              {
+                v: globeKpis.blocked,
+                l: t("proIntel.kpiBlocked", "Blocked"),
+                c: "#ef4444",
+              },
+            ].map(k => (
+              <div key={k.l}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: k.c }}>
+                  {k.v}
+                </div>
+                <div style={{ fontSize: 10.5, color: "#94a3b8" }}>{k.l}</div>
+              </div>
+            ))}
+          </div>
           <div
             style={{
               display: "grid",
