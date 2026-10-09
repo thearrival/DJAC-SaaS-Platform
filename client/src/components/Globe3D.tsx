@@ -529,7 +529,11 @@ export function Globe3D({
       disposables.push(tubeGeo, tubeMat);
 
       const pulse = new THREE.Mesh(
-        new THREE.SphereGeometry(0.012, 8, 8),
+        new THREE.SphereGeometry(
+          a.volume === "high" ? 0.014 : a.volume === "low" ? 0.008 : 0.011,
+          8,
+          8
+        ),
         new THREE.MeshBasicMaterial({ color: 0x9be9ff })
       );
       globe.add(pulse);
@@ -537,7 +541,9 @@ export function Globe3D({
         mesh: pulse,
         curve,
         t: Math.random(),
-        speed: 0.14 + Math.random() * 0.12,
+        speed:
+          (a.volume === "high" ? 0.26 : a.volume === "low" ? 0.09 : 0.16) +
+          Math.random() * 0.02,
       });
     }
 

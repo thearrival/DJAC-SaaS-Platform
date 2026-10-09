@@ -2220,6 +2220,8 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   setWhatIf(false);
                   setTimelapse(false);
                   setRegionFilter("all");
+                  setCompare([]);
+                  setGlobeSel(null);
                 }}
                 style={{
                   fontSize: 11,
