@@ -187,6 +187,7 @@ export function Globe3D({
   timelapse,
   showLabels,
   autoRotate,
+  highRiskOnly,
   selectedArc,
   onSelect,
   className,
@@ -201,6 +202,7 @@ export function Globe3D({
   timelapse?: boolean;
   showLabels?: boolean;
   autoRotate?: boolean;
+  highRiskOnly?: boolean;
   selectedArc?: { from: [number, number]; to: [number, number] } | null;
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
@@ -228,6 +230,7 @@ export function Globe3D({
   const regionFilterRef = useRef<string | null>(null);
   const applyRegionRef = useRef<() => void>(() => {});
   const showLabelsRef = useRef(true);
+  const highRiskRef = useRef(false);
   const setAutoRotateRef = useRef<(v: boolean) => void>(() => {});
   const rotateRef = useRef<(dx: number, dy: number) => void>(() => {});
   const refreshArcsRef = useRef<() => void>(() => {});
@@ -572,7 +575,8 @@ export function Globe3D({
         const cOn =
           !categoryFilterRef.current ||
           (ao.categories?.includes(categoryFilterRef.current) ?? false);
-        ao.tube.visible = fOn && cOn;
+        const hOn = !highRiskRef.current || ao.status !== "cleared";
+        ao.tube.visible = fOn && cOn && hOn;
         ao.mat.opacity = emOn ? 0.95 : 0.08;
       }
     };
@@ -949,6 +953,12 @@ export function Globe3D({
     categoryFilterRef.current = filterCategory ?? null;
     refreshArcsRef.current();
   }, [filterCategory]);
+
+  // Controlled "high-risk only" filter (hide cleared corridors).
+  useEffect(() => {
+    highRiskRef.current = highRiskOnly ?? false;
+    refreshArcsRef.current();
+  }, [highRiskOnly]);
 
   // Controlled time-lapse reveal.
   useEffect(() => {

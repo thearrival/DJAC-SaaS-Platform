@@ -1124,6 +1124,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const [compareMode, setCompareMode] = useState(false);
   const [compare, setCompare] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [highRiskOnly, setHighRiskOnly] = useState(false);
   const corridorCategories = useMemo(
     () =>
       Array.from(
@@ -1136,6 +1137,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
       GLOBE_ARCS.filter(a => {
         const eff = whatIf && a.status === "approval" ? "blocked" : a.status;
         if (corridorFilter !== "all" && eff !== corridorFilter) return false;
+        if (highRiskOnly && eff === "cleared") return false;
         if (
           categoryFilter !== "all" &&
           !(a.dataCategories ?? []).includes(categoryFilter)
@@ -1143,7 +1145,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
           return false;
         return true;
       }).length,
-    [corridorFilter, categoryFilter, whatIf]
+    [corridorFilter, categoryFilter, whatIf, highRiskOnly]
   );
   const globeKpis = useMemo(() => {
     const c = { cleared: 0, approval: 0, blocked: 0 };
@@ -1840,6 +1842,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               timelapse={timelapse}
               showLabels={showLabels}
               autoRotate={autoRotate}
+              highRiskOnly={highRiskOnly}
               selectedArc={selectedArc}
               onSelect={sel => {
                 if (compareMode && sel.type === "hub") {
@@ -2243,6 +2246,24 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             >
               {t("proIntel.compareBtn", "Compare")}
             </button>
+            <button
+              type="button"
+              aria-pressed={highRiskOnly}
+              onClick={() => setHighRiskOnly(v => !v)}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: `1px solid ${
+                  highRiskOnly ? "#f87171" : "rgba(148,163,184,0.3)"
+                }`,
+                background: highRiskOnly ? "#f8717122" : "rgba(2,10,25,0.5)",
+                color: highRiskOnly ? "#f87171" : "#9fb4d4",
+              }}
+            >
+              {t("proIntel.highRisk", "High-risk only")}
+            </button>
             {(corridorFilter !== "all" ||
               categoryFilter !== "all" ||
               whatIf ||
@@ -2256,6 +2277,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   setWhatIf(false);
                   setTimelapse(false);
                   setRegionFilter("all");
+                  setHighRiskOnly(false);
                   setCompare([]);
                   setGlobeSel(null);
                 }}
