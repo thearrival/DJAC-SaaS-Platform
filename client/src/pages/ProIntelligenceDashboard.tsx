@@ -19,7 +19,7 @@ import { useTheme } from "@/contexts/useTheme";
 import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SinoGulfArchitecture } from "@/components/SinoGulfArchitecture";
-import { Globe3D, type CorridorStatus } from "@/components/Globe3D";
+import { Globe3D, GLOBE_ARCS, type CorridorStatus } from "@/components/Globe3D";
 import { buildMarkersFromCounts } from "@/components/globeData";
 import { AIOrchestrationFeed } from "@/components/AIOrchestrationFeed";
 import { RegulatoryPulseMatrix } from "@/components/RegulatoryPulseMatrix";
@@ -984,6 +984,30 @@ const CORRIDOR_STATUS_META: Record<
   blocked: { label: "Blocked", color: "#ef4444" },
 };
 
+function exportCorridorsCsv() {
+  const rows: string[][] = [
+    ["Corridor", "From", "To", "Status", "Volume", "Data categories"],
+    ...GLOBE_ARCS.map(a => [
+      a.label ?? "",
+      a.from.join(" "),
+      a.to.join(" "),
+      a.status ? CORRIDOR_STATUS_META[a.status].label : "",
+      a.volume ?? "",
+      (a.dataCategories ?? []).join("; "),
+    ]),
+  ];
+  const csv = rows
+    .map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "djac-cross-border-corridors.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   usePageTitle("Pro Intelligence");
@@ -1796,6 +1820,21 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               }}
             >
               {t("proIntel.whatIf", "What-if: stricter rules")}
+            </button>
+            <button
+              type="button"
+              onClick={exportCorridorsCsv}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: "1px solid rgba(148,163,184,0.3)",
+                background: "rgba(2,10,25,0.5)",
+                color: "#9fb4d4",
+              }}
+            >
+              {t("proIntel.exportCsv", "Export CSV")}
             </button>
           </div>
           {whatIf && (

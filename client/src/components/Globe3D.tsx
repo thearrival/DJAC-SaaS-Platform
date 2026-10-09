@@ -19,6 +19,7 @@ export type GlobeArc = {
   to: [number, number];
   label?: string;
   status?: CorridorStatus;
+  volume?: "low" | "medium" | "high";
   dataCategories?: string[];
 };
 export type GlobeSelection = {
@@ -69,6 +70,7 @@ export const GLOBE_ARCS: GlobeArc[] = [
     to: [24.7, 46.7],
     label: "Sino–Saudi Data Corridor",
     status: "approval",
+    volume: "high",
     dataCategories: ["Personal Data", "Financial Records"],
   },
   {
@@ -76,6 +78,7 @@ export const GLOBE_ARCS: GlobeArc[] = [
     to: [50.85, 4.35],
     label: "China–EU Transfer",
     status: "approval",
+    volume: "high",
     dataCategories: ["Personal Data"],
   },
   {
@@ -83,18 +86,21 @@ export const GLOBE_ARCS: GlobeArc[] = [
     to: [50.85, 4.35],
     label: "Gulf–EU Link",
     status: "cleared",
+    volume: "medium",
   },
   {
     from: [50.85, 4.35],
     to: [38.9, -77.0],
     label: "EU–US Data Bridge",
     status: "cleared",
+    volume: "high",
   },
   {
     from: [25.2, 55.3],
     to: [1.35, 103.8],
     label: "Gulf–ASEAN Transit",
     status: "approval",
+    volume: "medium",
     dataCategories: ["Personal Data", "Biometric Data"],
   },
   {
@@ -102,12 +108,14 @@ export const GLOBE_ARCS: GlobeArc[] = [
     to: [-23.55, -46.63],
     label: "Americas Link",
     status: "cleared",
+    volume: "low",
   },
   {
     from: [39.9, 116.4],
     to: [1.35, 103.8],
     label: "China–ASEAN Link",
     status: "approval",
+    volume: "medium",
     dataCategories: ["Personal Data"],
   },
 ];
@@ -412,7 +420,9 @@ export function Globe3D({
         .multiplyScalar(RADIUS + dist * 0.42);
       const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
 
-      const tubeGeo = new THREE.TubeGeometry(curve, 72, 0.004, 8, false);
+      const tubeRadius =
+        a.volume === "high" ? 0.006 : a.volume === "low" ? 0.003 : 0.0045;
+      const tubeGeo = new THREE.TubeGeometry(curve, 72, tubeRadius, 8, false);
       const tubeMat = new THREE.MeshBasicMaterial({
         color: a.status ? CORRIDOR_COLOR[a.status] : 0x38bdf8,
         transparent: true,
