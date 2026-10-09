@@ -219,6 +219,8 @@ export function Globe3D({
   const tourRef = useRef(false);
   const [touring, setTouring] = useState(false);
   const [tourCaption, setTourCaption] = useState<string | null>(null);
+  const tourSpeedRef = useRef(1);
+  const [tourSpeed, setTourSpeed] = useState(1);
   const resetRef = useRef<() => void>(() => {});
   const emphasizeRef = useRef<(loc: [number, number] | null) => void>(() => {});
   const hubLocRef = useRef<[number, number] | null>(null);
@@ -694,26 +696,30 @@ export function Globe3D({
     // Auto-cycling spotlight tour
     let tourIdx = 0;
     let hoveredKey = "";
-    const tourTimer = window.setInterval(() => {
-      if (!tourRef.current || markers.length === 0) return;
-      const m = markers[tourIdx % markers.length];
-      tourIdx++;
-      emphasizeHub(m.location);
-      spawnRing(
-        toVec(m.location[0], m.location[1], RADIUS),
-        new THREE.Color(0x7dd3fc)
-      );
-      const cnt = m.value ?? 0;
-      setTourCaption(
-        `${m.label ?? m.id ?? ""} · ${cnt} framework${cnt === 1 ? "" : "s"}`
-      );
-      onSelectRef.current?.({
-        type: "hub",
-        id: m.id ?? m.label ?? "",
-        label: m.label ?? m.id ?? "",
-        value: m.value,
-      });
-    }, 3500);
+    let tourTimer = 0;
+    const advanceTour = () => {
+      if (tourRef.current && markers.length > 0) {
+        const m = markers[tourIdx % markers.length];
+        tourIdx++;
+        emphasizeHub(m.location);
+        spawnRing(
+          toVec(m.location[0], m.location[1], RADIUS),
+          new THREE.Color(0x7dd3fc)
+        );
+        const cnt = m.value ?? 0;
+        setTourCaption(
+          `${m.label ?? m.id ?? ""} · ${cnt} framework${cnt === 1 ? "" : "s"}`
+        );
+        onSelectRef.current?.({
+          type: "hub",
+          id: m.id ?? m.label ?? "",
+          label: m.label ?? m.id ?? "",
+          value: m.value,
+        });
+      }
+      tourTimer = window.setTimeout(advanceTour, 3500 / tourSpeedRef.current);
+    };
+    tourTimer = window.setTimeout(advanceTour, 3500 / tourSpeedRef.current);
 
     // Bloom post-processing
     const composer = new EffectComposer(renderer);
@@ -948,7 +954,7 @@ export function Globe3D({
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
-      window.clearInterval(tourTimer);
+      window.clearTimeout(tourTimer);
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
       ro.disconnect();
@@ -1032,6 +1038,11 @@ export function Globe3D({
   useEffect(() => {
     setAutoRotateRef.current(autoRotate ?? true);
   }, [autoRotate]);
+
+  // Controlled tour pacing.
+  useEffect(() => {
+    tourSpeedRef.current = tourSpeed;
+  }, [tourSpeed]);
 
   // Controlled "what-if" stress test.
   useEffect(() => {
@@ -1211,6 +1222,44 @@ export function Globe3D({
       >
         {touring ? "■ Tour" : "▶ Tour"}
       </button>
+
+      {/* Tour pacing */}
+      <div
+        style={{
+          position: "absolute",
+          right: 8,
+          top: 44,
+          display: "flex",
+          gap: 2,
+          background: "rgba(2,10,25,0.6)",
+          border: "1px solid rgba(56,189,248,0.25)",
+          borderRadius: 8,
+          padding: 2,
+        }}
+        role="group"
+        aria-label="Tour speed"
+      >
+        {[0.5, 1, 2].map(s => (
+          <button
+            key={s}
+            type="button"
+            aria-pressed={tourSpeed === s}
+            onClick={() => setTourSpeed(s)}
+            style={{
+              fontSize: 10,
+              padding: "2px 6px",
+              borderRadius: 6,
+              cursor: "pointer",
+              border: "none",
+              background:
+                tourSpeed === s ? "rgba(0,210,255,0.25)" : "transparent",
+              color: tourSpeed === s ? "#9bd6ff" : "#7f9dc0",
+            }}
+          >
+            {s}×
+          </button>
+        ))}
+      </div>
 
       {/* Tour caption */}
       {touring && tourCaption && (
