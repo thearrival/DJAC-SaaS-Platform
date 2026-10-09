@@ -126,6 +126,7 @@ export function Globe3D({
   onSelectRef.current = onSelect;
   const tourRef = useRef(false);
   const [touring, setTouring] = useState(false);
+  const resetRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const el = ref.current;
@@ -153,6 +154,10 @@ export function Globe3D({
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.display = "block";
     el.appendChild(renderer.domElement);
+
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     scene.add(new THREE.AmbientLight(0x93b8ff, 1.0));
     const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
@@ -412,10 +417,13 @@ export function Globe3D({
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.rotateSpeed = 0.5;
-    controls.autoRotate = true;
+    controls.autoRotate = !reduceMotion;
     controls.autoRotateSpeed = 0.6;
     controls.minPolarAngle = Math.PI * 0.15;
     controls.maxPolarAngle = Math.PI * 0.85;
+    resetRef.current = () => {
+      controls.reset();
+    };
 
     // Auto-cycling spotlight tour
     let tourIdx = 0;
@@ -531,16 +539,19 @@ export function Globe3D({
     canvas.addEventListener("pointerdown", onPointerDown);
     canvas.addEventListener("pointerup", onPointerUp);
 
-    // Loop
+    // Loop (paused while the tab is hidden or the globe is off-screen)
     let raf = 0;
+    let running = false;
+    let inView = true;
     const clock = new THREE.Clock();
     const animate = () => {
       const dt = Math.min(clock.getDelta(), 0.05);
+      const speedScale = reduceMotion ? 0.3 : 1;
       for (const p of pulses) {
-        p.t = (p.t + dt * p.speed) % 1;
+        p.t = (p.t + dt * p.speed * speedScale) % 1;
         p.mesh.position.copy(p.curve.getPoint(p.t));
       }
-      stars.rotation.y += dt * 0.005;
+      if (!reduceMotion) stars.rotation.y += dt * 0.005;
       for (let i = rings.length - 1; i >= 0; i--) {
         const r = rings[i];
         r.t += dt * 1.6;
@@ -557,7 +568,33 @@ export function Globe3D({
       composer.render();
       raf = requestAnimationFrame(animate);
     };
-    raf = requestAnimationFrame(animate);
+    const start = () => {
+      if (running) return;
+      running = true;
+      clock.getDelta();
+      raf = requestAnimationFrame(animate);
+    };
+    const stop = () => {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    const updateRun = () => {
+      if (inView && !document.hidden) start();
+      else stop();
+    };
+    updateRun();
+
+    const io = new IntersectionObserver(
+      entries => {
+        inView = entries[0]?.isIntersecting ?? true;
+        updateRun();
+      },
+      { threshold: 0.05 }
+    );
+    io.observe(el);
+    const onVisibility = () => updateRun();
+    document.addEventListener("visibilitychange", onVisibility);
 
     const resize = () => {
       const w = el.clientWidth || size;
@@ -572,6 +609,8 @@ export function Globe3D({
       cancelled = true;
       cancelAnimationFrame(raf);
       window.clearInterval(tourTimer);
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       ro.disconnect();
       controls.dispose();
       canvas.removeEventListener("pointermove", onPointerMove);
@@ -691,6 +730,27 @@ export function Globe3D({
         }}
       >
         PNG
+      </button>
+
+      {/* Reset view */}
+      <button
+        type="button"
+        onClick={() => resetRef.current()}
+        aria-label="Reset view"
+        style={{
+          position: "absolute",
+          left: 8,
+          top: 8,
+          background: "rgba(2,10,25,0.6)",
+          border: "1px solid rgba(56,189,248,0.35)",
+          borderRadius: 8,
+          color: "#9bd6ff",
+          fontSize: 12,
+          padding: "3px 9px",
+          cursor: "pointer",
+        }}
+      >
+        ⟲
       </button>
 
       {/* Tour toggle */}
