@@ -1116,6 +1116,8 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const [showLabels, setShowLabels] = useState(true);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compare, setCompare] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const corridorCategories = useMemo(
     () =>
@@ -1146,6 +1148,21 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     }
     return { hubs: globeMarkers.length, corridors: GLOBE_ARCS.length, ...c };
   }, [globeMarkers.length, whatIf]);
+  const compareData = useMemo(
+    () =>
+      compare.map(j => {
+        const fws = (globalFwQuery.data ?? []).filter(
+          f => f.jurisdiction === j
+        );
+        return { j, count: fws.length, codes: fws.map(f => f.code) };
+      }),
+    [compare, globalFwQuery.data]
+  );
+  const sharedCodes = useMemo(() => {
+    if (compareData.length < 2) return [];
+    const setB = new Set(compareData[1].codes);
+    return compareData[0].codes.filter(c => setB.has(c));
+  }, [compareData]);
   const selectedFrameworks = useMemo(() => {
     if (!globeSel) return [];
     return (globalFwQuery.data ?? [])
@@ -1711,6 +1728,93 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               </div>
             ))}
           </div>
+          {compare.length > 0 && (
+            <div
+              style={{
+                marginBottom: 12,
+                border: `1px solid ${C.cyan}44`,
+                background: "rgba(2,10,25,0.55)",
+                borderRadius: 12,
+                padding: "12px 16px",
+                color: "#dbeafe",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <strong style={{ fontSize: 13 }}>
+                  {t("proIntel.compare", "Compare jurisdictions")}
+                </strong>
+                <button
+                  type="button"
+                  onClick={() => setCompare([])}
+                  aria-label="Clear comparison"
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#9fb4d4",
+                    cursor: "pointer",
+                    fontSize: 16,
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    compareData.length === 2 ? "1fr 1fr" : "1fr",
+                  gap: 14,
+                }}
+              >
+                {compareData.map(d => (
+                  <div key={d.j}>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{d.j}</div>
+                    <div style={{ fontSize: 12, color: C.cyan }}>
+                      {d.count} frameworks
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "#9fb4d4",
+                        marginTop: 4,
+                      }}
+                    >
+                      {d.codes.join(" · ")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {compare.length === 2 ? (
+                <p
+                  style={{ margin: "10px 0 0", fontSize: 12, color: "#9fb4d4" }}
+                >
+                  {t("proIntel.shared", "Shared frameworks")}:{" "}
+                  {sharedCodes.length ? sharedCodes.join(" · ") : "—"}
+                </p>
+              ) : (
+                <p
+                  style={{
+                    margin: "8px 0 0",
+                    fontSize: 11.5,
+                    color: "#94a3b8",
+                  }}
+                >
+                  {t(
+                    "proIntel.compareHint",
+                    "Click hubs on the globe to add up to two jurisdictions."
+                  )}
+                </p>
+              )}
+            </div>
+          )}
           <div
             style={{
               display: "grid",
@@ -1733,6 +1837,16 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               autoRotate={autoRotate}
               selectedArc={selectedArc}
               onSelect={sel => {
+                if (compareMode && sel.type === "hub") {
+                  setCompare(prev =>
+                    prev.includes(sel.id)
+                      ? prev.filter(x => x !== sel.id)
+                      : prev.length >= 2
+                        ? [prev[1], sel.id]
+                        : [...prev, sel.id]
+                  );
+                  return;
+                }
                 setGlobeSel({
                   type: sel.type,
                   id: sel.id,
@@ -2071,6 +2185,27 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               }}
             >
               {t("proIntel.spin", "Spin")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={compareMode}
+              onClick={() => {
+                setCompareMode(v => !v);
+                if (compareMode) setCompare([]);
+              }}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: `1px solid ${
+                  compareMode ? C.cyan : "rgba(148,163,184,0.3)"
+                }`,
+                background: compareMode ? `${C.cyan}22` : "rgba(2,10,25,0.5)",
+                color: compareMode ? C.cyan : "#9fb4d4",
+              }}
+            >
+              {t("proIntel.compareBtn", "Compare")}
             </button>
             {(corridorFilter !== "all" ||
               categoryFilter !== "all" ||
