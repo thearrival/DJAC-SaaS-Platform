@@ -49,23 +49,28 @@ const SHORT: Record<string, string> = {
   "North America": "North America",
 };
 
-/** Build globe markers from real per-jurisdiction framework counts. */
-export function buildMarkersFromCounts(
-  counts: Record<string, number>
+/** Build globe markers from real frameworks, with per-jurisdiction counts. */
+export function buildMarkersFromFrameworks(
+  frameworks: { jurisdiction: string; code: string }[]
 ): GlobeMarker[] {
-  const entries = Object.entries(counts).filter(
-    ([j]) => JURISDICTION_COORDS[j]
-  );
-  const max = Math.max(1, ...entries.map(([, n]) => n));
-  return entries.map(([jurisdiction, count]) => {
+  const byJ: Record<string, { count: number; codes: string[] }> = {};
+  for (const f of frameworks) {
+    if (!JURISDICTION_COORDS[f.jurisdiction]) continue;
+    const e = (byJ[f.jurisdiction] ??= { count: 0, codes: [] });
+    e.count++;
+    if (e.codes.length < 3) e.codes.push(f.code);
+  }
+  const entries = Object.entries(byJ);
+  const max = Math.max(1, ...entries.map(([, v]) => v.count));
+  return entries.map(([jurisdiction, v]) => {
     const [lat, lng] = JURISDICTION_COORDS[jurisdiction];
     return {
       id: jurisdiction,
       location: [lat, lng],
-      value: count,
-      // 0.35 → 1.2 scaled by relative count
-      size: 0.35 + 0.85 * (count / max),
+      value: v.count,
+      size: 0.35 + 0.85 * (v.count / max),
       label: SHORT[jurisdiction] ?? jurisdiction,
+      topFrameworks: v.codes,
     };
   });
 }

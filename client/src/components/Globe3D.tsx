@@ -12,6 +12,7 @@ export type GlobeMarker = {
   size?: number;
   value?: number;
   label?: string;
+  topFrameworks?: string[];
 };
 export type CorridorStatus = "cleared" | "approval" | "blocked";
 export type GlobeArc = {
@@ -383,6 +384,7 @@ export function Globe3D({
         id: m.id ?? m.label ?? "",
         label: m.label ?? m.id ?? "",
         value: m.value,
+        topFrameworks: m.topFrameworks,
         location: m.location,
       };
       globe.add(dot);
@@ -639,15 +641,20 @@ export function Globe3D({
           value?: number;
           type: string;
           status?: CorridorStatus;
+          topFrameworks?: string[];
         };
         const st = d.status ? ` · ${CORRIDOR_LABEL[d.status]}` : "";
+        const hubLine =
+          d.type === "hub" && d.value != null
+            ? `${d.label} · ${d.value} framework${d.value === 1 ? "" : "s"}` +
+              (d.topFrameworks?.length
+                ? `\n${d.topFrameworks.join(" · ")}`
+                : "")
+            : `${d.label}${st}`;
         setTip({
           x: e.clientX - r.left,
           y: e.clientY - r.top,
-          text:
-            d.type === "hub" && d.value != null
-              ? `${d.label} · ${d.value} framework${d.value === 1 ? "" : "s"}`
-              : `${d.label}${st}`,
+          text: hubLine,
         });
       } else {
         renderer.domElement.style.cursor = "grab";
@@ -861,10 +868,12 @@ export function Globe3D({
             background: "rgba(2,10,25,0.92)",
             border: "1px solid rgba(56,189,248,0.45)",
             borderRadius: 8,
-            padding: "4px 9px",
+            padding: "6px 10px",
             fontSize: 11,
+            lineHeight: 1.5,
             color: "#c7e6ff",
-            whiteSpace: "nowrap",
+            whiteSpace: "pre-line",
+            maxWidth: 220,
           }}
         >
           {tip.text}

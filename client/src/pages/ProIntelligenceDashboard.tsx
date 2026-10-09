@@ -20,7 +20,7 @@ import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SinoGulfArchitecture } from "@/components/SinoGulfArchitecture";
 import { Globe3D, GLOBE_ARCS, type CorridorStatus } from "@/components/Globe3D";
-import { buildMarkersFromCounts } from "@/components/globeData";
+import { buildMarkersFromFrameworks } from "@/components/globeData";
 import { AIOrchestrationFeed } from "@/components/AIOrchestrationFeed";
 import { RegulatoryPulseMatrix } from "@/components/RegulatoryPulseMatrix";
 import { Badge } from "@/components/ui/badge";
@@ -1060,13 +1060,10 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     staleTime: 300_000,
     refetchOnWindowFocus: false,
   });
-  const globeMarkers = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const f of globalFwQuery.data ?? []) {
-      counts[f.jurisdiction] = (counts[f.jurisdiction] ?? 0) + 1;
-    }
-    return buildMarkersFromCounts(counts);
-  }, [globalFwQuery.data]);
+  const globeMarkers = useMemo(
+    () => buildMarkersFromFrameworks(globalFwQuery.data ?? []),
+    [globalFwQuery.data]
+  );
 
   const [globeSel, setGlobeSel] = useState<{
     type: "hub" | "arc";
