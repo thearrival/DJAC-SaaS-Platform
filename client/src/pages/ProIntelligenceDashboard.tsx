@@ -1901,6 +1901,56 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                 })}
             </div>
           )}
+          <div
+            style={{
+              marginTop: 8,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              alignItems: "center",
+            }}
+            aria-label={t("proIntel.globeCorridors", "Cross-border corridors")}
+          >
+            <span style={{ fontSize: 11, color: "#94a3b8" }}>
+              {t("proIntel.corridorList", "Cross-border corridors")}:
+            </span>
+            {GLOBE_ARCS.map(a => {
+              const id = a.label ?? "";
+              const active = globeSel?.type === "arc" && globeSel.id === id;
+              const col = a.status
+                ? CORRIDOR_STATUS_META[a.status].color
+                : "#38bdf8";
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() =>
+                    setGlobeSel({
+                      type: "arc",
+                      id,
+                      label: id,
+                      status: a.status,
+                      dataCategories: a.dataCategories,
+                    })
+                  }
+                  style={{
+                    fontSize: 11,
+                    padding: "3px 9px",
+                    borderRadius: 999,
+                    cursor: "pointer",
+                    border: `1px solid ${
+                      active ? col : "rgba(148,163,184,0.3)"
+                    }`,
+                    background: active ? `${col}22` : "rgba(2,10,25,0.5)",
+                    color: active ? col : "#9fb4d4",
+                  }}
+                >
+                  <span style={{ color: col }}>●</span> {id}
+                </button>
+              );
+            })}
+          </div>
         </section>
 
         {/* ── Row 1: Heatmap ────────────────────────────────────────── */}
