@@ -1515,6 +1515,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
           >
             <Globe3D
               markers={globeMarkers.length > 0 ? globeMarkers : undefined}
+              selectedId={globeSel?.id ?? null}
               onSelect={sel => {
                 if (sel.type === "arc") {
                   navigate("/cross-border-data-flow");
@@ -1613,6 +1614,55 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               </div>
             )}
           </div>
+          {globeMarkers.length > 0 && (
+            <div
+              style={{
+                marginTop: 14,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 6,
+              }}
+              aria-label={t("proIntel.globeHubs", "Jurisdictions")}
+            >
+              {globeMarkers
+                .slice()
+                .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
+                .map(m => {
+                  const id = m.id ?? m.label ?? "";
+                  const active = globeSel?.id === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() =>
+                        setGlobeSel({
+                          id,
+                          label: m.label ?? id,
+                          value: m.value,
+                        })
+                      }
+                      style={{
+                        fontSize: 11,
+                        padding: "3px 9px",
+                        borderRadius: 999,
+                        cursor: "pointer",
+                        border: `1px solid ${
+                          active ? C.cyan : "rgba(148,163,184,0.3)"
+                        }`,
+                        background: active
+                          ? "rgba(0,210,255,0.15)"
+                          : "rgba(2,10,25,0.5)",
+                        color: active ? "#bae6fd" : "#9fb4d4",
+                      }}
+                    >
+                      {m.label}
+                      <span style={{ opacity: 0.55 }}> {m.value ?? 0}</span>
+                    </button>
+                  );
+                })}
+            </div>
+          )}
         </section>
 
         {/* ── Row 1: Heatmap ────────────────────────────────────────── */}

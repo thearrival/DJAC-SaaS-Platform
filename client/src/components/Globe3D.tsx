@@ -107,11 +107,13 @@ function hubColor(t: number): THREE.Color {
 export function Globe3D({
   markers = GLOBE_MARKERS,
   arcs = GLOBE_ARCS,
+  selectedId,
   onSelect,
   className,
 }: {
   markers?: GlobeMarker[];
   arcs?: GlobeArc[];
+  selectedId?: string | null;
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
 }) {
@@ -127,6 +129,7 @@ export function Globe3D({
   const tourRef = useRef(false);
   const [touring, setTouring] = useState(false);
   const resetRef = useRef<() => void>(() => {});
+  const emphasizeRef = useRef<(loc: [number, number] | null) => void>(() => {});
 
   useEffect(() => {
     const el = ref.current;
@@ -382,6 +385,7 @@ export function Globe3D({
         ho.dot.scale.setScalar(loc && sameLoc(ho.loc, loc) ? 2.2 : 1);
       }
     };
+    emphasizeRef.current = emphasizeHub;
 
     // Expanding pulse rings (spawned when a hub is selected)
     const rings: {
@@ -636,6 +640,12 @@ export function Globe3D({
         renderer.domElement.parentNode.removeChild(renderer.domElement);
     };
   }, [markers, arcs]);
+
+  // Controlled selection (e.g. from an external keyboard-accessible list).
+  useEffect(() => {
+    const m = markers.find(x => (x.id ?? x.label) === selectedId);
+    emphasizeRef.current(m ? m.location : null);
+  }, [selectedId, markers]);
 
   const downloadPng = () => {
     const canvas = ref.current?.querySelector(
