@@ -1047,6 +1047,22 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
       .slice(0, 8);
   }, [globalFwQuery.data, globeSel]);
 
+  // Deep-link: apply ?jurisdiction=… on load…
+  useEffect(() => {
+    const j = new URLSearchParams(window.location.search).get("jurisdiction");
+    if (j && globeMarkers.some(m => (m.id ?? m.label) === j)) {
+      const m = globeMarkers.find(x => (x.id ?? x.label) === j);
+      setGlobeSel({ id: j, label: m?.label ?? j, value: m?.value });
+    }
+  }, [globeMarkers]);
+  // …and reflect the selection back into the URL so views are shareable.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (globeSel) url.searchParams.set("jurisdiction", globeSel.id);
+    else url.searchParams.delete("jurisdiction");
+    window.history.replaceState({}, "", url.toString());
+  }, [globeSel]);
+
   const liveJobCount = useMemo(() => {
     if (!jobsQuery.data) return 0;
     return jobsQuery.data.filter(
@@ -1602,13 +1618,22 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                     </li>
                   ))}
                 </ul>
-                <div style={{ marginTop: 14 }}>
+                <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => navigate("/global-registry")}
                   >
                     Open in Global Registry
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      void navigator.clipboard?.writeText(window.location.href);
+                    }}
+                  >
+                    Copy link
                   </Button>
                 </div>
               </div>
