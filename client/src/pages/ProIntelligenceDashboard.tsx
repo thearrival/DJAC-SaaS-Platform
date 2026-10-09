@@ -1115,6 +1115,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const [timelapse, setTimelapse] = useState(false);
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const [showLabels, setShowLabels] = useState(true);
+  const [autoRotate, setAutoRotate] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const corridorCategories = useMemo(
     () =>
@@ -1729,6 +1730,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               whatIf={whatIf}
               timelapse={timelapse}
               showLabels={showLabels}
+              autoRotate={autoRotate}
               selectedArc={selectedArc}
               onSelect={sel => {
                 setGlobeSel({
@@ -2051,6 +2053,24 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               }}
             >
               {t("proIntel.labels", "Labels")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={autoRotate}
+              onClick={() => setAutoRotate(v => !v)}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: `1px solid ${
+                  autoRotate ? C.cyan : "rgba(148,163,184,0.3)"
+                }`,
+                background: autoRotate ? `${C.cyan}22` : "rgba(2,10,25,0.5)",
+                color: autoRotate ? C.cyan : "#9fb4d4",
+              }}
+            >
+              {t("proIntel.spin", "Spin")}
             </button>
             {(corridorFilter !== "all" ||
               categoryFilter !== "all" ||

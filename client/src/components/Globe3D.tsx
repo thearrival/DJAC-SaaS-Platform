@@ -184,6 +184,7 @@ export function Globe3D({
   whatIf,
   timelapse,
   showLabels,
+  autoRotate,
   selectedArc,
   onSelect,
   className,
@@ -197,6 +198,7 @@ export function Globe3D({
   whatIf?: boolean;
   timelapse?: boolean;
   showLabels?: boolean;
+  autoRotate?: boolean;
   selectedArc?: { from: [number, number]; to: [number, number] } | null;
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
@@ -224,6 +226,7 @@ export function Globe3D({
   const regionFilterRef = useRef<string | null>(null);
   const applyRegionRef = useRef<() => void>(() => {});
   const showLabelsRef = useRef(true);
+  const setAutoRotateRef = useRef<(v: boolean) => void>(() => {});
   const refreshArcsRef = useRef<() => void>(() => {});
   const emphasizeArcRef = useRef<
     (arc: { from: [number, number]; to: [number, number] } | null) => void
@@ -648,7 +651,10 @@ export function Globe3D({
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.rotateSpeed = 0.5;
-    controls.autoRotate = !reduceMotion;
+    controls.autoRotate = (autoRotate ?? true) && !reduceMotion;
+    setAutoRotateRef.current = (v: boolean) => {
+      controls.autoRotate = v && !reduceMotion;
+    };
     controls.autoRotateSpeed = 0.6;
     controls.minPolarAngle = Math.PI * 0.15;
     controls.maxPolarAngle = Math.PI * 0.85;
@@ -946,6 +952,11 @@ export function Globe3D({
     showLabelsRef.current = showLabels ?? true;
     applyRegionRef.current();
   }, [showLabels]);
+
+  // Controlled auto-rotate.
+  useEffect(() => {
+    setAutoRotateRef.current(autoRotate ?? true);
+  }, [autoRotate]);
 
   // Controlled "what-if" stress test.
   useEffect(() => {
