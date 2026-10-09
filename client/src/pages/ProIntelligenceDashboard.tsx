@@ -1998,19 +1998,36 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   }}
                 >
                   {globeSel.type === "hub" ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        navigate(
-                          `/global-registry?jurisdiction=${encodeURIComponent(
-                            globeSel.id
-                          )}`
-                        )
-                      }
-                    >
-                      Open in Global Registry
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          navigate(
+                            `/global-registry?jurisdiction=${encodeURIComponent(
+                              globeSel.id
+                            )}`
+                          )
+                        }
+                      >
+                        Open in Global Registry
+                      </Button>
+                      {toDataFlowJurisdiction(globeSel.id) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(
+                              `/cross-border-data-flow?source=${encodeURIComponent(
+                                toDataFlowJurisdiction(globeSel.id)!
+                              )}`
+                            )
+                          }
+                        >
+                          Open data flow
+                        </Button>
+                      )}
+                    </>
                   ) : (
                     <Button
                       variant="outline"
