@@ -1061,6 +1061,67 @@ export function Globe3D({
     a.click();
   };
 
+  const downloadReport = () => {
+    const canvas = ref.current?.querySelector(
+      "canvas"
+    ) as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const W = canvas.width;
+    const H = canvas.height;
+    const pad = Math.round(W * 0.06);
+    const panelW = Math.round(W * 0.62);
+    const out = document.createElement("canvas");
+    out.width = W + panelW;
+    out.height = H;
+    const ctx = out.getContext("2d");
+    if (!ctx) return;
+    const bg = ctx.createLinearGradient(0, 0, out.width, out.height);
+    bg.addColorStop(0, "#020a19");
+    bg.addColorStop(1, "#04122b");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(canvas, 0, 0, W, H);
+    const x = W + pad;
+    let y = pad + Math.round(W * 0.04);
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#e6f2ff";
+    ctx.font = `700 ${Math.round(W * 0.055)}px system-ui, sans-serif`;
+    ctx.fillText("Global Regulatory Network", x, y);
+    y += Math.round(W * 0.05);
+    ctx.fillStyle = "#7f9dc0";
+    ctx.font = `${Math.round(W * 0.03)}px system-ui, sans-serif`;
+    ctx.fillText("DJAC · regulatory hubs & cross-border corridors", x, y);
+    y += Math.round(W * 0.032);
+    ctx.fillText(new Date().toISOString().slice(0, 10), x, y);
+    y += Math.round(W * 0.075);
+    const c = { cleared: 0, approval: 0, blocked: 0 };
+    for (const a of arcs) {
+      const eff = whatIf && a.status === "approval" ? "blocked" : a.status;
+      if (eff) c[eff as keyof typeof c]++;
+    }
+    const rows: Array<[string, string, string]> = [
+      ["Regulatory hubs", String(markers.length), "#9bd6ff"],
+      ["Cross-border corridors", String(arcs.length), "#9bd6ff"],
+      ["Cleared", String(c.cleared), "#10b981"],
+      ["Approval required", String(c.approval), "#f59e0b"],
+      ["Blocked", String(c.blocked), "#ef4444"],
+    ];
+    ctx.font = `${Math.round(W * 0.034)}px system-ui, sans-serif`;
+    for (const [label, val, color] of rows) {
+      ctx.fillStyle = "#cfe3ff";
+      ctx.fillText(label, x, y);
+      ctx.fillStyle = color;
+      ctx.textAlign = "right";
+      ctx.fillText(val, out.width - pad, y);
+      ctx.textAlign = "left";
+      y += Math.round(W * 0.055);
+    }
+    const a = document.createElement("a");
+    a.href = out.toDataURL("image/png");
+    a.download = "djac-global-regulatory-network-report.png";
+    a.click();
+  };
+
   return (
     <div
       ref={ref}
@@ -1175,6 +1236,27 @@ export function Globe3D({
         }}
       >
         PNG
+      </button>
+
+      {/* One-page report snapshot */}
+      <button
+        type="button"
+        onClick={downloadReport}
+        aria-label="Download one-page report"
+        style={{
+          position: "absolute",
+          right: 8,
+          bottom: 40,
+          background: "rgba(2,10,25,0.6)",
+          border: "1px solid rgba(56,189,248,0.35)",
+          borderRadius: 8,
+          color: "#9bd6ff",
+          fontSize: 11,
+          padding: "4px 9px",
+          cursor: "pointer",
+        }}
+      >
+        Report
       </button>
 
       {/* Reset view */}
