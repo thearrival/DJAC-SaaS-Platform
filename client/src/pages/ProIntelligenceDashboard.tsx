@@ -1008,6 +1008,34 @@ function exportCorridorsCsv() {
   URL.revokeObjectURL(url);
 }
 
+function corridorsSummary(opts: {
+  whatIf: boolean;
+  status: string;
+  category: string;
+  region: string;
+}): string {
+  const eff = (s?: CorridorStatus) =>
+    opts.whatIf && s === "approval" ? "blocked" : s;
+  const lines: string[] = [
+    "DJAC — Global Regulatory Network",
+    `Filters: status=${opts.status} · category=${opts.category} · region=${opts.region}${
+      opts.whatIf ? " · what-if: stricter rules" : ""
+    }`,
+    `Corridors (${GLOBE_ARCS.length}):`,
+  ];
+  for (const a of GLOBE_ARCS) {
+    const st = eff(a.status);
+    lines.push(
+      `• ${a.label ?? "Corridor"} — ${
+        st ? CORRIDOR_STATUS_META[st].label : "n/a"
+      }${a.volume ? ` · ${a.volume} volume` : ""}${
+        a.dataCategories?.length ? ` · ${a.dataCategories.join(", ")}` : ""
+      }`
+    );
+  }
+  return lines.join("\n");
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   usePageTitle("Pro Intelligence");
@@ -1172,6 +1200,15 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     set("whatif", whatIf ? "1" : null);
     window.history.replaceState({}, "", url.toString());
   }, [globeSel, corridorFilter, categoryFilter, regionFilter, whatIf]);
+
+  // Esc clears the current selection.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setGlobeSel(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const liveJobCount = useMemo(() => {
     if (!jobsQuery.data) return 0;
@@ -1964,6 +2001,30 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               }}
             >
               {t("proIntel.exportCsv", "Export CSV")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void navigator.clipboard?.writeText(
+                  corridorsSummary({
+                    whatIf,
+                    status: corridorFilter,
+                    category: categoryFilter,
+                    region: regionFilter,
+                  })
+                );
+              }}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: "1px solid rgba(148,163,184,0.3)",
+                background: "rgba(2,10,25,0.5)",
+                color: "#9fb4d4",
+              }}
+            >
+              {t("proIntel.copySummary", "Copy summary")}
             </button>
             {(corridorFilter !== "all" ||
               categoryFilter !== "all" ||
