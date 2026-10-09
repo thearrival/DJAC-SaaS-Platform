@@ -226,6 +226,11 @@ export function Globe3D({
     from: [number, number];
     to: [number, number];
   } | null>(null);
+  const selHubRef = useRef<[number, number] | null>(null);
+  const selArcRef = useRef<{
+    from: [number, number];
+    to: [number, number];
+  } | null>(null);
   const filterRef = useRef<CorridorStatus | "all">("all");
   const categoryFilterRef = useRef<string | null>(null);
   const regionFilterRef = useRef<string | null>(null);
@@ -517,6 +522,8 @@ export function Globe3D({
         status: a.status,
         volume: a.volume,
         dataCategories: a.dataCategories,
+        from: a.from,
+        to: a.to,
         fromLabel: nearestLabel(a.from),
         toLabel: nearestLabel(a.to),
       };
@@ -604,6 +611,10 @@ export function Globe3D({
     };
     emphasizeRef.current = emphasizeHub;
     emphasizeArcRef.current = emphasizeArc;
+    const restoreSelection = () => {
+      if (selArcRef.current) emphasizeArc(selArcRef.current);
+      else emphasizeHub(selHubRef.current);
+    };
     filterRef.current = filterStatus ?? "all";
     refreshArcs();
 
@@ -682,6 +693,7 @@ export function Globe3D({
 
     // Auto-cycling spotlight tour
     let tourIdx = 0;
+    let hoveredKey = "";
     const tourTimer = window.setInterval(() => {
       if (!tourRef.current || markers.length === 0) return;
       const m = markers[tourIdx % markers.length];
@@ -773,12 +785,41 @@ export function Globe3D({
           y: e.clientY - r.top,
           text,
         });
+        const ud = hit.object.userData as {
+          type: string;
+          id?: string;
+          location?: [number, number];
+          from?: [number, number];
+          to?: [number, number];
+        };
+        const hk =
+          ud.type === "hub"
+            ? `hub:${ud.location?.join(",") ?? d.label}`
+            : `arc:${ud.id ?? d.label}`;
+        if (hk !== hoveredKey) {
+          hoveredKey = hk;
+          if (ud.type === "hub" && ud.location) {
+            emphasizeHub(ud.location);
+          } else if (ud.type === "arc" && ud.from && ud.to) {
+            emphasizeArc({ from: ud.from, to: ud.to });
+          }
+        }
       } else {
         renderer.domElement.style.cursor = "grab";
         setTip(null);
+        if (hoveredKey !== "") {
+          hoveredKey = "";
+          restoreSelection();
+        }
       }
     };
-    const onPointerLeave = () => setTip(null);
+    const onPointerLeave = () => {
+      setTip(null);
+      if (hoveredKey !== "") {
+        hoveredKey = "";
+        restoreSelection();
+      }
+    };
     const onPointerDown = (e: PointerEvent) => {
       downPos = { x: e.clientX, y: e.clientY };
     };
@@ -939,11 +980,15 @@ export function Globe3D({
   // Controlled selection (e.g. from an external keyboard-accessible list).
   useEffect(() => {
     const m = markers.find(x => (x.id ?? x.label) === selectedId);
+    selHubRef.current = m ? m.location : null;
+    if (m) selArcRef.current = null;
     emphasizeRef.current(m ? m.location : null);
   }, [selectedId, markers]);
 
   // Controlled corridor selection → highlight its endpoints.
   useEffect(() => {
+    selArcRef.current = selectedArc ?? null;
+    if (selectedArc) selHubRef.current = null;
     emphasizeArcRef.current(selectedArc ?? null);
   }, [selectedArc]);
 
