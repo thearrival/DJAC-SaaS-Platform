@@ -13,7 +13,14 @@ export type GlobeMarker = {
   value?: number;
   label?: string;
 };
-export type GlobeArc = { from: [number, number]; to: [number, number] };
+export type CorridorStatus = "cleared" | "approval" | "blocked";
+export type GlobeArc = {
+  from: [number, number];
+  to: [number, number];
+  label?: string;
+  status?: CorridorStatus;
+  dataCategories?: string[];
+};
 export type GlobeSelection = {
   type: "hub" | "arc";
   id: string;
@@ -55,13 +62,64 @@ export const GLOBE_MARKERS: GlobeMarker[] = [
 ];
 
 export const GLOBE_ARCS: GlobeArc[] = [
-  { from: [39.9, 116.4], to: [24.7, 46.7] },
-  { from: [39.9, 116.4], to: [50.85, 4.35] },
-  { from: [24.7, 46.7], to: [50.85, 4.35] },
-  { from: [50.85, 4.35], to: [38.9, -77.0] },
-  { from: [25.2, 55.3], to: [1.35, 103.8] },
-  { from: [38.9, -77.0], to: [-23.55, -46.63] },
+  {
+    from: [39.9, 116.4],
+    to: [24.7, 46.7],
+    label: "Sino–Saudi Data Corridor",
+    status: "approval",
+    dataCategories: ["Personal Data", "Financial Records"],
+  },
+  {
+    from: [39.9, 116.4],
+    to: [50.85, 4.35],
+    label: "China–EU Transfer",
+    status: "approval",
+    dataCategories: ["Personal Data"],
+  },
+  {
+    from: [24.7, 46.7],
+    to: [50.85, 4.35],
+    label: "Gulf–EU Link",
+    status: "cleared",
+  },
+  {
+    from: [50.85, 4.35],
+    to: [38.9, -77.0],
+    label: "EU–US Data Bridge",
+    status: "cleared",
+  },
+  {
+    from: [25.2, 55.3],
+    to: [1.35, 103.8],
+    label: "Gulf–ASEAN Transit",
+    status: "approval",
+    dataCategories: ["Personal Data", "Biometric Data"],
+  },
+  {
+    from: [38.9, -77.0],
+    to: [-23.55, -46.63],
+    label: "Americas Link",
+    status: "cleared",
+  },
+  {
+    from: [39.9, 116.4],
+    to: [1.35, 103.8],
+    label: "China–ASEAN Link",
+    status: "approval",
+    dataCategories: ["Personal Data"],
+  },
 ];
+
+const CORRIDOR_COLOR: Record<CorridorStatus, number> = {
+  cleared: 0x10b981,
+  approval: 0xf59e0b,
+  blocked: 0xef4444,
+};
+const CORRIDOR_LABEL: Record<CorridorStatus, string> = {
+  cleared: "cleared",
+  approval: "approval required",
+  blocked: "blocked",
+};
 
 const RADIUS = 1;
 
@@ -342,9 +400,9 @@ export function Globe3D({
 
       const tubeGeo = new THREE.TubeGeometry(curve, 72, 0.004, 8, false);
       const tubeMat = new THREE.MeshBasicMaterial({
-        color: 0x38bdf8,
+        color: a.status ? CORRIDOR_COLOR[a.status] : 0x38bdf8,
         transparent: true,
-        opacity: 0.65,
+        opacity: 0.7,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
@@ -352,7 +410,9 @@ export function Globe3D({
       tube.userData = {
         type: "arc",
         id: `${a.from.join(",")}-${a.to.join(",")}`,
-        label: "Cross-border corridor",
+        label: a.label ?? "Cross-border corridor",
+        status: a.status,
+        dataCategories: a.dataCategories,
       };
       globe.add(tube);
       pickables.push(tube);
@@ -379,7 +439,6 @@ export function Globe3D({
       for (const ao of arcObjects) {
         const on = !loc || sameLoc(ao.from, loc) || sameLoc(ao.to, loc);
         ao.mat.opacity = on ? 0.95 : 0.1;
-        ao.mat.color.set(on ? 0x7dd3fc : 0x1e3a8a);
       }
       for (const ho of hubObjects) {
         ho.dot.scale.setScalar(loc && sameLoc(ho.loc, loc) ? 2.2 : 1);
@@ -483,14 +542,16 @@ export function Globe3D({
           label: string;
           value?: number;
           type: string;
+          status?: CorridorStatus;
         };
+        const st = d.status ? ` · ${CORRIDOR_LABEL[d.status]}` : "";
         setTip({
           x: e.clientX - r.left,
           y: e.clientY - r.top,
           text:
             d.type === "hub" && d.value != null
               ? `${d.label} · ${d.value} framework${d.value === 1 ? "" : "s"}`
-              : d.label,
+              : `${d.label}${st}`,
         });
       } else {
         renderer.domElement.style.cursor = "grab";
@@ -719,6 +780,18 @@ export function Globe3D({
           <span>many</span>
         </div>
         <div>Hub size/colour = frameworks per jurisdiction</div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 3,
+          }}
+        >
+          <span style={{ color: "#10b981" }}>●</span> cleared
+          <span style={{ color: "#f59e0b" }}>●</span> approval
+          <span style={{ color: "#ef4444" }}>●</span> blocked
+        </div>
       </div>
 
       {/* Snapshot */}
