@@ -31,6 +31,8 @@ export type GlobeSelection = {
   value?: number;
   status?: CorridorStatus;
   dataCategories?: string[];
+  fromLabel?: string;
+  toLabel?: string;
 };
 
 /** Fallback hubs (used when no data-driven markers are supplied). */
@@ -806,6 +808,8 @@ export function Globe3D({
           value: d.value,
           status: d.status,
           dataCategories: d.dataCategories,
+          fromLabel: d.fromLabel,
+          toLabel: d.toLabel,
         });
       } else if (!hit) {
         emphasizeHub(null);

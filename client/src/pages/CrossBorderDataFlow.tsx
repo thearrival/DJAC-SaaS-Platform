@@ -40,8 +40,12 @@ export default function CrossBorderDataFlow() {
   const matrixQ = trpc.crossBorderFlow.matrix.useQuery();
   const jurisdictionsQ = trpc.crossBorderFlow.jurisdictions.useQuery();
 
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [targetFilter, setTargetFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>(
+    () => new URLSearchParams(window.location.search).get("source") ?? "all"
+  );
+  const [targetFilter, setTargetFilter] = useState<string>(
+    () => new URLSearchParams(window.location.search).get("target") ?? "all"
+  );
   const [riskFilter, setRiskFilter] = useState<string>("all");
   const [selectedSource, setSelectedSource] = useState<string>("");
   const [selectedTarget, setSelectedTarget] = useState<string>("");

@@ -79,3 +79,53 @@ export function buildMarkersFromFrameworks(
     };
   });
 }
+
+/** Jurisdiction names recognised by the Cross-Border Data-Flow matrix. */
+const DATA_FLOW_JURISDICTIONS = new Set([
+  "EU",
+  "China",
+  "Saudi Arabia",
+  "US",
+  "United Arab Emirates",
+  "Singapore",
+  "Brazil",
+  "India",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Japan",
+  "South Korea",
+  "South Africa",
+  "Mexico",
+  "Qatar",
+  "Kuwait",
+  "Bahrain",
+  "Thailand",
+  "Indonesia",
+  "Malaysia",
+  "Philippines",
+  "Vietnam",
+  "Nigeria",
+  "Kenya",
+  "Oman",
+  "Jordan",
+  "Egypt",
+]);
+
+/** Globe (short) label → data-flow jurisdiction name. */
+const DATA_FLOW_ALIASES: Record<string, string> = {
+  "European Union": "EU",
+  "United States": "US",
+  UAE: "United Arab Emirates",
+  UK: "United Kingdom",
+};
+
+/**
+ * Resolve a globe hub label to a Cross-Border Data-Flow jurisdiction name,
+ * or null when the label has no counterpart in the data-flow matrix.
+ */
+export function toDataFlowJurisdiction(label?: string): string | null {
+  if (!label) return null;
+  const mapped = DATA_FLOW_ALIASES[label] ?? label;
+  return DATA_FLOW_JURISDICTIONS.has(mapped) ? mapped : null;
+}

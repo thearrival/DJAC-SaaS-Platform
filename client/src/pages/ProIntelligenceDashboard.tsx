@@ -20,7 +20,10 @@ import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SinoGulfArchitecture } from "@/components/SinoGulfArchitecture";
 import { Globe3D, GLOBE_ARCS, type CorridorStatus } from "@/components/Globe3D";
-import { buildMarkersFromFrameworks } from "@/components/globeData";
+import {
+  buildMarkersFromFrameworks,
+  toDataFlowJurisdiction,
+} from "@/components/globeData";
 import { AIOrchestrationFeed } from "@/components/AIOrchestrationFeed";
 import { RegulatoryPulseMatrix } from "@/components/RegulatoryPulseMatrix";
 import { Badge } from "@/components/ui/badge";
@@ -1107,6 +1110,8 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     value?: number;
     status?: CorridorStatus;
     dataCategories?: string[];
+    fromLabel?: string;
+    toLabel?: string;
   } | null>(null);
   const [corridorFilter, setCorridorFilter] = useState<CorridorStatus | "all">(
     "all"
@@ -1854,6 +1859,8 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   value: sel.value,
                   status: sel.status,
                   dataCategories: sel.dataCategories,
+                  fromLabel: sel.fromLabel,
+                  toLabel: sel.toLabel,
                 });
               }}
             />
@@ -2008,7 +2015,19 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate("/cross-border-data-flow")}
+                      onClick={() => {
+                        const src = toDataFlowJurisdiction(globeSel.fromLabel);
+                        const tgt = toDataFlowJurisdiction(globeSel.toLabel);
+                        if (src && tgt && src !== tgt) {
+                          navigate(
+                            `/cross-border-data-flow?source=${encodeURIComponent(
+                              src
+                            )}&target=${encodeURIComponent(tgt)}`
+                          );
+                        } else {
+                          navigate("/cross-border-data-flow");
+                        }
+                      }}
                     >
                       Open analysis
                     </Button>
