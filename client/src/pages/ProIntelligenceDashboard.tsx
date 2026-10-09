@@ -1114,26 +1114,44 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     [globeSel]
   );
 
-  // Deep-link: apply ?jurisdiction=… on load…
+  // Deep-link: apply ?jurisdiction/?status/?category/?whatif on load (once).
+  const globeHydratedRef = useRef(false);
   useEffect(() => {
-    const j = new URLSearchParams(window.location.search).get("jurisdiction");
-    if (j && globeMarkers.some(m => (m.id ?? m.label) === j)) {
+    if (globeHydratedRef.current || globeMarkers.length === 0) return;
+    globeHydratedRef.current = true;
+    const sp = new URLSearchParams(window.location.search);
+    const j = sp.get("jurisdiction");
+    if (j) {
       const m = globeMarkers.find(x => (x.id ?? x.label) === j);
-      setGlobeSel({
-        type: "hub",
-        id: j,
-        label: m?.label ?? j,
-        value: m?.value,
-      });
+      if (m)
+        setGlobeSel({
+          type: "hub",
+          id: j,
+          label: m.label ?? j,
+          value: m.value,
+        });
     }
+    const st = sp.get("status");
+    if (st && ["cleared", "approval", "blocked"].includes(st)) {
+      setCorridorFilter(st as CorridorStatus);
+    }
+    const cat = sp.get("category");
+    if (cat) setCategoryFilter(cat);
+    if (sp.get("whatif") === "1") setWhatIf(true);
   }, [globeMarkers]);
-  // …and reflect the selection back into the URL so views are shareable.
+  // …and reflect selection + filters back into the URL so views are shareable.
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (globeSel) url.searchParams.set("jurisdiction", globeSel.id);
-    else url.searchParams.delete("jurisdiction");
+    const set = (k: string, v: string | null) => {
+      if (v) url.searchParams.set(k, v);
+      else url.searchParams.delete(k);
+    };
+    set("jurisdiction", globeSel?.type === "hub" ? globeSel.id : null);
+    set("status", corridorFilter !== "all" ? corridorFilter : null);
+    set("category", categoryFilter !== "all" ? categoryFilter : null);
+    set("whatif", whatIf ? "1" : null);
     window.history.replaceState({}, "", url.toString());
-  }, [globeSel]);
+  }, [globeSel, corridorFilter, categoryFilter, whatIf]);
 
   const liveJobCount = useMemo(() => {
     if (!jobsQuery.data) return 0;
