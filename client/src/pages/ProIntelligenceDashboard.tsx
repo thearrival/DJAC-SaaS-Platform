@@ -1000,6 +1000,14 @@ type GlobeViewPreset = {
 
 const GLOBE_PRESET_KEY = "djac.globe.presets.v1";
 
+const CORRIDOR_SORTS = [
+  ["default", "Default"],
+  ["risk", "Risk"],
+  ["volume", "Volume"],
+  ["name", "A–Z"],
+] as const;
+type CorridorSort = (typeof CORRIDOR_SORTS)[number][0];
+
 function loadGlobePresets(): GlobeViewPreset[] {
   try {
     const raw = localStorage.getItem(GLOBE_PRESET_KEY);
@@ -1149,6 +1157,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const [compare, setCompare] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [highRiskOnly, setHighRiskOnly] = useState(false);
+  const [corridorSort, setCorridorSort] = useState<CorridorSort>("default");
   const [presets, setPresets] = useState<GlobeViewPreset[]>(loadGlobePresets);
   const persistPresets = (next: GlobeViewPreset[]) => {
     setPresets(next);
@@ -1212,6 +1221,32 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     }
     return { hubs: globeMarkers.length, corridors: GLOBE_ARCS.length, ...c };
   }, [globeMarkers.length, whatIf]);
+  const sortedCorridorList = useMemo(() => {
+    const list = [...GLOBE_ARCS];
+    const riskRank: Record<string, number> = {
+      blocked: 0,
+      approval: 1,
+      cleared: 2,
+    };
+    const volRank: Record<string, number> = { high: 0, medium: 1, low: 2 };
+    const eff = (a: (typeof GLOBE_ARCS)[number]) =>
+      whatIf && a.status === "approval" ? "blocked" : a.status;
+    if (corridorSort === "risk")
+      list.sort(
+        (a, b) =>
+          (riskRank[eff(a) ?? "cleared"] ?? 3) -
+          (riskRank[eff(b) ?? "cleared"] ?? 3)
+      );
+    else if (corridorSort === "volume")
+      list.sort(
+        (a, b) =>
+          (volRank[a.volume ?? "medium"] ?? 3) -
+          (volRank[b.volume ?? "medium"] ?? 3)
+      );
+    else if (corridorSort === "name")
+      list.sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""));
+    return list;
+  }, [corridorSort, whatIf]);
   const compareData = useMemo(
     () =>
       compare.map(j => {
@@ -2585,7 +2620,32 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             <span style={{ fontSize: 11, color: "#94a3b8" }}>
               {t("proIntel.corridorList", "Cross-border corridors")}:
             </span>
-            {GLOBE_ARCS.map(a => {
+            <span style={{ fontSize: 11, color: "#94a3b8" }}>
+              {t("proIntel.sortBy", "Sort")}:
+            </span>
+            {CORRIDOR_SORTS.map(([k, lab]) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={corridorSort === k}
+                onClick={() => setCorridorSort(k)}
+                style={{
+                  fontSize: 10,
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                  cursor: "pointer",
+                  border: `1px solid ${
+                    corridorSort === k ? C.cyan : "rgba(148,163,184,0.3)"
+                  }`,
+                  background:
+                    corridorSort === k ? `${C.cyan}22` : "rgba(2,10,25,0.5)",
+                  color: corridorSort === k ? C.cyan : "#9fb4d4",
+                }}
+              >
+                {lab}
+              </button>
+            ))}
+            {sortedCorridorList.map(a => {
               const id = a.label ?? "";
               const active = globeSel?.type === "arc" && globeSel.id === id;
               const col = a.status
