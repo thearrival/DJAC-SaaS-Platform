@@ -131,6 +131,17 @@ export async function getDb() {
       `[Database] Connection unavailable (attempt #${_consecutiveFailures}):`,
       String(error)
     );
+    // Crucial: end the failed pool. A pool that failed mid-connect can hold a
+    // half-open client; leaving it referenced (but unreachable) pinned a
+    // Supavisor session slot (hard limit: 15) on every retry and worsened the
+    // exhaustion it was reacting to.
+    if (_pool) {
+      try {
+        await _pool.end();
+      } catch {
+        /* already broken — ignore */
+      }
+    }
     _pool = null;
     _db = null;
     return null;
