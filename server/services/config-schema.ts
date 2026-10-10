@@ -155,11 +155,11 @@ export const parsedEnv = {
     process.env.DATABASE_POOL_SIZE,
     // Serverless (Vercel) runs many short-lived instances, each of which used to
     // open up to 25 connections against the shared Supabase pooler. A burst of
-    // instances exhausted the pooler ("max clients reached in session mode"),
-    // surfacing a database error to users. Each instance only handles one
-    // request at a time, so a small per-instance pool is correct and leaves the
-    // pooler budget for scale-out.
-    _isProduction ? 2 : 5,
+    // instances exhausted the pooler ("max clients reached in session mode",
+    // hard limit: 15), surfacing a database error to users. Each instance only
+    // handles one request at a time, so a single per-instance connection is
+    // correct and leaves the pooler budget for scale-out.
+    _isProduction ? 1 : 5,
     1,
     100
   ),

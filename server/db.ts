@@ -102,8 +102,12 @@ export async function getDb() {
     _pool = new pg.Pool({
       connectionString: sslUrl,
       max: connectionLimit,
-      idleTimeoutMillis: 30_000,
+      idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 5_000,
+      // Serverless: release idle clients promptly and let the process exit when
+      // the pool empties, so short-lived instances don't pin the shared
+      // Supavisor session pooler (hard client limit: 15).
+      allowExitOnIdle: true,
       statement_timeout: 30_000,
     });
 
