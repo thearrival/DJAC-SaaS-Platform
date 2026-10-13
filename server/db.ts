@@ -13,6 +13,7 @@ let _consecutiveFailures = 0;
 const DB_RETRY_BACKOFF_MIN_MS = 1_000;
 const DB_RETRY_BACKOFF_MAX_MS = 60_000;
 let devUserOverride: Partial<User> = {};
+let _databaseUrlOverride: string | null = null;
 
 function buildDevBypassUser(): User | null {
   if (!ENV.devAuthBypass) {
@@ -76,7 +77,30 @@ async function verifyPoolAlive(pool: pg.Pool): Promise<boolean> {
   }
 }
 
-export async function getDb() {
+function isSessionPoolerExhausted(error: unknown): boolean {
+  const msg = String(error ?? "");
+  return /EMAXCONNSESSION|max clients reached in session mode/i.test(msg);
+}
+
+/**
+ * Supabase's Supavisor exposes a transaction-mode pooler on port 6543 that
+ * multiplexes effectively unlimited clients. When the session pooler (port
+ * 5432, hard limit of 15 clients) is saturated, transparently rewrite the URL
+ * to the transaction pooler so serverless instances never exhaust it.
+ */
+function toTransactionPoolerUrl(databaseUrl: string): string | null {
+  try {
+    const u = new URL(databaseUrl);
+    if (!/pooler\.supabase\.com$/i.test(u.hostname)) return null;
+    if (u.port && u.port !== "5432") return null;
+    u.port = "6543";
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+export async function getDb(overrideUrl?: string) {
   if (_db && _pool) {
     const alive = await verifyPoolAlive(_pool);
     if (!alive) {
@@ -87,7 +111,7 @@ export async function getDb() {
     }
   }
 
-  const databaseUrl = ENV.databaseUrl;
+  const databaseUrl = overrideUrl ?? _databaseUrlOverride ?? ENV.databaseUrl;
   if (!databaseUrl) return null;
 
   const now = Date.now();
@@ -98,6 +122,7 @@ export async function getDb() {
   try {
     const connectionLimit = ENV.databasePoolSize;
     const sslUrl = fixSslMode(databaseUrl);
+    const isTransactionPooler = /:6543\b/.test(sslUrl);
 
     _pool = new pg.Pool({
       connectionString: sslUrl,
@@ -108,7 +133,12 @@ export async function getDb() {
       // the pool empties, so short-lived instances don't pin the shared
       // Supavisor session pooler (hard client limit: 15).
       allowExitOnIdle: true,
-      statement_timeout: 30_000,
+      // Transaction mode (port 6543) rejects session-level startup parameters
+      // and must not use named prepared statements, so swap statement_timeout
+      // for prepare:false.
+      ...(isTransactionPooler
+        ? { prepare: false }
+        : { statement_timeout: 30_000 }),
     });
 
     _pool.on("error", (err: Error) => {
@@ -121,7 +151,11 @@ export async function getDb() {
 
     _db = drizzle(_pool);
     _consecutiveFailures = 0;
-    console.info(`[Database] Pool created — max=${connectionLimit}`);
+    console.info(
+      `[Database] Pool created — max=${connectionLimit}${
+        isTransactionPooler ? " (transaction pooler)" : ""
+      }`
+    );
     _lastDbCheckFailedAt = 0;
     return _db;
   } catch (error) {
@@ -144,6 +178,22 @@ export async function getDb() {
     }
     _pool = null;
     _db = null;
+
+    // Fail over to the transaction pooler when the session pooler is saturated.
+    if (!overrideUrl && isSessionPoolerExhausted(error)) {
+      const txUrl = toTransactionPoolerUrl(ENV.databaseUrl ?? "");
+      if (txUrl) {
+        _databaseUrlOverride = txUrl;
+        console.warn(
+          "[Database] Session pooler saturated — switched to the transaction pooler (port 6543)"
+        );
+        return getDb(txUrl);
+      }
+    }
+    // The transaction pooler also failed — fall back to the session URL.
+    if (overrideUrl) {
+      _databaseUrlOverride = null;
+    }
     return null;
   }
 }
