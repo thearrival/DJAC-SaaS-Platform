@@ -1019,10 +1019,10 @@ function loadGlobePresets(): GlobeViewPreset[] {
   }
 }
 
-function exportCorridorsCsv() {
+function exportCorridorsCsv(arcs: typeof GLOBE_ARCS) {
   const rows: string[][] = [
     ["Corridor", "From", "To", "Status", "Volume", "Data categories"],
-    ...GLOBE_ARCS.map(a => [
+    ...arcs.map(a => [
       a.label ?? "",
       a.from.join(" "),
       a.to.join(" "),
@@ -2270,7 +2270,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
             </button>
             <button
               type="button"
-              onClick={exportCorridorsCsv}
+              onClick={() => exportCorridorsCsv(sortedCorridorList)}
               style={{
                 fontSize: 11,
                 padding: "3px 10px",
