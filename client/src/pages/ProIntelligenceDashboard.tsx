@@ -1222,7 +1222,17 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     return { hubs: globeMarkers.length, corridors: GLOBE_ARCS.length, ...c };
   }, [globeMarkers.length, whatIf]);
   const sortedCorridorList = useMemo(() => {
-    const list = [...GLOBE_ARCS];
+    const list = GLOBE_ARCS.filter(a => {
+      const eff = whatIf && a.status === "approval" ? "blocked" : a.status;
+      if (corridorFilter !== "all" && eff !== corridorFilter) return false;
+      if (highRiskOnly && eff === "cleared") return false;
+      if (
+        categoryFilter !== "all" &&
+        !(a.dataCategories ?? []).includes(categoryFilter)
+      )
+        return false;
+      return true;
+    });
     const riskRank: Record<string, number> = {
       blocked: 0,
       approval: 1,
@@ -1246,7 +1256,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     else if (corridorSort === "name")
       list.sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""));
     return list;
-  }, [corridorSort, whatIf]);
+  }, [corridorSort, whatIf, corridorFilter, categoryFilter, highRiskOnly]);
   const compareData = useMemo(
     () =>
       compare.map(j => {
