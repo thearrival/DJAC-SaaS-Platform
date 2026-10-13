@@ -1158,6 +1158,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [highRiskOnly, setHighRiskOnly] = useState(false);
   const [corridorSort, setCorridorSort] = useState<CorridorSort>("default");
+  const [copied, setCopied] = useState(false);
   const [presets, setPresets] = useState<GlobeViewPreset[]>(loadGlobePresets);
   const persistPresets = (next: GlobeViewPreset[]) => {
     setPresets(next);
@@ -1313,6 +1314,11 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     const rg = sp.get("region");
     if (rg) setRegionFilter(rg);
     if (sp.get("whatif") === "1") setWhatIf(true);
+    if (sp.get("highrisk") === "1") setHighRiskOnly(true);
+    const srt = sp.get("sort");
+    if (srt && CORRIDOR_SORTS.some(([k]) => k === srt)) {
+      setCorridorSort(srt as CorridorSort);
+    }
   }, [globeMarkers]);
   // …and reflect selection + filters back into the URL so views are shareable.
   useEffect(() => {
@@ -1326,8 +1332,18 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     set("category", categoryFilter !== "all" ? categoryFilter : null);
     set("region", regionFilter !== "all" ? regionFilter : null);
     set("whatif", whatIf ? "1" : null);
+    set("highrisk", highRiskOnly ? "1" : null);
+    set("sort", corridorSort !== "default" ? corridorSort : null);
     window.history.replaceState({}, "", url.toString());
-  }, [globeSel, corridorFilter, categoryFilter, regionFilter, whatIf]);
+  }, [
+    globeSel,
+    corridorFilter,
+    categoryFilter,
+    regionFilter,
+    whatIf,
+    highRiskOnly,
+    corridorSort,
+  ]);
 
   // Esc clears the current selection.
   useEffect(() => {
@@ -2290,6 +2306,29 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               }}
             >
               {t("proIntel.copySummary", "Copy summary")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void navigator.clipboard?.writeText(window.location.href);
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 1500);
+              }}
+              style={{
+                fontSize: 11,
+                padding: "3px 10px",
+                borderRadius: 999,
+                cursor: "pointer",
+                border: `1px solid ${
+                  copied ? C.cyan : "rgba(148,163,184,0.3)"
+                }`,
+                background: copied ? `${C.cyan}22` : "rgba(2,10,25,0.5)",
+                color: copied ? C.cyan : "#9fb4d4",
+              }}
+            >
+              {copied
+                ? t("proIntel.copied", "Copied!")
+                : t("proIntel.copyLink", "Copy link")}
             </button>
             <button
               type="button"
