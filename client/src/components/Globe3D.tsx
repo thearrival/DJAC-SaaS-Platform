@@ -189,6 +189,7 @@ export function Globe3D({
   autoRotate,
   highRiskOnly,
   selectedArc,
+  reportArcs,
   onSelect,
   className,
 }: {
@@ -204,6 +205,8 @@ export function Globe3D({
   autoRotate?: boolean;
   highRiskOnly?: boolean;
   selectedArc?: { from: [number, number]; to: [number, number] } | null;
+  /** Arcs to summarise in the exported report (defaults to all arcs). */
+  reportArcs?: GlobeArc[];
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
 }) {
@@ -1095,13 +1098,14 @@ export function Globe3D({
     ctx.fillText(new Date().toISOString().slice(0, 10), x, y);
     y += Math.round(W * 0.075);
     const c = { cleared: 0, approval: 0, blocked: 0 };
-    for (const a of arcs) {
+    const reportList = reportArcs ?? arcs;
+    for (const a of reportList) {
       const eff = whatIf && a.status === "approval" ? "blocked" : a.status;
       if (eff) c[eff as keyof typeof c]++;
     }
     const rows: Array<[string, string, string]> = [
       ["Regulatory hubs", String(markers.length), "#9bd6ff"],
-      ["Cross-border corridors", String(arcs.length), "#9bd6ff"],
+      ["Cross-border corridors", String(reportList.length), "#9bd6ff"],
       ["Cleared", String(c.cleared), "#10b981"],
       ["Approval required", String(c.approval), "#f59e0b"],
       ["Blocked", String(c.blocked), "#ef4444"],

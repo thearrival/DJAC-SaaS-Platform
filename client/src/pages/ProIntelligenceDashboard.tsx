@@ -1961,6 +1961,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               showLabels={showLabels}
               autoRotate={autoRotate}
               highRiskOnly={highRiskOnly}
+              reportArcs={sortedCorridorList}
               selectedArc={selectedArc}
               onSelect={sel => {
                 if (compareMode && sel.type === "hub") {
