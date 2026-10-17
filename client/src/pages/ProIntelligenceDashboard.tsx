@@ -1318,6 +1318,16 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
         hub: globeMarkers.find(m => (m.label ?? m.id) === l) ?? null,
       }));
   }, [globeSel, globeMarkers]);
+  const hubCorridors = useMemo(() => {
+    if (!globeSel || globeSel.type !== "hub") return [];
+    const hub = globeMarkers.find(m => (m.id ?? m.label) === globeSel.id);
+    if (!hub) return [];
+    const eq = (a: [number, number], b: [number, number]) =>
+      Math.abs(a[0] - b[0]) < 0.01 && Math.abs(a[1] - b[1]) < 0.01;
+    return GLOBE_ARCS.filter(
+      a => eq(a.from, hub.location) || eq(a.to, hub.location)
+    );
+  }, [globeSel, globeMarkers]);
 
   // Deep-link: apply ?jurisdiction/?status/?category/?whatif on load (once).
   const globeHydratedRef = useRef(false);
@@ -2142,34 +2152,94 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                 </div>
 
                 {globeSel.type === "hub" ? (
-                  <ul
-                    style={{
-                      listStyle: "none",
-                      margin: 0,
-                      padding: 0,
-                      display: "grid",
-                      gap: 8,
-                    }}
-                  >
-                    {selectedFrameworks.map(f => (
-                      <li
-                        key={f.code}
-                        style={{ display: "flex", gap: 8, fontSize: 13 }}
-                      >
-                        <span
+                  <>
+                    <ul
+                      style={{
+                        listStyle: "none",
+                        margin: 0,
+                        padding: 0,
+                        display: "grid",
+                        gap: 8,
+                      }}
+                    >
+                      {selectedFrameworks.map(f => (
+                        <li
+                          key={f.code}
+                          style={{ display: "flex", gap: 8, fontSize: 13 }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "ui-monospace, monospace",
+                              fontSize: 11,
+                              color: C.cyan,
+                              minWidth: 78,
+                            }}
+                          >
+                            {f.code}
+                          </span>
+                          <span style={{ color: "#9fb4d4" }}>{f.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {hubCorridors.length > 0 && (
+                      <div style={{ marginTop: 14 }}>
+                        <div
                           style={{
-                            fontFamily: "ui-monospace, monospace",
                             fontSize: 11,
-                            color: C.cyan,
-                            minWidth: 78,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                            color: "#94a3b8",
+                            marginBottom: 6,
                           }}
                         >
-                          {f.code}
-                        </span>
-                        <span style={{ color: "#9fb4d4" }}>{f.name}</span>
-                      </li>
-                    ))}
-                  </ul>
+                          {t(
+                            "proIntel.connectedCorridors",
+                            "Connected corridors"
+                          )}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 6,
+                          }}
+                        >
+                          {hubCorridors.map(a => {
+                            const id = a.label ?? "";
+                            const col = a.status
+                              ? CORRIDOR_STATUS_META[a.status].color
+                              : "#38bdf8";
+                            return (
+                              <button
+                                key={id}
+                                type="button"
+                                onClick={() =>
+                                  setGlobeSel({
+                                    type: "arc",
+                                    id,
+                                    label: id,
+                                    status: a.status,
+                                    dataCategories: a.dataCategories,
+                                  })
+                                }
+                                style={{
+                                  fontSize: 11,
+                                  padding: "3px 9px",
+                                  borderRadius: 999,
+                                  cursor: "pointer",
+                                  border: "1px solid rgba(148,163,184,0.3)",
+                                  background: "rgba(2,10,25,0.5)",
+                                  color: "#9fb4d4",
+                                }}
+                              >
+                                <span style={{ color: col }}>●</span> {id}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div>
                     {globeSel.dataCategories?.length ? (
