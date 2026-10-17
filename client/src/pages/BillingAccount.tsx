@@ -421,6 +421,9 @@ export default function BillingAccount() {
   const statusQuery = trpc.billing.getSubscriptionStatus.useQuery(undefined, {
     enabled: isLoggedIn,
   });
+  const entitlementsQuery = trpc.billing.getEntitlements.useQuery(undefined, {
+    enabled: isLoggedIn,
+  });
   const portalMutation = trpc.billing.createPortalSession.useMutation({
     onSuccess: data => {
       if (data.portalUrl) window.location.href = data.portalUrl;
@@ -429,6 +432,7 @@ export default function BillingAccount() {
   });
 
   const status = statusQuery.data;
+  const ent = entitlementsQuery.data;
   const orgId = status?.organizationId;
   const historyQuery = trpc.billing.getBillingHistory.useQuery(
     { organizationId: orgId ?? 0 },
@@ -756,6 +760,89 @@ export default function BillingAccount() {
           )}
         </div>
       </div>
+
+      {/* ── Plan Limits ── */}
+      {ent && (
+        <div
+          style={{
+            padding: 20,
+            borderRadius: 14,
+            border: "1px solid var(--djac-border)",
+            background: "var(--djac-card)",
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              marginBottom: 12,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Shield size={14} style={{ color: planMeta.color }} />
+            {t("billing.planLimits", "Plan limits")}
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))",
+              gap: 12,
+            }}
+          >
+            {[
+              [t("billing.limitVendors", "Vendors"), ent.limits.maxVendors],
+              [t("billing.limitSeats", "Seats"), ent.limits.maxSeats],
+              [
+                t("billing.limitFrameworks", "Frameworks"),
+                ent.limits.maxFrameworks,
+              ],
+              [
+                t("billing.limitAiReports", "AI reports / day"),
+                ent.limits.maxAiReportsPerDay,
+              ],
+            ].map(([label, value]) => (
+              <div
+                key={String(label)}
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: "var(--djac-card-hi)",
+                  border: "1px solid var(--djac-border)",
+                }}
+              >
+                <div style={{ fontSize: 11, color: "var(--djac-muted)" }}>
+                  {label}
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{value}</div>
+              </div>
+            ))}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              gap: 16,
+              marginTop: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
+              {t("billing.apiAccess", "API access")}:{" "}
+              {ent.limits.supportsApiAccess ? "Yes" : "—"}
+            </span>
+            <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
+              {t("billing.customReports", "Custom reports")}:{" "}
+              {ent.limits.supportsCustomReports ? "Yes" : "—"}
+            </span>
+            <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
+              {t("billing.prioritySupport", "Priority support")}:{" "}
+              {ent.limits.supportsPrioritySupport ? "Yes" : "—"}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* ── Trial Warning ── */}
       {isTrialActive && trialDays <= 3 && (
