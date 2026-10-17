@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import {
   serializeVendorMultiValue,
   type EnterpriseTechStackComponentInput,
@@ -206,6 +206,22 @@ export async function getVendorProfileById(
     .limit(1);
 
   return rows.length > 0 ? rows[0] : null;
+}
+
+export async function countVendorProfilesForOrg(
+  organizationId: number
+): Promise<number> {
+  const db = await getDb();
+  if (!db) {
+    return Array.from(inMemoryVendors.values()).filter(
+      v => v.organizationId === organizationId
+    ).length;
+  }
+  const [row] = await db
+    .select({ value: count() })
+    .from(vendors)
+    .where(eq(vendors.organizationId, organizationId));
+  return Number(row?.value ?? 0);
 }
 
 export async function createVendorProfile(

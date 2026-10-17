@@ -25,6 +25,7 @@ import {
   recordActivity,
 } from "./control-center-store";
 import {
+  countVendorProfilesForOrg,
   createVendorProfile,
   getVendorProfileById,
   listVendorProfiles,
@@ -32,6 +33,7 @@ import {
   patchVendorBasicFields,
   deleteVendorProfile,
 } from "./vendor-store";
+import { assertVendorCapacity } from "./services/entitlements";
 import { runAssessmentSync, enqueueAssessmentJob } from "./ai/orchestrator";
 import { buildAssessmentCsv } from "./supplier-assessment";
 
@@ -132,6 +134,10 @@ export const vendorRouter = router({
     .input(vendorInputSchema)
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "vendor_assessment", "canCreate");
+      const existingVendors = await countVendorProfilesForOrg(
+        ctx.organizationId
+      );
+      await assertVendorCapacity(ctx.organizationId, existingVendors);
       const startedAt = Date.now();
       const vendor = await createVendorProfile(
         ctx.user.id,

@@ -25,6 +25,7 @@ import { requireModulePermission } from "./_core/permission-guard";
 import { ENV } from "./_core/env";
 import { sendEmail } from "./email";
 import { recordAuditEvent } from "./audit-logger";
+import { assertSeatCapacity } from "./services/entitlements";
 import { randomBytes } from "crypto";
 import {
   getMyOrg,
@@ -146,13 +147,7 @@ export const orgMembersRouter = router({
       }
 
       const activeCount = await countActiveMembers(ctx.organizationId);
-      if (activeCount >= org.maxSeats) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "Seat limit reached. Upgrade your plan to invite more members.",
-        });
-      }
+      await assertSeatCapacity(ctx.organizationId, activeCount);
 
       const isDuplicate = await checkDuplicateInvite(
         ctx.organizationId,

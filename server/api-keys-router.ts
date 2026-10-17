@@ -22,6 +22,7 @@ import {
 import { recordAuditEvent } from "./audit-logger";
 import { requireModulePermission } from "./_core/permission-guard";
 import { listApiKeys, createApiKey, revokeApiKey } from "./api-keys-store";
+import { assertApiAccess } from "./services/entitlements";
 
 const API_KEYS_LIMIT = 20;
 const API_KEYS_WINDOW_MS = 60_000;
@@ -89,6 +90,7 @@ export const apiKeysRouter = router({
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "api_keys", "canCreate");
       const orgId = ctx.organizationId as number;
+      await assertApiAccess(orgId);
       const expiresAt = input.expiresInDays
         ? new Date(Date.now() + input.expiresInDays * 86_400_000)
         : null;

@@ -52,6 +52,7 @@ import {
   isTrialExpired,
   trialEndsAt,
 } from "./services/billing-entitlements";
+import { getOrgEntitlements } from "./services/entitlements";
 
 // ─── Stripe Price Catalog ────────────────────────────────────────────────────
 
@@ -323,6 +324,11 @@ export const billingRouter = router({
       organizationId: org.id,
       organizationName: org.name,
     };
+  }),
+
+  /** Current plan + enforced limits for the caller's organization */
+  getEntitlements: orgProcedure.query(async ({ ctx }) => {
+    return getOrgEntitlements(ctx.organizationId);
   }),
 
   /** Create a Stripe Checkout Session — redirects browser to hosted checkout */
