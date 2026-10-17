@@ -1135,6 +1135,10 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     [globeMarkers]
   );
 
+  const orgQuery = trpc.orgSettings.get.useQuery(undefined, {
+    retry: false,
+    staleTime: 300_000,
+  });
   const [globeSel, setGlobeSel] = useState<{
     type: "hub" | "arc";
     id: string;
@@ -1372,6 +1376,25 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
       setCorridorSort(srt as CorridorSort);
     }
   }, [globeMarkers]);
+  // Tailor the initial view to the organization's primary jurisdiction.
+  // An explicit ?jurisdiction= deep-link always takes precedence.
+  const tailoredRef = useRef(false);
+  useEffect(() => {
+    if (tailoredRef.current) return;
+    const j = orgQuery.data?.primaryJurisdiction;
+    if (!j || j === "Both" || j === "Global" || j === "Other") return;
+    tailoredRef.current = true;
+    if (new URLSearchParams(window.location.search).get("jurisdiction")) return;
+    const m = globeMarkers.find(x => (x.id ?? x.label) === j);
+    if (m) {
+      setGlobeSel({
+        type: "hub",
+        id: j,
+        label: m.label ?? j,
+        value: m.value,
+      });
+    }
+  }, [orgQuery.data, globeMarkers]);
   // …and reflect selection + filters back into the URL so views are shareable.
   useEffect(() => {
     const url = new URL(window.location.href);
