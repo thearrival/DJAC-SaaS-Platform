@@ -1258,6 +1258,28 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
       list.sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""));
     return list;
   }, [corridorSort, whatIf, corridorFilter, categoryFilter, highRiskOnly]);
+  const regionSummary = useMemo(() => {
+    if (regionFilter === "all") return null;
+    const hubs = globeMarkers.filter(m => m.region === regionFilter);
+    const hubSet = new Set(hubs.map(h => h.id ?? h.label ?? ""));
+    const nearest = (loc: [number, number]) => {
+      let best = "";
+      let bd = Infinity;
+      for (const m of globeMarkers) {
+        const d = (m.location[0] - loc[0]) ** 2 + (m.location[1] - loc[1]) ** 2;
+        if (d < bd) {
+          bd = d;
+          best = m.id ?? m.label ?? "";
+        }
+      }
+      return best;
+    };
+    const corridors = GLOBE_ARCS.filter(
+      a => hubSet.has(nearest(a.from)) || hubSet.has(nearest(a.to))
+    );
+    const frameworks = hubs.reduce((s, h) => s + (h.value ?? 0), 0);
+    return { hubs: hubs.length, corridors: corridors.length, frameworks };
+  }, [regionFilter, globeMarkers]);
   const compareData = useMemo(
     () =>
       compare.map(j => {
@@ -1975,6 +1997,31 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   )}
                 </p>
               )}
+            </div>
+          )}
+          {regionSummary && (
+            <div
+              style={{
+                marginBottom: 12,
+                display: "flex",
+                gap: 18,
+                flexWrap: "wrap",
+                alignItems: "center",
+                padding: "8px 14px",
+                borderRadius: 10,
+                border: `1px solid ${C.cyan}33`,
+                background: "rgba(2,10,25,0.5)",
+                fontSize: 12,
+                color: "#cfe3ff",
+              }}
+              aria-label={t("proIntel.regionSummary", "Region summary")}
+            >
+              <span style={{ color: C.cyan, fontWeight: 600 }}>
+                {regionFilter}
+              </span>
+              <span>{regionSummary.hubs} hubs</span>
+              <span>{regionSummary.corridors} corridors</span>
+              <span>{regionSummary.frameworks} frameworks</span>
             </div>
           )}
           <div
