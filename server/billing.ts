@@ -48,6 +48,7 @@ import { eq, desc } from "drizzle-orm";
 import {
   TRIAL_DAYS,
   daysRemainingInTrial,
+  getTierLimits,
   isAccessAllowed,
   isTrialExpired,
   trialEndsAt,
@@ -279,6 +280,7 @@ export const billingRouter = router({
         amountCents,
         label,
         savingsLabel: savingsLabel ?? null,
+        limits: getTierLimits(plan),
       })
     );
   }),

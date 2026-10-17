@@ -73,10 +73,10 @@ const PLANS: PlanConfig[] = [
     },
     features: [
       "5 compliance frameworks (PIPL, CSL, DSL, PDPL, NCA)",
-      "Up to 5 vendor assessments / month",
+      "Up to 10 vendors",
       "AI-powered gap analysis",
       "Basic compliance dashboards",
-      "5 AI compliance reports / month",
+      "Up to 3 AI reports / day",
       "Framework comparison engine",
       "7-day free trial included",
       "Email support",
@@ -84,8 +84,8 @@ const PLANS: PlanConfig[] = [
     limits: {
       users: "3 seats",
       vendors: "10 vendors",
-      reports: "5/month",
-      frameworks: "All 5",
+      reports: "3/day",
+      frameworks: "5",
       support: "Email",
     },
   },
@@ -107,22 +107,22 @@ const PLANS: PlanConfig[] = [
     },
     features: [
       "Everything in Starter",
-      "Unlimited vendor assessments",
+      "Up to 50 vendors",
       "Advanced AI risk scoring & heatmaps",
-      "Unlimited AI compliance reports",
+      "Up to 20 AI reports / day",
       "PDF export with executive summaries",
       "Compliance deadline calendar & alerts",
       "Multi-jurisdiction cross-analysis",
       "Audit trail & interaction logs",
-      "Priority email + chat support",
-      "Team collaboration (up to 10 seats)",
+      "Email + chat support",
+      "Team collaboration (up to 15 seats)",
     ],
     limits: {
-      users: "10 seats",
-      vendors: "Unlimited",
-      reports: "Unlimited",
-      frameworks: "All 5",
-      support: "Priority",
+      users: "15 seats",
+      vendors: "50 vendors",
+      reports: "20/day",
+      frameworks: "20",
+      support: "Email + chat",
     },
   },
   {
@@ -156,7 +156,7 @@ const PLANS: PlanConfig[] = [
     limits: {
       users: "Unlimited",
       vendors: "Unlimited",
-      reports: "Unlimited",
+      reports: "200/day",
       frameworks: "Custom",
       support: "Dedicated",
     },
@@ -215,6 +215,9 @@ export default function Pricing() {
       enabled: isLoggedIn,
     }
   );
+  // Authoritative prices + tier limits from the server.
+  const catalogQuery = trpc.billing.getPriceCatalog.useQuery({});
+  const catalog = catalogQuery.data ?? [];
 
   const createCheckout = trpc.billing.createCheckoutSession.useMutation({
     onSuccess: data => {
@@ -510,7 +513,28 @@ export default function Pricing() {
           }}
         >
           {PLANS.map(plan => {
-            const priceInfo = plan.prices[interval];
+            const catalogEntry = catalog.find(
+              c => c.plan === plan.key && c.interval === interval
+            );
+            const priceInfo = catalogEntry
+              ? {
+                  label: catalogEntry.label,
+                  savings: catalogEntry.savingsLabel ?? undefined,
+                }
+              : plan.prices[interval];
+            const cl = catalogEntry?.limits;
+            const limitBadges: Record<string, string> = cl
+              ? {
+                  users: `${cl.maxSeats} seats`,
+                  vendors: `${cl.maxVendors} vendors`,
+                  reports: `${cl.maxAiReportsPerDay}/day`,
+                  frameworks:
+                    cl.maxFrameworks >= 999
+                      ? "Unlimited"
+                      : `${cl.maxFrameworks}`,
+                  support: cl.supportsPrioritySupport ? "Priority" : "Email",
+                }
+              : plan.limits;
             const isCurrentPlan = currentPlan === plan.key;
             const isPending =
               createCheckout.isPending &&
@@ -647,7 +671,7 @@ export default function Pricing() {
                     border: "1px solid var(--djac-border)",
                   }}
                 >
-                  {Object.entries(plan.limits).map(([k, v]) => (
+                  {Object.entries(limitBadges).map(([k, v]) => (
                     <span
                       key={k}
                       style={{
@@ -659,7 +683,7 @@ export default function Pricing() {
                         border: `1px solid ${plan.color}30`,
                       }}
                     >
-                      {t(`pricing.plan.${plan.key}.limit.${k}`, v)}
+                      {v}
                     </span>
                   ))}
                 </div>
