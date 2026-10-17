@@ -1309,6 +1309,15 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
         : null,
     [globeSel]
   );
+  const corridorEndpoints = useMemo(() => {
+    if (!globeSel || globeSel.type !== "arc") return [];
+    return [globeSel.fromLabel, globeSel.toLabel]
+      .filter((l): l is string => !!l)
+      .map(l => ({
+        label: l,
+        hub: globeMarkers.find(m => (m.label ?? m.id) === l) ?? null,
+      }));
+  }, [globeSel, globeMarkers]);
 
   // Deep-link: apply ?jurisdiction/?status/?category/?whatif on load (once).
   const globeHydratedRef = useRef(false);
@@ -2235,25 +2244,47 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                       )}
                     </>
                   ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const src = toDataFlowJurisdiction(globeSel.fromLabel);
-                        const tgt = toDataFlowJurisdiction(globeSel.toLabel);
-                        if (src && tgt && src !== tgt) {
-                          navigate(
-                            `/cross-border-data-flow?source=${encodeURIComponent(
-                              src
-                            )}&target=${encodeURIComponent(tgt)}`
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const src = toDataFlowJurisdiction(
+                            globeSel.fromLabel
                           );
-                        } else {
-                          navigate("/cross-border-data-flow");
-                        }
-                      }}
-                    >
-                      Open analysis
-                    </Button>
+                          const tgt = toDataFlowJurisdiction(globeSel.toLabel);
+                          if (src && tgt && src !== tgt) {
+                            navigate(
+                              `/cross-border-data-flow?source=${encodeURIComponent(
+                                src
+                              )}&target=${encodeURIComponent(tgt)}`
+                            );
+                          } else {
+                            navigate("/cross-border-data-flow");
+                          }
+                        }}
+                      >
+                        Open analysis
+                      </Button>
+                      {corridorEndpoints.map(e =>
+                        e.hub ? (
+                          <Button
+                            key={e.label}
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              navigate(
+                                `/global-registry?jurisdiction=${encodeURIComponent(
+                                  e.hub?.id ?? e.label
+                                )}`
+                              )
+                            }
+                          >
+                            {e.label} frameworks
+                          </Button>
+                        ) : null
+                      )}
+                    </>
                   )}
                   <Button
                     variant="ghost"
