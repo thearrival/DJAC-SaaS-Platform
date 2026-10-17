@@ -36,6 +36,7 @@ const DevComponentShowcase = import.meta.env.DEV
   : null;
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const DashboardEnhanced = lazy(() => import("./pages/DashboardEnhanced"));
+const CompanyProfile = lazy(() => import("./pages/CompanyProfile"));
 const FrameworkAnalysis = lazy(() => import("./pages/FrameworkAnalysis"));
 const VendorAssessment = lazy(() => import("./pages/VendorAssessment"));
 const ClientWorkspace = lazy(() => import("./pages/ClientWorkspace"));
@@ -442,6 +443,9 @@ function Router() {
             </Route>
             <Route path={"/get-started"}>
               <OnboardingQuestionnaire />
+            </Route>
+            <Route path={"/company-profile"}>
+              <CompanyProfile />
             </Route>
             <Route path={"/saas-metrics"}>
               <FeatureGate plan="enterprise" feature="SaaS Metrics">

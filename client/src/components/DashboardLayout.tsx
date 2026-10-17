@@ -595,37 +595,58 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
       staleTime: 60_000,
     }
   );
+  const orgQuery = trpc.orgSettings.get.useQuery(undefined, {
+    retry: false,
+    staleTime: 60_000,
+  });
+
+  const isAdmin = isSuperAdmin || isPlatformAdmin;
+
+  // Lightweight company-profile gate: platform data stays locked until the
+  // organization supplies the name + industry the workspace personalises around.
+  const isOnCompanyProfile = currentPath === "/company-profile";
+  const orgComplete = orgQuery.data
+    ? orgQuery.data.name?.trim().length >= 2 && !!orgQuery.data.industry?.trim()
+    : true;
+  const needsCompanyProfile =
+    !isAdmin &&
+    !orgQuery.isLoading &&
+    !orgQuery.isError &&
+    !!orgQuery.data &&
+    !orgComplete &&
+    !isOnCompanyProfile;
 
   // Only recent accounts with no onboarding activity are gated (server-computed),
   // so existing users are never disrupted. Fail open on error.
   const shouldOnboard = data?.shouldOnboard ?? false;
   const isOnGetStartedPage = currentPath === "/get-started";
   const shouldRedirect =
-    !isSuperAdmin &&
-    !isPlatformAdmin &&
+    !isAdmin &&
     !isLoading &&
     !isError &&
     shouldOnboard &&
-    !isOnGetStartedPage;
+    !isOnGetStartedPage &&
+    !needsCompanyProfile;
 
   useEffect(() => {
-    if (shouldRedirect) {
+    if (needsCompanyProfile) {
+      navigate("/company-profile");
+    } else if (shouldRedirect) {
       navigate("/get-started");
     }
-  }, [shouldRedirect, navigate]);
+  }, [needsCompanyProfile, shouldRedirect, navigate]);
 
   // Admin users skip onboarding enforcement
-  if (isSuperAdmin || isPlatformAdmin) return <>{children}</>;
+  if (isAdmin) return <>{children}</>;
 
   // While loading, render children optimistically to avoid flash
-  if (isLoading) return <>{children}</>;
+  if (isLoading || orgQuery.isLoading) return <>{children}</>;
   // On error, allow access (don't block users from the platform)
-  if (isError) return <>{children}</>;
+  if (isError || orgQuery.isError) return <>{children}</>;
 
-  // Otherwise proceed (the redirect, when needed, happens in the effect above).
-  if (!shouldRedirect) return <>{children}</>;
-
-  return null;
+  if (needsCompanyProfile) return null;
+  if (shouldRedirect) return null;
+  return <>{children}</>;
 }
 
 type DashboardLayoutContentProps = {

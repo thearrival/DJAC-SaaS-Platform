@@ -56,6 +56,31 @@ export const orgSettingsRouter = router({
   }),
 
   /**
+   * First-run company-profile capture. Deliberately does NOT require MFA —
+   * these are non-sensitive fields needed to personalise the workspace, and
+   * gating them behind MFA would block brand-new accounts.
+   */
+  saveCompanyProfile: orgAdminProcedure
+    .input(
+      z.object({
+        name: z.string().trim().min(2).max(255),
+        industry: z.string().trim().min(1).max(120),
+        primaryJurisdiction: z.enum(JURISDICTION_VALUES),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.organizationId < 0) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cannot update dev virtual organization",
+        });
+      }
+      await requireModulePermission(ctx, "org_settings", "canEdit");
+      await updateOrgSettings(ctx.organizationId as number, input);
+      return { success: true as const };
+    }),
+
+  /**
    * Update editable fields.  Owner and admin only.
    * Slug and plan are intentionally excluded — those are system-managed.
    */
