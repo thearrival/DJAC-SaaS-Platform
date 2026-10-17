@@ -228,6 +228,22 @@ export default function GlobalRegistry() {
         </div>
       )}
 
+      {summary?.provenance && summary.provenance.stale > 0 && (
+        <div className="flex items-start gap-2 rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm text-foreground">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+          <p className="leading-relaxed">
+            <strong>
+              {summary.provenance.stale} framework citation
+              {summary.provenance.stale === 1 ? "" : "s"} past the review
+              window.
+            </strong>{" "}
+            These entries were verified previously but are due for
+            re-verification against the official regulator. Treat their
+            requirements as provisional until re-confirmed.
+          </p>
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="frameworks">
