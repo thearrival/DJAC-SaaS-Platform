@@ -1354,6 +1354,43 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Keyboard hub traversal: [ and ] step between regulatory hubs.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key !== "[" && e.key !== "]") return;
+      const tgt = e.target as HTMLElement | null;
+      if (
+        tgt &&
+        (tgt.tagName === "INPUT" ||
+          tgt.tagName === "TEXTAREA" ||
+          tgt.tagName === "SELECT" ||
+          tgt.isContentEditable)
+      )
+        return;
+      if (globeMarkers.length === 0) return;
+      e.preventDefault();
+      const ids = globeMarkers.map(m => m.id ?? m.label ?? "");
+      const dir = e.key === "]" ? 1 : -1;
+      const cur = globeSel?.type === "hub" ? ids.indexOf(globeSel.id) : -1;
+      const nextIdx =
+        cur < 0
+          ? dir > 0
+            ? 0
+            : ids.length - 1
+          : (cur + dir + ids.length) % ids.length;
+      const m = globeMarkers[nextIdx];
+      setGlobeSel({
+        type: "hub",
+        id: m.id ?? m.label ?? "",
+        label: m.label ?? m.id ?? "",
+        value: m.value,
+      });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [globeMarkers, globeSel]);
+
   const liveJobCount = useMemo(() => {
     if (!jobsQuery.data) return 0;
     return jobsQuery.data.filter(
