@@ -1328,6 +1328,17 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
       a => eq(a.from, hub.location) || eq(a.to, hub.location)
     );
   }, [globeSel, globeMarkers]);
+  const hubCorridorCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const m of globeMarkers) {
+      const id = m.id ?? m.label ?? "";
+      const eq = (p: [number, number]) =>
+        Math.abs(p[0] - m.location[0]) < 0.01 &&
+        Math.abs(p[1] - m.location[1]) < 0.01;
+      counts[id] = GLOBE_ARCS.filter(a => eq(a.from) || eq(a.to)).length;
+    }
+    return counts;
+  }, [globeMarkers]);
 
   // Deep-link: apply ?jurisdiction/?status/?category/?whatif on load (once).
   const globeHydratedRef = useRef(false);
@@ -2837,6 +2848,12 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                     >
                       {m.label}
                       <span style={{ opacity: 0.55 }}> {m.value ?? 0}</span>
+                      {(hubCorridorCounts[id] ?? 0) > 0 && (
+                        <span style={{ opacity: 0.45 }}>
+                          {" "}
+                          · {hubCorridorCounts[id]}↔
+                        </span>
+                      )}
                     </button>
                   );
                 })}
