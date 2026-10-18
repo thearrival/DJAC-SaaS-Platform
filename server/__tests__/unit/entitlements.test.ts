@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   assertAiReportCapacity,
   assertApiAccess,
+  assertFrameworkCapacity,
   assertSeatCapacity,
   assertVendorCapacity,
 } from "../../services/entitlements";
@@ -33,5 +34,12 @@ describe("entitlements — trial uses Starter limits", () => {
   it("allows AI reports below the daily cap", async () => {
     // No DB in tests → 0 reports used, under the Starter cap of 3.
     await expect(assertAiReportCapacity(1)).resolves.toBeUndefined();
+  });
+
+  it("allows framework selections within the cap and blocks beyond it", async () => {
+    await expect(assertFrameworkCapacity(1, 5)).resolves.toBeUndefined();
+    await expect(assertFrameworkCapacity(1, 6)).rejects.toThrow(
+      /up to 5 frameworks/i
+    );
   });
 });

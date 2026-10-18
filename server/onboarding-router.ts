@@ -19,7 +19,7 @@ import {
   type OnboardingActor,
 } from "./onboarding-service";
 import { getQuestionnaire } from "./services/personalization/engine";
-import { getOrgEntitlements } from "./services/entitlements";
+import { assertFrameworkCapacity } from "./services/entitlements";
 
 function actorFromCtx(ctx: TrpcContext, sessionId?: string): OnboardingActor {
   const rawId = ctx.user?.id ?? 0;
@@ -106,15 +106,10 @@ export const onboardingRouter = router({
         .where(eq(onboardingProgress.userId, ctx.user.id));
 
       if (ctx.organizationId != null && input.responses?.frameworks) {
-        const ent = await getOrgEntitlements(ctx.organizationId);
-        if (input.responses.frameworks.length > ent.limits.maxFrameworks) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: `Your ${
-              ent.plan === "free_trial" ? "trial" : ent.plan
-            } plan supports up to ${ent.limits.maxFrameworks} frameworks. Upgrade to select more.`,
-          });
-        }
+        await assertFrameworkCapacity(
+          ctx.organizationId,
+          input.responses.frameworks.length
+        );
       }
 
       const row = existing[0];

@@ -147,3 +147,16 @@ export async function assertAiReportCapacity(
     });
   }
 }
+
+export async function assertFrameworkCapacity(
+  organizationId: number,
+  selectedCount: number
+): Promise<void> {
+  const ent = await getOrgEntitlements(organizationId);
+  if (selectedCount > ent.limits.maxFrameworks) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: `Your ${planLabel(ent.plan)} plan supports up to ${ent.limits.maxFrameworks} frameworks. Upgrade to select more.`,
+    });
+  }
+}

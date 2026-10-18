@@ -491,6 +491,12 @@ const adminMenuItems: MenuItem[] = [
     path: "/admin-control-center",
   },
   {
+    icon: Shield,
+    labelKey: "layout.menuRegulatoryReview",
+    labelFallback: "Regulatory Review",
+    path: "/regulatory-review",
+  },
+  {
     icon: Activity,
     labelKey: "layout.menuAuditLog",
     labelFallback: "Audit Log",
