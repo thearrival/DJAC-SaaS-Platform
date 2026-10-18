@@ -12,7 +12,6 @@ Allow: /privacy
 Allow: /terms
 Allow: /docs
 Allow: /docs/
-Allow: /demo
 Allow: /hero
 Allow: /invite-accept
 

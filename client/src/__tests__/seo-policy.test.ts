@@ -31,7 +31,6 @@ describe("seoPolicy", () => {
       "/terms",
       "/docs",
       "/docs/getting-started/welcome",
-      "/demo",
       "/hero",
     ]) {
       expect(isPublicPath(p), `${p} should be public`).toBe(true);

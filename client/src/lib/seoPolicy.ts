@@ -21,7 +21,6 @@ const PUBLIC_PATHS = [
   "/privacy",
   "/terms",
   "/docs",
-  "/demo",
   "/hero",
   "/invite-accept",
   "/404",
