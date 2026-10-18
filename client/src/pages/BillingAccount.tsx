@@ -424,6 +424,9 @@ export default function BillingAccount() {
   const entitlementsQuery = trpc.billing.getEntitlements.useQuery(undefined, {
     enabled: isLoggedIn,
   });
+  const usageQuery = trpc.billing.getUsage.useQuery(undefined, {
+    enabled: isLoggedIn,
+  });
   const portalMutation = trpc.billing.createPortalSession.useMutation({
     onSuccess: data => {
       if (data.portalUrl) window.location.href = data.portalUrl;
@@ -433,6 +436,7 @@ export default function BillingAccount() {
 
   const status = statusQuery.data;
   const ent = entitlementsQuery.data;
+  const usage = usageQuery.data;
   const orgId = status?.organizationId;
   const historyQuery = trpc.billing.getBillingHistory.useQuery(
     { organizationId: orgId ?? 0 },
@@ -793,32 +797,70 @@ export default function BillingAccount() {
             }}
           >
             {[
-              [t("billing.limitVendors", "Vendors"), ent.limits.maxVendors],
-              [t("billing.limitSeats", "Seats"), ent.limits.maxSeats],
-              [
-                t("billing.limitFrameworks", "Frameworks"),
-                ent.limits.maxFrameworks,
-              ],
-              [
-                t("billing.limitAiReports", "AI reports / day"),
-                ent.limits.maxAiReportsPerDay,
-              ],
-            ].map(([label, value]) => (
-              <div
-                key={String(label)}
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  background: "var(--djac-card-hi)",
-                  border: "1px solid var(--djac-border)",
-                }}
-              >
-                <div style={{ fontSize: 11, color: "var(--djac-muted)" }}>
-                  {label}
+              {
+                label: t("billing.limitVendors", "Vendors"),
+                limit: ent.limits.maxVendors,
+                used: usage?.vendors,
+              },
+              {
+                label: t("billing.limitSeats", "Seats"),
+                limit: ent.limits.maxSeats,
+                used: usage?.seats,
+              },
+              {
+                label: t("billing.limitFrameworks", "Frameworks"),
+                limit: ent.limits.maxFrameworks,
+                used: undefined,
+              },
+              {
+                label: t("billing.limitAiReports", "AI reports / day"),
+                limit: ent.limits.maxAiReportsPerDay,
+                used: usage?.aiReportsToday,
+              },
+            ].map(({ label, limit, used }) => {
+              const pct =
+                used != null
+                  ? Math.min(100, Math.round((used / Math.max(1, limit)) * 100))
+                  : null;
+              return (
+                <div
+                  key={label}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    background: "var(--djac-card-hi)",
+                    border: "1px solid var(--djac-border)",
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: "var(--djac-muted)" }}>
+                    {label}
+                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 700 }}>
+                    {used != null ? `${used} / ${limit}` : limit}
+                  </div>
+                  {pct != null && (
+                    <div
+                      style={{
+                        height: 4,
+                        borderRadius: 2,
+                        background: "var(--djac-border)",
+                        marginTop: 6,
+                        overflow: "hidden",
+                      }}
+                      aria-hidden="true"
+                    >
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${pct}%`,
+                          background: pct >= 100 ? "#ef4444" : planMeta.color,
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 700 }}>{value}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div
             style={{

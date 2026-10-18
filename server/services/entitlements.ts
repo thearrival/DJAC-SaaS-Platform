@@ -9,6 +9,7 @@
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, gte } from "drizzle-orm";
 import {
+  organizationMembers,
   organizations,
   subscriptions,
   vendorAssessments,
@@ -159,4 +160,37 @@ export async function assertFrameworkCapacity(
       message: `Your ${planLabel(ent.plan)} plan supports up to ${ent.limits.maxFrameworks} frameworks. Upgrade to select more.`,
     });
   }
+}
+
+export type OrgUsage = {
+  vendors: number;
+  seats: number;
+  aiReportsToday: number;
+};
+
+/** Current consumption against the plan's caps, for usage meters. */
+export async function getOrgUsage(organizationId: number): Promise<OrgUsage> {
+  const db = await getDb();
+  if (!db) return { vendors: 0, seats: 0, aiReportsToday: 0 };
+
+  const [v] = await db
+    .select({ value: count() })
+    .from(vendors)
+    .where(eq(vendors.organizationId, organizationId));
+  const [s] = await db
+    .select({ value: count() })
+    .from(organizationMembers)
+    .where(
+      and(
+        eq(organizationMembers.organizationId, organizationId),
+        eq(organizationMembers.status, "active")
+      )
+    );
+  const aiReportsToday = await countAiReportsToday(organizationId);
+
+  return {
+    vendors: Number(v?.value ?? 0),
+    seats: Number(s?.value ?? 0),
+    aiReportsToday,
+  };
 }
