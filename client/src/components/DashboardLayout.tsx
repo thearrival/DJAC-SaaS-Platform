@@ -157,6 +157,12 @@ const menuGroups: MenuGroup[] = [
         path: "/pro-intelligence",
       },
       {
+        icon: ArrowLeftRight,
+        labelKey: "layout.menuTransferChecker",
+        labelFallback: "Transfer Checker",
+        path: "/transfer-checker",
+      },
+      {
         icon: Bell,
         labelKey: "layout.menuRegulatoryChanges",
         labelFallback: "Regulatory Changes",
