@@ -35,6 +35,19 @@ async function postTrpc(path, payload, headers = {}) {
   return asText(response);
 }
 
+async function getTrpc(path, payload, headers = {}) {
+  const input = encodeURIComponent(JSON.stringify({ json: payload }));
+  const response = await fetchWithHint(
+    `${baseUrl}/api/trpc/${path}?input=${input}`,
+    `Unable to reach ${baseUrl}. Start the app server before running smoke checks.`,
+    {
+      method: "GET",
+      headers: { ...headers },
+    }
+  );
+  return asText(response);
+}
+
 async function fetchWithHint(url, hint, init) {
   try {
     return await fetch(url, init);
@@ -166,6 +179,41 @@ async function run() {
   const sessionCookie = (login.setCookie || register.setCookie || "")
     .split(";")[0]
     .trim();
+
+  const entitlements = await getTrpc(
+    "billing.getEntitlements",
+    {},
+    { cookie: sessionCookie }
+  );
+  log("entitlements", entitlements.status, entitlements.text.slice(0, 200));
+  assert(
+    entitlements.status === 200,
+    "billing.getEntitlements should succeed for an authenticated org"
+  );
+  assert(
+    entitlements.text.includes("limits"),
+    "billing.getEntitlements should include plan limits"
+  );
+
+  const usage = await getTrpc(
+    "billing.getUsage",
+    {},
+    { cookie: sessionCookie }
+  );
+  log("usage", usage.status, usage.text.slice(0, 160));
+  assert(usage.status === 200, "billing.getUsage should succeed");
+
+  const entities = await getTrpc(
+    "orgEntities.list",
+    {},
+    { cookie: sessionCookie }
+  );
+  log("entities", entities.status, entities.text.slice(0, 160));
+  assert(entities.status === 200, "orgEntities.list should succeed");
+  assert(
+    entities.text.includes("totals"),
+    "orgEntities.list should include consolidated totals"
+  );
 
   const report = await postTrpc(
     "compliance.report",
