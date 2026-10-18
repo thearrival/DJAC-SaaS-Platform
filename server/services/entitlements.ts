@@ -49,21 +49,39 @@ export async function getOrgEntitlements(
   if (!db) return trialEntitlements(organizationId);
 
   const [org] = await db
-    .select({ plan: organizations.plan })
+    .select({
+      plan: organizations.plan,
+      parentOrganizationId: organizations.parentOrganizationId,
+    })
     .from(organizations)
     .where(eq(organizations.id, organizationId))
     .limit(1);
   if (!org) return trialEntitlements(organizationId);
 
+  // Child entities inherit the parent organization's plan and subscription.
+  let sourceOrgId = organizationId;
+  let sourcePlan = org.plan;
+  if (org.parentOrganizationId) {
+    const [parent] = await db
+      .select({ plan: organizations.plan })
+      .from(organizations)
+      .where(eq(organizations.id, org.parentOrganizationId))
+      .limit(1);
+    if (parent) {
+      sourceOrgId = org.parentOrganizationId;
+      sourcePlan = parent.plan;
+    }
+  }
+
   const [sub] = await db
     .select({ status: subscriptions.status })
     .from(subscriptions)
-    .where(eq(subscriptions.organizationId, organizationId))
+    .where(eq(subscriptions.organizationId, sourceOrgId))
     .orderBy(desc(subscriptions.createdAt))
     .limit(1);
 
   const plan: EffectivePlan =
-    org.plan === "free_trial" ? "free_trial" : (org.plan as PlanTier);
+    sourcePlan === "free_trial" ? "free_trial" : (sourcePlan as PlanTier);
 
   return {
     organizationId,

@@ -529,6 +529,12 @@ const companyMenuItems: MenuItem[] = [
     labelFallback: "Company Dashboard",
     path: "/company/dashboard",
   },
+  {
+    icon: Building2,
+    labelKey: "layout.menuMultiEntity",
+    labelFallback: "Organizations & Entities",
+    path: "/entities",
+  },
 ];
 
 const superAdminMenuItems: MenuItem[] = [

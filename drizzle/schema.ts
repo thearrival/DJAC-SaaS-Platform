@@ -1049,6 +1049,7 @@ export const organizations = pgTable("organizations", {
   billingEmail: varchar("billingEmail", { length: 320 }).notNull(),
   industry: varchar("industry", { length: 120 }),
   primaryJurisdiction: jurisdictionEnum("primaryJurisdiction").default("Both"),
+  parentOrganizationId: integer("parentOrganizationId"),
   stripeCustomerId: varchar("stripeCustomerId", { length: 64 }),
   plan: planEnum("plan").default("free_trial").notNull(),
   trialStartedAt: timestamp("trialStartedAt"),

@@ -39,6 +39,7 @@ const DashboardEnhanced = lazy(() => import("./pages/DashboardEnhanced"));
 const CompanyProfile = lazy(() => import("./pages/CompanyProfile"));
 const RegulatoryReview = lazy(() => import("./pages/RegulatoryReview"));
 const VendorDataFlow = lazy(() => import("./pages/VendorDataFlow"));
+const MultiEntity = lazy(() => import("./pages/MultiEntity"));
 const FrameworkAnalysis = lazy(() => import("./pages/FrameworkAnalysis"));
 const VendorAssessment = lazy(() => import("./pages/VendorAssessment"));
 const ClientWorkspace = lazy(() => import("./pages/ClientWorkspace"));
@@ -454,6 +455,9 @@ function Router() {
             </Route>
             <Route path={"/vendor-data-flow"}>
               <VendorDataFlow />
+            </Route>
+            <Route path={"/entities"}>
+              <MultiEntity />
             </Route>
             <Route path={"/saas-metrics"}>
               <FeatureGate plan="enterprise" feature="SaaS Metrics">

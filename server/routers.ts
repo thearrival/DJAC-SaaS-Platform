@@ -13,6 +13,7 @@ import { roleRouter } from "./role-router";
 import { rbacRouter } from "./rbac-router";
 import { orgMembersRouter } from "./org-members-router";
 import { orgSettingsRouter } from "./org-settings-router";
+import { orgEntitiesRouter } from "./org-entities-router";
 import { scorecardRouter } from "./scorecard-router";
 import { apiKeysRouter } from "./api-keys-router";
 import { remediationRouter } from "./remediation-router";
@@ -52,6 +53,7 @@ export const appRouter = router({
   rbac: rbacRouter,
   orgMembers: orgMembersRouter,
   orgSettings: orgSettingsRouter,
+  orgEntities: orgEntitiesRouter,
   scorecard: scorecardRouter,
   apiKeys: apiKeysRouter,
   remediation: remediationRouter,

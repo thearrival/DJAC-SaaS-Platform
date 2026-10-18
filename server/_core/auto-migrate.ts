@@ -636,6 +636,10 @@ export async function ensureMigrated(): Promise<void> {
         "organizations",
         sql`ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`,
       ],
+      [
+        "organizations",
+        sql`ADD COLUMN IF NOT EXISTS "parentOrganizationId" integer`,
+      ],
       ["organizations", sql`ADD COLUMN IF NOT EXISTS "metadata" text`],
       ["auditLogs", sql`ADD COLUMN IF NOT EXISTS "userId" integer`],
       ["auditLogs", sql`ADD COLUMN IF NOT EXISTS "localUserId" integer`],
