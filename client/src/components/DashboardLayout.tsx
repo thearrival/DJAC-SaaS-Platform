@@ -62,6 +62,7 @@ import {
   LayoutDashboard,
   LogIn,
   LogOut,
+  MessageSquareText,
   PanelLeft,
   Scale,
   Search,
@@ -161,6 +162,12 @@ const menuGroups: MenuGroup[] = [
         labelKey: "layout.menuTransferChecker",
         labelFallback: "Transfer Checker",
         path: "/transfer-checker",
+      },
+      {
+        icon: MessageSquareText,
+        labelKey: "layout.menuComplianceChat",
+        labelFallback: "AI Compliance Chat",
+        path: "/compliance-chat",
       },
       {
         icon: Bell,
