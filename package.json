@@ -24,6 +24,7 @@
     "prod:preflight": "node scripts/production-preflight.mjs",
     "prod:preflight:strict": "node scripts/production-preflight.mjs --fail-on-warn --require-billing",
     "prod:preflight:json": "node scripts/production-preflight.mjs --json",
+    "verify:live": "node scripts/verify-live.mjs",
     "db:doctor": "node scripts/db-doctor.mjs",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "db:migrate": "drizzle-kit migrate",
