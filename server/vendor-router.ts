@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { hasMinRole } from "../shared/const";
 import {
+  parseVendorMultiValue,
   serializeVendorMultiValue,
   vendorCloudProviderValues,
   vendorComplianceStandardValues,
@@ -131,6 +132,63 @@ export const vendorRouter = router({
   list: orgProcedure.query(async ({ ctx }) => {
     await requireModulePermission(ctx, "vendor_assessment", "canView");
     return listVendorProfiles(ctx.user.id, ctx.organizationId);
+  }),
+
+  /**
+   * Vendor data-flow map — aggregates each vendor's regulatory jurisdictions,
+   * data locations and processing activities so the workspace can see where
+   * third-party data actually flows.
+   */
+  dataFlow: orgProcedure.query(async ({ ctx }) => {
+    await requireModulePermission(ctx, "vendor_assessment", "canView");
+    const vendorsList = await listVendorProfiles(
+      ctx.user.id,
+      ctx.organizationId
+    );
+
+    const jurisdictionCounts: Record<string, number> = {};
+    const locationCounts: Record<string, number> = {};
+    const categoryCounts: Record<string, number> = {};
+    const riskCounts: Record<string, number> = {};
+
+    const rows = vendorsList.map(v => {
+      const jurisdictions = parseVendorMultiValue(v.regulatoryJurisdictions);
+      const locations = parseVendorMultiValue(v.dataLocations);
+      const categories = parseVendorMultiValue(v.dataProcessingActivities);
+      for (const j of jurisdictions)
+        jurisdictionCounts[j] = (jurisdictionCounts[j] ?? 0) + 1;
+      for (const l of locations)
+        locationCounts[l] = (locationCounts[l] ?? 0) + 1;
+      for (const c of categories)
+        categoryCounts[c] = (categoryCounts[c] ?? 0) + 1;
+      if (v.riskTier)
+        riskCounts[v.riskTier] = (riskCounts[v.riskTier] ?? 0) + 1;
+      return {
+        id: v.id,
+        name: v.vendorName,
+        riskTier: v.riskTier ?? null,
+        criticality: v.criticalityLevel ?? null,
+        hosting: v.hostingEnvironment ?? null,
+        cloudProvider: v.cloudProvider ?? null,
+        jurisdictions,
+        locations,
+        categories,
+      };
+    });
+
+    const sorted = (rec: Record<string, number>) =>
+      Object.entries(rec)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, count]) => ({ name, count }));
+
+    return {
+      vendors: rows,
+      totalVendors: rows.length,
+      jurisdictionCounts: sorted(jurisdictionCounts),
+      locationCounts: sorted(locationCounts),
+      categoryCounts: sorted(categoryCounts),
+      riskCounts: sorted(riskCounts),
+    };
   }),
 
   create: orgProcedure

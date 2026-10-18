@@ -178,6 +178,12 @@ const menuGroups: MenuGroup[] = [
         path: "/vendor-assessment",
       },
       {
+        icon: ArrowLeftRight,
+        labelKey: "layout.menuVendorDataFlow",
+        labelFallback: "Vendor Data Flow",
+        path: "/vendor-data-flow",
+      },
+      {
         icon: Bot,
         labelKey: "layout.menuProIntelligence",
         labelFallback: "Pro Intelligence",
