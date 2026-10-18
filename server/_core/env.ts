@@ -110,6 +110,7 @@ export const ENV = {
   cookieSecret: parsedEnv.JWT_SECRET,
   cronSecret: parsedEnv.CRON_SECRET,
   databaseUrl: parsedEnv.DATABASE_URL,
+  companyProfileGate: parsedEnv.COMPANY_PROFILE_GATE,
   oAuthServerUrl: parsedEnv.OAUTH_SERVER_URL,
   ownerOpenId: parsedEnv.OWNER_OPEN_ID,
   isProduction: parsedEnv.NODE_ENV === "production",

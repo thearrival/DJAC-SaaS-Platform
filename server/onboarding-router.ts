@@ -20,6 +20,7 @@ import {
 } from "./onboarding-service";
 import { getQuestionnaire } from "./services/personalization/engine";
 import { assertFrameworkCapacity } from "./services/entitlements";
+import { ENV } from "./_core/env";
 
 function actorFromCtx(ctx: TrpcContext, sessionId?: string): OnboardingActor {
   const rawId = ctx.user?.id ?? 0;
@@ -209,9 +210,13 @@ export const onboardingRouter = router({
   getQuestionnaire: protectedProcedure.query(async () => getQuestionnaire()),
 
   /** Server-side state for resume + personalization. */
-  getState: protectedProcedure.query(async ({ ctx }) =>
-    getOnboardingState(actorFromCtx(ctx), ctx.organizationId ?? null)
-  ),
+  getState: protectedProcedure.query(async ({ ctx }) => {
+    const state = await getOnboardingState(
+      actorFromCtx(ctx),
+      ctx.organizationId ?? null
+    );
+    return { ...state, companyProfileGate: ENV.companyProfileGate };
+  }),
 
   /** Persist a single answer idempotently (no duplicate rows on retry). */
   submitAnswer: protectedProcedure

@@ -29,6 +29,14 @@ function strEnv(raw: string | undefined, fallback = ""): string {
   return (raw ?? fallback).trim() || fallback;
 }
 
+function enumEnv<T extends string>(
+  raw: string | undefined,
+  allowed: readonly T[],
+  fallback: T
+): T {
+  return allowed.includes(raw as T) ? (raw as T) : fallback;
+}
+
 // ── Parsed env ─────────────────────────────────────────────────────────────
 export const parsedEnv = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
@@ -162,6 +170,14 @@ export const parsedEnv = {
     _isProduction ? 1 : 5,
     1,
     100
+  ),
+
+  // "all" = every account must supply company details before data renders;
+  // "new" = only new accounts are gated (grandfathers existing accounts).
+  COMPANY_PROFILE_GATE: enumEnv(
+    process.env.COMPANY_PROFILE_GATE,
+    ["all", "new"] as const,
+    "all"
   ),
 
   // ── HTTP / Timeouts ───────────────────────────────────────────────────────

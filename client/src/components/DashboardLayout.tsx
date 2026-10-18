@@ -614,18 +614,23 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
   const orgComplete = orgQuery.data
     ? orgQuery.data.name?.trim().length >= 2 && !!orgQuery.data.industry?.trim()
     : true;
+
+  // Only recent accounts with no onboarding activity are gated (server-computed),
+  // so existing users are never disrupted. Fail open on error.
+  const shouldOnboard = data?.shouldOnboard ?? false;
+  // "all" gates every incomplete profile; "new" grandfathers existing accounts.
+  const gateMode = data?.companyProfileGate ?? "all";
+  const isOnGetStartedPage = currentPath === "/get-started";
+  const companyProfileRequired =
+    gateMode === "all" || (gateMode === "new" && shouldOnboard);
   const needsCompanyProfile =
     !isAdmin &&
     !orgQuery.isLoading &&
     !orgQuery.isError &&
     !!orgQuery.data &&
     !orgComplete &&
-    !isOnCompanyProfile;
-
-  // Only recent accounts with no onboarding activity are gated (server-computed),
-  // so existing users are never disrupted. Fail open on error.
-  const shouldOnboard = data?.shouldOnboard ?? false;
-  const isOnGetStartedPage = currentPath === "/get-started";
+    !isOnCompanyProfile &&
+    companyProfileRequired;
   const shouldRedirect =
     !isAdmin &&
     !isLoading &&
