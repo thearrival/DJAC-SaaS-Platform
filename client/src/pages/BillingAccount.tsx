@@ -437,6 +437,12 @@ export default function BillingAccount() {
   const status = statusQuery.data;
   const ent = entitlementsQuery.data;
   const usage = usageQuery.data;
+  const anyAtLimit =
+    !!ent &&
+    !!usage &&
+    (usage.vendors >= ent.limits.maxVendors ||
+      usage.seats >= ent.limits.maxSeats ||
+      usage.aiReportsToday >= ent.limits.maxAiReportsPerDay);
   const orgId = status?.organizationId;
   const historyQuery = trpc.billing.getBillingHistory.useQuery(
     { organizationId: orgId ?? 0 },
@@ -822,6 +828,7 @@ export default function BillingAccount() {
                 used != null
                   ? Math.min(100, Math.round((used / Math.max(1, limit)) * 100))
                   : null;
+              const atLimit = used != null && used >= limit;
               return (
                 <div
                   key={label}
@@ -858,10 +865,60 @@ export default function BillingAccount() {
                       />
                     </div>
                   )}
+                  {atLimit && (
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: "#ef4444",
+                        marginTop: 4,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {t("billing.limitReached", "Limit reached")}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
+          {anyAtLimit && (
+            <div
+              style={{
+                marginTop: 12,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 12px",
+                borderRadius: 8,
+                background: "rgba(239,68,68,0.1)",
+                border: "1px solid rgba(239,68,68,0.3)",
+                fontSize: 12,
+              }}
+            >
+              <span style={{ color: "#ef4444", fontWeight: 600 }}>
+                {t(
+                  "billing.limitReachedBanner",
+                  "You've reached a plan limit."
+                )}
+              </span>
+              <Link href="/pricing">
+                <button
+                  style={{
+                    padding: "5px 12px",
+                    borderRadius: 6,
+                    background: "linear-gradient(135deg,#d900ff,#d900ff)",
+                    color: "var(--djac-text)",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  {t("billing.upgradePlan", "Upgrade plan")}
+                </button>
+              </Link>
+            </div>
+          )}
           <div
             style={{
               display: "flex",
