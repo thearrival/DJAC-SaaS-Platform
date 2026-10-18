@@ -94,7 +94,18 @@ try {
     );
   }
 
-  for (const path of ["/", "/pricing", "/docs", "/login", "/signup"]) {
+  for (const path of [
+    "/",
+    "/pricing",
+    "/docs",
+    "/login",
+    "/signup",
+    "/transfer-checker",
+    "/compliance-chat",
+    "/vendor-data-flow",
+    "/entities",
+    "/regulatory-review",
+  ]) {
     const code = await getStatus(path);
     record(`page · ${path}`, code === 200, `HTTP ${code}`);
   }
