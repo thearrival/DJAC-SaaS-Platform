@@ -102,6 +102,10 @@ export default function GlobalRegistry() {
   const frameworksQ = trpc.compliance.globalFrameworks.useQuery();
   const jurisdictionsQ = trpc.compliance.globalJurisdictions.useQuery();
   const categoriesQ = trpc.compliance.globalFrameworkCategories.useQuery();
+  const orgQuery = trpc.orgSettings.get.useQuery(undefined, {
+    retry: false,
+    staleTime: 300_000,
+  });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [regionFilter, setRegionFilter] = useState<string>("all");
@@ -109,12 +113,19 @@ export default function GlobalRegistry() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("frameworks");
 
-  // Deep-link: pre-filter by jurisdiction from ?jurisdiction=… (e.g. from the
-  // Pro-Intelligence globe).
+  // Tailor the default jurisdiction to the organization's profile. An explicit
+  // ?jurisdiction= deep-link (e.g. from the globe) always wins.
   useEffect(() => {
     const j = new URLSearchParams(window.location.search).get("jurisdiction");
-    if (j) setJurisdictionFilter(j);
-  }, []);
+    if (j) {
+      setJurisdictionFilter(j);
+      return;
+    }
+    const pj = orgQuery.data?.primaryJurisdiction;
+    if (pj && pj !== "Both" && pj !== "Global" && pj !== "Other") {
+      setJurisdictionFilter(pj);
+    }
+  }, [orgQuery.data]);
 
   const frameworks = frameworksQ.data ?? [];
 

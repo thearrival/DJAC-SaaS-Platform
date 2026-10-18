@@ -21,6 +21,10 @@ import {
 import { listUsersForAdmin } from "./db";
 import { adminProcedure, requireMfa, router } from "./_core/trpc";
 import { getConversionStats } from "./admin-store";
+import {
+  PROVENANCE_REGISTRY,
+  getProvenance,
+} from "../shared/regulatory-provenance";
 import fs from "fs";
 import path from "path";
 
@@ -34,6 +38,36 @@ const searchLimitSchema = z.object({
 });
 
 export const adminRouter = router({
+  /**
+   * Regulatory review queue — every citation that is not freshly verified.
+   * Read-only: sign-off is a human action performed via the provenance script.
+   */
+  provenanceQueue: adminProcedure.query(() => {
+    const now = Date.now();
+    const rank: Record<string, number> = {
+      stale: 0,
+      pending_review: 1,
+      unverified: 2,
+    };
+    return Object.entries(PROVENANCE_REGISTRY)
+      .map(([code, entry]) => {
+        const p = getProvenance(code, now);
+        return {
+          code,
+          sourceTitle: p.sourceTitle ?? entry.sourceTitle ?? code,
+          authority: p.authority ?? null,
+          status: p.status,
+          sourceUrl: p.sourceUrl ?? null,
+          lastVerified: p.lastVerified ?? null,
+          verifiedBy: p.verifiedBy ?? null,
+          assignedReviewer: p.assignedReviewer ?? null,
+          effectiveDate: p.effectiveDate ?? null,
+        };
+      })
+      .filter(e => e.status !== "verified")
+      .sort((a, b) => (rank[a.status] ?? 9) - (rank[b.status] ?? 9));
+  }),
+
   overview: adminProcedure
     .input(searchLimitSchema.optional())
     .query(async () => {
