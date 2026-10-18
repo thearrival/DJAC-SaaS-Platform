@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  assertAiReportCapacity,
   assertApiAccess,
   assertSeatCapacity,
   assertVendorCapacity,
@@ -27,5 +28,10 @@ describe("entitlements — trial uses Starter limits", () => {
   it("allows seats below the cap and blocks at the cap", async () => {
     await expect(assertSeatCapacity(1, 2)).resolves.toBeUndefined();
     await expect(assertSeatCapacity(1, 3)).rejects.toThrow(/3 seats/i);
+  });
+
+  it("allows AI reports below the daily cap", async () => {
+    // No DB in tests → 0 reports used, under the Starter cap of 3.
+    await expect(assertAiReportCapacity(1)).resolves.toBeUndefined();
   });
 });

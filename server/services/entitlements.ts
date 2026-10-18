@@ -7,8 +7,13 @@
  */
 
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
-import { organizations, subscriptions } from "../../drizzle/schema";
+import { and, count, desc, eq, gte } from "drizzle-orm";
+import {
+  organizations,
+  subscriptions,
+  vendorAssessments,
+  vendors,
+} from "../../drizzle/schema";
 import { getDb } from "../db";
 import {
   getTierLimits,
@@ -105,6 +110,40 @@ export async function assertSeatCapacity(
     throw new TRPCError({
       code: "FORBIDDEN",
       message: `Your ${planLabel(ent.plan)} plan includes ${ent.limits.maxSeats} seats. Upgrade to invite more members.`,
+    });
+  }
+}
+
+/** Count AI assessments created by the org's vendors since midnight UTC. */
+export async function countAiReportsToday(
+  organizationId: number
+): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  const [row] = await db
+    .select({ value: count() })
+    .from(vendorAssessments)
+    .innerJoin(vendors, eq(vendorAssessments.vendorId, vendors.id))
+    .where(
+      and(
+        eq(vendors.organizationId, organizationId),
+        gte(vendorAssessments.createdAt, start)
+      )
+    );
+  return Number(row?.value ?? 0);
+}
+
+export async function assertAiReportCapacity(
+  organizationId: number
+): Promise<void> {
+  const ent = await getOrgEntitlements(organizationId);
+  const used = await countAiReportsToday(organizationId);
+  if (used >= ent.limits.maxAiReportsPerDay) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: `Your ${planLabel(ent.plan)} plan allows ${ent.limits.maxAiReportsPerDay} AI assessments per day. Upgrade for more.`,
     });
   }
 }

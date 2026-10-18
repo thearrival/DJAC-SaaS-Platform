@@ -33,7 +33,10 @@ import {
   patchVendorBasicFields,
   deleteVendorProfile,
 } from "./vendor-store";
-import { assertVendorCapacity } from "./services/entitlements";
+import {
+  assertAiReportCapacity,
+  assertVendorCapacity,
+} from "./services/entitlements";
 import { runAssessmentSync, enqueueAssessmentJob } from "./ai/orchestrator";
 import { buildAssessmentCsv } from "./supplier-assessment";
 
@@ -290,6 +293,7 @@ export const vendorRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "vendor_assessment", "canCreate");
+      await assertAiReportCapacity(ctx.organizationId as number);
       const startedAt = Date.now();
       const vendor = await getVendorProfileById(
         input.vendorId,
@@ -424,6 +428,7 @@ export const vendorRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "vendor_assessment", "canExport");
+      await assertAiReportCapacity(ctx.organizationId as number);
       const startedAt = Date.now();
       const vendor = await getVendorProfileById(
         input.vendorId,
