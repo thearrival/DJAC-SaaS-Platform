@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +70,24 @@ export default function RegulatoryChangeFeed() {
   const [jurisdictionFilter, setJurisdictionFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const orgQuery = trpc.orgSettings.get.useQuery(undefined, {
+    retry: false,
+    staleTime: 300_000,
+  });
+  // Tailor the default jurisdiction to the organization profile.
+  useEffect(() => {
+    const pj = orgQuery.data?.primaryJurisdiction;
+    if (
+      pj &&
+      pj !== "Both" &&
+      pj !== "Global" &&
+      pj !== "Other" &&
+      !new URLSearchParams(window.location.search).get("jurisdiction")
+    ) {
+      setJurisdictionFilter(pj);
+    }
+  }, [orgQuery.data]);
 
   const result = listQ.data;
   const changes = result?.rows ?? [];
@@ -155,6 +173,28 @@ export default function RegulatoryChangeFeed() {
             posture.
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            const lines = [
+              `Regulatory Change Digest — ${new Date()
+                .toISOString()
+                .slice(0, 10)}`,
+              ...filteredChanges.map(
+                c =>
+                  `• [${c.jurisdiction}] ${c.title} (${c.changeType}, ${
+                    c.status
+                  }) — effective ${String(c.effectiveDate).slice(0, 10)}${
+                    c.url ? ` · ${c.url}` : ""
+                  }`
+              ),
+            ];
+            void navigator.clipboard?.writeText(lines.join("\n"));
+          }}
+          className="shrink-0 rounded-lg border border-border px-3 py-2 text-xs hover:bg-muted"
+        >
+          Copy digest
+        </button>
       </div>
 
       {stats && (
