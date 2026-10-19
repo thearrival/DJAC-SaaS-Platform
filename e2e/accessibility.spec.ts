@@ -67,6 +67,9 @@ const AUTH_PAGES = [
   "/global-registry",
   "/account-settings",
   "/gap-tracker",
+  "/pro-intelligence",
+  "/vendor-data-flow",
+  "/entities",
 ];
 
 test.describe("authenticated pages", () => {
@@ -103,14 +106,27 @@ test.describe("authenticated pages", () => {
         timeout: 45000,
       });
       await page.waitForTimeout(4000);
+      await page.waitForLoadState("networkidle").catch(() => {});
 
-      const results = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-        .analyze();
+      const analyze = () =>
+        new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+          .analyze();
 
-      const blocking = results.violations.filter(
+      let results = await analyze();
+      let blocking = results.violations.filter(
         v => v.impact === "critical" || v.impact === "serious"
       );
+      // Transient loading/animation states can briefly trip contrast/hidden
+      // checks; re-scan once after the page settles before failing.
+      if (blocking.length) {
+        await page.waitForTimeout(2000);
+        results = await analyze();
+        blocking = results.violations.filter(
+          v => v.impact === "critical" || v.impact === "serious"
+        );
+      }
+
       if (blocking.length) {
         console.log(
           `A11y violations on ${path}: ${blocking

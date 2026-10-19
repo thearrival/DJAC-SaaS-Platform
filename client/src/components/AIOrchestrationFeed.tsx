@@ -396,7 +396,12 @@ export const AIOrchestrationFeed = memo(function AIOrchestrationFeed() {
 
       {/* Pipeline stages — horizontal scroll */}
       <div style={{ padding: "14px 18px 0" }}>
-        <div style={{ overflowX: "auto", paddingBottom: 6 }}>
+        <div
+          role="region"
+          aria-label={t("orchFeed.pipelineStages", "Pipeline stages")}
+          tabIndex={0}
+          style={{ overflowX: "auto", paddingBottom: 6 }}
+        >
           <div
             style={{
               display: "flex",

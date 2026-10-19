@@ -408,6 +408,9 @@ export function RegulatoryPulseMatrix() {
             </div>
           </div>
           <div
+            role="region"
+            aria-label={t("pulse.feed", "Regulatory enforcement feed")}
+            tabIndex={0}
             style={{
               display: "flex",
               flexDirection: "column",
@@ -816,9 +819,7 @@ export function RegulatoryPulseMatrix() {
               }}
             >
               <p style={{ margin: 0, fontSize: 11, color: "var(--djac-text)" }}>
-                <strong style={{ color: C.purple }}>
-                  Combined maximum exposure:
-                </strong>{" "}
+                <strong>Combined maximum exposure:</strong>{" "}
                 <span style={{ fontFamily: "monospace", fontWeight: 700 }}>
                   {formatCurrency(piplMaxPenalty + pdplMaxPenalty, "sar")}
                 </span>
