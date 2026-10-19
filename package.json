@@ -40,7 +40,8 @@
     "prepare": "husky",
     "drill:restore": "tsx scripts/restore-drill.ts",
     "smoke:cleanup": "node scripts/smoke-cleanup.mjs",
-    "provenance:signoff": "tsx scripts/provenance-signoff.ts"
+    "provenance:signoff": "tsx scripts/provenance-signoff.ts",
+    "provenance:audit": "tsx scripts/provenance-audit.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1152.0",

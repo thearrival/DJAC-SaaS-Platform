@@ -1,0 +1,59 @@
+name: Regulatory provenance review
+
+on:
+  schedule:
+    # Quarterly: 1st of Jan/Apr/Jul/Oct at 06:00 UTC.
+    - cron: "0 6 1 1,4,7,10 *"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.4.1"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+
+      - name: Audit citation currency
+        id: audit
+        continue-on-error: true
+        run: pnpm provenance:audit
+
+      - name: Open or update the review issue
+        if: steps.audit.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BODY="An automated quarterly check found regulatory citations that are **pending review, stale, or unverified**.
+
+          **How to resolve**
+          - Review the queue in-app at \`/regulatory-review\` (platform admins).
+          - Re-confirm each citation against the official regulator, then sign off:
+            \`pnpm provenance:signoff -- --reviewer "<name>" --confirm\`
+          - Verification is a human action; this workflow never modifies citations.
+
+          _Created automatically by the Regulatory provenance review workflow._"
+
+          EXISTING=$(gh issue list --state open \
+            --search "Regulatory provenance review due in:title" \
+            --json number --jq '.[0].number')
+
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create \
+              --title "Regulatory provenance review due" \
+              --body "$BODY"
+          fi
