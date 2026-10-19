@@ -5,6 +5,7 @@
  */
 
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useLocale } from "@/contexts/useLocale";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
@@ -45,10 +46,12 @@ function Chips({ items, max = 5 }: { items: string[]; max?: number }) {
 function DistributionList({
   title,
   data,
+  empty,
   color = "#00d2ff",
 }: {
   title: string;
   data: { name: string; count: number }[];
+  empty: string;
   color?: string;
 }) {
   const max = Math.max(1, ...data.map(d => d.count));
@@ -59,7 +62,7 @@ function DistributionList({
       </CardHeader>
       <CardContent className="space-y-2">
         {data.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No data yet.</p>
+          <p className="text-xs text-muted-foreground">{empty}</p>
         ) : (
           data.slice(0, 8).map(d => (
             <div key={d.name} className="text-xs">
@@ -116,19 +119,22 @@ function Kpi({
 
 export default function VendorDataFlow() {
   usePageTitle("Vendor Data Flow");
+  const { t } = useLocale();
   const q = trpc.vendor.dataFlow.useQuery(undefined, { retry: false });
   const data = q.data;
 
   if (q.isLoading) {
     return (
-      <div className="p-8 text-sm text-muted-foreground">Loading data map…</div>
+      <div className="p-8 text-sm text-muted-foreground">
+        {t("vendorFlow.loading", "Loading data map…")}
+      </div>
     );
   }
 
   if (q.isError) {
     return (
       <div className="p-8 text-sm text-muted-foreground">
-        Unable to load vendor data flows.
+        {t("vendorFlow.loadError", "Unable to load vendor data flows.")}
       </div>
     );
   }
@@ -137,16 +143,20 @@ export default function VendorDataFlow() {
     return (
       <div className="mx-auto max-w-2xl p-10 text-center">
         <Database className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-        <h1 className="text-lg font-semibold">No vendor data flows yet</h1>
+        <h1 className="text-lg font-semibold">
+          {t("vendorFlow.emptyTitle", "No vendor data flows yet")}
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Register vendors with their jurisdictions and data locations to build
-          this map.
+          {t(
+            "vendorFlow.emptyBody",
+            "Register vendors with their jurisdictions and data locations to build this map."
+          )}
         </p>
         <Link
           href="/vendor-assessment"
           className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
         >
-          Go to Vendor Assessment
+          {t("vendorFlow.goToVendors", "Go to Vendor Assessment")}
         </Link>
       </div>
     );
@@ -155,36 +165,41 @@ export default function VendorDataFlow() {
   const highRisk = data.vendors.filter(
     v => v.riskTier === "critical" || v.riskTier === "high"
   ).length;
+  const noData = t("vendorFlow.noData", "No data yet.");
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold">Vendor Data Flow</h1>
+        <h1 className="text-2xl font-bold">
+          {t("vendorFlow.title", "Vendor Data Flow")}
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Where third-party data is processed, stored and regulated — derived
-          from your registered vendor profiles.
+          {t(
+            "vendorFlow.subtitle",
+            "Where third-party data is processed, stored and regulated — derived from your registered vendor profiles."
+          )}
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi
           icon={<Building2 size={16} />}
-          label="Vendors"
+          label={t("vendorFlow.vendors", "Vendors")}
           value={data.totalVendors}
         />
         <Kpi
           icon={<Globe2 size={16} />}
-          label="Jurisdictions"
+          label={t("vendorFlow.jurisdictions", "Jurisdictions")}
           value={data.jurisdictionCounts.length}
         />
         <Kpi
           icon={<Database size={16} />}
-          label="Data locations"
+          label={t("vendorFlow.dataLocations", "Data locations")}
           value={data.locationCounts.length}
         />
         <Kpi
           icon={<AlertTriangle size={16} />}
-          label="High / critical risk"
+          label={t("vendorFlow.highRisk", "High / critical risk")}
           value={highRisk}
           accent
         />
@@ -192,36 +207,53 @@ export default function VendorDataFlow() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <DistributionList
-          title="Regulatory jurisdictions"
+          title={t("vendorFlow.distJurisdictions", "Regulatory jurisdictions")}
           data={data.jurisdictionCounts}
+          empty={noData}
         />
         <DistributionList
-          title="Data locations"
+          title={t("vendorFlow.distLocations", "Data locations")}
           data={data.locationCounts}
+          empty={noData}
           color="#10b981"
         />
         <DistributionList
-          title="Processing activities"
+          title={t("vendorFlow.distActivities", "Processing activities")}
           data={data.categoryCounts}
+          empty={noData}
           color="#f59e0b"
         />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Vendor flow matrix</CardTitle>
+          <CardTitle className="text-sm">
+            {t("vendorFlow.matrix", "Vendor flow matrix")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b text-xs text-muted-foreground">
-                  <th className="py-2 pr-4">Vendor</th>
-                  <th className="py-2 pr-4">Risk</th>
-                  <th className="py-2 pr-4">Hosting</th>
-                  <th className="py-2 pr-4">Jurisdictions</th>
-                  <th className="py-2 pr-4">Data locations</th>
-                  <th className="py-2 pr-4">Activities</th>
+                  <th className="py-2 pr-4">
+                    {t("vendorFlow.colVendor", "Vendor")}
+                  </th>
+                  <th className="py-2 pr-4">
+                    {t("vendorFlow.colRisk", "Risk")}
+                  </th>
+                  <th className="py-2 pr-4">
+                    {t("vendorFlow.colHosting", "Hosting")}
+                  </th>
+                  <th className="py-2 pr-4">
+                    {t("vendorFlow.colJurisdictions", "Jurisdictions")}
+                  </th>
+                  <th className="py-2 pr-4">
+                    {t("vendorFlow.colLocations", "Data locations")}
+                  </th>
+                  <th className="py-2 pr-4">
+                    {t("vendorFlow.colActivities", "Activities")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -261,8 +293,10 @@ export default function VendorDataFlow() {
       </Card>
 
       <p className="text-xs text-muted-foreground">
-        Based on declared vendor profile fields. Verify against each vendor's
-        actual processing before relying on this map for regulatory filings.
+        {t(
+          "vendorFlow.disclaimer",
+          "Based on declared vendor profile fields. Verify against each vendor's actual processing before relying on this map for regulatory filings."
+        )}
       </p>
     </div>
   );
