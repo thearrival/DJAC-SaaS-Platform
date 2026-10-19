@@ -103,12 +103,7 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 type AuditCategory =
-  | "auth"
-  | "data_write"
-  | "data_read"
-  | "role_change"
-  | "system"
-  | "billing";
+  "auth" | "data_write" | "data_read" | "role_change" | "system" | "billing";
 type AuditOutcome = "success" | "failure" | "blocked";
 
 function OutcomeIcon({ outcome }: { outcome: string }) {

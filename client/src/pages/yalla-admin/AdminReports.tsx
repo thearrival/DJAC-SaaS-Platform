@@ -28,11 +28,7 @@ import {
 const ADMIN_API = "/api/admin-dashboard";
 
 type ReportType =
-  | "growth"
-  | "engagement"
-  | "revenue"
-  | "security"
-  | "operations";
+  "growth" | "engagement" | "revenue" | "security" | "operations";
 
 interface ReportResult {
   type: ReportType;

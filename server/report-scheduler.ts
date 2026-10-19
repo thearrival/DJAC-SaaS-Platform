@@ -135,13 +135,7 @@ async function sendOrgReport(
   orgName: string,
   email: string,
   jurisdiction:
-    | "Saudi Arabia"
-    | "China"
-    | "EU"
-    | "US"
-    | "Brazil"
-    | "Global"
-    | "both",
+    "Saudi Arabia" | "China" | "EU" | "US" | "Brazil" | "Global" | "both",
   locale: "en" | "ar" | "zh",
   cadence: "weekly" | "monthly"
 ): Promise<void> {

@@ -29,9 +29,7 @@ type Milestone = "3d" | "1d" | "expired";
 function milestoneColumn(
   milestone: Milestone
 ):
-  | "trialReminderDay3Sent"
-  | "trialReminderDay6Sent"
-  | "trialExpiredNoticeSent" {
+  "trialReminderDay3Sent" | "trialReminderDay6Sent" | "trialExpiredNoticeSent" {
   if (milestone === "3d") return "trialReminderDay3Sent";
   if (milestone === "1d") return "trialReminderDay6Sent";
   return "trialExpiredNoticeSent";

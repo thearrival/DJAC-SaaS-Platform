@@ -7,11 +7,7 @@ import { getDb } from "./db";
 
 export type RegulatoryChangeStatus = "pending" | "in_effect" | "superseded";
 export type RegulatoryChangeType =
-  | "amendment"
-  | "new_regulation"
-  | "repeal"
-  | "guidance"
-  | "enforcement";
+  "amendment" | "new_regulation" | "repeal" | "guidance" | "enforcement";
 
 export type RegulatoryChangeRow = {
   id: number;

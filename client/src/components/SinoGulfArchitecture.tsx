@@ -10,12 +10,7 @@ import {
 } from "lucide-react";
 
 type NodeKey =
-  | "beijing"
-  | "shanghai"
-  | "hongkong"
-  | "singapore"
-  | "riyadh"
-  | "dubai";
+  "beijing" | "shanghai" | "hongkong" | "singapore" | "riyadh" | "dubai";
 type PipeStatus = "compliant" | "approval_required" | "blocked";
 
 interface GNode {

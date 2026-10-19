@@ -44,10 +44,7 @@
  *                   unverified until re-reviewed.
  */
 export type ProvenanceStatus =
-  | "unverified"
-  | "pending_review"
-  | "verified"
-  | "stale";
+  "unverified" | "pending_review" | "verified" | "stale";
 
 export type RegulatoryProvenance = {
   /** Canonical claim code. Joins to `GlobalFrameworkPack.code` and law slugs. */

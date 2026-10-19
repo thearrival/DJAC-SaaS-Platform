@@ -16,11 +16,7 @@ type IncidentType =
   | "third_party_breach"
   | "other";
 type IncidentStatus =
-  | "open"
-  | "under_investigation"
-  | "contained"
-  | "resolved"
-  | "closed";
+  "open" | "under_investigation" | "contained" | "resolved" | "closed";
 type IncidentSeverity = "critical" | "high" | "medium" | "low";
 
 export type IncidentRow = {

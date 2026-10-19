@@ -26,11 +26,9 @@ if (typeof window !== "undefined") {
 
 const injectAnalyticsScript = () => {
   const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT as
-    | string
-    | undefined;
+    string | undefined;
   const websiteId = import.meta.env.VITE_ANALYTICS_WEBSITE_ID as
-    | string
-    | undefined;
+    string | undefined;
 
   if (!endpoint || !websiteId || typeof document === "undefined") {
     return;

@@ -571,9 +571,8 @@ export const vendorRouter = router({
 
   gapSummary: orgProcedure.query(async ({ ctx }) => {
     await requireModulePermission(ctx, "vendor_assessment", "canView");
-    const { runDualJurisdictionAssessment } = await import(
-      "./supplier-assessment"
-    );
+    const { runDualJurisdictionAssessment } =
+      await import("./supplier-assessment");
     const vendors = await listVendorProfiles(ctx.user.id, ctx.organizationId);
     return vendors.map(v => ({
       vendor: {
@@ -642,9 +641,8 @@ export const vendorRouter = router({
     .input(z.number().int().positive())
     .query(async ({ ctx, input }) => {
       await requireModulePermission(ctx, "vendor_assessment", "canView");
-      const { runDualJurisdictionAssessment } = await import(
-        "./supplier-assessment"
-      );
+      const { runDualJurisdictionAssessment } =
+        await import("./supplier-assessment");
       const vendor = await getVendorProfileById(
         input,
         ctx.user.id,

@@ -685,9 +685,7 @@ export async function dismissRecommendation(
 }
 
 export type ModuleSignal =
-  | "module_opened"
-  | "first_action_started"
-  | "first_action_completed";
+  "module_opened" | "first_action_started" | "first_action_completed";
 
 export async function recordModuleSignal(
   actor: OnboardingActor,

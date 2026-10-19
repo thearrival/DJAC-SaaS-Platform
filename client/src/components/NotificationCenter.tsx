@@ -208,8 +208,7 @@ export function NotificationCenter() {
 
     // System degraded services
     const services = readinessQuery.data?.services as
-      | Record<string, { ready: boolean; details: string }>
-      | undefined;
+      Record<string, { ready: boolean; details: string }> | undefined;
     if (services) {
       for (const [svc, info] of Object.entries(services)) {
         if (!info.ready) {

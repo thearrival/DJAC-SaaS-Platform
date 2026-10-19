@@ -1487,9 +1487,7 @@ export default function ContinuousCompliance() {
                   handlesCriticalData: assetForm.handlesCriticalData,
                   criticalityScore: assetForm.criticalityScore,
                   status: assetForm.status as
-                    | "active"
-                    | "inactive"
-                    | "decommissioned",
+                    "active" | "inactive" | "decommissioned",
                   notes: assetForm.notes || undefined,
                   vendorId: assetForm.vendorId
                     ? Number(assetForm.vendorId)
@@ -1657,11 +1655,7 @@ export default function ContinuousCompliance() {
                   cveId: vulnForm.cveId || null,
                   title: vulnForm.title.trim(),
                   severity: vulnForm.severity as
-                    | "critical"
-                    | "high"
-                    | "medium"
-                    | "low"
-                    | "informational",
+                    "critical" | "high" | "medium" | "low" | "informational",
                   cvssScore: Number(vulnForm.cvssScore),
                   exploitAvailable: vulnForm.exploitAvailable,
                   isConfirmed: vulnForm.isConfirmed,

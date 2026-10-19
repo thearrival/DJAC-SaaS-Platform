@@ -46,9 +46,8 @@ async function isOperationalAuthorized(req: any): Promise<boolean> {
     }
 
     // 2) Local (email + password) session cookie
-    const { resolveLocalSession } = await import(
-      "../server/services/local-jwt"
-    );
+    const { resolveLocalSession } =
+      await import("../server/services/local-jwt");
     const localUser = await resolveLocalSession({ headers: req.headers });
     if (localUser && localUser.userType === "admin") return true;
   } catch {

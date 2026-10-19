@@ -31,12 +31,7 @@ import { getStripe, PRICE_CATALOG } from "./billing";
 import { emailService } from "./email/service";
 
 type StripeSubscriptionStatus =
-  | "trialing"
-  | "active"
-  | "past_due"
-  | "canceled"
-  | "incomplete"
-  | "paused";
+  "trialing" | "active" | "past_due" | "canceled" | "incomplete" | "paused";
 
 function mapStripeStatus(s: string): StripeSubscriptionStatus {
   const valid = [
@@ -213,10 +208,7 @@ export async function processStripeEvent(
         "starter";
       const interval =
         (session.metadata?.interval as
-          | "monthly"
-          | "quarterly"
-          | "biannual"
-          | "annual") ?? "monthly";
+          "monthly" | "quarterly" | "biannual" | "annual") ?? "monthly";
       const tier = resolveTier(plan, interval);
 
       // Insert billingEvent FIRST as idempotency marker before any data mutations.

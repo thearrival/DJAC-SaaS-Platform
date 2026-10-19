@@ -385,8 +385,7 @@ export default function VendorDetail() {
       vendorName: vendor.vendorName,
       vendorDescription: vendor.vendorDescription ?? "",
       criticalityLevel: (vendor.criticalityLevel ?? "") as
-        | VendorCriticalityLevel
-        | "",
+        VendorCriticalityLevel | "",
       riskTier: (vendor.riskTier ?? "") as VendorRiskTier | "",
       primaryContactName: vendor.primaryContactName ?? "",
       primaryContactEmail: vendor.primaryContactEmail ?? "",

@@ -91,10 +91,7 @@ interface ITInfrastructure {
 interface ComplianceProfile {
   dataResidencyStatus: "NotApplicable" | "Partial" | "Full";
   crossBorderTransferMechanism:
-    | "None"
-    | "StandardContractualClauses"
-    | "BindingCorporateRules"
-    | "Other";
+    "None" | "StandardContractualClauses" | "BindingCorporateRules" | "Other";
   cybersecurityFrameworks: string[];
   encryptionStandard: "None" | "AES128" | "AES256" | "Custom";
   localRegulatoryExposure: string[];

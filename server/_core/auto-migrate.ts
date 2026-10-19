@@ -14,9 +14,8 @@ async function seedComplianceFrameworks(
   db: NonNullable<Awaited<ReturnType<typeof getDb>>>
 ): Promise<void> {
   try {
-    const { complianceFrameworks } = await import(
-      "../../scripts/compliance-reference-data.mjs"
-    );
+    const { complianceFrameworks } =
+      await import("../../scripts/compliance-reference-data.mjs");
 
     let seeded = 0;
     for (const fw of complianceFrameworks) {

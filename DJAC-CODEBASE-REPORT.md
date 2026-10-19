@@ -476,22 +476,24 @@
 ### Role Hierarchy & Permissions
 
 **Platform Roles** (from `shared/const.ts`):
-| Role | Level | Description |
-|------|-------|-------------|
-| `basic_user` (legacy: `user`) | 10 | Basic access |
-| `professional_user` | 20 | Professional features |
-| `company_admin` | 30 | Org administration |
-| `platform_admin` (legacy: `admin`) | 40 | Platform management |
-| `yalla_hack_employee` | 45 | Internal staff |
-| `super_admin` | 100 | Full access |
+
+| Role                               | Level | Description           |
+| ---------------------------------- | ----- | --------------------- |
+| `basic_user` (legacy: `user`)      | 10    | Basic access          |
+| `professional_user`                | 20    | Professional features |
+| `company_admin`                    | 30    | Org administration    |
+| `platform_admin` (legacy: `admin`) | 40    | Platform management   |
+| `yalla_hack_employee`              | 45    | Internal staff        |
+| `super_admin`                      | 100   | Full access           |
 
 **Org Roles** (from `shared/const.ts`):
-| Role | Level | Description |
-|------|-------|-------------|
-| `analyst` | 10 | Read-only on most modules |
-| `compliance_officer` | 20 | CRUD on compliance modules |
-| `admin` | 30 | Full access + API keys, team mgmt |
-| `owner` | 40 | Full access + billing, org settings |
+
+| Role                 | Level | Description                         |
+| -------------------- | ----- | ----------------------------------- |
+| `analyst`            | 10    | Read-only on most modules           |
+| `compliance_officer` | 20    | CRUD on compliance modules          |
+| `admin`              | 30    | Full access + API keys, team mgmt   |
+| `owner`              | 40    | Full access + billing, org settings |
 
 **Permission Flags**: `canView`, `canCreate`, `canEdit`, `canDelete`, `canExport`, `canInvite`
 

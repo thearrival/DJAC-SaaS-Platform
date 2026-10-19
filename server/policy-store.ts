@@ -10,11 +10,7 @@ import { getDb } from "./db";
 
 type PolicyType = "policy" | "standard" | "procedure" | "guideline";
 type PolicyStatus =
-  | "draft"
-  | "under_review"
-  | "approved"
-  | "active"
-  | "retired";
+  "draft" | "under_review" | "approved" | "active" | "retired";
 
 export type PolicyRow = {
   id: number;

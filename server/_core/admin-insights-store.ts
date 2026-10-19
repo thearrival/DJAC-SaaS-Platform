@@ -68,11 +68,7 @@ export interface EngagementMetrics {
 }
 
 export type ReportType =
-  | "growth"
-  | "engagement"
-  | "revenue"
-  | "security"
-  | "operations";
+  "growth" | "engagement" | "revenue" | "security" | "operations";
 
 export interface ReportResult {
   type: ReportType;

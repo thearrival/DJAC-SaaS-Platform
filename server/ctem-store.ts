@@ -415,11 +415,7 @@ export async function listCtemVulnerabilities(
       eq(
         ctemVulnerabilities.severity,
         filters.severity as
-          | "critical"
-          | "high"
-          | "medium"
-          | "low"
-          | "informational"
+          "critical" | "high" | "medium" | "low" | "informational"
       )
     );
   if (filters?.exploitableOnly)
@@ -480,11 +476,7 @@ export async function createCtemVulnerability(input: {
       title: input.title,
       description: input.description ?? null,
       severity: input.severity as
-        | "critical"
-        | "high"
-        | "medium"
-        | "low"
-        | "informational",
+        "critical" | "high" | "medium" | "low" | "informational",
       cvssScore: input.cvssScore,
       exploitAvailable: input.exploitAvailable ? 1 : 0,
       isConfirmed: input.isConfirmed ? 1 : 0,

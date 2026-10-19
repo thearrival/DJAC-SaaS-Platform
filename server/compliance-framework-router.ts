@@ -487,13 +487,7 @@ export const complianceFrameworkRouter = router({
       }
       const report = generateComplianceReport({
         jurisdiction: share.jurisdiction as
-          | "Saudi Arabia"
-          | "China"
-          | "EU"
-          | "US"
-          | "Brazil"
-          | "Global"
-          | "both",
+          "Saudi Arabia" | "China" | "EU" | "US" | "Brazil" | "Global" | "both",
         locale: toReportLocale(share.locale),
         reportType: share.reportType as Parameters<
           typeof generateComplianceReport

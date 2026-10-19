@@ -12,6 +12,7 @@
  */
 
 import * as Sentry from "@sentry/node";
+import type { ErrorRequestHandler } from "express";
 import { ENV } from "./env";
 import { parsedEnv } from "../services/config-schema";
 
@@ -35,8 +36,10 @@ export function initialiseSentry(): void {
  * Mount AFTER all routes:
  *   app.use(sentryErrorHandler());
  */
-export function sentryErrorHandler() {
-  return Sentry.expressErrorHandler();
+export function sentryErrorHandler(): ErrorRequestHandler {
+  // Sentry's handler is a valid Express error middleware; the assertion bridges
+  // the SDK's narrow return type with Express's four-arg handler type.
+  return Sentry.expressErrorHandler() as unknown as ErrorRequestHandler;
 }
 
 /**

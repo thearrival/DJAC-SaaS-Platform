@@ -6,12 +6,7 @@ import type { TrpcContext } from "./_core/context";
 import { broadcastSSE } from "./services/sse-bus";
 
 type JsonLike =
-  | Record<string, unknown>
-  | Array<unknown>
-  | string
-  | number
-  | boolean
-  | null;
+  Record<string, unknown> | Array<unknown> | string | number | boolean | null;
 
 type InteractionLogInput = {
   context: string;

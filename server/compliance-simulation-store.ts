@@ -39,11 +39,7 @@ export type SimulationResult = {
 };
 
 export type SimulationType =
-  | "readiness"
-  | "gap_analysis"
-  | "cost_estimate"
-  | "cross_border"
-  | "full";
+  "readiness" | "gap_analysis" | "cost_estimate" | "cross_border" | "full";
 
 export type SimulationRisk = "low" | "medium" | "high" | "critical";
 

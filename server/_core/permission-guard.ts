@@ -5,12 +5,7 @@ import { recordAuditEvent } from "../audit-logger";
 import type { ModuleSlug } from "../../shared/const";
 
 export type PermissionAction =
-  | "canView"
-  | "canCreate"
-  | "canEdit"
-  | "canDelete"
-  | "canExport"
-  | "canInvite";
+  "canView" | "canCreate" | "canEdit" | "canDelete" | "canExport" | "canInvite";
 
 export async function requireModulePermission(
   ctx: TrpcContext,

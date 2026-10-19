@@ -65,11 +65,7 @@ export type ActivityEventInput = {
 
 export type AdminNotificationInput = {
   category:
-    | "registration"
-    | "consultation"
-    | "assessment"
-    | "support"
-    | "system";
+    "registration" | "consultation" | "assessment" | "support" | "system";
   title: string;
   content?: string;
   entityType?: string;

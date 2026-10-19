@@ -1188,8 +1188,7 @@ export default function ClientWorkspace() {
                     setVendorForm(prev => ({
                       ...prev,
                       hostingEnvironment: value as
-                        | VendorHostingEnvironment
-                        | "",
+                        VendorHostingEnvironment | "",
                     }))
                   }
                   options={vendorHostingEnvironmentOptions}
@@ -1264,8 +1263,7 @@ export default function ClientWorkspace() {
                     setVendorForm(prev => ({
                       ...prev,
                       thirdPartyDependencies: value as
-                        | VendorDependencyLevel
-                        | "",
+                        VendorDependencyLevel | "",
                     }))
                   }
                   options={vendorDependencyLevelOptions}
@@ -1293,8 +1291,7 @@ export default function ClientWorkspace() {
                     setVendorForm(prev => ({
                       ...prev,
                       fourthPartyDependencies: value as
-                        | VendorDependencyLevel
-                        | "",
+                        VendorDependencyLevel | "",
                     }))
                   }
                   options={vendorDependencyLevelOptions}

@@ -238,10 +238,7 @@ export function deriveExposureMappings(
         controlCode: "PDPL-Art.19",
         mappingReason: `Asset handles personal data and vulnerability "${input.title}" creates a data leakage risk — maps to PDPL Art.19 personal data security obligations.`,
         severityImpact: (input.severity === "critical" ? "critical" : sev) as
-          | "critical"
-          | "high"
-          | "medium"
-          | "low",
+          "critical" | "high" | "medium" | "low",
       });
     }
     if (isChinaRegion) {
@@ -253,10 +250,7 @@ export function deriveExposureMappings(
         controlCode: "PIPL-Art.51",
         mappingReason: `Asset processes personal information and vulnerability "${input.title}" exposes data subjects — maps to PIPL Art.51 security measures requirements.`,
         severityImpact: (input.severity === "critical" ? "critical" : sev) as
-          | "critical"
-          | "high"
-          | "medium"
-          | "low",
+          "critical" | "high" | "medium" | "low",
       });
     }
     if (isEURegion) {
@@ -268,10 +262,7 @@ export function deriveExposureMappings(
         controlCode: "GDPR-Art.32",
         mappingReason: `Asset handles EU personal data and vulnerability "${input.title}" creates a data leakage risk — maps to GDPR Art.32 security of processing obligations.`,
         severityImpact: (input.severity === "critical" ? "critical" : sev) as
-          | "critical"
-          | "high"
-          | "medium"
-          | "low",
+          "critical" | "high" | "medium" | "low",
       });
     }
     if (isUSRegion) {
@@ -283,10 +274,7 @@ export function deriveExposureMappings(
         controlCode: "CCPA-Sec.1798.150",
         mappingReason: `Asset handles consumer personal information and vulnerability "${input.title}" exposes data — relevant to CCPA private right of action for data breaches.`,
         severityImpact: (input.severity === "critical" ? "critical" : sev) as
-          | "critical"
-          | "high"
-          | "medium"
-          | "low",
+          "critical" | "high" | "medium" | "low",
       });
     }
     if (isBrazilRegion) {
@@ -298,10 +286,7 @@ export function deriveExposureMappings(
         controlCode: "LGPD-Art.46",
         mappingReason: `Asset processes personal data in Brazil and vulnerability "${input.title}" creates a data leakage risk — maps to LGPD Art.46 security measures requirements.`,
         severityImpact: (input.severity === "critical" ? "critical" : sev) as
-          | "critical"
-          | "high"
-          | "medium"
-          | "low",
+          "critical" | "high" | "medium" | "low",
       });
     }
   }
@@ -316,10 +301,7 @@ export function deriveExposureMappings(
       controlCode: "DSL-Art.27",
       mappingReason: `Asset handles important/critical data under DSL and vulnerability "${input.title}" may lead to unauthorized data access — requires DSL Art.27 security management measures.`,
       severityImpact: (input.severity === "critical" ? "critical" : "high") as
-        | "critical"
-        | "high"
-        | "medium"
-        | "low",
+        "critical" | "high" | "medium" | "low",
     });
   }
 

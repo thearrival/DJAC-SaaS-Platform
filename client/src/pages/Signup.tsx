@@ -342,13 +342,7 @@ type RoleDef = {
   id: RoleId;
   icon: React.ReactNode;
   accentKey:
-    | "cyan"
-    | "green"
-    | "purple"
-    | "orange"
-    | "yellow"
-    | "red"
-    | "muted";
+    "cyan" | "green" | "purple" | "orange" | "yellow" | "red" | "muted";
   titleFallback: string;
   descFallback: string;
   badgeFallback: string;

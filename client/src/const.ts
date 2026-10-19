@@ -8,8 +8,7 @@ export const APP_LOGO = "/yalla-hack-logo.png";
 // Use this to conditionally show SSO buttons/UI that would otherwise loop back.
 export const isExternalOAuth = (): boolean => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL as
-    | string
-    | undefined;
+    string | undefined;
   if (!oauthPortalUrl || oauthPortalUrl.trim() === "") return false;
   if (typeof window === "undefined") return true;
   return (
@@ -23,8 +22,7 @@ export const isExternalOAuth = (): boolean => {
 // (local-dev mode), return the built-in /login route to avoid a redirect loop.
 export const getLoginUrl = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL as
-    | string
-    | undefined;
+    string | undefined;
 
   const isSameOrigin =
     !oauthPortalUrl ||

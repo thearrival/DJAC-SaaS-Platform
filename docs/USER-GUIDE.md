@@ -50,7 +50,7 @@
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | **Framework registry** | 107 framework packs across 7 regions; 46 frameworks with full control-level detail in the database                                        |
 | **Jurisdictions**      | 31 supported jurisdictions, from China & Saudi Arabia to Brazil, India, Nigeria and Vietnam                                               |
-| **Conflict detection** | Framework↔framework relationships typed as `overlap`, `conflict`, `harmonization`, `coordination`, `gap`, `dependency`                   |
+| **Conflict detection** | Framework↔framework relationships typed as `overlap`, `conflict`, `harmonization`, `coordination`, `gap`, `dependency`                    |
 | **Simulation engine**  | Deterministic readiness / gap / cost / cross-border scenario modeling with per-framework maturity scores                                  |
 | **AI pipeline**        | 8-stage agent pipeline (gatekeeper → intake → extractor → RAG context → judge → synthesizer → validator → reporter) + 18 domain AI agents |
 | **Reporting**          | PDF, DOCX and Markdown output in en / ar / zh, with shareable links and email delivery                                                    |

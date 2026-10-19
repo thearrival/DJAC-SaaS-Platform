@@ -13,11 +13,7 @@ import { ENV } from "./_core/env";
 import { getDb } from "./db";
 
 type MvpRelationshipType =
-  | "overlap"
-  | "conflict"
-  | "coordination"
-  | "dependency"
-  | "gap";
+  "overlap" | "conflict" | "coordination" | "dependency" | "gap";
 
 type MvpSeverity = "critical" | "high" | "medium" | "low";
 

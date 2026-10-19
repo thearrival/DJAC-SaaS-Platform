@@ -40,11 +40,7 @@ export type AIAgentCatalogEntry = {
 };
 
 export type GraphNodeKind =
-  | "region"
-  | "framework"
-  | "edition"
-  | "agent"
-  | "standard";
+  "region" | "framework" | "edition" | "agent" | "standard";
 
 export type GraphNode = {
   id: string;

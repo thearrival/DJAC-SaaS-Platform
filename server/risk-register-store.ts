@@ -9,11 +9,7 @@ import { getDb } from "./db";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type RiskCategory =
-  | "operational"
-  | "legal"
-  | "technical"
-  | "financial"
-  | "reputational";
+  "operational" | "legal" | "technical" | "financial" | "reputational";
 type RiskTreatment = "accept" | "mitigate" | "transfer" | "avoid";
 type RiskStatus = "open" | "in_treatment" | "closed" | "accepted";
 

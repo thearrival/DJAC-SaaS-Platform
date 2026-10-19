@@ -9,11 +9,7 @@ import { getDb } from "./db";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type MaturityLevel =
-  | "initial"
-  | "developing"
-  | "defined"
-  | "managed"
-  | "optimized";
+  "initial" | "developing" | "defined" | "managed" | "optimized";
 
 export type AssessmentRow = {
   id: number;
