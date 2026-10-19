@@ -3250,3 +3250,40 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
     box-shadow: none;
   }
 }
+
+.djac-pro-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.djac-pro-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--djac-muted);
+  border: 1px solid var(--djac-border);
+  background: var(--djac-card, transparent);
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.djac-pro-nav-pill:hover,
+.djac-pro-nav-pill:focus-visible {
+  color: var(--djac-text);
+  border-color: rgba(0, 210, 255, 0.45);
+  background: rgba(0, 210, 255, 0.08);
+  outline: none;
+}
+
+.djac-pro-nav-pill:focus-visible {
+  box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.35);
+}

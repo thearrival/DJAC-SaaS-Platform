@@ -1582,6 +1582,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
 
         {/* ── Header ───────────────────────────────────────────────── */}
         <div
+          id="pro-intel-overview"
           className="djac-section-1"
           style={{
             position: "relative",
@@ -1781,6 +1782,55 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
           </div>
         </div>
 
+        {/* ── Section nav ──────────────────────────────────────────── */}
+        <nav
+          className="djac-pro-nav"
+          aria-label={t("proIntel.sectionNav", "Section navigation")}
+        >
+          {[
+            {
+              id: "pro-intel-overview",
+              icon: Activity,
+              label: t("proIntel.navOverview", "Overview"),
+            },
+            {
+              id: "pro-intel-globe",
+              icon: Globe2,
+              label: t("proIntel.navGlobe", "Globe"),
+            },
+            {
+              id: "pro-intel-heatmap",
+              icon: Shield,
+              label: t("proIntel.navHeatmap", "Heatmap"),
+            },
+            {
+              id: "pro-intel-grid-2",
+              icon: Bot,
+              label: t("proIntel.navPipeline", "Pipeline"),
+            },
+            {
+              id: "pro-intel-grid-3",
+              icon: Brain,
+              label: t("proIntel.navRadar", "Radar"),
+            },
+          ].map(({ id, icon: Icon, label }) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className="djac-pro-nav-pill"
+              onClick={event => {
+                event.preventDefault();
+                document
+                  .getElementById(id)
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            >
+              <Icon className="h-3 w-3" />
+              {label}
+            </a>
+          ))}
+        </nav>
+
         {/* ── KPI Stats Strip ───────────────────────────────────────── */}
         <div className="djac-pro-eyebrow" aria-hidden="true">
           <span className="djac-pro-eyebrow-text">
@@ -1939,6 +1989,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
 
         {/* ── 3D Globe: regulatory hubs + corridors ─────────────────── */}
         <section
+          id="pro-intel-globe"
           className="djac-section-2c"
           aria-label={t("proIntel.globeSection", "3D Regulatory Globe")}
         >
@@ -2987,6 +3038,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
 
         {/* ── Row 1: Heatmap ────────────────────────────────────────── */}
         <section
+          id="pro-intel-heatmap"
           className="djac-section-3"
           aria-label={t("proIntel.heatmapSection", "Regulatory Heatmap")}
           dir="ltr"

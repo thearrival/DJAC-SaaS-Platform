@@ -8,6 +8,7 @@ import {
 import { LOCALE_SUPPLEMENT } from "./localeSupplement";
 import { LOCALE_EXTRAS } from "./localeExtras";
 import { LOCALE_EXTRAS_2 } from "./localeExtras2";
+import { LOCALE_NAV } from "./localeNav";
 import { ONBOARDING_STRINGS } from "./onboardingStrings";
 import { interpolateCoverage } from "../../../shared/coverage-claims";
 
@@ -87,6 +88,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
             ONBOARDING_STRINGS[locale]?.[key] ||
             LOCALE_EXTRAS[locale]?.[key] ||
             LOCALE_EXTRAS_2[locale]?.[key] ||
+            LOCALE_NAV[locale]?.[key] ||
             LOCALE_SUPPLEMENT[locale]?.[key] ||
             fallback
         ),
