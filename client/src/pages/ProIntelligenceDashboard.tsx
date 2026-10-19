@@ -2947,9 +2947,9 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                       }}
                     >
                       {m.label}
-                      <span style={{ opacity: 0.55 }}> {m.value ?? 0}</span>
+                      <span style={{ opacity: 0.9 }}> {m.value ?? 0}</span>
                       {(hubCorridorCounts[id] ?? 0) > 0 && (
-                        <span style={{ opacity: 0.45 }}>
+                        <span style={{ opacity: 0.85 }}>
                           {" "}
                           · {hubCorridorCounts[id]}↔
                         </span>

@@ -851,7 +851,6 @@ export default function Dashboard() {
                   }}
                   role="button"
                   tabIndex={0}
-                  aria-label={`${m.label}: ${m.count}`}
                   title={`${m.label}: ${m.count}`}
                   style={{
                     background: C.card,
@@ -1414,6 +1413,12 @@ export default function Dashboard() {
               </div>
               <div
                 className="djac-scroll"
+                role="region"
+                aria-label={t(
+                  "dashboard.activityFeed",
+                  "Compliance activity feed"
+                )}
+                tabIndex={0}
                 style={{
                   display: "flex",
                   flexDirection: "column",

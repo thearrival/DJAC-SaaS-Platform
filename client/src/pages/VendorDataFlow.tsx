@@ -154,7 +154,8 @@ export default function VendorDataFlow() {
         </p>
         <Link
           href="/vendor-assessment"
-          className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+          className="mt-4 inline-block rounded-lg px-4 py-2 text-sm font-semibold text-white"
+          style={{ background: "#a300c4" }}
         >
           {t("vendorFlow.goToVendors", "Go to Vendor Assessment")}
         </Link>
