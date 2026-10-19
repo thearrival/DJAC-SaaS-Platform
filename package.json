@@ -23,6 +23,7 @@
     "smoke:runtime": "node scripts/smoke-runtime.mjs",
     "smoke:runtime:strict": "cross-env SMOKE_BASE_URL=http://localhost:3001 SMOKE_EXPECT_MODE=strict node scripts/smoke-runtime.mjs",
     "smoke:scale": "node scripts/load-smoke.mjs",
+    "smoke:console": "node scripts/console-sweep.mjs",
     "prod:preflight": "node scripts/production-preflight.mjs",
     "prod:preflight:strict": "node scripts/production-preflight.mjs --fail-on-warn --require-billing",
     "prod:preflight:json": "node scripts/production-preflight.mjs --json",
