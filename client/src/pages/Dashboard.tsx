@@ -1201,10 +1201,6 @@ export default function Dashboard() {
                       }}
                       role="button"
                       tabIndex={0}
-                      aria-label={t(
-                        "dashboard.openFrameworkAnalysis",
-                        "Open {code} framework analysis"
-                      ).replace("{code}", fw.code)}
                       title={t(
                         "dashboard.openFrameworkAnalysis",
                         "Open {code} framework analysis"
