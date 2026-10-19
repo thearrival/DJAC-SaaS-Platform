@@ -939,7 +939,7 @@ function DashboardLayoutContent({
               <button
                 onClick={() => setCmdOpen(true)}
                 className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-border hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Open command palette"
+                aria-label="Search — open command palette"
               >
                 <Search className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Search</span>
@@ -990,11 +990,14 @@ function DashboardLayoutContent({
               <button
                 onClick={() => setCmdOpen(true)}
                 className="hidden md:flex items-center gap-2 rounded-md border border-border/60 bg-background/50 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Open command palette (Ctrl+K)"
+                aria-label="Search… — open command palette (Ctrl+K)"
               >
                 <Search className="h-3.5 w-3.5" />
                 <span>Search…</span>
-                <span className="ms-1 flex items-center gap-0.5 opacity-60">
+                <span
+                  aria-hidden="true"
+                  className="ms-1 flex items-center gap-0.5 opacity-60"
+                >
                   <kbd className="rounded bg-muted px-1 py-0.5 text-[10px] font-medium">
                     ⌘
                   </kbd>
