@@ -52,6 +52,7 @@ import {
   Building2,
   CalendarCheck2,
   CalendarDays,
+  ChevronDown,
   ClipboardList,
   CreditCard,
   Crown,
@@ -565,6 +566,32 @@ function DashboardLayoutContent({
   );
   const isMobile = useIsMobile();
 
+  // Collapsible sidebar groups (persisted). The active group always stays open.
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem("djac.sidebar.collapsed.v1");
+      return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      return new Set();
+    }
+  });
+  const toggleGroup = (key: string) => {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      try {
+        localStorage.setItem(
+          "djac.sidebar.collapsed.v1",
+          JSON.stringify([...next])
+        );
+      } catch {
+        /* ignore quota/private-mode */
+      }
+      return next;
+    });
+  };
+
   useEffect(() => {
     if (isCollapsed) {
       setIsResizing(false);
@@ -665,61 +692,93 @@ function DashboardLayoutContent({
           </SidebarHeader>
 
           <SidebarContent className="gap-0 djac-scroll overflow-y-auto">
-            {allGroups.map(group => (
-              <SidebarGroup key={group.groupKey} className="py-1 px-2">
-                <SidebarGroupLabel className="mb-0.5 px-2 text-[10px] font-bold uppercase tracking-widest opacity-50">
-                  {t(group.groupKey, group.groupFallback)}
-                </SidebarGroupLabel>
-                <SidebarMenu>
-                  {group.items.map(item => {
-                    const isActive =
-                      location === item.path ||
-                      location.startsWith(item.path + "/") ||
-                      (item.aliases?.some(
-                        a => location === a || location.startsWith(a + "/")
-                      ) ??
-                        false);
-                    // Derive tour-id from path for the spotlight system
-                    const tourId = `tour-menu-${item.path.replace(/^\//, "").replace(/\//g, "-")}`;
-                    return (
-                      <SidebarMenuItem key={item.path}>
-                        <SidebarMenuButton
-                          isActive={isActive}
-                          onClick={() => {
-                            sounds.navigate();
-                            setLocation(item.path);
-                          }}
-                          tooltip={t(item.labelKey, item.labelFallback)}
-                          className="h-9 transition-all font-normal"
-                          data-tour-id={tourId}
-                        >
-                          <div className="relative shrink-0">
-                            <item.icon
-                              className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                            />
-                            {item.path === "/notifications" &&
-                              notifBadge > 0 && (
-                                <span
-                                  className="absolute -top-1.5 -end-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground leading-none"
-                                  aria-label={`${notifBadge} unread notifications`}
-                                >
-                                  {notifBadge > 9 ? "9+" : notifBadge}
-                                </span>
-                              )}
-                          </div>
-                          <span>{t(item.labelKey, item.labelFallback)}</span>
-                          {item.path === "/notifications" && notifBadge > 0 && (
-                            <span className="ms-auto shrink-0 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground leading-none group-data-[collapsible=icon]:hidden">
-                              {notifBadge > 99 ? "99+" : notifBadge}
-                            </span>
-                          )}
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroup>
-            ))}
+            {allGroups.map(group => {
+              const groupHasActive = group.items.some(
+                item =>
+                  location === item.path ||
+                  location.startsWith(item.path + "/") ||
+                  (item.aliases?.some(
+                    a => location === a || location.startsWith(a + "/")
+                  ) ??
+                    false)
+              );
+              const groupCollapsed =
+                !isCollapsed &&
+                collapsedGroups.has(group.groupKey) &&
+                !groupHasActive;
+              return (
+                <SidebarGroup key={group.groupKey} className="py-1 px-2">
+                  <SidebarGroupLabel className="mb-0.5 px-2 text-[10px] font-bold uppercase tracking-widest opacity-50">
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(group.groupKey)}
+                      aria-expanded={!groupCollapsed}
+                      className="flex w-full items-center justify-between gap-1 transition-colors hover:text-foreground"
+                    >
+                      <span>{t(group.groupKey, group.groupFallback)}</span>
+                      <ChevronDown
+                        className={`h-3 w-3 shrink-0 transition-transform ${
+                          groupCollapsed ? "-rotate-90" : ""
+                        }`}
+                      />
+                    </button>
+                  </SidebarGroupLabel>
+                  {!groupCollapsed && (
+                    <SidebarMenu>
+                      {group.items.map(item => {
+                        const isActive =
+                          location === item.path ||
+                          location.startsWith(item.path + "/") ||
+                          (item.aliases?.some(
+                            a => location === a || location.startsWith(a + "/")
+                          ) ??
+                            false);
+                        // Derive tour-id from path for the spotlight system
+                        const tourId = `tour-menu-${item.path.replace(/^\//, "").replace(/\//g, "-")}`;
+                        return (
+                          <SidebarMenuItem key={item.path}>
+                            <SidebarMenuButton
+                              isActive={isActive}
+                              onClick={() => {
+                                sounds.navigate();
+                                setLocation(item.path);
+                              }}
+                              tooltip={t(item.labelKey, item.labelFallback)}
+                              className="h-9 transition-all font-normal"
+                              data-tour-id={tourId}
+                            >
+                              <div className="relative shrink-0">
+                                <item.icon
+                                  className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                                />
+                                {item.path === "/notifications" &&
+                                  notifBadge > 0 && (
+                                    <span
+                                      className="absolute -top-1.5 -end-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground leading-none"
+                                      aria-label={`${notifBadge} unread notifications`}
+                                    >
+                                      {notifBadge > 9 ? "9+" : notifBadge}
+                                    </span>
+                                  )}
+                              </div>
+                              <span>
+                                {t(item.labelKey, item.labelFallback)}
+                              </span>
+                              {item.path === "/notifications" &&
+                                notifBadge > 0 && (
+                                  <span className="ms-auto shrink-0 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground leading-none group-data-[collapsible=icon]:hidden">
+                                    {notifBadge > 99 ? "99+" : notifBadge}
+                                  </span>
+                                )}
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        );
+                      })}
+                    </SidebarMenu>
+                  )}
+                </SidebarGroup>
+              );
+            })}
           </SidebarContent>
 
           <SidebarFooter className="p-3">
