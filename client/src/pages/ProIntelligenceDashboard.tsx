@@ -1584,6 +1584,8 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
         <div
           className="djac-section-1"
           style={{
+            position: "relative",
+            overflow: "hidden",
             background: isDark
               ? `linear-gradient(135deg, rgba(0,247,255,0.04) 0%, rgba(147,89,236,0.03) 100%)`
               : `linear-gradient(135deg, rgba(2,132,199,0.04) 0%, rgba(124,58,237,0.02) 100%)`,
@@ -1600,6 +1602,19 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
               : `inset 0 1px 0 ${C.cyan}20`,
           }}
         >
+          {/* Accent line */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 2,
+              background: `linear-gradient(90deg, ${C.cyan}, ${C.purple} 55%, transparent 100%)`,
+              opacity: isDark ? 0.9 : 0.7,
+            }}
+          />
           {/* Left: title */}
           <div>
             <div
@@ -1767,9 +1782,20 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
         </div>
 
         {/* ── KPI Stats Strip ───────────────────────────────────────── */}
+        <div className="djac-pro-eyebrow" aria-hidden="true">
+          <span className="djac-pro-eyebrow-text">
+            {t("proIntel.liveMetrics", "Live metrics")}
+          </span>
+          <span className="djac-pro-eyebrow-rule" />
+        </div>
         <div
           className="djac-section-2"
-          style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(168px, 1fr))",
+            gap: 12,
+            alignItems: "stretch",
+          }}
         >
           <StatTile
             label="Frameworks Monitored"

@@ -6,6 +6,7 @@ import {
   type LocaleContextValue,
 } from "./localeTypes";
 import { LOCALE_SUPPLEMENT } from "./localeSupplement";
+import { LOCALE_EXTRAS } from "./localeExtras";
 import { ONBOARDING_STRINGS } from "./onboardingStrings";
 import { interpolateCoverage } from "../../../shared/coverage-claims";
 
@@ -83,6 +84,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
         interpolateCoverage(
           catalog[key] ||
             ONBOARDING_STRINGS[locale]?.[key] ||
+            LOCALE_EXTRAS[locale]?.[key] ||
             LOCALE_SUPPLEMENT[locale]?.[key] ||
             fallback
         ),

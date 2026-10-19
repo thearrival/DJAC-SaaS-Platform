@@ -3206,3 +3206,47 @@ html[dir="rtl"] [data-sidebar="menu-button"][data-active="true"]::before {
     padding: 1rem 0.75rem;
   }
 }
+
+/* ── Pro Intelligence polish ─────────────────────────────────────────────── */
+.djac-pro-kpi-card {
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.djac-pro-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(0, 210, 255, 0.14);
+}
+
+.djac-pro-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: -4px;
+}
+
+.djac-pro-eyebrow-text {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--djac-muted);
+  white-space: nowrap;
+}
+
+.djac-pro-eyebrow-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--djac-border), transparent 85%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .djac-pro-kpi-card,
+  .djac-pro-kpi-card:hover {
+    transition: none;
+    transform: none;
+    box-shadow: none;
+  }
+}
