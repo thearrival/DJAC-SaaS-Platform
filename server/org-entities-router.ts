@@ -8,12 +8,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, count, eq } from "drizzle-orm";
-import {
-  orgAdminProcedure,
-  orgProcedure,
-  requireMfa,
-  router,
-} from "./_core/trpc";
+import { orgAdminProcedure, requireMfa, router } from "./_core/trpc";
 import { getDb } from "./db";
 import { organizations, organizationMembers, vendors } from "../drizzle/schema";
 import { getLocalUserIdFromOpenId } from "./services/org-context";
@@ -44,8 +39,11 @@ async function statsForOrg(orgId: number): Promise<{
 }
 
 export const orgEntitiesRouter = router({
-  /** Current org, its parent (if any), its direct children, and totals. */
-  list: orgProcedure.query(async ({ ctx }) => {
+  /**
+   * Current org, its parent (if any), its direct children, and totals.
+   * Admin-only: this exposes sibling-entity names and aggregate counts.
+   */
+  list: orgAdminProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) {
       return {
