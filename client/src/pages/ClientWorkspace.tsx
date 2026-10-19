@@ -1050,6 +1050,10 @@ export default function ClientWorkspace() {
                   {t("client.vendorDescription", "Vendor Description")}
                 </Label>
                 <Textarea
+                  aria-label={t(
+                    "client.vendorDescription",
+                    "Vendor Description"
+                  )}
                   rows={3}
                   value={vendorForm.vendorDescription}
                   onChange={event =>
@@ -1068,6 +1072,10 @@ export default function ClientWorkspace() {
                   )}
                 </Label>
                 <Input
+                  aria-label={t(
+                    "client.businessRegistrationNumber",
+                    "Business Registration Number"
+                  )}
                   value={vendorForm.businessRegistrationNumber}
                   onChange={event =>
                     setVendorForm(prev => ({
@@ -1206,6 +1214,7 @@ export default function ClientWorkspace() {
               <div className="md:col-span-2">
                 <Label>{t("client.serviceScope", "Service Scope")}</Label>
                 <Textarea
+                  aria-label={t("client.serviceScope", "Service Scope")}
                   rows={2}
                   value={vendorForm.serviceScope}
                   onChange={event =>
@@ -1532,6 +1541,7 @@ export default function ClientWorkspace() {
                     <div className="md:col-span-2">
                       <Label>{t("client.description", "Description")}</Label>
                       <Textarea
+                        aria-label={t("client.description", "Description")}
                         rows={2}
                         value={component.description ?? ""}
                         onChange={event =>
@@ -1883,6 +1893,10 @@ export default function ClientWorkspace() {
                   )}
                 </Label>
                 <Input
+                  aria-label={t(
+                    "client.techStackSummary",
+                    "Tech Stack Summary (Optional)"
+                  )}
                   value={consultationForm.techStackSummary}
                   onChange={event =>
                     setConsultationForm(prev => ({

@@ -990,14 +990,10 @@ function DashboardLayoutContent({
               <button
                 onClick={() => setCmdOpen(true)}
                 className="hidden md:flex items-center gap-2 rounded-md border border-border/60 bg-background/50 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Search… — open command palette (Ctrl+K)"
               >
-                <Search className="h-3.5 w-3.5" />
+                <Search aria-hidden="true" className="h-3.5 w-3.5" />
                 <span>Search…</span>
-                <span
-                  aria-hidden="true"
-                  className="ms-1 flex items-center gap-0.5 opacity-60"
-                >
+                <span className="ms-1 flex items-center gap-0.5 opacity-60">
                   <kbd className="rounded bg-muted px-1 py-0.5 text-[10px] font-medium">
                     ⌘
                   </kbd>
