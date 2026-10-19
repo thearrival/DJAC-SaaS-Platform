@@ -374,7 +374,7 @@ function GapItem({
               flex: 1,
               fontSize: 13,
               fontWeight: 500,
-              color: "var(--djac-foreground, #ffffff0d)",
+              color: "var(--djac-text, #0b0b12)",
             }}
           >
             [{gap.code}] {gap.title}
@@ -427,7 +427,7 @@ function GapItem({
               style={{
                 margin: "4px 0 0",
                 fontSize: 13,
-                color: "var(--djac-foreground, #ffffff0d)",
+                color: "var(--djac-text, #0b0b12)",
                 lineHeight: 1.6,
               }}
             >
@@ -456,7 +456,7 @@ function GapItem({
               style={{
                 margin: "4px 0 0",
                 fontSize: 13,
-                color: "var(--djac-foreground, #ffffff0d)",
+                color: "var(--djac-text, #0b0b12)",
                 lineHeight: 1.6,
               }}
             >
@@ -571,7 +571,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
               style={{
                 fontSize: 15,
                 fontWeight: 600,
-                color: "var(--djac-foreground, #ffffff0d)",
+                color: "var(--djac-text, #0b0b12)",
               }}
             >
               <Link
@@ -742,7 +742,7 @@ function VendorCard({ entry }: { entry: GapEntry }) {
                         key={`rec-${i}`}
                         style={{
                           fontSize: 12,
-                          color: "var(--djac-foreground, #ffffff0d)",
+                          color: "var(--djac-text, #0b0b12)",
                           lineHeight: 1.5,
                         }}
                       >
@@ -896,7 +896,7 @@ export default function GapTracker() {
               margin: 0,
               fontSize: 22,
               fontWeight: 700,
-              color: "var(--djac-foreground, #ffffff0d)",
+              color: "var(--djac-text, #0b0b12)",
             }}
           >
             {t("gapTracker.title", "Vendor Compliance Gap Tracker")}
@@ -1008,7 +1008,7 @@ export default function GapTracker() {
                     : "transparent",
                 color:
                   severityFilter === sev
-                    ? "#d900ff"
+                    ? "#f0abfc"
                     : "var(--djac-muted-foreground, #94a3b8)",
                 cursor: "pointer",
                 transition: "all 0.15s",
@@ -1053,7 +1053,7 @@ export default function GapTracker() {
                     : "transparent",
                 color:
                   jurisFilter === jur
-                    ? "#d900ff"
+                    ? "#f0abfc"
                     : "var(--djac-muted-foreground, #94a3b8)",
                 cursor: "pointer",
                 transition: "all 0.15s",
@@ -1151,7 +1151,7 @@ export default function GapTracker() {
                 margin: "0 0 6px",
                 fontSize: 16,
                 fontWeight: 600,
-                color: "var(--djac-foreground, #ffffff0d)",
+                color: "var(--djac-text, #0b0b12)",
               }}
             >
               {t("gapTracker.emptyTitle", "No vendors registered yet")}
