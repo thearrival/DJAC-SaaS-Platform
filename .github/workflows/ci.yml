@@ -32,12 +32,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pnpm install --frozen-lockfile || true
-      # Secret scan of the working tree. Reports (non-blocking) until historical
-      # findings are purged; then flip --exit-code to 1 to make it a hard gate.
-      - name: Secret scan (gitleaks)
-        run: |
-          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
-            detect --source=/repo --no-git --redact --verbose --exit-code 0
+      # Block CI on credentials committed to tracked files. Examples, docs and
+      # test fixtures are allowlisted; the scanner is dependency-free.
+      - name: Secret scan (tracked files)
+        run: pnpm secret:scan
       # Block CI on high+ vulnerabilities in shipped (production) dependencies.
       # Dev-only advisories (e.g. the esbuild dev-server advisory) are reported
       # separately and must not gate the build.
