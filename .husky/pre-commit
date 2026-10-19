@@ -1,1 +1,1 @@
-pnpm lint && pnpm format:check && pnpm test
+pnpm secret:scan && pnpm lint && pnpm format:check && pnpm test

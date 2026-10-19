@@ -154,6 +154,8 @@ security uses per-login alert emails instead (see §4/§11).
 - Dependency hygiene: `pnpm audit --prod --audit-level=high` gate in CI, **SBOM**
   artifact, **Dependabot** (npm + Actions), CodeQL.
 - `/.well-known/security.txt` for responsible disclosure.
+- **Secret scanning**: `pnpm secret:scan` (tracked files only) is a blocking CI
+  gate and a pre-commit check; no credentials are committed (verified clean).
 
 ## 11. Monitoring & operations
 
@@ -168,8 +170,9 @@ security uses per-login alert emails instead (see §4/§11).
 
 ## 12. CI/CD
 
-- GitHub Actions: `ci.yml` (lint, typecheck, tests, security scan + SBOM),
-  `codeql.yml`, `e2e.yml`, `db-backup.yml`, `health-check.yml`, deploy workflows.
+- GitHub Actions: `ci.yml` (lint, typecheck, tests, dependency audit, secret
+  scan + SBOM), `codeql.yml`, `e2e.yml`, `db-backup.yml`, `health-check.yml`,
+  `provenance-review.yml` (quarterly citation review), deploy workflows.
 - Deploy: push to `main` (Vercel Git integration) or `vercel deploy --prod`.
 - Rollback: `git revert` or `vercel rollback`.
 
@@ -182,9 +185,12 @@ security uses per-login alert emails instead (see §4/§11).
 
 ## 14. Verification (this release)
 
-- `pnpm verify:all` → lint + tsc + **711 tests** + build, all green.
-- Live matrix: status / readyz / login / pricing / signup / docs / robots /
-  sitemap / security.txt / registry / health → **200**; docs subdomain 308.
+- `pnpm verify:all` → lint + tsc + **716 tests** + build, all green.
+- `pnpm verify:live` → **24/24** checks (health, readiness, services,
+  integrations, commit SHA, core routes).
+- Accessibility (Playwright + axe): **13/13** (5 public + 8 authenticated),
+  0 critical/serious.
+- Dependency audit: **0 vulnerabilities**; secret scan clean.
 - Deployed commit verifiable via `/api/status`.
 
 ## 15. Pending actions (owner)
@@ -199,10 +205,15 @@ place (IP allowlist intentionally unused)._
 
 ```bash
 pnpm verify:all        # lint + typecheck + tests + build
+pnpm verify:live       # post-deploy health/readiness/route checks
+pnpm secret:scan       # scan tracked files for committed credentials
+pnpm test:e2e          # Playwright end-to-end (set E2E_BASE_URL)
+pnpm test:e2e:a11y     # Playwright + axe accessibility gate
 pnpm prod:preflight    # production config checks
+pnpm provenance:audit  # citation currency (exits 1 if review needed)
 pnpm smoke:cleanup     # remove smoke residue (--dry-run to preview)
 pnpm drill:restore     # restore drill (refuses prod without --force)
-pnpm i18n:report       # translation coverage
+pnpm i18n:report       # translation coverage (9 locales)
 pnpm db:doctor         # database diagnostics
 pnpm provenance:signoff -- --reviewer "Name" --confirm   # regulatory sign-off
 ```
