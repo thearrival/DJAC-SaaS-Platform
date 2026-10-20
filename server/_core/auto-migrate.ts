@@ -2,7 +2,8 @@
  * Auto-migration runner — applies missing schema changes on server startup.
  * Safe for serverless (Vercel): runs fast, checks existence first, idempotent.
  */
-import { sql, SQL } from "drizzle-orm";
+import { sql, SQL, getTableColumns, getTableName } from "drizzle-orm";
+import * as schema from "../../drizzle/schema";
 import { getDb } from "../db";
 import { ENV } from "../_core/env";
 import { ensureOnboardingSchema } from "./onboarding-schema";
@@ -490,6 +491,59 @@ export async function ensureMigrated(): Promise<void> {
         );
       }
     };
+
+    // Self-heal columns declared in the Drizzle schema but missing in the DB.
+    // Idempotent and additive: never drops or alters existing columns.
+    try {
+      const colResult = (await db.execute(
+        sql`select table_name, column_name from information_schema.columns where table_schema = 'public'`
+      )) as unknown as {
+        rows?: Array<{ table_name: string; column_name: string }>;
+      };
+      const rows = (colResult.rows ??
+        (colResult as unknown as Array<{
+          table_name: string;
+          column_name: string;
+        }>)) as Array<{ table_name: string; column_name: string }>;
+      const existingByTable = new Map<string, Set<string>>();
+      for (const r of rows) {
+        if (!existingByTable.has(r.table_name))
+          existingByTable.set(r.table_name, new Set());
+        existingByTable.get(r.table_name)!.add(r.column_name);
+      }
+      for (const value of Object.values(schema)) {
+        if (!value || typeof value !== "object") continue;
+        let tableName: string;
+        try {
+          tableName = getTableName(value as never);
+        } catch {
+          continue;
+        }
+        const existing = existingByTable.get(tableName);
+        if (!existing) continue;
+        let cols: Record<string, { name: string; getSQLType?: () => string }>;
+        try {
+          cols = getTableColumns(value as never) as never;
+        } catch {
+          continue;
+        }
+        for (const col of Object.values(cols)) {
+          if (existing.has(col.name)) continue;
+          const type = col.getSQLType?.() ?? "text";
+          await driftExec(
+            `${tableName}.${col.name} (heal)`,
+            sql.raw(
+              `ALTER TABLE "${tableName}" ADD COLUMN IF NOT EXISTS "${col.name}" ${type}`
+            )
+          );
+        }
+      }
+    } catch (err) {
+      console.warn(
+        "[Migrate] Column self-heal skipped:",
+        (err as Error).message
+      );
+    }
 
     // Audit-log tamper-evidence column (hash chain) — additive, nullable.
     await driftExec(

@@ -666,6 +666,151 @@ var init_const = __esm({
 });
 
 // drizzle/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  accessRequestStatusEnum: () => accessRequestStatusEnum,
+  accessRequests: () => accessRequests,
+  accountIntentEnum: () => accountIntentEnum,
+  activityEvents: () => activityEvents,
+  actorTypeEnum: () => actorTypeEnum,
+  adminNotifications: () => adminNotifications,
+  aiAgentRunStatusEnum: () => aiAgentRunStatusEnum,
+  aiAgentRuns: () => aiAgentRuns,
+  analyticsEvents: () => analyticsEvents,
+  apiKeys: () => apiKeys,
+  assessmentGaps: () => assessmentGaps,
+  assessmentStatusEnum: () => assessmentStatusEnum,
+  assetInventory: () => assetInventory,
+  assetStatusEnum: () => assetStatusEnum,
+  auditLogCategoryEnum: () => auditLogCategoryEnum,
+  auditLogOutcomeEnum: () => auditLogOutcomeEnum,
+  auditLogs: () => auditLogs,
+  auditSchedules: () => auditSchedules,
+  auditStatusEnum: () => auditStatusEnum,
+  auditTypeEnum: () => auditTypeEnum,
+  billingEventStatusEnum: () => billingEventStatusEnum,
+  billingEvents: () => billingEvents,
+  billingIntervalEnum: () => billingIntervalEnum,
+  complianceControls: () => complianceControls,
+  complianceDeadlines: () => complianceDeadlines,
+  complianceEvidence: () => complianceEvidence,
+  complianceExposureMappings: () => complianceExposureMappings,
+  complianceIncidents: () => complianceIncidents,
+  compliancePolicies: () => compliancePolicies,
+  complianceReports: () => complianceReports,
+  complianceSimulationRiskEnum: () => complianceSimulationRiskEnum,
+  complianceSimulationStatusEnum: () => complianceSimulationStatusEnum,
+  complianceSimulationTypeEnum: () => complianceSimulationTypeEnum,
+  complianceSimulations: () => complianceSimulations,
+  consultationRequests: () => consultationRequests,
+  consultationStatusEnum: () => consultationStatusEnum,
+  continuousComplianceRuns: () => continuousComplianceRuns,
+  controlMappings: () => controlMappings,
+  criticalityEnum: () => criticalityEnum,
+  ctemAssetTypeEnum: () => ctemAssetTypeEnum,
+  ctemAssets: () => ctemAssets,
+  ctemAttackSimulations: () => ctemAttackSimulations,
+  ctemRiskScores: () => ctemRiskScores,
+  ctemVulnerabilities: () => ctemVulnerabilities,
+  deadlineJurisdictionEnum: () => deadlineJurisdictionEnum,
+  deadlinePriorityEnum: () => deadlinePriorityEnum,
+  deadlineStatusEnum: () => deadlineStatusEnum,
+  dsrJurisdictionEnum: () => dsrJurisdictionEnum,
+  dsrPriorityEnum: () => dsrPriorityEnum,
+  dsrRequestTypeEnum: () => dsrRequestTypeEnum,
+  dsrRequests: () => dsrRequests,
+  dsrStatusEnum: () => dsrStatusEnum,
+  emailLog: () => emailLog,
+  evidenceSourceTypeEnum: () => evidenceSourceTypeEnum,
+  exposureEnum: () => exposureEnum,
+  featureFlags: () => featureFlags,
+  frameworkRelationships: () => frameworkRelationships,
+  frameworks: () => frameworks,
+  incidentStatusEnum: () => incidentStatusEnum,
+  incidentTypeEnum: () => incidentTypeEnum,
+  inventoryAssetTypeEnum: () => inventoryAssetTypeEnum,
+  inventoryStatusEnum: () => inventoryStatusEnum,
+  jurisdictionEnum: () => jurisdictionEnum,
+  knowledgeGraphEdgeRelationEnum: () => knowledgeGraphEdgeRelationEnum,
+  knowledgeGraphEdges: () => knowledgeGraphEdges,
+  knowledgeGraphNodeKindEnum: () => knowledgeGraphNodeKindEnum,
+  knowledgeGraphNodes: () => knowledgeGraphNodes,
+  localUsers: () => localUsers,
+  localeEnum: () => localeEnum,
+  mappingTypeEnum: () => mappingTypeEnum,
+  maturityLevelEnum: () => maturityLevelEnum,
+  notificationCategoryEnum: () => notificationCategoryEnum,
+  notifications: () => notifications,
+  onboardingEvents: () => onboardingEvents,
+  onboardingProfileHistory: () => onboardingProfileHistory,
+  onboardingProgress: () => onboardingProgress,
+  onboardingResponses: () => onboardingResponses,
+  onboardingStageEnum: () => onboardingStageEnum,
+  orgMemberRoleEnum: () => orgMemberRoleEnum,
+  orgMemberStatusEnum: () => orgMemberStatusEnum,
+  organizationMembers: () => organizationMembers,
+  organizationProfilesCustom: () => organizationProfilesCustom,
+  organizations: () => organizations,
+  otpCodes: () => otpCodes,
+  paidPlanEnum: () => paidPlanEnum,
+  personalizationRecommendations: () => personalizationRecommendations,
+  planEnum: () => planEnum,
+  policyStatusEnum: () => policyStatusEnum,
+  policyTypeEnum: () => policyTypeEnum,
+  priorityEnum: () => priorityEnum,
+  priorityTierEnum: () => priorityTierEnum,
+  recurrenceEnum: () => recurrenceEnum,
+  regionEnum: () => regionEnum,
+  regulatorOversightTargets: () => regulatorOversightTargets,
+  regulatoryChangeStatusEnum: () => regulatoryChangeStatusEnum,
+  regulatoryChangeTypeEnum: () => regulatoryChangeTypeEnum,
+  regulatoryChanges: () => regulatoryChanges,
+  relationshipTypeEnum: () => relationshipTypeEnum,
+  remediationTasks: () => remediationTasks,
+  reportShares: () => reportShares,
+  reportStatusEnum: () => reportStatusEnum,
+  reportTypeEnum: () => reportTypeEnum,
+  riskCategoryEnum: () => riskCategoryEnum,
+  riskRegister: () => riskRegister,
+  riskStatusEnum: () => riskStatusEnum,
+  roleEnum: () => roleEnum,
+  rolePermissions: () => rolePermissions,
+  runStatusEnum: () => runStatusEnum,
+  securityMaturityAssessments: () => securityMaturityAssessments,
+  servicePriorityEnum: () => servicePriorityEnum,
+  serviceRequests: () => serviceRequests,
+  serviceStatusEnum: () => serviceStatusEnum,
+  serviceTypeEnum: () => serviceTypeEnum,
+  severityEnum: () => severityEnum,
+  severityImpactEnum: () => severityImpactEnum,
+  simulationTypeEnum: () => simulationTypeEnum,
+  subscriptionStatusEnum: () => subscriptionStatusEnum,
+  subscriptions: () => subscriptions,
+  taskSeverityEnum: () => taskSeverityEnum,
+  taskStatusEnum: () => taskStatusEnum,
+  techStackComponents: () => techStackComponents,
+  threatCategoryEnum: () => threatCategoryEnum,
+  threatIntelItems: () => threatIntelItems,
+  threatSeverityEnum: () => threatSeverityEnum,
+  tlpEnum: () => tlpEnum,
+  treatmentEnum: () => treatmentEnum,
+  triggeredByEnum: () => triggeredByEnum,
+  userActivitySummary: () => userActivitySummary,
+  userInteractionLogs: () => userInteractionLogs,
+  userOAuthStatusEnum: () => userOAuthStatusEnum,
+  userOnboarding: () => userOnboarding,
+  userPreferences: () => userPreferences,
+  userStatusEnum: () => userStatusEnum,
+  userTypeEnum: () => userTypeEnum,
+  users: () => users,
+  vendorAssessments: () => vendorAssessments,
+  vendorShares: () => vendorShares,
+  vendors: () => vendors,
+  vulnSeverityEnum: () => vulnSeverityEnum,
+  yallaAdminAccessLinkNonces: () => yallaAdminAccessLinkNonces,
+  yallaAdminAuditLogs: () => yallaAdminAuditLogs,
+  yallaAdminSessions: () => yallaAdminSessions
+});
 import {
   pgEnum,
   pgTable,
@@ -37271,9 +37416,10 @@ function startOtpCleanupScheduler() {
 init_queueFactory();
 
 // server/_core/auto-migrate.ts
+init_schema();
 init_db();
 init_env();
-import { sql as sql12 } from "drizzle-orm";
+import { sql as sql12, getTableColumns, getTableName } from "drizzle-orm";
 
 // server/_core/fk-indexes.ts
 import { sql as sql11 } from "drizzle-orm";
@@ -37956,6 +38102,50 @@ async function ensureMigrated() {
         );
       }
     };
+    try {
+      const colResult = await db.execute(
+        sql12`select table_name, column_name from information_schema.columns where table_schema = 'public'`
+      );
+      const rows = colResult.rows ?? colResult;
+      const existingByTable = /* @__PURE__ */ new Map();
+      for (const r of rows) {
+        if (!existingByTable.has(r.table_name))
+          existingByTable.set(r.table_name, /* @__PURE__ */ new Set());
+        existingByTable.get(r.table_name).add(r.column_name);
+      }
+      for (const value of Object.values(schema_exports)) {
+        if (!value || typeof value !== "object") continue;
+        let tableName;
+        try {
+          tableName = getTableName(value);
+        } catch {
+          continue;
+        }
+        const existing = existingByTable.get(tableName);
+        if (!existing) continue;
+        let cols;
+        try {
+          cols = getTableColumns(value);
+        } catch {
+          continue;
+        }
+        for (const col of Object.values(cols)) {
+          if (existing.has(col.name)) continue;
+          const type = col.getSQLType?.() ?? "text";
+          await driftExec(
+            `${tableName}.${col.name} (heal)`,
+            sql12.raw(
+              `ALTER TABLE "${tableName}" ADD COLUMN IF NOT EXISTS "${col.name}" ${type}`
+            )
+          );
+        }
+      }
+    } catch (err) {
+      console.warn(
+        "[Migrate] Column self-heal skipped:",
+        err.message
+      );
+    }
     await driftExec(
       "auditLogs.chainHash",
       sql12`ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text`
