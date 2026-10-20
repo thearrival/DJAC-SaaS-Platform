@@ -26520,14 +26520,37 @@ var orgSettingsRouter = router({
       inviteEmail: organizationMembers.inviteEmail,
       createdAt: organizationMembers.createdAt
     }).from(organizationMembers).where(eq19(organizationMembers.organizationId, orgId));
-    const deadlines = await db.select().from(complianceDeadlines).where(eq19(complianceDeadlines.organizationId, orgId));
-    const risks = await db.select().from(riskRegister).where(eq19(riskRegister.organizationId, orgId));
-    const policies = await db.select().from(compliancePolicies).where(eq19(compliancePolicies.organizationId, orgId));
-    const incidents = await db.select().from(complianceIncidents).where(eq19(complianceIncidents.organizationId, orgId));
-    const dsrs = await db.select().from(dsrRequests).where(eq19(dsrRequests.organizationId, orgId));
-    const remediation = await db.select().from(remediationTasks).where(eq19(remediationTasks.organizationId, orgId));
-    const evidenceRows = await db.select().from(complianceEvidence).where(eq19(complianceEvidence.organizationId, orgId));
-    const schedules = await db.select().from(auditSchedules).where(eq19(auditSchedules.organizationId, orgId));
+    const safeRows = async (query) => {
+      try {
+        return await query;
+      } catch {
+        return [];
+      }
+    };
+    const deadlines = await safeRows(
+      db.select().from(complianceDeadlines).where(eq19(complianceDeadlines.organizationId, orgId))
+    );
+    const risks = await safeRows(
+      db.select().from(riskRegister).where(eq19(riskRegister.organizationId, orgId))
+    );
+    const policies = await safeRows(
+      db.select().from(compliancePolicies).where(eq19(compliancePolicies.organizationId, orgId))
+    );
+    const incidents = await safeRows(
+      db.select().from(complianceIncidents).where(eq19(complianceIncidents.organizationId, orgId))
+    );
+    const dsrs = await safeRows(
+      db.select().from(dsrRequests).where(eq19(dsrRequests.organizationId, orgId))
+    );
+    const remediation = await safeRows(
+      db.select().from(remediationTasks).where(eq19(remediationTasks.organizationId, orgId))
+    );
+    const evidenceRows = await safeRows(
+      db.select().from(complianceEvidence).where(eq19(complianceEvidence.organizationId, orgId))
+    );
+    const schedules = await safeRows(
+      db.select().from(auditSchedules).where(eq19(auditSchedules.organizationId, orgId))
+    );
     return {
       exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
       organization: org ?? null,
@@ -38182,7 +38205,14 @@ async function ensureMigrated() {
       [
         "organizationMembers",
         sql12`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
-      ]
+      ],
+      [
+        "dsrRequests",
+        sql12`ADD COLUMN IF NOT EXISTS "dueDate" timestamp NOT NULL DEFAULT now()`
+      ],
+      ["dsrRequests", sql12`ADD COLUMN IF NOT EXISTS "completedAt" timestamp`],
+      ["dsrRequests", sql12`ADD COLUMN IF NOT EXISTS "assignedToUserId" integer`],
+      ["dsrRequests", sql12`ADD COLUMN IF NOT EXISTS "notes" text`]
     ];
     for (const [table, clause] of driftColumns) {
       await driftExec(

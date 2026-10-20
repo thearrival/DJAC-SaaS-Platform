@@ -757,6 +757,13 @@ export async function ensureMigrated(): Promise<void> {
         "organizationMembers",
         sql`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`,
       ],
+      [
+        "dsrRequests",
+        sql`ADD COLUMN IF NOT EXISTS "dueDate" timestamp NOT NULL DEFAULT now()`,
+      ],
+      ["dsrRequests", sql`ADD COLUMN IF NOT EXISTS "completedAt" timestamp`],
+      ["dsrRequests", sql`ADD COLUMN IF NOT EXISTS "assignedToUserId" integer`],
+      ["dsrRequests", sql`ADD COLUMN IF NOT EXISTS "notes" text`],
     ];
     for (const [table, clause] of driftColumns) {
       await driftExec(

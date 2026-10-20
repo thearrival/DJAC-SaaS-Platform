@@ -121,38 +121,60 @@ export const orgSettingsRouter = router({
       .from(organizationMembers)
       .where(eq(organizationMembers.organizationId, orgId));
 
-    const deadlines = await db
-      .select()
-      .from(complianceDeadlines)
-      .where(eq(complianceDeadlines.organizationId, orgId));
-    const risks = await db
-      .select()
-      .from(riskRegister)
-      .where(eq(riskRegister.organizationId, orgId));
-    const policies = await db
-      .select()
-      .from(compliancePolicies)
-      .where(eq(compliancePolicies.organizationId, orgId));
-    const incidents = await db
-      .select()
-      .from(complianceIncidents)
-      .where(eq(complianceIncidents.organizationId, orgId));
-    const dsrs = await db
-      .select()
-      .from(dsrRequests)
-      .where(eq(dsrRequests.organizationId, orgId));
-    const remediation = await db
-      .select()
-      .from(remediationTasks)
-      .where(eq(remediationTasks.organizationId, orgId));
-    const evidenceRows = await db
-      .select()
-      .from(complianceEvidence)
-      .where(eq(complianceEvidence.organizationId, orgId));
-    const schedules = await db
-      .select()
-      .from(auditSchedules)
-      .where(eq(auditSchedules.organizationId, orgId));
+    // Schema drift on secondary tables must not break the whole export.
+    const safeRows = async <T>(query: Promise<T[]>): Promise<T[]> => {
+      try {
+        return await query;
+      } catch {
+        return [];
+      }
+    };
+
+    const deadlines = await safeRows(
+      db
+        .select()
+        .from(complianceDeadlines)
+        .where(eq(complianceDeadlines.organizationId, orgId))
+    );
+    const risks = await safeRows(
+      db
+        .select()
+        .from(riskRegister)
+        .where(eq(riskRegister.organizationId, orgId))
+    );
+    const policies = await safeRows(
+      db
+        .select()
+        .from(compliancePolicies)
+        .where(eq(compliancePolicies.organizationId, orgId))
+    );
+    const incidents = await safeRows(
+      db
+        .select()
+        .from(complianceIncidents)
+        .where(eq(complianceIncidents.organizationId, orgId))
+    );
+    const dsrs = await safeRows(
+      db.select().from(dsrRequests).where(eq(dsrRequests.organizationId, orgId))
+    );
+    const remediation = await safeRows(
+      db
+        .select()
+        .from(remediationTasks)
+        .where(eq(remediationTasks.organizationId, orgId))
+    );
+    const evidenceRows = await safeRows(
+      db
+        .select()
+        .from(complianceEvidence)
+        .where(eq(complianceEvidence.organizationId, orgId))
+    );
+    const schedules = await safeRows(
+      db
+        .select()
+        .from(auditSchedules)
+        .where(eq(auditSchedules.organizationId, orgId))
+    );
 
     return {
       exportedAt: new Date().toISOString(),
