@@ -424,6 +424,8 @@ function initialiseSentry() {
   Sentry.init({
     dsn: ENV.sentryDsn,
     environment: parsedEnv.NODE_ENV ?? "production",
+    // Tie events to the deployed build so errors resolve to a release.
+    release: process.env.APP_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT ?? void 0,
     // Trace 10 % of requests in production; 100 % in dev/staging for visibility.
     tracesSampleRate: ENV.isProduction ? 0.1 : 1,
     // Attach request data (URL, method, headers) to error events.
