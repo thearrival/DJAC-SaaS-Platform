@@ -9,6 +9,10 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { trpc } from "@/lib/trpc";
 import {
+  shouldRequireCompanyProfile,
+  type CompanyProfileGateMode,
+} from "@/lib/companyProfile";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -433,26 +437,23 @@ function OnboardingGate({ children }: { children: React.ReactNode }) {
   // Lightweight company-profile gate: platform data stays locked until the
   // organization supplies the name + industry the workspace personalises around.
   const isOnCompanyProfile = currentPath === "/company-profile";
-  const orgComplete = orgQuery.data
-    ? orgQuery.data.name?.trim().length >= 2 && !!orgQuery.data.industry?.trim()
-    : true;
 
   // Only recent accounts with no onboarding activity are gated (server-computed),
   // so existing users are never disrupted. Fail open on error.
   const shouldOnboard = data?.shouldOnboard ?? false;
   // "all" gates every incomplete profile; "new" grandfathers existing accounts.
-  const gateMode = data?.companyProfileGate ?? "all";
+  const gateMode: CompanyProfileGateMode =
+    data?.companyProfileGate === "new" ? "new" : "all";
   const isOnGetStartedPage = currentPath === "/get-started";
-  const companyProfileRequired =
-    gateMode === "all" || (gateMode === "new" && shouldOnboard);
-  const needsCompanyProfile =
-    !isAdmin &&
-    !orgQuery.isLoading &&
-    !orgQuery.isError &&
-    !!orgQuery.data &&
-    !orgComplete &&
-    !isOnCompanyProfile &&
-    companyProfileRequired;
+  const needsCompanyProfile = shouldRequireCompanyProfile({
+    org: orgQuery.data,
+    gateMode,
+    shouldOnboard,
+    isAdmin,
+    onCompanyProfilePage: isOnCompanyProfile,
+    loading: orgQuery.isLoading,
+    error: orgQuery.isError,
+  });
   const shouldRedirect =
     !isAdmin &&
     !isLoading &&
