@@ -41995,6 +41995,13 @@ async function createApp() {
         },
         "Client error reported"
       );
+      captureError(new Error(clip(body.message, 800) ?? "Client error"), {
+        source: "client",
+        id: clip(body.id, 40),
+        componentStack: clip(body.componentStack, 2e3),
+        url: clip(body.url, 300),
+        userAgent: clip(req.headers["user-agent"], 200)
+      });
     } catch {
     }
     res.status(204).end();

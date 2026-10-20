@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { initialiseSentry, sentryErrorHandler } from "./sentry";
+import { captureError, initialiseSentry, sentryErrorHandler } from "./sentry";
 // Sentry must be initialised before any other imports so auto-instrumentation
 // can wrap imported modules.
 initialiseSentry();
@@ -511,6 +511,14 @@ export async function createApp() {
         },
         "Client error reported"
       );
+      // Surface client crashes in Sentry alongside server errors.
+      captureError(new Error(clip(body.message, 800) ?? "Client error"), {
+        source: "client",
+        id: clip(body.id, 40),
+        componentStack: clip(body.componentStack, 2000),
+        url: clip(body.url, 300),
+        userAgent: clip(req.headers["user-agent"], 200),
+      });
     } catch {
       /* telemetry must never fail the request */
     }
