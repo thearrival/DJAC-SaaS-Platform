@@ -106,6 +106,8 @@ jobs:
           NODE_ENV: production
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_APP_ID: DJAC
+      - name: Bundle budget
+        run: pnpm bundle:check
       - uses: actions/upload-artifact@v4
         with:
           name: build-output

@@ -43,7 +43,8 @@
     "smoke:cleanup": "node scripts/smoke-cleanup.mjs",
     "provenance:signoff": "tsx scripts/provenance-signoff.ts",
     "provenance:audit": "tsx scripts/provenance-audit.ts",
-    "secret:scan": "node scripts/secret-scan.mjs"
+    "secret:scan": "node scripts/secret-scan.mjs",
+    "bundle:check": "node scripts/bundle-budget.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1152.0",
