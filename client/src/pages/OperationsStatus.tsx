@@ -81,6 +81,17 @@ function getErrorMessage(error: unknown) {
   return "";
 }
 
+function formatUptime(seconds?: number): string {
+  if (seconds == null || !Number.isFinite(seconds)) return "—";
+  const total = Math.floor(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
 export default function OperationsStatus() {
   usePageTitle("Operations Status");
   const { t, locale } = useLocale();
@@ -128,6 +139,27 @@ export default function OperationsStatus() {
   }, [jobsQuery.error]);
 
   const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
+  const [build, setBuild] = useState<{
+    version?: string;
+    commit?: string;
+    env?: string;
+    uptime?: number;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/status")
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        if (!cancelled && d) setBuild(d);
+      })
+      .catch(() => {
+        /* non-critical */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const readiness = readinessQuery.data;
   const history = historyQuery.data;
@@ -241,6 +273,35 @@ export default function OperationsStatus() {
           </Button>
         </div>
       </div>
+
+      {build && (
+        <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-border bg-card px-4 py-3 text-xs text-muted-foreground">
+          <span>
+            {t("ops.buildVersion", "Version")}:{" "}
+            <span className="font-mono text-foreground">
+              {build.version ?? "—"}
+            </span>
+          </span>
+          <span>
+            {t("ops.buildCommit", "Commit")}:{" "}
+            <span className="font-mono text-foreground">
+              {(build.commit ?? "—").slice(0, 12)}
+            </span>
+          </span>
+          <span>
+            {t("ops.buildEnv", "Environment")}:{" "}
+            <span className="font-mono text-foreground">
+              {build.env ?? "—"}
+            </span>
+          </span>
+          <span>
+            {t("ops.buildUptime", "Uptime")}:{" "}
+            <span className="font-mono text-foreground">
+              {formatUptime(build.uptime)}
+            </span>
+          </span>
+        </div>
+      )}
 
       {hasCoreLoadError && (
         <Card className="mb-6 border-destructive/40 bg-destructive/5">
