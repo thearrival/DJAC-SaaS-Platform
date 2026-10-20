@@ -493,8 +493,14 @@ export async function createApp() {
   // ─── Client error telemetry ───────────────────────────────────────────────
   // The client ErrorBoundary reports crashes here so a failure that only shows
   // as "Something went wrong" in the UI is still visible in the logs.
-  app.post("/api/client-error", (req: Request, res: Response) => {
+  app.post("/api/client-error", async (req: Request, res: Response) => {
     try {
+      const ip = req.ip || req.socket.remoteAddress || "unknown";
+      const rl = await checkRateLimit(`client-error:${ip}`, 30, 60_000);
+      if (!rl.allowed) {
+        res.status(429).json({ error: "Too many requests" });
+        return;
+      }
       const body = (req.body ?? {}) as Record<string, unknown>;
       const clip = (v: unknown, n: number) =>
         typeof v === "string" ? v.slice(0, n) : undefined;

@@ -41978,8 +41978,14 @@ async function createApp() {
   app.get("/readyz", sendReadiness);
   app.get("/api/readiness", sendReadiness);
   app.get("/api/readyz", sendReadiness);
-  app.post("/api/client-error", (req, res) => {
+  app.post("/api/client-error", async (req, res) => {
     try {
+      const ip = req.ip || req.socket.remoteAddress || "unknown";
+      const rl = await checkRateLimit(`client-error:${ip}`, 30, 6e4);
+      if (!rl.allowed) {
+        res.status(429).json({ error: "Too many requests" });
+        return;
+      }
       const body = req.body ?? {};
       const clip = (v, n) => typeof v === "string" ? v.slice(0, n) : void 0;
       logger.error(
