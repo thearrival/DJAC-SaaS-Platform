@@ -38,6 +38,7 @@ const pages = [
   "/compliance-calendar",
   "/billing",
   "/account-settings",
+  "/operations",
 ];
 
 const browser = await chromium.launch();

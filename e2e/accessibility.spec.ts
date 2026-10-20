@@ -70,6 +70,7 @@ const AUTH_PAGES = [
   "/pro-intelligence",
   "/vendor-data-flow",
   "/entities",
+  "/operations",
 ];
 
 test.describe("authenticated pages", () => {

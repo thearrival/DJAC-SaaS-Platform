@@ -248,7 +248,7 @@ export default function OperationsStatus() {
           <h1 className="text-3xl font-bold text-foreground mb-2">
             {t("ops.title", "Operations Status")}
           </h1>
-          <p className="text-slate-600">
+          <p className="text-muted-foreground">
             {t(
               "ops.subtitle",
               "Track runtime readiness, AI pipeline transport, and recent assessment jobs."
@@ -328,7 +328,7 @@ export default function OperationsStatus() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700">
+            <CardTitle className="text-sm font-medium text-foreground">
               {t("ops.queueMode", "Queue Mode")}
             </CardTitle>
           </CardHeader>
@@ -337,7 +337,7 @@ export default function OperationsStatus() {
               {streamConfigQuery.data?.queueMode ??
                 t("ops.notAvailable", "N/A")}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {t("ops.queueModeDesc", "Selected by environment configuration")}
             </p>
           </CardContent>
@@ -345,7 +345,7 @@ export default function OperationsStatus() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700">
+            <CardTitle className="text-sm font-medium text-foreground">
               {t("ops.websocketPath", "WebSocket Path")}
             </CardTitle>
           </CardHeader>
@@ -354,7 +354,7 @@ export default function OperationsStatus() {
               {streamConfigQuery.data?.websocketPath ??
                 t("ops.notAvailable", "N/A")}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {t("ops.streamTransport", "Live updates transport endpoint")}
             </p>
           </CardContent>
@@ -362,7 +362,7 @@ export default function OperationsStatus() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700">
+            <CardTitle className="text-sm font-medium text-foreground">
               {t("ops.runningJobs", "Running Jobs")}
             </CardTitle>
           </CardHeader>
@@ -370,7 +370,7 @@ export default function OperationsStatus() {
             <p className="text-2xl font-bold text-foreground">
               {jobSummary.running}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {t("ops.activePipelines", "Active orchestration pipelines")}
             </p>
           </CardContent>
@@ -378,7 +378,7 @@ export default function OperationsStatus() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-700">
+            <CardTitle className="text-sm font-medium text-foreground">
               {t("ops.failedJobs", "Failed Jobs")}
             </CardTitle>
           </CardHeader>
@@ -386,7 +386,7 @@ export default function OperationsStatus() {
             <p className="text-2xl font-bold text-foreground">
               {jobSummary.failed}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {t("ops.inRecentWindow", "In recent assessment window")}
             </p>
           </CardContent>
@@ -425,7 +425,7 @@ export default function OperationsStatus() {
               </Button>
             </div>
           ) : readinessQuery.isLoading ? (
-            <div className="flex items-center gap-2 text-slate-600">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <LoaderCircle className="h-4 w-4 animate-spin" />
               <span>{t("ops.loadingReadiness", "Loading readiness...")}</span>
             </div>
@@ -447,7 +447,7 @@ export default function OperationsStatus() {
                       ? t("ops.ready", "Ready")
                       : t("ops.notReady", "Not Ready")}
                   </Badge>
-                  <p className="text-slate-600 mt-2">
+                  <p className="text-muted-foreground mt-2">
                     {readiness.services.database.details}
                   </p>
                 </div>
@@ -467,7 +467,7 @@ export default function OperationsStatus() {
                       ? t("ops.ready", "Ready")
                       : t("ops.notReady", "Not Ready")}
                   </Badge>
-                  <p className="text-slate-600 mt-2">
+                  <p className="text-muted-foreground mt-2">
                     {readiness.services.redis.details}
                   </p>
                 </div>
@@ -487,22 +487,22 @@ export default function OperationsStatus() {
                       ? t("ops.ready", "Ready")
                       : t("ops.notReady", "Not Ready")}
                   </Badge>
-                  <p className="text-slate-600 mt-2">
+                  <p className="text-muted-foreground mt-2">
                     {readiness.services.aiOrchestrator.details}
                   </p>
-                  <p className="text-slate-600 mt-1">
+                  <p className="text-muted-foreground mt-1">
                     {t("ops.agentSwarm", "Agent Swarm Configured")}:{" "}
                     {readiness.services.aiOrchestrator.agentSwarmConfigured
                       ? t("ops.yes", "Yes")
                       : t("ops.no", "No")}
                   </p>
-                  <p className="text-slate-600 mt-1">
+                  <p className="text-muted-foreground mt-1">
                     {t("ops.wsPathLabel", "WebSocket")}:{" "}
                     {readiness.services.aiOrchestrator.websocketPath}
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {t("ops.lastUpdated", "Last updated")}:{" "}
                 {formatTime(
                   readiness.timestamp,
@@ -583,7 +583,7 @@ export default function OperationsStatus() {
               </Button>
             </div>
           ) : historyQuery.isLoading ? (
-            <div className="flex items-center gap-2 text-slate-600">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <LoaderCircle className="h-4 w-4 animate-spin" />
               <span>
                 {t("ops.historyLoading", "Loading history diagnostics...")}
@@ -596,7 +596,7 @@ export default function OperationsStatus() {
                   <p className="font-medium text-foreground">
                     {t("ops.storageType", "Storage Type")}
                   </p>
-                  <p className="text-slate-600 mt-2">
+                  <p className="text-muted-foreground mt-2">
                     {formatStorageType(history.storageType, t)}
                   </p>
                 </div>
@@ -653,7 +653,7 @@ export default function OperationsStatus() {
                   <p className="font-medium text-foreground">
                     {t("ops.lastWrite", "Last Write")}
                   </p>
-                  <p className="text-slate-600 mt-2">
+                  <p className="text-muted-foreground mt-2">
                     {formatTime(
                       history.lastUpdatedAt,
                       t("ops.notAvailable", "N/A"),
@@ -663,7 +663,7 @@ export default function OperationsStatus() {
                 </div>
               </div>
 
-              <div className="rounded-md border bg-muted p-3 text-sm text-slate-700">
+              <div className="rounded-md border bg-muted p-3 text-sm text-foreground">
                 <p>
                   <span className="font-medium text-foreground">
                     {t("ops.storagePath", "Storage Path")}:
@@ -710,18 +710,18 @@ export default function OperationsStatus() {
               </Button>
             </div>
           ) : jobsQuery.isLoading ? (
-            <div className="flex items-center gap-2 text-slate-600">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <LoaderCircle className="h-4 w-4 animate-spin" />
               <span>{t("ops.loadingJobs", "Loading jobs...")}</span>
             </div>
           ) : jobs.length === 0 ? (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               {t("ops.noJobs", "No assessment jobs yet.")}
             </p>
           ) : (
             <div className="overflow-x-auto rounded-md border">
               <table className="min-w-full text-sm">
-                <thead className="bg-muted text-left text-slate-700">
+                <thead className="bg-muted text-left text-foreground">
                   <tr>
                     <th className="px-3 py-2 font-medium">
                       {t("ops.job", "Job")}
@@ -746,7 +746,7 @@ export default function OperationsStatus() {
                 <tbody>
                   {jobs.map(job => (
                     <tr key={job.id} className="border-t">
-                      <td className="px-3 py-2 font-mono text-xs text-slate-700">
+                      <td className="px-3 py-2 font-mono text-xs text-foreground">
                         {shortJobId(job.id)}
                       </td>
                       <td className="px-3 py-2">
@@ -754,18 +754,18 @@ export default function OperationsStatus() {
                           {translateStatus(job.status)}
                         </Badge>
                       </td>
-                      <td className="px-3 py-2 text-slate-700">
+                      <td className="px-3 py-2 text-foreground">
                         {translateStage(job.stage)}
                       </td>
-                      <td className="px-3 py-2 text-slate-700">
+                      <td className="px-3 py-2 text-foreground">
                         {job.result?.inputSummary.source ??
                           t("ops.notAvailable", "N/A")}
                       </td>
-                      <td className="px-3 py-2 text-slate-700">
+                      <td className="px-3 py-2 text-foreground">
                         {job.result?.inputSummary.vendorId ??
                           t("ops.notAvailable", "N/A")}
                       </td>
-                      <td className="px-3 py-2 text-slate-700">
+                      <td className="px-3 py-2 text-foreground">
                         {formatTime(
                           job.updatedAt,
                           t("ops.notAvailable", "N/A"),
