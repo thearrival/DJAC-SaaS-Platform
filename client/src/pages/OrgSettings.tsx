@@ -35,6 +35,7 @@ import {
   CreditCard,
   Lock,
   CheckCircle2,
+  Download,
 } from "lucide-react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -142,6 +143,29 @@ export default function OrgSettings() {
   const org = orgQuery.data;
   const isAdmin =
     org?.currentUserRole === "owner" || org?.currentUserRole === "admin";
+
+  const utils = trpc.useUtils();
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const data = await utils.orgSettings.exportData.fetch();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `djac-org-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   // ─── Form state ────────────────────────────────────────────────────────────
   const [name, setName] = useState("");
@@ -527,6 +551,40 @@ export default function OrgSettings() {
           </form>
         </CardContent>
       </Card>
+
+      {/* ── Data export (admin) ──────────────────────────────────────── */}
+      {isAdmin && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">
+              {t("orgSettings.exportTitle", "Export your data")}
+            </CardTitle>
+            <CardDescription>
+              {t(
+                "orgSettings.exportDesc",
+                "Download your organization profile, vendors and members as JSON."
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={exporting}
+              className="gap-1.5"
+            >
+              {exporting ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Download size={14} />
+              )}
+              {exporting
+                ? t("orgSettings.exporting", "Preparing…")
+                : t("orgSettings.exportButton", "Download JSON")}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Danger zone (owner only) ─────────────────────────────────── */}
       {org?.currentUserRole === "owner" && (

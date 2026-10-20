@@ -8620,7 +8620,7 @@ __export(admin_insights_store_exports, {
   sendAlertDigest: () => sendAlertDigest
 });
 import { readFileSync } from "node:fs";
-import { and as and38, count as count5, desc as desc28, eq as eq52, gte as gte4, sql as sql16 } from "drizzle-orm";
+import { and as and38, count as count5, desc as desc28, eq as eq53, gte as gte4, sql as sql16 } from "drizzle-orm";
 async function getUserTimeline(userId, limit = 100) {
   const db = await getDb();
   if (!db) return [];
@@ -8634,14 +8634,14 @@ async function getUserTimeline(userId, limit = 100) {
       ipAddress: auditLogs.ipHash,
       userAgent: auditLogs.userAgent,
       createdAt: auditLogs.createdAt
-    }).from(auditLogs).where(eq52(auditLogs.localUserId, userId)).orderBy(desc28(auditLogs.createdAt)).limit(limit),
+    }).from(auditLogs).where(eq53(auditLogs.localUserId, userId)).orderBy(desc28(auditLogs.createdAt)).limit(limit),
     db.select({
       id: activityEvents.id,
       action: activityEvents.action,
       entityType: activityEvents.entityType,
       ipAddress: activityEvents.ipHash,
       createdAt: activityEvents.createdAt
-    }).from(activityEvents).where(eq52(activityEvents.localUserId, userId)).orderBy(desc28(activityEvents.createdAt)).limit(limit),
+    }).from(activityEvents).where(eq53(activityEvents.localUserId, userId)).orderBy(desc28(activityEvents.createdAt)).limit(limit),
     db.select({
       id: userInteractionLogs.id,
       action: userInteractionLogs.action,
@@ -8650,7 +8650,7 @@ async function getUserTimeline(userId, limit = 100) {
       ipAddress: userInteractionLogs.ipHash,
       userAgent: userInteractionLogs.userAgent,
       createdAt: userInteractionLogs.createdAt
-    }).from(userInteractionLogs).where(eq52(userInteractionLogs.localUserId, userId)).orderBy(desc28(userInteractionLogs.createdAt)).limit(limit)
+    }).from(userInteractionLogs).where(eq53(userInteractionLogs.localUserId, userId)).orderBy(desc28(userInteractionLogs.createdAt)).limit(limit)
   ]);
   const merged = [
     ...auditRows.map((r) => ({
@@ -8700,7 +8700,7 @@ async function getUserAuthHistory(userId, limit = 50) {
     userAgent: auditLogs.userAgent,
     createdAt: auditLogs.createdAt
   }).from(auditLogs).where(
-    and38(eq52(auditLogs.localUserId, userId), eq52(auditLogs.category, "auth"))
+    and38(eq53(auditLogs.localUserId, userId), eq53(auditLogs.category, "auth"))
   ).orderBy(desc28(auditLogs.createdAt)).limit(limit);
   return rows.map((r) => ({
     id: r.id,
@@ -9002,7 +9002,7 @@ async function buildRevenueReport(db, base, windowStart) {
     periodEnd: subscriptions.currentPeriodEnd
   }).from(subscriptions).innerJoin(
     organizations,
-    eq52(subscriptions.organizationId, organizations.id)
+    eq53(subscriptions.organizationId, organizations.id)
   ).orderBy(desc28(subscriptions.updatedAt)).limit(500);
   const active = subs.filter(
     (s) => s.status === "active" || s.status === "trialing"
@@ -9379,7 +9379,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const pastDue = await db.select({ c: count5() }).from(subscriptions).where(eq52(subscriptions.status, "past_due"));
+    const pastDue = await db.select({ c: count5() }).from(subscriptions).where(eq53(subscriptions.status, "past_due"));
     if ((pastDue[0]?.c ?? 0) > 0) {
       const pastDueCount = Number(pastDue[0].c);
       alerts.push({
@@ -9462,7 +9462,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const canceling = await db.select({ c: count5() }).from(subscriptions).where(eq52(subscriptions.cancelAtPeriodEnd, 1));
+    const canceling = await db.select({ c: count5() }).from(subscriptions).where(eq53(subscriptions.cancelAtPeriodEnd, 1));
     if ((canceling[0]?.c ?? 0) > 0) {
       alerts.push({
         id: "canceling",
@@ -9531,7 +9531,7 @@ async function getLiveMetrics() {
       outcome: auditLogs.outcome,
       userName: localUsers.name,
       createdAt: auditLogs.createdAt
-    }).from(auditLogs).leftJoin(localUsers, eq52(auditLogs.localUserId, localUsers.id)).orderBy(desc28(auditLogs.createdAt)).limit(25);
+    }).from(auditLogs).leftJoin(localUsers, eq53(auditLogs.localUserId, localUsers.id)).orderBy(desc28(auditLogs.createdAt)).limit(25);
     return {
       generatedAt: now.toISOString(),
       sseClients: getSSEClientCount2(),
@@ -26455,6 +26455,9 @@ async function updateOrgSettings(orgId, input) {
 }
 
 // server/org-settings-router.ts
+init_db();
+init_schema();
+import { eq as eq19 } from "drizzle-orm";
 var JURISDICTION_VALUES = GLOBAL_JURISDICTIONS;
 var updateOrgSchema = z15.object({
   name: z15.string().trim().min(2, "Organization name must be at least 2 characters").max(255).optional(),
@@ -26479,6 +26482,50 @@ var orgSettingsRouter = router({
         message: "Organization not found"
       });
     return org;
+  }),
+  /**
+   * Export the organization's core data as JSON (owner/admin only). Read-only
+   * and bounded to profile, vendors and members for portability/compliance.
+   */
+  exportData: orgAdminProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) {
+      throw new TRPCError12({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database unavailable"
+      });
+    }
+    const orgId = ctx.organizationId;
+    const [org] = await db.select({
+      name: organizations.name,
+      industry: organizations.industry,
+      primaryJurisdiction: organizations.primaryJurisdiction,
+      plan: organizations.plan,
+      createdAt: organizations.createdAt
+    }).from(organizations).where(eq19(organizations.id, orgId)).limit(1);
+    const vendorRows = await db.select({
+      id: vendors.id,
+      vendorName: vendors.vendorName,
+      industry: vendors.industry,
+      riskTier: vendors.riskTier,
+      criticalityLevel: vendors.criticalityLevel,
+      dataLocations: vendors.dataLocations,
+      regulatoryJurisdictions: vendors.regulatoryJurisdictions,
+      certifications: vendors.certifications,
+      createdAt: vendors.createdAt
+    }).from(vendors).where(eq19(vendors.organizationId, orgId));
+    const memberRows = await db.select({
+      role: organizationMembers.role,
+      status: organizationMembers.status,
+      inviteEmail: organizationMembers.inviteEmail,
+      createdAt: organizationMembers.createdAt
+    }).from(organizationMembers).where(eq19(organizationMembers.organizationId, orgId));
+    return {
+      exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      organization: org ?? null,
+      vendors: vendorRows,
+      members: memberRows
+    };
   }),
   /**
    * First-run company-profile capture. Deliberately does NOT require MFA —
@@ -26528,14 +26575,14 @@ var orgSettingsRouter = router({
 // server/org-entities-router.ts
 import { z as z16 } from "zod";
 import { TRPCError as TRPCError13 } from "@trpc/server";
-import { and as and13, count as count3, eq as eq20 } from "drizzle-orm";
+import { and as and13, count as count3, eq as eq21 } from "drizzle-orm";
 init_db();
 init_schema();
 
 // server/services/org-context.ts
 init_schema();
 init_db();
-import { and as and12, eq as eq19, sql as sql5 } from "drizzle-orm";
+import { and as and12, eq as eq20, sql as sql5 } from "drizzle-orm";
 async function createDefaultOrganizationForUser(user, localUserId) {
   if (user.id <= 0 && !localUserId) return null;
   const db = await getDb();
@@ -26550,7 +26597,7 @@ async function createDefaultOrganizationForUser(user, localUserId) {
       sql5`SELECT pg_advisory_xact_lock(hashtext(${`org-owner:${ownerKey}`}))`
     );
     const existingMembership = await tx.select({ organizationId: organizationMembers.organizationId }).from(organizationMembers).where(
-      localUserId != null ? eq19(organizationMembers.localUserId, localUserId) : eq19(organizationMembers.userId, user.id)
+      localUserId != null ? eq20(organizationMembers.localUserId, localUserId) : eq20(organizationMembers.userId, user.id)
     ).limit(1);
     if (existingMembership.length > 0) return null;
     const [inserted] = await tx.insert(organizations).values({
@@ -26587,8 +26634,8 @@ async function resolveOrganizationForUser(user) {
     role: organizationMembers.role
   }).from(organizationMembers).where(
     and12(
-      eq19(organizationMembers.userId, user.id),
-      eq19(organizationMembers.status, "active")
+      eq20(organizationMembers.userId, user.id),
+      eq20(organizationMembers.status, "active")
     )
   ).limit(1);
   if (!membership) {
@@ -26615,8 +26662,8 @@ async function resolveOrganizationForLocalUser(user) {
     role: organizationMembers.role
   }).from(organizationMembers).where(
     and12(
-      eq19(organizationMembers.localUserId, localUserId),
-      eq19(organizationMembers.status, "active")
+      eq20(organizationMembers.localUserId, localUserId),
+      eq20(organizationMembers.status, "active")
     )
   ).limit(1);
   if (!membership) {
@@ -26638,11 +26685,11 @@ async function resolveOrganizationForLocalUser(user) {
 async function statsForOrg(orgId) {
   const db = await getDb();
   if (!db) return { vendors: 0, members: 0 };
-  const [v] = await db.select({ value: count3() }).from(vendors).where(eq20(vendors.organizationId, orgId));
+  const [v] = await db.select({ value: count3() }).from(vendors).where(eq21(vendors.organizationId, orgId));
   const [m] = await db.select({ value: count3() }).from(organizationMembers).where(
     and13(
-      eq20(organizationMembers.organizationId, orgId),
-      eq20(organizationMembers.status, "active")
+      eq21(organizationMembers.organizationId, orgId),
+      eq21(organizationMembers.status, "active")
     )
   );
   return {
@@ -26672,14 +26719,14 @@ var orgEntitiesRouter = router({
       plan: organizations.plan,
       parentOrganizationId: organizations.parentOrganizationId,
       primaryJurisdiction: organizations.primaryJurisdiction
-    }).from(organizations).where(eq20(organizations.id, orgId)).limit(1);
+    }).from(organizations).where(eq21(organizations.id, orgId)).limit(1);
     let parent = null;
     if (current?.parentOrganizationId) {
       const [p] = await db.select({
         id: organizations.id,
         name: organizations.name,
         plan: organizations.plan
-      }).from(organizations).where(eq20(organizations.id, current.parentOrganizationId)).limit(1);
+      }).from(organizations).where(eq21(organizations.id, current.parentOrganizationId)).limit(1);
       parent = p ?? null;
     }
     const children = await db.select({
@@ -26688,7 +26735,7 @@ var orgEntitiesRouter = router({
       slug: organizations.slug,
       plan: organizations.plan,
       createdAt: organizations.createdAt
-    }).from(organizations).where(eq20(organizations.parentOrganizationId, orgId));
+    }).from(organizations).where(eq21(organizations.parentOrganizationId, orgId));
     const entities = [];
     for (const c of children) {
       const s = await statsForOrg(c.id);
@@ -26720,7 +26767,7 @@ var orgEntitiesRouter = router({
         message: "Cannot manage entities in dev-bypass mode."
       });
     }
-    const [parent] = await db.select().from(organizations).where(eq20(organizations.id, orgId)).limit(1);
+    const [parent] = await db.select().from(organizations).where(eq21(organizations.id, orgId)).limit(1);
     if (!parent) {
       throw new TRPCError13({
         code: "NOT_FOUND",
@@ -26765,7 +26812,7 @@ var orgEntitiesRouter = router({
 // server/scorecard-store.ts
 init_schema();
 init_db();
-import { and as and14, desc as desc9, eq as eq21 } from "drizzle-orm";
+import { and as and14, desc as desc9, eq as eq22 } from "drizzle-orm";
 function makeEmptyScorecard(totalVendors) {
   return {
     totalVendors,
@@ -26793,7 +26840,7 @@ async function getOrgScorecard(orgId, userId) {
     return makeEmptyScorecard(inMemVendors.length);
   }
   if (orgId < 0) return makeEmptyScorecard(0);
-  const vendorRows = await db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq21(vendors.organizationId, orgId));
+  const vendorRows = await db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq22(vendors.organizationId, orgId));
   const totalVendors = vendorRows.length;
   if (totalVendors === 0) return makeEmptyScorecard(0);
   const assessmentRows = await db.select({
@@ -26807,7 +26854,7 @@ async function getOrgScorecard(orgId, userId) {
     riskLevel: vendorAssessments.riskLevel,
     status: vendorAssessments.status,
     assessmentDate: vendorAssessments.assessmentDate
-  }).from(vendorAssessments).innerJoin(vendors, eq21(vendorAssessments.vendorId, vendors.id)).innerJoin(frameworks, eq21(vendorAssessments.frameworkId, frameworks.id)).where(eq21(vendors.organizationId, orgId)).orderBy(desc9(vendorAssessments.assessmentDate));
+  }).from(vendorAssessments).innerJoin(vendors, eq22(vendorAssessments.vendorId, vendors.id)).innerJoin(frameworks, eq22(vendorAssessments.frameworkId, frameworks.id)).where(eq22(vendors.organizationId, orgId)).orderBy(desc9(vendorAssessments.assessmentDate));
   const latestMap = /* @__PURE__ */ new Map();
   for (const row of assessmentRows) {
     const key = `${row.vendorId}:${row.frameworkId}`;
@@ -26860,8 +26907,8 @@ async function getOrgScorecard(orgId, userId) {
   const gapsBySeverity = { low: 0, medium: 0, high: 0, critical: 0 };
   const gapRows = await db.select({ severity: assessmentGaps.severity }).from(assessmentGaps).innerJoin(
     vendorAssessments,
-    eq21(assessmentGaps.assessmentId, vendorAssessments.id)
-  ).innerJoin(vendors, eq21(vendorAssessments.vendorId, vendors.id)).where(eq21(vendors.organizationId, orgId));
+    eq22(assessmentGaps.assessmentId, vendorAssessments.id)
+  ).innerJoin(vendors, eq22(vendorAssessments.vendorId, vendors.id)).where(eq22(vendors.organizationId, orgId));
   for (const g of gapRows) {
     if (g.severity && g.severity in gapsBySeverity) {
       gapsBySeverity[g.severity]++;
@@ -26876,8 +26923,8 @@ async function getOrgScorecard(orgId, userId) {
     createdAt: complianceReports.createdAt
   }).from(complianceReports).where(
     and14(
-      eq21(complianceReports.organizationId, orgId),
-      eq21(complianceReports.status, "ready")
+      eq22(complianceReports.organizationId, orgId),
+      eq22(complianceReports.status, "ready")
     )
   ).orderBy(desc9(complianceReports.createdAt)).limit(5);
   return {
@@ -26917,7 +26964,7 @@ import { TRPCError as TRPCError14 } from "@trpc/server";
 init_schema();
 init_db();
 import crypto3 from "crypto";
-import { and as and15, eq as eq22, isNull as isNull2 } from "drizzle-orm";
+import { and as and15, eq as eq23, isNull as isNull2 } from "drizzle-orm";
 var MEM_KEYS = [];
 var memIdSeq = 1;
 function genApiKey() {
@@ -26941,7 +26988,7 @@ async function listApiKeys(orgId) {
     lastUsedAt: apiKeys.lastUsedAt,
     expiresAt: apiKeys.expiresAt,
     createdAt: apiKeys.createdAt
-  }).from(apiKeys).where(and15(eq22(apiKeys.organizationId, orgId), isNull2(apiKeys.revokedAt)));
+  }).from(apiKeys).where(and15(eq23(apiKeys.organizationId, orgId), isNull2(apiKeys.revokedAt)));
 }
 async function createApiKey(orgId, createdByUserId, name, scopesJson, expiresAt) {
   const db = await getDb();
@@ -26984,9 +27031,9 @@ async function revokeApiKey(orgId, keyId) {
     MEM_KEYS[idx].revokedAt = /* @__PURE__ */ new Date();
     return true;
   }
-  const [existing] = await db.select({ id: apiKeys.id }).from(apiKeys).where(and15(eq22(apiKeys.id, keyId), eq22(apiKeys.organizationId, orgId)));
+  const [existing] = await db.select({ id: apiKeys.id }).from(apiKeys).where(and15(eq23(apiKeys.id, keyId), eq23(apiKeys.organizationId, orgId)));
   if (!existing) return false;
-  await db.update(apiKeys).set({ revokedAt: /* @__PURE__ */ new Date() }).where(eq22(apiKeys.id, keyId));
+  await db.update(apiKeys).set({ revokedAt: /* @__PURE__ */ new Date() }).where(eq23(apiKeys.id, keyId));
   return true;
 }
 
@@ -27101,7 +27148,7 @@ import { TRPCError as TRPCError15 } from "@trpc/server";
 // server/remediation-store.ts
 init_schema();
 init_db();
-import { and as and16, desc as desc10, eq as eq23 } from "drizzle-orm";
+import { and as and16, desc as desc10, eq as eq24 } from "drizzle-orm";
 var MEM_TASKS = [];
 var memSeq = 1;
 async function listTasks(orgId) {
@@ -27111,7 +27158,7 @@ async function listTasks(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(remediationTasks).where(eq23(remediationTasks.organizationId, orgId)).orderBy(desc10(remediationTasks.createdAt));
+  return db.select().from(remediationTasks).where(eq24(remediationTasks.organizationId, orgId)).orderBy(desc10(remediationTasks.createdAt));
 }
 async function createTask(orgId, input) {
   const db = await getDb();
@@ -27176,8 +27223,8 @@ async function updateTaskStatus(orgId, id, status) {
   }
   await db.update(remediationTasks).set({ status, updatedAt: /* @__PURE__ */ new Date() }).where(
     and16(
-      eq23(remediationTasks.id, id),
-      eq23(remediationTasks.organizationId, orgId)
+      eq24(remediationTasks.id, id),
+      eq24(remediationTasks.organizationId, orgId)
     )
   );
   return { id, status };
@@ -27196,8 +27243,8 @@ async function patchTask(orgId, id, fields, dueDate) {
   if (dueDate !== void 0) updates.dueDate = dueDate;
   await db.update(remediationTasks).set(updates).where(
     and16(
-      eq23(remediationTasks.id, id),
-      eq23(remediationTasks.organizationId, orgId)
+      eq24(remediationTasks.id, id),
+      eq24(remediationTasks.organizationId, orgId)
     )
   );
   return { id };
@@ -27214,8 +27261,8 @@ async function removeTask(orgId, id) {
   }
   await db.delete(remediationTasks).where(
     and16(
-      eq23(remediationTasks.id, id),
-      eq23(remediationTasks.organizationId, orgId)
+      eq24(remediationTasks.id, id),
+      eq24(remediationTasks.organizationId, orgId)
     )
   );
   return true;
@@ -27337,7 +27384,7 @@ import { TRPCError as TRPCError16 } from "@trpc/server";
 // server/risk-register-store.ts
 init_schema();
 init_db();
-import { and as and17, desc as desc11, eq as eq24 } from "drizzle-orm";
+import { and as and17, desc as desc11, eq as eq25 } from "drizzle-orm";
 var MEM_RISKS = [];
 var memSeq2 = 1;
 async function listRisks(orgId) {
@@ -27347,7 +27394,7 @@ async function listRisks(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(riskRegister).where(eq24(riskRegister.organizationId, orgId)).orderBy(desc11(riskRegister.createdAt));
+  return db.select().from(riskRegister).where(eq25(riskRegister.organizationId, orgId)).orderBy(desc11(riskRegister.createdAt));
 }
 async function createRisk(orgId, input) {
   const db = await getDb();
@@ -27426,7 +27473,7 @@ async function patchRisk(orgId, id, fields, reviewDate) {
   const updates = { ...fields, updatedAt: /* @__PURE__ */ new Date() };
   if (reviewDate !== void 0) updates.reviewDate = reviewDate;
   await db.update(riskRegister).set(updates).where(
-    and17(eq24(riskRegister.id, id), eq24(riskRegister.organizationId, orgId))
+    and17(eq25(riskRegister.id, id), eq25(riskRegister.organizationId, orgId))
   );
   return { id };
 }
@@ -27441,11 +27488,11 @@ async function removeRisk(orgId, id) {
     return true;
   }
   const rows = await db.select({ id: riskRegister.id }).from(riskRegister).where(
-    and17(eq24(riskRegister.id, id), eq24(riskRegister.organizationId, orgId))
+    and17(eq25(riskRegister.id, id), eq25(riskRegister.organizationId, orgId))
   );
   if (!rows.length) return false;
   await db.delete(riskRegister).where(
-    and17(eq24(riskRegister.id, id), eq24(riskRegister.organizationId, orgId))
+    and17(eq25(riskRegister.id, id), eq25(riskRegister.organizationId, orgId))
   );
   return true;
 }
@@ -27558,7 +27605,7 @@ import { TRPCError as TRPCError17 } from "@trpc/server";
 // server/policy-store.ts
 init_schema();
 init_db();
-import { and as and18, desc as desc12, eq as eq25 } from "drizzle-orm";
+import { and as and18, desc as desc12, eq as eq26 } from "drizzle-orm";
 var MEM_POLICIES = [];
 var memSeq3 = 1;
 async function listPolicies(orgId) {
@@ -27568,7 +27615,7 @@ async function listPolicies(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(compliancePolicies).where(eq25(compliancePolicies.organizationId, orgId)).orderBy(desc12(compliancePolicies.createdAt));
+  return db.select().from(compliancePolicies).where(eq26(compliancePolicies.organizationId, orgId)).orderBy(desc12(compliancePolicies.createdAt));
 }
 async function createPolicy(orgId, input) {
   const db = await getDb();
@@ -27650,15 +27697,15 @@ async function patchPolicy(orgId, id, updates) {
   }
   const existing = await db.select({ id: compliancePolicies.id }).from(compliancePolicies).where(
     and18(
-      eq25(compliancePolicies.id, id),
-      eq25(compliancePolicies.organizationId, orgId)
+      eq26(compliancePolicies.id, id),
+      eq26(compliancePolicies.organizationId, orgId)
     )
   );
   if (!existing.length) return null;
   await db.update(compliancePolicies).set(updates).where(
     and18(
-      eq25(compliancePolicies.id, id),
-      eq25(compliancePolicies.organizationId, orgId)
+      eq26(compliancePolicies.id, id),
+      eq26(compliancePolicies.organizationId, orgId)
     )
   );
   return { id };
@@ -27670,8 +27717,8 @@ async function getPolicyStatus(orgId, id) {
   }
   const rows = await db.select({ status: compliancePolicies.status }).from(compliancePolicies).where(
     and18(
-      eq25(compliancePolicies.id, id),
-      eq25(compliancePolicies.organizationId, orgId)
+      eq26(compliancePolicies.id, id),
+      eq26(compliancePolicies.organizationId, orgId)
     )
   );
   return rows[0]?.status ?? null;
@@ -27698,8 +27745,8 @@ async function applyPolicyStatusTransition(orgId, id, newStatus) {
     setPatch.lastApprovedAt = now;
   await db.update(compliancePolicies).set(setPatch).where(
     and18(
-      eq25(compliancePolicies.id, id),
-      eq25(compliancePolicies.organizationId, orgId)
+      eq26(compliancePolicies.id, id),
+      eq26(compliancePolicies.organizationId, orgId)
     )
   );
   return { id, status: newStatus };
@@ -27716,15 +27763,15 @@ async function deletePolicy(orgId, id) {
   }
   const rows = await db.select({ id: compliancePolicies.id }).from(compliancePolicies).where(
     and18(
-      eq25(compliancePolicies.id, id),
-      eq25(compliancePolicies.organizationId, orgId)
+      eq26(compliancePolicies.id, id),
+      eq26(compliancePolicies.organizationId, orgId)
     )
   );
   if (!rows.length) return false;
   await db.delete(compliancePolicies).where(
     and18(
-      eq25(compliancePolicies.id, id),
-      eq25(compliancePolicies.organizationId, orgId)
+      eq26(compliancePolicies.id, id),
+      eq26(compliancePolicies.organizationId, orgId)
     )
   );
   return true;
@@ -27848,7 +27895,7 @@ import { TRPCError as TRPCError18 } from "@trpc/server";
 // server/incident-store.ts
 init_schema();
 init_db();
-import { and as and19, desc as desc13, eq as eq26 } from "drizzle-orm";
+import { and as and19, desc as desc13, eq as eq27 } from "drizzle-orm";
 var MEM_INCIDENTS = [];
 var memSeq4 = 1;
 async function listIncidents(orgId) {
@@ -27858,7 +27905,7 @@ async function listIncidents(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(complianceIncidents).where(eq26(complianceIncidents.organizationId, orgId)).orderBy(desc13(complianceIncidents.createdAt));
+  return db.select().from(complianceIncidents).where(eq27(complianceIncidents.organizationId, orgId)).orderBy(desc13(complianceIncidents.createdAt));
 }
 async function createIncident(orgId, input) {
   const db = await getDb();
@@ -27934,15 +27981,15 @@ async function patchIncident(orgId, id, updates) {
   }
   const existing = await db.select({ id: complianceIncidents.id }).from(complianceIncidents).where(
     and19(
-      eq26(complianceIncidents.id, id),
-      eq26(complianceIncidents.organizationId, orgId)
+      eq27(complianceIncidents.id, id),
+      eq27(complianceIncidents.organizationId, orgId)
     )
   );
   if (!existing.length) return null;
   await db.update(complianceIncidents).set(updates).where(
     and19(
-      eq26(complianceIncidents.id, id),
-      eq26(complianceIncidents.organizationId, orgId)
+      eq27(complianceIncidents.id, id),
+      eq27(complianceIncidents.organizationId, orgId)
     )
   );
   return { id };
@@ -27954,8 +28001,8 @@ async function getIncidentStatus(orgId, id) {
   }
   const rows = await db.select({ status: complianceIncidents.status }).from(complianceIncidents).where(
     and19(
-      eq26(complianceIncidents.id, id),
-      eq26(complianceIncidents.organizationId, orgId)
+      eq27(complianceIncidents.id, id),
+      eq27(complianceIncidents.organizationId, orgId)
     )
   );
   return rows[0]?.status ?? null;
@@ -27984,8 +28031,8 @@ async function applyIncidentStatusTransition(orgId, id, newStatus) {
     setPatch.resolvedAt = now;
   await db.update(complianceIncidents).set(setPatch).where(
     and19(
-      eq26(complianceIncidents.id, id),
-      eq26(complianceIncidents.organizationId, orgId)
+      eq27(complianceIncidents.id, id),
+      eq27(complianceIncidents.organizationId, orgId)
     )
   );
   return { id, status: newStatus };
@@ -28004,15 +28051,15 @@ async function markIncidentNotified(orgId, id) {
   }
   const rows = await db.select({ id: complianceIncidents.id }).from(complianceIncidents).where(
     and19(
-      eq26(complianceIncidents.id, id),
-      eq26(complianceIncidents.organizationId, orgId)
+      eq27(complianceIncidents.id, id),
+      eq27(complianceIncidents.organizationId, orgId)
     )
   );
   if (!rows.length) return null;
   await db.update(complianceIncidents).set({ regulatoryNotificationSentAt: now, updatedAt: now }).where(
     and19(
-      eq26(complianceIncidents.id, id),
-      eq26(complianceIncidents.organizationId, orgId)
+      eq27(complianceIncidents.id, id),
+      eq27(complianceIncidents.organizationId, orgId)
     )
   );
   return { id, notifiedAt: now };
@@ -28029,15 +28076,15 @@ async function deleteIncident(orgId, id) {
   }
   const rows = await db.select({ id: complianceIncidents.id }).from(complianceIncidents).where(
     and19(
-      eq26(complianceIncidents.id, id),
-      eq26(complianceIncidents.organizationId, orgId)
+      eq27(complianceIncidents.id, id),
+      eq27(complianceIncidents.organizationId, orgId)
     )
   );
   if (!rows.length) return false;
   await db.delete(complianceIncidents).where(
     and19(
-      eq26(complianceIncidents.id, id),
-      eq26(complianceIncidents.organizationId, orgId)
+      eq27(complianceIncidents.id, id),
+      eq27(complianceIncidents.organizationId, orgId)
     )
   );
   return true;
@@ -28187,7 +28234,7 @@ import { TRPCError as TRPCError19 } from "@trpc/server";
 // server/audit-schedule-store.ts
 init_schema();
 init_db();
-import { and as and20, asc, eq as eq27 } from "drizzle-orm";
+import { and as and20, asc, eq as eq28 } from "drizzle-orm";
 var MEM_AUDITS = [];
 var memSeq5 = 1;
 function addMonths(d2, n) {
@@ -28216,7 +28263,7 @@ async function listAudits(orgId) {
       (a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime()
     );
   }
-  return db.select().from(auditSchedules).where(eq27(auditSchedules.organizationId, orgId)).orderBy(asc(auditSchedules.scheduledDate));
+  return db.select().from(auditSchedules).where(eq28(auditSchedules.organizationId, orgId)).orderBy(asc(auditSchedules.scheduledDate));
 }
 async function createAudit(orgId, input) {
   const db = await getDb();
@@ -28273,7 +28320,7 @@ async function patchAudit(orgId, id, updates) {
     return;
   }
   await db.update(auditSchedules).set({ ...updates, updatedAt: /* @__PURE__ */ new Date() }).where(
-    and20(eq27(auditSchedules.id, id), eq27(auditSchedules.organizationId, orgId))
+    and20(eq28(auditSchedules.id, id), eq28(auditSchedules.organizationId, orgId))
   );
 }
 async function completeAudit(orgId, id, findings) {
@@ -28297,7 +28344,7 @@ async function completeAudit(orgId, id, findings) {
     return { nextOccurrence: null, found: false };
   }
   const rows = await db.select().from(auditSchedules).where(
-    and20(eq27(auditSchedules.id, id), eq27(auditSchedules.organizationId, orgId))
+    and20(eq28(auditSchedules.id, id), eq28(auditSchedules.organizationId, orgId))
   );
   if (!rows.length) return { nextOccurrence: null, found: false };
   const audit = rows[0];
@@ -28309,7 +28356,7 @@ async function completeAudit(orgId, id, findings) {
     findings: findings ?? audit.findings ?? null,
     nextOccurrence: nextOcc ?? null,
     updatedAt: /* @__PURE__ */ new Date()
-  }).where(eq27(auditSchedules.id, id));
+  }).where(eq28(auditSchedules.id, id));
   return { nextOccurrence: nextOcc?.toISOString() ?? null, found: true };
 }
 async function removeAudit(orgId, id) {
@@ -28322,7 +28369,7 @@ async function removeAudit(orgId, id) {
     return;
   }
   await db.delete(auditSchedules).where(
-    and20(eq27(auditSchedules.id, id), eq27(auditSchedules.organizationId, orgId))
+    and20(eq28(auditSchedules.id, id), eq28(auditSchedules.organizationId, orgId))
   );
 }
 
@@ -28443,7 +28490,7 @@ import { TRPCError as TRPCError20 } from "@trpc/server";
 // server/vendor-compliance-store.ts
 init_schema();
 init_db();
-import { and as and21, eq as eq28, inArray as inArray3 } from "drizzle-orm";
+import { and as and21, eq as eq29, inArray as inArray3 } from "drizzle-orm";
 function calcRiskLevel(score) {
   if (score < 40) return "critical";
   if (score < 60) return "high";
@@ -28464,7 +28511,7 @@ async function getVendorComplianceList(orgId) {
     industry: vendors.industry,
     headquartersLocation: vendors.headquartersLocation,
     riskTier: vendors.riskTier
-  }).from(vendors).where(eq28(vendors.organizationId, orgId));
+  }).from(vendors).where(eq29(vendors.organizationId, orgId));
   if (!vendorRows.length) return [];
   const vendorIds = vendorRows.map((v) => v.id);
   const assessRows = await db.select({
@@ -28483,16 +28530,16 @@ async function getVendorComplianceList(orgId) {
       status: riskRegister.status,
       likelihood: riskRegister.likelihood,
       impact: riskRegister.impact
-    }).from(riskRegister).where(eq28(riskRegister.organizationId, orgId)),
+    }).from(riskRegister).where(eq29(riskRegister.organizationId, orgId)),
     db.select({
       vendorId: remediationTasks.vendorId,
       status: remediationTasks.status
-    }).from(remediationTasks).where(eq28(remediationTasks.organizationId, orgId)),
+    }).from(remediationTasks).where(eq29(remediationTasks.organizationId, orgId)),
     db.select({
       affectedVendorId: complianceIncidents.affectedVendorId,
       severity: complianceIncidents.severity,
       status: complianceIncidents.status
-    }).from(complianceIncidents).where(eq28(complianceIncidents.organizationId, orgId))
+    }).from(complianceIncidents).where(eq29(complianceIncidents.organizationId, orgId))
   ]);
   return vendorRows.map((v) => {
     const vAssess = assessRows.filter((a) => a.vendorId === v.id);
@@ -28554,26 +28601,26 @@ async function getVendorComplianceList(orgId) {
 async function getVendorComplianceProfile(orgId, vendorId) {
   const db = await getDb();
   if (!db || orgId < 0) return null;
-  const [vendor] = await db.select().from(vendors).where(and21(eq28(vendors.id, vendorId), eq28(vendors.organizationId, orgId)));
+  const [vendor] = await db.select().from(vendors).where(and21(eq29(vendors.id, vendorId), eq29(vendors.organizationId, orgId)));
   if (!vendor) return null;
   const [assessRows, riskRows, remRows, incRows] = await Promise.all([
-    db.select().from(vendorAssessments).where(eq28(vendorAssessments.vendorId, vendorId)),
+    db.select().from(vendorAssessments).where(eq29(vendorAssessments.vendorId, vendorId)),
     db.select().from(riskRegister).where(
       and21(
-        eq28(riskRegister.organizationId, orgId),
-        eq28(riskRegister.vendorId, vendorId)
+        eq29(riskRegister.organizationId, orgId),
+        eq29(riskRegister.vendorId, vendorId)
       )
     ),
     db.select().from(remediationTasks).where(
       and21(
-        eq28(remediationTasks.organizationId, orgId),
-        eq28(remediationTasks.vendorId, vendorId)
+        eq29(remediationTasks.organizationId, orgId),
+        eq29(remediationTasks.vendorId, vendorId)
       )
     ),
     db.select().from(complianceIncidents).where(
       and21(
-        eq28(complianceIncidents.organizationId, orgId),
-        eq28(complianceIncidents.affectedVendorId, vendorId)
+        eq29(complianceIncidents.organizationId, orgId),
+        eq29(complianceIncidents.affectedVendorId, vendorId)
       )
     )
   ]);
@@ -28623,7 +28670,7 @@ import { z as z24 } from "zod";
 // server/compliance-report-store.ts
 init_schema();
 init_db();
-import { eq as eq29, inArray as inArray4 } from "drizzle-orm";
+import { eq as eq30, inArray as inArray4 } from "drizzle-orm";
 function toIso2(d2) {
   if (!d2) return null;
   return d2 instanceof Date ? d2.toISOString() : String(d2);
@@ -28643,7 +28690,7 @@ async function getComplianceSummary(orgId) {
   if (!db || orgId < 0)
     return { ...EMPTY_SUMMARY, generatedAt: (/* @__PURE__ */ new Date()).toISOString() };
   const now = /* @__PURE__ */ new Date();
-  const vRows = await db.select({ id: vendors.id }).from(vendors).where(eq29(vendors.organizationId, orgId));
+  const vRows = await db.select({ id: vendors.id }).from(vendors).where(eq30(vendors.organizationId, orgId));
   const vendorIds = vRows.map((v) => v.id);
   let gapRows = [];
   if (vendorIds.length) {
@@ -28658,17 +28705,17 @@ async function getComplianceSummary(orgId) {
       status: riskRegister.status,
       likelihood: riskRegister.likelihood,
       impact: riskRegister.impact
-    }).from(riskRegister).where(eq29(riskRegister.organizationId, orgId)),
-    db.select({ status: remediationTasks.status }).from(remediationTasks).where(eq29(remediationTasks.organizationId, orgId)),
-    db.select({ status: compliancePolicies.status }).from(compliancePolicies).where(eq29(compliancePolicies.organizationId, orgId)),
+    }).from(riskRegister).where(eq30(riskRegister.organizationId, orgId)),
+    db.select({ status: remediationTasks.status }).from(remediationTasks).where(eq30(remediationTasks.organizationId, orgId)),
+    db.select({ status: compliancePolicies.status }).from(compliancePolicies).where(eq30(compliancePolicies.organizationId, orgId)),
     db.select({
       status: complianceIncidents.status,
       severity: complianceIncidents.severity
-    }).from(complianceIncidents).where(eq29(complianceIncidents.organizationId, orgId)),
+    }).from(complianceIncidents).where(eq30(complianceIncidents.organizationId, orgId)),
     db.select({
       status: auditSchedules.status,
       scheduledDate: auditSchedules.scheduledDate
-    }).from(auditSchedules).where(eq29(auditSchedules.organizationId, orgId))
+    }).from(auditSchedules).where(eq30(auditSchedules.organizationId, orgId))
   ]);
   return {
     generatedAt: now.toISOString(),
@@ -28719,7 +28766,7 @@ async function getComplianceModuleData(orgId, module) {
   if (!db || orgId < 0) return [];
   switch (module) {
     case "gaps": {
-      const vRows = await db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq29(vendors.organizationId, orgId));
+      const vRows = await db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq30(vendors.organizationId, orgId));
       if (!vRows.length) return [];
       const vendorIds = vRows.map((v) => v.id);
       const aRows = await db.select({
@@ -28747,7 +28794,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "risks": {
-      const rows = await db.select().from(riskRegister).where(eq29(riskRegister.organizationId, orgId));
+      const rows = await db.select().from(riskRegister).where(eq30(riskRegister.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         score: (r.likelihood ?? 1) * (r.impact ?? 1),
@@ -28757,7 +28804,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "remediation": {
-      const rows = await db.select().from(remediationTasks).where(eq29(remediationTasks.organizationId, orgId));
+      const rows = await db.select().from(remediationTasks).where(eq30(remediationTasks.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         dueDate: toIso2(r.dueDate),
@@ -28766,7 +28813,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "policies": {
-      const rows = await db.select().from(compliancePolicies).where(eq29(compliancePolicies.organizationId, orgId));
+      const rows = await db.select().from(compliancePolicies).where(eq30(compliancePolicies.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         lastApprovedAt: toIso2(r.lastApprovedAt),
@@ -28776,7 +28823,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "incidents": {
-      const rows = await db.select().from(complianceIncidents).where(eq29(complianceIncidents.organizationId, orgId));
+      const rows = await db.select().from(complianceIncidents).where(eq30(complianceIncidents.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         occurredAt: toIso2(r.occurredAt),
@@ -28788,7 +28835,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "audit_schedule": {
-      const rows = await db.select().from(auditSchedules).where(eq29(auditSchedules.organizationId, orgId));
+      const rows = await db.select().from(auditSchedules).where(eq30(auditSchedules.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         scheduledDate: toIso2(r.scheduledDate),
@@ -28833,7 +28880,7 @@ import { TRPCError as TRPCError21 } from "@trpc/server";
 // server/ctem-scoring.ts
 init_schema();
 init_db();
-import { and as and22, desc as desc14, eq as eq30, inArray as inArray5 } from "drizzle-orm";
+import { and as and22, desc as desc14, eq as eq31, inArray as inArray5 } from "drizzle-orm";
 var SEVERITY_WEIGHT = {
   critical: 100,
   high: 75,
@@ -29074,14 +29121,14 @@ async function executeContinuousComplianceRun(params) {
     }).returning({ id: continuousComplianceRuns.id });
     runId = insertedRun.id;
   } else {
-    await db.update(continuousComplianceRuns).set({ runStatus: "running" }).where(eq30(continuousComplianceRuns.id, runId));
+    await db.update(continuousComplianceRuns).set({ runStatus: "running" }).where(eq31(continuousComplianceRuns.id, runId));
   }
   try {
     const assetQuery = db.select().from(ctemAssets).where(
       and22(
-        eq30(ctemAssets.organizationId, organizationId),
-        eq30(ctemAssets.status, "active"),
-        ...vendorId ? [eq30(ctemAssets.vendorId, vendorId)] : []
+        eq31(ctemAssets.organizationId, organizationId),
+        eq31(ctemAssets.status, "active"),
+        ...vendorId ? [eq31(ctemAssets.vendorId, vendorId)] : []
       )
     );
     const assets = await assetQuery;
@@ -29090,7 +29137,7 @@ async function executeContinuousComplianceRun(params) {
         runStatus: "completed",
         completedAt: /* @__PURE__ */ new Date(),
         summary: "No active assets found."
-      }).where(eq30(continuousComplianceRuns.id, runId));
+      }).where(eq31(continuousComplianceRuns.id, runId));
       return {
         runId,
         assetsScanned: 0,
@@ -29138,7 +29185,7 @@ async function executeContinuousComplianceRun(params) {
           ...scored,
           previousFinalScore: prev,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq30(ctemRiskScores.assetId, asset.id));
+        }).where(eq31(ctemRiskScores.assetId, asset.id));
       } else {
         await db.insert(ctemRiskScores).values({
           assetId: asset.id,
@@ -29160,9 +29207,9 @@ async function executeContinuousComplianceRun(params) {
         for (const m of maps) {
           const already = await db.select({ id: complianceExposureMappings.id }).from(complianceExposureMappings).where(
             and22(
-              eq30(complianceExposureMappings.vulnerabilityId, vuln.id),
+              eq31(complianceExposureMappings.vulnerabilityId, vuln.id),
               ...m.frameworkCode ? [
-                eq30(
+                eq31(
                   complianceExposureMappings.frameworkCode,
                   m.frameworkCode
                 )
@@ -29186,8 +29233,8 @@ async function executeContinuousComplianceRun(params) {
     const avgScore = assets.length > 0 ? Math.round(totalScore / assets.length) : 0;
     const [prevRun] = await db.select({ avgPriorityScore: continuousComplianceRuns.avgPriorityScore }).from(continuousComplianceRuns).where(
       and22(
-        eq30(continuousComplianceRuns.organizationId, organizationId),
-        eq30(continuousComplianceRuns.runStatus, "completed")
+        eq31(continuousComplianceRuns.organizationId, organizationId),
+        eq31(continuousComplianceRuns.runStatus, "completed")
       )
     ).orderBy(desc14(continuousComplianceRuns.startedAt)).limit(1);
     const runDelta = prevRun ? avgScore - prevRun.avgPriorityScore : null;
@@ -29201,7 +29248,7 @@ async function executeContinuousComplianceRun(params) {
       alertRaised: alertRaised ? 1 : 0,
       completedAt: /* @__PURE__ */ new Date(),
       summary: `Scanned ${assets.length} asset(s). Found ${totalVulns} vulnerability/ies, ${exploitable} exploitable. Average risk score: ${avgScore}/100.`
-    }).where(eq30(continuousComplianceRuns.id, runId));
+    }).where(eq31(continuousComplianceRuns.id, runId));
     if (alertRaised) {
       await db.insert(adminNotifications).values({
         category: "system",
@@ -29227,7 +29274,7 @@ async function executeContinuousComplianceRun(params) {
       runStatus: "failed",
       completedAt: /* @__PURE__ */ new Date(),
       summary: String(err)
-    }).where(eq30(continuousComplianceRuns.id, runId));
+    }).where(eq31(continuousComplianceRuns.id, runId));
     throw err;
   }
 }
@@ -29276,7 +29323,7 @@ function simulateInMemoryRun(params) {
 // server/ctem-store.ts
 init_schema();
 init_db();
-import { and as and23, desc as desc15, eq as eq31, inArray as inArray6 } from "drizzle-orm";
+import { and as and23, desc as desc15, eq as eq32, inArray as inArray6 } from "drizzle-orm";
 function inMemoryDemoData(orgId) {
   const seed = Math.abs(orgId) % 8;
   const demoAssets = [
@@ -29434,18 +29481,18 @@ function inMemoryDemoData(orgId) {
 async function listCtemAssets(orgId, filters) {
   const db = await getDb();
   if (!db) return inMemoryDemoData(orgId).assets;
-  const where = [eq31(ctemAssets.organizationId, orgId)];
+  const where = [eq32(ctemAssets.organizationId, orgId)];
   if (filters?.region)
     where.push(
-      eq31(
+      eq32(
         ctemAssets.region,
         filters.region
       )
     );
-  if (filters?.vendorId) where.push(eq31(ctemAssets.vendorId, filters.vendorId));
+  if (filters?.vendorId) where.push(eq32(ctemAssets.vendorId, filters.vendorId));
   if (filters?.status)
     where.push(
-      eq31(
+      eq32(
         ctemAssets.status,
         filters.status
       )
@@ -29470,7 +29517,7 @@ async function createCtemAsset(orgId, input) {
     notes: input.notes ?? void 0
   }).returning({ id: ctemAssets.id });
   const id = inserted.id;
-  const [row] = await db.select().from(ctemAssets).where(eq31(ctemAssets.id, id));
+  const [row] = await db.select().from(ctemAssets).where(eq32(ctemAssets.id, id));
   return row;
 }
 async function updateCtemAsset(id, patch) {
@@ -29501,14 +29548,14 @@ async function updateCtemAsset(id, patch) {
       status: patch.status
     },
     ...patch.notes !== void 0 && { notes: patch.notes }
-  }).where(eq31(ctemAssets.id, id));
-  const [row] = await db.select().from(ctemAssets).where(eq31(ctemAssets.id, id));
+  }).where(eq32(ctemAssets.id, id));
+  const [row] = await db.select().from(ctemAssets).where(eq32(ctemAssets.id, id));
   return row;
 }
 async function deleteCtemAsset(id) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.delete(ctemAssets).where(eq31(ctemAssets.id, id));
+  await db.delete(ctemAssets).where(eq32(ctemAssets.id, id));
 }
 async function listCtemVulnerabilities(orgId, filters) {
   const db = await getDb();
@@ -29521,24 +29568,24 @@ async function listCtemVulnerabilities(orgId, filters) {
       result = result.filter((v) => v.severity === filters.severity);
     return result;
   }
-  const orgAssets = await db.select({ id: ctemAssets.id }).from(ctemAssets).where(eq31(ctemAssets.organizationId, orgId));
+  const orgAssets = await db.select({ id: ctemAssets.id }).from(ctemAssets).where(eq32(ctemAssets.organizationId, orgId));
   const orgAssetIds = orgAssets.map((a) => a.id);
   if (orgAssetIds.length === 0) return [];
   const vulnFilters = [];
   if (filters?.assetId) {
-    vulnFilters.push(eq31(ctemVulnerabilities.assetId, filters.assetId));
+    vulnFilters.push(eq32(ctemVulnerabilities.assetId, filters.assetId));
   } else {
     vulnFilters.push(inArray6(ctemVulnerabilities.assetId, orgAssetIds));
   }
   if (filters?.severity)
     vulnFilters.push(
-      eq31(
+      eq32(
         ctemVulnerabilities.severity,
         filters.severity
       )
     );
   if (filters?.exploitableOnly)
-    vulnFilters.push(eq31(ctemVulnerabilities.exploitAvailable, 1));
+    vulnFilters.push(eq32(ctemVulnerabilities.exploitAvailable, 1));
   const rows = await db.select().from(ctemVulnerabilities).where(and23(...vulnFilters)).orderBy(desc15(ctemVulnerabilities.cvssScore));
   if (!filters?.includeMappings) return rows;
   const vulnIds = rows.map((r) => r.id);
@@ -29551,7 +29598,7 @@ async function listCtemVulnerabilities(orgId, filters) {
 async function getCtemVulnAssetOwner(vulnId) {
   const db = await getDb();
   if (!db) return null;
-  const [row] = await db.select({ assetId: ctemVulnerabilities.assetId }).from(ctemVulnerabilities).where(eq31(ctemVulnerabilities.id, vulnId));
+  const [row] = await db.select({ assetId: ctemVulnerabilities.assetId }).from(ctemVulnerabilities).where(eq32(ctemVulnerabilities.id, vulnId));
   return row ?? null;
 }
 async function createCtemVulnerability(input) {
@@ -29570,7 +29617,7 @@ async function createCtemVulnerability(input) {
     discoveredAt: /* @__PURE__ */ new Date()
   }).returning({ id: ctemVulnerabilities.id });
   const id = inserted.id;
-  const [row] = await db.select().from(ctemVulnerabilities).where(eq31(ctemVulnerabilities.id, id));
+  const [row] = await db.select().from(ctemVulnerabilities).where(eq32(ctemVulnerabilities.id, id));
   return row;
 }
 async function patchCtemVulnerability(id, patch) {
@@ -29588,8 +29635,8 @@ async function patchCtemVulnerability(id, patch) {
   if (patch.severity !== void 0) update.severity = patch.severity;
   if (patch.notes !== void 0) update.notes = patch.notes;
   if (Object.keys(update).length > 0)
-    await db.update(ctemVulnerabilities).set(update).where(eq31(ctemVulnerabilities.id, id));
-  const [row] = await db.select().from(ctemVulnerabilities).where(eq31(ctemVulnerabilities.id, id));
+    await db.update(ctemVulnerabilities).set(update).where(eq32(ctemVulnerabilities.id, id));
+  const [row] = await db.select().from(ctemVulnerabilities).where(eq32(ctemVulnerabilities.id, id));
   return row;
 }
 async function listCtemRiskScores(orgId, filters) {
@@ -29601,16 +29648,16 @@ async function listCtemRiskScores(orgId, filters) {
       return { ...s, asset: a ?? null };
     });
   }
-  const assetFilters = [eq31(ctemAssets.organizationId, orgId)];
+  const assetFilters = [eq32(ctemAssets.organizationId, orgId)];
   if (filters?.region)
     assetFilters.push(
-      eq31(
+      eq32(
         ctemAssets.region,
         filters.region
       )
     );
   if (filters?.vendorId)
-    assetFilters.push(eq31(ctemAssets.vendorId, filters.vendorId));
+    assetFilters.push(eq32(ctemAssets.vendorId, filters.vendorId));
   const orgAssets = await db.select().from(ctemAssets).where(and23(...assetFilters));
   if (orgAssets.length === 0) return [];
   const assetIds = orgAssets.map((a) => a.id);
@@ -29619,7 +29666,7 @@ async function listCtemRiskScores(orgId, filters) {
   ];
   if (filters?.tier)
     scoreFilters.push(
-      eq31(
+      eq32(
         ctemRiskScores.priorityTier,
         filters.tier
       )
@@ -29664,11 +29711,11 @@ async function getCtemRiskSummary(orgId) {
       ]
     };
   }
-  const orgAssets = await db.select().from(ctemAssets).where(eq31(ctemAssets.organizationId, orgId));
+  const orgAssets = await db.select().from(ctemAssets).where(eq32(ctemAssets.organizationId, orgId));
   const assetIds = orgAssets.map((a) => a.id);
   const vulnCounts = assetIds.length > 0 ? await db.select().from(ctemVulnerabilities).where(inArray6(ctemVulnerabilities.assetId, assetIds)) : [];
   const scores = assetIds.length > 0 ? await db.select().from(ctemRiskScores).where(inArray6(ctemRiskScores.assetId, assetIds)) : [];
-  const [lastRun] = await db.select().from(continuousComplianceRuns).where(eq31(continuousComplianceRuns.organizationId, orgId)).orderBy(desc15(continuousComplianceRuns.startedAt)).limit(1);
+  const [lastRun] = await db.select().from(continuousComplianceRuns).where(eq32(continuousComplianceRuns.organizationId, orgId)).orderBy(desc15(continuousComplianceRuns.startedAt)).limit(1);
   const vulnIds = vulnCounts.map((v) => v.id);
   const mappings = vulnIds.length > 0 ? await db.select().from(complianceExposureMappings).where(inArray6(complianceExposureMappings.vulnerabilityId, vulnIds)) : [];
   const fwMap = /* @__PURE__ */ new Map();
@@ -29733,7 +29780,7 @@ async function listCtemRuns(orgId, limit = 20) {
       }
     ];
   }
-  return db.select().from(continuousComplianceRuns).where(eq31(continuousComplianceRuns.organizationId, orgId)).orderBy(desc15(continuousComplianceRuns.startedAt)).limit(limit);
+  return db.select().from(continuousComplianceRuns).where(eq32(continuousComplianceRuns.organizationId, orgId)).orderBy(desc15(continuousComplianceRuns.startedAt)).limit(limit);
 }
 async function getCtemFrameworkExposure(orgId) {
   const db = await getDb();
@@ -29781,7 +29828,7 @@ async function getCtemFrameworkExposure(orgId) {
       }
     ];
   }
-  const orgAssets = await db.select({ id: ctemAssets.id }).from(ctemAssets).where(eq31(ctemAssets.organizationId, orgId));
+  const orgAssets = await db.select({ id: ctemAssets.id }).from(ctemAssets).where(eq32(ctemAssets.organizationId, orgId));
   if (orgAssets.length === 0) return [];
   const assetIds = orgAssets.map((a) => a.id);
   const vulnIds = assetIds.length > 0 ? (await db.select({ id: ctemVulnerabilities.id }).from(ctemVulnerabilities).where(inArray6(ctemVulnerabilities.assetId, assetIds))).map((v) => v.id) : [];
@@ -29810,12 +29857,12 @@ async function getCtemFrameworkExposure(orgId) {
 async function listVendorsForCtemAssets(orgId) {
   const db = await getDb();
   if (!db) return [{ id: 1, vendorName: "Demo Vendor" }];
-  return db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq31(vendors.organizationId, orgId));
+  return db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq32(vendors.organizationId, orgId));
 }
 async function getCtemAssetOrgId(assetId) {
   const db = await getDb();
   if (!db) return null;
-  const [row] = await db.select({ orgId: ctemAssets.organizationId }).from(ctemAssets).where(eq31(ctemAssets.id, assetId));
+  const [row] = await db.select({ orgId: ctemAssets.organizationId }).from(ctemAssets).where(eq32(ctemAssets.id, assetId));
   return row?.orgId ?? null;
 }
 
@@ -30034,7 +30081,7 @@ import { TRPCError as TRPCError22 } from "@trpc/server";
 // server/evidence-store.ts
 init_schema();
 init_db();
-import { and as and24, desc as desc16, eq as eq32 } from "drizzle-orm";
+import { and as and24, desc as desc16, eq as eq33 } from "drizzle-orm";
 var SOURCE_TYPES = [
   "audit_schedule",
   "policy",
@@ -30110,10 +30157,10 @@ async function listEvidence(orgId, sourceType, sourceId) {
     if (sourceId) items = items.filter((e) => e.sourceId === sourceId);
     return items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
-  const conditions = [eq32(complianceEvidence.organizationId, orgId)];
+  const conditions = [eq33(complianceEvidence.organizationId, orgId)];
   if (sourceType)
-    conditions.push(eq32(complianceEvidence.sourceType, sourceType));
-  if (sourceId) conditions.push(eq32(complianceEvidence.sourceId, sourceId));
+    conditions.push(eq33(complianceEvidence.sourceType, sourceType));
+  if (sourceId) conditions.push(eq33(complianceEvidence.sourceId, sourceId));
   return db.select().from(complianceEvidence).where(and24(...conditions)).orderBy(desc16(complianceEvidence.createdAt));
 }
 async function addEvidence(orgId, input, addedByUserId) {
@@ -30162,7 +30209,7 @@ async function getEvidenceForRemoval(orgId, evidenceId) {
   const [row] = await db.select({
     id: complianceEvidence.id,
     organizationId: complianceEvidence.organizationId
-  }).from(complianceEvidence).where(eq32(complianceEvidence.id, evidenceId));
+  }).from(complianceEvidence).where(eq33(complianceEvidence.id, evidenceId));
   return row ?? null;
 }
 async function removeEvidence(orgId, evidenceId) {
@@ -30176,8 +30223,8 @@ async function removeEvidence(orgId, evidenceId) {
   }
   await db.delete(complianceEvidence).where(
     and24(
-      eq32(complianceEvidence.id, evidenceId),
-      eq32(complianceEvidence.organizationId, orgId)
+      eq33(complianceEvidence.id, evidenceId),
+      eq33(complianceEvidence.organizationId, orgId)
     )
   );
 }
@@ -30263,7 +30310,7 @@ import { TRPCError as TRPCError23 } from "@trpc/server";
 // server/dsr-store.ts
 init_schema();
 init_db();
-import { and as and25, asc as asc2, eq as eq33 } from "drizzle-orm";
+import { and as and25, asc as asc2, eq as eq34 } from "drizzle-orm";
 var REQUEST_TYPES = [
   "access",
   "rectification",
@@ -30471,12 +30518,12 @@ async function listDsrs(orgId, filters) {
       items = items.filter((d2) => d2.jurisdiction === filters.jurisdiction);
     return [...items].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   }
-  const conditions = [eq33(dsrRequests.organizationId, orgId)];
-  if (filters?.status) conditions.push(eq33(dsrRequests.status, filters.status));
+  const conditions = [eq34(dsrRequests.organizationId, orgId)];
+  if (filters?.status) conditions.push(eq34(dsrRequests.status, filters.status));
   if (filters?.requestType)
-    conditions.push(eq33(dsrRequests.requestType, filters.requestType));
+    conditions.push(eq34(dsrRequests.requestType, filters.requestType));
   if (filters?.jurisdiction)
-    conditions.push(eq33(dsrRequests.jurisdiction, filters.jurisdiction));
+    conditions.push(eq34(dsrRequests.jurisdiction, filters.jurisdiction));
   return db.select().from(dsrRequests).where(and25(...conditions)).orderBy(asc2(dsrRequests.dueDate));
 }
 async function createDsr(orgId, input, assignedToUserId) {
@@ -30533,9 +30580,9 @@ async function patchDsr(orgId, id, update) {
     Object.assign(MEM_DSRS[idx], update);
     return true;
   }
-  const [existing] = await db.select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId }).from(dsrRequests).where(eq33(dsrRequests.id, id));
+  const [existing] = await db.select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId }).from(dsrRequests).where(eq34(dsrRequests.id, id));
   if (!existing || existing.organizationId !== orgId) return false;
-  await db.update(dsrRequests).set(update).where(and25(eq33(dsrRequests.id, id), eq33(dsrRequests.organizationId, orgId)));
+  await db.update(dsrRequests).set(update).where(and25(eq34(dsrRequests.id, id), eq34(dsrRequests.organizationId, orgId)));
   return true;
 }
 async function removeDsr(orgId, id) {
@@ -30548,9 +30595,9 @@ async function removeDsr(orgId, id) {
     MEM_DSRS.splice(idx, 1);
     return true;
   }
-  const [existing] = await db.select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId }).from(dsrRequests).where(eq33(dsrRequests.id, id));
+  const [existing] = await db.select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId }).from(dsrRequests).where(eq34(dsrRequests.id, id));
   if (!existing || existing.organizationId !== orgId) return false;
-  await db.delete(dsrRequests).where(and25(eq33(dsrRequests.id, id), eq33(dsrRequests.organizationId, orgId)));
+  await db.delete(dsrRequests).where(and25(eq34(dsrRequests.id, id), eq34(dsrRequests.organizationId, orgId)));
   return true;
 }
 async function getDsrSummary(orgId) {
@@ -30563,7 +30610,7 @@ async function getDsrSummary(orgId) {
       }))
     );
   }
-  const rows = await db.select({ status: dsrRequests.status, dueDate: dsrRequests.dueDate }).from(dsrRequests).where(eq33(dsrRequests.organizationId, orgId));
+  const rows = await db.select({ status: dsrRequests.status, dueDate: dsrRequests.dueDate }).from(dsrRequests).where(eq34(dsrRequests.organizationId, orgId));
   return buildDsrSummary(rows);
 }
 
@@ -31023,7 +31070,7 @@ init_sse_bus();
 // server/service-request-store.ts
 init_schema();
 init_db();
-import { and as and26, desc as desc17, eq as eq34 } from "drizzle-orm";
+import { and as and26, desc as desc17, eq as eq35 } from "drizzle-orm";
 var SERVICE_TYPES = [
   "penetration_test",
   "red_team",
@@ -31057,7 +31104,7 @@ async function listRequests(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(serviceRequests).where(eq34(serviceRequests.organizationId, orgId)).orderBy(desc17(serviceRequests.createdAt));
+  return db.select().from(serviceRequests).where(eq35(serviceRequests.organizationId, orgId)).orderBy(desc17(serviceRequests.createdAt));
 }
 async function getRequest(orgId, id) {
   const db = await getDb();
@@ -31065,7 +31112,7 @@ async function getRequest(orgId, id) {
     return MEM_REQUESTS.find((r) => r.id === id && r.organizationId === orgId) ?? null;
   }
   const [row] = await db.select().from(serviceRequests).where(
-    and26(eq34(serviceRequests.id, id), eq34(serviceRequests.organizationId, orgId))
+    and26(eq35(serviceRequests.id, id), eq35(serviceRequests.organizationId, orgId))
   ).limit(1);
   return row ?? null;
 }
@@ -31110,7 +31157,7 @@ async function createRequest(orgId, input, localUserId) {
     status: "submitted"
   }).returning({ id: serviceRequests.id });
   const insertId = inserted.id;
-  const [created] = await db.select().from(serviceRequests).where(eq34(serviceRequests.id, insertId)).limit(1);
+  const [created] = await db.select().from(serviceRequests).where(eq35(serviceRequests.id, insertId)).limit(1);
   return { row: created, insertId };
 }
 async function cancelRequest(orgId, id) {
@@ -31126,12 +31173,12 @@ async function cancelRequest(orgId, id) {
     return req;
   }
   const [existing] = await db.select().from(serviceRequests).where(
-    and26(eq34(serviceRequests.id, id), eq34(serviceRequests.organizationId, orgId))
+    and26(eq35(serviceRequests.id, id), eq35(serviceRequests.organizationId, orgId))
   ).limit(1);
   if (!existing) return "not_found";
   if (!["draft", "submitted"].includes(existing.status))
     return "not_cancellable";
-  await db.update(serviceRequests).set({ status: "cancelled", updatedAt: /* @__PURE__ */ new Date() }).where(eq34(serviceRequests.id, id));
+  await db.update(serviceRequests).set({ status: "cancelled", updatedAt: /* @__PURE__ */ new Date() }).where(eq35(serviceRequests.id, id));
   return { id, status: "cancelled" };
 }
 async function adminListRequests() {
@@ -31151,8 +31198,8 @@ async function adminUpdateRequest(id, updateValues) {
     Object.assign(req, updateValues);
     return req;
   }
-  await db.update(serviceRequests).set(updateValues).where(eq34(serviceRequests.id, id));
-  const [updated] = await db.select().from(serviceRequests).where(eq34(serviceRequests.id, id)).limit(1);
+  await db.update(serviceRequests).set(updateValues).where(eq35(serviceRequests.id, id));
+  const [updated] = await db.select().from(serviceRequests).where(eq35(serviceRequests.id, id)).limit(1);
   return updated ?? null;
 }
 
@@ -31312,7 +31359,7 @@ import { TRPCError as TRPCError26 } from "@trpc/server";
 // server/asset-inventory-store.ts
 init_schema();
 init_db();
-import { and as and27, desc as desc18, eq as eq35 } from "drizzle-orm";
+import { and as and27, desc as desc18, eq as eq36 } from "drizzle-orm";
 var ASSET_TYPES = [
   "server",
   "workstation",
@@ -31373,7 +31420,7 @@ async function listAssets(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(assetInventory).where(eq35(assetInventory.organizationId, orgId)).orderBy(desc18(assetInventory.createdAt));
+  return db.select().from(assetInventory).where(eq36(assetInventory.organizationId, orgId)).orderBy(desc18(assetInventory.createdAt));
 }
 async function getAsset(orgId, id) {
   const db = await getDb();
@@ -31381,7 +31428,7 @@ async function getAsset(orgId, id) {
     return MEM_ASSETS.find((a) => a.id === id && a.organizationId === orgId) ?? null;
   }
   const [row] = await db.select().from(assetInventory).where(
-    and27(eq35(assetInventory.id, id), eq35(assetInventory.organizationId, orgId))
+    and27(eq36(assetInventory.id, id), eq36(assetInventory.organizationId, orgId))
   ).limit(1);
   return row ?? null;
 }
@@ -31433,7 +31480,7 @@ async function createAsset(orgId, input, localUserId) {
     addedByUserId: localUserId
   }).returning({ id: assetInventory.id });
   const insertId = inserted.id;
-  const [created] = await db.select().from(assetInventory).where(eq35(assetInventory.id, insertId)).limit(1);
+  const [created] = await db.select().from(assetInventory).where(eq36(assetInventory.id, insertId)).limit(1);
   return created;
 }
 async function getAssetForPatch(orgId, id) {
@@ -31442,7 +31489,7 @@ async function getAssetForPatch(orgId, id) {
     return MEM_ASSETS.find((a) => a.id === id && a.organizationId === orgId) ?? null;
   }
   const [row] = await db.select().from(assetInventory).where(
-    and27(eq35(assetInventory.id, id), eq35(assetInventory.organizationId, orgId))
+    and27(eq36(assetInventory.id, id), eq36(assetInventory.organizationId, orgId))
   ).limit(1);
   return row ?? null;
 }
@@ -31456,8 +31503,8 @@ async function patchAssetRow(orgId, id, updateValues) {
     Object.assign(asset, updateValues);
     return asset;
   }
-  await db.update(assetInventory).set(updateValues).where(eq35(assetInventory.id, id));
-  const [updated] = await db.select().from(assetInventory).where(eq35(assetInventory.id, id)).limit(1);
+  await db.update(assetInventory).set(updateValues).where(eq36(assetInventory.id, id));
+  const [updated] = await db.select().from(assetInventory).where(eq36(assetInventory.id, id)).limit(1);
   return updated ?? null;
 }
 async function deleteAsset(orgId, id) {
@@ -31471,10 +31518,10 @@ async function deleteAsset(orgId, id) {
     return { found: true };
   }
   const [existing] = await db.select({ id: assetInventory.id, name: assetInventory.name }).from(assetInventory).where(
-    and27(eq35(assetInventory.id, id), eq35(assetInventory.organizationId, orgId))
+    and27(eq36(assetInventory.id, id), eq36(assetInventory.organizationId, orgId))
   ).limit(1);
   if (!existing) return { found: false };
-  await db.delete(assetInventory).where(eq35(assetInventory.id, id));
+  await db.delete(assetInventory).where(eq36(assetInventory.id, id));
   return { found: true, name: existing.name };
 }
 async function getAllOrgAssets(orgId) {
@@ -31482,7 +31529,7 @@ async function getAllOrgAssets(orgId) {
   if (!db || orgId < 0) {
     return MEM_ASSETS.filter((a) => a.organizationId === orgId);
   }
-  return db.select().from(assetInventory).where(eq35(assetInventory.organizationId, orgId));
+  return db.select().from(assetInventory).where(eq36(assetInventory.organizationId, orgId));
 }
 
 // server/asset-inventory-router.ts
@@ -31631,7 +31678,7 @@ init_const();
 // server/threat-intel-store.ts
 init_schema();
 init_db();
-import { and as and28, desc as desc19, eq as eq36, isNull as isNull3, or as or5 } from "drizzle-orm";
+import { and as and28, desc as desc19, eq as eq37, isNull as isNull3, or as or5 } from "drizzle-orm";
 var CATEGORIES = [
   "malware",
   "ransomware",
@@ -31725,10 +31772,10 @@ async function getThreatFeed(orgId, filters) {
   } else {
     items = await db.select().from(threatIntelItems).where(
       and28(
-        eq36(threatIntelItems.isActive, 1),
+        eq37(threatIntelItems.isActive, 1),
         or5(
           isNull3(threatIntelItems.organizationId),
-          eq36(threatIntelItems.organizationId, orgId)
+          eq37(threatIntelItems.organizationId, orgId)
         )
       )
     ).orderBy(desc19(threatIntelItems.publishedAt)).limit(filters.limit);
@@ -31748,10 +31795,10 @@ async function getThreatItem(orgId, id) {
   }
   const [row] = await db.select().from(threatIntelItems).where(
     and28(
-      eq36(threatIntelItems.id, id),
+      eq37(threatIntelItems.id, id),
       or5(
         isNull3(threatIntelItems.organizationId),
-        eq36(threatIntelItems.organizationId, orgId)
+        eq37(threatIntelItems.organizationId, orgId)
       )
     )
   ).limit(1);
@@ -31802,7 +31849,7 @@ async function adminCreateThreatItem(input, localUserId) {
     publishedAt
   }).returning({ id: threatIntelItems.id });
   const insertId = inserted.id;
-  const [created] = await db.select().from(threatIntelItems).where(eq36(threatIntelItems.id, insertId)).limit(1);
+  const [created] = await db.select().from(threatIntelItems).where(eq37(threatIntelItems.id, insertId)).limit(1);
   return created;
 }
 async function adminUpdateThreatItem(id, updateValues) {
@@ -31813,8 +31860,8 @@ async function adminUpdateThreatItem(id, updateValues) {
     Object.assign(item, updateValues);
     return item;
   }
-  await db.update(threatIntelItems).set(updateValues).where(eq36(threatIntelItems.id, id));
-  const [updated] = await db.select().from(threatIntelItems).where(eq36(threatIntelItems.id, id)).limit(1);
+  await db.update(threatIntelItems).set(updateValues).where(eq37(threatIntelItems.id, id));
+  const [updated] = await db.select().from(threatIntelItems).where(eq37(threatIntelItems.id, id)).limit(1);
   return updated ?? null;
 }
 async function adminRemoveThreatItem(id) {
@@ -31826,7 +31873,7 @@ async function adminRemoveThreatItem(id) {
     item.updatedAt = /* @__PURE__ */ new Date();
     return true;
   }
-  await db.update(threatIntelItems).set({ isActive: 0, updatedAt: /* @__PURE__ */ new Date() }).where(eq36(threatIntelItems.id, id));
+  await db.update(threatIntelItems).set({ isActive: 0, updatedAt: /* @__PURE__ */ new Date() }).where(eq37(threatIntelItems.id, id));
   return true;
 }
 
@@ -31946,7 +31993,7 @@ import { TRPCError as TRPCError28 } from "@trpc/server";
 // server/security-maturity-store.ts
 init_schema();
 init_db();
-import { and as and29, desc as desc20, eq as eq37 } from "drizzle-orm";
+import { and as and29, desc as desc20, eq as eq38 } from "drizzle-orm";
 var MEM_ASSESSMENTS = [];
 var memSeq11 = 1;
 function toMaturityLevel(overallScore) {
@@ -31968,7 +32015,7 @@ async function listAssessments(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(securityMaturityAssessments).where(eq37(securityMaturityAssessments.organizationId, orgId)).orderBy(desc20(securityMaturityAssessments.createdAt));
+  return db.select().from(securityMaturityAssessments).where(eq38(securityMaturityAssessments.organizationId, orgId)).orderBy(desc20(securityMaturityAssessments.createdAt));
 }
 async function getLatestAssessment(orgId) {
   const db = await getDb();
@@ -31978,7 +32025,7 @@ async function getLatestAssessment(orgId) {
     ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     return all[0] ?? null;
   }
-  const [row] = await db.select().from(securityMaturityAssessments).where(eq37(securityMaturityAssessments.organizationId, orgId)).orderBy(desc20(securityMaturityAssessments.createdAt)).limit(1);
+  const [row] = await db.select().from(securityMaturityAssessments).where(eq38(securityMaturityAssessments.organizationId, orgId)).orderBy(desc20(securityMaturityAssessments.createdAt)).limit(1);
   return row ?? null;
 }
 async function getAssessment(orgId, id) {
@@ -31986,7 +32033,7 @@ async function getAssessment(orgId, id) {
   if (!db || orgId < 0) {
     return MEM_ASSESSMENTS.find((a) => a.id === id && a.organizationId === orgId) ?? null;
   }
-  const [row] = await db.select().from(securityMaturityAssessments).where(eq37(securityMaturityAssessments.id, id)).limit(1);
+  const [row] = await db.select().from(securityMaturityAssessments).where(eq38(securityMaturityAssessments.id, id)).limit(1);
   if (!row || row.organizationId !== orgId) return null;
   return row;
 }
@@ -32035,7 +32082,7 @@ async function createAssessmentRow(orgId, input, localUserId) {
     assessedByUserId: localUserId
   }).returning({ id: securityMaturityAssessments.id });
   const insertId = inserted.id;
-  const [created] = await db.select().from(securityMaturityAssessments).where(eq37(securityMaturityAssessments.id, insertId)).limit(1);
+  const [created] = await db.select().from(securityMaturityAssessments).where(eq38(securityMaturityAssessments.id, insertId)).limit(1);
   return created;
 }
 async function deleteAssessmentRow(orgId, id) {
@@ -32050,15 +32097,15 @@ async function deleteAssessmentRow(orgId, id) {
   }
   const [existing] = await db.select({ id: securityMaturityAssessments.id }).from(securityMaturityAssessments).where(
     and29(
-      eq37(securityMaturityAssessments.id, id),
-      eq37(securityMaturityAssessments.organizationId, orgId)
+      eq38(securityMaturityAssessments.id, id),
+      eq38(securityMaturityAssessments.organizationId, orgId)
     )
   ).limit(1);
   if (!existing) return false;
   await db.delete(securityMaturityAssessments).where(
     and29(
-      eq37(securityMaturityAssessments.id, id),
-      eq37(securityMaturityAssessments.organizationId, orgId)
+      eq38(securityMaturityAssessments.id, id),
+      eq38(securityMaturityAssessments.organizationId, orgId)
     )
   );
   return true;
@@ -32173,13 +32220,13 @@ import { z as z34 } from "zod";
 // server/knowledge-graph-store.ts
 init_db();
 init_schema();
-import { and as and30, eq as eq38, or as or6, like, sql as sql6, asc as asc3, isNull as isNull4 } from "drizzle-orm";
+import { and as and30, eq as eq39, or as or6, like, sql as sql6, asc as asc3, isNull as isNull4 } from "drizzle-orm";
 async function seedKnowledgeGraph(input, organizationId) {
   const db = await getDb();
   if (!db)
     return { nodesSeeded: 0, edgesSeeded: 0, error: "Database unavailable" };
   for (const n of input.nodes) {
-    const existing = await db.select().from(knowledgeGraphNodes).where(eq38(knowledgeGraphNodes.nodeId, n.id)).limit(1);
+    const existing = await db.select().from(knowledgeGraphNodes).where(eq39(knowledgeGraphNodes.nodeId, n.id)).limit(1);
     if (existing.length === 0) {
       await db.insert(knowledgeGraphNodes).values({
         nodeId: n.id,
@@ -32194,9 +32241,9 @@ async function seedKnowledgeGraph(input, organizationId) {
   for (const e of input.edges) {
     const existing = await db.select().from(knowledgeGraphEdges).where(
       and30(
-        eq38(knowledgeGraphEdges.sourceNodeId, e.source),
-        eq38(knowledgeGraphEdges.targetNodeId, e.target),
-        eq38(knowledgeGraphEdges.relation, e.relation)
+        eq39(knowledgeGraphEdges.sourceNodeId, e.source),
+        eq39(knowledgeGraphEdges.targetNodeId, e.target),
+        eq39(knowledgeGraphEdges.relation, e.relation)
       )
     ).limit(1);
     if (existing.length === 0) {
@@ -32217,7 +32264,7 @@ async function queryKnowledgeGraph(query, organizationId) {
   conditions.push(
     organizationId != null ? or6(
       isNull4(knowledgeGraphNodes.organizationId),
-      eq38(knowledgeGraphNodes.organizationId, organizationId)
+      eq39(knowledgeGraphNodes.organizationId, organizationId)
     ) : isNull4(knowledgeGraphNodes.organizationId)
   );
   if (query.kinds && query.kinds.length > 0) {
@@ -32226,10 +32273,10 @@ async function queryKnowledgeGraph(query, organizationId) {
     );
   }
   if (query.region) {
-    conditions.push(eq38(knowledgeGraphNodes.region, query.region));
+    conditions.push(eq39(knowledgeGraphNodes.region, query.region));
   }
   if (query.jurisdiction) {
-    conditions.push(eq38(knowledgeGraphNodes.jurisdiction, query.jurisdiction));
+    conditions.push(eq39(knowledgeGraphNodes.jurisdiction, query.jurisdiction));
   }
   if (query.search) {
     const q = `%${query.search.toLowerCase()}%`;
@@ -32256,7 +32303,7 @@ async function getAllKnowledgeGraphNodes(organizationId) {
   if (!db) return [];
   const scope = organizationId != null ? or6(
     isNull4(knowledgeGraphNodes.organizationId),
-    eq38(knowledgeGraphNodes.organizationId, organizationId)
+    eq39(knowledgeGraphNodes.organizationId, organizationId)
   ) : isNull4(knowledgeGraphNodes.organizationId);
   return db.select().from(knowledgeGraphNodes).where(scope).orderBy(asc3(knowledgeGraphNodes.kind), asc3(knowledgeGraphNodes.label));
 }
@@ -32283,11 +32330,11 @@ async function deleteKnowledgeGraphNode(nodeId) {
   if (!db) return;
   await db.delete(knowledgeGraphEdges).where(
     or6(
-      eq38(knowledgeGraphEdges.sourceNodeId, nodeId),
-      eq38(knowledgeGraphEdges.targetNodeId, nodeId)
+      eq39(knowledgeGraphEdges.sourceNodeId, nodeId),
+      eq39(knowledgeGraphEdges.targetNodeId, nodeId)
     )
   );
-  await db.delete(knowledgeGraphNodes).where(eq38(knowledgeGraphNodes.nodeId, nodeId));
+  await db.delete(knowledgeGraphNodes).where(eq39(knowledgeGraphNodes.nodeId, nodeId));
 }
 async function createCustomNode(input) {
   const db = await getDb();
@@ -32413,7 +32460,7 @@ import { TRPCError as TRPCError30 } from "@trpc/server";
 // server/regulatory-change-store.ts
 init_schema();
 init_db();
-import { and as and31, desc as desc21, eq as eq39, sql as sql7 } from "drizzle-orm";
+import { and as and31, desc as desc21, eq as eq40, sql as sql7 } from "drizzle-orm";
 var MEM_CHANGES = [];
 var memSeq12 = 1;
 var SEED_CHANGES = [
@@ -32772,16 +32819,16 @@ async function listRegulatoryChanges(orgId, filters) {
   }
   const conditions = [];
   if (filters?.jurisdiction) {
-    conditions.push(eq39(regulatoryChanges.jurisdiction, filters.jurisdiction));
+    conditions.push(eq40(regulatoryChanges.jurisdiction, filters.jurisdiction));
   }
   if (filters?.status) {
-    conditions.push(eq39(regulatoryChanges.status, filters.status));
+    conditions.push(eq40(regulatoryChanges.status, filters.status));
   }
   if (filters?.changeType) {
-    conditions.push(eq39(regulatoryChanges.changeType, filters.changeType));
+    conditions.push(eq40(regulatoryChanges.changeType, filters.changeType));
   }
   if (filters?.frameworkCode) {
-    conditions.push(eq39(regulatoryChanges.frameworkCode, filters.frameworkCode));
+    conditions.push(eq40(regulatoryChanges.frameworkCode, filters.frameworkCode));
   }
   const where = conditions.length > 0 ? and31(...conditions) : void 0;
   const [rows, countResult] = await Promise.all([
@@ -32796,7 +32843,7 @@ async function getRegulatoryChangeById(id) {
   if (!db) {
     return MEM_CHANGES.find((c) => c.id === id) ?? null;
   }
-  const rows = await db.select().from(regulatoryChanges).where(eq39(regulatoryChanges.id, id)).limit(1);
+  const rows = await db.select().from(regulatoryChanges).where(eq40(regulatoryChanges.id, id)).limit(1);
   return rows.length > 0 ? rows[0] : null;
 }
 async function getRegulatoryChangeStats() {
@@ -32879,7 +32926,7 @@ async function markRegulatoryChangeEffective(id) {
     return change;
   }
   await db.update(regulatoryChanges).set({ status: "in_effect", updatedAt: /* @__PURE__ */ new Date() }).where(
-    and31(eq39(regulatoryChanges.id, id), eq39(regulatoryChanges.status, "pending"))
+    and31(eq40(regulatoryChanges.id, id), eq40(regulatoryChanges.status, "pending"))
   );
   return getRegulatoryChangeById(id);
 }
@@ -32891,7 +32938,7 @@ async function removeRegulatoryChange(id) {
     MEM_CHANGES.splice(idx, 1);
     return true;
   }
-  await db.delete(regulatoryChanges).where(eq39(regulatoryChanges.id, id));
+  await db.delete(regulatoryChanges).where(eq40(regulatoryChanges.id, id));
   return true;
 }
 function aggregateJurisdictions(changes) {
@@ -33037,7 +33084,7 @@ import { TRPCError as TRPCError31 } from "@trpc/server";
 // server/compliance-simulation-store.ts
 init_schema();
 init_db();
-import { and as and32, desc as desc22, eq as eq40, inArray as inArray7 } from "drizzle-orm";
+import { and as and32, desc as desc22, eq as eq41, inArray as inArray7 } from "drizzle-orm";
 var SCENARIOS = [
   {
     id: "scenario-expand-saudi",
@@ -33516,7 +33563,7 @@ async function runSimulationEngine(orgId, params, userId) {
       summary,
       createdByUserId: userId
     }).returning({ id: complianceSimulations.id });
-    const [row] = await db.select().from(complianceSimulations).where(eq40(complianceSimulations.id, inserted.id)).limit(1);
+    const [row] = await db.select().from(complianceSimulations).where(eq41(complianceSimulations.id, inserted.id)).limit(1);
     return {
       id: row.id,
       organizationId: row.organizationId,
@@ -33572,7 +33619,7 @@ async function getSimulationHistory(orgId) {
   if (db && orgId > 0) {
     const rows = await db.select().from(complianceSimulations).where(
       and32(
-        eq40(complianceSimulations.organizationId, orgId),
+        eq41(complianceSimulations.organizationId, orgId),
         inArray7(complianceSimulations.status, ["completed", "draft"])
       )
     ).orderBy(desc22(complianceSimulations.createdAt));
@@ -33613,8 +33660,8 @@ async function getSimulationById(orgId, id) {
   if (db && orgId > 0) {
     const [row] = await db.select().from(complianceSimulations).where(
       and32(
-        eq40(complianceSimulations.id, id),
-        eq40(complianceSimulations.organizationId, orgId)
+        eq41(complianceSimulations.id, id),
+        eq41(complianceSimulations.organizationId, orgId)
       )
     ).limit(1);
     if (!row) return null;
@@ -33652,12 +33699,12 @@ async function archiveSimulation(orgId, id) {
   if (db && orgId > 0) {
     const [existing] = await db.select({ id: complianceSimulations.id }).from(complianceSimulations).where(
       and32(
-        eq40(complianceSimulations.id, id),
-        eq40(complianceSimulations.organizationId, orgId)
+        eq41(complianceSimulations.id, id),
+        eq41(complianceSimulations.organizationId, orgId)
       )
     ).limit(1);
     if (!existing) return false;
-    await db.update(complianceSimulations).set({ status: "archived", updatedAt: /* @__PURE__ */ new Date() }).where(eq40(complianceSimulations.id, id));
+    await db.update(complianceSimulations).set({ status: "archived", updatedAt: /* @__PURE__ */ new Date() }).where(eq41(complianceSimulations.id, id));
     return true;
   }
   const mem = MEM_SIMULATIONS.find(
@@ -34236,14 +34283,14 @@ var crossBorderDataFlowRouter = router({
 init_schema();
 init_db();
 import { z as z38 } from "zod";
-import { eq as eq42 } from "drizzle-orm";
+import { eq as eq43 } from "drizzle-orm";
 init_rateLimiter();
 import { TRPCError as TRPCError32 } from "@trpc/server";
 
 // server/onboarding-service.ts
 init_db();
 init_schema();
-import { and as and33, desc as desc23, eq as eq41, or as or7, sql as sql9 } from "drizzle-orm";
+import { and as and33, desc as desc23, eq as eq42, or as or7, sql as sql9 } from "drizzle-orm";
 
 // server/services/personalization/engine.ts
 var QUESTIONNAIRE_VERSION = 1;
@@ -34642,23 +34689,23 @@ async function getOnboardingState(identity, organizationId) {
   try {
     const rows = await db.select().from(onboardingResponses).where(
       and33(
-        isLocal ? eq41(onboardingResponses.localUserId, identity.localUserId) : eq41(onboardingResponses.userId, identity.userId),
-        eq41(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION)
+        isLocal ? eq42(onboardingResponses.localUserId, identity.localUserId) : eq42(onboardingResponses.userId, identity.userId),
+        eq42(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION)
       )
     );
     const answers = {};
     for (const row of rows) answers[row.questionId] = row.answerValue;
     const profile = deriveProfile(answers);
     const [progress] = await db.select().from(onboardingProgress).where(
-      isLocal ? eq41(onboardingProgress.userId, -(5e4 + identity.localUserId)) : eq41(onboardingProgress.userId, identity.userId)
+      isLocal ? eq42(onboardingProgress.userId, -(5e4 + identity.localUserId)) : eq42(onboardingProgress.userId, identity.userId)
     ).limit(1);
     const recs = await db.select().from(personalizationRecommendations).where(
       and33(
-        isLocal ? eq41(
+        isLocal ? eq42(
           personalizationRecommendations.localUserId,
           identity.localUserId
-        ) : eq41(personalizationRecommendations.userId, identity.userId),
-        eq41(personalizationRecommendations.status, "active")
+        ) : eq42(personalizationRecommendations.userId, identity.userId),
+        eq42(personalizationRecommendations.status, "active")
       )
     ).orderBy(desc23(personalizationRecommendations.priority));
     const events = await db.select({
@@ -34666,7 +34713,7 @@ async function getOnboardingState(identity, organizationId) {
       stepNumber: onboardingEvents.stepNumber,
       createdAt: onboardingEvents.createdAt
     }).from(onboardingEvents).where(
-      isLocal ? eq41(onboardingEvents.localUserId, identity.localUserId) : eq41(onboardingEvents.userId, identity.userId)
+      isLocal ? eq42(onboardingEvents.localUserId, identity.localUserId) : eq42(onboardingEvents.userId, identity.userId)
     ).orderBy(desc23(onboardingEvents.createdAt)).limit(50);
     const completedEvent = events.find(
       (e) => e.eventType === "onboarding_completed"
@@ -34676,7 +34723,7 @@ async function getOnboardingState(identity, organizationId) {
     const resolvedSkipped = progress?.skipped ?? skippedEvent;
     let shouldOnboard = false;
     try {
-      const account = isLocal ? (await db.select({ createdAt: localUsers.createdAt }).from(localUsers).where(eq41(localUsers.id, identity.localUserId)).limit(1))[0] : (await db.select({ createdAt: users.createdAt }).from(users).where(eq41(users.id, identity.userId)).limit(1))[0];
+      const account = isLocal ? (await db.select({ createdAt: localUsers.createdAt }).from(localUsers).where(eq42(localUsers.id, identity.localUserId)).limit(1))[0] : (await db.select({ createdAt: users.createdAt }).from(users).where(eq42(users.id, identity.userId)).limit(1))[0];
       const ageMs = account?.createdAt ? Date.now() - new Date(account.createdAt).getTime() : Number.POSITIVE_INFINITY;
       const isNewAccount = ageMs <= 14 * 24 * 60 * 60 * 1e3;
       shouldOnboard = !resolvedCompletedAt && !resolvedSkipped && Object.keys(answers).length === 0 && isNewAccount;
@@ -34733,8 +34780,8 @@ async function getOnboardingTimelineForAnyId(id, limit = 200) {
   try {
     return await db.select().from(onboardingEvents).where(
       or7(
-        eq41(onboardingEvents.userId, id),
-        eq41(onboardingEvents.localUserId, id)
+        eq42(onboardingEvents.userId, id),
+        eq42(onboardingEvents.localUserId, id)
       )
     ).orderBy(desc23(onboardingEvents.createdAt)).limit(Math.min(Math.max(limit, 1), 500));
   } catch (err) {
@@ -34748,14 +34795,14 @@ async function getOnboardingResponsesForAnyId(id) {
   try {
     const responses = await db.select().from(onboardingResponses).where(
       or7(
-        eq41(onboardingResponses.userId, id),
-        eq41(onboardingResponses.localUserId, id)
+        eq42(onboardingResponses.userId, id),
+        eq42(onboardingResponses.localUserId, id)
       )
     ).orderBy(onboardingResponses.stepNumber);
     const history = await db.select().from(onboardingProfileHistory).where(
       or7(
-        eq41(onboardingProfileHistory.userId, id),
-        eq41(onboardingProfileHistory.localUserId, id)
+        eq42(onboardingProfileHistory.userId, id),
+        eq42(onboardingProfileHistory.localUserId, id)
       )
     ).orderBy(desc23(onboardingProfileHistory.createdAt)).limit(200);
     return { responses, history };
@@ -34772,7 +34819,7 @@ function identityColumns(actor) {
 }
 function identityWhere(table, actor) {
   const t2 = table;
-  return actor.localUserId != null ? eq41(t2.localUserId, actor.localUserId) : eq41(t2.userId, actor.userId);
+  return actor.localUserId != null ? eq42(t2.localUserId, actor.localUserId) : eq42(t2.userId, actor.userId);
 }
 async function recordEvent(actor, eventType, payload = {}, stepNumber) {
   const db = await getReadyDb();
@@ -34803,8 +34850,8 @@ async function submitAnswer(actor, input) {
   try {
     const where = and33(
       identityWhere(onboardingResponses, actor),
-      eq41(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
-      eq41(onboardingResponses.questionId, input.questionId)
+      eq42(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
+      eq42(onboardingResponses.questionId, input.questionId)
     );
     const result = await db.transaction(async (tx) => {
       const [existing] = await tx.select({ answerValue: onboardingResponses.answerValue }).from(onboardingResponses).where(where).limit(1);
@@ -34984,7 +35031,7 @@ async function dismissRecommendation(actor, moduleId) {
     await db.update(personalizationRecommendations).set({ status: "dismissed", updatedAt: /* @__PURE__ */ new Date() }).where(
       and33(
         identityWhere(personalizationRecommendations, actor),
-        eq41(personalizationRecommendations.moduleId, moduleId)
+        eq42(personalizationRecommendations.moduleId, moduleId)
       )
     );
     await recordEvent(actor, "recommendation_dismissed", { moduleId });
@@ -35005,8 +35052,8 @@ async function recordModuleSignal(actor, moduleId, signal) {
       }).where(
         and33(
           identityWhere(personalizationRecommendations, actor),
-          eq41(personalizationRecommendations.moduleId, moduleId),
-          eq41(personalizationRecommendations.status, "active")
+          eq42(personalizationRecommendations.moduleId, moduleId),
+          eq42(personalizationRecommendations.status, "active")
         )
       );
     }
@@ -35014,7 +35061,7 @@ async function recordModuleSignal(actor, moduleId, signal) {
       await db.update(personalizationRecommendations).set({ status: "completed", updatedAt: /* @__PURE__ */ new Date() }).where(
         and33(
           identityWhere(personalizationRecommendations, actor),
-          eq41(personalizationRecommendations.moduleId, moduleId)
+          eq42(personalizationRecommendations.moduleId, moduleId)
         )
       );
     }
@@ -35173,7 +35220,7 @@ var onboardingRouter = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const rows = await db.select().from(onboardingProgress).where(eq42(onboardingProgress.userId, ctx.user.id));
+    const rows = await db.select().from(onboardingProgress).where(eq43(onboardingProgress.userId, ctx.user.id));
     return rows[0] ?? null;
   }),
   updateProgress: protectedProcedure.input(
@@ -35188,7 +35235,7 @@ var onboardingRouter = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const existing = await db.select().from(onboardingProgress).where(eq42(onboardingProgress.userId, ctx.user.id));
+    const existing = await db.select().from(onboardingProgress).where(eq43(onboardingProgress.userId, ctx.user.id));
     if (ctx.organizationId != null && input.responses?.frameworks) {
       await assertFrameworkCapacity(
         ctx.organizationId,
@@ -35204,7 +35251,7 @@ var onboardingRouter = router({
         completedSteps: Array.from(completed),
         responses: input.responses ?? void 0,
         updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq42(onboardingProgress.userId, ctx.user.id));
+      }).where(eq43(onboardingProgress.userId, ctx.user.id));
     } else {
       await db.insert(onboardingProgress).values({
         userId: ctx.user.id,
@@ -35247,7 +35294,7 @@ var onboardingRouter = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const existing = await db.select().from(onboardingProgress).where(eq42(onboardingProgress.userId, ctx.user.id));
+    const existing = await db.select().from(onboardingProgress).where(eq43(onboardingProgress.userId, ctx.user.id));
     if (existing[0]) {
       if (existing[0].skipped) {
         throw new TRPCError32({
@@ -35255,7 +35302,7 @@ var onboardingRouter = router({
           message: "Onboarding already skipped."
         });
       }
-      await db.update(onboardingProgress).set({ skipped: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq42(onboardingProgress.userId, ctx.user.id));
+      await db.update(onboardingProgress).set({ skipped: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq43(onboardingProgress.userId, ctx.user.id));
     } else {
       await db.insert(onboardingProgress).values({
         userId: ctx.user.id,
@@ -35395,7 +35442,7 @@ var onboardingRouter = router({
 init_schema();
 init_db();
 import { z as z39 } from "zod";
-import { eq as eq43, desc as desc24, sql as sql10 } from "drizzle-orm";
+import { eq as eq44, desc as desc24, sql as sql10 } from "drizzle-orm";
 import { TRPCError as TRPCError33 } from "@trpc/server";
 var analyticsRouter = router({
   track: protectedProcedure.input(
@@ -35453,7 +35500,7 @@ var analyticsRouter = router({
           code: "INTERNAL_SERVER_ERROR",
           message: "Database unavailable"
         });
-      const rows = await db.select().from(userActivitySummary).where(eq43(userActivitySummary.userId, ctx.user.id));
+      const rows = await db.select().from(userActivitySummary).where(eq44(userActivitySummary.userId, ctx.user.id));
       const summary = rows[0];
       return {
         totalEvents: summary?.totalEvents ?? 0,
@@ -35481,7 +35528,7 @@ var analyticsRouter = router({
           code: "INTERNAL_SERVER_ERROR",
           message: "Database unavailable"
         });
-      const rows = await db.select().from(analyticsEvents).where(eq43(analyticsEvents.userId, ctx.user.id)).orderBy(desc24(analyticsEvents.createdAt)).limit(input.limit);
+      const rows = await db.select().from(analyticsEvents).where(eq44(analyticsEvents.userId, ctx.user.id)).orderBy(desc24(analyticsEvents.createdAt)).limit(input.limit);
       return rows;
     } catch {
       throw new TRPCError33({
@@ -35496,7 +35543,7 @@ var analyticsRouter = router({
 init_schema();
 init_db();
 import { z as z40 } from "zod";
-import { eq as eq44, desc as desc25, and as and34 } from "drizzle-orm";
+import { eq as eq45, desc as desc25, and as and34 } from "drizzle-orm";
 init_rateLimiter();
 import { TRPCError as TRPCError34 } from "@trpc/server";
 var NOTIF_LIMIT = 30;
@@ -35519,9 +35566,9 @@ var notificationsRouter = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const conditions = [eq44(notifications.userId, ctx.user.id)];
+    const conditions = [eq45(notifications.userId, ctx.user.id)];
     if (input.unreadOnly) {
-      conditions.push(eq44(notifications.isRead, false));
+      conditions.push(eq45(notifications.isRead, false));
     }
     const query = db.select().from(notifications).where(and34(...conditions)).orderBy(desc25(notifications.createdAt)).limit(input.limit);
     if (input.offset > 0) {
@@ -35538,8 +35585,8 @@ var notificationsRouter = router({
       });
     const rows = await db.select().from(notifications).where(
       and34(
-        eq44(notifications.userId, ctx.user.id),
-        eq44(notifications.isRead, false)
+        eq45(notifications.userId, ctx.user.id),
+        eq45(notifications.isRead, false)
       )
     );
     return rows.length;
@@ -35564,8 +35611,8 @@ var notificationsRouter = router({
       });
     await db.update(notifications).set({ isRead: true, readAt: /* @__PURE__ */ new Date() }).where(
       and34(
-        eq44(notifications.id, input.id),
-        eq44(notifications.userId, ctx.user.id)
+        eq45(notifications.id, input.id),
+        eq45(notifications.userId, ctx.user.id)
       )
     );
     return { ok: true };
@@ -35590,8 +35637,8 @@ var notificationsRouter = router({
       });
     await db.update(notifications).set({ isRead: true, readAt: /* @__PURE__ */ new Date() }).where(
       and34(
-        eq44(notifications.userId, ctx.user.id),
-        eq44(notifications.isRead, false)
+        eq45(notifications.userId, ctx.user.id),
+        eq45(notifications.isRead, false)
       )
     );
     return { ok: true };
@@ -35787,7 +35834,7 @@ var personalizationRouter = router({
 init_schema();
 init_db();
 import { z as z42 } from "zod";
-import { eq as eq45, desc as desc26 } from "drizzle-orm";
+import { eq as eq46, desc as desc26 } from "drizzle-orm";
 init_rateLimiter();
 import { TRPCError as TRPCError36 } from "@trpc/server";
 var C360_LIMIT = 20;
@@ -35833,16 +35880,16 @@ var customer360Router = router({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable"
       });
-    const userRows = await db.select().from(users).where(eq45(users.id, input.userId)).limit(1);
+    const userRows = await db.select().from(users).where(eq46(users.id, input.userId)).limit(1);
     const user = userRows[0];
     if (!user) return null;
     let activity = null;
     try {
-      const rows = await db.select().from(userActivitySummary).where(eq45(userActivitySummary.userId, input.userId));
+      const rows = await db.select().from(userActivitySummary).where(eq46(userActivitySummary.userId, input.userId));
       activity = rows[0] ?? null;
     } catch {
     }
-    const recentEvents = await db.select().from(analyticsEvents).where(eq45(analyticsEvents.userId, input.userId)).orderBy(desc26(analyticsEvents.createdAt)).limit(20);
+    const recentEvents = await db.select().from(analyticsEvents).where(eq46(analyticsEvents.userId, input.userId)).orderBy(desc26(analyticsEvents.createdAt)).limit(20);
     return {
       user: {
         id: user.id,
@@ -35938,7 +35985,7 @@ init_env();
 init_sdk();
 init_local_jwt();
 import crypto4 from "crypto";
-import { and as and35, eq as eq46, isNull as isNull5 } from "drizzle-orm";
+import { and as and35, eq as eq47, isNull as isNull5 } from "drizzle-orm";
 async function resolveDevBypassUser() {
   const now = /* @__PURE__ */ new Date();
   return {
@@ -35975,9 +36022,9 @@ async function resolveApiKeyAuth(req) {
     revokedAt: apiKeys.revokedAt,
     expiresAt: apiKeys.expiresAt,
     scopes: apiKeys.scopes
-  }).from(apiKeys).where(and35(eq46(apiKeys.keyHash, keyHash), isNull5(apiKeys.revokedAt))).limit(1);
+  }).from(apiKeys).where(and35(eq47(apiKeys.keyHash, keyHash), isNull5(apiKeys.revokedAt))).limit(1);
   if (!keyRow || keyRow.expiresAt && keyRow.expiresAt <= now) return null;
-  db.update(apiKeys).set({ lastUsedAt: now }).where(eq46(apiKeys.id, keyRow.id)).catch(() => {
+  db.update(apiKeys).set({ lastUsedAt: now }).where(eq47(apiKeys.id, keyRow.id)).catch(() => {
   });
   const organizationRole = null;
   const user = {
@@ -36403,7 +36450,7 @@ function registerAssessmentWebSocketServer(server) {
 init_env();
 init_db();
 init_schema();
-import { eq as eq47 } from "drizzle-orm";
+import { eq as eq48 } from "drizzle-orm";
 function mapStripeStatus(s) {
   const valid = [
     "trialing",
@@ -36426,7 +36473,7 @@ function resolveTier(plan, interval) {
   ) ?? null;
 }
 async function upsertSubscriptionRecord(db, params) {
-  const existing = await db.select({ id: subscriptions.id }).from(subscriptions).where(eq47(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)).limit(1);
+  const existing = await db.select({ id: subscriptions.id }).from(subscriptions).where(eq48(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)).limit(1);
   const payload = {
     organizationId: params.organizationId,
     stripeSubscriptionId: params.stripeSubscriptionId,
@@ -36445,7 +36492,7 @@ async function upsertSubscriptionRecord(db, params) {
   };
   if (existing.length > 0) {
     await db.update(subscriptions).set(payload).where(
-      eq47(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
+      eq48(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
     );
     return;
   }
@@ -36489,7 +36536,7 @@ async function stripeWebhookHandler(req, res) {
   res.json({ received: true });
 }
 async function isDuplicateBillingEvent(db, stripeEventId) {
-  const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq47(billingEvents.stripeEventId, stripeEventId)).limit(1);
+  const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq48(billingEvents.stripeEventId, stripeEventId)).limit(1);
   return existing.length > 0 && existing[0].status === "success";
 }
 async function processStripeEvent(event, db) {
@@ -36514,7 +36561,7 @@ async function processStripeEvent(event, db) {
         description: `Checkout completed \u2014 plan: ${plan}/${interval}`,
         rawPayload: JSON.stringify(event.data.object)
       }).onConflictDoNothing({ target: billingEvents.stripeEventId });
-      await db.update(organizations).set({ plan, stripeCustomerId: String(session.customer ?? "") }).where(eq47(organizations.id, orgId));
+      await db.update(organizations).set({ plan, stripeCustomerId: String(session.customer ?? "") }).where(eq48(organizations.id, orgId));
       await upsertSubscriptionRecord(db, {
         organizationId: orgId,
         stripeSubscriptionId: String(session.subscription),
@@ -36527,10 +36574,10 @@ async function processStripeEvent(event, db) {
         cancelAtPeriodEnd: 0,
         stripeMetadata: JSON.stringify(session.metadata ?? {})
       });
-      await db.update(billingEvents).set({ status: "success" }).where(eq47(billingEvents.stripeEventId, event.id));
+      await db.update(billingEvents).set({ status: "success" }).where(eq48(billingEvents.stripeEventId, event.id));
       const customerEmail = session.customer_details?.email ?? session.customer_email ?? null;
       if (customerEmail) {
-        const [orgRow] = await db.select({ name: organizations.name }).from(organizations).where(eq47(organizations.id, orgId)).limit(1);
+        const [orgRow] = await db.select({ name: organizations.name }).from(organizations).where(eq48(organizations.id, orgId)).limit(1);
         void emailService.sendSubscriptionConfirmed(
           {
             name: session.customer_details?.name ?? null,
@@ -36547,7 +36594,7 @@ async function processStripeEvent(event, db) {
     case "invoice.payment_succeeded": {
       const invoice = event.data.object;
       const orgResult = await db.select({ id: organizations.id }).from(organizations).where(
-        eq47(organizations.stripeCustomerId, String(invoice.customer ?? ""))
+        eq48(organizations.stripeCustomerId, String(invoice.customer ?? ""))
       ).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
@@ -36578,7 +36625,7 @@ async function processStripeEvent(event, db) {
           stripeMetadata: JSON.stringify(invoice.lines?.data?.[0] ?? {})
         });
       } else if (subId) {
-        await db.update(subscriptions).set({ status: "active", lastInvoiceId: invoice.id }).where(eq47(subscriptions.stripeSubscriptionId, subId));
+        await db.update(subscriptions).set({ status: "active", lastInvoiceId: invoice.id }).where(eq48(subscriptions.stripeSubscriptionId, subId));
       }
       await db.insert(billingEvents).values({
         organizationId: orgId,
@@ -36596,12 +36643,12 @@ async function processStripeEvent(event, db) {
     case "invoice.payment_failed": {
       const invoice = event.data.object;
       const orgResult = await db.select({ id: organizations.id }).from(organizations).where(
-        eq47(organizations.stripeCustomerId, String(invoice.customer ?? ""))
+        eq48(organizations.stripeCustomerId, String(invoice.customer ?? ""))
       ).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       const subIdFailed = invoice.subscription ?? invoice.parent?.subscription_details?.subscription ?? "";
-      await db.update(subscriptions).set({ status: "past_due" }).where(eq47(subscriptions.stripeSubscriptionId, subIdFailed));
+      await db.update(subscriptions).set({ status: "past_due" }).where(eq48(subscriptions.stripeSubscriptionId, subIdFailed));
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -36615,7 +36662,7 @@ async function processStripeEvent(event, db) {
     // ── Subscription updated ──────────────────────────────────────────────────
     case "customer.subscription.updated": {
       const sub = event.data.object;
-      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq47(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
+      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq48(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       const priceId = sub.items?.data?.[0]?.price?.id ?? "";
@@ -36642,7 +36689,7 @@ async function processStripeEvent(event, db) {
           cancelAtPeriodEnd: sub.cancel_at_period_end ? 1 : 0,
           stripeMetadata: JSON.stringify(sub.metadata ?? {})
         });
-        await db.update(organizations).set({ plan: planInfo.plan }).where(eq47(organizations.id, orgId));
+        await db.update(organizations).set({ plan: planInfo.plan }).where(eq48(organizations.id, orgId));
       } else {
         await db.update(subscriptions).set({
           stripePriceId: priceId || null,
@@ -36651,7 +36698,7 @@ async function processStripeEvent(event, db) {
           currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1e3) : null,
           cancelAtPeriodEnd: sub.cancel_at_period_end ? 1 : 0,
           stripeMetadata: JSON.stringify(sub.metadata ?? {})
-        }).where(eq47(subscriptions.stripeSubscriptionId, sub.id));
+        }).where(eq48(subscriptions.stripeSubscriptionId, sub.id));
       }
       await db.insert(billingEvents).values({
         organizationId: orgId,
@@ -36666,14 +36713,14 @@ async function processStripeEvent(event, db) {
     // ── Subscription cancelled ────────────────────────────────────────────────
     case "customer.subscription.deleted": {
       const sub = event.data.object;
-      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq47(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
+      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq48(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       await db.update(subscriptions).set({
         status: "canceled",
         cancelAtPeriodEnd: 0,
         canceledAt: sub.canceled_at ? new Date(sub.canceled_at * 1e3) : /* @__PURE__ */ new Date()
-      }).where(eq47(subscriptions.stripeSubscriptionId, sub.id));
+      }).where(eq48(subscriptions.stripeSubscriptionId, sub.id));
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -36738,7 +36785,7 @@ init_schema();
 init_db();
 init_email();
 init_env();
-import { eq as eq48 } from "drizzle-orm";
+import { eq as eq49 } from "drizzle-orm";
 var INTERVAL_MS = 6 * 60 * 60 * 1e3;
 var DAY_MS = 24 * 60 * 60 * 1e3;
 function milestoneColumn(milestone) {
@@ -36818,7 +36865,7 @@ async function runReminderCheck() {
     trialReminderDay3Sent: organizations.trialReminderDay3Sent,
     trialReminderDay6Sent: organizations.trialReminderDay6Sent,
     trialExpiredNoticeSent: organizations.trialExpiredNoticeSent
-  }).from(organizations).where(eq48(organizations.plan, "free_trial"));
+  }).from(organizations).where(eq49(organizations.plan, "free_trial"));
   if (trialOrgs.length === 0) return;
   const pricingUrl = `${ENV.appUrl}/pricing`;
   let sent = 0;
@@ -36844,7 +36891,7 @@ async function runReminderCheck() {
         html: buildEmailHtml(org.name, milestone, pricingUrl),
         text: buildEmailText(org.name, milestone, pricingUrl)
       });
-      await db.update(organizations).set({ [col]: 1 }).where(eq48(organizations.id, org.id));
+      await db.update(organizations).set({ [col]: 1 }).where(eq49(organizations.id, org.id));
       sent++;
     } catch (err) {
       console.warn(
@@ -36881,7 +36928,7 @@ init_schema();
 init_db();
 init_email();
 init_env();
-import { and as and36, eq as eq49, lte, gte as gte2, inArray as inArray9 } from "drizzle-orm";
+import { and as and36, eq as eq50, lte, gte as gte2, inArray as inArray9 } from "drizzle-orm";
 var INTERVAL_MS2 = 2 * 60 * 60 * 1e3;
 var DAY_MS2 = 24 * 60 * 60 * 1e3;
 var sentSet = /* @__PURE__ */ new Set();
@@ -36934,7 +36981,7 @@ async function runDeadlineAlertCheck() {
   const horizon = new Date(now.getTime() + 31 * DAY_MS2);
   const upcoming = await db.select().from(complianceDeadlines).where(
     and36(
-      eq49(complianceDeadlines.status, "upcoming"),
+      eq50(complianceDeadlines.status, "upcoming"),
       gte2(complianceDeadlines.deadlineDate, now),
       lte(complianceDeadlines.deadlineDate, horizon)
     )
@@ -36982,10 +37029,10 @@ async function runDeadlineAlertCheck() {
     if (!milestone) continue;
     const dedupKey = `${deadline.id}:${milestone}`;
     if (sentSet.has(dedupKey)) continue;
-    const members = await db.select({ email: users.email, name: users.name }).from(organizationMembers).innerJoin(users, eq49(organizationMembers.userId, users.id)).where(
+    const members = await db.select({ email: users.email, name: users.name }).from(organizationMembers).innerJoin(users, eq50(organizationMembers.userId, users.id)).where(
       and36(
-        eq49(organizationMembers.organizationId, deadline.organizationId),
-        eq49(organizationMembers.status, "active"),
+        eq50(organizationMembers.organizationId, deadline.organizationId),
+        eq50(organizationMembers.status, "active"),
         inArray9(organizationMembers.role, [
           "owner",
           "admin",
@@ -36995,8 +37042,8 @@ async function runDeadlineAlertCheck() {
     );
     const invitedEmails = await db.select({ inviteEmail: organizationMembers.inviteEmail }).from(organizationMembers).where(
       and36(
-        eq49(organizationMembers.organizationId, deadline.organizationId),
-        eq49(organizationMembers.status, "invited"),
+        eq50(organizationMembers.organizationId, deadline.organizationId),
+        eq50(organizationMembers.status, "invited"),
         inArray9(organizationMembers.role, [
           "owner",
           "admin",
@@ -37045,7 +37092,7 @@ function startDeadlineAlertScheduler() {
 // server/report-scheduler.ts
 init_schema();
 init_db();
-import { eq as eq50 } from "drizzle-orm";
+import { eq as eq51 } from "drizzle-orm";
 init_env();
 var INTERVAL_MS3 = 6 * 60 * 60 * 1e3;
 var sentSet2 = /* @__PURE__ */ new Set();
@@ -37089,7 +37136,7 @@ async function runScheduledReports() {
     name: organizations.name,
     billingEmail: organizations.billingEmail,
     primaryJurisdiction: organizations.primaryJurisdiction
-  }).from(organizations).where(eq50(organizations.isActive, 1));
+  }).from(organizations).where(eq51(organizations.isActive, 1));
   for (const org of activeOrgs) {
     if (!org.billingEmail) continue;
     const jurisdiction = mapJurisdiction(org.primaryJurisdiction);
@@ -40431,7 +40478,7 @@ import { sql as sql18 } from "drizzle-orm";
 init_schema();
 init_db();
 init_local_jwt();
-import { and as and37, count as count4, desc as desc27, eq as eq51, gte as gte3, like as like2, or as or8, sql as sql15 } from "drizzle-orm";
+import { and as and37, count as count4, desc as desc27, eq as eq52, gte as gte3, like as like2, or as or8, sql as sql15 } from "drizzle-orm";
 async function getUnifiedUsers(options) {
   const db = await getDb();
   if (!db) {
@@ -40477,7 +40524,7 @@ async function getUnifiedUsers(options) {
   }
   if (options.status) {
     conditions.push(
-      eq51(
+      eq52(
         localUsers.status,
         options.status
       )
@@ -40509,7 +40556,7 @@ async function getUnifiedUsers(options) {
   }).from(organizationMembers).where(
     and37(
       sql15`${organizationMembers.localUserId} IS NOT NULL`,
-      eq51(organizationMembers.status, "active")
+      eq52(organizationMembers.status, "active")
     )
   ).groupBy(organizationMembers.localUserId);
   const orgCountMap = new Map(orgCounts.map((r) => [r.localUserId, r.orgCount]));
@@ -40564,7 +40611,7 @@ async function getUserStats() {
 async function getUserDetail(userId) {
   const db = await getDb();
   if (!db) return null;
-  const [user] = await db.select().from(localUsers).where(eq51(localUsers.id, userId)).limit(1);
+  const [user] = await db.select().from(localUsers).where(eq52(localUsers.id, userId)).limit(1);
   if (!user) return null;
   const memberships = await db.select({
     orgId: organizations.id,
@@ -40573,11 +40620,11 @@ async function getUserDetail(userId) {
     joinedAt: organizationMembers.createdAt
   }).from(organizationMembers).innerJoin(
     organizations,
-    eq51(organizationMembers.organizationId, organizations.id)
+    eq52(organizationMembers.organizationId, organizations.id)
   ).where(
     and37(
-      eq51(organizationMembers.localUserId, userId),
-      eq51(organizationMembers.status, "active")
+      eq52(organizationMembers.localUserId, userId),
+      eq52(organizationMembers.status, "active")
     )
   );
   const activity = await db.select({
@@ -40585,7 +40632,7 @@ async function getUserDetail(userId) {
     action: auditLogs.action,
     category: auditLogs.category,
     createdAt: auditLogs.createdAt
-  }).from(auditLogs).where(eq51(auditLogs.localUserId, userId)).orderBy(desc27(auditLogs.createdAt)).limit(50);
+  }).from(auditLogs).where(eq52(auditLogs.localUserId, userId)).orderBy(desc27(auditLogs.createdAt)).limit(50);
   return {
     id: user.id,
     source: "local",
@@ -40608,7 +40655,7 @@ async function getUserDetail(userId) {
 async function toggleUserSuspension(userId, suspend) {
   const db = await getDb();
   if (!db) return false;
-  await db.update(localUsers).set({ status: suspend ? "suspended" : "active", updatedAt: /* @__PURE__ */ new Date() }).where(eq51(localUsers.id, userId));
+  await db.update(localUsers).set({ status: suspend ? "suspended" : "active", updatedAt: /* @__PURE__ */ new Date() }).where(eq52(localUsers.id, userId));
   return true;
 }
 async function updateUserRole(userId, newRole) {
@@ -40617,16 +40664,16 @@ async function updateUserRole(userId, newRole) {
   await db.update(localUsers).set({
     userType: newRole,
     updatedAt: /* @__PURE__ */ new Date()
-  }).where(eq51(localUsers.id, userId));
+  }).where(eq52(localUsers.id, userId));
   return true;
 }
 async function deleteUser(userId) {
   const db = await getDb();
   if (!db) return false;
-  await db.delete(organizationMembers).where(eq51(organizationMembers.localUserId, userId));
-  await db.delete(auditLogs).where(eq51(auditLogs.localUserId, userId));
-  await db.delete(userOnboarding).where(eq51(userOnboarding.localUserId, userId));
-  await db.delete(localUsers).where(eq51(localUsers.id, userId));
+  await db.delete(organizationMembers).where(eq52(organizationMembers.localUserId, userId));
+  await db.delete(auditLogs).where(eq52(auditLogs.localUserId, userId));
+  await db.delete(userOnboarding).where(eq52(userOnboarding.localUserId, userId));
+  await db.delete(localUsers).where(eq52(localUsers.id, userId));
   return true;
 }
 async function getRecentActivity(limit = 100) {
@@ -40642,7 +40689,7 @@ async function getRecentActivity(limit = 100) {
     outcome: auditLogs.outcome,
     ipAddress: auditLogs.ipHash,
     createdAt: auditLogs.createdAt
-  }).from(auditLogs).leftJoin(localUsers, eq51(auditLogs.localUserId, localUsers.id)).orderBy(desc27(auditLogs.createdAt)).limit(limit);
+  }).from(auditLogs).leftJoin(localUsers, eq52(auditLogs.localUserId, localUsers.id)).orderBy(desc27(auditLogs.createdAt)).limit(limit);
 }
 async function getMonthlyRegistrations(months = 12) {
   const db = await getDb();
@@ -40676,7 +40723,7 @@ async function getSubscriptionData() {
     updatedAt: subscriptions.updatedAt
   }).from(subscriptions).innerJoin(
     organizations,
-    eq51(subscriptions.organizationId, organizations.id)
+    eq52(subscriptions.organizationId, organizations.id)
   ).orderBy(desc27(subscriptions.updatedAt)).limit(500);
   return {
     subscriptions: rows.map((r) => ({
@@ -40700,7 +40747,7 @@ async function getOrganizationData() {
     lastActivity: sql15`MAX(${organizationMembers.createdAt})`
   }).from(organizations).leftJoin(
     organizationMembers,
-    eq51(organizations.id, organizationMembers.organizationId)
+    eq52(organizations.id, organizationMembers.organizationId)
   ).groupBy(organizations.id).orderBy(desc27(organizations.createdAt)).limit(500);
   return rows.map((r) => ({
     ...r,
@@ -40721,9 +40768,9 @@ async function getSecurityEvents(limit = 200) {
     targetEntity: auditLogs.targetEntity
   }).from(auditLogs).where(
     or8(
-      eq51(auditLogs.category, "auth"),
-      eq51(auditLogs.outcome, "failure"),
-      eq51(auditLogs.outcome, "blocked")
+      eq52(auditLogs.category, "auth"),
+      eq52(auditLogs.outcome, "failure"),
+      eq52(auditLogs.outcome, "blocked")
     )
   ).orderBy(desc27(auditLogs.createdAt)).limit(limit);
   const platformEvents = rows.map((r) => ({
@@ -40770,7 +40817,7 @@ init_admin_insights_store();
 // server/_core/platform-monitor-store.ts
 init_schema();
 init_db();
-import { desc as desc29, eq as eq53, gte as gte5, sql as sql17 } from "drizzle-orm";
+import { desc as desc29, eq as eq54, gte as gte5, sql as sql17 } from "drizzle-orm";
 var DAY_MS3 = 24 * 60 * 60 * 1e3;
 var INTERVAL_MONTHS = {
   monthly: 1,
@@ -40960,7 +41007,7 @@ async function getRevenueMetrics() {
     currency: billingEvents.currency,
     organizationName: organizations.name,
     createdAt: billingEvents.createdAt
-  }).from(billingEvents).leftJoin(organizations, eq53(organizations.id, billingEvents.organizationId)).orderBy(desc29(billingEvents.createdAt)).limit(20);
+  }).from(billingEvents).leftJoin(organizations, eq54(organizations.id, billingEvents.organizationId)).orderBy(desc29(billingEvents.createdAt)).limit(20);
   return {
     mrrCents,
     arrCents: mrrCents * 12,
@@ -41010,7 +41057,7 @@ async function getAiJobMetrics() {
     organizationId: aiAgentRuns.organizationId,
     errorMessage: aiAgentRuns.errorMessage,
     createdAt: aiAgentRuns.createdAt
-  }).from(aiAgentRuns).where(eq53(aiAgentRuns.status, "failed")).orderBy(desc29(aiAgentRuns.createdAt)).limit(10);
+  }).from(aiAgentRuns).where(eq54(aiAgentRuns.status, "failed")).orderBy(desc29(aiAgentRuns.createdAt)).limit(10);
   const completed = num(counts?.completed);
   const failed = num(counts?.failed);
   const finished = completed + failed;
@@ -41053,7 +41100,7 @@ async function getEmailMetrics() {
     recipient: emailLog.recipient,
     errorMessage: emailLog.errorMessage,
     createdAt: emailLog.createdAt
-  }).from(emailLog).where(eq53(emailLog.status, "failed")).orderBy(desc29(emailLog.createdAt)).limit(10);
+  }).from(emailLog).where(eq54(emailLog.status, "failed")).orderBy(desc29(emailLog.createdAt)).limit(10);
   const sent = num(counts?.sent);
   const opened = num(counts?.opened);
   const clicked = num(counts?.clicked);

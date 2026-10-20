@@ -17,6 +17,9 @@ import {
 import { requireModulePermission } from "./_core/permission-guard";
 import { getOrgSettings, updateOrgSettings } from "./org-settings-store";
 import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
+import { eq } from "drizzle-orm";
+import { getDb } from "./db";
+import { organizationMembers, organizations, vendors } from "../drizzle/schema";
 
 const JURISDICTION_VALUES = GLOBAL_JURISDICTIONS;
 
@@ -53,6 +56,65 @@ export const orgSettingsRouter = router({
         message: "Organization not found",
       });
     return org;
+  }),
+
+  /**
+   * Export the organization's core data as JSON (owner/admin only). Read-only
+   * and bounded to profile, vendors and members for portability/compliance.
+   */
+  exportData: orgAdminProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database unavailable",
+      });
+    }
+    const orgId = ctx.organizationId as number;
+
+    const [org] = await db
+      .select({
+        name: organizations.name,
+        industry: organizations.industry,
+        primaryJurisdiction: organizations.primaryJurisdiction,
+        plan: organizations.plan,
+        createdAt: organizations.createdAt,
+      })
+      .from(organizations)
+      .where(eq(organizations.id, orgId))
+      .limit(1);
+
+    const vendorRows = await db
+      .select({
+        id: vendors.id,
+        vendorName: vendors.vendorName,
+        industry: vendors.industry,
+        riskTier: vendors.riskTier,
+        criticalityLevel: vendors.criticalityLevel,
+        dataLocations: vendors.dataLocations,
+        regulatoryJurisdictions: vendors.regulatoryJurisdictions,
+        certifications: vendors.certifications,
+        createdAt: vendors.createdAt,
+      })
+      .from(vendors)
+      .where(eq(vendors.organizationId, orgId));
+
+    const memberRows = await db
+      .select({
+        role: organizationMembers.role,
+        status: organizationMembers.status,
+        inviteEmail: organizationMembers.inviteEmail,
+        createdAt: organizationMembers.createdAt,
+      })
+      .from(organizationMembers)
+      .where(eq(organizationMembers.organizationId, orgId));
+
+    return {
+      exportedAt: new Date().toISOString(),
+      organization: org ?? null,
+      vendors: vendorRows,
+      members: memberRows,
+    };
   }),
 
   /**

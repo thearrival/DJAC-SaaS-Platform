@@ -215,6 +215,18 @@ async function run() {
     "orgEntities.list should include consolidated totals"
   );
 
+  const exportData = await getTrpc(
+    "orgSettings.exportData",
+    {},
+    { cookie: sessionCookie }
+  );
+  log("export", exportData.status, exportData.text.slice(0, 120));
+  assert(exportData.status === 200, "orgSettings.exportData should succeed");
+  assert(
+    exportData.text.includes("exportedAt"),
+    "orgSettings.exportData should return an export bundle"
+  );
+
   const report = await postTrpc(
     "compliance.report",
     { jurisdiction: "both", locale: "en" },
