@@ -26,6 +26,9 @@ function boolEnv(raw, fallback) {
 function strEnv(raw, fallback = "") {
   return (raw ?? fallback).trim() || fallback;
 }
+function enumEnv(raw, allowed, fallback) {
+  return allowed.includes(raw) ? raw : fallback;
+}
 var _isProduction, _isDevelopment, parsedEnv;
 var init_config_schema = __esm({
   "server/services/config-schema.ts"() {
@@ -44,9 +47,20 @@ var init_config_schema = __esm({
       OAUTH_SERVER_URL: process.env.OAUTH_SERVER_URL ?? "",
       OWNER_OPEN_ID: process.env.OWNER_OPEN_ID ?? "",
       APP_URL: (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""),
+      // ── Google OAuth (direct, no third-party redirect host) ───────────────────
+      // When both are set, "Continue with Google" runs entirely on APP_URL, so the
+      // user never sees *.supabase.co during sign-in.
+      GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? "",
+      GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ?? "",
       // ── Forge ─────────────────────────────────────────────────────────────────
       BUILT_IN_FORGE_API_URL: process.env.BUILT_IN_FORGE_API_URL ?? "",
       BUILT_IN_FORGE_API_KEY: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+      // ── DeepSeek (optional; preferred LLM provider when configured) ───────────
+      // OpenAI-compatible. When DEEPSEEK_API_KEY is set it takes priority over
+      // Forge for all LLM calls (compliance chat, AI agents, report generation).
+      DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY ?? "",
+      DEEPSEEK_BASE_URL: (process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com").replace(/\/$/, ""),
+      DEEPSEEK_MODEL: strEnv(process.env.DEEPSEEK_MODEL, "deepseek-chat"),
       // ── Dev auth bypass ───────────────────────────────────────────────────────
       DEV_AUTH_BYPASS: _isDevelopment && process.env.DEV_AUTH_BYPASS === "true",
       DEV_AUTH_OPEN_ID: process.env.DEV_AUTH_OPEN_ID ?? "local-dev-user",
@@ -117,9 +131,22 @@ var init_config_schema = __esm({
       ),
       DATABASE_POOL_SIZE: intEnv(
         process.env.DATABASE_POOL_SIZE,
-        _isProduction ? 25 : 5,
+        // Serverless (Vercel) runs many short-lived instances, each of which used to
+        // open up to 25 connections against the shared Supabase pooler. A burst of
+        // instances exhausted the pooler ("max clients reached in session mode",
+        // hard limit: 15), surfacing a database error to users. Each instance only
+        // handles one request at a time, so a single per-instance connection is
+        // correct and leaves the pooler budget for scale-out.
+        _isProduction ? 1 : 5,
         1,
         100
+      ),
+      // "all" = every account must supply company details before data renders;
+      // "new" = only new accounts are gated (grandfathers existing accounts).
+      COMPANY_PROFILE_GATE: enumEnv(
+        process.env.COMPANY_PROFILE_GATE,
+        ["all", "new"],
+        "all"
       ),
       // ── HTTP / Timeouts ───────────────────────────────────────────────────────
       COMPLIANCE_CACHE_TTL_MS: intEnv(
@@ -196,6 +223,7 @@ __export(env_exports, {
   STRIPE_PRICE_ENV_KEYS: () => STRIPE_PRICE_ENV_KEYS,
   checkProductionEnv: () => checkProductionEnv,
   evaluateStripeBillingConfig: () => evaluateStripeBillingConfig,
+  parseQueueMode: () => parseQueueMode,
   resolveAiQueueMode: () => resolveAiQueueMode
 });
 function parseQueueMode(value) {
@@ -205,9 +233,9 @@ function parseQueueMode(value) {
 function resolveAiQueueMode(value, options) {
   const explicitMode = parseQueueMode(value);
   const hasRedis = Boolean((options.redisUrl ?? "").trim());
-  if (options.isProduction && hasRedis) return "redis";
-  if (explicitMode) return explicitMode;
-  return "in_memory";
+  if (!hasRedis) return "in_memory";
+  if (options.isProduction) return "redis";
+  return explicitMode ?? "in_memory";
 }
 function evaluateStripeBillingConfig(env) {
   const configuredPriceKeys = STRIPE_PRICE_ENV_KEYS.filter(
@@ -321,12 +349,16 @@ var init_env = __esm({
       cookieSecret: parsedEnv.JWT_SECRET,
       cronSecret: parsedEnv.CRON_SECRET,
       databaseUrl: parsedEnv.DATABASE_URL,
+      companyProfileGate: parsedEnv.COMPANY_PROFILE_GATE,
       oAuthServerUrl: parsedEnv.OAUTH_SERVER_URL,
       ownerOpenId: parsedEnv.OWNER_OPEN_ID,
       isProduction: parsedEnv.NODE_ENV === "production",
       isDevelopment: parsedEnv.NODE_ENV === "development",
       forgeApiUrl: parsedEnv.BUILT_IN_FORGE_API_URL,
       forgeApiKey: parsedEnv.BUILT_IN_FORGE_API_KEY,
+      deepseekApiKey: parsedEnv.DEEPSEEK_API_KEY,
+      deepseekBaseUrl: parsedEnv.DEEPSEEK_BASE_URL,
+      deepseekModel: parsedEnv.DEEPSEEK_MODEL,
       devAuthBypass: parsedEnv.DEV_AUTH_BYPASS,
       devAuthOpenId: parsedEnv.DEV_AUTH_OPEN_ID,
       devAuthName: parsedEnv.DEV_AUTH_NAME,
@@ -349,6 +381,8 @@ var init_env = __esm({
       stripeSecretKey: parsedEnv.STRIPE_SECRET_KEY,
       stripeWebhookSecret: parsedEnv.STRIPE_WEBHOOK_SECRET,
       appUrl: parsedEnv.APP_URL,
+      googleClientId: parsedEnv.GOOGLE_CLIENT_ID,
+      googleClientSecret: parsedEnv.GOOGLE_CLIENT_SECRET,
       smtpHost: parsedEnv.SMTP_HOST,
       smtpPort: parsedEnv.SMTP_PORT,
       smtpSecure: parsedEnv.SMTP_SECURE,
@@ -380,6 +414,37 @@ var init_env = __esm({
       supabaseAnonKey: parsedEnv.SUPABASE_ANON_KEY,
       supabaseServiceRoleKey: parsedEnv.SUPABASE_SERVICE_ROLE_KEY
     };
+  }
+});
+
+// server/_core/sentry.ts
+import * as Sentry from "@sentry/node";
+function initialiseSentry() {
+  if (!ENV.sentryDsn) return;
+  Sentry.init({
+    dsn: ENV.sentryDsn,
+    environment: parsedEnv.NODE_ENV ?? "production",
+    // Trace 10 % of requests in production; 100 % in dev/staging for visibility.
+    tracesSampleRate: ENV.isProduction ? 0.1 : 1,
+    // Attach request data (URL, method, headers) to error events.
+    includeLocalVariables: !ENV.isProduction
+  });
+  console.info("[Sentry] Error monitoring initialised.");
+}
+function sentryErrorHandler() {
+  return Sentry.expressErrorHandler();
+}
+function captureError(error, context) {
+  try {
+    Sentry.captureException(error, context ? { extra: context } : void 0);
+  } catch {
+  }
+}
+var init_sentry = __esm({
+  "server/_core/sentry.ts"() {
+    "use strict";
+    init_env();
+    init_config_schema();
   }
 });
 
@@ -1422,6 +1487,7 @@ var init_schema = __esm({
       billingEmail: varchar("billingEmail", { length: 320 }).notNull(),
       industry: varchar("industry", { length: 120 }),
       primaryJurisdiction: jurisdictionEnum("primaryJurisdiction").default("Both"),
+      parentOrganizationId: integer("parentOrganizationId"),
       stripeCustomerId: varchar("stripeCustomerId", { length: 64 }),
       plan: planEnum("plan").default("free_trial").notNull(),
       trialStartedAt: timestamp("trialStartedAt"),
@@ -2463,7 +2529,22 @@ async function verifyPoolAlive(pool) {
     return false;
   }
 }
-async function getDb() {
+function isSessionPoolerExhausted(error) {
+  const msg = String(error ?? "");
+  return /EMAXCONNSESSION|max clients reached in session mode/i.test(msg);
+}
+function toTransactionPoolerUrl(databaseUrl) {
+  try {
+    const u = new URL(databaseUrl);
+    if (!/pooler\.supabase\.com$/i.test(u.hostname)) return null;
+    if (u.port && u.port !== "5432") return null;
+    u.port = "6543";
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+async function getDb(overrideUrl) {
   if (_db && _pool) {
     const alive = await verifyPoolAlive(_pool);
     if (!alive) {
@@ -2473,7 +2554,7 @@ async function getDb() {
       return _db;
     }
   }
-  const databaseUrl = ENV.databaseUrl;
+  const databaseUrl = overrideUrl ?? _databaseUrlOverride ?? ENV.databaseUrl;
   if (!databaseUrl) return null;
   const now = Date.now();
   if (now - _lastDbCheckFailedAt < getBackoffDelay()) {
@@ -2482,12 +2563,20 @@ async function getDb() {
   try {
     const connectionLimit = ENV.databasePoolSize;
     const sslUrl = fixSslMode(databaseUrl);
+    const isTransactionPooler = /:6543\b/.test(sslUrl);
     _pool = new pg.Pool({
       connectionString: sslUrl,
       max: connectionLimit,
-      idleTimeoutMillis: 3e4,
+      idleTimeoutMillis: 1e4,
       connectionTimeoutMillis: 5e3,
-      statement_timeout: 3e4
+      // Serverless: release idle clients promptly and let the process exit when
+      // the pool empties, so short-lived instances don't pin the shared
+      // Supavisor session pooler (hard client limit: 15).
+      allowExitOnIdle: true,
+      // Transaction mode (port 6543) rejects session-level startup parameters
+      // and must not use named prepared statements, so swap statement_timeout
+      // for prepare:false.
+      ...isTransactionPooler ? { prepare: false } : { statement_timeout: 3e4 }
     });
     _pool.on("error", (err) => {
       console.error("[Database] Pool error:", err.message);
@@ -2497,7 +2586,9 @@ async function getDb() {
     client.release();
     _db = drizzle(_pool);
     _consecutiveFailures = 0;
-    console.info(`[Database] Pool created \u2014 max=${connectionLimit}`);
+    console.info(
+      `[Database] Pool created \u2014 max=${connectionLimit}${isTransactionPooler ? " (transaction pooler)" : ""}`
+    );
     _lastDbCheckFailedAt = 0;
     return _db;
   } catch (error) {
@@ -2507,8 +2598,27 @@ async function getDb() {
       `[Database] Connection unavailable (attempt #${_consecutiveFailures}):`,
       String(error)
     );
+    if (_pool) {
+      try {
+        await _pool.end();
+      } catch {
+      }
+    }
     _pool = null;
     _db = null;
+    if (!overrideUrl && isSessionPoolerExhausted(error)) {
+      const txUrl = toTransactionPoolerUrl(ENV.databaseUrl ?? "");
+      if (txUrl) {
+        _databaseUrlOverride = txUrl;
+        console.warn(
+          "[Database] Session pooler saturated \u2014 switched to the transaction pooler (port 6543)"
+        );
+        return getDb(txUrl);
+      }
+    }
+    if (overrideUrl) {
+      _databaseUrlOverride = null;
+    }
     return null;
   }
 }
@@ -2684,7 +2794,7 @@ async function touchUserActivity(userId) {
   }
   await db.update(users).set({ lastActivityAt: /* @__PURE__ */ new Date() }).where(eq(users.id, userId));
 }
-var _db, _pool, _lastDbCheckFailedAt, _consecutiveFailures, DB_RETRY_BACKOFF_MIN_MS, DB_RETRY_BACKOFF_MAX_MS, devUserOverride;
+var _db, _pool, _lastDbCheckFailedAt, _consecutiveFailures, DB_RETRY_BACKOFF_MIN_MS, DB_RETRY_BACKOFF_MAX_MS, devUserOverride, _databaseUrlOverride;
 var init_db = __esm({
   "server/db.ts"() {
     "use strict";
@@ -2698,6 +2808,7 @@ var init_db = __esm({
     DB_RETRY_BACKOFF_MIN_MS = 1e3;
     DB_RETRY_BACKOFF_MAX_MS = 6e4;
     devUserOverride = {};
+    _databaseUrlOverride = null;
   }
 });
 
@@ -3005,6 +3116,44 @@ var init_logger = __esm({
   }
 });
 
+// server/services/sse-bus.ts
+var sse_bus_exports = {};
+__export(sse_bus_exports, {
+  addSSEClient: () => addSSEClient,
+  broadcastSSE: () => broadcastSSE,
+  getSSEClientCount: () => getSSEClientCount,
+  removeSSEClient: () => removeSSEClient
+});
+function addSSEClient(res) {
+  sseClients.add(res);
+}
+function removeSSEClient(res) {
+  sseClients.delete(res);
+}
+function getSSEClientCount() {
+  return sseClients.size;
+}
+function broadcastSSE(event, data) {
+  const msg = `event: ${event}
+data: ${JSON.stringify(data)}
+
+`;
+  for (const client of sseClients) {
+    try {
+      client.write(msg);
+    } catch {
+      sseClients.delete(client);
+    }
+  }
+}
+var sseClients;
+var init_sse_bus = __esm({
+  "server/services/sse-bus.ts"() {
+    "use strict";
+    sseClients = /* @__PURE__ */ new Set();
+  }
+});
+
 // server/_core/rateLimiter.ts
 var rateLimiter_exports = {};
 __export(rateLimiter_exports, {
@@ -3015,7 +3164,7 @@ __export(rateLimiter_exports, {
   resetRateLimit: () => resetRateLimit
 });
 import Redis from "ioredis";
-import { sql as sql2 } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 function getRedis() {
   if (_redisInitialised) return _redis;
   _redisInitialised = true;
@@ -3043,7 +3192,7 @@ function getRedis() {
 async function ensureRateLimitTable(db) {
   if (_pgTableEnsured) return;
   try {
-    await db.execute(sql2`
+    await db.execute(sql`
       CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
         "key" text NOT NULL,
         "windowIndex" bigint NOT NULL,
@@ -3062,7 +3211,7 @@ async function tryPostgresIncrement(key, windowIndex) {
     const db = await getDb();
     if (!db) return null;
     await ensureRateLimitTable(db);
-    const result = await db.execute(sql2`
+    const result = await db.execute(sql`
       INSERT INTO "rateLimitWindows" ("key", "windowIndex", "count")
       VALUES (${key}, ${windowIndex}, 1)
       ON CONFLICT ("key", "windowIndex")
@@ -3071,15 +3220,15 @@ async function tryPostgresIncrement(key, windowIndex) {
     `);
     const row = result.rows?.[0] ?? null;
     if (!row) return null;
-    const count3 = Number(row.count);
-    if (!Number.isFinite(count3)) return null;
+    const count6 = Number(row.count);
+    if (!Number.isFinite(count6)) return null;
     if (Math.random() < 0.01) {
       void db.execute(
-        sql2`DELETE FROM "rateLimitWindows" WHERE "createdAt" < now() - interval '1 day'`
+        sql`DELETE FROM "rateLimitWindows" WHERE "createdAt" < now() - interval '1 day'`
       ).catch(() => {
       });
     }
-    return count3;
+    return count6;
   } catch {
     return null;
   }
@@ -3089,15 +3238,15 @@ async function tryPostgresCount(key, windowIndex) {
   try {
     const db = await getDb();
     if (!db) return null;
-    const result = await db.execute(sql2`
+    const result = await db.execute(sql`
       SELECT "count" FROM "rateLimitWindows"
       WHERE "key" = ${key} AND "windowIndex" = ${windowIndex}
       LIMIT 1
     `);
     const row = result.rows?.[0] ?? null;
     if (!row) return 0;
-    const count3 = Number(row.count);
-    return Number.isFinite(count3) ? count3 : 0;
+    const count6 = Number(row.count);
+    return Number.isFinite(count6) ? count6 : 0;
   } catch {
     return null;
   }
@@ -3108,7 +3257,7 @@ async function tryPostgresReset(key, windowIndex) {
     const db = await getDb();
     if (!db) return;
     await db.execute(
-      sql2`DELETE FROM "rateLimitWindows" WHERE "key" = ${key} AND "windowIndex" = ${windowIndex}`
+      sql`DELETE FROM "rateLimitWindows" WHERE "key" = ${key} AND "windowIndex" = ${windowIndex}`
     );
   } catch {
   }
@@ -3121,14 +3270,14 @@ async function checkRateLimit(key, limit, windowMs) {
   if (redis) {
     try {
       const redisKey = `rl:${windowIndex}:${key}`;
-      const count3 = await redis.incr(redisKey);
-      if (count3 === 1) {
+      const count6 = await redis.incr(redisKey);
+      if (count6 === 1) {
         const ttlMs = windowResetMs - Date.now();
         await redis.pexpire(redisKey, Math.max(ttlMs, 1));
       }
       return {
-        allowed: count3 <= limit,
-        remaining: Math.max(0, limit - count3),
+        allowed: count6 <= limit,
+        remaining: Math.max(0, limit - count6),
         resetAt,
         limit
       };
@@ -3229,44 +3378,6 @@ var init_rateLimiter = __esm({
     }, 5 * 6e4);
     _pruneInterval.unref();
     _pgTableEnsured = false;
-  }
-});
-
-// server/services/sse-bus.ts
-var sse_bus_exports = {};
-__export(sse_bus_exports, {
-  addSSEClient: () => addSSEClient,
-  broadcastSSE: () => broadcastSSE,
-  getSSEClientCount: () => getSSEClientCount,
-  removeSSEClient: () => removeSSEClient
-});
-function addSSEClient(res) {
-  sseClients.add(res);
-}
-function removeSSEClient(res) {
-  sseClients.delete(res);
-}
-function getSSEClientCount() {
-  return sseClients.size;
-}
-function broadcastSSE(event, data) {
-  const msg = `event: ${event}
-data: ${JSON.stringify(data)}
-
-`;
-  for (const client of sseClients) {
-    try {
-      client.write(msg);
-    } catch {
-      sseClients.delete(client);
-    }
-  }
-}
-var sseClients;
-var init_sse_bus = __esm({
-  "server/services/sse-bus.ts"() {
-    "use strict";
-    sseClients = /* @__PURE__ */ new Set();
   }
 });
 
@@ -6027,6 +6138,11 @@ ${payload.text ?? payload.html}
       `[EMAIL] Failed to send to ${payload.to}:`,
       err.message
     );
+    captureError(err, {
+      area: "email",
+      to: payload.to,
+      subject: payload.subject
+    });
     console.info(
       `[EMAIL] Content (not delivered): ${payload.subject} \u2014 ${payload.text ?? ""}`.slice(
         0,
@@ -6042,6 +6158,7 @@ var init_email = __esm({
     "use strict";
     init_env();
     init_db();
+    init_sentry();
   }
 });
 
@@ -6062,7 +6179,7 @@ __export(local_jwt_exports, {
 });
 import * as jose from "jose";
 import { parse as parseCookieHeader2 } from "cookie";
-import { eq as eq9 } from "drizzle-orm";
+import { eq as eq10 } from "drizzle-orm";
 function cookieOptions() {
   const isSecure = !ENV.isDevelopment;
   return {
@@ -6143,7 +6260,7 @@ async function resolveLocalSession(req) {
   if (!userId) return null;
   const db = await getDb();
   if (db) {
-    const [row] = await db.select().from(localUsers).where(eq9(localUsers.id, userId)).limit(1);
+    const [row] = await db.select().from(localUsers).where(eq10(localUsers.id, userId)).limit(1);
     return row ?? null;
   }
   if (isLocalMemoryFallbackEnabled()) {
@@ -6191,7 +6308,7 @@ __export(compliance_db_exports, {
   getVendorById: () => getVendorById,
   getVendorsByUser: () => getVendorsByUser
 });
-import { and as and7, eq as eq13, or as or3 } from "drizzle-orm";
+import { and as and8, eq as eq14, or as or3 } from "drizzle-orm";
 function normalizeRelationshipType(rawType) {
   switch (rawType) {
     case "harmonization":
@@ -6359,7 +6476,7 @@ async function getFrameworkByCode(code) {
     const fallback2 = await loadFallbackData();
     return fallback2.frameworks.find((framework) => framework.code === code) ?? null;
   }
-  const result = await db.select().from(frameworks).where(eq13(frameworks.code, code)).limit(1);
+  const result = await db.select().from(frameworks).where(eq14(frameworks.code, code)).limit(1);
   if (result.length > 0) {
     return result[0];
   }
@@ -6377,7 +6494,7 @@ async function getFrameworksByCountry(country) {
           (framework) => framework.country === country
         );
       }
-      const rows = await db.select().from(frameworks).where(eq13(frameworks.country, country));
+      const rows = await db.select().from(frameworks).where(eq14(frameworks.country, country));
       if (rows.length > 0) {
         return rows;
       }
@@ -6397,7 +6514,7 @@ async function getControlsByFramework(frameworkId) {
         (control) => control.frameworkId === frameworkId
       );
     }
-    const rows = await db.select().from(complianceControls).where(eq13(complianceControls.frameworkId, frameworkId));
+    const rows = await db.select().from(complianceControls).where(eq14(complianceControls.frameworkId, frameworkId));
     if (rows.length > 0) {
       return rows;
     }
@@ -6410,12 +6527,12 @@ async function getControlsByFramework(frameworkId) {
 async function getControlsByCategory(category) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(complianceControls).where(eq13(complianceControls.category, category));
+  return db.select().from(complianceControls).where(eq14(complianceControls.category, category));
 }
 async function getControlByCode(controlCode) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(complianceControls).where(eq13(complianceControls.controlCode, controlCode)).limit(1);
+  const result = await db.select().from(complianceControls).where(eq14(complianceControls.controlCode, controlCode)).limit(1);
   return result.length > 0 ? result[0] : null;
 }
 async function getFrameworkRelationships(sourceFrameworkId) {
@@ -6427,7 +6544,7 @@ async function getFrameworkRelationships(sourceFrameworkId) {
         const fallback2 = await loadFallbackData();
         return fallback2.relationships.filter((row) => row.sourceFrameworkId === sourceFrameworkId).map(enrichRelationship);
       }
-      const rows = await db.select().from(frameworkRelationships).where(eq13(frameworkRelationships.sourceFrameworkId, sourceFrameworkId));
+      const rows = await db.select().from(frameworkRelationships).where(eq14(frameworkRelationships.sourceFrameworkId, sourceFrameworkId));
       if (rows.length > 0) {
         return rows.map(enrichRelationship);
       }
@@ -6441,14 +6558,14 @@ async function getRelationshipsByType(relationshipType) {
   if (!db) return [];
   const rows = relationshipType === "coordination" || relationshipType === "harmonization" ? await db.select().from(frameworkRelationships).where(
     or3(
-      eq13(
+      eq14(
         frameworkRelationships.relationshipType,
         "harmonization"
       ),
-      eq13(frameworkRelationships.relationshipType, "coordination")
+      eq14(frameworkRelationships.relationshipType, "coordination")
     )
   ) : await db.select().from(frameworkRelationships).where(
-    eq13(frameworkRelationships.relationshipType, relationshipType)
+    eq14(frameworkRelationships.relationshipType, relationshipType)
   );
   return rows.map(enrichRelationship);
 }
@@ -6456,9 +6573,9 @@ async function getConflictingFrameworks(frameworkId) {
   const db = await getDb();
   if (!db) return [];
   const rows = await db.select().from(frameworkRelationships).where(
-    and7(
-      eq13(frameworkRelationships.sourceFrameworkId, frameworkId),
-      eq13(frameworkRelationships.relationshipType, "conflict")
+    and8(
+      eq14(frameworkRelationships.sourceFrameworkId, frameworkId),
+      eq14(frameworkRelationships.relationshipType, "conflict")
     )
   );
   return rows.map(enrichRelationship);
@@ -6467,9 +6584,9 @@ async function getOverlappingFrameworks(frameworkId) {
   const db = await getDb();
   if (!db) return [];
   const rows = await db.select().from(frameworkRelationships).where(
-    and7(
-      eq13(frameworkRelationships.sourceFrameworkId, frameworkId),
-      eq13(frameworkRelationships.relationshipType, "overlap")
+    and8(
+      eq14(frameworkRelationships.sourceFrameworkId, frameworkId),
+      eq14(frameworkRelationships.relationshipType, "overlap")
     )
   );
   return rows.map(enrichRelationship);
@@ -6477,62 +6594,62 @@ async function getOverlappingFrameworks(frameworkId) {
 async function getControlMappings(sourceControlId) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(controlMappings).where(eq13(controlMappings.sourceControlId, sourceControlId));
+  return db.select().from(controlMappings).where(eq14(controlMappings.sourceControlId, sourceControlId));
 }
 async function getEquivalentControls(sourceControlId) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(controlMappings).where(
-    and7(
-      eq13(controlMappings.sourceControlId, sourceControlId),
-      eq13(controlMappings.mappingType, "equivalent")
+    and8(
+      eq14(controlMappings.sourceControlId, sourceControlId),
+      eq14(controlMappings.mappingType, "equivalent")
     )
   );
 }
 async function getVendorsByUser(userId) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(vendors).where(eq13(vendors.userId, userId));
+  return db.select().from(vendors).where(eq14(vendors.userId, userId));
 }
 async function getVendorById(vendorId) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(vendors).where(eq13(vendors.id, vendorId)).limit(1);
+  const result = await db.select().from(vendors).where(eq14(vendors.id, vendorId)).limit(1);
   return result.length > 0 ? result[0] : null;
 }
 async function getTechStackByVendor(vendorId) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(techStackComponents).where(eq13(techStackComponents.vendorId, vendorId));
+  return db.select().from(techStackComponents).where(eq14(techStackComponents.vendorId, vendorId));
 }
 async function getAssessmentsByVendor(vendorId) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(vendorAssessments).where(eq13(vendorAssessments.vendorId, vendorId));
+  return db.select().from(vendorAssessments).where(eq14(vendorAssessments.vendorId, vendorId));
 }
 async function getAssessmentsByFramework(frameworkId) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(vendorAssessments).where(eq13(vendorAssessments.frameworkId, frameworkId));
+  return db.select().from(vendorAssessments).where(eq14(vendorAssessments.frameworkId, frameworkId));
 }
 async function getAssessmentById(assessmentId) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(vendorAssessments).where(eq13(vendorAssessments.id, assessmentId)).limit(1);
+  const result = await db.select().from(vendorAssessments).where(eq14(vendorAssessments.id, assessmentId)).limit(1);
   return result.length > 0 ? result[0] : null;
 }
 async function getGapsByAssessment(assessmentId) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(assessmentGaps).where(eq13(assessmentGaps.assessmentId, assessmentId));
+  return db.select().from(assessmentGaps).where(eq14(assessmentGaps.assessmentId, assessmentId));
 }
 async function getCriticalGaps(assessmentId) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(assessmentGaps).where(
-    and7(
-      eq13(assessmentGaps.assessmentId, assessmentId),
-      eq13(assessmentGaps.severity, "critical")
+    and8(
+      eq14(assessmentGaps.assessmentId, assessmentId),
+      eq14(assessmentGaps.severity, "critical")
     )
   );
 }
@@ -8501,7 +8618,7 @@ __export(admin_insights_store_exports, {
   sendAlertDigest: () => sendAlertDigest
 });
 import { readFileSync } from "node:fs";
-import { and as and36, count as count2, desc as desc27, eq as eq50, gte as gte3, sql as sql14 } from "drizzle-orm";
+import { and as and38, count as count5, desc as desc28, eq as eq52, gte as gte4, sql as sql16 } from "drizzle-orm";
 async function getUserTimeline(userId, limit = 100) {
   const db = await getDb();
   if (!db) return [];
@@ -8515,14 +8632,14 @@ async function getUserTimeline(userId, limit = 100) {
       ipAddress: auditLogs.ipHash,
       userAgent: auditLogs.userAgent,
       createdAt: auditLogs.createdAt
-    }).from(auditLogs).where(eq50(auditLogs.localUserId, userId)).orderBy(desc27(auditLogs.createdAt)).limit(limit),
+    }).from(auditLogs).where(eq52(auditLogs.localUserId, userId)).orderBy(desc28(auditLogs.createdAt)).limit(limit),
     db.select({
       id: activityEvents.id,
       action: activityEvents.action,
       entityType: activityEvents.entityType,
       ipAddress: activityEvents.ipHash,
       createdAt: activityEvents.createdAt
-    }).from(activityEvents).where(eq50(activityEvents.localUserId, userId)).orderBy(desc27(activityEvents.createdAt)).limit(limit),
+    }).from(activityEvents).where(eq52(activityEvents.localUserId, userId)).orderBy(desc28(activityEvents.createdAt)).limit(limit),
     db.select({
       id: userInteractionLogs.id,
       action: userInteractionLogs.action,
@@ -8531,7 +8648,7 @@ async function getUserTimeline(userId, limit = 100) {
       ipAddress: userInteractionLogs.ipHash,
       userAgent: userInteractionLogs.userAgent,
       createdAt: userInteractionLogs.createdAt
-    }).from(userInteractionLogs).where(eq50(userInteractionLogs.localUserId, userId)).orderBy(desc27(userInteractionLogs.createdAt)).limit(limit)
+    }).from(userInteractionLogs).where(eq52(userInteractionLogs.localUserId, userId)).orderBy(desc28(userInteractionLogs.createdAt)).limit(limit)
   ]);
   const merged = [
     ...auditRows.map((r) => ({
@@ -8581,8 +8698,8 @@ async function getUserAuthHistory(userId, limit = 50) {
     userAgent: auditLogs.userAgent,
     createdAt: auditLogs.createdAt
   }).from(auditLogs).where(
-    and36(eq50(auditLogs.localUserId, userId), eq50(auditLogs.category, "auth"))
-  ).orderBy(desc27(auditLogs.createdAt)).limit(limit);
+    and38(eq52(auditLogs.localUserId, userId), eq52(auditLogs.category, "auth"))
+  ).orderBy(desc28(auditLogs.createdAt)).limit(limit);
   return rows.map((r) => ({
     id: r.id,
     action: r.action,
@@ -8616,7 +8733,7 @@ async function getEngagementMetrics(windowDays = 30) {
   const windowStart = new Date(
     now.getTime() - Math.max(windowDays, 1) * 24 * 3600 * 1e3
   );
-  const activeCounts = await db.execute(sql14`
+  const activeCounts = await db.execute(sql16`
     WITH actors AS (
       SELECT "localUserId" AS uid, MAX("createdAt") AS last_at
       FROM "auditLogs"
@@ -8640,14 +8757,14 @@ async function getEngagementMetrics(windowDays = 30) {
   `);
   const ac = activeCounts.rows[0] ?? {};
   const totals = await db.select({
-    total: count2(),
-    newInWindow: sql14`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
-    dormant: sql14`COUNT(*) FILTER (WHERE "lastSignedIn" IS NULL OR "lastSignedIn" < ${monthAgo})`
+    total: count5(),
+    newInWindow: sql16`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
+    dormant: sql16`COUNT(*) FILTER (WHERE "lastSignedIn" IS NULL OR "lastSignedIn" < ${monthAgo})`
   }).from(localUsers);
   const totalsRow = totals[0];
   const totalUsers = Number(totalsRow?.total ?? 0);
-  const [newWindow] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.createdAt, windowStart));
-  const dailyRows = await db.execute(sql14`
+  const [newWindow] = await db.select({ c: count5() }).from(localUsers).where(gte4(localUsers.createdAt, windowStart));
+  const dailyRows = await db.execute(sql16`
     SELECT to_char(d, 'YYYY-MM-DD') AS date, COUNT(DISTINCT uid) AS count
     FROM (
       SELECT date_trunc('day', "createdAt") AS d, "localUserId" AS uid
@@ -8662,7 +8779,7 @@ async function getEngagementMetrics(windowDays = 30) {
     ORDER BY d
   `);
   const dailyActive = dailyRows.rows.map((r) => ({ date: r.date, count: Number(r.count) })).slice(-90);
-  const topUserRows = await db.execute(sql14`
+  const topUserRows = await db.execute(sql16`
     SELECT u.id, u.name, u.email,
            COUNT(*) AS "eventCount",
            MAX(a."createdAt") AS "lastActiveAt"
@@ -8680,7 +8797,7 @@ async function getEngagementMetrics(windowDays = 30) {
     eventCount: Number(r.eventCount),
     lastActiveAt: r.lastActiveAt instanceof Date ? r.lastActiveAt.toISOString() : r.lastActiveAt ?? null
   }));
-  const featureRows = await db.execute(sql14`
+  const featureRows = await db.execute(sql16`
     SELECT action, COUNT(*) AS count
     FROM "userInteractionLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8689,7 +8806,7 @@ async function getEngagementMetrics(windowDays = 30) {
     LIMIT 12
   `);
   const topFeatures = featureRows.rows.map((r) => ({ action: r.action, count: Number(r.count) }));
-  const orgRows = await db.execute(sql14`
+  const orgRows = await db.execute(sql16`
     SELECT o.id, o.name, COUNT(*) AS "eventCount"
     FROM "auditLogs" a
     JOIN "organizationMembers" m ON m."localUserId" = a."localUserId"
@@ -8770,22 +8887,22 @@ function titleFor(type) {
 }
 async function buildGrowthReport(db, base, windowStart) {
   const [stats] = await db.select({
-    total: count2(),
-    newInWindow: sql14`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
-    verified: sql14`COUNT(*) FILTER (WHERE "verifiedAt" IS NOT NULL)`,
-    mfa: sql14`COUNT(*) FILTER (WHERE "mfaEnabled" = 1)`,
-    active: sql14`COUNT(*) FILTER (WHERE "status" = 'active')`,
-    pending: sql14`COUNT(*) FILTER (WHERE "status" = 'pending')`,
-    suspended: sql14`COUNT(*) FILTER (WHERE "status" = 'suspended')`
+    total: count5(),
+    newInWindow: sql16`COUNT(*) FILTER (WHERE "createdAt" >= ${windowStart})`,
+    verified: sql16`COUNT(*) FILTER (WHERE "verifiedAt" IS NOT NULL)`,
+    mfa: sql16`COUNT(*) FILTER (WHERE "mfaEnabled" = 1)`,
+    active: sql16`COUNT(*) FILTER (WHERE "status" = 'active')`,
+    pending: sql16`COUNT(*) FILTER (WHERE "status" = 'pending')`,
+    suspended: sql16`COUNT(*) FILTER (WHERE "status" = 'suspended')`
   }).from(localUsers);
-  const byRole = await db.select({ role: localUsers.userType, c: count2() }).from(localUsers).groupBy(localUsers.userType);
-  const byDay = await db.execute(sql14`
+  const byRole = await db.select({ role: localUsers.userType, c: count5() }).from(localUsers).groupBy(localUsers.userType);
+  const byDay = await db.execute(sql16`
     SELECT to_char("createdAt", 'YYYY-MM-DD') AS day, COUNT(*) AS count
     FROM "localUsers"
     WHERE "createdAt" >= ${windowStart}
     GROUP BY 1 ORDER BY 1
   `);
-  const orgStats = await db.select({ c: count2() }).from(organizations);
+  const orgStats = await db.select({ c: count5() }).from(organizations);
   return {
     ...base,
     title: titleFor("growth"),
@@ -8821,14 +8938,14 @@ async function buildGrowthReport(db, base, windowStart) {
 }
 async function buildEngagementReport(db, base, windowStart) {
   const eng = await getEngagementMetrics(base.windowDays);
-  const loginRows = await db.execute(sql14`
+  const loginRows = await db.execute(sql16`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS logins
     FROM "auditLogs"
     WHERE action = 'user.login' AND "createdAt" >= ${windowStart}
     GROUP BY 1 ORDER BY 1
   `);
-  const featureRows = await db.execute(sql14`
+  const featureRows = await db.execute(sql16`
     SELECT action, COUNT(*) AS count
     FROM "userInteractionLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8883,8 +9000,8 @@ async function buildRevenueReport(db, base, windowStart) {
     periodEnd: subscriptions.currentPeriodEnd
   }).from(subscriptions).innerJoin(
     organizations,
-    eq50(subscriptions.organizationId, organizations.id)
-  ).orderBy(desc27(subscriptions.updatedAt)).limit(500);
+    eq52(subscriptions.organizationId, organizations.id)
+  ).orderBy(desc28(subscriptions.updatedAt)).limit(500);
   const active = subs.filter(
     (s) => s.status === "active" || s.status === "trialing"
   );
@@ -8894,7 +9011,7 @@ async function buildRevenueReport(db, base, windowStart) {
   }, 0);
   const canceling = active.filter((s) => s.cancelAtEnd).length;
   const pastDue = subs.filter((s) => s.status === "past_due").length;
-  const newOrgs = await db.select({ c: count2() }).from(organizations).where(gte3(organizations.createdAt, windowStart));
+  const newOrgs = await db.select({ c: count5() }).from(organizations).where(gte4(organizations.createdAt, windowStart));
   const planMix = /* @__PURE__ */ new Map();
   for (const s of active) {
     planMix.set(s.plan, (planMix.get(s.plan) ?? 0) + 1);
@@ -8946,8 +9063,8 @@ async function buildRevenueReport(db, base, windowStart) {
   };
 }
 async function buildSecurityReport(db, base, windowStart) {
-  const outcomeRows = await db.select({ outcome: auditLogs.outcome, c: count2() }).from(auditLogs).where(gte3(auditLogs.createdAt, windowStart)).groupBy(auditLogs.outcome);
-  const actionRows = await db.execute(sql14`
+  const outcomeRows = await db.select({ outcome: auditLogs.outcome, c: count5() }).from(auditLogs).where(gte4(auditLogs.createdAt, windowStart)).groupBy(auditLogs.outcome);
+  const actionRows = await db.execute(sql16`
     SELECT action, COUNT(*) AS count
     FROM "auditLogs"
     WHERE "createdAt" >= ${windowStart}
@@ -8955,19 +9072,19 @@ async function buildSecurityReport(db, base, windowStart) {
            OR action LIKE '%role%' OR action LIKE '%password%')
     GROUP BY action ORDER BY count DESC LIMIT 25
   `);
-  const dailyFailures = await db.execute(sql14`
+  const dailyFailures = await db.execute(sql16`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS count
     FROM "auditLogs"
     WHERE outcome = 'failure' AND "createdAt" >= ${windowStart}
     GROUP BY 1 ORDER BY 1
   `);
-  const roleChanges = await db.execute(sql14`
+  const roleChanges = await db.execute(sql16`
     SELECT COUNT(*) AS c FROM "auditLogs"
     WHERE action LIKE '%role%' AND "createdAt" >= ${windowStart}
   `);
   const founderFails = await db.execute(
-    sql14`
+    sql16`
     SELECT COUNT(*) AS c FROM "yallaAdminAuditLogs"
     WHERE action IN ('login.failed','login.mfa_failed')
       AND "createdAt" >= ${windowStart}
@@ -9012,23 +9129,23 @@ async function buildSecurityReport(db, base, windowStart) {
   };
 }
 async function buildOperationsReport(db, base, windowStart) {
-  const srByStatus = await db.select({ status: serviceRequests.status, c: count2() }).from(serviceRequests).groupBy(serviceRequests.status);
-  const srOpen = await db.execute(sql14`
+  const srByStatus = await db.select({ status: serviceRequests.status, c: count5() }).from(serviceRequests).groupBy(serviceRequests.status);
+  const srOpen = await db.execute(sql16`
     SELECT COUNT(*) AS c FROM "serviceRequests"
     WHERE status NOT IN ('completed','cancelled') AND "createdAt" >= ${windowStart}
   `);
-  const adminNotes = await db.execute(sql14`
+  const adminNotes = await db.execute(sql16`
     SELECT COUNT(*) AS c FROM "adminNotifications"
     WHERE "isRead" = 0
   `);
   const emails = await db.execute(
-    sql14`
+    sql16`
     SELECT status, COUNT(*) AS c FROM "email_log"
     WHERE "createdAt" >= ${windowStart}
     GROUP BY status
   `
   ).catch(() => ({ rows: [] }));
-  const dailyRegs = await db.execute(sql14`
+  const dailyRegs = await db.execute(sql16`
     SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS day,
            COUNT(*) AS count
     FROM "localUsers"
@@ -9241,7 +9358,7 @@ async function getOperationalAlerts() {
   const dayAgo = new Date(now.getTime() - 24 * 3600 * 1e3);
   const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1e3);
   try {
-    const failRow = await db.execute(sql14`
+    const failRow = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE outcome = 'failure' AND "createdAt" >= ${dayAgo}
     `);
@@ -9260,7 +9377,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const pastDue = await db.select({ c: count2() }).from(subscriptions).where(eq50(subscriptions.status, "past_due"));
+    const pastDue = await db.select({ c: count5() }).from(subscriptions).where(eq52(subscriptions.status, "past_due"));
     if ((pastDue[0]?.c ?? 0) > 0) {
       const pastDueCount = Number(pastDue[0].c);
       alerts.push({
@@ -9276,7 +9393,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const openSr = await db.execute(sql14`
+    const openSr = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "serviceRequests"
       WHERE status NOT IN ('completed','cancelled')
     `);
@@ -9305,7 +9422,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const dormant = await db.execute(sql14`
+    const dormant = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "localUsers"
       WHERE "status" = 'active'
         AND ("lastSignedIn" IS NULL OR "lastSignedIn" < ${weekAgo})
@@ -9325,7 +9442,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const unread = await db.execute(sql14`
+    const unread = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "adminNotifications" WHERE "isRead" = 0
     `);
     const n = Number(unread.rows[0]?.c ?? 0);
@@ -9343,7 +9460,7 @@ async function getOperationalAlerts() {
   } catch {
   }
   try {
-    const canceling = await db.select({ c: count2() }).from(subscriptions).where(eq50(subscriptions.cancelAtPeriodEnd, 1));
+    const canceling = await db.select({ c: count5() }).from(subscriptions).where(eq52(subscriptions.cancelAtPeriodEnd, 1));
     if ((canceling[0]?.c ?? 0) > 0) {
       alerts.push({
         id: "canceling",
@@ -9384,25 +9501,25 @@ async function getLiveMetrics() {
   };
   if (!db) return empty;
   try {
-    const [online] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.lastSignedIn, fiveMinAgo));
-    const sessionsResult = await db.execute(sql14`
+    const [online] = await db.select({ c: count5() }).from(localUsers).where(gte4(localUsers.lastSignedIn, fiveMinAgo));
+    const sessionsResult = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "yallaAdminSessions"
       WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
     `);
-    const [signups] = await db.select({ c: count2() }).from(localUsers).where(gte3(localUsers.createdAt, dayStart));
-    const loginsResult = await db.execute(sql14`
+    const [signups] = await db.select({ c: count5() }).from(localUsers).where(gte4(localUsers.createdAt, dayStart));
+    const loginsResult = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE action = 'user.login' AND "createdAt" >= ${dayStart}
     `);
-    const failsResult = await db.execute(sql14`
+    const failsResult = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "auditLogs"
       WHERE outcome = 'failure' AND "createdAt" >= ${dayAgo}
     `);
-    const openSrResult = await db.execute(sql14`
+    const openSrResult = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "serviceRequests"
       WHERE status NOT IN ('completed','cancelled')
     `);
-    const unreadResult = await db.execute(sql14`
+    const unreadResult = await db.execute(sql16`
       SELECT COUNT(*) AS c FROM "adminNotifications" WHERE "isRead" = 0
     `);
     const recent = await db.select({
@@ -9412,7 +9529,7 @@ async function getLiveMetrics() {
       outcome: auditLogs.outcome,
       userName: localUsers.name,
       createdAt: auditLogs.createdAt
-    }).from(auditLogs).leftJoin(localUsers, eq50(auditLogs.localUserId, localUsers.id)).orderBy(desc27(auditLogs.createdAt)).limit(25);
+    }).from(auditLogs).leftJoin(localUsers, eq52(auditLogs.localUserId, localUsers.id)).orderBy(desc28(auditLogs.createdAt)).limit(25);
     return {
       generatedAt: now.toISOString(),
       sseClients: getSSEClientCount2(),
@@ -9451,29 +9568,8 @@ var init_admin_insights_store = __esm({
 });
 
 // server/_core/index.ts
+init_sentry();
 import "dotenv/config";
-
-// server/_core/sentry.ts
-init_env();
-init_config_schema();
-import * as Sentry from "@sentry/node";
-function initialiseSentry() {
-  if (!ENV.sentryDsn) return;
-  Sentry.init({
-    dsn: ENV.sentryDsn,
-    environment: parsedEnv.NODE_ENV ?? "production",
-    // Trace 10 % of requests in production; 100 % in dev/staging for visibility.
-    tracesSampleRate: ENV.isProduction ? 0.1 : 1,
-    // Attach request data (URL, method, headers) to error events.
-    includeLocalVariables: !ENV.isProduction
-  });
-  console.info("[Sentry] Error monitoring initialised.");
-}
-function sentryErrorHandler() {
-  return Sentry.expressErrorHandler();
-}
-
-// server/_core/index.ts
 import compression from "compression";
 import express4 from "express";
 import { createServer } from "http";
@@ -9547,6 +9643,463 @@ function registerOAuthRoutes(app) {
     } catch (error) {
       logger.error({ error }, "OAuth callback failed");
       res.status(500).json({ error: "OAuth callback failed" });
+    }
+  });
+}
+
+// server/_core/google-oauth.ts
+init_const();
+init_db();
+init_env();
+init_sdk();
+import crypto from "node:crypto";
+
+// server/audit-logger.ts
+init_schema();
+init_db();
+init_env();
+init_sse_bus();
+import { createHash } from "node:crypto";
+import { desc as desc2 } from "drizzle-orm";
+function sanitizePayload(value) {
+  if (value == null) return null;
+  try {
+    return JSON.stringify(value, (key, val) => {
+      if (/(password|secret|token|auth|cookie|api[_-]?key)/i.test(key))
+        return "[redacted]";
+      if (typeof val === "string" && val.length > 500)
+        return val.slice(0, 500) + "\u2026";
+      return val;
+    });
+  } catch {
+    return null;
+  }
+}
+function getClientIp(ctx) {
+  const forwarded = ctx.req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.trim()) {
+    return forwarded.split(",")[0]?.trim() || "unknown";
+  }
+  return ctx.req.socket?.remoteAddress || "unknown";
+}
+function hashIp(ip) {
+  const salt = ENV.cookieSecret || "djac-audit-salt";
+  return createHash("sha256").update(`${salt}:${ip}`).digest("hex");
+}
+function getHashedIpFromHeaders(headers) {
+  const forwarded = headers["x-forwarded-for"];
+  const first = typeof forwarded === "string" ? forwarded.split(",")[0]?.trim() : Array.isArray(forwarded) ? forwarded[0]?.trim() : null;
+  if (!first) return null;
+  return hashIp(first);
+}
+function computeChainHash(prevHash, eventJson) {
+  return createHash("sha256").update(`${prevHash ?? "genesis"}
+${eventJson}`).digest("hex");
+}
+async function getPrevChainHash(db) {
+  try {
+    const [last] = await db.select({ chainHash: auditLogs.chainHash }).from(auditLogs).orderBy(desc2(auditLogs.id)).limit(1);
+    return last?.chainHash ?? null;
+  } catch {
+    return null;
+  }
+}
+async function buildChainHash(db, event) {
+  try {
+    const prev = await getPrevChainHash(db);
+    return computeChainHash(prev, JSON.stringify(event));
+  } catch {
+    return null;
+  }
+}
+async function recordAuditEvent(ctx, input) {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    const userAgent = ctx.req.headers["user-agent"]?.toString().slice(0, 512) ?? null;
+    const ipHash = hashIp(getClientIp(ctx));
+    const chainHash = await buildChainHash(db, {
+      actor: ctx.user?.id ?? null,
+      localUserId: input.localUserId ?? null,
+      org: ctx.organizationId ?? null,
+      role: ctx.user?.role ?? null,
+      category: input.category,
+      action: input.action.slice(0, 120),
+      entityType: input.entityType ?? null,
+      entityId: input.entityId ?? null,
+      outcome: input.outcome ?? "success",
+      payload: input.payload ?? null
+    });
+    await db.insert(auditLogs).values({
+      userId: ctx.user?.id ?? null,
+      localUserId: input.localUserId ?? null,
+      organizationId: ctx.organizationId ?? null,
+      actorRole: ctx.user?.role ?? null,
+      category: input.category,
+      action: input.action.slice(0, 120),
+      entityType: input.entityType?.slice(0, 120) ?? null,
+      entityId: input.entityId ?? null,
+      targetEntity: input.targetEntity?.slice(0, 255) ?? null,
+      outcome: input.outcome ?? "success",
+      payload: sanitizePayload(input.payload),
+      ipHash,
+      userAgent,
+      chainHash
+    });
+    const BROADCAST_CATEGORIES = [
+      "auth",
+      "billing",
+      "system",
+      "data_write",
+      "data_read",
+      "role_change"
+    ];
+    if (BROADCAST_CATEGORIES.includes(input.category)) {
+      broadcastSSE("platform_event", {
+        category: input.category,
+        action: input.action,
+        entityType: input.entityType ?? null,
+        entityId: input.entityId ?? null,
+        outcome: input.outcome ?? "success",
+        actorRole: ctx.user?.role ?? "anonymous",
+        organizationId: ctx.organizationId ?? null,
+        ts: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    }
+  } catch (err) {
+    console.warn("[AuditLog] Failed to persist audit event:", err);
+  }
+}
+async function recordSystemAuditEvent(input) {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    const chainHash = await buildChainHash(db, {
+      actor: "system",
+      org: input.organizationId ?? null,
+      role: input.actorRole ?? "system",
+      category: input.category,
+      action: input.action.slice(0, 120),
+      entityType: input.entityType ?? null,
+      entityId: input.entityId ?? null,
+      outcome: input.outcome ?? "success",
+      payload: input.payload ?? null
+    });
+    await db.insert(auditLogs).values({
+      userId: null,
+      localUserId: null,
+      organizationId: input.organizationId ?? null,
+      actorRole: input.actorRole ?? "system",
+      category: input.category,
+      action: input.action.slice(0, 120),
+      entityType: input.entityType?.slice(0, 120) ?? null,
+      entityId: input.entityId ?? null,
+      targetEntity: input.targetEntity?.slice(0, 255) ?? null,
+      outcome: input.outcome ?? "success",
+      payload: sanitizePayload(input.payload),
+      ipHash: null,
+      userAgent: null,
+      chainHash
+    });
+  } catch (err) {
+    console.warn("[AuditLog] Failed to persist system audit event:", err);
+  }
+}
+async function recordTrpcFailureEvent(input) {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    const localUserId = input.ctx?.user?.localUserId ?? null;
+    const userId = input.ctx?.user && input.ctx.user.id > 0 ? input.ctx.user.id : null;
+    const outcome = [
+      "BAD_REQUEST",
+      "PARSE_ERROR",
+      "UNAUTHORIZED",
+      "FORBIDDEN",
+      "PRECONDITION_FAILED"
+    ].includes(input.code) ? "blocked" : "failure";
+    const chainHash = await buildChainHash(db, {
+      actor: userId,
+      localUserId,
+      org: input.ctx?.organizationId ?? null,
+      role: input.ctx?.user?.role ?? "anonymous",
+      category: "system",
+      action: input.code === "BAD_REQUEST" || input.code === "PARSE_ERROR" ? "trpc.validation_failed" : "trpc.request_failed",
+      target: input.path ?? input.type ?? "unknown",
+      code: input.code
+    });
+    await db.insert(auditLogs).values({
+      userId,
+      localUserId,
+      organizationId: input.ctx?.organizationId ?? null,
+      actorRole: input.ctx?.user?.role ?? "anonymous",
+      category: "system",
+      action: input.code === "BAD_REQUEST" || input.code === "PARSE_ERROR" ? "trpc.validation_failed" : "trpc.request_failed",
+      entityType: "trpc",
+      entityId: null,
+      targetEntity: (input.path ?? input.type ?? "unknown").slice(0, 255),
+      outcome,
+      payload: sanitizePayload({
+        code: input.code,
+        message: input.message,
+        input: input.procedureInput,
+        issues: input.issues
+      }),
+      ipHash: input.ctx ? hashIp(getClientIp(input.ctx)) : getHashedIpFromHeaders(input.headers ?? {}),
+      userAgent: input.ctx?.req.headers["user-agent"]?.toString().slice(0, 512) ?? input.headers?.["user-agent"]?.toString().slice(0, 512) ?? null,
+      chainHash
+    });
+    broadcastSSE("validation_event", {
+      code: input.code,
+      action: input.code === "BAD_REQUEST" || input.code === "PARSE_ERROR" ? "trpc.validation_failed" : "trpc.request_failed",
+      target: (input.path ?? input.type ?? "unknown").slice(0, 255),
+      outcome,
+      actorRole: input.ctx?.user?.role ?? "anonymous",
+      ts: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (err) {
+    console.warn("[AuditLog] Failed to persist tRPC failure event:", err);
+  }
+}
+
+// server/_core/google-oauth.ts
+init_sse_bus();
+init_rateLimiter();
+init_logger();
+var GOOGLE_AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
+var GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+var GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
+var GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
+var STATE_TTL_MS = 10 * 60 * 1e3;
+var SESSION_TTL_MS = 1e3 * 60 * 60 * 24 * 30;
+var CALLBACK_RATE_LIMIT_MAX = 20;
+var CALLBACK_RATE_LIMIT_WINDOW_MS = 5 * 60 * 1e3;
+function safeRedirectTo(value, fallback = "/dashboard") {
+  if (typeof value !== "string" || value.length === 0) return fallback;
+  if (!value.startsWith("/") || value.startsWith("//")) return fallback;
+  return value;
+}
+function googleOAuthConfigured() {
+  return Boolean(ENV.googleClientId && ENV.googleClientSecret);
+}
+function googleRedirectUri() {
+  return `${ENV.appUrl}/`;
+}
+function signState(redirectTo) {
+  const payload = Buffer.from(
+    JSON.stringify({ r: redirectTo, t: Date.now() })
+  ).toString("base64url");
+  const sig = crypto.createHmac("sha256", ENV.cookieSecret).update(payload).digest("base64url");
+  return `${payload}.${sig}`;
+}
+function verifyGoogleState(state) {
+  if (typeof state !== "string") return null;
+  const [payload, sig] = state.split(".");
+  if (!payload || !sig) return null;
+  const expected = crypto.createHmac("sha256", ENV.cookieSecret).update(payload).digest("base64url");
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  try {
+    const decoded = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8")
+    );
+    if (typeof decoded.t !== "number") return null;
+    if (Date.now() - decoded.t > STATE_TTL_MS) return null;
+    return safeRedirectTo(decoded.r);
+  } catch {
+    return null;
+  }
+}
+function buildGoogleAuthUrl(redirectTo) {
+  const params = new URLSearchParams({
+    client_id: ENV.googleClientId,
+    redirect_uri: googleRedirectUri(),
+    response_type: "code",
+    scope: "openid email profile",
+    access_type: "online",
+    include_granted_scopes: "true",
+    prompt: "select_account",
+    state: signState(safeRedirectTo(redirectTo))
+  });
+  return `${GOOGLE_AUTH_ENDPOINT}?${params.toString()}`;
+}
+async function exchangeCodeForProfile(code) {
+  const tokenRes = await fetch(GOOGLE_TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      code,
+      client_id: ENV.googleClientId,
+      client_secret: ENV.googleClientSecret,
+      redirect_uri: googleRedirectUri(),
+      grant_type: "authorization_code"
+    })
+  });
+  if (!tokenRes.ok) {
+    logger.error({ status: tokenRes.status }, "Google token exchange failed");
+    return null;
+  }
+  const token = await tokenRes.json();
+  if (!token.access_token) return null;
+  const infoRes = await fetch(GOOGLE_USERINFO_ENDPOINT, {
+    headers: { Authorization: `Bearer ${token.access_token}` }
+  });
+  if (!infoRes.ok) {
+    logger.error({ status: infoRes.status }, "Google userinfo fetch failed");
+    return null;
+  }
+  const profile = await infoRes.json();
+  if (!profile?.sub) return null;
+  return profile;
+}
+function clientKey(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+  const ip = raw?.split(",")[0]?.trim() || req.ip || "unknown";
+  return `google-cb:${ip}`;
+}
+async function completeGoogleLogin(req, res, profile) {
+  const openId = `google:${profile.sub}`;
+  const email = profile.email ?? "";
+  const name = profile.name ?? email ?? "User";
+  await upsertUser({
+    openId,
+    name,
+    email,
+    loginMethod: "google",
+    role: "basic_user",
+    status: "active",
+    preferredLocale: "en"
+  });
+  const user = await getUserByOpenId(openId);
+  if (!user) return null;
+  const token = await sdk.createSessionToken(openId, {
+    name: name || email || "User",
+    expiresInMs: SESSION_TTL_MS
+  });
+  res.cookie(COOKIE_NAME, token, {
+    ...getSessionCookieOptions(req),
+    maxAge: SESSION_TTL_MS
+  });
+  try {
+    broadcastSSE("user_login", {
+      userId: user.id,
+      email,
+      method: "google",
+      ts: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch {
+  }
+  void recordSystemAuditEvent({
+    category: "auth",
+    action: "user.login",
+    entityType: "users",
+    entityId: user.id,
+    outcome: "success",
+    actorRole: user.role ?? "basic_user",
+    payload: { method: "google", email }
+  });
+  return user.id;
+}
+function registerGoogleOAuthRoutes(app) {
+  app.get("/api/auth/google/callback", async (req, res) => {
+    const code = typeof req.query.code === "string" ? req.query.code : void 0;
+    const state = req.query.state;
+    const oauthError = typeof req.query.error === "string" ? req.query.error : void 0;
+    const redirectTo = verifyGoogleState(state) ?? "/dashboard";
+    const fail = (reason) => {
+      logger.warn({ reason }, "Google OAuth callback failed");
+      void recordSystemAuditEvent({
+        category: "auth",
+        action: "user.login",
+        entityType: "users",
+        outcome: "failure",
+        payload: { method: "google", reason }
+      });
+      res.redirect(302, `/login?error=${encodeURIComponent(reason)}`);
+    };
+    if (oauthError) {
+      fail("google_denied");
+      return;
+    }
+    if (!code) {
+      fail("google_no_code");
+      return;
+    }
+    if (!googleOAuthConfigured()) {
+      fail("google_not_configured");
+      return;
+    }
+    const rl = await checkRateLimit(
+      clientKey(req),
+      CALLBACK_RATE_LIMIT_MAX,
+      CALLBACK_RATE_LIMIT_WINDOW_MS
+    ).catch(() => ({ allowed: true }));
+    if (!rl.allowed) {
+      logger.warn({ ip: clientKey(req) }, "Google OAuth callback rate limited");
+      res.redirect(302, "/login?error=google_rate_limited");
+      return;
+    }
+    try {
+      const profile = await exchangeCodeForProfile(code);
+      if (!profile) {
+        fail("google_exchange_failed");
+        return;
+      }
+      const userId = await completeGoogleLogin(req, res, profile);
+      if (!userId) {
+        fail("google_user_missing");
+        return;
+      }
+      res.redirect(302, redirectTo);
+    } catch (err) {
+      logger.error({ err }, "Google OAuth callback error");
+      fail("google_error");
+    }
+  });
+  app.post("/api/auth/google/verify", async (req, res) => {
+    const credential = req.body?.credential;
+    if (typeof credential !== "string" || !credential) {
+      res.status(400).json({ error: "missing_credential" });
+      return;
+    }
+    if (!googleOAuthConfigured()) {
+      res.status(500).json({ error: "not_configured" });
+      return;
+    }
+    const rl = await checkRateLimit(
+      clientKey(req),
+      CALLBACK_RATE_LIMIT_MAX,
+      CALLBACK_RATE_LIMIT_WINDOW_MS
+    ).catch(() => ({ allowed: true }));
+    if (!rl.allowed) {
+      res.status(429).json({ error: "rate_limited" });
+      return;
+    }
+    try {
+      const infoRes = await fetch(
+        `${GOOGLE_TOKENINFO_ENDPOINT}?id_token=${encodeURIComponent(credential)}`
+      );
+      if (!infoRes.ok) {
+        res.status(401).json({ error: "invalid_token" });
+        return;
+      }
+      const info = await infoRes.json();
+      if (info.aud !== ENV.googleClientId || !info.sub) {
+        logger.warn({ aud: info.aud }, "Google ID token audience mismatch");
+        res.status(401).json({ error: "invalid_token" });
+        return;
+      }
+      const userId = await completeGoogleLogin(req, res, info);
+      if (!userId) {
+        res.status(500).json({ error: "user_create_failed" });
+        return;
+      }
+      res.json({ ok: true, redirectTo: "/dashboard" });
+    } catch (err) {
+      logger.error({ err }, "Google credential verification failed");
+      res.status(500).json({ error: "google_error" });
     }
   });
 }
@@ -9732,10 +10285,10 @@ init_const();
 init_schema();
 init_db();
 init_env();
-import { and as and2, desc as desc2, eq as eq3, inArray as inArray2, lt, sql } from "drizzle-orm";
+import { and as and2, desc as desc3, eq as eq3, inArray as inArray2, lt, sql as sql2 } from "drizzle-orm";
 
 // server/vendor-store.ts
-import { and, eq as eq2, inArray } from "drizzle-orm";
+import { and, count, eq as eq2, inArray } from "drizzle-orm";
 init_schema();
 init_db();
 var inMemoryVendors = /* @__PURE__ */ new Map();
@@ -9869,6 +10422,16 @@ async function getVendorProfileById(vendorId, userId, organizationId) {
     ) : and(eq2(vendors.id, vendorId), eq2(vendors.userId, userId))
   ).limit(1);
   return rows.length > 0 ? rows[0] : null;
+}
+async function countVendorProfilesForOrg(organizationId) {
+  const db = await getDb();
+  if (!db) {
+    return Array.from(inMemoryVendors.values()).filter(
+      (v) => v.organizationId === organizationId
+    ).length;
+  }
+  const [row] = await db.select({ value: count() }).from(vendors).where(eq2(vendors.organizationId, organizationId));
+  return Number(row?.value ?? 0);
 }
 async function createVendorProfile(userId, input, organizationId) {
   const db = await getDb();
@@ -10211,7 +10774,7 @@ async function listAccessRequests(limit = 50) {
   if (!db) {
     return memoryAccessRequests.slice(0, limit);
   }
-  return db.select().from(accessRequests).orderBy(desc2(accessRequests.createdAt)).limit(limit);
+  return db.select().from(accessRequests).orderBy(desc3(accessRequests.createdAt)).limit(limit);
 }
 async function updateAccessRequestStatus(input) {
   const db = await getDb();
@@ -10278,14 +10841,14 @@ async function listConsultationRequests(limit = 50) {
   if (!db) {
     return memoryConsultationRequests.slice(0, limit);
   }
-  return db.select().from(consultationRequests).orderBy(desc2(consultationRequests.createdAt)).limit(limit);
+  return db.select().from(consultationRequests).orderBy(desc3(consultationRequests.createdAt)).limit(limit);
 }
 async function listAdminNotifications(limit = 50) {
   const db = await getDb();
   if (!db) {
     return memoryAdminNotifications.slice(0, limit);
   }
-  return db.select().from(adminNotifications).orderBy(desc2(adminNotifications.createdAt)).limit(limit);
+  return db.select().from(adminNotifications).orderBy(desc3(adminNotifications.createdAt)).limit(limit);
 }
 async function markAdminNotificationRead(notificationIdValue) {
   const db = await getDb();
@@ -10434,7 +10997,7 @@ async function listAssessmentSummaries(limit = 50) {
   if (!db) {
     return [];
   }
-  const rows = await db.select().from(vendorAssessments).orderBy(desc2(vendorAssessments.assessmentDate), desc2(vendorAssessments.id)).limit(limit);
+  const rows = await db.select().from(vendorAssessments).orderBy(desc3(vendorAssessments.assessmentDate), desc3(vendorAssessments.id)).limit(limit);
   const vendors2 = await listAllVendorProfiles(Math.max(limit * 4, 100));
   const vendorMap = new Map(vendors2.map((vendor) => [vendor.id, vendor]));
   const frameworkRows = await listRecentFrameworks();
@@ -10491,7 +11054,7 @@ async function listAdminVendorSummaries(limit = 100) {
 }
 async function listActivityFeed(limit = 50) {
   const db = await getDb();
-  const rows = !db ? memoryActivityEvents.slice(0, limit) : await db.select().from(activityEvents).orderBy(desc2(activityEvents.createdAt)).limit(limit);
+  const rows = !db ? memoryActivityEvents.slice(0, limit) : await db.select().from(activityEvents).orderBy(desc3(activityEvents.createdAt)).limit(limit);
   const userRows = await listUsersForAdmin(limit * 2);
   const userMap = new Map(userRows.map((user) => [user.id, user]));
   return rows.map((row) => {
@@ -10519,7 +11082,7 @@ async function listUserInteractionRows(limit = 2e3) {
     context: userInteractionLogs.context,
     action: userInteractionLogs.action,
     createdAt: userInteractionLogs.createdAt
-  }).from(userInteractionLogs).orderBy(desc2(userInteractionLogs.createdAt)).limit(limit);
+  }).from(userInteractionLogs).orderBy(desc3(userInteractionLogs.createdAt)).limit(limit);
   return rows;
 }
 function getRetentionCutoff(retentionDays) {
@@ -10538,8 +11101,8 @@ async function getInteractionPrivacyStats(retentionDays = 90) {
       logsOlderThanRetention: 0
     };
   }
-  const [totals] = await db.select({ count: sql`count(*)` }).from(userInteractionLogs);
-  const [expired] = await db.select({ count: sql`count(*)` }).from(userInteractionLogs).where(lt(userInteractionLogs.createdAt, cutoff));
+  const [totals] = await db.select({ count: sql2`count(*)` }).from(userInteractionLogs);
+  const [expired] = await db.select({ count: sql2`count(*)` }).from(userInteractionLogs).where(lt(userInteractionLogs.createdAt, cutoff));
   return {
     retentionDays,
     cutoffIso: cutoff.toISOString(),
@@ -10599,7 +11162,7 @@ async function deleteInteractionLogsBySubject(input) {
     eq3(userInteractionLogs.userId, userId),
     eq3(userInteractionLogs.organizationId, organizationId)
   ) : userId ? eq3(userInteractionLogs.userId, userId) : eq3(userInteractionLogs.organizationId, organizationId);
-  const [countRow] = await db.select({ count: sql`count(*)` }).from(userInteractionLogs).where(whereClause);
+  const [countRow] = await db.select({ count: sql2`count(*)` }).from(userInteractionLogs).where(whereClause);
   const deletedLogs = Number(countRow?.count ?? 0);
   if (deletedLogs > 0) {
     await db.delete(userInteractionLogs).where(whereClause);
@@ -10891,6 +11454,42 @@ function isAccessAllowed(org, sub) {
   if (org.plan === "free_trial" && !isTrialExpired(org)) return true;
   if (!sub) return false;
   return sub.status === "active" || sub.status === "trialing";
+}
+var TIER_MATRIX = {
+  starter: {
+    maxVendors: 10,
+    maxFrameworks: 5,
+    maxSeats: 3,
+    maxAiReportsPerDay: 3,
+    supportsApiAccess: false,
+    supportsCustomReports: false,
+    supportsPrioritySupport: false,
+    supportsWhiteLabel: false
+  },
+  professional: {
+    maxVendors: 50,
+    maxFrameworks: 20,
+    maxSeats: 15,
+    maxAiReportsPerDay: 20,
+    supportsApiAccess: true,
+    supportsCustomReports: true,
+    supportsPrioritySupport: false,
+    supportsWhiteLabel: false
+  },
+  enterprise: {
+    maxVendors: 999,
+    maxFrameworks: 999,
+    maxSeats: 999,
+    maxAiReportsPerDay: 200,
+    supportsApiAccess: true,
+    supportsCustomReports: true,
+    supportsPrioritySupport: true,
+    supportsWhiteLabel: true
+  }
+};
+function getTierLimits(plan) {
+  const tier = TIER_MATRIX[plan];
+  return tier ?? TIER_MATRIX.starter;
 }
 
 // server/_core/trpc.ts
@@ -11203,9 +11802,9 @@ async function getConversionStats() {
   orgs.forEach((o) => {
     planCounts[o.plan] = (planCounts[o.plan] ?? 0) + 1;
   });
-  const planBreakdown = Object.entries(planCounts).map(([plan, count3]) => ({
+  const planBreakdown = Object.entries(planCounts).map(([plan, count6]) => ({
     plan,
-    count: count3
+    count: count6
   }));
   return {
     trialOrgs,
@@ -11214,6 +11813,1239 @@ async function getConversionStats() {
     total,
     conversionRate,
     planBreakdown
+  };
+}
+
+// shared/regulatory-provenance.ts
+var DEFAULT_REVIEW_WINDOW_DAYS = 730;
+var PROVENANCE_REGISTRY = {
+  "NIST-CSF-2": {
+    claimCode: "NIST-CSF-2",
+    authority: "NIST",
+    sourceUrl: "https://www.nist.gov/cyberframework",
+    sourceTitle: "NIST Cybersecurity Framework 2.0",
+    version: "2.0",
+    effectiveDate: "2024-02-26",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NIST-SP-800-53": {
+    claimCode: "NIST-SP-800-53",
+    authority: "NIST",
+    sourceUrl: "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final",
+    sourceTitle: "NIST SP 800-53",
+    version: "Rev. 5",
+    effectiveDate: "2020-09-23",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NIST-SP-800-171": {
+    claimCode: "NIST-SP-800-171",
+    authority: "NIST",
+    sourceUrl: "https://csrc.nist.gov/pubs/sp/800/171/r3/final",
+    sourceTitle: "NIST SP 800-171",
+    version: "Rev. 3",
+    effectiveDate: "2024-05-14",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NIST-SP-800-61": {
+    claimCode: "NIST-SP-800-61",
+    authority: "NIST",
+    sourceUrl: "https://csrc.nist.gov/pubs/sp/800/61/r2/final",
+    sourceTitle: "NIST SP 800-61",
+    version: "Rev. 2",
+    effectiveDate: "2012-08-06",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NIST-SP-800-207": {
+    claimCode: "NIST-SP-800-207",
+    authority: "NIST",
+    sourceUrl: "https://csrc.nist.gov/pubs/sp/800/207/final",
+    sourceTitle: "NIST SP 800-207 Zero Trust",
+    version: "Final",
+    effectiveDate: "2020-08-11",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NIST-AI-RMF": {
+    claimCode: "NIST-AI-RMF",
+    authority: "NIST",
+    sourceUrl: "https://www.nist.gov/itl/ai-risk-management-framework",
+    sourceTitle: "NIST AI Risk Management Framework",
+    version: "1.0",
+    effectiveDate: "2023-01-26",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  HIPAA: {
+    claimCode: "HIPAA",
+    authority: "HHS OCR",
+    sourceUrl: "https://www.hhs.gov/hipaa/for-professionals/privacy/laws-regulations/index.html",
+    sourceTitle: "Health Insurance Portability and Accountability Act",
+    version: "as amended",
+    effectiveDate: "2003-04-14",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  HITECH: {
+    claimCode: "HITECH",
+    authority: "HHS OCR",
+    sourceUrl: "https://www.hhs.gov/hipaa/for-professionals/security/laws-regulations/index.html",
+    sourceTitle: "Health Information Technology for Economic and Clinical Health Act",
+    version: "Pub. L. 111-5",
+    effectiveDate: "2009-02-17",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  GLBA: {
+    claimCode: "GLBA",
+    authority: "FTC / Federal Regulators",
+    sourceUrl: "https://www.ftc.gov/business-guidance/privacy-security/gramm-leach-bliley-act",
+    sourceTitle: "Gramm-Leach-Bliley Act",
+    version: "Pub. L. 106-102",
+    effectiveDate: "1999-11-12",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  SOX: {
+    claimCode: "SOX",
+    authority: "SEC / PCAOB",
+    sourceUrl: "https://www.govinfo.gov/content/pkg/PLAW-107publ204/html/PLAW-107publ204.htm",
+    sourceTitle: "Sarbanes-Oxley Act",
+    version: "Pub. L. 107-204",
+    effectiveDate: "2002-07-30",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "SEC-CYBER": {
+    claimCode: "SEC-CYBER",
+    authority: "SEC",
+    sourceUrl: "https://www.sec.gov/rules/final/2023/33-11216.pdf",
+    sourceTitle: "SEC Cybersecurity Disclosure Rules",
+    version: "Release 33-11216",
+    effectiveDate: "2023-12-18",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "FTC-SAFEGUARDS": {
+    claimCode: "FTC-SAFEGUARDS",
+    authority: "FTC",
+    sourceUrl: "https://www.ftc.gov/legal-library/browse/rules/safeguards-rule",
+    sourceTitle: "FTC Safeguards Rule",
+    version: "16 CFR Part 314",
+    effectiveDate: "2002-05-23",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  CMMC: {
+    claimCode: "CMMC",
+    authority: "DoD",
+    sourceUrl: "https://dodcio.defense.gov/CMMC/",
+    sourceTitle: "Cybersecurity Maturity Model Certification",
+    version: "2.0",
+    effectiveDate: "2024-12-16",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  FEDRAMP: {
+    claimCode: "FEDRAMP",
+    authority: "FedRAMP PMO",
+    sourceUrl: "https://www.fedramp.gov/",
+    sourceTitle: "FedRAMP",
+    version: "Rev. 5",
+    effectiveDate: "2024-05-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  CJIS: {
+    claimCode: "CJIS",
+    authority: "FBI",
+    sourceUrl: "https://www.fbi.gov/services/cjis/cjis-security-policy-resource-center",
+    sourceTitle: "CJIS Security Policy",
+    version: "v6.0",
+    effectiveDate: "2024-12-27",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "IRS-1075": {
+    claimCode: "IRS-1075",
+    authority: "IRS",
+    sourceUrl: "https://www.irs.gov/pub/irs-pdf/p1075.pdf",
+    sourceTitle: "IRS Publication 1075",
+    version: "Rev. 2023",
+    effectiveDate: "2023-11-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "PCI-DSS": {
+    claimCode: "PCI-DSS",
+    authority: "PCI SSC",
+    sourceUrl: "https://www.pcisecuritystandards.org/document_library/",
+    sourceTitle: "PCI DSS",
+    version: "4.0",
+    effectiveDate: "2022-03-31",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  SOC1: {
+    claimCode: "SOC1",
+    authority: "AICPA",
+    sourceUrl: "https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc",
+    sourceTitle: "SOC 1",
+    version: "AT-C 320",
+    effectiveDate: "2017-05-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  SOC2: {
+    claimCode: "SOC2",
+    authority: "AICPA",
+    sourceUrl: "https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc",
+    sourceTitle: "SOC 2",
+    version: "TSC 2017",
+    effectiveDate: "2017-05-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  SOC3: {
+    claimCode: "SOC3",
+    authority: "AICPA",
+    sourceUrl: "https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc",
+    sourceTitle: "SOC 3",
+    version: "TSC 2017",
+    effectiveDate: "2017-05-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CIS-V8": {
+    claimCode: "CIS-V8",
+    authority: "CIS",
+    sourceUrl: "https://www.cisecurity.org/controls",
+    sourceTitle: "CIS Controls v8",
+    version: "v8",
+    effectiveDate: "2021-05-18",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "COBIT-2019": {
+    claimCode: "COBIT-2019",
+    authority: "ISACA",
+    sourceUrl: "https://www.isaca.org/resources/cobit",
+    sourceTitle: "COBIT 2019",
+    version: "2019",
+    effectiveDate: "2019-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  PIPEDA: {
+    claimCode: "PIPEDA",
+    authority: "Office of the Privacy Commissioner of Canada",
+    sourceUrl: "https://laws-lois.justice.gc.ca/eng/acts/P-8.6/",
+    sourceTitle: "Personal Information Protection and Electronic Documents Act",
+    version: "S.C. 2000, c. 5",
+    effectiveDate: "2001-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CCCS-GUIDANCE": {
+    claimCode: "CCCS-GUIDANCE",
+    authority: "Canadian Centre for Cyber Security",
+    sourceUrl: "https://www.cyber.gc.ca/en/guidance",
+    sourceTitle: "Canadian Centre for Cyber Security Guidance",
+    version: "ITSP.10 / ITSG-33",
+    effectiveDate: "2024-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  GDPR: {
+    claimCode: "GDPR",
+    authority: "European Commission",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+    sourceTitle: "General Data Protection Regulation",
+    version: "2016/679",
+    effectiveDate: "2018-05-25",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "UK-GDPR": {
+    claimCode: "UK-GDPR",
+    authority: "ICO",
+    sourceUrl: "https://www.legislation.gov.uk/ukpga/2018/12/contents",
+    sourceTitle: "UK GDPR",
+    version: "2018 c. 12",
+    effectiveDate: "2018-05-23",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  NIS2: {
+    claimCode: "NIS2",
+    authority: "ENISA / Member States",
+    sourceUrl: "https://eur-lex.europa.eu/eli/dir/2022/2555/oj",
+    sourceTitle: "NIS2 Directive",
+    version: "2022/2555",
+    effectiveDate: "2023-01-16",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  DORA: {
+    claimCode: "DORA",
+    authority: "European Supervisory Authorities",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2022/2554/oj",
+    sourceTitle: "Digital Operational Resilience Act",
+    version: "2022/2554",
+    effectiveDate: "2025-01-17",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  CRA: {
+    claimCode: "CRA",
+    authority: "European Commission",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2024/2847/oj",
+    sourceTitle: "Cyber Resilience Act",
+    version: "2024/2847",
+    effectiveDate: "2024-12-10",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "EU-AI-ACT": {
+    claimCode: "EU-AI-ACT",
+    authority: "European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    sourceTitle: "EU AI Act",
+    version: "2024/1689",
+    effectiveDate: "2024-08-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  EPD: {
+    claimCode: "EPD",
+    authority: "European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/dir/2002/58/oj",
+    sourceTitle: "ePrivacy Directive",
+    version: "2002/58/EC",
+    effectiveDate: "2002-07-31",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  PSD2: {
+    claimCode: "PSD2",
+    authority: "European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/dir/2015/2366/oj",
+    sourceTitle: "Payment Services Directive 2",
+    version: "2015/2366",
+    effectiveDate: "2018-01-13",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  DSA: {
+    claimCode: "DSA",
+    authority: "European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2022/2065/oj",
+    sourceTitle: "Digital Services Act",
+    version: "2022/2065",
+    effectiveDate: "2022-11-16",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  DMA: {
+    claimCode: "DMA",
+    authority: "European Union",
+    sourceUrl: "https://eur-lex.europa.eu/eli/reg/2022/1925/oj",
+    sourceTitle: "Digital Markets Act",
+    version: "2022/1925",
+    effectiveDate: "2022-11-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ENISA-GUIDANCE": {
+    claimCode: "ENISA-GUIDANCE",
+    authority: "ENISA",
+    sourceUrl: "https://www.enisa.europa.eu/publications",
+    sourceTitle: "ENISA Guidance",
+    version: "various",
+    effectiveDate: "2024-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISO-27001": {
+    claimCode: "ISO-27001",
+    authority: "ISO/IEC",
+    sourceUrl: "https://www.iso.org/standard/27001.html",
+    sourceTitle: "ISO/IEC 27001",
+    version: "ISO/IEC 27001:2022",
+    effectiveDate: "2022-10-25",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISO-27017": {
+    claimCode: "ISO-27017",
+    authority: "ISO/IEC",
+    sourceUrl: "https://www.iso.org/standard/43757.html",
+    sourceTitle: "ISO/IEC 27017",
+    version: "ISO/IEC 27017:2015",
+    effectiveDate: "2015-12-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISO-27018": {
+    claimCode: "ISO-27018",
+    authority: "ISO/IEC",
+    sourceUrl: "https://www.iso.org/standard/76559.html",
+    sourceTitle: "ISO/IEC 27018",
+    version: "ISO/IEC 27018:2019",
+    effectiveDate: "2019-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISO-27701": {
+    claimCode: "ISO-27701",
+    authority: "ISO/IEC",
+    sourceUrl: "https://www.iso.org/standard/71670.html",
+    sourceTitle: "ISO/IEC 27701",
+    version: "ISO/IEC 27701:2019",
+    effectiveDate: "2019-08-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISO-22301": {
+    claimCode: "ISO-22301",
+    authority: "ISO/IEC",
+    sourceUrl: "https://www.iso.org/standard/75106.html",
+    sourceTitle: "ISO/IEC 22301",
+    version: "ISO 22301:2019",
+    effectiveDate: "2019-10-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISO-42001": {
+    claimCode: "ISO-42001",
+    authority: "ISO/IEC",
+    sourceUrl: "https://www.iso.org/standard/81230.html",
+    sourceTitle: "ISO/IEC 42001",
+    version: "ISO/IEC 42001:2023",
+    effectiveDate: "2023-12-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISO-31000": {
+    claimCode: "ISO-31000",
+    authority: "ISO",
+    sourceUrl: "https://www.iso.org/standard/65694.html",
+    sourceTitle: "ISO 31000",
+    version: "ISO 31000:2018",
+    effectiveDate: "2018-02-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "PDPL-KSA": {
+    claimCode: "PDPL-KSA",
+    authority: "SDAIA",
+    sourceUrl: "https://sdaia.gov.sa/en/SDAIA/about/Pages/PDPL.aspx",
+    sourceTitle: "Saudi Personal Data Protection Law",
+    version: "Royal Decree M/19",
+    effectiveDate: "2023-09-14",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NCA-ECC": {
+    claimCode: "NCA-ECC",
+    authority: "NCA",
+    sourceUrl: "https://nca.gov.sa/en/regulations/",
+    sourceTitle: "NCA Essential Cybersecurity Controls",
+    version: "ECC-1:2018",
+    effectiveDate: "2018-05-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NCA-CCC": {
+    claimCode: "NCA-CCC",
+    authority: "NCA",
+    sourceUrl: "https://nca.gov.sa/en/regulations/",
+    sourceTitle: "NCA Cloud Cybersecurity Controls",
+    version: "CCC-1:2020",
+    effectiveDate: "2020-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ECC-1": {
+    claimCode: "ECC-1",
+    authority: "NCA",
+    sourceUrl: "https://nca.gov.sa/en/regulations/",
+    sourceTitle: "ECC-1",
+    version: "ECC-1:2018",
+    effectiveDate: "2018-05-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "KSA-ECC": {
+    claimCode: "KSA-ECC",
+    authority: "NCA",
+    sourceUrl: "https://nca.gov.sa/en/regulations/",
+    sourceTitle: "Essential Cybersecurity Controls",
+    version: "ECC-1:2018",
+    effectiveDate: "2018-05-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CST-CLOUD": {
+    claimCode: "CST-CLOUD",
+    authority: "CST",
+    sourceUrl: "https://www.cst.gov.sa/en/regulations",
+    sourceTitle: "CST Cloud Regulations",
+    version: "2.0",
+    effectiveDate: "2024-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "UAE-PDPL": {
+    claimCode: "UAE-PDPL",
+    authority: "UAE Data Office",
+    sourceUrl: "https://u.ae/en/about-the-uae/digital-uae/data/data-protection-laws",
+    sourceTitle: "UAE Personal Data Protection Law",
+    version: "Federal Decree-Law 45/2021",
+    effectiveDate: "2021-11-20",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "DESC-ISR": {
+    claimCode: "DESC-ISR",
+    authority: "DESC",
+    sourceUrl: "https://www.desc.gov.ae/",
+    sourceTitle: "DESC Information Security Regulation",
+    version: "ISR v1.0",
+    effectiveDate: "2021-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "UAE-IA": {
+    claimCode: "UAE-IA",
+    authority: "UAE National Cybersecurity Council",
+    sourceUrl: "https://www.csc.gov.ae/",
+    sourceTitle: "UAE Information Assurance Standards",
+    version: "IA Standards",
+    effectiveDate: "2021-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "QCB-FRAMEWORK": {
+    claimCode: "QCB-FRAMEWORK",
+    authority: "QCB",
+    sourceUrl: "https://www.qcb.gov.qa/",
+    sourceTitle: "Qatar Central Bank Framework",
+    version: "2018",
+    effectiveDate: "2018-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "QATAR-NIA": {
+    claimCode: "QATAR-NIA",
+    authority: "Qatar National Cyber Security Agency",
+    sourceUrl: "https://www.ncsa.gov.qa/",
+    sourceTitle: "Qatar National Information Assurance",
+    version: "2020",
+    effectiveDate: "2020-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "BHR-PDPL": {
+    claimCode: "BHR-PDPL",
+    authority: "Bahrain Personal Data Protection Authority",
+    sourceUrl: "https://www.pdp.gov.bh/",
+    sourceTitle: "Bahrain Personal Data Protection Law",
+    version: "Law 30 of 2018",
+    effectiveDate: "2019-07-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "OMAN-CYBER": {
+    claimCode: "OMAN-CYBER",
+    authority: "National Cybersecurity Centre",
+    sourceUrl: "https://www.cert.gov.om/",
+    sourceTitle: "Oman National Cybersecurity Requirements",
+    version: "2019",
+    effectiveDate: "2019-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "KUWAIT-CYBER": {
+    claimCode: "KUWAIT-CYBER",
+    authority: "Kuwait National Cyber Security Center",
+    sourceUrl: "https://www.citca.gov.kw/",
+    sourceTitle: "Kuwait National Cybersecurity Regulations",
+    version: "2020",
+    effectiveDate: "2020-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "MLPS-2": {
+    claimCode: "MLPS-2",
+    authority: "MPS / CAC",
+    sourceUrl: "https://www.cac.gov.cn/",
+    sourceTitle: "MLPS 2.0",
+    version: "2.0",
+    effectiveDate: "2019-05-13",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CHINA-CRYPT": {
+    claimCode: "CHINA-CRYPT",
+    authority: "CAC / State Cryptography Administration",
+    sourceUrl: "https://www.oscca.gov.cn/",
+    sourceTitle: "Cryptography Law",
+    version: "Cryptography Law",
+    effectiveDate: "2020-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CHINA-AI": {
+    claimCode: "CHINA-AI",
+    authority: "CAC",
+    sourceUrl: "https://www.cac.gov.cn/",
+    sourceTitle: "AI Regulations",
+    version: "Interim Measures",
+    effectiveDate: "2023-08-15",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "PDPA-SG": {
+    claimCode: "PDPA-SG",
+    authority: "PDPC",
+    sourceUrl: "https://sso.agc.gov.sg/Act/PDPA2012",
+    sourceTitle: "Singapore Personal Data Protection Act",
+    version: "Act 26 of 2012",
+    effectiveDate: "2014-07-02",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "MAS-TRM": {
+    claimCode: "MAS-TRM",
+    authority: "Monetary Authority of Singapore",
+    sourceUrl: "https://www.mas.gov.sg/regulation/guidelines/technology-risk-management-guidelines",
+    sourceTitle: "MAS Technology Risk Management",
+    version: "2021",
+    effectiveDate: "2021-01-18",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "MAS-NOTICES": {
+    claimCode: "MAS-NOTICES",
+    authority: "Monetary Authority of Singapore",
+    sourceUrl: "https://www.mas.gov.sg/regulation/notices",
+    sourceTitle: "MAS Notices",
+    version: "2019",
+    effectiveDate: "2019-08-06",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  APPI: {
+    claimCode: "APPI",
+    authority: "PPC",
+    sourceUrl: "https://www.ppc.go.jp/en/",
+    sourceTitle: "Act on the Protection of Personal Information",
+    version: "2020 Amendment",
+    effectiveDate: "2022-04-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "PIPA-KR": {
+    claimCode: "PIPA-KR",
+    authority: "PIPC",
+    sourceUrl: "https://www.pipc.go.kr/eng/",
+    sourceTitle: "Personal Information Protection Act",
+    version: "2011",
+    effectiveDate: "2011-09-30",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ESSENTIAL-EIGHT": {
+    claimCode: "ESSENTIAL-EIGHT",
+    authority: "ACSC",
+    sourceUrl: "https://www.cyber.gov.au/resources-business-and-government/essential-cyber-security/essential-eight",
+    sourceTitle: "Essential Eight",
+    version: "2023",
+    effectiveDate: "2023-11-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISM-AU": {
+    claimCode: "ISM-AU",
+    authority: "ACSC",
+    sourceUrl: "https://www.cyber.gov.au/resources-business-and-government/essential-cyber-security/ism",
+    sourceTitle: "Australian Information Security Manual",
+    version: "2024",
+    effectiveDate: "2024-09-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "PRIVACY-ACT-AU": {
+    claimCode: "PRIVACY-ACT-AU",
+    authority: "OAIC",
+    sourceUrl: "https://www.oaic.gov.au/privacy/privacy-legislation/the-privacy-act",
+    sourceTitle: "Australian Privacy Act",
+    version: "Privacy Act 1988",
+    effectiveDate: "1988-12-21",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NZ-PRIVACY": {
+    claimCode: "NZ-PRIVACY",
+    authority: "Office of the Privacy Commissioner",
+    sourceUrl: "https://www.privacy.org.nz/privacy-act-2020/",
+    sourceTitle: "New Zealand Privacy Act",
+    version: "Privacy Act 2020",
+    effectiveDate: "2020-12-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "DPDP-IN": {
+    claimCode: "DPDP-IN",
+    authority: "Data Protection Board of India",
+    sourceUrl: "https://www.meity.gov.in/data-protection-framework",
+    sourceTitle: "Digital Personal Data Protection Act",
+    version: "2023",
+    effectiveDate: "2023-08-11",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CERT-IN": {
+    claimCode: "CERT-IN",
+    authority: "CERT-In",
+    sourceUrl: "https://www.cert-in.org.in/",
+    sourceTitle: "CERT-In Directions",
+    version: "Directions 2022",
+    effectiveDate: "2022-06-27",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "MY-PDPA": {
+    claimCode: "MY-PDPA",
+    authority: "JPDP",
+    sourceUrl: "https://www.pdp.gov.my/",
+    sourceTitle: "Malaysia Personal Data Protection Act",
+    version: "Act 709",
+    effectiveDate: "2013-11-15",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ID-PDP": {
+    claimCode: "ID-PDP",
+    authority: "Ministry of Communication and Digital Affairs",
+    sourceUrl: "https://www.kominfo.go.id/",
+    sourceTitle: "Indonesia Personal Data Protection Law",
+    version: "Law 27/2022",
+    effectiveDate: "2022-10-17",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "TH-PDPA": {
+    claimCode: "TH-PDPA",
+    authority: "PDPC Thailand",
+    sourceUrl: "https://www.pdpc.or.th/",
+    sourceTitle: "Thailand Personal Data Protection Act",
+    version: "B.E. 2562 (2019)",
+    effectiveDate: "2020-05-27",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "VN-PDPD": {
+    claimCode: "VN-PDPD",
+    authority: "MPS / MIC",
+    sourceUrl: "https://mic.gov.vn/",
+    sourceTitle: "Vietnam Personal Data Protection Decree",
+    version: "Decree 13/2023",
+    effectiveDate: "2023-04-17",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "PH-DPA": {
+    claimCode: "PH-DPA",
+    authority: "NPC",
+    sourceUrl: "https://privacy.gov.ph/data-privacy-act/",
+    sourceTitle: "Philippines Data Privacy Act",
+    version: "Republic Act 10173",
+    effectiveDate: "2012-09-08",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  POPIA: {
+    claimCode: "POPIA",
+    authority: "Information Regulator",
+    sourceUrl: "https://www.justice.gov.za/inforeg/",
+    sourceTitle: "Protection of Personal Information Act",
+    version: "Act 4 of 2013",
+    effectiveDate: "2021-07-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NDPA-NG": {
+    claimCode: "NDPA-NG",
+    authority: "NDPC",
+    sourceUrl: "https://ndpc.gov.ng/",
+    sourceTitle: "Nigeria Data Protection Act",
+    version: "2023",
+    effectiveDate: "2023-06-14",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "KENYA-DPA": {
+    claimCode: "KENYA-DPA",
+    authority: "ODPC",
+    sourceUrl: "https://www.odpc.go.ke/",
+    sourceTitle: "Kenya Data Protection Act",
+    version: "Act 24 of 2019",
+    effectiveDate: "2021-11-25",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "EGYPT-PDPL": {
+    claimCode: "EGYPT-PDPL",
+    authority: "Egyptian Data Protection Center",
+    sourceUrl: "https://www.mcit.gov.eg/",
+    sourceTitle: "Egypt Personal Data Protection Law",
+    version: "Law 151 of 2020",
+    effectiveDate: "2020-10-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "AU-CYBER-PRIVACY": {
+    claimCode: "AU-CYBER-PRIVACY",
+    authority: "African Union",
+    sourceUrl: "https://au.int/en/treaties/african-union-convention-cyber-security-and-personal-data-protection",
+    sourceTitle: "African Union Cyber Security and Personal Data Protection Convention",
+    version: "Malabo Convention",
+    effectiveDate: "2018-06-08",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  LGPD: {
+    claimCode: "LGPD",
+    authority: "ANPD",
+    sourceUrl: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm",
+    sourceTitle: "Lei Geral de Prote\xE7\xE3o de Dados",
+    version: "13.709/2018",
+    effectiveDate: "2020-09-18",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "MEXICO-DPA": {
+    claimCode: "MEXICO-DPA",
+    authority: "INAI",
+    sourceUrl: "https://www.inai.org.mx/",
+    sourceTitle: "Mexico Federal Data Protection Law",
+    version: "2017",
+    effectiveDate: "2017-05-26",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ARG-PDPL": {
+    claimCode: "ARG-PDPL",
+    authority: "AAIP",
+    sourceUrl: "https://www.argentina.gob.ar/aaip",
+    sourceTitle: "Argentina Personal Data Protection Law",
+    version: "Law 25.326",
+    effectiveDate: "2000-10-30",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CHILE-DPF": {
+    claimCode: "CHILE-DPF",
+    authority: "Chilean data protection authorities",
+    sourceUrl: "https://www.bcn.cl/leychile/",
+    sourceTitle: "Chile Data Protection Framework",
+    version: "Law 19.628",
+    effectiveDate: "1999-08-28",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "COLOMBIA-HABEAS": {
+    claimCode: "COLOMBIA-HABEAS",
+    authority: "SIC",
+    sourceUrl: "https://www.sic.gov.co/",
+    sourceTitle: "Colombia Habeas Data",
+    version: "Law 1581 of 2012",
+    effectiveDate: "2012-10-18",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "MITRE-ATTACK": {
+    claimCode: "MITRE-ATTACK",
+    authority: "MITRE",
+    sourceUrl: "https://attack.mitre.org/",
+    sourceTitle: "MITRE ATT&CK",
+    version: "v14",
+    effectiveDate: "2023-04-25",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "MITRE-D3FEND": {
+    claimCode: "MITRE-D3FEND",
+    authority: "MITRE",
+    sourceUrl: "https://d3fend.mitre.org/",
+    sourceTitle: "MITRE D3FEND",
+    version: "v1.0",
+    effectiveDate: "2023-06-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "OWASP-TOP10": {
+    claimCode: "OWASP-TOP10",
+    authority: "OWASP",
+    sourceUrl: "https://owasp.org/www-project-top-ten/",
+    sourceTitle: "OWASP Top 10",
+    version: "2021",
+    effectiveDate: "2021-09-28",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "OWASP-ASVS": {
+    claimCode: "OWASP-ASVS",
+    authority: "OWASP",
+    sourceUrl: "https://owasp.org/www-project-application-security-verification-standard/",
+    sourceTitle: "OWASP ASVS",
+    version: "5.0",
+    effectiveDate: "2025-05-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "OWASP-SAMM": {
+    claimCode: "OWASP-SAMM",
+    authority: "OWASP",
+    sourceUrl: "https://owasp.org/www-project-samm/",
+    sourceTitle: "OWASP SAMM",
+    version: "2.0",
+    effectiveDate: "2017-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CSA-CCM": {
+    claimCode: "CSA-CCM",
+    authority: "Cloud Security Alliance",
+    sourceUrl: "https://cloudsecurityalliance.org/research/cloud-controls-matrix",
+    sourceTitle: "Cloud Controls Matrix",
+    version: "v4.0",
+    effectiveDate: "2021-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CSA-STAR": {
+    claimCode: "CSA-STAR",
+    authority: "Cloud Security Alliance",
+    sourceUrl: "https://cloudsecurityalliance.org/star",
+    sourceTitle: "CSA STAR",
+    version: "v1",
+    effectiveDate: "2021-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CIS-BENCHMARKS": {
+    claimCode: "CIS-BENCHMARKS",
+    authority: "Center for Internet Security",
+    sourceUrl: "https://www.cisecurity.org/cis-benchmarks",
+    sourceTitle: "CIS Benchmarks",
+    version: "various",
+    effectiveDate: "2024-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "IEC-62443": {
+    claimCode: "IEC-62443",
+    authority: "IEC",
+    sourceUrl: "https://www.iec.ch/cyber-security",
+    sourceTitle: "IEC 62443",
+    version: "series",
+    effectiveDate: "2019-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "FIPS-140-3": {
+    claimCode: "FIPS-140-3",
+    authority: "NIST",
+    sourceUrl: "https://csrc.nist.gov/pubs/fips/140-3/final",
+    sourceTitle: "FIPS 140-3",
+    version: "140-3",
+    effectiveDate: "2019-03-22",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "ISO-SAE-21434": {
+    claimCode: "ISO-SAE-21434",
+    authority: "ISO / SAE",
+    sourceUrl: "https://www.iso.org/standard/70918.html",
+    sourceTitle: "ISO/SAE 21434",
+    version: "ISO/SAE 21434:2021",
+    effectiveDate: "2021-08-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  TISAX: {
+    claimCode: "TISAX",
+    authority: "ENX Association",
+    sourceUrl: "https://www.enx.com/tisax/",
+    sourceTitle: "TISAX",
+    version: "ISA 6",
+    effectiveDate: "2024-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "IEC-61508": {
+    claimCode: "IEC-61508",
+    authority: "IEC",
+    sourceUrl: "https://www.iec.ch/functional-safety",
+    sourceTitle: "IEC 61508",
+    version: "Ed. 2.0",
+    effectiveDate: "2010-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "NERC-CIP": {
+    claimCode: "NERC-CIP",
+    authority: "NERC",
+    sourceUrl: "https://www.nerc.com/pa/Stand/Pages/CIPStandards.aspx",
+    sourceTitle: "NERC CIP",
+    version: "v7",
+    effectiveDate: "2024-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "SWIFT-CSCF": {
+    claimCode: "SWIFT-CSCF",
+    authority: "SWIFT",
+    sourceUrl: "https://www.swift.com/myswift/customer-security-programme-csp",
+    sourceTitle: "SWIFT Customer Security Controls Framework",
+    version: "v2024",
+    effectiveDate: "2024-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  HITRUST: {
+    claimCode: "HITRUST",
+    authority: "HITRUST",
+    sourceUrl: "https://hitrustalliance.net/",
+    sourceTitle: "HITRUST CSF",
+    version: "CSF v11",
+    effectiveDate: "2023-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  FAIR: {
+    claimCode: "FAIR",
+    authority: "The FAIR Institute",
+    sourceUrl: "https://www.fairinstitute.org/",
+    sourceTitle: "FAIR Risk Framework",
+    version: "v3.0",
+    effectiveDate: "2021-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  OPENCRE: {
+    claimCode: "OPENCRE",
+    authority: "OpenCRE community",
+    sourceUrl: "https://www.opencre.org/",
+    sourceTitle: "OpenCRE",
+    version: "n/a",
+    effectiveDate: "2023-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  OPENSSF: {
+    claimCode: "OPENSSF",
+    authority: "OpenSSF",
+    sourceUrl: "https://openssf.org/",
+    sourceTitle: "OpenSSF",
+    version: "n/a",
+    effectiveDate: "2024-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  SLSA: {
+    claimCode: "SLSA",
+    authority: "OpenSSF",
+    sourceUrl: "https://slsa.dev/",
+    sourceTitle: "SLSA Framework",
+    version: "v1.0",
+    effectiveDate: "2023-04-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  SPDX: {
+    claimCode: "SPDX",
+    authority: "Linux Foundation",
+    sourceUrl: "https://spdx.dev/",
+    sourceTitle: "SPDX",
+    version: "2.3",
+    effectiveDate: "2022-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  },
+  "CYCLONE-DX": {
+    claimCode: "CYCLONE-DX",
+    authority: "OWASP",
+    sourceUrl: "https://cyclonedx.org/",
+    sourceTitle: "CycloneDX",
+    version: "1.5",
+    effectiveDate: "2023-01-01",
+    lastVerified: "2026-10-02",
+    verifiedBy: "Esmail",
+    status: "verified"
+  }
+};
+function unverifiedProvenance(claimCode) {
+  return { claimCode, status: "unverified" };
+}
+function daysBetween(from, to) {
+  const then = Date.parse(from);
+  if (Number.isNaN(then)) return Number.POSITIVE_INFINITY;
+  return (to - then) / 864e5;
+}
+function resolveProvenance(entry, claimCode, now = Date.now()) {
+  if (!entry) return unverifiedProvenance(claimCode);
+  if (entry.status === "verified" && entry.lastVerified) {
+    const window = entry.reviewWindowDays ?? DEFAULT_REVIEW_WINDOW_DAYS;
+    if (daysBetween(entry.lastVerified, now) > window) {
+      return { ...entry, status: "stale" };
+    }
+  }
+  return entry;
+}
+function getProvenance(claimCode, now = Date.now()) {
+  return resolveProvenance(PROVENANCE_REGISTRY[claimCode], claimCode, now);
+}
+function summariseProvenance(claimCodes, now = Date.now()) {
+  let verified = 0;
+  let pendingReview = 0;
+  let stale = 0;
+  let unverified = 0;
+  for (const code of claimCodes) {
+    switch (getProvenance(code, now).status) {
+      case "verified":
+        verified++;
+        break;
+      case "pending_review":
+        pendingReview++;
+        break;
+      case "stale":
+        stale++;
+        break;
+      default:
+        unverified++;
+    }
+  }
+  const total = claimCodes.length;
+  return {
+    total,
+    verified,
+    pendingReview,
+    stale,
+    unverified,
+    fullyVerified: total > 0 && verified === total
   };
 }
 
@@ -11228,6 +13060,32 @@ var searchLimitSchema = z.object({
   limit: z.number().int().min(1).max(200).optional()
 });
 var adminRouter = router({
+  /**
+   * Regulatory review queue — every citation that is not freshly verified.
+   * Read-only: sign-off is a human action performed via the provenance script.
+   */
+  provenanceQueue: adminProcedure.query(() => {
+    const now = Date.now();
+    const rank = {
+      stale: 0,
+      pending_review: 1,
+      unverified: 2
+    };
+    return Object.entries(PROVENANCE_REGISTRY).map(([code, entry]) => {
+      const p = getProvenance(code, now);
+      return {
+        code,
+        sourceTitle: p.sourceTitle ?? entry.sourceTitle ?? code,
+        authority: p.authority ?? null,
+        status: p.status,
+        sourceUrl: p.sourceUrl ?? null,
+        lastVerified: p.lastVerified ?? null,
+        verifiedBy: p.verifiedBy ?? null,
+        assignedReviewer: p.assignedReviewer ?? null,
+        effectiveDate: p.effectiveDate ?? null
+      };
+    }).filter((e) => e.status !== "verified").sort((a, b) => (rank[a.status] ?? 9) - (rank[b.status] ?? 9));
+  }),
   overview: adminProcedure.input(searchLimitSchema.optional()).query(async () => {
     try {
       const result = await getAdminOverview();
@@ -11560,179 +13418,6 @@ async function isOnboardingComplete(userId, localUserId) {
   return stage === "completed";
 }
 
-// server/audit-logger.ts
-init_schema();
-init_db();
-init_env();
-init_sse_bus();
-import { createHash } from "node:crypto";
-import { desc as desc3 } from "drizzle-orm";
-function sanitizePayload(value) {
-  if (value == null) return null;
-  try {
-    return JSON.stringify(value, (key, val) => {
-      if (/(password|secret|token|auth|cookie|api[_-]?key)/i.test(key))
-        return "[redacted]";
-      if (typeof val === "string" && val.length > 500)
-        return val.slice(0, 500) + "\u2026";
-      return val;
-    });
-  } catch {
-    return null;
-  }
-}
-function getClientIp(ctx) {
-  const forwarded = ctx.req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string" && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() || "unknown";
-  }
-  return ctx.req.socket?.remoteAddress || "unknown";
-}
-function hashIp(ip) {
-  const salt = ENV.cookieSecret || "djac-audit-salt";
-  return createHash("sha256").update(`${salt}:${ip}`).digest("hex");
-}
-function getHashedIpFromHeaders(headers) {
-  const forwarded = headers["x-forwarded-for"];
-  const first = typeof forwarded === "string" ? forwarded.split(",")[0]?.trim() : Array.isArray(forwarded) ? forwarded[0]?.trim() : null;
-  if (!first) return null;
-  return hashIp(first);
-}
-function computeChainHash(prevHash, eventJson) {
-  return createHash("sha256").update(`${prevHash ?? "genesis"}
-${eventJson}`).digest("hex");
-}
-async function getPrevChainHash(db) {
-  try {
-    const [last] = await db.select({ chainHash: auditLogs.chainHash }).from(auditLogs).orderBy(desc3(auditLogs.id)).limit(1);
-    return last?.chainHash ?? null;
-  } catch {
-    return null;
-  }
-}
-async function buildChainHash(db, event) {
-  try {
-    const prev = await getPrevChainHash(db);
-    return computeChainHash(prev, JSON.stringify(event));
-  } catch {
-    return null;
-  }
-}
-async function recordAuditEvent(ctx, input) {
-  const db = await getDb();
-  if (!db) return;
-  try {
-    const userAgent = ctx.req.headers["user-agent"]?.toString().slice(0, 512) ?? null;
-    const ipHash = hashIp(getClientIp(ctx));
-    const chainHash = await buildChainHash(db, {
-      actor: ctx.user?.id ?? null,
-      localUserId: input.localUserId ?? null,
-      org: ctx.organizationId ?? null,
-      role: ctx.user?.role ?? null,
-      category: input.category,
-      action: input.action.slice(0, 120),
-      entityType: input.entityType ?? null,
-      entityId: input.entityId ?? null,
-      outcome: input.outcome ?? "success",
-      payload: input.payload ?? null
-    });
-    await db.insert(auditLogs).values({
-      userId: ctx.user?.id ?? null,
-      localUserId: input.localUserId ?? null,
-      organizationId: ctx.organizationId ?? null,
-      actorRole: ctx.user?.role ?? null,
-      category: input.category,
-      action: input.action.slice(0, 120),
-      entityType: input.entityType?.slice(0, 120) ?? null,
-      entityId: input.entityId ?? null,
-      targetEntity: input.targetEntity?.slice(0, 255) ?? null,
-      outcome: input.outcome ?? "success",
-      payload: sanitizePayload(input.payload),
-      ipHash,
-      userAgent,
-      chainHash
-    });
-    const BROADCAST_CATEGORIES = [
-      "auth",
-      "billing",
-      "system",
-      "data_write",
-      "data_read",
-      "role_change"
-    ];
-    if (BROADCAST_CATEGORIES.includes(input.category)) {
-      broadcastSSE("platform_event", {
-        category: input.category,
-        action: input.action,
-        entityType: input.entityType ?? null,
-        entityId: input.entityId ?? null,
-        outcome: input.outcome ?? "success",
-        actorRole: ctx.user?.role ?? "anonymous",
-        organizationId: ctx.organizationId ?? null,
-        ts: (/* @__PURE__ */ new Date()).toISOString()
-      });
-    }
-  } catch (err) {
-    console.warn("[AuditLog] Failed to persist audit event:", err);
-  }
-}
-async function recordTrpcFailureEvent(input) {
-  const db = await getDb();
-  if (!db) return;
-  try {
-    const localUserId = input.ctx?.user?.localUserId ?? null;
-    const userId = input.ctx?.user && input.ctx.user.id > 0 ? input.ctx.user.id : null;
-    const outcome = [
-      "BAD_REQUEST",
-      "PARSE_ERROR",
-      "UNAUTHORIZED",
-      "FORBIDDEN",
-      "PRECONDITION_FAILED"
-    ].includes(input.code) ? "blocked" : "failure";
-    const chainHash = await buildChainHash(db, {
-      actor: userId,
-      localUserId,
-      org: input.ctx?.organizationId ?? null,
-      role: input.ctx?.user?.role ?? "anonymous",
-      category: "system",
-      action: input.code === "BAD_REQUEST" || input.code === "PARSE_ERROR" ? "trpc.validation_failed" : "trpc.request_failed",
-      target: input.path ?? input.type ?? "unknown",
-      code: input.code
-    });
-    await db.insert(auditLogs).values({
-      userId,
-      localUserId,
-      organizationId: input.ctx?.organizationId ?? null,
-      actorRole: input.ctx?.user?.role ?? "anonymous",
-      category: "system",
-      action: input.code === "BAD_REQUEST" || input.code === "PARSE_ERROR" ? "trpc.validation_failed" : "trpc.request_failed",
-      entityType: "trpc",
-      entityId: null,
-      targetEntity: (input.path ?? input.type ?? "unknown").slice(0, 255),
-      outcome,
-      payload: sanitizePayload({
-        code: input.code,
-        message: input.message,
-        input: input.procedureInput,
-        issues: input.issues
-      }),
-      ipHash: input.ctx ? hashIp(getClientIp(input.ctx)) : getHashedIpFromHeaders(input.headers ?? {}),
-      userAgent: input.ctx?.req.headers["user-agent"]?.toString().slice(0, 512) ?? input.headers?.["user-agent"]?.toString().slice(0, 512) ?? null,
-      chainHash
-    });
-    broadcastSSE("validation_event", {
-      code: input.code,
-      action: input.code === "BAD_REQUEST" || input.code === "PARSE_ERROR" ? "trpc.validation_failed" : "trpc.request_failed",
-      target: (input.path ?? input.type ?? "unknown").slice(0, 255),
-      outcome,
-      actorRole: input.ctx?.user?.role ?? "anonymous",
-      ts: (/* @__PURE__ */ new Date()).toISOString()
-    });
-  } catch (err) {
-    console.warn("[AuditLog] Failed to persist tRPC failure event:", err);
-  }
-}
-
 // server/_core/permission-guard.ts
 async function requireModulePermission(ctx, module, action) {
   const perms = await getEffectivePermissionsFromCtx(ctx, module);
@@ -12063,7 +13748,7 @@ var aiRouter = router({
 
 // server/billing.ts
 import { z as z4 } from "zod";
-import { TRPCError as TRPCError5 } from "@trpc/server";
+import { TRPCError as TRPCError6 } from "@trpc/server";
 init_env();
 
 // shared/jurisdictions.ts
@@ -12145,7 +13830,130 @@ var DSR_JURISDICTIONS = [
 init_config_schema();
 init_db();
 init_schema();
-import { eq as eq7, desc as desc5 } from "drizzle-orm";
+import { eq as eq8, desc as desc6 } from "drizzle-orm";
+
+// server/services/entitlements.ts
+init_schema();
+init_db();
+import { TRPCError as TRPCError5 } from "@trpc/server";
+import { and as and5, count as count2, desc as desc5, eq as eq7, gte } from "drizzle-orm";
+function trialEntitlements(organizationId) {
+  return {
+    organizationId,
+    plan: "free_trial",
+    limits: getTierLimits("starter"),
+    isPaid: false,
+    subscriptionStatus: null
+  };
+}
+async function getOrgEntitlements(organizationId) {
+  const db = await getDb();
+  if (!db) return trialEntitlements(organizationId);
+  const [org] = await db.select({
+    plan: organizations.plan,
+    parentOrganizationId: organizations.parentOrganizationId
+  }).from(organizations).where(eq7(organizations.id, organizationId)).limit(1);
+  if (!org) return trialEntitlements(organizationId);
+  let sourceOrgId = organizationId;
+  let sourcePlan = org.plan;
+  if (org.parentOrganizationId) {
+    const [parent] = await db.select({ plan: organizations.plan }).from(organizations).where(eq7(organizations.id, org.parentOrganizationId)).limit(1);
+    if (parent) {
+      sourceOrgId = org.parentOrganizationId;
+      sourcePlan = parent.plan;
+    }
+  }
+  const [sub] = await db.select({ status: subscriptions.status }).from(subscriptions).where(eq7(subscriptions.organizationId, sourceOrgId)).orderBy(desc5(subscriptions.createdAt)).limit(1);
+  const plan = sourcePlan === "free_trial" ? "free_trial" : sourcePlan;
+  return {
+    organizationId,
+    plan,
+    limits: getTierLimits(plan),
+    isPaid: sub?.status === "active" || sub?.status === "trialing",
+    subscriptionStatus: sub?.status ?? null
+  };
+}
+function planLabel(plan) {
+  return plan === "free_trial" ? "trial" : plan;
+}
+async function assertApiAccess(organizationId) {
+  const ent = await getOrgEntitlements(organizationId);
+  if (!ent.limits.supportsApiAccess) {
+    throw new TRPCError5({
+      code: "FORBIDDEN",
+      message: "API access is available on Professional and Enterprise plans. Upgrade to create API keys."
+    });
+  }
+}
+async function assertVendorCapacity(organizationId, currentCount) {
+  const ent = await getOrgEntitlements(organizationId);
+  if (currentCount >= ent.limits.maxVendors) {
+    throw new TRPCError5({
+      code: "FORBIDDEN",
+      message: `Your ${planLabel(ent.plan)} plan supports up to ${ent.limits.maxVendors} vendors. Upgrade to add more.`
+    });
+  }
+}
+async function assertSeatCapacity(organizationId, activeCount) {
+  const ent = await getOrgEntitlements(organizationId);
+  if (activeCount >= ent.limits.maxSeats) {
+    throw new TRPCError5({
+      code: "FORBIDDEN",
+      message: `Your ${planLabel(ent.plan)} plan includes ${ent.limits.maxSeats} seats. Upgrade to invite more members.`
+    });
+  }
+}
+async function countAiReportsToday(organizationId) {
+  const db = await getDb();
+  if (!db) return 0;
+  const start = /* @__PURE__ */ new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  const [row] = await db.select({ value: count2() }).from(vendorAssessments).innerJoin(vendors, eq7(vendorAssessments.vendorId, vendors.id)).where(
+    and5(
+      eq7(vendors.organizationId, organizationId),
+      gte(vendorAssessments.createdAt, start)
+    )
+  );
+  return Number(row?.value ?? 0);
+}
+async function assertAiReportCapacity(organizationId) {
+  const ent = await getOrgEntitlements(organizationId);
+  const used = await countAiReportsToday(organizationId);
+  if (used >= ent.limits.maxAiReportsPerDay) {
+    throw new TRPCError5({
+      code: "FORBIDDEN",
+      message: `Your ${planLabel(ent.plan)} plan allows ${ent.limits.maxAiReportsPerDay} AI assessments per day. Upgrade for more.`
+    });
+  }
+}
+async function assertFrameworkCapacity(organizationId, selectedCount) {
+  const ent = await getOrgEntitlements(organizationId);
+  if (selectedCount > ent.limits.maxFrameworks) {
+    throw new TRPCError5({
+      code: "FORBIDDEN",
+      message: `Your ${planLabel(ent.plan)} plan supports up to ${ent.limits.maxFrameworks} frameworks. Upgrade to select more.`
+    });
+  }
+}
+async function getOrgUsage(organizationId) {
+  const db = await getDb();
+  if (!db) return { vendors: 0, seats: 0, aiReportsToday: 0 };
+  const [v] = await db.select({ value: count2() }).from(vendors).where(eq7(vendors.organizationId, organizationId));
+  const [s] = await db.select({ value: count2() }).from(organizationMembers).where(
+    and5(
+      eq7(organizationMembers.organizationId, organizationId),
+      eq7(organizationMembers.status, "active")
+    )
+  );
+  const aiReportsToday = await countAiReportsToday(organizationId);
+  return {
+    vendors: Number(v?.value ?? 0),
+    seats: Number(s?.value ?? 0),
+    aiReportsToday
+  };
+}
+
+// server/billing.ts
 var PRICE_CATALOG = [
   // ── Starter ──────────────────────────────────────────────────────────────
   {
@@ -12251,7 +14059,7 @@ var _stripe = null;
 async function getStripe() {
   if (_stripe) return _stripe;
   if (!ENV.stripeSecretKey) {
-    throw new TRPCError5({
+    throw new TRPCError6({
       code: "INTERNAL_SERVER_ERROR",
       message: "Stripe is not configured. Set STRIPE_SECRET_KEY in your environment."
     });
@@ -12265,7 +14073,7 @@ async function getStripe() {
 async function createOrganizationForUser(params) {
   const db = await getDb();
   if (!db)
-    throw new TRPCError5({
+    throw new TRPCError6({
       code: "INTERNAL_SERVER_ERROR",
       message: "Database unavailable"
     });
@@ -12292,7 +14100,7 @@ async function createOrganizationForUser(params) {
       role: "owner",
       status: "active"
     });
-    const [org] = await tx.select().from(organizations).where(eq7(organizations.id, orgId));
+    const [org] = await tx.select().from(organizations).where(eq8(organizations.id, orgId));
     return org;
   });
 }
@@ -12307,7 +14115,8 @@ var billingRouter = router({
         interval,
         amountCents,
         label,
-        savingsLabel: savingsLabel ?? null
+        savingsLabel: savingsLabel ?? null,
+        limits: getTierLimits(plan)
       })
     );
   }),
@@ -12321,14 +14130,14 @@ var billingRouter = router({
         isActive: false
       };
     const orgId = ctx.organizationId;
-    const [org] = await db.select().from(organizations).where(eq7(organizations.id, orgId));
+    const [org] = await db.select().from(organizations).where(eq8(organizations.id, orgId));
     if (!org)
       return {
         plan: "free_trial",
         trialDaysRemaining: 0,
         isActive: false
       };
-    const [sub] = await db.select().from(subscriptions).where(eq7(subscriptions.organizationId, org.id)).orderBy(desc5(subscriptions.createdAt)).limit(1);
+    const [sub] = await db.select().from(subscriptions).where(eq8(subscriptions.organizationId, org.id)).orderBy(desc6(subscriptions.createdAt)).limit(1);
     return {
       plan: org.plan,
       trialDaysRemaining: daysRemainingInTrial(org),
@@ -12341,6 +14150,14 @@ var billingRouter = router({
       organizationName: org.name
     };
   }),
+  /** Current plan + enforced limits for the caller's organization */
+  getEntitlements: orgProcedure.query(async ({ ctx }) => {
+    return getOrgEntitlements(ctx.organizationId);
+  }),
+  /** Current usage against the plan's caps (for usage meters). */
+  getUsage: orgProcedure.query(async ({ ctx }) => {
+    return getOrgUsage(ctx.organizationId);
+  }),
   /** Create a Stripe Checkout Session — redirects browser to hosted checkout */
   createCheckoutSession: orgAdminProcedure.use(requireMfa).input(
     z4.object({
@@ -12350,7 +14167,7 @@ var billingRouter = router({
     })
   ).mutation(async ({ ctx, input }) => {
     if (input.organizationId !== ctx.organizationId) {
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "FORBIDDEN",
         message: "Cannot manage billing for a different organization."
       });
@@ -12358,25 +14175,25 @@ var billingRouter = router({
     const stripe = await getStripe();
     const tier = getPriceTier(input.plan, input.interval);
     if (!tier)
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "BAD_REQUEST",
         message: "Invalid plan/interval combination"
       });
     if (!tier.stripePriceId) {
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "INTERNAL_SERVER_ERROR",
         message: `Stripe Price ID not configured for ${input.plan}/${input.interval}. Set the STRIPE_PRICE_* env variables.`
       });
     }
     const db = await getDb();
     if (!db)
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const [org] = await db.select().from(organizations).where(eq7(organizations.id, input.organizationId));
+    const [org] = await db.select().from(organizations).where(eq8(organizations.id, input.organizationId));
     if (!org)
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "NOT_FOUND",
         message: "Organization not found"
       });
@@ -12393,7 +14210,7 @@ var billingRouter = router({
         }
       });
       customerId = customer.id;
-      await db.update(organizations).set({ stripeCustomerId: customerId }).where(eq7(organizations.id, org.id));
+      await db.update(organizations).set({ stripeCustomerId: customerId }).where(eq8(organizations.id, org.id));
     }
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -12423,7 +14240,7 @@ var billingRouter = router({
   /** Open Stripe Customer Portal (manage / cancel subscription) */
   createPortalSession: orgAdminProcedure.use(requireMfa).input(z4.object({ organizationId: z4.number().int().positive() })).mutation(async ({ ctx, input }) => {
     if (input.organizationId !== ctx.organizationId) {
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "FORBIDDEN",
         message: "Cannot manage billing for a different organization."
       });
@@ -12431,13 +14248,13 @@ var billingRouter = router({
     const stripe = await getStripe();
     const db = await getDb();
     if (!db)
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const [org] = await db.select().from(organizations).where(eq7(organizations.id, input.organizationId));
+    const [org] = await db.select().from(organizations).where(eq8(organizations.id, input.organizationId));
     if (!org?.stripeCustomerId) {
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "BAD_REQUEST",
         message: "No billing account found. Please subscribe first."
       });
@@ -12452,14 +14269,14 @@ var billingRouter = router({
   /** Get billing history for an organization */
   getBillingHistory: orgProcedure.input(z4.object({ organizationId: z4.number().int().positive() })).query(async ({ ctx, input }) => {
     if (input.organizationId !== ctx.organizationId) {
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "FORBIDDEN",
         message: "Cannot read billing for a different organization."
       });
     }
     const db = await getDb();
     if (!db) return [];
-    const events = await db.select().from(billingEvents).where(eq7(billingEvents.organizationId, input.organizationId)).orderBy(desc5(billingEvents.createdAt)).limit(50);
+    const events = await db.select().from(billingEvents).where(eq8(billingEvents.organizationId, input.organizationId)).orderBy(desc6(billingEvents.createdAt)).limit(50);
     return events.map((e) => ({
       id: e.id,
       eventType: e.eventType,
@@ -12481,7 +14298,7 @@ var billingRouter = router({
   ).mutation(async ({ ctx, input }) => {
     const startedAt = Date.now();
     if (ctx.organizationId) {
-      throw new TRPCError5({
+      throw new TRPCError6({
         code: "CONFLICT",
         message: "This account already belongs to an organization."
       });
@@ -12531,7 +14348,7 @@ import { z as z5 } from "zod";
 
 // server/_core/notification.ts
 init_env();
-import { TRPCError as TRPCError6 } from "@trpc/server";
+import { TRPCError as TRPCError7 } from "@trpc/server";
 var TITLE_MAX_LENGTH = 1200;
 var CONTENT_MAX_LENGTH = 2e4;
 var trimValue = (value) => value.trim();
@@ -12545,13 +14362,13 @@ var buildEndpointUrl = (baseUrl) => {
 };
 var validatePayload = (input) => {
   if (!isNonEmptyString2(input.title)) {
-    throw new TRPCError6({
+    throw new TRPCError7({
       code: "BAD_REQUEST",
       message: "Notification title is required."
     });
   }
   if (!isNonEmptyString2(input.content)) {
-    throw new TRPCError6({
+    throw new TRPCError7({
       code: "BAD_REQUEST",
       message: "Notification content is required."
     });
@@ -12559,13 +14376,13 @@ var validatePayload = (input) => {
   const title = trimValue(input.title);
   const content = trimValue(input.content);
   if (title.length > TITLE_MAX_LENGTH) {
-    throw new TRPCError6({
+    throw new TRPCError7({
       code: "BAD_REQUEST",
       message: `Notification title must be at most ${TITLE_MAX_LENGTH} characters.`
     });
   }
   if (content.length > CONTENT_MAX_LENGTH) {
-    throw new TRPCError6({
+    throw new TRPCError7({
       code: "BAD_REQUEST",
       message: `Notification content must be at most ${CONTENT_MAX_LENGTH} characters.`
     });
@@ -12575,13 +14392,13 @@ var validatePayload = (input) => {
 async function notifyOwner(payload) {
   const { title, content } = validatePayload(payload);
   if (!ENV.forgeApiUrl) {
-    throw new TRPCError6({
+    throw new TRPCError7({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service URL is not configured."
     });
   }
   if (!ENV.forgeApiKey) {
-    throw new TRPCError6({
+    throw new TRPCError7({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service API key is not configured."
     });
@@ -12622,12 +14439,18 @@ function evaluateScalingReadiness(input) {
   const warnings = [];
   if (!input.hasRedis) {
     warnings.push(
-      "Redis-backed shared infrastructure is required for multi-instance scale-out."
+      "Redis-backed shared infrastructure is recommended for multi-instance scale-out (rate limiting falls back to Postgres)."
     );
   }
-  if (input.databasePoolSize < 20) {
+  if (input.serverless) {
+    if (input.databasePoolSize > 5) {
+      warnings.push(
+        `DATABASE_POOL_SIZE=${input.databasePoolSize} is high for a serverless deployment; keep it small (1-5) so instances do not exhaust the shared connection pooler.`
+      );
+    }
+  } else if (input.databasePoolSize < 20) {
     warnings.push(
-      `DATABASE_POOL_SIZE=${input.databasePoolSize} is below the recommended high-scale baseline of 20.`
+      `DATABASE_POOL_SIZE=${input.databasePoolSize} is below the recommended baseline of 20 for a long-lived server.`
     );
   }
   if (input.allowInMemoryPersistenceFallback) {
@@ -12635,7 +14458,11 @@ function evaluateScalingReadiness(input) {
       "In-memory persistence fallback should be disabled for large-scale production traffic."
     );
   }
-  if (input.aiQueueMode !== "redis") {
+  if (input.aiQueueMode === "redis" && !input.hasRedis) {
+    warnings.push(
+      "AI queue mode is 'redis' but REDIS_URL is not configured; the AI queue will fall back to in-memory."
+    );
+  } else if (input.aiQueueMode !== "redis" && !input.serverless) {
     warnings.push(
       "AI queue mode should use Redis to avoid single-instance bottlenecks."
     );
@@ -12644,8 +14471,10 @@ function evaluateScalingReadiness(input) {
     readyForHighScale: input.isProduction && warnings.length === 0,
     warnings,
     recommended: {
-      redisRequired: true,
-      minDatabasePoolSize: 20,
+      redisRequired: !input.serverless,
+      minDatabasePoolSize: input.serverless ? 1 : 20,
+      maxDatabasePoolSize: input.serverless ? 5 : null,
+      serverless: input.serverless,
       preferredAiQueueMode: "redis"
     }
   };
@@ -12757,24 +14586,106 @@ function checkBillingReadiness() {
     details: `Stripe billing is fully configured with ${billing.configuredPriceCount} price ids.`
   };
 }
+var priceValidationCache = null;
+async function validateStripePrices(secret, priceIds) {
+  const now = Date.now();
+  if (priceValidationCache && now - priceValidationCache.at < 6e5) {
+    return priceValidationCache.result;
+  }
+  const invalid = [];
+  await Promise.all(
+    priceIds.map(async (id) => {
+      try {
+        const r = await fetch(
+          `https://api.stripe.com/v1/prices/${encodeURIComponent(id)}`,
+          {
+            headers: { Authorization: `Bearer ${secret}` },
+            signal: AbortSignal.timeout(8e3)
+          }
+        );
+        if (r.status >= 400 && r.status < 500) invalid.push(id);
+      } catch {
+      }
+    })
+  );
+  const result = { checked: true, count: priceIds.length, invalid };
+  priceValidationCache = { at: now, result };
+  return result;
+}
+function checkIntegrations() {
+  const configured = (v) => Boolean(v && v.trim());
+  const googleSso = configured(ENV.googleClientId) && configured(ENV.googleClientSecret);
+  const supabase = configured(ENV.supabaseUrl) && configured(ENV.supabaseAnonKey);
+  const email = configured(ENV.smtpHost) && configured(ENV.smtpUser);
+  const observability = configured(ENV.sentryDsn);
+  const deepseek = configured(ENV.deepseekApiKey);
+  const forge = configured(ENV.forgeApiKey);
+  return {
+    googleSso: {
+      configured: googleSso,
+      details: googleSso ? "Google sign-in configured (client id + secret present)." : "Google sign-in not configured."
+    },
+    supabase: {
+      configured: supabase,
+      details: supabase ? "Supabase URL + anon key present." : "Supabase environment variables not configured."
+    },
+    email: {
+      configured: email,
+      details: email ? "SMTP configured for transactional email and OTP delivery." : "SMTP not configured."
+    },
+    observability: {
+      configured: observability,
+      details: observability ? "Sentry error reporting configured." : "Sentry not configured."
+    },
+    llm: {
+      configured: deepseek || forge,
+      details: deepseek ? `LLM provider: DeepSeek (${ENV.deepseekModel}).` : forge ? "LLM provider: Forge gateway." : "No LLM provider configured (set DEEPSEEK_API_KEY or BUILT_IN_FORGE_API_KEY)."
+    }
+  };
+}
 async function getSystemReadiness() {
   const database = await checkDatabaseReadiness();
   const redis = await checkRedisReadiness();
   const billing = checkBillingReadiness();
+  const priceIds = [
+    parsedEnv.STRIPE_PRICE_STARTER_MONTHLY,
+    parsedEnv.STRIPE_PRICE_STARTER_QUARTERLY,
+    parsedEnv.STRIPE_PRICE_STARTER_BIANNUAL,
+    parsedEnv.STRIPE_PRICE_STARTER_ANNUAL,
+    parsedEnv.STRIPE_PRICE_PRO_MONTHLY,
+    parsedEnv.STRIPE_PRICE_PRO_QUARTERLY,
+    parsedEnv.STRIPE_PRICE_PRO_BIANNUAL,
+    parsedEnv.STRIPE_PRICE_PRO_ANNUAL,
+    parsedEnv.STRIPE_PRICE_ENTERPRISE_MONTHLY,
+    parsedEnv.STRIPE_PRICE_ENTERPRISE_QUARTERLY,
+    parsedEnv.STRIPE_PRICE_ENTERPRISE_BIANNUAL,
+    parsedEnv.STRIPE_PRICE_ENTERPRISE_ANNUAL
+  ].filter((v) => Boolean(v && v.trim()));
+  if (billing.enabled && billing.ready && ENV.stripeSecretKey && priceIds.length) {
+    const v = await validateStripePrices(ENV.stripeSecretKey, priceIds);
+    if (v.invalid.length) {
+      billing.ready = false;
+      billing.details = `Stripe price id(s) not found in the live account: ${v.invalid.join(", ")}.`;
+    } else if (v.checked) {
+      billing.details = `Stripe billing ready \u2014 ${v.count} price ids validated against the live account.`;
+    }
+  }
   const aiOrchestrator = {
     enabled: ENV.aiOrchestratorEnabled,
     ready: ENV.aiOrchestratorEnabled && (ENV.aiQueueMode !== "redis" || redis.ready),
     details: ENV.aiOrchestratorEnabled ? `Orchestrator enabled in ${ENV.aiQueueMode} mode.` : "AI orchestrator is disabled by configuration.",
     queueMode: ENV.aiQueueMode,
     websocketPath: ENV.aiWebsocketPath,
-    agentSwarmConfigured: ENV.agentSwarmBaseUrl.trim().length > 0
+    agentSwarmConfigured: ENV.agentSwarmBaseUrl.trim().length > 0,
+    llmProvider: ENV.deepseekApiKey ? "deepseek" : "forge"
   };
   const scaling = evaluateScalingReadiness({
     isProduction: ENV.isProduction,
     hasRedis: ENV.redisUrl.trim().length > 0,
     databasePoolSize: ENV.databasePoolSize,
     allowInMemoryPersistenceFallback: ENV.allowInMemoryPersistenceFallback,
-    aiQueueMode: ENV.aiQueueMode
+    aiQueueMode: ENV.aiQueueMode,
+    serverless: Boolean(process.env.VERCEL)
   });
   const ok = database.ready && (billing.enabled ? billing.ready : true) && (redis.enabled ? redis.ready : true) && (aiOrchestrator.enabled ? aiOrchestrator.ready : true);
   return {
@@ -12786,7 +14697,8 @@ async function getSystemReadiness() {
       redis,
       billing,
       aiOrchestrator
-    }
+    },
+    integrations: checkIntegrations()
   };
 }
 
@@ -12890,8 +14802,10 @@ function shouldDisableCaching(pathname) {
   return normalized.startsWith("/api/") || shouldNoIndex(normalized);
 }
 var INLINE_SCRIPT_HASHES = [
+  "'sha256-qiqD4vBMysKIzUZl2pD2jryTmAbhwVth63kZAnORI7s='",
+  "'sha256-391XYfEnDSqlTOd+XaKhSPajGm5N1BPIdHLhIJdDqUM='",
   "'sha256-b8HHhxgpPQOBt+YfV7Dng67nVx5OD/mMCc1ccB3kgZc='",
-  "'sha256-fXZPvcOmpcv9yR99Nkm2SfFXY8ftEpTFS7Tbu3NIy4U='",
+  "'sha256-K9Pxi9uJDKUL7vdKcTh14CF2I8fIvfQiH0BoH/Hec6U='",
   "'sha256-3HOZD86+Qs+PZBFyeafbkeALcAvCkuCxNeWP0DMM80k='",
   "'sha256-iqo2FjLo6RiAmUfcCHtPr8Vaz7aivy3B2kxRhSPOess='"
 ];
@@ -13323,7 +15237,7 @@ init_db();
 init_env();
 import bcrypt from "bcryptjs";
 import { createHash as createHash4 } from "node:crypto";
-import { TRPCError as TRPCError7 } from "@trpc/server";
+import { TRPCError as TRPCError8 } from "@trpc/server";
 import { z as z7 } from "zod";
 import {
   generateSecret as otpGenerateSecret,
@@ -13337,9 +15251,10 @@ init_sse_bus();
 // server/services/login-notification.ts
 init_db();
 init_schema();
-import { eq as eq8 } from "drizzle-orm";
+import { eq as eq9 } from "drizzle-orm";
 
 // server/email/service.ts
+init_sentry();
 init_db();
 import { createTransport } from "nodemailer";
 import { sql as sql4 } from "drizzle-orm";
@@ -13496,6 +15411,62 @@ var emailService = {
       html,
       "security-alert"
     );
+  },
+  /** Sent after a successful password change (security notification). */
+  async sendPasswordChanged(user, when) {
+    const html = baseTemplate(`
+      <h2>Your password was changed</h2>
+      <p>The password for your DJAC account <strong>${user.email || "unknown"}</strong> was changed on ${when}.</p>
+      <p>If you made this change, no action is needed. If you did not, reset your password immediately and contact support.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/forgot-password" class="btn" style="background:#dc2626;">Reset Password \u2192</a>
+      <p style="margin-top:12px;font-size:11px;color:#94a3b8;">Automated security notification. Contact hello@yalla-hack.com for support.</p>
+    `);
+    return send(
+      user,
+      "Your DJAC password was changed",
+      html,
+      "password-changed"
+    );
+  },
+  /** Sent after a subscription becomes active (Stripe checkout completed). */
+  async sendSubscriptionConfirmed(user, planName, orgName) {
+    const html = baseTemplate(`
+      <h2>Subscription confirmed</h2>
+      <p>Thanks, ${user.name || "there"}! Your <strong>${planName}</strong> subscription${orgName ? ` for <strong>${orgName}</strong>` : ""} is now active.</p>
+      <p>You have full access to DJAC&rsquo;s compliance, risk, vendor, audit and reporting modules across every supported jurisdiction.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/billing" class="btn">Manage Billing \u2192</a>
+      <p style="margin-top:12px;font-size:11px;color:#94a3b8;">Your receipt is available in billing settings.</p>
+    `);
+    return send(
+      user,
+      "Your DJAC subscription is active",
+      html,
+      "subscription-confirmed"
+    );
+  },
+  /**
+   * Security alert to the operator on every founder-console sign-in (defence in
+   * depth in place of an IP allowlist — the owner is notified of all access).
+   */
+  async sendAdminLoginAlert(ip, userAgent, when) {
+    const html = baseTemplate(`
+      <h2>Owner console sign-in</h2>
+      <p>A successful sign-in to the DJAC owner console was recorded.</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:16px 0;">
+        <table style="width:100%;font-size:13px;color:#334155;border-collapse:collapse;">
+          <tr><td style="padding:4px 8px 4px 0;color:#64748b;">Time</td><td style="padding:4px 0;">${when}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:#64748b;">IP address</td><td style="padding:4px 0;">${ip}</td></tr>
+          <tr><td style="padding:4px 8px 4px 0;color:#64748b;">Device</td><td style="padding:4px 0;font-size:12px;">${userAgent}</td></tr>
+        </table>
+      </div>
+      <p>If this wasn&rsquo;t you, revoke the admin session and rotate the admin credentials immediately.</p>
+    `);
+    return sendTo(
+      "hello@yalla-hack.com",
+      "DJAC owner console sign-in",
+      html,
+      "admin-login-alert"
+    );
   }
 };
 async function send(user, subject, html, template) {
@@ -13529,6 +15500,7 @@ async function send(user, subject, html, template) {
     });
   } catch (e) {
     console.error(`[Email] Failed to send ${template}:`, e);
+    captureError(e, { area: "email", template, recipient: email });
     await logEmailDelivery2({
       template,
       recipient: email,
@@ -13567,6 +15539,7 @@ async function sendTo(email, subject, html, template) {
     });
   } catch (e) {
     console.error(`[Email] Failed to send ${template}:`, e);
+    captureError(e, { area: "email", template, recipient: email });
     await logEmailDelivery2({
       template,
       recipient: email,
@@ -13609,9 +15582,9 @@ async function markFirstLoginSent(table, pk) {
   if (!db) return;
   try {
     if (table === "localUsers") {
-      await db.update(localUsers).set({ firstLoginEmailSent: 1, updatedAt: /* @__PURE__ */ new Date() }).where(eq8(localUsers.id, pk));
+      await db.update(localUsers).set({ firstLoginEmailSent: 1, updatedAt: /* @__PURE__ */ new Date() }).where(eq9(localUsers.id, pk));
     } else {
-      await db.update(users).set({ updatedAt: /* @__PURE__ */ new Date() }).where(eq8(users.id, pk));
+      await db.update(users).set({ updatedAt: /* @__PURE__ */ new Date() }).where(eq9(users.id, pk));
     }
   } catch {
   }
@@ -13621,10 +15594,10 @@ async function hasFirstLoginBeenSent(table, pk) {
   if (!db) return false;
   try {
     if (table === "localUsers") {
-      const [row] = await db.select({ firstLoginEmailSent: localUsers.firstLoginEmailSent }).from(localUsers).where(eq8(localUsers.id, pk)).limit(1);
+      const [row] = await db.select({ firstLoginEmailSent: localUsers.firstLoginEmailSent }).from(localUsers).where(eq9(localUsers.id, pk)).limit(1);
       return row?.firstLoginEmailSent === 1;
     } else {
-      const [row] = await db.select({ lastActivityAt: users.lastActivityAt }).from(users).where(eq8(users.id, pk)).limit(1);
+      const [row] = await db.select({ lastActivityAt: users.lastActivityAt }).from(users).where(eq9(users.id, pk)).limit(1);
       if (!row) return false;
       return row.lastActivityAt != null;
     }
@@ -13677,14 +15650,14 @@ init_local_jwt();
 init_schema();
 init_db();
 init_local_jwt();
-import { eq as eq10 } from "drizzle-orm";
+import { eq as eq11 } from "drizzle-orm";
 async function findLocalUserByEmail(email) {
   const db = await getDb();
   if (!db) {
     if (!isLocalMemoryFallbackEnabled()) return null;
     return localMemoryUsers.find((u) => u.email === email) ?? null;
   }
-  const [row] = await db.select().from(localUsers).where(eq10(localUsers.email, email)).limit(1);
+  const [row] = await db.select().from(localUsers).where(eq11(localUsers.email, email)).limit(1);
   return row ?? null;
 }
 async function findLocalUserById(id) {
@@ -13693,7 +15666,7 @@ async function findLocalUserById(id) {
     if (!isLocalMemoryFallbackEnabled()) return null;
     return localMemoryUsers.find((u) => u.id === id) ?? null;
   }
-  const [row] = await db.select().from(localUsers).where(eq10(localUsers.id, id)).limit(1);
+  const [row] = await db.select().from(localUsers).where(eq11(localUsers.id, id)).limit(1);
   return row ?? null;
 }
 async function findLocalUserByPhone(phone) {
@@ -13702,21 +15675,21 @@ async function findLocalUserByPhone(phone) {
     if (!isLocalMemoryFallbackEnabled()) return null;
     return localMemoryUsers.find((u) => u.phoneNumber === phone) ?? null;
   }
-  const [row] = await db.select().from(localUsers).where(eq10(localUsers.phoneNumber, phone)).limit(1);
+  const [row] = await db.select().from(localUsers).where(eq11(localUsers.phoneNumber, phone)).limit(1);
   return row ?? null;
 }
 async function checkEmailExists(email) {
   const db = await getDb();
   if (!db)
     return isLocalMemoryFallbackEnabled() && localMemoryUsers.some((u) => u.email === email);
-  const rows = await db.select({ id: localUsers.id }).from(localUsers).where(eq10(localUsers.email, email)).limit(1);
+  const rows = await db.select({ id: localUsers.id }).from(localUsers).where(eq11(localUsers.email, email)).limit(1);
   return rows.length > 0;
 }
 async function checkPhoneExists(phone) {
   const db = await getDb();
   if (!db)
     return isLocalMemoryFallbackEnabled() && localMemoryUsers.some((u) => u.phoneNumber === phone);
-  const rows = await db.select({ id: localUsers.id }).from(localUsers).where(eq10(localUsers.phoneNumber, phone)).limit(1);
+  const rows = await db.select({ id: localUsers.id }).from(localUsers).where(eq11(localUsers.phoneNumber, phone)).limit(1);
   return rows.length > 0;
 }
 async function listLocalUsersForAdmin() {
@@ -13783,12 +15756,12 @@ async function updateLocalUserLastSignedIn(id) {
     }
     return;
   }
-  await db.update(localUsers).set({ lastSignedIn: /* @__PURE__ */ new Date() }).where(eq10(localUsers.id, id));
+  await db.update(localUsers).set({ lastSignedIn: /* @__PURE__ */ new Date() }).where(eq11(localUsers.id, id));
 }
 async function markLocalUserMfaVerified(id) {
   const db = await getDb();
   if (!db) return;
-  await db.update(localUsers).set({ lastMfaVerifiedAt: /* @__PURE__ */ new Date() }).where(eq10(localUsers.id, id));
+  await db.update(localUsers).set({ lastMfaVerifiedAt: /* @__PURE__ */ new Date() }).where(eq11(localUsers.id, id));
 }
 async function updateLocalUserStatus(id, status) {
   const db = await getDb();
@@ -13800,7 +15773,7 @@ async function updateLocalUserStatus(id, status) {
     }
     return;
   }
-  await db.update(localUsers).set({ status }).where(eq10(localUsers.id, id));
+  await db.update(localUsers).set({ status }).where(eq11(localUsers.id, id));
 }
 async function updateLocalUserPassword(id, passwordHash) {
   const db = await getDb();
@@ -13812,7 +15785,7 @@ async function updateLocalUserPassword(id, passwordHash) {
     }
     return;
   }
-  await db.update(localUsers).set({ passwordHash, updatedAt: /* @__PURE__ */ new Date() }).where(eq10(localUsers.id, id));
+  await db.update(localUsers).set({ passwordHash, updatedAt: /* @__PURE__ */ new Date() }).where(eq11(localUsers.id, id));
 }
 async function updateLocalUserProfile(id, fields) {
   const db = await getDb();
@@ -13824,7 +15797,7 @@ async function updateLocalUserProfile(id, fields) {
     }
     return;
   }
-  await db.update(localUsers).set({ ...fields, updatedAt: /* @__PURE__ */ new Date() }).where(eq10(localUsers.id, id));
+  await db.update(localUsers).set({ ...fields, updatedAt: /* @__PURE__ */ new Date() }).where(eq11(localUsers.id, id));
 }
 async function updateLocalUserTotpSecret(id, secret) {
   const db = await getDb();
@@ -13833,7 +15806,7 @@ async function updateLocalUserTotpSecret(id, secret) {
     if (mem) mem.totpSecret = secret;
     return;
   }
-  await db.update(localUsers).set({ totpSecret: secret }).where(eq10(localUsers.id, id));
+  await db.update(localUsers).set({ totpSecret: secret }).where(eq11(localUsers.id, id));
 }
 async function enableLocalUserMfa(id, hashedBackupCodes) {
   const db = await getDb();
@@ -13850,7 +15823,7 @@ async function enableLocalUserMfa(id, hashedBackupCodes) {
     mfaEnabled: 1,
     mfaBackupCodes: JSON.stringify(hashedBackupCodes),
     updatedAt: /* @__PURE__ */ new Date()
-  }).where(eq10(localUsers.id, id));
+  }).where(eq11(localUsers.id, id));
 }
 async function disableLocalUserMfa(id) {
   const db = await getDb();
@@ -13869,7 +15842,7 @@ async function disableLocalUserMfa(id) {
     totpSecret: null,
     mfaBackupCodes: null,
     updatedAt: /* @__PURE__ */ new Date()
-  }).where(eq10(localUsers.id, id));
+  }).where(eq11(localUsers.id, id));
 }
 async function consumeLocalUserBackupCode(id, remainingCodes) {
   const db = await getDb();
@@ -13884,7 +15857,7 @@ async function consumeLocalUserBackupCode(id, remainingCodes) {
   await db.update(localUsers).set({
     mfaBackupCodes: JSON.stringify(remainingCodes),
     lastSignedIn: /* @__PURE__ */ new Date()
-  }).where(eq10(localUsers.id, id));
+  }).where(eq11(localUsers.id, id));
 }
 async function verifyLocalUserEmail(id) {
   const db = await getDb();
@@ -13896,7 +15869,7 @@ async function verifyLocalUserEmail(id) {
     }
     return;
   }
-  await db.update(localUsers).set({ verifiedAt: /* @__PURE__ */ new Date(), updatedAt: /* @__PURE__ */ new Date() }).where(eq10(localUsers.id, id));
+  await db.update(localUsers).set({ verifiedAt: /* @__PURE__ */ new Date(), updatedAt: /* @__PURE__ */ new Date() }).where(eq11(localUsers.id, id));
 }
 
 // server/services/otp.ts
@@ -13904,7 +15877,7 @@ init_schema();
 init_db();
 init_email();
 import { createHash as createHash3, randomInt } from "node:crypto";
-import { eq as eq11, and as and5, lt as lt2 } from "drizzle-orm";
+import { eq as eq12, and as and6, lt as lt2 } from "drizzle-orm";
 var OTP_EXPIRY_MINUTES = 5;
 var OTP_MAX_ATTEMPTS = 5;
 var OTP_LENGTH = 6;
@@ -13936,7 +15909,7 @@ async function sendOtp(input) {
     };
   }
   const normalized = input.identifier.trim().toLowerCase();
-  const recentCount = await db.select().from(otpCodes).where(and5(eq11(otpCodes.identifier, normalized))).limit(10);
+  const recentCount = await db.select().from(otpCodes).where(and6(eq12(otpCodes.identifier, normalized))).limit(10);
   const inWindow = recentCount.filter(
     (r) => new Date(r.createdAt).getTime() > Date.now() - 5 * 60 * 1e3
   );
@@ -13983,7 +15956,7 @@ async function sendOtp(input) {
     <p style="color:#a1a1aa;font-size:13px;line-height:1.6;margin:0">For security reasons, never share this code with anyone.</p>
   </td></tr>
   <tr><td style="background:#fafafa;padding:20px 40px;text-align:center;border-top:1px solid #e4e4e7">
-    <p style="color:#a1a1aa;font-size:12px;margin:0">DJAC Tool \u2014 China-Saudi Compliance Intelligence<br>&copy; ${(/* @__PURE__ */ new Date()).getFullYear()} DJAC. All rights reserved.</p>
+    <p style="color:#a1a1aa;font-size:12px;margin:0">DJAC Platform \u2014 China-Saudi Compliance Intelligence<br>&copy; ${(/* @__PURE__ */ new Date()).getFullYear()} DJAC. All rights reserved.</p>
   </td></tr>
 </table>
 </td></tr>
@@ -14000,7 +15973,7 @@ Use it to ${actionLabel}.
 If you did not request this code, ignore this message.
 Your account security has not been compromised.
 
-DJAC Tool \u2014 China-Saudi Compliance Intelligence`;
+DJAC Platform \u2014 China-Saudi Compliance Intelligence`;
     delivered = await sendEmail({ to: normalized, subject, html, text: text2 });
   } else {
     console.info(
@@ -14035,9 +16008,9 @@ async function verifyOtp(input) {
   const normalized = input.identifier.trim().toLowerCase();
   const codeHash = hashCode(input.code);
   const rows = await db.select().from(otpCodes).where(
-    and5(
-      eq11(otpCodes.identifier, normalized),
-      eq11(otpCodes.purpose, input.purpose)
+    and6(
+      eq12(otpCodes.identifier, normalized),
+      eq12(otpCodes.purpose, input.purpose)
     )
   ).orderBy(otpCodes.createdAt).limit(5);
   if (rows.length === 0) {
@@ -14051,14 +16024,14 @@ async function verifyOtp(input) {
     if (row.attempts >= OTP_MAX_ATTEMPTS) continue;
     if (row.codeHash === codeHash) {
       await db.delete(otpCodes).where(
-        and5(
-          eq11(otpCodes.identifier, normalized),
-          eq11(otpCodes.purpose, input.purpose)
+        and6(
+          eq12(otpCodes.identifier, normalized),
+          eq12(otpCodes.purpose, input.purpose)
         )
       );
       return { success: true, message: "Code verified." };
     }
-    await db.update(otpCodes).set({ attempts: row.attempts + 1 }).where(eq11(otpCodes.id, row.id));
+    await db.update(otpCodes).set({ attempts: row.attempts + 1 }).where(eq12(otpCodes.id, row.id));
   }
   return { success: false, message: "Invalid or expired verification code." };
 }
@@ -14125,20 +16098,20 @@ var localAuthRouter = router({
   register: publicProcedure.input(registerSchema).mutation(async ({ input, ctx }) => {
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const normalizedEmail = input.email.toLowerCase();
     if (await checkEmailExists(normalizedEmail)) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "CONFLICT",
         message: "An account with this email already exists."
       });
     }
     if (input.phoneNumber && await checkPhoneExists(input.phoneNumber)) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "CONFLICT",
         message: "An account with this phone number already exists."
       });
@@ -14213,7 +16186,7 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
@@ -14223,13 +16196,13 @@ var localAuthRouter = router({
     const hashToCheck = user?.passwordHash ?? dummyHash;
     const valid = await bcrypt.compare(input.password, hashToCheck);
     if (!user || !valid) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid email or password."
       });
     }
     if (user.status === "suspended") {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "FORBIDDEN",
         message: "This account has been suspended. Contact support."
       });
@@ -14316,13 +16289,13 @@ var localAuthRouter = router({
       if (isElevatedLocalUserType(payload?.userType)) isAdmin = true;
     }
     if (!isAdmin)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "FORBIDDEN",
         message: "Admin access required."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
@@ -14343,20 +16316,20 @@ var localAuthRouter = router({
       if (isElevatedLocalUserType(payload?.userType)) isAdmin = true;
     }
     if (!isAdmin)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "FORBIDDEN",
         message: "Admin access required."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const user = await findLocalUserById(input.userId);
     if (!user)
-      throw new TRPCError7({ code: "NOT_FOUND", message: "User not found." });
+      throw new TRPCError8({ code: "NOT_FOUND", message: "User not found." });
     await updateLocalUserStatus(input.userId, input.status);
     return { success: true };
   }),
@@ -14408,14 +16381,14 @@ var localAuthRouter = router({
       purpose: "password-reset"
     });
     if (!verifyResult.success) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: verifyResult.message
       });
     }
     const user = await findLocalUserByEmail(input.email);
     if (!user || user.status === "suspended") {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "NOT_FOUND",
         message: "Account not found or suspended."
       });
@@ -14445,20 +16418,20 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Not logged in."
       });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
@@ -14482,32 +16455,32 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Not logged in."
       });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "NOT_FOUND",
         message: "Account not found."
       });
     if (!user.passwordHash)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "Account uses OTP login. Set a password first."
       });
@@ -14516,12 +16489,17 @@ var localAuthRouter = router({
       user.passwordHash
     );
     if (!valid)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Current password is incorrect."
       });
     const newHash = await bcrypt.hash(input.newPassword, BCRYPT_ROUNDS);
     await updateLocalUserPassword(userId, newHash);
+    void emailService.sendPasswordChanged(
+      { name: user.name ?? null, email: user.email ?? null },
+      (/* @__PURE__ */ new Date()).toISOString()
+    ).catch(() => {
+    });
     void recordAuditEvent(ctx, {
       category: "auth",
       action: "password.change",
@@ -14541,11 +16519,11 @@ var localAuthRouter = router({
   setup2fa: publicProcedure.mutation(async ({ ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError7({ code: "UNAUTHORIZED", message: "Not logged in." });
+      throw new TRPCError8({ code: "UNAUTHORIZED", message: "Not logged in." });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
@@ -14565,21 +16543,21 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Not logged in."
       });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const user = await findLocalUserById(userId);
     const storedSecret = user?.totpSecret ?? null;
     if (!storedSecret)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "No pending 2FA setup. Call setup2fa first."
       });
@@ -14588,7 +16566,7 @@ var localAuthRouter = router({
       secret: storedSecret
     });
     if (!isValid)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "Invalid authenticator code."
       });
@@ -14614,38 +16592,38 @@ var localAuthRouter = router({
   disable2fa: publicProcedure.input(z7.object({ password: z7.string().min(1).max(128) })).mutation(async ({ input, ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Not logged in."
       });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "NOT_FOUND",
         message: "Account not found."
       });
     if (!user.passwordHash)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "Account uses OTP login. Set a password first."
       });
     const valid = await bcrypt.compare(input.password, user.passwordHash);
     if (!valid)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Incorrect password."
       });
@@ -14668,38 +16646,38 @@ var localAuthRouter = router({
   ).mutation(async ({ input, ctx }) => {
     const payload = await verifyJwt(input.pendingToken);
     if (!payload || payload["purpose"] !== "totp-challenge") {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid or expired challenge token."
       });
     }
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid challenge token."
       });
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
     }
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "NOT_FOUND",
         message: "Account not found."
       });
     const code = input.code.toUpperCase();
     if (!user.mfaEnabled)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "2FA is not enabled for this account."
       });
     if (!user.totpSecret)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: "2FA misconfigured."
       });
@@ -14709,7 +16687,7 @@ var localAuthRouter = router({
       const backupCodes = user.mfaBackupCodes ? JSON.parse(user.mfaBackupCodes) : [];
       const backupIdx = backupCodes.indexOf(hashed);
       if (backupIdx === -1)
-        throw new TRPCError7({
+        throw new TRPCError8({
           code: "UNAUTHORIZED",
           message: "Invalid authentication code."
         });
@@ -14742,19 +16720,19 @@ var localAuthRouter = router({
   sendVerificationEmail: publicProcedure.mutation(async ({ ctx }) => {
     const token = getSessionTokenFromRequest(ctx.req);
     if (!token)
-      throw new TRPCError7({ code: "UNAUTHORIZED", message: "Not logged in." });
+      throw new TRPCError8({ code: "UNAUTHORIZED", message: "Not logged in." });
     const payload = await verifyJwt(token);
     const userId = parseJwtUserId(payload?.sub);
     if (!userId)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "UNAUTHORIZED",
         message: "Invalid session."
       });
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError7({ code: "NOT_FOUND", message: "Account not found." });
+      throw new TRPCError8({ code: "NOT_FOUND", message: "Account not found." });
     if (!user.email)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "No email address on file. Add an email in Account Settings."
       });
@@ -14794,32 +16772,32 @@ If you did not create this account, ignore this email.`
         throw new Error();
       })();
     } catch {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "The verification link is invalid or has expired."
       });
     }
     if (payload["purpose"] !== "email-verify" || typeof payload["sub"] !== "string") {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "Invalid verification token."
       });
     }
     const userId = parseInt(payload["sub"], 10);
     if (!Number.isFinite(userId)) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "Invalid verification token."
       });
     }
     const user = await findLocalUserById(userId);
     if (!user)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "NOT_FOUND",
         message: "Account not found."
       });
     if (user.verifiedAt)
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "BAD_REQUEST",
         message: "Email is already verified."
       });
@@ -14847,7 +16825,7 @@ If you did not create this account, ignore this email.`
       purpose: input.purpose
     });
     if (!result.success) {
-      throw new TRPCError7({ code: "BAD_REQUEST", message: result.message });
+      throw new TRPCError8({ code: "BAD_REQUEST", message: result.message });
     }
     void recordAuditEvent(ctx, {
       category: "auth",
@@ -14874,7 +16852,7 @@ If you did not create this account, ignore this email.`
   ).mutation(async ({ input, ctx }) => {
     const db = await getDb();
     if (!db && !isLocalMemoryFallbackEnabled()) {
-      throw new TRPCError7({
+      throw new TRPCError8({
         code: "INTERNAL_SERVER_ERROR",
         message: getDatabaseUnavailableMessage()
       });
@@ -14885,19 +16863,19 @@ If you did not create this account, ignore this email.`
       purpose: input.purpose
     });
     if (!result.success) {
-      throw new TRPCError7({ code: "UNAUTHORIZED", message: result.message });
+      throw new TRPCError8({ code: "UNAUTHORIZED", message: result.message });
     }
     const isPhone2 = /^\+?[1-9]/.test(input.identifier);
     const existing = isPhone2 ? await findLocalUserByPhone(input.identifier) : await findLocalUserByEmail(input.identifier.toLowerCase());
     if (input.purpose === "login") {
       if (!existing) {
-        throw new TRPCError7({
+        throw new TRPCError8({
           code: "NOT_FOUND",
           message: "No account found with this identifier. Please register first."
         });
       }
       if (existing.status === "suspended") {
-        throw new TRPCError7({
+        throw new TRPCError8({
           code: "FORBIDDEN",
           message: "Account suspended."
         });
@@ -20199,11 +22177,11 @@ Generated at: ${report.generatedAt}
 // server/report-share-store.ts
 init_db();
 init_schema();
-import crypto from "node:crypto";
-import { and as and6, eq as eq12, gt, lt as lt3 } from "drizzle-orm";
+import crypto2 from "node:crypto";
+import { and as and7, eq as eq13, gt, lt as lt3 } from "drizzle-orm";
 var memShares = /* @__PURE__ */ new Map();
 function generateToken() {
-  return crypto.randomBytes(24).toString("hex");
+  return crypto2.randomBytes(24).toString("hex");
 }
 async function createReportShare(params) {
   const token = generateToken();
@@ -20235,7 +22213,7 @@ async function createReportShare(params) {
     viewCount: 0,
     expiresAt
   });
-  const [row] = await db.select().from(reportShares).where(eq12(reportShares.token, token)).limit(1);
+  const [row] = await db.select().from(reportShares).where(eq13(reportShares.token, token)).limit(1);
   return row;
 }
 async function getReportShareByToken(token) {
@@ -20248,66 +22226,11 @@ async function getReportShareByToken(token) {
     entry.share = { ...entry.share, viewCount: entry.share.viewCount + 1 };
     return entry.share;
   }
-  const [row] = await db.select().from(reportShares).where(and6(eq12(reportShares.token, token), gt(reportShares.expiresAt, now))).limit(1);
+  const [row] = await db.select().from(reportShares).where(and7(eq13(reportShares.token, token), gt(reportShares.expiresAt, now))).limit(1);
   if (!row) return null;
-  void db.update(reportShares).set({ viewCount: row.viewCount + 1 }).where(eq12(reportShares.id, row.id)).catch(() => {
+  void db.update(reportShares).set({ viewCount: row.viewCount + 1 }).where(eq13(reportShares.id, row.id)).catch(() => {
   });
   return row;
-}
-
-// shared/regulatory-provenance.ts
-var DEFAULT_REVIEW_WINDOW_DAYS = 730;
-var PROVENANCE_REGISTRY = {};
-function unverifiedProvenance(claimCode) {
-  return { claimCode, status: "unverified" };
-}
-function daysBetween(from, to) {
-  const then = Date.parse(from);
-  if (Number.isNaN(then)) return Number.POSITIVE_INFINITY;
-  return (to - then) / 864e5;
-}
-function resolveProvenance(entry, claimCode, now = Date.now()) {
-  if (!entry) return unverifiedProvenance(claimCode);
-  if (entry.status === "verified" && entry.lastVerified) {
-    const window = entry.reviewWindowDays ?? DEFAULT_REVIEW_WINDOW_DAYS;
-    if (daysBetween(entry.lastVerified, now) > window) {
-      return { ...entry, status: "stale" };
-    }
-  }
-  return entry;
-}
-function getProvenance(claimCode, now = Date.now()) {
-  return resolveProvenance(PROVENANCE_REGISTRY[claimCode], claimCode, now);
-}
-function summariseProvenance(claimCodes, now = Date.now()) {
-  let verified = 0;
-  let pendingReview = 0;
-  let stale = 0;
-  let unverified = 0;
-  for (const code of claimCodes) {
-    switch (getProvenance(code, now).status) {
-      case "verified":
-        verified++;
-        break;
-      case "pending_review":
-        pendingReview++;
-        break;
-      case "stale":
-        stale++;
-        break;
-      default:
-        unverified++;
-    }
-  }
-  const total = claimCodes.length;
-  return {
-    total,
-    verified,
-    pendingReview,
-    stale,
-    unverified,
-    fullyVerified: total > 0 && verified === total
-  };
 }
 
 // server/global-compliance-registry.ts
@@ -22241,7 +24164,7 @@ var complianceFrameworkRouter = router({
 
 // server/vendor-router.ts
 init_const();
-import { TRPCError as TRPCError8 } from "@trpc/server";
+import { TRPCError as TRPCError9 } from "@trpc/server";
 import { z as z9 } from "zod";
 init_orchestrator();
 init_supplier_assessment();
@@ -22293,8 +24216,61 @@ var vendorRouter = router({
     await requireModulePermission(ctx, "vendor_assessment", "canView");
     return listVendorProfiles(ctx.user.id, ctx.organizationId);
   }),
+  /**
+   * Vendor data-flow map — aggregates each vendor's regulatory jurisdictions,
+   * data locations and processing activities so the workspace can see where
+   * third-party data actually flows.
+   */
+  dataFlow: orgProcedure.query(async ({ ctx }) => {
+    await requireModulePermission(ctx, "vendor_assessment", "canView");
+    const vendorsList = await listVendorProfiles(
+      ctx.user.id,
+      ctx.organizationId
+    );
+    const jurisdictionCounts = {};
+    const locationCounts = {};
+    const categoryCounts = {};
+    const riskCounts = {};
+    const rows = vendorsList.map((v) => {
+      const jurisdictions = parseVendorMultiValue(v.regulatoryJurisdictions);
+      const locations = parseVendorMultiValue(v.dataLocations);
+      const categories = parseVendorMultiValue(v.dataProcessingActivities);
+      for (const j of jurisdictions)
+        jurisdictionCounts[j] = (jurisdictionCounts[j] ?? 0) + 1;
+      for (const l of locations)
+        locationCounts[l] = (locationCounts[l] ?? 0) + 1;
+      for (const c of categories)
+        categoryCounts[c] = (categoryCounts[c] ?? 0) + 1;
+      if (v.riskTier)
+        riskCounts[v.riskTier] = (riskCounts[v.riskTier] ?? 0) + 1;
+      return {
+        id: v.id,
+        name: v.vendorName,
+        riskTier: v.riskTier ?? null,
+        criticality: v.criticalityLevel ?? null,
+        hosting: v.hostingEnvironment ?? null,
+        cloudProvider: v.cloudProvider ?? null,
+        jurisdictions,
+        locations,
+        categories
+      };
+    });
+    const sorted = (rec) => Object.entries(rec).sort((a, b) => b[1] - a[1]).map(([name, count6]) => ({ name, count: count6 }));
+    return {
+      vendors: rows,
+      totalVendors: rows.length,
+      jurisdictionCounts: sorted(jurisdictionCounts),
+      locationCounts: sorted(locationCounts),
+      categoryCounts: sorted(categoryCounts),
+      riskCounts: sorted(riskCounts)
+    };
+  }),
   create: orgProcedure.input(vendorInputSchema).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "vendor_assessment", "canCreate");
+    const existingVendors = await countVendorProfilesForOrg(
+      ctx.organizationId
+    );
+    await assertVendorCapacity(ctx.organizationId, existingVendors);
     const startedAt = Date.now();
     const vendor = await createVendorProfile(
       ctx.user.id,
@@ -22369,7 +24345,7 @@ var vendorRouter = router({
       ctx.organizationId
     );
     if (!existing) {
-      throw new TRPCError8({
+      throw new TRPCError9({
         code: "NOT_FOUND",
         message: "Vendor not found."
       });
@@ -22397,7 +24373,7 @@ var vendorRouter = router({
       ctx.organizationId
     );
     if (!existing) {
-      throw new TRPCError8({
+      throw new TRPCError9({
         code: "NOT_FOUND",
         message: "Vendor not found."
       });
@@ -22422,6 +24398,7 @@ var vendorRouter = router({
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "vendor_assessment", "canCreate");
+    await assertAiReportCapacity(ctx.organizationId);
     const startedAt = Date.now();
     const vendor = await getVendorProfileById(
       input.vendorId,
@@ -22542,6 +24519,7 @@ var vendorRouter = router({
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "vendor_assessment", "canExport");
+    await assertAiReportCapacity(ctx.organizationId);
     const startedAt = Date.now();
     const vendor = await getVendorProfileById(
       input.vendorId,
@@ -22684,7 +24662,7 @@ var vendorRouter = router({
       ctx.organizationId
     );
     if (!vendor) {
-      throw new TRPCError8({
+      throw new TRPCError9({
         code: "NOT_FOUND",
         message: "Vendor not found."
       });
@@ -22701,7 +24679,7 @@ import { z as z10 } from "zod";
 // server/deadline-store.ts
 init_db();
 init_schema();
-import { and as and8, eq as eq14, isNull, desc as desc6, or as or4 } from "drizzle-orm";
+import { and as and9, eq as eq15, isNull, desc as desc7, or as or4 } from "drizzle-orm";
 var NOW = /* @__PURE__ */ new Date("2026-03-23T00:00:00Z");
 var d = (offsetDays) => new Date(NOW.getTime() + offsetDays * 864e5);
 var GLOBAL_DEADLINES = [
@@ -23481,22 +25459,22 @@ async function listDeadlines(filters = {}) {
   }
   const conditions = [];
   if (filters.status)
-    conditions.push(eq14(complianceDeadlines.status, filters.status));
+    conditions.push(eq15(complianceDeadlines.status, filters.status));
   if (filters.jurisdiction)
-    conditions.push(eq14(complianceDeadlines.jurisdiction, filters.jurisdiction));
+    conditions.push(eq15(complianceDeadlines.jurisdiction, filters.jurisdiction));
   if (filters.frameworkCode)
     conditions.push(
-      eq14(complianceDeadlines.frameworkCode, filters.frameworkCode)
+      eq15(complianceDeadlines.frameworkCode, filters.frameworkCode)
     );
   if (filters.organizationId != null) {
     conditions.push(
       or4(
-        eq14(complianceDeadlines.organizationId, filters.organizationId),
+        eq15(complianceDeadlines.organizationId, filters.organizationId),
         isNull(complianceDeadlines.organizationId)
       )
     );
   }
-  const rows = await db.select().from(complianceDeadlines).where(conditions.length > 0 ? and8(...conditions) : void 0).orderBy(desc6(complianceDeadlines.deadlineDate)).limit(limit);
+  const rows = await db.select().from(complianceDeadlines).where(conditions.length > 0 ? and9(...conditions) : void 0).orderBy(desc7(complianceDeadlines.deadlineDate)).limit(limit);
   return rows;
 }
 async function createDeadline(input) {
@@ -23536,7 +25514,7 @@ async function createDeadline(input) {
   };
   const [inserted] = await db.insert(complianceDeadlines).values(values).returning({ id: complianceDeadlines.id });
   const id = inserted?.id ?? 0;
-  const [row] = await db.select().from(complianceDeadlines).where(eq14(complianceDeadlines.id, id)).limit(1);
+  const [row] = await db.select().from(complianceDeadlines).where(eq15(complianceDeadlines.id, id)).limit(1);
   return row;
 }
 async function completeDeadline(id, organizationId) {
@@ -23555,12 +25533,12 @@ async function completeDeadline(id, organizationId) {
     };
     return memoryDeadlines[idx];
   }
-  const whereClause = and8(
-    eq14(complianceDeadlines.id, id),
-    eq14(complianceDeadlines.organizationId, organizationId)
+  const whereClause = and9(
+    eq15(complianceDeadlines.id, id),
+    eq15(complianceDeadlines.organizationId, organizationId)
   );
   await db.update(complianceDeadlines).set({ status: "completed", completedAt: now }).where(whereClause);
-  const [row] = await db.select().from(complianceDeadlines).where(eq14(complianceDeadlines.id, id)).limit(1);
+  const [row] = await db.select().from(complianceDeadlines).where(eq15(complianceDeadlines.id, id)).limit(1);
   return row ?? null;
 }
 async function getDeadlineSummary(organizationId) {
@@ -23584,10 +25562,10 @@ async function listOrgMembersForDeadlines(organizationId) {
     role: organizationMembers.role,
     userName: users.name,
     userEmail: users.email
-  }).from(organizationMembers).leftJoin(users, eq14(organizationMembers.userId, users.id)).where(
-    and8(
-      eq14(organizationMembers.organizationId, organizationId),
-      eq14(organizationMembers.status, "active")
+  }).from(organizationMembers).leftJoin(users, eq15(organizationMembers.userId, users.id)).where(
+    and9(
+      eq15(organizationMembers.organizationId, organizationId),
+      eq15(organizationMembers.status, "active")
     )
   );
   return rows.filter((r) => r.userId !== null).map((r) => ({
@@ -23708,13 +25686,13 @@ var authRouter = router({
 
 // server/role-router.ts
 import { z as z12 } from "zod";
-import { TRPCError as TRPCError9 } from "@trpc/server";
+import { TRPCError as TRPCError10 } from "@trpc/server";
 init_const();
 
 // server/role-store.ts
 init_schema();
 init_db();
-import { and as and9, desc as desc7, eq as eq15 } from "drizzle-orm";
+import { and as and10, desc as desc8, eq as eq16 } from "drizzle-orm";
 async function listUsersWithRoles(limit, offset) {
   const db = await getDb();
   if (!db) return [];
@@ -23736,9 +25714,9 @@ async function assignUserRole(targetUserId, newRole) {
     name: users.name,
     email: users.email,
     role: users.role
-  }).from(users).where(eq15(users.id, targetUserId)).limit(1);
+  }).from(users).where(eq16(users.id, targetUserId)).limit(1);
   if (!target) return null;
-  await db.update(users).set({ role: newRole, updatedAt: /* @__PURE__ */ new Date() }).where(eq15(users.id, targetUserId));
+  await db.update(users).set({ role: newRole, updatedAt: /* @__PURE__ */ new Date() }).where(eq16(users.id, targetUserId));
   return target;
 }
 async function assignLocalUserRole(targetLocalUserId, newUserType) {
@@ -23749,18 +25727,18 @@ async function assignLocalUserRole(targetLocalUserId, newUserType) {
     name: localUsers.name,
     email: localUsers.email,
     userType: localUsers.userType
-  }).from(localUsers).where(eq15(localUsers.id, targetLocalUserId)).limit(1);
+  }).from(localUsers).where(eq16(localUsers.id, targetLocalUserId)).limit(1);
   if (!target) return null;
-  await db.update(localUsers).set({ userType: newUserType, updatedAt: /* @__PURE__ */ new Date() }).where(eq15(localUsers.id, targetLocalUserId));
+  await db.update(localUsers).set({ userType: newUserType, updatedAt: /* @__PURE__ */ new Date() }).where(eq16(localUsers.id, targetLocalUserId));
   return target;
 }
 async function listAuditLogs(limit, offset, category, outcome) {
   const db = await getDb();
   if (!db) return [];
   const conditions = [];
-  if (category) conditions.push(eq15(auditLogs.category, category));
-  if (outcome) conditions.push(eq15(auditLogs.outcome, outcome));
-  return db.select().from(auditLogs).where(conditions.length > 0 ? and9(...conditions) : void 0).orderBy(desc7(auditLogs.createdAt)).limit(limit).offset(offset);
+  if (category) conditions.push(eq16(auditLogs.category, category));
+  if (outcome) conditions.push(eq16(auditLogs.outcome, outcome));
+  return db.select().from(auditLogs).where(conditions.length > 0 ? and10(...conditions) : void 0).orderBy(desc8(auditLogs.createdAt)).limit(limit).offset(offset);
 }
 
 // server/role-router.ts
@@ -23811,13 +25789,13 @@ var roleRouter = router({
   ).mutation(async ({ ctx, input }) => {
     const actorRole = ctx.user.role;
     if (!hasMinRole(actorRole, "super_admin") && (input.newRole === "super_admin" || input.newRole === "yalla_hack_employee")) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "FORBIDDEN",
         message: NOT_PLATFORM_ADMIN_ERR_MSG
       });
     }
     if (input.targetUserId === ctx.user.id && !hasMinRole(input.newRole, actorRole)) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "FORBIDDEN",
         message: "You cannot demote your own role."
       });
@@ -23827,7 +25805,7 @@ var roleRouter = router({
       input.newRole
     );
     if (!target)
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable or user not found"
       });
@@ -23868,7 +25846,7 @@ var roleRouter = router({
   ).mutation(async ({ ctx, input }) => {
     const actorRole = ctx.user.role;
     if (!hasMinRole(actorRole, "super_admin") && (input.newUserType === "super_admin" || input.newUserType === "yalla_hack_employee")) {
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "FORBIDDEN",
         message: NOT_PLATFORM_ADMIN_ERR_MSG
       });
@@ -23878,7 +25856,7 @@ var roleRouter = router({
       input.newUserType
     );
     if (!target)
-      throw new TRPCError9({
+      throw new TRPCError10({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable or user not found"
       });
@@ -24006,7 +25984,7 @@ var rbacRouter = router({
 
 // server/org-members-router.ts
 import { z as z14 } from "zod";
-import { TRPCError as TRPCError10 } from "@trpc/server";
+import { TRPCError as TRPCError11 } from "@trpc/server";
 init_env();
 init_email();
 import { randomBytes } from "crypto";
@@ -24015,7 +25993,7 @@ import { randomBytes } from "crypto";
 init_schema();
 init_db();
 init_env();
-import { eq as eq16, and as and10 } from "drizzle-orm";
+import { eq as eq17, and as and11 } from "drizzle-orm";
 async function getMyOrg(orgId, role) {
   const db = await getDb();
   if (!db) {
@@ -24059,7 +26037,7 @@ async function getMyOrg(orgId, role) {
     industry: organizations.industry,
     trialEndsAt: organizations.trialEndsAt,
     createdAt: organizations.createdAt
-  }).from(organizations).where(eq16(organizations.id, orgId)).limit(1);
+  }).from(organizations).where(eq17(organizations.id, orgId)).limit(1);
   if (!org) return null;
   return { ...org, currentUserRole: role };
 }
@@ -24081,7 +26059,7 @@ async function listOrgMembers(orgId, currentUserId) {
     oauthName: users.name,
     oauthEmail: users.email,
     oauthJobTitle: users.jobTitle
-  }).from(organizationMembers).leftJoin(localUsers, eq16(organizationMembers.localUserId, localUsers.id)).leftJoin(users, eq16(organizationMembers.userId, users.id)).where(eq16(organizationMembers.organizationId, orgId)).orderBy(organizationMembers.createdAt);
+  }).from(organizationMembers).leftJoin(localUsers, eq17(organizationMembers.localUserId, localUsers.id)).leftJoin(users, eq17(organizationMembers.userId, users.id)).where(eq17(organizationMembers.organizationId, orgId)).orderBy(organizationMembers.createdAt);
   return rows.map((r) => ({
     id: r.id,
     role: r.role,
@@ -24098,9 +26076,9 @@ async function getOrgMember(orgId, memberId) {
   const db = await getDb();
   if (!db) return null;
   const [row] = await db.select({ id: organizationMembers.id, role: organizationMembers.role }).from(organizationMembers).where(
-    and10(
-      eq16(organizationMembers.id, memberId),
-      eq16(organizationMembers.organizationId, orgId)
+    and11(
+      eq17(organizationMembers.id, memberId),
+      eq17(organizationMembers.organizationId, orgId)
     )
   ).limit(1);
   return row ?? null;
@@ -24108,26 +26086,26 @@ async function getOrgMember(orgId, memberId) {
 async function updateMemberRole(memberId, newRole) {
   const db = await getDb();
   if (!db) return;
-  await db.update(organizationMembers).set({ role: newRole, updatedAt: /* @__PURE__ */ new Date() }).where(eq16(organizationMembers.id, memberId));
+  await db.update(organizationMembers).set({ role: newRole, updatedAt: /* @__PURE__ */ new Date() }).where(eq17(organizationMembers.id, memberId));
 }
 async function deleteMember(memberId) {
   const db = await getDb();
   if (!db) return;
-  await db.delete(organizationMembers).where(eq16(organizationMembers.id, memberId));
+  await db.delete(organizationMembers).where(eq17(organizationMembers.id, memberId));
 }
 async function getOrgForInvite(orgId) {
   const db = await getDb();
   if (!db) return null;
-  const [org] = await db.select({ maxSeats: organizations.maxSeats, name: organizations.name }).from(organizations).where(eq16(organizations.id, orgId)).limit(1);
+  const [org] = await db.select({ maxSeats: organizations.maxSeats, name: organizations.name }).from(organizations).where(eq17(organizations.id, orgId)).limit(1);
   return org ?? null;
 }
 async function countActiveMembers(orgId) {
   const db = await getDb();
   if (!db) return 0;
   const rows = await db.select({ id: organizationMembers.id }).from(organizationMembers).where(
-    and10(
-      eq16(organizationMembers.organizationId, orgId),
-      eq16(organizationMembers.status, "active")
+    and11(
+      eq17(organizationMembers.organizationId, orgId),
+      eq17(organizationMembers.status, "active")
     )
   );
   return rows.length;
@@ -24140,7 +26118,7 @@ async function checkDuplicateInvite(orgId, email) {
     inviteEmail: organizationMembers.inviteEmail,
     oauthEmail: users.email,
     localEmail: localUsers.email
-  }).from(organizationMembers).leftJoin(users, eq16(organizationMembers.userId, users.id)).leftJoin(localUsers, eq16(organizationMembers.localUserId, localUsers.id)).where(eq16(organizationMembers.organizationId, orgId));
+  }).from(organizationMembers).leftJoin(users, eq17(organizationMembers.userId, users.id)).leftJoin(localUsers, eq17(organizationMembers.localUserId, localUsers.id)).where(eq17(organizationMembers.organizationId, orgId));
   return rows.some((row) => {
     const candidates = [row.inviteEmail, row.oauthEmail, row.localEmail];
     return candidates.some(
@@ -24174,8 +26152,8 @@ async function lookupInviteToken(token) {
     orgSlug: organizations.slug
   }).from(organizationMembers).innerJoin(
     organizations,
-    eq16(organizationMembers.organizationId, organizations.id)
-  ).where(eq16(organizationMembers.inviteToken, token)).limit(1);
+    eq17(organizationMembers.organizationId, organizations.id)
+  ).where(eq17(organizationMembers.inviteToken, token)).limit(1);
   return row ?? null;
 }
 async function getInviteByToken(token) {
@@ -24187,7 +26165,7 @@ async function getInviteByToken(token) {
     createdAt: organizationMembers.createdAt,
     organizationId: organizationMembers.organizationId,
     inviteEmail: organizationMembers.inviteEmail
-  }).from(organizationMembers).where(eq16(organizationMembers.inviteToken, token)).limit(1);
+  }).from(organizationMembers).where(eq17(organizationMembers.inviteToken, token)).limit(1);
   return row ?? null;
 }
 async function activateInvite(memberId, userId) {
@@ -24199,7 +26177,7 @@ async function activateInvite(memberId, userId) {
     inviteAcceptedAt: /* @__PURE__ */ new Date(),
     inviteToken: null,
     updatedAt: /* @__PURE__ */ new Date()
-  }).where(eq16(organizationMembers.id, memberId));
+  }).where(eq17(organizationMembers.id, memberId));
 }
 
 // server/org-members-router.ts
@@ -24222,13 +26200,13 @@ var orgMembersRouter = router({
     await requireModulePermission(ctx, "team_members", "canEdit");
     const member = await getOrgMember(ctx.organizationId, input.memberId);
     if (!member) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "NOT_FOUND",
         message: "Member not found in this organization."
       });
     }
     if (member.role === "owner") {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "FORBIDDEN",
         message: "The organization owner's role cannot be changed here."
       });
@@ -24247,13 +26225,13 @@ var orgMembersRouter = router({
     await requireModulePermission(ctx, "team_members", "canDelete");
     const member = await getOrgMember(ctx.organizationId, input);
     if (!member) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "NOT_FOUND",
         message: "Member not found in this organization."
       });
     }
     if (member.role === "owner") {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "FORBIDDEN",
         message: "The organization owner cannot be removed. Transfer ownership first."
       });
@@ -24278,31 +26256,26 @@ var orgMembersRouter = router({
     const inviteEmailRaw = input.email.trim();
     const inviteEmail = inviteEmailRaw.toLowerCase();
     if (ctx.organizationId < 0) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "FORBIDDEN",
         message: "Cannot invite members in dev-bypass mode."
       });
     }
     const org = await getOrgForInvite(ctx.organizationId);
     if (!org) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "NOT_FOUND",
         message: "Organization not found."
       });
     }
     const activeCount = await countActiveMembers(ctx.organizationId);
-    if (activeCount >= org.maxSeats) {
-      throw new TRPCError10({
-        code: "FORBIDDEN",
-        message: "Seat limit reached. Upgrade your plan to invite more members."
-      });
-    }
+    await assertSeatCapacity(ctx.organizationId, activeCount);
     const isDuplicate = await checkDuplicateInvite(
       ctx.organizationId,
       inviteEmail
     );
     if (isDuplicate) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "CONFLICT",
         message: "This email already has a membership or pending invite in your organization."
       });
@@ -24379,19 +26352,19 @@ var orgMembersRouter = router({
   acceptInvite: protectedProcedure.input(z14.string().min(1).max(64)).mutation(async ({ ctx, input }) => {
     const member = await getInviteByToken(input);
     if (!member)
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "NOT_FOUND",
         message: "Invitation not found."
       });
     if (member.status !== "invited") {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "BAD_REQUEST",
         message: "This invitation has already been used or was cancelled."
       });
     }
     const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1e3;
     if (Date.now() - new Date(member.createdAt).getTime() > SEVEN_DAYS) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "BAD_REQUEST",
         message: "This invitation has expired."
       });
@@ -24399,7 +26372,7 @@ var orgMembersRouter = router({
     const userEmail = ctx.user.email?.trim().toLowerCase() ?? "";
     const inviteEmail = member.inviteEmail?.trim().toLowerCase() ?? "";
     if (!userEmail || !inviteEmail || userEmail !== inviteEmail) {
-      throw new TRPCError10({
+      throw new TRPCError11({
         code: "FORBIDDEN",
         message: "This invitation is issued for a different account email."
       });
@@ -24418,13 +26391,13 @@ var orgMembersRouter = router({
 
 // server/org-settings-router.ts
 import { z as z15 } from "zod";
-import { TRPCError as TRPCError11 } from "@trpc/server";
+import { TRPCError as TRPCError12 } from "@trpc/server";
 
 // server/org-settings-store.ts
 init_db();
 init_env();
 init_schema();
-import { eq as eq17 } from "drizzle-orm";
+import { eq as eq18 } from "drizzle-orm";
 async function getOrgSettings(orgId, role) {
   const db = await getDb();
   if (!db) {
@@ -24463,7 +26436,7 @@ async function getOrgSettings(orgId, role) {
       currentUserRole: "owner"
     };
   }
-  const [org] = await db.select().from(organizations).where(eq17(organizations.id, orgId)).limit(1);
+  const [org] = await db.select().from(organizations).where(eq18(organizations.id, orgId)).limit(1);
   if (!org) return null;
   return { ...org, currentUserRole: role ?? "analyst" };
 }
@@ -24476,7 +26449,7 @@ async function updateOrgSettings(orgId, input) {
   if (input.industry !== void 0) patch.industry = input.industry;
   if (input.primaryJurisdiction !== void 0)
     patch.primaryJurisdiction = input.primaryJurisdiction;
-  await db.update(organizations).set(patch).where(eq17(organizations.id, orgId));
+  await db.update(organizations).set(patch).where(eq18(organizations.id, orgId));
 }
 
 // server/org-settings-router.ts
@@ -24499,11 +26472,33 @@ var orgSettingsRouter = router({
       ctx.organizationRole ?? "analyst"
     );
     if (!org)
-      throw new TRPCError11({
+      throw new TRPCError12({
         code: "NOT_FOUND",
         message: "Organization not found"
       });
     return org;
+  }),
+  /**
+   * First-run company-profile capture. Deliberately does NOT require MFA —
+   * these are non-sensitive fields needed to personalise the workspace, and
+   * gating them behind MFA would block brand-new accounts.
+   */
+  saveCompanyProfile: orgAdminProcedure.input(
+    z15.object({
+      name: z15.string().trim().min(2).max(255),
+      industry: z15.string().trim().min(1).max(120),
+      primaryJurisdiction: z15.enum(JURISDICTION_VALUES)
+    })
+  ).mutation(async ({ ctx, input }) => {
+    if (ctx.organizationId < 0) {
+      throw new TRPCError12({
+        code: "FORBIDDEN",
+        message: "Cannot update dev virtual organization"
+      });
+    }
+    await requireModulePermission(ctx, "org_settings", "canEdit");
+    await updateOrgSettings(ctx.organizationId, input);
+    return { success: true };
   }),
   /**
    * Update editable fields.  Owner and admin only.
@@ -24512,13 +26507,13 @@ var orgSettingsRouter = router({
   update: orgAdminProcedure.use(requireMfa).input(updateOrgSchema).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "org_settings", "canEdit");
     if (Object.keys(input).length === 0) {
-      throw new TRPCError11({
+      throw new TRPCError12({
         code: "BAD_REQUEST",
         message: "No fields to update"
       });
     }
     if (ctx.organizationId < 0) {
-      throw new TRPCError11({
+      throw new TRPCError12({
         code: "FORBIDDEN",
         message: "Cannot update dev virtual organization"
       });
@@ -24528,10 +26523,247 @@ var orgSettingsRouter = router({
   })
 });
 
+// server/org-entities-router.ts
+import { z as z16 } from "zod";
+import { TRPCError as TRPCError13 } from "@trpc/server";
+import { and as and13, count as count3, eq as eq20 } from "drizzle-orm";
+init_db();
+init_schema();
+
+// server/services/org-context.ts
+init_schema();
+init_db();
+import { and as and12, eq as eq19, sql as sql5 } from "drizzle-orm";
+async function createDefaultOrganizationForUser(user, localUserId) {
+  if (user.id <= 0 && !localUserId) return null;
+  const db = await getDb();
+  if (!db) return null;
+  const now = /* @__PURE__ */ new Date();
+  const defaultTrialEndsAt = trialEndsAt(now);
+  const orgName = user.organizationName && user.organizationName.trim() ? user.organizationName.trim() : `${(user.name || "New User").trim()} Organization`;
+  const ownerKey = localUserId ?? user.id;
+  const safeSlug = `org-${ownerKey}-${orgName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "default"}`;
+  return db.transaction(async (tx) => {
+    await tx.execute(
+      sql5`SELECT pg_advisory_xact_lock(hashtext(${`org-owner:${ownerKey}`}))`
+    );
+    const existingMembership = await tx.select({ organizationId: organizationMembers.organizationId }).from(organizationMembers).where(
+      localUserId != null ? eq19(organizationMembers.localUserId, localUserId) : eq19(organizationMembers.userId, user.id)
+    ).limit(1);
+    if (existingMembership.length > 0) return null;
+    const [inserted] = await tx.insert(organizations).values({
+      slug: safeSlug,
+      name: orgName,
+      billingEmail: user.email || `user-${ownerKey}@example.local`,
+      primaryJurisdiction: "Both",
+      plan: "free_trial",
+      trialStartedAt: now,
+      trialEndsAt: defaultTrialEndsAt,
+      isActive: 1,
+      maxSeats: 5
+    }).returning({ id: organizations.id });
+    const organizationId = inserted.id;
+    await tx.insert(organizationMembers).values({
+      organizationId,
+      ...localUserId != null ? { localUserId } : { userId: user.id },
+      role: "owner",
+      status: "active"
+    });
+    return { organizationId, organizationRole: "owner" };
+  });
+}
+function getLocalUserIdFromOpenId(openId) {
+  if (!openId) return null;
+  const m = /^local:(\d+)$/.exec(openId);
+  return m ? Number(m[1]) : null;
+}
+async function resolveOrganizationForUser(user) {
+  const db = await getDb();
+  if (!db) return { organizationId: null, organizationRole: null };
+  const [membership] = await db.select({
+    organizationId: organizationMembers.organizationId,
+    role: organizationMembers.role
+  }).from(organizationMembers).where(
+    and12(
+      eq19(organizationMembers.userId, user.id),
+      eq19(organizationMembers.status, "active")
+    )
+  ).limit(1);
+  if (!membership) {
+    const seeded = await createDefaultOrganizationForUser(user);
+    if (seeded) {
+      return {
+        organizationId: seeded.organizationId,
+        organizationRole: seeded.organizationRole
+      };
+    }
+  }
+  return {
+    organizationId: membership?.organizationId ?? null,
+    organizationRole: membership?.role ?? null
+  };
+}
+async function resolveOrganizationForLocalUser(user) {
+  const localUserId = getLocalUserIdFromOpenId(user.openId);
+  if (!localUserId) return { organizationId: null, organizationRole: null };
+  const db = await getDb();
+  if (!db) return { organizationId: null, organizationRole: null };
+  const [membership] = await db.select({
+    organizationId: organizationMembers.organizationId,
+    role: organizationMembers.role
+  }).from(organizationMembers).where(
+    and12(
+      eq19(organizationMembers.localUserId, localUserId),
+      eq19(organizationMembers.status, "active")
+    )
+  ).limit(1);
+  if (!membership) {
+    const seeded = await createDefaultOrganizationForUser(user, localUserId);
+    if (seeded) {
+      return {
+        organizationId: seeded.organizationId,
+        organizationRole: seeded.organizationRole
+      };
+    }
+  }
+  return {
+    organizationId: membership?.organizationId ?? null,
+    organizationRole: membership?.role ?? null
+  };
+}
+
+// server/org-entities-router.ts
+async function statsForOrg(orgId) {
+  const db = await getDb();
+  if (!db) return { vendors: 0, members: 0 };
+  const [v] = await db.select({ value: count3() }).from(vendors).where(eq20(vendors.organizationId, orgId));
+  const [m] = await db.select({ value: count3() }).from(organizationMembers).where(
+    and13(
+      eq20(organizationMembers.organizationId, orgId),
+      eq20(organizationMembers.status, "active")
+    )
+  );
+  return {
+    vendors: Number(v?.value ?? 0),
+    members: Number(m?.value ?? 0)
+  };
+}
+var orgEntitiesRouter = router({
+  /**
+   * Current org, its parent (if any), its direct children, and totals.
+   * Admin-only: this exposes sibling-entity names and aggregate counts.
+   */
+  list: orgAdminProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) {
+      return {
+        current: null,
+        parent: null,
+        entities: [],
+        totals: { vendors: 0, members: 0 }
+      };
+    }
+    const orgId = ctx.organizationId;
+    const [current] = await db.select({
+      id: organizations.id,
+      name: organizations.name,
+      plan: organizations.plan,
+      parentOrganizationId: organizations.parentOrganizationId,
+      primaryJurisdiction: organizations.primaryJurisdiction
+    }).from(organizations).where(eq20(organizations.id, orgId)).limit(1);
+    let parent = null;
+    if (current?.parentOrganizationId) {
+      const [p] = await db.select({
+        id: organizations.id,
+        name: organizations.name,
+        plan: organizations.plan
+      }).from(organizations).where(eq20(organizations.id, current.parentOrganizationId)).limit(1);
+      parent = p ?? null;
+    }
+    const children = await db.select({
+      id: organizations.id,
+      name: organizations.name,
+      slug: organizations.slug,
+      plan: organizations.plan,
+      createdAt: organizations.createdAt
+    }).from(organizations).where(eq20(organizations.parentOrganizationId, orgId));
+    const entities = [];
+    for (const c of children) {
+      const s = await statsForOrg(c.id);
+      entities.push({ ...c, ...s });
+    }
+    const selfStats = await statsForOrg(orgId);
+    const totals = entities.reduce(
+      (acc, e) => ({
+        vendors: acc.vendors + e.vendors,
+        members: acc.members + e.members
+      }),
+      { ...selfStats }
+    );
+    return { current: current ?? null, parent, entities, totals };
+  }),
+  /** Create a direct child entity; the caller becomes its owner. */
+  createChild: orgAdminProcedure.use(requireMfa).input(z16.object({ name: z16.string().trim().min(2).max(255) })).mutation(async ({ ctx, input }) => {
+    const db = await getDb();
+    if (!db) {
+      throw new TRPCError13({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Database unavailable"
+      });
+    }
+    const orgId = ctx.organizationId;
+    if (orgId < 0) {
+      throw new TRPCError13({
+        code: "FORBIDDEN",
+        message: "Cannot manage entities in dev-bypass mode."
+      });
+    }
+    const [parent] = await db.select().from(organizations).where(eq20(organizations.id, orgId)).limit(1);
+    if (!parent) {
+      throw new TRPCError13({
+        code: "NOT_FOUND",
+        message: "Organization not found"
+      });
+    }
+    if (parent.parentOrganizationId) {
+      throw new TRPCError13({
+        code: "BAD_REQUEST",
+        message: "Nested entities are not supported."
+      });
+    }
+    const slug = `entity-${orgId}-${Date.now().toString(36)}`;
+    const localUserId = getLocalUserIdFromOpenId(ctx.user.openId);
+    const [child] = await db.insert(organizations).values({
+      slug,
+      name: input.name,
+      billingEmail: parent.billingEmail,
+      industry: parent.industry,
+      primaryJurisdiction: parent.primaryJurisdiction,
+      plan: parent.plan,
+      parentOrganizationId: orgId,
+      trialStartedAt: parent.trialStartedAt,
+      trialEndsAt: parent.trialEndsAt,
+      isActive: 1,
+      maxSeats: parent.maxSeats
+    }).returning({
+      id: organizations.id,
+      name: organizations.name,
+      slug: organizations.slug
+    });
+    await db.insert(organizationMembers).values({
+      organizationId: child.id,
+      ...localUserId != null ? { localUserId } : { userId: ctx.user.id },
+      role: "owner",
+      status: "active"
+    });
+    return child;
+  })
+});
+
 // server/scorecard-store.ts
 init_schema();
 init_db();
-import { and as and11, desc as desc8, eq as eq18 } from "drizzle-orm";
+import { and as and14, desc as desc9, eq as eq21 } from "drizzle-orm";
 function makeEmptyScorecard(totalVendors) {
   return {
     totalVendors,
@@ -24559,7 +26791,7 @@ async function getOrgScorecard(orgId, userId) {
     return makeEmptyScorecard(inMemVendors.length);
   }
   if (orgId < 0) return makeEmptyScorecard(0);
-  const vendorRows = await db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq18(vendors.organizationId, orgId));
+  const vendorRows = await db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq21(vendors.organizationId, orgId));
   const totalVendors = vendorRows.length;
   if (totalVendors === 0) return makeEmptyScorecard(0);
   const assessmentRows = await db.select({
@@ -24573,7 +26805,7 @@ async function getOrgScorecard(orgId, userId) {
     riskLevel: vendorAssessments.riskLevel,
     status: vendorAssessments.status,
     assessmentDate: vendorAssessments.assessmentDate
-  }).from(vendorAssessments).innerJoin(vendors, eq18(vendorAssessments.vendorId, vendors.id)).innerJoin(frameworks, eq18(vendorAssessments.frameworkId, frameworks.id)).where(eq18(vendors.organizationId, orgId)).orderBy(desc8(vendorAssessments.assessmentDate));
+  }).from(vendorAssessments).innerJoin(vendors, eq21(vendorAssessments.vendorId, vendors.id)).innerJoin(frameworks, eq21(vendorAssessments.frameworkId, frameworks.id)).where(eq21(vendors.organizationId, orgId)).orderBy(desc9(vendorAssessments.assessmentDate));
   const latestMap = /* @__PURE__ */ new Map();
   for (const row of assessmentRows) {
     const key = `${row.vendorId}:${row.frameworkId}`;
@@ -24626,8 +26858,8 @@ async function getOrgScorecard(orgId, userId) {
   const gapsBySeverity = { low: 0, medium: 0, high: 0, critical: 0 };
   const gapRows = await db.select({ severity: assessmentGaps.severity }).from(assessmentGaps).innerJoin(
     vendorAssessments,
-    eq18(assessmentGaps.assessmentId, vendorAssessments.id)
-  ).innerJoin(vendors, eq18(vendorAssessments.vendorId, vendors.id)).where(eq18(vendors.organizationId, orgId));
+    eq21(assessmentGaps.assessmentId, vendorAssessments.id)
+  ).innerJoin(vendors, eq21(vendorAssessments.vendorId, vendors.id)).where(eq21(vendors.organizationId, orgId));
   for (const g of gapRows) {
     if (g.severity && g.severity in gapsBySeverity) {
       gapsBySeverity[g.severity]++;
@@ -24641,11 +26873,11 @@ async function getOrgScorecard(orgId, userId) {
     status: complianceReports.status,
     createdAt: complianceReports.createdAt
   }).from(complianceReports).where(
-    and11(
-      eq18(complianceReports.organizationId, orgId),
-      eq18(complianceReports.status, "ready")
+    and14(
+      eq21(complianceReports.organizationId, orgId),
+      eq21(complianceReports.status, "ready")
     )
-  ).orderBy(desc8(complianceReports.createdAt)).limit(5);
+  ).orderBy(desc9(complianceReports.createdAt)).limit(5);
   return {
     totalVendors,
     assessedVendors,
@@ -24676,19 +26908,19 @@ var scorecardRouter = router({
 
 // server/api-keys-router.ts
 init_rateLimiter();
-import { z as z16 } from "zod";
-import { TRPCError as TRPCError12 } from "@trpc/server";
+import { z as z17 } from "zod";
+import { TRPCError as TRPCError14 } from "@trpc/server";
 
 // server/api-keys-store.ts
 init_schema();
 init_db();
-import crypto2 from "crypto";
-import { and as and12, eq as eq19, isNull as isNull2 } from "drizzle-orm";
+import crypto3 from "crypto";
+import { and as and15, eq as eq22, isNull as isNull2 } from "drizzle-orm";
 var MEM_KEYS = [];
 var memIdSeq = 1;
 function genApiKey() {
-  const raw = "djac_" + crypto2.randomBytes(16).toString("hex");
-  const hash = crypto2.createHash("sha256").update(raw).digest("hex");
+  const raw = "djac_" + crypto3.randomBytes(16).toString("hex");
+  const hash = crypto3.createHash("sha256").update(raw).digest("hex");
   const prefix = raw.slice(0, 12);
   return { raw, hash, prefix };
 }
@@ -24707,7 +26939,7 @@ async function listApiKeys(orgId) {
     lastUsedAt: apiKeys.lastUsedAt,
     expiresAt: apiKeys.expiresAt,
     createdAt: apiKeys.createdAt
-  }).from(apiKeys).where(and12(eq19(apiKeys.organizationId, orgId), isNull2(apiKeys.revokedAt)));
+  }).from(apiKeys).where(and15(eq22(apiKeys.organizationId, orgId), isNull2(apiKeys.revokedAt)));
 }
 async function createApiKey(orgId, createdByUserId, name, scopesJson, expiresAt) {
   const db = await getDb();
@@ -24750,9 +26982,9 @@ async function revokeApiKey(orgId, keyId) {
     MEM_KEYS[idx].revokedAt = /* @__PURE__ */ new Date();
     return true;
   }
-  const [existing] = await db.select({ id: apiKeys.id }).from(apiKeys).where(and12(eq19(apiKeys.id, keyId), eq19(apiKeys.organizationId, orgId)));
+  const [existing] = await db.select({ id: apiKeys.id }).from(apiKeys).where(and15(eq22(apiKeys.id, keyId), eq22(apiKeys.organizationId, orgId)));
   if (!existing) return false;
-  await db.update(apiKeys).set({ revokedAt: /* @__PURE__ */ new Date() }).where(eq19(apiKeys.id, keyId));
+  await db.update(apiKeys).set({ revokedAt: /* @__PURE__ */ new Date() }).where(eq22(apiKeys.id, keyId));
   return true;
 }
 
@@ -24773,15 +27005,15 @@ var apiKeysRouter = router({
         API_KEYS_WINDOW_MS
       );
       if (!rl.allowed) {
-        throw new TRPCError12({
+        throw new TRPCError14({
           code: "TOO_MANY_REQUESTS",
           message: "Rate limit exceeded. Please try again shortly."
         });
       }
       return listApiKeys(ctx.organizationId);
     } catch (err) {
-      if (err instanceof TRPCError12) throw err;
-      throw new TRPCError12({
+      if (err instanceof TRPCError14) throw err;
+      throw new TRPCError14({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to list API keys"
       });
@@ -24792,10 +27024,10 @@ var apiKeysRouter = router({
    * Only org admins can create keys.
    */
   create: orgAdminProcedure.use(requireMfa).input(
-    z16.object({
-      name: z16.string().trim().min(2, "API key name must be at least 2 characters").max(120),
-      scopes: z16.array(
-        z16.enum([
+    z17.object({
+      name: z17.string().trim().min(2, "API key name must be at least 2 characters").max(120),
+      scopes: z17.array(
+        z17.enum([
           "vendor:read",
           "vendor:write",
           "report:read",
@@ -24806,11 +27038,12 @@ var apiKeysRouter = router({
           "admin:read"
         ])
       ).min(1).max(8),
-      expiresInDays: z16.number().int().min(1).max(365).optional()
+      expiresInDays: z17.number().int().min(1).max(365).optional()
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "api_keys", "canCreate");
     const orgId = ctx.organizationId;
+    await assertApiAccess(orgId);
     const expiresAt = input.expiresInDays ? new Date(Date.now() + input.expiresInDays * 864e5) : null;
     const scopesJson = JSON.stringify(input.scopes);
     const result = await createApiKey(
@@ -24832,7 +27065,7 @@ var apiKeysRouter = router({
   /**
    * Revoke an API key by id. Only org admins can revoke.
    */
-  revoke: orgAdminProcedure.use(requireMfa).input(z16.number().int().positive()).mutation(async ({ ctx, input }) => {
+  revoke: orgAdminProcedure.use(requireMfa).input(z17.number().int().positive()).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "api_keys", "canDelete");
     const rl = await checkRateLimit(
       `apikeys:revoke:${ctx.organizationId}`,
@@ -24840,14 +27073,14 @@ var apiKeysRouter = router({
       API_KEYS_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError12({
+      throw new TRPCError14({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded. Please try again shortly."
       });
     }
     const orgId = ctx.organizationId;
     const found = await revokeApiKey(orgId, input);
-    if (!found) throw new TRPCError12({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError14({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "auth",
       action: "api_key.revoke",
@@ -24860,13 +27093,13 @@ var apiKeysRouter = router({
 });
 
 // server/remediation-router.ts
-import { z as z17 } from "zod";
-import { TRPCError as TRPCError13 } from "@trpc/server";
+import { z as z18 } from "zod";
+import { TRPCError as TRPCError15 } from "@trpc/server";
 
 // server/remediation-store.ts
 init_schema();
 init_db();
-import { and as and13, desc as desc9, eq as eq20 } from "drizzle-orm";
+import { and as and16, desc as desc10, eq as eq23 } from "drizzle-orm";
 var MEM_TASKS = [];
 var memSeq = 1;
 async function listTasks(orgId) {
@@ -24876,7 +27109,7 @@ async function listTasks(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(remediationTasks).where(eq20(remediationTasks.organizationId, orgId)).orderBy(desc9(remediationTasks.createdAt));
+  return db.select().from(remediationTasks).where(eq23(remediationTasks.organizationId, orgId)).orderBy(desc10(remediationTasks.createdAt));
 }
 async function createTask(orgId, input) {
   const db = await getDb();
@@ -24940,9 +27173,9 @@ async function updateTaskStatus(orgId, id, status) {
     return { id: task.id, status: task.status };
   }
   await db.update(remediationTasks).set({ status, updatedAt: /* @__PURE__ */ new Date() }).where(
-    and13(
-      eq20(remediationTasks.id, id),
-      eq20(remediationTasks.organizationId, orgId)
+    and16(
+      eq23(remediationTasks.id, id),
+      eq23(remediationTasks.organizationId, orgId)
     )
   );
   return { id, status };
@@ -24960,9 +27193,9 @@ async function patchTask(orgId, id, fields, dueDate) {
   const updates = { ...fields, updatedAt: /* @__PURE__ */ new Date() };
   if (dueDate !== void 0) updates.dueDate = dueDate;
   await db.update(remediationTasks).set(updates).where(
-    and13(
-      eq20(remediationTasks.id, id),
-      eq20(remediationTasks.organizationId, orgId)
+    and16(
+      eq23(remediationTasks.id, id),
+      eq23(remediationTasks.organizationId, orgId)
     )
   );
   return { id };
@@ -24978,38 +27211,38 @@ async function removeTask(orgId, id) {
     return true;
   }
   await db.delete(remediationTasks).where(
-    and13(
-      eq20(remediationTasks.id, id),
-      eq20(remediationTasks.organizationId, orgId)
+    and16(
+      eq23(remediationTasks.id, id),
+      eq23(remediationTasks.organizationId, orgId)
     )
   );
   return true;
 }
 
 // server/remediation-router.ts
-var statusEnum = z17.enum(["open", "in_progress", "resolved", "accepted_risk"]);
-var severityEnum2 = z17.enum(["critical", "high", "medium", "low"]);
-var createSchema = z17.object({
-  title: z17.string().trim().min(2, "Title must be at least 2 characters").max(255),
-  description: z17.string().trim().max(2e3).optional(),
+var statusEnum = z18.enum(["open", "in_progress", "resolved", "accepted_risk"]);
+var severityEnum2 = z18.enum(["critical", "high", "medium", "low"]);
+var createSchema = z18.object({
+  title: z18.string().trim().min(2, "Title must be at least 2 characters").max(255),
+  description: z18.string().trim().max(2e3).optional(),
   severity: severityEnum2.default("medium"),
   status: statusEnum.default("open"),
-  gapCode: z17.string().trim().max(64).optional(),
-  vendorId: z17.number().int().positive().optional(),
-  assignedToUserId: z17.number().int().positive().optional(),
-  dueDate: z17.string().optional(),
+  gapCode: z18.string().trim().max(64).optional(),
+  vendorId: z18.number().int().positive().optional(),
+  assignedToUserId: z18.number().int().positive().optional(),
+  dueDate: z18.string().optional(),
   // ISO-8601 date string
-  notes: z17.string().trim().max(2e3).optional()
+  notes: z18.string().trim().max(2e3).optional()
 });
-var patchSchema = z17.object({
-  id: z17.number().int().positive(),
-  title: z17.string().trim().min(2, "Title must be at least 2 characters").max(255).optional(),
-  description: z17.string().trim().max(2e3).optional(),
+var patchSchema = z18.object({
+  id: z18.number().int().positive(),
+  title: z18.string().trim().min(2, "Title must be at least 2 characters").max(255).optional(),
+  description: z18.string().trim().max(2e3).optional(),
   severity: severityEnum2.optional(),
   status: statusEnum.optional(),
-  assignedToUserId: z17.number().int().positive().nullable().optional(),
-  dueDate: z17.string().nullable().optional(),
-  notes: z17.string().trim().max(2e3).optional()
+  assignedToUserId: z18.number().int().positive().nullable().optional(),
+  dueDate: z18.string().nullable().optional(),
+  notes: z18.string().trim().max(2e3).optional()
 });
 var remediationRouter = router({
   /**
@@ -25041,7 +27274,7 @@ var remediationRouter = router({
   /**
    * Move a task to a different Kanban column (status transition).
    */
-  updateStatus: activeOrgProcedure.input(z17.object({ id: z17.number().int().positive(), status: statusEnum })).mutation(async ({ ctx, input }) => {
+  updateStatus: activeOrgProcedure.input(z18.object({ id: z18.number().int().positive(), status: statusEnum })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "remediation_planner", "canEdit");
     const result = await updateTaskStatus(
       ctx.organizationId,
@@ -25049,7 +27282,7 @@ var remediationRouter = router({
       input.status
     );
     if (!result)
-      throw new TRPCError13({ code: "NOT_FOUND", message: "Task not found" });
+      throw new TRPCError15({ code: "NOT_FOUND", message: "Task not found" });
     return result;
   }),
   /**
@@ -25066,7 +27299,7 @@ var remediationRouter = router({
       dueDate
     );
     if (!result)
-      throw new TRPCError13({ code: "NOT_FOUND", message: "Task not found" });
+      throw new TRPCError15({ code: "NOT_FOUND", message: "Task not found" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "remediation_task_updated",
@@ -25079,11 +27312,11 @@ var remediationRouter = router({
   /**
    * Delete a remediation task by id.
    */
-  remove: activeOrgProcedure.input(z17.number().int().positive()).mutation(async ({ ctx, input: id }) => {
+  remove: activeOrgProcedure.input(z18.number().int().positive()).mutation(async ({ ctx, input: id }) => {
     await requireModulePermission(ctx, "remediation_planner", "canDelete");
     const deleted = await removeTask(ctx.organizationId, id);
     if (!deleted)
-      throw new TRPCError13({ code: "NOT_FOUND", message: "Task not found" });
+      throw new TRPCError15({ code: "NOT_FOUND", message: "Task not found" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "remediation_task_deleted",
@@ -25096,13 +27329,13 @@ var remediationRouter = router({
 });
 
 // server/risk-register-router.ts
-import { z as z18 } from "zod";
-import { TRPCError as TRPCError14 } from "@trpc/server";
+import { z as z19 } from "zod";
+import { TRPCError as TRPCError16 } from "@trpc/server";
 
 // server/risk-register-store.ts
 init_schema();
 init_db();
-import { and as and14, desc as desc10, eq as eq21 } from "drizzle-orm";
+import { and as and17, desc as desc11, eq as eq24 } from "drizzle-orm";
 var MEM_RISKS = [];
 var memSeq2 = 1;
 async function listRisks(orgId) {
@@ -25112,7 +27345,7 @@ async function listRisks(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(riskRegister).where(eq21(riskRegister.organizationId, orgId)).orderBy(desc10(riskRegister.createdAt));
+  return db.select().from(riskRegister).where(eq24(riskRegister.organizationId, orgId)).orderBy(desc11(riskRegister.createdAt));
 }
 async function createRisk(orgId, input) {
   const db = await getDb();
@@ -25191,7 +27424,7 @@ async function patchRisk(orgId, id, fields, reviewDate) {
   const updates = { ...fields, updatedAt: /* @__PURE__ */ new Date() };
   if (reviewDate !== void 0) updates.reviewDate = reviewDate;
   await db.update(riskRegister).set(updates).where(
-    and14(eq21(riskRegister.id, id), eq21(riskRegister.organizationId, orgId))
+    and17(eq24(riskRegister.id, id), eq24(riskRegister.organizationId, orgId))
   );
   return { id };
 }
@@ -25206,46 +27439,46 @@ async function removeRisk(orgId, id) {
     return true;
   }
   const rows = await db.select({ id: riskRegister.id }).from(riskRegister).where(
-    and14(eq21(riskRegister.id, id), eq21(riskRegister.organizationId, orgId))
+    and17(eq24(riskRegister.id, id), eq24(riskRegister.organizationId, orgId))
   );
   if (!rows.length) return false;
   await db.delete(riskRegister).where(
-    and14(eq21(riskRegister.id, id), eq21(riskRegister.organizationId, orgId))
+    and17(eq24(riskRegister.id, id), eq24(riskRegister.organizationId, orgId))
   );
   return true;
 }
 
 // server/risk-register-router.ts
-var categoryEnum = z18.enum([
+var categoryEnum = z19.enum([
   "operational",
   "legal",
   "technical",
   "financial",
   "reputational"
 ]);
-var treatmentEnum2 = z18.enum(["accept", "mitigate", "transfer", "avoid"]);
-var statusEnum2 = z18.enum(["open", "in_treatment", "closed", "accepted"]);
-var createSchema2 = z18.object({
-  title: z18.string().trim().min(2, "Title must be at least 2 characters").max(255),
-  description: z18.string().trim().max(2e3).optional(),
+var treatmentEnum2 = z19.enum(["accept", "mitigate", "transfer", "avoid"]);
+var statusEnum2 = z19.enum(["open", "in_treatment", "closed", "accepted"]);
+var createSchema2 = z19.object({
+  title: z19.string().trim().min(2, "Title must be at least 2 characters").max(255),
+  description: z19.string().trim().max(2e3).optional(),
   category: categoryEnum.default("operational"),
-  likelihood: z18.number().int().min(1).max(5).default(3),
-  impact: z18.number().int().min(1).max(5).default(3),
+  likelihood: z19.number().int().min(1).max(5).default(3),
+  impact: z19.number().int().min(1).max(5).default(3),
   treatment: treatmentEnum2.default("mitigate"),
   status: statusEnum2.default("open"),
-  ownerId: z18.number().int().positive().optional(),
-  vendorId: z18.number().int().positive().optional(),
-  gapCode: z18.string().trim().max(64).optional(),
-  controlReference: z18.string().trim().max(128).optional(),
-  reviewDate: z18.string().optional(),
+  ownerId: z19.number().int().positive().optional(),
+  vendorId: z19.number().int().positive().optional(),
+  gapCode: z19.string().trim().max(64).optional(),
+  controlReference: z19.string().trim().max(128).optional(),
+  reviewDate: z19.string().optional(),
   // ISO-8601
-  notes: z18.string().trim().max(2e3).optional()
+  notes: z19.string().trim().max(2e3).optional()
 });
 var patchSchema2 = createSchema2.partial().extend({
-  id: z18.number().int().positive(),
-  reviewDate: z18.string().nullable().optional(),
-  ownerId: z18.number().int().positive().nullable().optional(),
-  vendorId: z18.number().int().positive().nullable().optional()
+  id: z19.number().int().positive(),
+  reviewDate: z19.string().nullable().optional(),
+  ownerId: z19.number().int().positive().nullable().optional(),
+  vendorId: z19.number().int().positive().nullable().optional()
 });
 var riskRegisterRouter = router({
   /**
@@ -25286,7 +27519,7 @@ var riskRegisterRouter = router({
     const reviewDate = reviewDateStr === null ? null : reviewDateStr ? new Date(reviewDateStr) : void 0;
     const result = await patchRisk(orgId, id, rest, reviewDate);
     if (!result)
-      throw new TRPCError14({ code: "NOT_FOUND", message: "Risk not found" });
+      throw new TRPCError16({ code: "NOT_FOUND", message: "Risk not found" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "risk_entry_updated",
@@ -25299,12 +27532,12 @@ var riskRegisterRouter = router({
   /**
    * Delete a risk entry (org-scoped ownership check).
    */
-  remove: activeOrgProcedure.input(z18.number().int().positive()).mutation(async ({ ctx, input: id }) => {
+  remove: activeOrgProcedure.input(z19.number().int().positive()).mutation(async ({ ctx, input: id }) => {
     await requireModulePermission(ctx, "risk_register", "canDelete");
     const orgId = ctx.organizationId;
     const deleted = await removeRisk(orgId, id);
     if (!deleted)
-      throw new TRPCError14({ code: "NOT_FOUND", message: "Risk not found" });
+      throw new TRPCError16({ code: "NOT_FOUND", message: "Risk not found" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "risk_entry_deleted",
@@ -25317,13 +27550,13 @@ var riskRegisterRouter = router({
 });
 
 // server/policy-router.ts
-import { z as z19 } from "zod";
-import { TRPCError as TRPCError15 } from "@trpc/server";
+import { z as z20 } from "zod";
+import { TRPCError as TRPCError17 } from "@trpc/server";
 
 // server/policy-store.ts
 init_schema();
 init_db();
-import { and as and15, desc as desc11, eq as eq22 } from "drizzle-orm";
+import { and as and18, desc as desc12, eq as eq25 } from "drizzle-orm";
 var MEM_POLICIES = [];
 var memSeq3 = 1;
 async function listPolicies(orgId) {
@@ -25333,7 +27566,7 @@ async function listPolicies(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(compliancePolicies).where(eq22(compliancePolicies.organizationId, orgId)).orderBy(desc11(compliancePolicies.createdAt));
+  return db.select().from(compliancePolicies).where(eq25(compliancePolicies.organizationId, orgId)).orderBy(desc12(compliancePolicies.createdAt));
 }
 async function createPolicy(orgId, input) {
   const db = await getDb();
@@ -25414,16 +27647,16 @@ async function patchPolicy(orgId, id, updates) {
     return policy;
   }
   const existing = await db.select({ id: compliancePolicies.id }).from(compliancePolicies).where(
-    and15(
-      eq22(compliancePolicies.id, id),
-      eq22(compliancePolicies.organizationId, orgId)
+    and18(
+      eq25(compliancePolicies.id, id),
+      eq25(compliancePolicies.organizationId, orgId)
     )
   );
   if (!existing.length) return null;
   await db.update(compliancePolicies).set(updates).where(
-    and15(
-      eq22(compliancePolicies.id, id),
-      eq22(compliancePolicies.organizationId, orgId)
+    and18(
+      eq25(compliancePolicies.id, id),
+      eq25(compliancePolicies.organizationId, orgId)
     )
   );
   return { id };
@@ -25434,9 +27667,9 @@ async function getPolicyStatus(orgId, id) {
     return MEM_POLICIES.find((p) => p.id === id && p.organizationId === orgId)?.status ?? null;
   }
   const rows = await db.select({ status: compliancePolicies.status }).from(compliancePolicies).where(
-    and15(
-      eq22(compliancePolicies.id, id),
-      eq22(compliancePolicies.organizationId, orgId)
+    and18(
+      eq25(compliancePolicies.id, id),
+      eq25(compliancePolicies.organizationId, orgId)
     )
   );
   return rows[0]?.status ?? null;
@@ -25462,9 +27695,9 @@ async function applyPolicyStatusTransition(orgId, id, newStatus) {
   if (newStatus === "approved" || newStatus === "active")
     setPatch.lastApprovedAt = now;
   await db.update(compliancePolicies).set(setPatch).where(
-    and15(
-      eq22(compliancePolicies.id, id),
-      eq22(compliancePolicies.organizationId, orgId)
+    and18(
+      eq25(compliancePolicies.id, id),
+      eq25(compliancePolicies.organizationId, orgId)
     )
   );
   return { id, status: newStatus };
@@ -25480,16 +27713,16 @@ async function deletePolicy(orgId, id) {
     return true;
   }
   const rows = await db.select({ id: compliancePolicies.id }).from(compliancePolicies).where(
-    and15(
-      eq22(compliancePolicies.id, id),
-      eq22(compliancePolicies.organizationId, orgId)
+    and18(
+      eq25(compliancePolicies.id, id),
+      eq25(compliancePolicies.organizationId, orgId)
     )
   );
   if (!rows.length) return false;
   await db.delete(compliancePolicies).where(
-    and15(
-      eq22(compliancePolicies.id, id),
-      eq22(compliancePolicies.organizationId, orgId)
+    and18(
+      eq25(compliancePolicies.id, id),
+      eq25(compliancePolicies.organizationId, orgId)
     )
   );
   return true;
@@ -25503,28 +27736,28 @@ var STATUS_TRANSITIONS = {
   active: ["under_review", "retired"],
   retired: []
 };
-var policyTypeEnum2 = z19.enum(["policy", "standard", "procedure", "guideline"]);
-var statusEnum3 = z19.enum([
+var policyTypeEnum2 = z20.enum(["policy", "standard", "procedure", "guideline"]);
+var statusEnum3 = z20.enum([
   "draft",
   "under_review",
   "approved",
   "active",
   "retired"
 ]);
-var createSchema3 = z19.object({
-  policyCode: z19.string().trim().max(50).optional(),
-  title: z19.string().trim().min(1).max(255),
-  description: z19.string().trim().max(5e3).optional(),
+var createSchema3 = z20.object({
+  policyCode: z20.string().trim().max(50).optional(),
+  title: z20.string().trim().min(1).max(255),
+  description: z20.string().trim().max(5e3).optional(),
   policyType: policyTypeEnum2,
-  frameworks: z19.array(z19.string()),
-  controlReferences: z19.array(z19.string()),
+  frameworks: z20.array(z20.string()),
+  controlReferences: z20.array(z20.string()),
   status: statusEnum3,
-  ownerId: z19.number().int().positive().optional(),
-  reviewCycleMonths: z19.number().int().min(1).max(120),
-  nextReviewAt: z19.string().optional(),
-  version: z19.string().trim().max(20),
-  documentUrl: z19.string().url().optional().or(z19.literal("")),
-  notes: z19.string().trim().max(5e3).optional()
+  ownerId: z20.number().int().positive().optional(),
+  reviewCycleMonths: z20.number().int().min(1).max(120),
+  nextReviewAt: z20.string().optional(),
+  version: z20.string().trim().max(20),
+  documentUrl: z20.string().url().optional().or(z20.literal("")),
+  notes: z20.string().trim().max(5e3).optional()
 });
 var policyRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
@@ -25546,13 +27779,13 @@ var policyRouter = router({
     return result;
   }),
   patch: activeOrgProcedure.input(
-    z19.object({ id: z19.number().int().positive() }).merge(createSchema3.partial())
+    z20.object({ id: z20.number().int().positive() }).merge(createSchema3.partial())
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "policy_manager", "canEdit");
     const { id, ...data } = input;
     const orgId = ctx.organizationId;
     const result = await patchPolicy(orgId, id, data);
-    if (!result) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError17({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "policy.patch",
@@ -25562,14 +27795,14 @@ var policyRouter = router({
     });
     return result;
   }),
-  updateStatus: activeOrgProcedure.input(z19.object({ id: z19.number().int().positive(), status: statusEnum3 })).mutation(async ({ ctx, input }) => {
+  updateStatus: activeOrgProcedure.input(z20.object({ id: z20.number().int().positive(), status: statusEnum3 })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "policy_manager", "canEdit");
     const orgId = ctx.organizationId;
     const currentStatus = await getPolicyStatus(orgId, input.id);
-    if (currentStatus === null) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (currentStatus === null) throw new TRPCError17({ code: "NOT_FOUND" });
     const allowed = STATUS_TRANSITIONS[currentStatus] ?? [];
     if (!allowed.includes(input.status)) {
-      throw new TRPCError15({
+      throw new TRPCError17({
         code: "BAD_REQUEST",
         message: `Cannot transition from '${currentStatus}' to '${input.status}'`
       });
@@ -25579,7 +27812,7 @@ var policyRouter = router({
       input.id,
       input.status
     );
-    if (!result) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError17({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "policy.updateStatus",
@@ -25590,11 +27823,11 @@ var policyRouter = router({
     });
     return result;
   }),
-  remove: activeOrgProcedure.input(z19.number().int().positive()).mutation(async ({ ctx, input: id }) => {
+  remove: activeOrgProcedure.input(z20.number().int().positive()).mutation(async ({ ctx, input: id }) => {
     await requireModulePermission(ctx, "policy_manager", "canDelete");
     const orgId = ctx.organizationId;
     const found = await deletePolicy(orgId, id);
-    if (!found) throw new TRPCError15({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError17({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "policy.remove",
@@ -25607,13 +27840,13 @@ var policyRouter = router({
 });
 
 // server/incident-router.ts
-import { z as z20 } from "zod";
-import { TRPCError as TRPCError16 } from "@trpc/server";
+import { z as z21 } from "zod";
+import { TRPCError as TRPCError18 } from "@trpc/server";
 
 // server/incident-store.ts
 init_schema();
 init_db();
-import { and as and16, desc as desc12, eq as eq23 } from "drizzle-orm";
+import { and as and19, desc as desc13, eq as eq26 } from "drizzle-orm";
 var MEM_INCIDENTS = [];
 var memSeq4 = 1;
 async function listIncidents(orgId) {
@@ -25623,7 +27856,7 @@ async function listIncidents(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(complianceIncidents).where(eq23(complianceIncidents.organizationId, orgId)).orderBy(desc12(complianceIncidents.createdAt));
+  return db.select().from(complianceIncidents).where(eq26(complianceIncidents.organizationId, orgId)).orderBy(desc13(complianceIncidents.createdAt));
 }
 async function createIncident(orgId, input) {
   const db = await getDb();
@@ -25698,16 +27931,16 @@ async function patchIncident(orgId, id, updates) {
     return incident;
   }
   const existing = await db.select({ id: complianceIncidents.id }).from(complianceIncidents).where(
-    and16(
-      eq23(complianceIncidents.id, id),
-      eq23(complianceIncidents.organizationId, orgId)
+    and19(
+      eq26(complianceIncidents.id, id),
+      eq26(complianceIncidents.organizationId, orgId)
     )
   );
   if (!existing.length) return null;
   await db.update(complianceIncidents).set(updates).where(
-    and16(
-      eq23(complianceIncidents.id, id),
-      eq23(complianceIncidents.organizationId, orgId)
+    and19(
+      eq26(complianceIncidents.id, id),
+      eq26(complianceIncidents.organizationId, orgId)
     )
   );
   return { id };
@@ -25718,9 +27951,9 @@ async function getIncidentStatus(orgId, id) {
     return MEM_INCIDENTS.find((i) => i.id === id && i.organizationId === orgId)?.status ?? null;
   }
   const rows = await db.select({ status: complianceIncidents.status }).from(complianceIncidents).where(
-    and16(
-      eq23(complianceIncidents.id, id),
-      eq23(complianceIncidents.organizationId, orgId)
+    and19(
+      eq26(complianceIncidents.id, id),
+      eq26(complianceIncidents.organizationId, orgId)
     )
   );
   return rows[0]?.status ?? null;
@@ -25748,9 +27981,9 @@ async function applyIncidentStatusTransition(orgId, id, newStatus) {
   if (newStatus === "resolved" || newStatus === "closed")
     setPatch.resolvedAt = now;
   await db.update(complianceIncidents).set(setPatch).where(
-    and16(
-      eq23(complianceIncidents.id, id),
-      eq23(complianceIncidents.organizationId, orgId)
+    and19(
+      eq26(complianceIncidents.id, id),
+      eq26(complianceIncidents.organizationId, orgId)
     )
   );
   return { id, status: newStatus };
@@ -25768,16 +28001,16 @@ async function markIncidentNotified(orgId, id) {
     return { id, notifiedAt: now };
   }
   const rows = await db.select({ id: complianceIncidents.id }).from(complianceIncidents).where(
-    and16(
-      eq23(complianceIncidents.id, id),
-      eq23(complianceIncidents.organizationId, orgId)
+    and19(
+      eq26(complianceIncidents.id, id),
+      eq26(complianceIncidents.organizationId, orgId)
     )
   );
   if (!rows.length) return null;
   await db.update(complianceIncidents).set({ regulatoryNotificationSentAt: now, updatedAt: now }).where(
-    and16(
-      eq23(complianceIncidents.id, id),
-      eq23(complianceIncidents.organizationId, orgId)
+    and19(
+      eq26(complianceIncidents.id, id),
+      eq26(complianceIncidents.organizationId, orgId)
     )
   );
   return { id, notifiedAt: now };
@@ -25793,16 +28026,16 @@ async function deleteIncident(orgId, id) {
     return true;
   }
   const rows = await db.select({ id: complianceIncidents.id }).from(complianceIncidents).where(
-    and16(
-      eq23(complianceIncidents.id, id),
-      eq23(complianceIncidents.organizationId, orgId)
+    and19(
+      eq26(complianceIncidents.id, id),
+      eq26(complianceIncidents.organizationId, orgId)
     )
   );
   if (!rows.length) return false;
   await db.delete(complianceIncidents).where(
-    and16(
-      eq23(complianceIncidents.id, id),
-      eq23(complianceIncidents.organizationId, orgId)
+    and19(
+      eq26(complianceIncidents.id, id),
+      eq26(complianceIncidents.organizationId, orgId)
     )
   );
   return true;
@@ -25816,7 +28049,7 @@ var STATUS_TRANSITIONS2 = {
   resolved: ["closed", "under_investigation"],
   closed: []
 };
-var incidentTypeEnum2 = z20.enum([
+var incidentTypeEnum2 = z21.enum([
   "data_breach",
   "unauthorized_access",
   "policy_violation",
@@ -25824,32 +28057,32 @@ var incidentTypeEnum2 = z20.enum([
   "third_party_breach",
   "other"
 ]);
-var severityEnum3 = z20.enum(["critical", "high", "medium", "low"]);
-var statusEnum4 = z20.enum([
+var severityEnum3 = z21.enum(["critical", "high", "medium", "low"]);
+var statusEnum4 = z21.enum([
   "open",
   "under_investigation",
   "contained",
   "resolved",
   "closed"
 ]);
-var createSchema4 = z20.object({
-  incidentCode: z20.string().trim().max(50).optional(),
-  title: z20.string().trim().min(1).max(255),
-  description: z20.string().trim().max(5e3).optional(),
+var createSchema4 = z21.object({
+  incidentCode: z21.string().trim().max(50).optional(),
+  title: z21.string().trim().min(1).max(255),
+  description: z21.string().trim().max(5e3).optional(),
   incidentType: incidentTypeEnum2,
   severity: severityEnum3,
   status: statusEnum4,
-  affectedFrameworks: z20.array(z20.string()),
-  affectedVendorId: z20.number().int().positive().optional(),
-  affectedDataTypes: z20.array(z20.string()),
-  affectedDataSubjects: z20.number().int().min(0).optional(),
-  occurredAt: z20.string().optional(),
-  detectedAt: z20.string().optional(),
-  regulatoryNotificationRequired: z20.boolean(),
-  notificationDeadlineHours: z20.number().int().min(1).max(720),
-  rootCause: z20.string().trim().max(5e3).optional(),
-  lessonsLearned: z20.string().trim().max(5e3).optional(),
-  notes: z20.string().trim().max(5e3).optional()
+  affectedFrameworks: z21.array(z21.string()),
+  affectedVendorId: z21.number().int().positive().optional(),
+  affectedDataTypes: z21.array(z21.string()),
+  affectedDataSubjects: z21.number().int().min(0).optional(),
+  occurredAt: z21.string().optional(),
+  detectedAt: z21.string().optional(),
+  regulatoryNotificationRequired: z21.boolean(),
+  notificationDeadlineHours: z21.number().int().min(1).max(720),
+  rootCause: z21.string().trim().max(5e3).optional(),
+  lessonsLearned: z21.string().trim().max(5e3).optional(),
+  notes: z21.string().trim().max(5e3).optional()
 });
 var incidentRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
@@ -25871,13 +28104,13 @@ var incidentRouter = router({
     return result;
   }),
   patch: activeOrgProcedure.input(
-    z20.object({ id: z20.number().int().positive() }).merge(createSchema4.partial())
+    z21.object({ id: z21.number().int().positive() }).merge(createSchema4.partial())
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "incident_register", "canEdit");
     const { id, ...data } = input;
     const orgId = ctx.organizationId;
     const result = await patchIncident(orgId, id, data);
-    if (!result) throw new TRPCError16({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError18({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "incident.patch",
@@ -25887,14 +28120,14 @@ var incidentRouter = router({
     });
     return result;
   }),
-  updateStatus: activeOrgProcedure.input(z20.object({ id: z20.number().int().positive(), status: statusEnum4 })).mutation(async ({ ctx, input }) => {
+  updateStatus: activeOrgProcedure.input(z21.object({ id: z21.number().int().positive(), status: statusEnum4 })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "incident_register", "canEdit");
     const orgId = ctx.organizationId;
     const currentStatus = await getIncidentStatus(orgId, input.id);
-    if (currentStatus === null) throw new TRPCError16({ code: "NOT_FOUND" });
+    if (currentStatus === null) throw new TRPCError18({ code: "NOT_FOUND" });
     const allowed = STATUS_TRANSITIONS2[currentStatus] ?? [];
     if (!allowed.includes(input.status)) {
-      throw new TRPCError16({
+      throw new TRPCError18({
         code: "BAD_REQUEST",
         message: `Cannot transition from '${currentStatus}' to '${input.status}'`
       });
@@ -25904,7 +28137,7 @@ var incidentRouter = router({
       input.id,
       input.status
     );
-    if (!result) throw new TRPCError16({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError18({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "incident.updateStatus",
@@ -25915,11 +28148,11 @@ var incidentRouter = router({
     });
     return result;
   }),
-  markNotified: activeOrgProcedure.input(z20.number().int().positive()).mutation(async ({ ctx, input: id }) => {
+  markNotified: activeOrgProcedure.input(z21.number().int().positive()).mutation(async ({ ctx, input: id }) => {
     await requireModulePermission(ctx, "incident_register", "canEdit");
     const orgId = ctx.organizationId;
     const result = await markIncidentNotified(orgId, id);
-    if (!result) throw new TRPCError16({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError18({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "incident.markNotified",
@@ -25929,11 +28162,11 @@ var incidentRouter = router({
     });
     return result;
   }),
-  remove: activeOrgProcedure.input(z20.number().int().positive()).mutation(async ({ ctx, input: id }) => {
+  remove: activeOrgProcedure.input(z21.number().int().positive()).mutation(async ({ ctx, input: id }) => {
     await requireModulePermission(ctx, "incident_register", "canDelete");
     const orgId = ctx.organizationId;
     const found = await deleteIncident(orgId, id);
-    if (!found) throw new TRPCError16({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError18({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "incident.remove",
@@ -25946,13 +28179,13 @@ var incidentRouter = router({
 });
 
 // server/audit-schedule-router.ts
-import { z as z21 } from "zod";
-import { TRPCError as TRPCError17 } from "@trpc/server";
+import { z as z22 } from "zod";
+import { TRPCError as TRPCError19 } from "@trpc/server";
 
 // server/audit-schedule-store.ts
 init_schema();
 init_db();
-import { and as and17, asc, eq as eq24 } from "drizzle-orm";
+import { and as and20, asc, eq as eq27 } from "drizzle-orm";
 var MEM_AUDITS = [];
 var memSeq5 = 1;
 function addMonths(d2, n) {
@@ -25981,7 +28214,7 @@ async function listAudits(orgId) {
       (a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime()
     );
   }
-  return db.select().from(auditSchedules).where(eq24(auditSchedules.organizationId, orgId)).orderBy(asc(auditSchedules.scheduledDate));
+  return db.select().from(auditSchedules).where(eq27(auditSchedules.organizationId, orgId)).orderBy(asc(auditSchedules.scheduledDate));
 }
 async function createAudit(orgId, input) {
   const db = await getDb();
@@ -26038,7 +28271,7 @@ async function patchAudit(orgId, id, updates) {
     return;
   }
   await db.update(auditSchedules).set({ ...updates, updatedAt: /* @__PURE__ */ new Date() }).where(
-    and17(eq24(auditSchedules.id, id), eq24(auditSchedules.organizationId, orgId))
+    and20(eq27(auditSchedules.id, id), eq27(auditSchedules.organizationId, orgId))
   );
 }
 async function completeAudit(orgId, id, findings) {
@@ -26062,7 +28295,7 @@ async function completeAudit(orgId, id, findings) {
     return { nextOccurrence: null, found: false };
   }
   const rows = await db.select().from(auditSchedules).where(
-    and17(eq24(auditSchedules.id, id), eq24(auditSchedules.organizationId, orgId))
+    and20(eq27(auditSchedules.id, id), eq27(auditSchedules.organizationId, orgId))
   );
   if (!rows.length) return { nextOccurrence: null, found: false };
   const audit = rows[0];
@@ -26074,7 +28307,7 @@ async function completeAudit(orgId, id, findings) {
     findings: findings ?? audit.findings ?? null,
     nextOccurrence: nextOcc ?? null,
     updatedAt: /* @__PURE__ */ new Date()
-  }).where(eq24(auditSchedules.id, id));
+  }).where(eq27(auditSchedules.id, id));
   return { nextOccurrence: nextOcc?.toISOString() ?? null, found: true };
 }
 async function removeAudit(orgId, id) {
@@ -26087,40 +28320,40 @@ async function removeAudit(orgId, id) {
     return;
   }
   await db.delete(auditSchedules).where(
-    and17(eq24(auditSchedules.id, id), eq24(auditSchedules.organizationId, orgId))
+    and20(eq27(auditSchedules.id, id), eq27(auditSchedules.organizationId, orgId))
   );
 }
 
 // server/audit-schedule-router.ts
-var auditTypeEnum2 = z21.enum([
+var auditTypeEnum2 = z22.enum([
   "internal",
   "external",
   "regulatory",
   "certification"
 ]);
-var statusEnum5 = z21.enum(["planned", "in_progress", "completed", "cancelled"]);
-var recurrenceEnum2 = z21.enum([
+var statusEnum5 = z22.enum(["planned", "in_progress", "completed", "cancelled"]);
+var recurrenceEnum2 = z22.enum([
   "none",
   "monthly",
   "quarterly",
   "biannual",
   "annual"
 ]);
-var createSchema5 = z21.object({
-  title: z21.string().trim().min(2, "Title must be at least 2 characters").max(255),
-  description: z21.string().trim().max(2e3).optional(),
+var createSchema5 = z22.object({
+  title: z22.string().trim().min(2, "Title must be at least 2 characters").max(255),
+  description: z22.string().trim().max(2e3).optional(),
   auditType: auditTypeEnum2.default("internal"),
-  scope: z21.array(z21.string().trim().max(64)).max(20).optional(),
+  scope: z22.array(z22.string().trim().max(64)).max(20).optional(),
   status: statusEnum5.default("planned"),
-  scheduledDate: z21.string().min(1),
-  assignedToId: z21.number().int().positive().optional(),
-  vendorId: z21.number().int().positive().optional(),
-  findings: z21.string().trim().max(4e3).optional(),
+  scheduledDate: z22.string().min(1),
+  assignedToId: z22.number().int().positive().optional(),
+  vendorId: z22.number().int().positive().optional(),
+  findings: z22.string().trim().max(4e3).optional(),
   recurrence: recurrenceEnum2.default("none"),
-  notes: z21.string().trim().max(2e3).optional()
+  notes: z22.string().trim().max(2e3).optional()
 });
 var patchSchema3 = createSchema5.partial().extend({
-  id: z21.number().int().positive()
+  id: z22.number().int().positive()
 });
 var auditScheduleRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
@@ -26128,8 +28361,8 @@ var auditScheduleRouter = router({
       await requireModulePermission(ctx, "audit_schedule", "canView");
       return listAudits(ctx.organizationId);
     } catch (err) {
-      if (err instanceof TRPCError17) throw err;
-      throw new TRPCError17({
+      if (err instanceof TRPCError19) throw err;
+      throw new TRPCError19({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to list audits"
       });
@@ -26166,16 +28399,16 @@ var auditScheduleRouter = router({
     return { success: true };
   }),
   complete: activeOrgProcedure.input(
-    z21.object({
-      id: z21.number().int().positive(),
-      findings: z21.string().trim().max(4e3).optional()
+    z22.object({
+      id: z22.number().int().positive(),
+      findings: z22.string().trim().max(4e3).optional()
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "audit_schedule", "canEdit");
     const orgId = ctx.organizationId;
     const result = await completeAudit(orgId, input.id, input.findings);
     if (!result.found) {
-      throw new TRPCError17({ code: "NOT_FOUND", message: "Audit not found" });
+      throw new TRPCError19({ code: "NOT_FOUND", message: "Audit not found" });
     }
     void recordAuditEvent(ctx, {
       category: "data_write",
@@ -26186,7 +28419,7 @@ var auditScheduleRouter = router({
     });
     return { nextOccurrence: result.nextOccurrence };
   }),
-  remove: activeOrgProcedure.input(z21.object({ id: z21.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  remove: activeOrgProcedure.input(z22.object({ id: z22.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "audit_schedule", "canDelete");
     const orgId = ctx.organizationId;
     await removeAudit(orgId, input.id);
@@ -26202,13 +28435,13 @@ var auditScheduleRouter = router({
 });
 
 // server/vendor-compliance-router.ts
-import { z as z22 } from "zod";
-import { TRPCError as TRPCError18 } from "@trpc/server";
+import { z as z23 } from "zod";
+import { TRPCError as TRPCError20 } from "@trpc/server";
 
 // server/vendor-compliance-store.ts
 init_schema();
 init_db();
-import { and as and18, eq as eq25, inArray as inArray3 } from "drizzle-orm";
+import { and as and21, eq as eq28, inArray as inArray3 } from "drizzle-orm";
 function calcRiskLevel(score) {
   if (score < 40) return "critical";
   if (score < 60) return "high";
@@ -26229,7 +28462,7 @@ async function getVendorComplianceList(orgId) {
     industry: vendors.industry,
     headquartersLocation: vendors.headquartersLocation,
     riskTier: vendors.riskTier
-  }).from(vendors).where(eq25(vendors.organizationId, orgId));
+  }).from(vendors).where(eq28(vendors.organizationId, orgId));
   if (!vendorRows.length) return [];
   const vendorIds = vendorRows.map((v) => v.id);
   const assessRows = await db.select({
@@ -26248,16 +28481,16 @@ async function getVendorComplianceList(orgId) {
       status: riskRegister.status,
       likelihood: riskRegister.likelihood,
       impact: riskRegister.impact
-    }).from(riskRegister).where(eq25(riskRegister.organizationId, orgId)),
+    }).from(riskRegister).where(eq28(riskRegister.organizationId, orgId)),
     db.select({
       vendorId: remediationTasks.vendorId,
       status: remediationTasks.status
-    }).from(remediationTasks).where(eq25(remediationTasks.organizationId, orgId)),
+    }).from(remediationTasks).where(eq28(remediationTasks.organizationId, orgId)),
     db.select({
       affectedVendorId: complianceIncidents.affectedVendorId,
       severity: complianceIncidents.severity,
       status: complianceIncidents.status
-    }).from(complianceIncidents).where(eq25(complianceIncidents.organizationId, orgId))
+    }).from(complianceIncidents).where(eq28(complianceIncidents.organizationId, orgId))
   ]);
   return vendorRows.map((v) => {
     const vAssess = assessRows.filter((a) => a.vendorId === v.id);
@@ -26319,26 +28552,26 @@ async function getVendorComplianceList(orgId) {
 async function getVendorComplianceProfile(orgId, vendorId) {
   const db = await getDb();
   if (!db || orgId < 0) return null;
-  const [vendor] = await db.select().from(vendors).where(and18(eq25(vendors.id, vendorId), eq25(vendors.organizationId, orgId)));
+  const [vendor] = await db.select().from(vendors).where(and21(eq28(vendors.id, vendorId), eq28(vendors.organizationId, orgId)));
   if (!vendor) return null;
   const [assessRows, riskRows, remRows, incRows] = await Promise.all([
-    db.select().from(vendorAssessments).where(eq25(vendorAssessments.vendorId, vendorId)),
+    db.select().from(vendorAssessments).where(eq28(vendorAssessments.vendorId, vendorId)),
     db.select().from(riskRegister).where(
-      and18(
-        eq25(riskRegister.organizationId, orgId),
-        eq25(riskRegister.vendorId, vendorId)
+      and21(
+        eq28(riskRegister.organizationId, orgId),
+        eq28(riskRegister.vendorId, vendorId)
       )
     ),
     db.select().from(remediationTasks).where(
-      and18(
-        eq25(remediationTasks.organizationId, orgId),
-        eq25(remediationTasks.vendorId, vendorId)
+      and21(
+        eq28(remediationTasks.organizationId, orgId),
+        eq28(remediationTasks.vendorId, vendorId)
       )
     ),
     db.select().from(complianceIncidents).where(
-      and18(
-        eq25(complianceIncidents.organizationId, orgId),
-        eq25(complianceIncidents.affectedVendorId, vendorId)
+      and21(
+        eq28(complianceIncidents.organizationId, orgId),
+        eq28(complianceIncidents.affectedVendorId, vendorId)
       )
     )
   ]);
@@ -26366,7 +28599,7 @@ var vendorComplianceRouter = router({
     await requireModulePermission(ctx, "vendor_compliance_profiles", "canView");
     return getVendorComplianceList(ctx.organizationId);
   }),
-  profile: activeOrgProcedure.input(z22.object({ vendorId: z22.number().int().positive() })).query(async ({ ctx, input }) => {
+  profile: activeOrgProcedure.input(z23.object({ vendorId: z23.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(
       ctx,
       "vendor_compliance_profiles",
@@ -26377,18 +28610,18 @@ var vendorComplianceRouter = router({
       input.vendorId
     );
     if (!profile)
-      throw new TRPCError18({ code: "NOT_FOUND", message: "Vendor not found" });
+      throw new TRPCError20({ code: "NOT_FOUND", message: "Vendor not found" });
     return profile;
   })
 });
 
 // server/compliance-report-router.ts
-import { z as z23 } from "zod";
+import { z as z24 } from "zod";
 
 // server/compliance-report-store.ts
 init_schema();
 init_db();
-import { eq as eq26, inArray as inArray4 } from "drizzle-orm";
+import { eq as eq29, inArray as inArray4 } from "drizzle-orm";
 function toIso2(d2) {
   if (!d2) return null;
   return d2 instanceof Date ? d2.toISOString() : String(d2);
@@ -26408,7 +28641,7 @@ async function getComplianceSummary(orgId) {
   if (!db || orgId < 0)
     return { ...EMPTY_SUMMARY, generatedAt: (/* @__PURE__ */ new Date()).toISOString() };
   const now = /* @__PURE__ */ new Date();
-  const vRows = await db.select({ id: vendors.id }).from(vendors).where(eq26(vendors.organizationId, orgId));
+  const vRows = await db.select({ id: vendors.id }).from(vendors).where(eq29(vendors.organizationId, orgId));
   const vendorIds = vRows.map((v) => v.id);
   let gapRows = [];
   if (vendorIds.length) {
@@ -26423,17 +28656,17 @@ async function getComplianceSummary(orgId) {
       status: riskRegister.status,
       likelihood: riskRegister.likelihood,
       impact: riskRegister.impact
-    }).from(riskRegister).where(eq26(riskRegister.organizationId, orgId)),
-    db.select({ status: remediationTasks.status }).from(remediationTasks).where(eq26(remediationTasks.organizationId, orgId)),
-    db.select({ status: compliancePolicies.status }).from(compliancePolicies).where(eq26(compliancePolicies.organizationId, orgId)),
+    }).from(riskRegister).where(eq29(riskRegister.organizationId, orgId)),
+    db.select({ status: remediationTasks.status }).from(remediationTasks).where(eq29(remediationTasks.organizationId, orgId)),
+    db.select({ status: compliancePolicies.status }).from(compliancePolicies).where(eq29(compliancePolicies.organizationId, orgId)),
     db.select({
       status: complianceIncidents.status,
       severity: complianceIncidents.severity
-    }).from(complianceIncidents).where(eq26(complianceIncidents.organizationId, orgId)),
+    }).from(complianceIncidents).where(eq29(complianceIncidents.organizationId, orgId)),
     db.select({
       status: auditSchedules.status,
       scheduledDate: auditSchedules.scheduledDate
-    }).from(auditSchedules).where(eq26(auditSchedules.organizationId, orgId))
+    }).from(auditSchedules).where(eq29(auditSchedules.organizationId, orgId))
   ]);
   return {
     generatedAt: now.toISOString(),
@@ -26484,7 +28717,7 @@ async function getComplianceModuleData(orgId, module) {
   if (!db || orgId < 0) return [];
   switch (module) {
     case "gaps": {
-      const vRows = await db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq26(vendors.organizationId, orgId));
+      const vRows = await db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq29(vendors.organizationId, orgId));
       if (!vRows.length) return [];
       const vendorIds = vRows.map((v) => v.id);
       const aRows = await db.select({
@@ -26512,7 +28745,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "risks": {
-      const rows = await db.select().from(riskRegister).where(eq26(riskRegister.organizationId, orgId));
+      const rows = await db.select().from(riskRegister).where(eq29(riskRegister.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         score: (r.likelihood ?? 1) * (r.impact ?? 1),
@@ -26522,7 +28755,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "remediation": {
-      const rows = await db.select().from(remediationTasks).where(eq26(remediationTasks.organizationId, orgId));
+      const rows = await db.select().from(remediationTasks).where(eq29(remediationTasks.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         dueDate: toIso2(r.dueDate),
@@ -26531,7 +28764,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "policies": {
-      const rows = await db.select().from(compliancePolicies).where(eq26(compliancePolicies.organizationId, orgId));
+      const rows = await db.select().from(compliancePolicies).where(eq29(compliancePolicies.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         lastApprovedAt: toIso2(r.lastApprovedAt),
@@ -26541,7 +28774,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "incidents": {
-      const rows = await db.select().from(complianceIncidents).where(eq26(complianceIncidents.organizationId, orgId));
+      const rows = await db.select().from(complianceIncidents).where(eq29(complianceIncidents.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         occurredAt: toIso2(r.occurredAt),
@@ -26553,7 +28786,7 @@ async function getComplianceModuleData(orgId, module) {
       }));
     }
     case "audit_schedule": {
-      const rows = await db.select().from(auditSchedules).where(eq26(auditSchedules.organizationId, orgId));
+      const rows = await db.select().from(auditSchedules).where(eq29(auditSchedules.organizationId, orgId));
       return rows.map((r) => ({
         ...r,
         scheduledDate: toIso2(r.scheduledDate),
@@ -26569,7 +28802,7 @@ async function getComplianceModuleData(orgId, module) {
 }
 
 // server/compliance-report-router.ts
-var moduleEnum = z23.enum([
+var moduleEnum = z24.enum([
   "gaps",
   "risks",
   "remediation",
@@ -26582,7 +28815,7 @@ var complianceReportRouter = router({
     await requireModulePermission(ctx, "compliance_reports", "canView");
     return getComplianceSummary(ctx.organizationId);
   }),
-  moduleData: activeOrgProcedure.input(z23.object({ module: moduleEnum })).query(async ({ ctx, input }) => {
+  moduleData: activeOrgProcedure.input(z24.object({ module: moduleEnum })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_reports", "canView");
     return getComplianceModuleData(
       ctx.organizationId,
@@ -26592,13 +28825,13 @@ var complianceReportRouter = router({
 });
 
 // server/ctem-router.ts
-import { z as z24 } from "zod";
-import { TRPCError as TRPCError19 } from "@trpc/server";
+import { z as z25 } from "zod";
+import { TRPCError as TRPCError21 } from "@trpc/server";
 
 // server/ctem-scoring.ts
 init_schema();
 init_db();
-import { and as and19, desc as desc13, eq as eq27, inArray as inArray5 } from "drizzle-orm";
+import { and as and22, desc as desc14, eq as eq30, inArray as inArray5 } from "drizzle-orm";
 var SEVERITY_WEIGHT = {
   critical: 100,
   high: 75,
@@ -26839,14 +29072,14 @@ async function executeContinuousComplianceRun(params) {
     }).returning({ id: continuousComplianceRuns.id });
     runId = insertedRun.id;
   } else {
-    await db.update(continuousComplianceRuns).set({ runStatus: "running" }).where(eq27(continuousComplianceRuns.id, runId));
+    await db.update(continuousComplianceRuns).set({ runStatus: "running" }).where(eq30(continuousComplianceRuns.id, runId));
   }
   try {
     const assetQuery = db.select().from(ctemAssets).where(
-      and19(
-        eq27(ctemAssets.organizationId, organizationId),
-        eq27(ctemAssets.status, "active"),
-        ...vendorId ? [eq27(ctemAssets.vendorId, vendorId)] : []
+      and22(
+        eq30(ctemAssets.organizationId, organizationId),
+        eq30(ctemAssets.status, "active"),
+        ...vendorId ? [eq30(ctemAssets.vendorId, vendorId)] : []
       )
     );
     const assets = await assetQuery;
@@ -26855,7 +29088,7 @@ async function executeContinuousComplianceRun(params) {
         runStatus: "completed",
         completedAt: /* @__PURE__ */ new Date(),
         summary: "No active assets found."
-      }).where(eq27(continuousComplianceRuns.id, runId));
+      }).where(eq30(continuousComplianceRuns.id, runId));
       return {
         runId,
         assetsScanned: 0,
@@ -26903,7 +29136,7 @@ async function executeContinuousComplianceRun(params) {
           ...scored,
           previousFinalScore: prev,
           updatedAt: /* @__PURE__ */ new Date()
-        }).where(eq27(ctemRiskScores.assetId, asset.id));
+        }).where(eq30(ctemRiskScores.assetId, asset.id));
       } else {
         await db.insert(ctemRiskScores).values({
           assetId: asset.id,
@@ -26924,10 +29157,10 @@ async function executeContinuousComplianceRun(params) {
         });
         for (const m of maps) {
           const already = await db.select({ id: complianceExposureMappings.id }).from(complianceExposureMappings).where(
-            and19(
-              eq27(complianceExposureMappings.vulnerabilityId, vuln.id),
+            and22(
+              eq30(complianceExposureMappings.vulnerabilityId, vuln.id),
               ...m.frameworkCode ? [
-                eq27(
+                eq30(
                   complianceExposureMappings.frameworkCode,
                   m.frameworkCode
                 )
@@ -26950,11 +29183,11 @@ async function executeContinuousComplianceRun(params) {
     }
     const avgScore = assets.length > 0 ? Math.round(totalScore / assets.length) : 0;
     const [prevRun] = await db.select({ avgPriorityScore: continuousComplianceRuns.avgPriorityScore }).from(continuousComplianceRuns).where(
-      and19(
-        eq27(continuousComplianceRuns.organizationId, organizationId),
-        eq27(continuousComplianceRuns.runStatus, "completed")
+      and22(
+        eq30(continuousComplianceRuns.organizationId, organizationId),
+        eq30(continuousComplianceRuns.runStatus, "completed")
       )
-    ).orderBy(desc13(continuousComplianceRuns.startedAt)).limit(1);
+    ).orderBy(desc14(continuousComplianceRuns.startedAt)).limit(1);
     const runDelta = prevRun ? avgScore - prevRun.avgPriorityScore : null;
     await db.update(continuousComplianceRuns).set({
       runStatus: "completed",
@@ -26966,7 +29199,7 @@ async function executeContinuousComplianceRun(params) {
       alertRaised: alertRaised ? 1 : 0,
       completedAt: /* @__PURE__ */ new Date(),
       summary: `Scanned ${assets.length} asset(s). Found ${totalVulns} vulnerability/ies, ${exploitable} exploitable. Average risk score: ${avgScore}/100.`
-    }).where(eq27(continuousComplianceRuns.id, runId));
+    }).where(eq30(continuousComplianceRuns.id, runId));
     if (alertRaised) {
       await db.insert(adminNotifications).values({
         category: "system",
@@ -26992,7 +29225,7 @@ async function executeContinuousComplianceRun(params) {
       runStatus: "failed",
       completedAt: /* @__PURE__ */ new Date(),
       summary: String(err)
-    }).where(eq27(continuousComplianceRuns.id, runId));
+    }).where(eq30(continuousComplianceRuns.id, runId));
     throw err;
   }
 }
@@ -27041,7 +29274,7 @@ function simulateInMemoryRun(params) {
 // server/ctem-store.ts
 init_schema();
 init_db();
-import { and as and20, desc as desc14, eq as eq28, inArray as inArray6 } from "drizzle-orm";
+import { and as and23, desc as desc15, eq as eq31, inArray as inArray6 } from "drizzle-orm";
 function inMemoryDemoData(orgId) {
   const seed = Math.abs(orgId) % 8;
   const demoAssets = [
@@ -27199,23 +29432,23 @@ function inMemoryDemoData(orgId) {
 async function listCtemAssets(orgId, filters) {
   const db = await getDb();
   if (!db) return inMemoryDemoData(orgId).assets;
-  const where = [eq28(ctemAssets.organizationId, orgId)];
+  const where = [eq31(ctemAssets.organizationId, orgId)];
   if (filters?.region)
     where.push(
-      eq28(
+      eq31(
         ctemAssets.region,
         filters.region
       )
     );
-  if (filters?.vendorId) where.push(eq28(ctemAssets.vendorId, filters.vendorId));
+  if (filters?.vendorId) where.push(eq31(ctemAssets.vendorId, filters.vendorId));
   if (filters?.status)
     where.push(
-      eq28(
+      eq31(
         ctemAssets.status,
         filters.status
       )
     );
-  return db.select().from(ctemAssets).where(and20(...where)).orderBy(desc14(ctemAssets.createdAt));
+  return db.select().from(ctemAssets).where(and23(...where)).orderBy(desc15(ctemAssets.createdAt));
 }
 async function createCtemAsset(orgId, input) {
   const db = await getDb();
@@ -27235,7 +29468,7 @@ async function createCtemAsset(orgId, input) {
     notes: input.notes ?? void 0
   }).returning({ id: ctemAssets.id });
   const id = inserted.id;
-  const [row] = await db.select().from(ctemAssets).where(eq28(ctemAssets.id, id));
+  const [row] = await db.select().from(ctemAssets).where(eq31(ctemAssets.id, id));
   return row;
 }
 async function updateCtemAsset(id, patch) {
@@ -27266,14 +29499,14 @@ async function updateCtemAsset(id, patch) {
       status: patch.status
     },
     ...patch.notes !== void 0 && { notes: patch.notes }
-  }).where(eq28(ctemAssets.id, id));
-  const [row] = await db.select().from(ctemAssets).where(eq28(ctemAssets.id, id));
+  }).where(eq31(ctemAssets.id, id));
+  const [row] = await db.select().from(ctemAssets).where(eq31(ctemAssets.id, id));
   return row;
 }
 async function deleteCtemAsset(id) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.delete(ctemAssets).where(eq28(ctemAssets.id, id));
+  await db.delete(ctemAssets).where(eq31(ctemAssets.id, id));
 }
 async function listCtemVulnerabilities(orgId, filters) {
   const db = await getDb();
@@ -27286,25 +29519,25 @@ async function listCtemVulnerabilities(orgId, filters) {
       result = result.filter((v) => v.severity === filters.severity);
     return result;
   }
-  const orgAssets = await db.select({ id: ctemAssets.id }).from(ctemAssets).where(eq28(ctemAssets.organizationId, orgId));
+  const orgAssets = await db.select({ id: ctemAssets.id }).from(ctemAssets).where(eq31(ctemAssets.organizationId, orgId));
   const orgAssetIds = orgAssets.map((a) => a.id);
   if (orgAssetIds.length === 0) return [];
   const vulnFilters = [];
   if (filters?.assetId) {
-    vulnFilters.push(eq28(ctemVulnerabilities.assetId, filters.assetId));
+    vulnFilters.push(eq31(ctemVulnerabilities.assetId, filters.assetId));
   } else {
     vulnFilters.push(inArray6(ctemVulnerabilities.assetId, orgAssetIds));
   }
   if (filters?.severity)
     vulnFilters.push(
-      eq28(
+      eq31(
         ctemVulnerabilities.severity,
         filters.severity
       )
     );
   if (filters?.exploitableOnly)
-    vulnFilters.push(eq28(ctemVulnerabilities.exploitAvailable, 1));
-  const rows = await db.select().from(ctemVulnerabilities).where(and20(...vulnFilters)).orderBy(desc14(ctemVulnerabilities.cvssScore));
+    vulnFilters.push(eq31(ctemVulnerabilities.exploitAvailable, 1));
+  const rows = await db.select().from(ctemVulnerabilities).where(and23(...vulnFilters)).orderBy(desc15(ctemVulnerabilities.cvssScore));
   if (!filters?.includeMappings) return rows;
   const vulnIds = rows.map((r) => r.id);
   const mappings = vulnIds.length > 0 ? await db.select().from(complianceExposureMappings).where(inArray6(complianceExposureMappings.vulnerabilityId, vulnIds)) : [];
@@ -27316,7 +29549,7 @@ async function listCtemVulnerabilities(orgId, filters) {
 async function getCtemVulnAssetOwner(vulnId) {
   const db = await getDb();
   if (!db) return null;
-  const [row] = await db.select({ assetId: ctemVulnerabilities.assetId }).from(ctemVulnerabilities).where(eq28(ctemVulnerabilities.id, vulnId));
+  const [row] = await db.select({ assetId: ctemVulnerabilities.assetId }).from(ctemVulnerabilities).where(eq31(ctemVulnerabilities.id, vulnId));
   return row ?? null;
 }
 async function createCtemVulnerability(input) {
@@ -27335,7 +29568,7 @@ async function createCtemVulnerability(input) {
     discoveredAt: /* @__PURE__ */ new Date()
   }).returning({ id: ctemVulnerabilities.id });
   const id = inserted.id;
-  const [row] = await db.select().from(ctemVulnerabilities).where(eq28(ctemVulnerabilities.id, id));
+  const [row] = await db.select().from(ctemVulnerabilities).where(eq31(ctemVulnerabilities.id, id));
   return row;
 }
 async function patchCtemVulnerability(id, patch) {
@@ -27353,8 +29586,8 @@ async function patchCtemVulnerability(id, patch) {
   if (patch.severity !== void 0) update.severity = patch.severity;
   if (patch.notes !== void 0) update.notes = patch.notes;
   if (Object.keys(update).length > 0)
-    await db.update(ctemVulnerabilities).set(update).where(eq28(ctemVulnerabilities.id, id));
-  const [row] = await db.select().from(ctemVulnerabilities).where(eq28(ctemVulnerabilities.id, id));
+    await db.update(ctemVulnerabilities).set(update).where(eq31(ctemVulnerabilities.id, id));
+  const [row] = await db.select().from(ctemVulnerabilities).where(eq31(ctemVulnerabilities.id, id));
   return row;
 }
 async function listCtemRiskScores(orgId, filters) {
@@ -27366,17 +29599,17 @@ async function listCtemRiskScores(orgId, filters) {
       return { ...s, asset: a ?? null };
     });
   }
-  const assetFilters = [eq28(ctemAssets.organizationId, orgId)];
+  const assetFilters = [eq31(ctemAssets.organizationId, orgId)];
   if (filters?.region)
     assetFilters.push(
-      eq28(
+      eq31(
         ctemAssets.region,
         filters.region
       )
     );
   if (filters?.vendorId)
-    assetFilters.push(eq28(ctemAssets.vendorId, filters.vendorId));
-  const orgAssets = await db.select().from(ctemAssets).where(and20(...assetFilters));
+    assetFilters.push(eq31(ctemAssets.vendorId, filters.vendorId));
+  const orgAssets = await db.select().from(ctemAssets).where(and23(...assetFilters));
   if (orgAssets.length === 0) return [];
   const assetIds = orgAssets.map((a) => a.id);
   const scoreFilters = [
@@ -27384,12 +29617,12 @@ async function listCtemRiskScores(orgId, filters) {
   ];
   if (filters?.tier)
     scoreFilters.push(
-      eq28(
+      eq31(
         ctemRiskScores.priorityTier,
         filters.tier
       )
     );
-  const scores = await db.select().from(ctemRiskScores).where(and20(...scoreFilters)).orderBy(desc14(ctemRiskScores.finalPriorityScore));
+  const scores = await db.select().from(ctemRiskScores).where(and23(...scoreFilters)).orderBy(desc15(ctemRiskScores.finalPriorityScore));
   return scores.map((s) => ({
     ...s,
     asset: orgAssets.find((a) => a.id === s.assetId) ?? null
@@ -27429,11 +29662,11 @@ async function getCtemRiskSummary(orgId) {
       ]
     };
   }
-  const orgAssets = await db.select().from(ctemAssets).where(eq28(ctemAssets.organizationId, orgId));
+  const orgAssets = await db.select().from(ctemAssets).where(eq31(ctemAssets.organizationId, orgId));
   const assetIds = orgAssets.map((a) => a.id);
   const vulnCounts = assetIds.length > 0 ? await db.select().from(ctemVulnerabilities).where(inArray6(ctemVulnerabilities.assetId, assetIds)) : [];
   const scores = assetIds.length > 0 ? await db.select().from(ctemRiskScores).where(inArray6(ctemRiskScores.assetId, assetIds)) : [];
-  const [lastRun] = await db.select().from(continuousComplianceRuns).where(eq28(continuousComplianceRuns.organizationId, orgId)).orderBy(desc14(continuousComplianceRuns.startedAt)).limit(1);
+  const [lastRun] = await db.select().from(continuousComplianceRuns).where(eq31(continuousComplianceRuns.organizationId, orgId)).orderBy(desc15(continuousComplianceRuns.startedAt)).limit(1);
   const vulnIds = vulnCounts.map((v) => v.id);
   const mappings = vulnIds.length > 0 ? await db.select().from(complianceExposureMappings).where(inArray6(complianceExposureMappings.vulnerabilityId, vulnIds)) : [];
   const fwMap = /* @__PURE__ */ new Map();
@@ -27498,7 +29731,7 @@ async function listCtemRuns(orgId, limit = 20) {
       }
     ];
   }
-  return db.select().from(continuousComplianceRuns).where(eq28(continuousComplianceRuns.organizationId, orgId)).orderBy(desc14(continuousComplianceRuns.startedAt)).limit(limit);
+  return db.select().from(continuousComplianceRuns).where(eq31(continuousComplianceRuns.organizationId, orgId)).orderBy(desc15(continuousComplianceRuns.startedAt)).limit(limit);
 }
 async function getCtemFrameworkExposure(orgId) {
   const db = await getDb();
@@ -27546,7 +29779,7 @@ async function getCtemFrameworkExposure(orgId) {
       }
     ];
   }
-  const orgAssets = await db.select({ id: ctemAssets.id }).from(ctemAssets).where(eq28(ctemAssets.organizationId, orgId));
+  const orgAssets = await db.select({ id: ctemAssets.id }).from(ctemAssets).where(eq31(ctemAssets.organizationId, orgId));
   if (orgAssets.length === 0) return [];
   const assetIds = orgAssets.map((a) => a.id);
   const vulnIds = assetIds.length > 0 ? (await db.select({ id: ctemVulnerabilities.id }).from(ctemVulnerabilities).where(inArray6(ctemVulnerabilities.assetId, assetIds))).map((v) => v.id) : [];
@@ -27575,17 +29808,17 @@ async function getCtemFrameworkExposure(orgId) {
 async function listVendorsForCtemAssets(orgId) {
   const db = await getDb();
   if (!db) return [{ id: 1, vendorName: "Demo Vendor" }];
-  return db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq28(vendors.organizationId, orgId));
+  return db.select({ id: vendors.id, vendorName: vendors.vendorName }).from(vendors).where(eq31(vendors.organizationId, orgId));
 }
 async function getCtemAssetOrgId(assetId) {
   const db = await getDb();
   if (!db) return null;
-  const [row] = await db.select({ orgId: ctemAssets.organizationId }).from(ctemAssets).where(eq28(ctemAssets.id, assetId));
+  const [row] = await db.select({ orgId: ctemAssets.organizationId }).from(ctemAssets).where(eq31(ctemAssets.id, assetId));
   return row?.orgId ?? null;
 }
 
 // server/ctem-router.ts
-var assetTypeEnum = z24.enum([
+var assetTypeEnum = z25.enum([
   "web_application",
   "api_endpoint",
   "database",
@@ -27597,7 +29830,7 @@ var assetTypeEnum = z24.enum([
   "storage_bucket",
   "other"
 ]);
-var regionEnum2 = z24.enum([
+var regionEnum2 = z25.enum([
   "North America",
   "Europe",
   "APAC",
@@ -27606,43 +29839,43 @@ var regionEnum2 = z24.enum([
   "Africa",
   "Global"
 ]);
-var severityEnum4 = z24.enum([
+var severityEnum4 = z25.enum([
   "critical",
   "high",
   "medium",
   "low",
   "informational"
 ]);
-var assetInputSchema = z24.object({
-  vendorId: z24.number().int().positive().optional().nullable(),
-  assetName: z24.string().trim().min(1).max(255),
+var assetInputSchema = z25.object({
+  vendorId: z25.number().int().positive().optional().nullable(),
+  assetName: z25.string().trim().min(1).max(255),
   assetType: assetTypeEnum.default("other"),
-  ipDomain: z24.string().trim().max(255).optional().nullable(),
+  ipDomain: z25.string().trim().max(255).optional().nullable(),
   region: regionEnum2.default("Global"),
-  isInternetFacing: z24.boolean().default(false),
-  handlesPersonalData: z24.boolean().default(false),
-  handlesCriticalData: z24.boolean().default(false),
-  criticalityScore: z24.number().int().min(1).max(10).default(5),
-  status: z24.enum(["active", "inactive", "decommissioned"]).default("active"),
-  notes: z24.string().trim().max(2e3).optional().nullable()
+  isInternetFacing: z25.boolean().default(false),
+  handlesPersonalData: z25.boolean().default(false),
+  handlesCriticalData: z25.boolean().default(false),
+  criticalityScore: z25.number().int().min(1).max(10).default(5),
+  status: z25.enum(["active", "inactive", "decommissioned"]).default("active"),
+  notes: z25.string().trim().max(2e3).optional().nullable()
 });
-var vulnInputSchema = z24.object({
-  assetId: z24.number().int().positive(),
-  cveId: z24.string().trim().max(64).optional().nullable(),
-  title: z24.string().trim().min(1).max(255),
-  description: z24.string().trim().max(3e3).optional().nullable(),
+var vulnInputSchema = z25.object({
+  assetId: z25.number().int().positive(),
+  cveId: z25.string().trim().max(64).optional().nullable(),
+  title: z25.string().trim().min(1).max(255),
+  description: z25.string().trim().max(3e3).optional().nullable(),
   severity: severityEnum4.default("medium"),
-  cvssScore: z24.number().int().min(0).max(100).default(0),
-  exploitAvailable: z24.boolean().default(false),
-  isConfirmed: z24.boolean().default(false),
-  notes: z24.string().trim().max(2e3).optional().nullable()
+  cvssScore: z25.number().int().min(0).max(100).default(0),
+  exploitAvailable: z25.boolean().default(false),
+  isConfirmed: z25.boolean().default(false),
+  notes: z25.string().trim().max(2e3).optional().nullable()
 });
 var ctemRouter = router({
   listAssets: activeOrgProcedure.input(
-    z24.object({
+    z25.object({
       region: regionEnum2.optional(),
-      vendorId: z24.number().int().positive().optional(),
-      status: z24.enum(["active", "inactive", "decommissioned"]).optional()
+      vendorId: z25.number().int().positive().optional(),
+      status: z25.enum(["active", "inactive", "decommissioned"]).optional()
     }).optional()
   ).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_tracker", "canView");
@@ -27653,45 +29886,45 @@ var ctemRouter = router({
     try {
       return await createCtemAsset(ctx.organizationId ?? -1, input);
     } catch {
-      throw new TRPCError19({
+      throw new TRPCError21({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     }
   }),
   updateAsset: activeOrgProcedure.input(
-    assetInputSchema.partial().extend({ id: z24.number().int().positive() })
+    assetInputSchema.partial().extend({ id: z25.number().int().positive() })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_tracker", "canEdit");
     const orgId = ctx.organizationId ?? -1;
     const { id, ...patch } = input;
     const ownerOrgId = await getCtemAssetOrgId(id);
     if (ownerOrgId === null || ownerOrgId !== orgId)
-      throw new TRPCError19({ code: "NOT_FOUND", message: "Asset not found" });
+      throw new TRPCError21({ code: "NOT_FOUND", message: "Asset not found" });
     try {
       return await updateCtemAsset(id, patch);
     } catch {
-      throw new TRPCError19({
+      throw new TRPCError21({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     }
   }),
-  deleteAsset: activeOrgProcedure.input(z24.object({ id: z24.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  deleteAsset: activeOrgProcedure.input(z25.object({ id: z25.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_tracker", "canDelete");
     const orgId = ctx.organizationId ?? -1;
     const ownerOrgId = await getCtemAssetOrgId(input.id);
     if (ownerOrgId === null || ownerOrgId !== orgId)
-      throw new TRPCError19({ code: "NOT_FOUND", message: "Asset not found" });
+      throw new TRPCError21({ code: "NOT_FOUND", message: "Asset not found" });
     await deleteCtemAsset(input.id);
     return { ok: true };
   }),
   listVulnerabilities: activeOrgProcedure.input(
-    z24.object({
-      assetId: z24.number().int().positive().optional(),
-      exploitableOnly: z24.boolean().optional(),
+    z25.object({
+      assetId: z25.number().int().positive().optional(),
+      exploitableOnly: z25.boolean().optional(),
       severity: severityEnum4.optional(),
-      includeMappings: z24.boolean().optional()
+      includeMappings: z25.boolean().optional()
     }).optional()
   ).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_tracker", "canView");
@@ -27699,7 +29932,7 @@ var ctemRouter = router({
     if (input?.assetId) {
       const ownerOrgId = await getCtemAssetOrgId(input.assetId);
       if (ownerOrgId === null || ownerOrgId !== orgId)
-        throw new TRPCError19({
+        throw new TRPCError21({
           code: "NOT_FOUND",
           message: "Asset not found"
         });
@@ -27711,24 +29944,24 @@ var ctemRouter = router({
     const orgId = ctx.organizationId ?? -1;
     const assetOrgId = await getCtemAssetOrgId(input.assetId);
     if (assetOrgId === null || assetOrgId !== orgId)
-      throw new TRPCError19({ code: "NOT_FOUND", message: "Asset not found" });
+      throw new TRPCError21({ code: "NOT_FOUND", message: "Asset not found" });
     try {
       return await createCtemVulnerability(input);
     } catch {
-      throw new TRPCError19({
+      throw new TRPCError21({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     }
   }),
   patchVulnerability: activeOrgProcedure.input(
-    z24.object({
-      id: z24.number().int().positive(),
-      isPatched: z24.boolean().optional(),
-      isConfirmed: z24.boolean().optional(),
-      exploitAvailable: z24.boolean().optional(),
+    z25.object({
+      id: z25.number().int().positive(),
+      isPatched: z25.boolean().optional(),
+      isConfirmed: z25.boolean().optional(),
+      exploitAvailable: z25.boolean().optional(),
       severity: severityEnum4.optional(),
-      notes: z24.string().trim().max(2e3).optional().nullable()
+      notes: z25.string().trim().max(2e3).optional().nullable()
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_tracker", "canEdit");
@@ -27736,27 +29969,27 @@ var ctemRouter = router({
     const { id, ...patch } = input;
     const vuln = await getCtemVulnAssetOwner(id);
     if (!vuln)
-      throw new TRPCError19({
+      throw new TRPCError21({
         code: "NOT_FOUND",
         message: "Vulnerability not found"
       });
     const assetOrgId = await getCtemAssetOrgId(vuln.assetId);
     if (assetOrgId === null || assetOrgId !== orgId)
-      throw new TRPCError19({ code: "FORBIDDEN", message: "Access denied" });
+      throw new TRPCError21({ code: "FORBIDDEN", message: "Access denied" });
     try {
       return await patchCtemVulnerability(id, patch);
     } catch {
-      throw new TRPCError19({
+      throw new TRPCError21({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     }
   }),
   listRiskScores: activeOrgProcedure.input(
-    z24.object({
-      tier: z24.enum(["critical", "high", "medium", "low"]).optional(),
+    z25.object({
+      tier: z25.enum(["critical", "high", "medium", "low"]).optional(),
       region: regionEnum2.optional(),
-      vendorId: z24.number().int().positive().optional()
+      vendorId: z25.number().int().positive().optional()
     }).optional()
   ).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_tracker", "canView");
@@ -27767,13 +30000,13 @@ var ctemRouter = router({
     return getCtemRiskSummary(ctx.organizationId ?? -1);
   }),
   listRuns: activeOrgProcedure.input(
-    z24.object({ limit: z24.number().int().min(1).max(100).default(20) }).optional()
+    z25.object({ limit: z25.number().int().min(1).max(100).default(20) }).optional()
   ).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_tracker", "canView");
     return listCtemRuns(ctx.organizationId ?? -1, input?.limit);
   }),
   triggerRun: activeOrgProcedure.input(
-    z24.object({ vendorId: z24.number().int().positive().optional() }).optional()
+    z25.object({ vendorId: z25.number().int().positive().optional() }).optional()
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_tracker", "canEdit");
     return executeContinuousComplianceRun({
@@ -27793,13 +30026,13 @@ var ctemRouter = router({
 });
 
 // server/evidence-router.ts
-import { z as z25 } from "zod";
-import { TRPCError as TRPCError20 } from "@trpc/server";
+import { z as z26 } from "zod";
+import { TRPCError as TRPCError22 } from "@trpc/server";
 
 // server/evidence-store.ts
 init_schema();
 init_db();
-import { and as and21, desc as desc15, eq as eq29 } from "drizzle-orm";
+import { and as and24, desc as desc16, eq as eq32 } from "drizzle-orm";
 var SOURCE_TYPES = [
   "audit_schedule",
   "policy",
@@ -27875,11 +30108,11 @@ async function listEvidence(orgId, sourceType, sourceId) {
     if (sourceId) items = items.filter((e) => e.sourceId === sourceId);
     return items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
-  const conditions = [eq29(complianceEvidence.organizationId, orgId)];
+  const conditions = [eq32(complianceEvidence.organizationId, orgId)];
   if (sourceType)
-    conditions.push(eq29(complianceEvidence.sourceType, sourceType));
-  if (sourceId) conditions.push(eq29(complianceEvidence.sourceId, sourceId));
-  return db.select().from(complianceEvidence).where(and21(...conditions)).orderBy(desc15(complianceEvidence.createdAt));
+    conditions.push(eq32(complianceEvidence.sourceType, sourceType));
+  if (sourceId) conditions.push(eq32(complianceEvidence.sourceId, sourceId));
+  return db.select().from(complianceEvidence).where(and24(...conditions)).orderBy(desc16(complianceEvidence.createdAt));
 }
 async function addEvidence(orgId, input, addedByUserId) {
   const db = await getDb();
@@ -27927,7 +30160,7 @@ async function getEvidenceForRemoval(orgId, evidenceId) {
   const [row] = await db.select({
     id: complianceEvidence.id,
     organizationId: complianceEvidence.organizationId
-  }).from(complianceEvidence).where(eq29(complianceEvidence.id, evidenceId));
+  }).from(complianceEvidence).where(eq32(complianceEvidence.id, evidenceId));
   return row ?? null;
 }
 async function removeEvidence(orgId, evidenceId) {
@@ -27940,9 +30173,9 @@ async function removeEvidence(orgId, evidenceId) {
     return;
   }
   await db.delete(complianceEvidence).where(
-    and21(
-      eq29(complianceEvidence.id, evidenceId),
-      eq29(complianceEvidence.organizationId, orgId)
+    and24(
+      eq32(complianceEvidence.id, evidenceId),
+      eq32(complianceEvidence.organizationId, orgId)
     )
   );
 }
@@ -27960,9 +30193,9 @@ var SOURCE_TYPE_LABELS = {
 };
 var evidenceRouter = router({
   list: activeOrgProcedure.input(
-    z25.object({
-      sourceType: z25.string().optional(),
-      sourceId: z25.number().int().positive().optional()
+    z26.object({
+      sourceType: z26.string().optional(),
+      sourceId: z26.number().int().positive().optional()
     }).optional()
   ).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "evidence_repository", "canView");
@@ -27973,13 +30206,13 @@ var evidenceRouter = router({
     );
   }),
   add: activeOrgProcedure.input(
-    z25.object({
-      title: z25.string().trim().min(1).max(255),
-      url: z25.string().url().max(2e3),
-      sourceType: z25.enum(SOURCE_TYPES),
-      sourceId: z25.number().int().positive().optional(),
-      description: z25.string().trim().max(2e3).optional(),
-      tags: z25.string().trim().max(500).optional()
+    z26.object({
+      title: z26.string().trim().min(1).max(255),
+      url: z26.string().url().max(2e3),
+      sourceType: z26.enum(SOURCE_TYPES),
+      sourceId: z26.number().int().positive().optional(),
+      description: z26.string().trim().max(2e3).optional(),
+      tags: z26.string().trim().max(500).optional()
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "evidence_repository", "canCreate");
@@ -27997,11 +30230,11 @@ var evidenceRouter = router({
     });
     return result;
   }),
-  remove: activeOrgProcedure.input(z25.number().int().positive()).mutation(async ({ ctx, input: evidenceId }) => {
+  remove: activeOrgProcedure.input(z26.number().int().positive()).mutation(async ({ ctx, input: evidenceId }) => {
     await requireModulePermission(ctx, "evidence_repository", "canDelete");
     const orgId = ctx.organizationId;
     const ev = await getEvidenceForRemoval(orgId, evidenceId);
-    if (!ev) throw new TRPCError20({ code: "NOT_FOUND" });
+    if (!ev) throw new TRPCError22({ code: "NOT_FOUND" });
     await removeEvidence(orgId, evidenceId);
     void recordAuditEvent(ctx, {
       category: "data_write",
@@ -28022,13 +30255,13 @@ var evidenceRouter = router({
 });
 
 // server/dsr-router.ts
-import { z as z26 } from "zod";
-import { TRPCError as TRPCError21 } from "@trpc/server";
+import { z as z27 } from "zod";
+import { TRPCError as TRPCError23 } from "@trpc/server";
 
 // server/dsr-store.ts
 init_schema();
 init_db();
-import { and as and22, asc as asc2, eq as eq30 } from "drizzle-orm";
+import { and as and25, asc as asc2, eq as eq33 } from "drizzle-orm";
 var REQUEST_TYPES = [
   "access",
   "rectification",
@@ -28236,13 +30469,13 @@ async function listDsrs(orgId, filters) {
       items = items.filter((d2) => d2.jurisdiction === filters.jurisdiction);
     return [...items].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   }
-  const conditions = [eq30(dsrRequests.organizationId, orgId)];
-  if (filters?.status) conditions.push(eq30(dsrRequests.status, filters.status));
+  const conditions = [eq33(dsrRequests.organizationId, orgId)];
+  if (filters?.status) conditions.push(eq33(dsrRequests.status, filters.status));
   if (filters?.requestType)
-    conditions.push(eq30(dsrRequests.requestType, filters.requestType));
+    conditions.push(eq33(dsrRequests.requestType, filters.requestType));
   if (filters?.jurisdiction)
-    conditions.push(eq30(dsrRequests.jurisdiction, filters.jurisdiction));
-  return db.select().from(dsrRequests).where(and22(...conditions)).orderBy(asc2(dsrRequests.dueDate));
+    conditions.push(eq33(dsrRequests.jurisdiction, filters.jurisdiction));
+  return db.select().from(dsrRequests).where(and25(...conditions)).orderBy(asc2(dsrRequests.dueDate));
 }
 async function createDsr(orgId, input, assignedToUserId) {
   const db = await getDb();
@@ -28298,9 +30531,9 @@ async function patchDsr(orgId, id, update) {
     Object.assign(MEM_DSRS[idx], update);
     return true;
   }
-  const [existing] = await db.select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId }).from(dsrRequests).where(eq30(dsrRequests.id, id));
+  const [existing] = await db.select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId }).from(dsrRequests).where(eq33(dsrRequests.id, id));
   if (!existing || existing.organizationId !== orgId) return false;
-  await db.update(dsrRequests).set(update).where(and22(eq30(dsrRequests.id, id), eq30(dsrRequests.organizationId, orgId)));
+  await db.update(dsrRequests).set(update).where(and25(eq33(dsrRequests.id, id), eq33(dsrRequests.organizationId, orgId)));
   return true;
 }
 async function removeDsr(orgId, id) {
@@ -28313,9 +30546,9 @@ async function removeDsr(orgId, id) {
     MEM_DSRS.splice(idx, 1);
     return true;
   }
-  const [existing] = await db.select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId }).from(dsrRequests).where(eq30(dsrRequests.id, id));
+  const [existing] = await db.select({ id: dsrRequests.id, organizationId: dsrRequests.organizationId }).from(dsrRequests).where(eq33(dsrRequests.id, id));
   if (!existing || existing.organizationId !== orgId) return false;
-  await db.delete(dsrRequests).where(and22(eq30(dsrRequests.id, id), eq30(dsrRequests.organizationId, orgId)));
+  await db.delete(dsrRequests).where(and25(eq33(dsrRequests.id, id), eq33(dsrRequests.organizationId, orgId)));
   return true;
 }
 async function getDsrSummary(orgId) {
@@ -28328,35 +30561,35 @@ async function getDsrSummary(orgId) {
       }))
     );
   }
-  const rows = await db.select({ status: dsrRequests.status, dueDate: dsrRequests.dueDate }).from(dsrRequests).where(eq30(dsrRequests.organizationId, orgId));
+  const rows = await db.select({ status: dsrRequests.status, dueDate: dsrRequests.dueDate }).from(dsrRequests).where(eq33(dsrRequests.organizationId, orgId));
   return buildDsrSummary(rows);
 }
 
 // server/dsr-router.ts
-var requestTypeEnum = z26.enum(REQUEST_TYPES);
-var jurisdictionEnum2 = z26.enum(JURISDICTIONS);
-var statusEnum6 = z26.enum(STATUSES);
-var priorityEnum2 = z26.enum(PRIORITIES);
-var createSchema6 = z26.object({
+var requestTypeEnum = z27.enum(REQUEST_TYPES);
+var jurisdictionEnum2 = z27.enum(JURISDICTIONS);
+var statusEnum6 = z27.enum(STATUSES);
+var priorityEnum2 = z27.enum(PRIORITIES);
+var createSchema6 = z27.object({
   requestType: requestTypeEnum,
   jurisdiction: jurisdictionEnum2,
-  requesterName: z26.string().trim().min(1).max(255),
-  requesterEmail: z26.string().email().max(255),
-  description: z26.string().trim().max(5e3).optional(),
+  requesterName: z27.string().trim().min(1).max(255),
+  requesterEmail: z27.string().email().max(255),
+  description: z27.string().trim().max(5e3).optional(),
   priority: priorityEnum2,
-  assignedToUserId: z26.number().int().positive().optional(),
-  notes: z26.string().trim().max(5e3).optional()
+  assignedToUserId: z27.number().int().positive().optional(),
+  notes: z27.string().trim().max(5e3).optional()
 });
-var patchSchema4 = z26.object({
+var patchSchema4 = z27.object({
   status: statusEnum6.optional(),
   priority: priorityEnum2.optional(),
-  assignedToUserId: z26.number().int().positive().nullable().optional(),
-  notes: z26.string().trim().max(5e3).optional(),
-  completedAt: z26.string().nullable().optional()
+  assignedToUserId: z27.number().int().positive().nullable().optional(),
+  notes: z27.string().trim().max(5e3).optional(),
+  completedAt: z27.string().nullable().optional()
 });
 var dsrRouter = router({
   list: activeOrgProcedure.input(
-    z26.object({
+    z27.object({
       status: statusEnum6.optional(),
       requestType: requestTypeEnum.optional(),
       jurisdiction: jurisdictionEnum2.optional()
@@ -28387,7 +30620,7 @@ var dsrRouter = router({
     });
     return result;
   }),
-  patch: activeOrgProcedure.input(z26.object({ id: z26.number().int().positive() }).merge(patchSchema4)).mutation(async ({ ctx, input }) => {
+  patch: activeOrgProcedure.input(z27.object({ id: z27.number().int().positive() }).merge(patchSchema4)).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "dsr_management", "canEdit");
     const { id, ...data } = input;
     const orgId = ctx.organizationId;
@@ -28399,7 +30632,7 @@ var dsrRouter = router({
       updateValues.completedAt = data.completedAt ? new Date(data.completedAt) : null;
     }
     const success = await patchDsr(orgId, id, updateValues);
-    if (!success) throw new TRPCError21({ code: "NOT_FOUND" });
+    if (!success) throw new TRPCError23({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "dsr.patch",
@@ -28409,11 +30642,11 @@ var dsrRouter = router({
     });
     return { success: true };
   }),
-  remove: activeOrgProcedure.input(z26.number().int().positive()).mutation(async ({ ctx, input: id }) => {
+  remove: activeOrgProcedure.input(z27.number().int().positive()).mutation(async ({ ctx, input: id }) => {
     await requireModulePermission(ctx, "dsr_management", "canDelete");
     const orgId = ctx.organizationId;
     const success = await removeDsr(orgId, id);
-    if (!success) throw new TRPCError21({ code: "NOT_FOUND" });
+    if (!success) throw new TRPCError23({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "dsr.remove",
@@ -28430,8 +30663,8 @@ var dsrRouter = router({
 });
 
 // server/compliance-chat-router.ts
-import { TRPCError as TRPCError22 } from "@trpc/server";
-import { z as z27 } from "zod";
+import { TRPCError as TRPCError24 } from "@trpc/server";
+import { z as z28 } from "zod";
 
 // server/_core/llm.ts
 init_env();
@@ -28505,12 +30738,27 @@ var normalizeToolChoice = (toolChoice, tools) => {
   }
   return toolChoice;
 };
-var resolveApiUrl = () => ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0 ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions` : "https://forge.manus.im/v1/chat/completions";
-var assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+function resolveLlmProvider(env = ENV) {
+  if (env.deepseekApiKey) {
+    return {
+      name: "deepseek",
+      url: `${env.deepseekBaseUrl.replace(/\/$/, "")}/chat/completions`,
+      apiKey: env.deepseekApiKey,
+      model: env.deepseekModel || "deepseek-chat",
+      maxTokensLimit: 8192,
+      supportsThinking: false
+    };
   }
-};
+  const forgeUrl = env.forgeApiUrl && env.forgeApiUrl.trim().length > 0 ? `${env.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions` : "https://forge.manus.im/v1/chat/completions";
+  return {
+    name: "forge",
+    url: forgeUrl,
+    apiKey: env.forgeApiKey,
+    model: "gemini-2.5-flash",
+    maxTokensLimit: 32768,
+    supportsThinking: true
+  };
+}
 var normalizeResponseFormat = ({
   responseFormat,
   response_format,
@@ -28541,7 +30789,12 @@ var normalizeResponseFormat = ({
   };
 };
 async function invokeLLM(params) {
-  assertApiKey();
+  const provider = resolveLlmProvider();
+  if (!provider.apiKey) {
+    throw new Error(
+      "No LLM provider configured: set DEEPSEEK_API_KEY (or BUILT_IN_FORGE_API_KEY)."
+    );
+  }
   const {
     messages,
     tools,
@@ -28555,7 +30808,7 @@ async function invokeLLM(params) {
     response_format
   } = params;
   const payload = {
-    model: "gemini-2.5-flash",
+    model: provider.model,
     messages: messages.map(normalizeMessage)
   };
   if (tools && tools.length > 0) {
@@ -28569,24 +30822,27 @@ async function invokeLLM(params) {
     payload.tool_choice = normalizedToolChoice;
   }
   const requestedMaxTokens = maxTokens ?? max_tokens;
-  payload.max_tokens = typeof requestedMaxTokens === "number" && Number.isFinite(requestedMaxTokens) && requestedMaxTokens > 0 ? Math.min(Math.floor(requestedMaxTokens), 32768) : 32768;
-  payload.thinking = {
-    budget_tokens: 128
-  };
+  payload.max_tokens = typeof requestedMaxTokens === "number" && Number.isFinite(requestedMaxTokens) && requestedMaxTokens > 0 ? Math.min(Math.floor(requestedMaxTokens), provider.maxTokensLimit) : provider.maxTokensLimit;
+  if (provider.supportsThinking) {
+    payload.thinking = {
+      budget_tokens: 128
+    };
+  }
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
     response_format,
     outputSchema,
     output_schema
   });
-  if (normalizedResponseFormat) {
-    payload.response_format = normalizedResponseFormat;
+  const effectiveResponseFormat = provider.name === "deepseek" && normalizedResponseFormat?.type === "json_schema" ? { type: "json_object" } : normalizedResponseFormat;
+  if (effectiveResponseFormat) {
+    payload.response_format = effectiveResponseFormat;
   }
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetch(provider.url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`
+      authorization: `Bearer ${provider.apiKey}`
     },
     body: JSON.stringify(payload)
   });
@@ -28606,25 +30862,25 @@ init_pipeline();
 function screenChatMessages(messages) {
   for (const message of messages) {
     if (findInjectionThreats(message.content).length > 0) {
-      throw new TRPCError22({
+      throw new TRPCError24({
         code: "BAD_REQUEST",
         message: "Message blocked by the content safety policy."
       });
     }
   }
 }
-var chatMessageSchema = z27.object({
-  role: z27.enum(["user", "assistant"]),
-  content: z27.string().max(2e3)
+var chatMessageSchema = z28.object({
+  role: z28.enum(["user", "assistant"]),
+  content: z28.string().max(2e3)
 });
-var chatInputSchema = z27.object({
+var chatInputSchema = z28.object({
   /** Full conversation history including the latest user message at the end */
-  messages: z27.array(chatMessageSchema).min(1).max(30),
+  messages: z28.array(chatMessageSchema).min(1).max(30),
   /**
    * Optional jurisdiction to bias the knowledge-base search.
    * Omit or pass "all" to search across all jurisdictions.
    */
-  jurisdiction: z27.enum(["all", ...GLOBAL_JURISDICTIONS]).optional().default("all")
+  jurisdiction: z28.enum(["all", ...GLOBAL_JURISDICTIONS]).optional().default("all")
 });
 var SYSTEM_PROMPT_PREFIX = `You are the DJAC Compliance Assistant \u2014 an expert on global data-protection and cybersecurity regulations across multiple jurisdictions (APAC, EMEA, Americas).
 
@@ -28686,7 +30942,7 @@ var complianceChatRouter = router({
       6e4
     );
     if (!rl.allowed) {
-      throw new TRPCError22({
+      throw new TRPCError24({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded. Please wait before retrying."
       });
@@ -28695,7 +30951,7 @@ var complianceChatRouter = router({
     screenChatMessages(messages);
     const lastMessage = messages[messages.length - 1];
     if (lastMessage.role !== "user") {
-      throw new TRPCError22({
+      throw new TRPCError24({
         code: "BAD_REQUEST",
         message: "The last message must be from the user."
       });
@@ -28745,7 +31001,7 @@ var complianceChatRouter = router({
         "[complianceChat] LLM call failed:",
         err instanceof Error ? err.message : err
       );
-      throw new TRPCError22({
+      throw new TRPCError24({
         code: "INTERNAL_SERVER_ERROR",
         message: "The AI service is temporarily unavailable. Please try again."
       });
@@ -28754,8 +31010,8 @@ var complianceChatRouter = router({
 });
 
 // server/service-request-router.ts
-import { z as z28 } from "zod";
-import { TRPCError as TRPCError23 } from "@trpc/server";
+import { z as z29 } from "zod";
+import { TRPCError as TRPCError25 } from "@trpc/server";
 init_const();
 init_logger();
 init_email();
@@ -28765,7 +31021,7 @@ init_sse_bus();
 // server/service-request-store.ts
 init_schema();
 init_db();
-import { and as and23, desc as desc16, eq as eq31 } from "drizzle-orm";
+import { and as and26, desc as desc17, eq as eq34 } from "drizzle-orm";
 var SERVICE_TYPES = [
   "penetration_test",
   "red_team",
@@ -28799,7 +31055,7 @@ async function listRequests(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(serviceRequests).where(eq31(serviceRequests.organizationId, orgId)).orderBy(desc16(serviceRequests.createdAt));
+  return db.select().from(serviceRequests).where(eq34(serviceRequests.organizationId, orgId)).orderBy(desc17(serviceRequests.createdAt));
 }
 async function getRequest(orgId, id) {
   const db = await getDb();
@@ -28807,7 +31063,7 @@ async function getRequest(orgId, id) {
     return MEM_REQUESTS.find((r) => r.id === id && r.organizationId === orgId) ?? null;
   }
   const [row] = await db.select().from(serviceRequests).where(
-    and23(eq31(serviceRequests.id, id), eq31(serviceRequests.organizationId, orgId))
+    and26(eq34(serviceRequests.id, id), eq34(serviceRequests.organizationId, orgId))
   ).limit(1);
   return row ?? null;
 }
@@ -28852,7 +31108,7 @@ async function createRequest(orgId, input, localUserId) {
     status: "submitted"
   }).returning({ id: serviceRequests.id });
   const insertId = inserted.id;
-  const [created] = await db.select().from(serviceRequests).where(eq31(serviceRequests.id, insertId)).limit(1);
+  const [created] = await db.select().from(serviceRequests).where(eq34(serviceRequests.id, insertId)).limit(1);
   return { row: created, insertId };
 }
 async function cancelRequest(orgId, id) {
@@ -28868,12 +31124,12 @@ async function cancelRequest(orgId, id) {
     return req;
   }
   const [existing] = await db.select().from(serviceRequests).where(
-    and23(eq31(serviceRequests.id, id), eq31(serviceRequests.organizationId, orgId))
+    and26(eq34(serviceRequests.id, id), eq34(serviceRequests.organizationId, orgId))
   ).limit(1);
   if (!existing) return "not_found";
   if (!["draft", "submitted"].includes(existing.status))
     return "not_cancellable";
-  await db.update(serviceRequests).set({ status: "cancelled", updatedAt: /* @__PURE__ */ new Date() }).where(eq31(serviceRequests.id, id));
+  await db.update(serviceRequests).set({ status: "cancelled", updatedAt: /* @__PURE__ */ new Date() }).where(eq34(serviceRequests.id, id));
   return { id, status: "cancelled" };
 }
 async function adminListRequests() {
@@ -28883,7 +31139,7 @@ async function adminListRequests() {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(serviceRequests).orderBy(desc16(serviceRequests.createdAt));
+  return db.select().from(serviceRequests).orderBy(desc17(serviceRequests.createdAt));
 }
 async function adminUpdateRequest(id, updateValues) {
   const db = await getDb();
@@ -28893,29 +31149,29 @@ async function adminUpdateRequest(id, updateValues) {
     Object.assign(req, updateValues);
     return req;
   }
-  await db.update(serviceRequests).set(updateValues).where(eq31(serviceRequests.id, id));
-  const [updated] = await db.select().from(serviceRequests).where(eq31(serviceRequests.id, id)).limit(1);
+  await db.update(serviceRequests).set(updateValues).where(eq34(serviceRequests.id, id));
+  const [updated] = await db.select().from(serviceRequests).where(eq34(serviceRequests.id, id)).limit(1);
   return updated ?? null;
 }
 
 // server/service-request-router.ts
-var serviceTypeEnum2 = z28.enum(SERVICE_TYPES);
-var statusEnum7 = z28.enum(REQUEST_STATUSES);
-var priorityEnum3 = z28.enum(PRIORITY_LEVELS);
-var createSchema7 = z28.object({
+var serviceTypeEnum2 = z29.enum(SERVICE_TYPES);
+var statusEnum7 = z29.enum(REQUEST_STATUSES);
+var priorityEnum3 = z29.enum(PRIORITY_LEVELS);
+var createSchema7 = z29.object({
   serviceType: serviceTypeEnum2,
-  title: z28.string().trim().min(3).max(255),
-  description: z28.string().trim().min(10).max(5e3),
-  scopeDetails: z28.string().trim().max(3e3).optional(),
-  preferredStartDate: z28.string().optional(),
-  budgetRange: z28.string().trim().max(100).optional(),
+  title: z29.string().trim().min(3).max(255),
+  description: z29.string().trim().min(10).max(5e3),
+  scopeDetails: z29.string().trim().max(3e3).optional(),
+  preferredStartDate: z29.string().optional(),
+  budgetRange: z29.string().trim().max(100).optional(),
   priority: priorityEnum3
 });
-var adminUpdateSchema = z28.object({
+var adminUpdateSchema = z29.object({
   status: statusEnum7.optional(),
-  assignedToUserId: z28.number().int().positive().nullable().optional(),
-  internalNotes: z28.string().trim().max(5e3).nullable().optional(),
-  clientResponse: z28.string().trim().max(5e3).nullable().optional(),
+  assignedToUserId: z29.number().int().positive().nullable().optional(),
+  internalNotes: z29.string().trim().max(5e3).nullable().optional(),
+  clientResponse: z29.string().trim().max(5e3).nullable().optional(),
   priority: priorityEnum3.optional()
 });
 var serviceRequestRouter = router({
@@ -28923,10 +31179,10 @@ var serviceRequestRouter = router({
     await requireModulePermission(ctx, "service_requests", "canView");
     return listRequests(ctx.organizationId);
   }),
-  get: activeOrgProcedure.input(z28.object({ id: z28.number().int().positive() })).query(async ({ ctx, input }) => {
+  get: activeOrgProcedure.input(z29.object({ id: z29.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "service_requests", "canView");
     const req = await getRequest(ctx.organizationId, input.id);
-    if (!req) throw new TRPCError23({ code: "NOT_FOUND" });
+    if (!req) throw new TRPCError25({ code: "NOT_FOUND" });
     return req;
   }),
   create: activeOrgProcedure.input(createSchema7).mutation(async ({ ctx, input }) => {
@@ -28979,13 +31235,13 @@ ${input.description}`;
     });
     return row;
   }),
-  cancel: activeOrgProcedure.input(z28.object({ id: z28.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  cancel: activeOrgProcedure.input(z29.object({ id: z29.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "service_requests", "canEdit");
     const orgId = ctx.organizationId;
     const result = await cancelRequest(orgId, input.id);
-    if (result === "not_found") throw new TRPCError23({ code: "NOT_FOUND" });
+    if (result === "not_found") throw new TRPCError25({ code: "NOT_FOUND" });
     if (result === "not_cancellable")
-      throw new TRPCError23({
+      throw new TRPCError25({
         code: "BAD_REQUEST",
         message: "Request cannot be cancelled in its current state"
       });
@@ -29000,7 +31256,7 @@ ${input.description}`;
   }),
   adminList: protectedProcedure.query(async ({ ctx }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError23({ code: "FORBIDDEN" });
+      throw new TRPCError25({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "service_requests",
@@ -29009,10 +31265,10 @@ ${input.description}`;
     return adminListRequests();
   }),
   adminUpdate: protectedProcedure.input(
-    z28.object({ id: z28.number().int().positive() }).merge(adminUpdateSchema)
+    z29.object({ id: z29.number().int().positive() }).merge(adminUpdateSchema)
   ).mutation(async ({ ctx, input }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError23({ code: "FORBIDDEN" });
+      throw new TRPCError25({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "service_requests",
@@ -29027,7 +31283,7 @@ ${input.description}`;
     if (data.clientResponse !== void 0)
       updateValues.respondedAt = /* @__PURE__ */ new Date();
     const updated = await adminUpdateRequest(id, updateValues);
-    if (!updated) throw new TRPCError23({ code: "NOT_FOUND" });
+    if (!updated) throw new TRPCError25({ code: "NOT_FOUND" });
     if (data.clientResponse && updated.organizationId != null) {
       broadcastSSE("service_request_updated", {
         id,
@@ -29048,13 +31304,13 @@ ${input.description}`;
 });
 
 // server/asset-inventory-router.ts
-import { z as z29 } from "zod";
-import { TRPCError as TRPCError24 } from "@trpc/server";
+import { z as z30 } from "zod";
+import { TRPCError as TRPCError26 } from "@trpc/server";
 
 // server/asset-inventory-store.ts
 init_schema();
 init_db();
-import { and as and24, desc as desc17, eq as eq32 } from "drizzle-orm";
+import { and as and27, desc as desc18, eq as eq35 } from "drizzle-orm";
 var ASSET_TYPES = [
   "server",
   "workstation",
@@ -29115,7 +31371,7 @@ async function listAssets(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(assetInventory).where(eq32(assetInventory.organizationId, orgId)).orderBy(desc17(assetInventory.createdAt));
+  return db.select().from(assetInventory).where(eq35(assetInventory.organizationId, orgId)).orderBy(desc18(assetInventory.createdAt));
 }
 async function getAsset(orgId, id) {
   const db = await getDb();
@@ -29123,7 +31379,7 @@ async function getAsset(orgId, id) {
     return MEM_ASSETS.find((a) => a.id === id && a.organizationId === orgId) ?? null;
   }
   const [row] = await db.select().from(assetInventory).where(
-    and24(eq32(assetInventory.id, id), eq32(assetInventory.organizationId, orgId))
+    and27(eq35(assetInventory.id, id), eq35(assetInventory.organizationId, orgId))
   ).limit(1);
   return row ?? null;
 }
@@ -29175,7 +31431,7 @@ async function createAsset(orgId, input, localUserId) {
     addedByUserId: localUserId
   }).returning({ id: assetInventory.id });
   const insertId = inserted.id;
-  const [created] = await db.select().from(assetInventory).where(eq32(assetInventory.id, insertId)).limit(1);
+  const [created] = await db.select().from(assetInventory).where(eq35(assetInventory.id, insertId)).limit(1);
   return created;
 }
 async function getAssetForPatch(orgId, id) {
@@ -29184,7 +31440,7 @@ async function getAssetForPatch(orgId, id) {
     return MEM_ASSETS.find((a) => a.id === id && a.organizationId === orgId) ?? null;
   }
   const [row] = await db.select().from(assetInventory).where(
-    and24(eq32(assetInventory.id, id), eq32(assetInventory.organizationId, orgId))
+    and27(eq35(assetInventory.id, id), eq35(assetInventory.organizationId, orgId))
   ).limit(1);
   return row ?? null;
 }
@@ -29198,8 +31454,8 @@ async function patchAssetRow(orgId, id, updateValues) {
     Object.assign(asset, updateValues);
     return asset;
   }
-  await db.update(assetInventory).set(updateValues).where(eq32(assetInventory.id, id));
-  const [updated] = await db.select().from(assetInventory).where(eq32(assetInventory.id, id)).limit(1);
+  await db.update(assetInventory).set(updateValues).where(eq35(assetInventory.id, id));
+  const [updated] = await db.select().from(assetInventory).where(eq35(assetInventory.id, id)).limit(1);
   return updated ?? null;
 }
 async function deleteAsset(orgId, id) {
@@ -29213,10 +31469,10 @@ async function deleteAsset(orgId, id) {
     return { found: true };
   }
   const [existing] = await db.select({ id: assetInventory.id, name: assetInventory.name }).from(assetInventory).where(
-    and24(eq32(assetInventory.id, id), eq32(assetInventory.organizationId, orgId))
+    and27(eq35(assetInventory.id, id), eq35(assetInventory.organizationId, orgId))
   ).limit(1);
   if (!existing) return { found: false };
-  await db.delete(assetInventory).where(eq32(assetInventory.id, id));
+  await db.delete(assetInventory).where(eq35(assetInventory.id, id));
   return { found: true, name: existing.name };
 }
 async function getAllOrgAssets(orgId) {
@@ -29224,30 +31480,30 @@ async function getAllOrgAssets(orgId) {
   if (!db || orgId < 0) {
     return MEM_ASSETS.filter((a) => a.organizationId === orgId);
   }
-  return db.select().from(assetInventory).where(eq32(assetInventory.organizationId, orgId));
+  return db.select().from(assetInventory).where(eq35(assetInventory.organizationId, orgId));
 }
 
 // server/asset-inventory-router.ts
-var assetTypeEnum2 = z29.enum(ASSET_TYPES);
-var criticalityEnum2 = z29.enum(CRITICALITY_LEVELS);
-var exposureEnum2 = z29.enum(EXPOSURE_LEVELS);
-var statusEnum8 = z29.enum(ASSET_STATUSES);
-var createSchema8 = z29.object({
-  name: z29.string().trim().min(1).max(255),
+var assetTypeEnum2 = z30.enum(ASSET_TYPES);
+var criticalityEnum2 = z30.enum(CRITICALITY_LEVELS);
+var exposureEnum2 = z30.enum(EXPOSURE_LEVELS);
+var statusEnum8 = z30.enum(ASSET_STATUSES);
+var createSchema8 = z30.object({
+  name: z30.string().trim().min(1).max(255),
   assetType: assetTypeEnum2,
   criticality: criticalityEnum2,
   exposure: exposureEnum2,
   status: statusEnum8,
-  identifier: z29.string().trim().max(255).optional(),
-  owner: z29.string().trim().max(255).optional(),
-  location: z29.string().trim().max(255).optional(),
-  platform: z29.string().trim().max(255).optional(),
-  version: z29.string().trim().max(100).optional(),
-  tags: z29.string().trim().max(500).optional(),
-  notes: z29.string().trim().max(2e3).optional()
+  identifier: z30.string().trim().max(255).optional(),
+  owner: z30.string().trim().max(255).optional(),
+  location: z30.string().trim().max(255).optional(),
+  platform: z30.string().trim().max(255).optional(),
+  version: z30.string().trim().max(100).optional(),
+  tags: z30.string().trim().max(500).optional(),
+  notes: z30.string().trim().max(2e3).optional()
 });
 var patchSchema5 = createSchema8.partial().extend({
-  openVulnCount: z29.number().int().min(0).optional()
+  openVulnCount: z30.number().int().min(0).optional()
 });
 var assetInventoryRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
@@ -29255,22 +31511,22 @@ var assetInventoryRouter = router({
       await requireModulePermission(ctx, "asset_inventory", "canView");
       return listAssets(ctx.organizationId);
     } catch (err) {
-      if (err instanceof TRPCError24) throw err;
-      throw new TRPCError24({
+      if (err instanceof TRPCError26) throw err;
+      throw new TRPCError26({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to list assets"
       });
     }
   }),
-  get: activeOrgProcedure.input(z29.object({ id: z29.number().int().positive() })).query(async ({ ctx, input }) => {
+  get: activeOrgProcedure.input(z30.object({ id: z30.number().int().positive() })).query(async ({ ctx, input }) => {
     try {
       await requireModulePermission(ctx, "asset_inventory", "canView");
       const asset = await getAsset(ctx.organizationId, input.id);
-      if (!asset) throw new TRPCError24({ code: "NOT_FOUND" });
+      if (!asset) throw new TRPCError26({ code: "NOT_FOUND" });
       return asset;
     } catch (err) {
-      if (err instanceof TRPCError24) throw err;
-      throw new TRPCError24({
+      if (err instanceof TRPCError26) throw err;
+      throw new TRPCError26({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch asset"
       });
@@ -29291,12 +31547,12 @@ var assetInventoryRouter = router({
     });
     return result;
   }),
-  patch: activeOrgProcedure.input(z29.object({ id: z29.number().int().positive() }).merge(patchSchema5)).mutation(async ({ ctx, input }) => {
+  patch: activeOrgProcedure.input(z30.object({ id: z30.number().int().positive() }).merge(patchSchema5)).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "asset_inventory", "canEdit");
     const { id, ...data } = input;
     const orgId = ctx.organizationId;
     const existing = await getAssetForPatch(orgId, id);
-    if (!existing) throw new TRPCError24({ code: "NOT_FOUND" });
+    if (!existing) throw new TRPCError26({ code: "NOT_FOUND" });
     const updateValues = {
       ...data,
       updatedAt: /* @__PURE__ */ new Date()
@@ -29317,11 +31573,11 @@ var assetInventoryRouter = router({
     });
     return updated;
   }),
-  remove: activeOrgProcedure.input(z29.object({ id: z29.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  remove: activeOrgProcedure.input(z30.object({ id: z30.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "asset_inventory", "canDelete");
     const orgId = ctx.organizationId;
     const result = await deleteAsset(orgId, input.id);
-    if (!result.found) throw new TRPCError24({ code: "NOT_FOUND" });
+    if (!result.found) throw new TRPCError26({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "asset.remove",
@@ -29356,8 +31612,8 @@ var assetInventoryRouter = router({
         totalOpenVulnerabilities: totalVulns
       };
     } catch (err) {
-      if (err instanceof TRPCError24) throw err;
-      throw new TRPCError24({
+      if (err instanceof TRPCError26) throw err;
+      throw new TRPCError26({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch asset summary"
       });
@@ -29366,14 +31622,14 @@ var assetInventoryRouter = router({
 });
 
 // server/threat-intel-router.ts
-import { z as z30 } from "zod";
-import { TRPCError as TRPCError25 } from "@trpc/server";
+import { z as z31 } from "zod";
+import { TRPCError as TRPCError27 } from "@trpc/server";
 init_const();
 
 // server/threat-intel-store.ts
 init_schema();
 init_db();
-import { and as and25, desc as desc18, eq as eq33, isNull as isNull3, or as or5 } from "drizzle-orm";
+import { and as and28, desc as desc19, eq as eq36, isNull as isNull3, or as or5 } from "drizzle-orm";
 var CATEGORIES = [
   "malware",
   "ransomware",
@@ -29466,14 +31722,14 @@ async function getThreatFeed(orgId, filters) {
     items = MEM_ITEMS.filter((i) => i.isActive === 1);
   } else {
     items = await db.select().from(threatIntelItems).where(
-      and25(
-        eq33(threatIntelItems.isActive, 1),
+      and28(
+        eq36(threatIntelItems.isActive, 1),
         or5(
           isNull3(threatIntelItems.organizationId),
-          eq33(threatIntelItems.organizationId, orgId)
+          eq36(threatIntelItems.organizationId, orgId)
         )
       )
-    ).orderBy(desc18(threatIntelItems.publishedAt)).limit(filters.limit);
+    ).orderBy(desc19(threatIntelItems.publishedAt)).limit(filters.limit);
   }
   if (filters.severity)
     items = items.filter((i) => i.severity === filters.severity);
@@ -29489,11 +31745,11 @@ async function getThreatItem(orgId, id) {
     return MEM_ITEMS.find((i) => i.id === id) ?? null;
   }
   const [row] = await db.select().from(threatIntelItems).where(
-    and25(
-      eq33(threatIntelItems.id, id),
+    and28(
+      eq36(threatIntelItems.id, id),
       or5(
         isNull3(threatIntelItems.organizationId),
-        eq33(threatIntelItems.organizationId, orgId)
+        eq36(threatIntelItems.organizationId, orgId)
       )
     )
   ).limit(1);
@@ -29544,7 +31800,7 @@ async function adminCreateThreatItem(input, localUserId) {
     publishedAt
   }).returning({ id: threatIntelItems.id });
   const insertId = inserted.id;
-  const [created] = await db.select().from(threatIntelItems).where(eq33(threatIntelItems.id, insertId)).limit(1);
+  const [created] = await db.select().from(threatIntelItems).where(eq36(threatIntelItems.id, insertId)).limit(1);
   return created;
 }
 async function adminUpdateThreatItem(id, updateValues) {
@@ -29555,8 +31811,8 @@ async function adminUpdateThreatItem(id, updateValues) {
     Object.assign(item, updateValues);
     return item;
   }
-  await db.update(threatIntelItems).set(updateValues).where(eq33(threatIntelItems.id, id));
-  const [updated] = await db.select().from(threatIntelItems).where(eq33(threatIntelItems.id, id)).limit(1);
+  await db.update(threatIntelItems).set(updateValues).where(eq36(threatIntelItems.id, id));
+  const [updated] = await db.select().from(threatIntelItems).where(eq36(threatIntelItems.id, id)).limit(1);
   return updated ?? null;
 }
 async function adminRemoveThreatItem(id) {
@@ -29568,38 +31824,38 @@ async function adminRemoveThreatItem(id) {
     item.updatedAt = /* @__PURE__ */ new Date();
     return true;
   }
-  await db.update(threatIntelItems).set({ isActive: 0, updatedAt: /* @__PURE__ */ new Date() }).where(eq33(threatIntelItems.id, id));
+  await db.update(threatIntelItems).set({ isActive: 0, updatedAt: /* @__PURE__ */ new Date() }).where(eq36(threatIntelItems.id, id));
   return true;
 }
 
 // server/threat-intel-router.ts
-var categoryEnum2 = z30.enum(CATEGORIES);
-var severityEnum5 = z30.enum(SEVERITIES);
-var tlpEnum2 = z30.enum(TLP_LEVELS);
-var createSchema9 = z30.object({
-  title: z30.string().trim().min(3).max(255),
-  summary: z30.string().trim().min(10).max(1e4),
+var categoryEnum2 = z31.enum(CATEGORIES);
+var severityEnum5 = z31.enum(SEVERITIES);
+var tlpEnum2 = z31.enum(TLP_LEVELS);
+var createSchema9 = z31.object({
+  title: z31.string().trim().min(3).max(255),
+  summary: z31.string().trim().min(10).max(1e4),
   category: categoryEnum2,
   severity: severityEnum5,
   tlp: tlpEnum2,
-  organizationId: z30.number().int().positive().nullable().optional(),
-  threatActor: z30.string().trim().max(255).optional(),
-  affectedSectors: z30.string().trim().max(1e3).optional(),
-  indicators: z30.string().trim().max(5e3).optional(),
-  referenceUrl: z30.string().url().optional().or(z30.literal("")),
-  cveId: z30.string().trim().max(50).optional(),
-  cvssScore: z30.string().trim().max(10).optional(),
-  publishedAt: z30.string().optional()
+  organizationId: z31.number().int().positive().nullable().optional(),
+  threatActor: z31.string().trim().max(255).optional(),
+  affectedSectors: z31.string().trim().max(1e3).optional(),
+  indicators: z31.string().trim().max(5e3).optional(),
+  referenceUrl: z31.string().url().optional().or(z31.literal("")),
+  cveId: z31.string().trim().max(50).optional(),
+  cvssScore: z31.string().trim().max(10).optional(),
+  publishedAt: z31.string().optional()
 });
 var updateSchema = createSchema9.partial().extend({
-  isActive: z30.number().int().min(0).max(1).optional()
+  isActive: z31.number().int().min(0).max(1).optional()
 });
 var threatIntelRouter = router({
   feed: activeOrgProcedure.input(
-    z30.object({
+    z31.object({
       severity: severityEnum5.optional(),
       category: categoryEnum2.optional(),
-      limit: z30.number().int().min(1).max(100).default(50)
+      limit: z31.number().int().min(1).max(100).default(50)
     })
   ).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "pro_intelligence", "canView");
@@ -29609,15 +31865,15 @@ var threatIntelRouter = router({
       limit: input.limit
     });
   }),
-  get: activeOrgProcedure.input(z30.object({ id: z30.number().int().positive() })).query(async ({ ctx, input }) => {
+  get: activeOrgProcedure.input(z31.object({ id: z31.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "pro_intelligence", "canView");
     const item = await getThreatItem(ctx.organizationId, input.id);
-    if (!item) throw new TRPCError25({ code: "NOT_FOUND" });
+    if (!item) throw new TRPCError27({ code: "NOT_FOUND" });
     return item;
   }),
   adminCreate: protectedProcedure.input(createSchema9).mutation(async ({ ctx, input }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError25({ code: "FORBIDDEN" });
+      throw new TRPCError27({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "pro_intelligence",
@@ -29635,9 +31891,9 @@ var threatIntelRouter = router({
     });
     return item;
   }),
-  adminUpdate: protectedProcedure.input(z30.object({ id: z30.number().int().positive() }).merge(updateSchema)).mutation(async ({ ctx, input }) => {
+  adminUpdate: protectedProcedure.input(z31.object({ id: z31.number().int().positive() }).merge(updateSchema)).mutation(async ({ ctx, input }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError25({ code: "FORBIDDEN" });
+      throw new TRPCError27({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "pro_intelligence",
@@ -29649,7 +31905,7 @@ var threatIntelRouter = router({
       updatedAt: /* @__PURE__ */ new Date()
     };
     const updated = await adminUpdateThreatItem(id, updateValues);
-    if (!updated) throw new TRPCError25({ code: "NOT_FOUND" });
+    if (!updated) throw new TRPCError27({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "threatIntel.adminUpdate",
@@ -29660,16 +31916,16 @@ var threatIntelRouter = router({
     });
     return updated;
   }),
-  adminRemove: protectedProcedure.input(z30.object({ id: z30.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  adminRemove: protectedProcedure.input(z31.object({ id: z31.number().int().positive() })).mutation(async ({ ctx, input }) => {
     if (!hasMinRole(ctx.user?.role, "admin"))
-      throw new TRPCError25({ code: "FORBIDDEN" });
+      throw new TRPCError27({ code: "FORBIDDEN" });
     await requireModulePermissionIfOrgContext(
       ctx,
       "pro_intelligence",
       "canDelete"
     );
     const found = await adminRemoveThreatItem(input.id);
-    if (!found) throw new TRPCError25({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError27({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "threatIntel.adminRemove",
@@ -29682,13 +31938,13 @@ var threatIntelRouter = router({
 });
 
 // server/security-maturity-router.ts
-import { z as z31 } from "zod";
-import { TRPCError as TRPCError26 } from "@trpc/server";
+import { z as z32 } from "zod";
+import { TRPCError as TRPCError28 } from "@trpc/server";
 
 // server/security-maturity-store.ts
 init_schema();
 init_db();
-import { and as and26, desc as desc19, eq as eq34 } from "drizzle-orm";
+import { and as and29, desc as desc20, eq as eq37 } from "drizzle-orm";
 var MEM_ASSESSMENTS = [];
 var memSeq11 = 1;
 function toMaturityLevel(overallScore) {
@@ -29710,7 +31966,7 @@ async function listAssessments(orgId) {
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
-  return db.select().from(securityMaturityAssessments).where(eq34(securityMaturityAssessments.organizationId, orgId)).orderBy(desc19(securityMaturityAssessments.createdAt));
+  return db.select().from(securityMaturityAssessments).where(eq37(securityMaturityAssessments.organizationId, orgId)).orderBy(desc20(securityMaturityAssessments.createdAt));
 }
 async function getLatestAssessment(orgId) {
   const db = await getDb();
@@ -29720,7 +31976,7 @@ async function getLatestAssessment(orgId) {
     ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     return all[0] ?? null;
   }
-  const [row] = await db.select().from(securityMaturityAssessments).where(eq34(securityMaturityAssessments.organizationId, orgId)).orderBy(desc19(securityMaturityAssessments.createdAt)).limit(1);
+  const [row] = await db.select().from(securityMaturityAssessments).where(eq37(securityMaturityAssessments.organizationId, orgId)).orderBy(desc20(securityMaturityAssessments.createdAt)).limit(1);
   return row ?? null;
 }
 async function getAssessment(orgId, id) {
@@ -29728,7 +31984,7 @@ async function getAssessment(orgId, id) {
   if (!db || orgId < 0) {
     return MEM_ASSESSMENTS.find((a) => a.id === id && a.organizationId === orgId) ?? null;
   }
-  const [row] = await db.select().from(securityMaturityAssessments).where(eq34(securityMaturityAssessments.id, id)).limit(1);
+  const [row] = await db.select().from(securityMaturityAssessments).where(eq37(securityMaturityAssessments.id, id)).limit(1);
   if (!row || row.organizationId !== orgId) return null;
   return row;
 }
@@ -29777,7 +32033,7 @@ async function createAssessmentRow(orgId, input, localUserId) {
     assessedByUserId: localUserId
   }).returning({ id: securityMaturityAssessments.id });
   const insertId = inserted.id;
-  const [created] = await db.select().from(securityMaturityAssessments).where(eq34(securityMaturityAssessments.id, insertId)).limit(1);
+  const [created] = await db.select().from(securityMaturityAssessments).where(eq37(securityMaturityAssessments.id, insertId)).limit(1);
   return created;
 }
 async function deleteAssessmentRow(orgId, id) {
@@ -29791,26 +32047,26 @@ async function deleteAssessmentRow(orgId, id) {
     return true;
   }
   const [existing] = await db.select({ id: securityMaturityAssessments.id }).from(securityMaturityAssessments).where(
-    and26(
-      eq34(securityMaturityAssessments.id, id),
-      eq34(securityMaturityAssessments.organizationId, orgId)
+    and29(
+      eq37(securityMaturityAssessments.id, id),
+      eq37(securityMaturityAssessments.organizationId, orgId)
     )
   ).limit(1);
   if (!existing) return false;
   await db.delete(securityMaturityAssessments).where(
-    and26(
-      eq34(securityMaturityAssessments.id, id),
-      eq34(securityMaturityAssessments.organizationId, orgId)
+    and29(
+      eq37(securityMaturityAssessments.id, id),
+      eq37(securityMaturityAssessments.organizationId, orgId)
     )
   );
   return true;
 }
 
 // server/security-maturity-router.ts
-var domainScore = z31.number().int().min(1).max(5);
-var createSchema10 = z31.object({
-  title: z31.string().trim().min(3).max(255),
-  frameworkRef: z31.enum([
+var domainScore = z32.number().int().min(1).max(5);
+var createSchema10 = z32.object({
+  title: z32.string().trim().min(3).max(255),
+  frameworkRef: z32.enum([
     "ISO 27001",
     "NIST CSF",
     "CIS Controls",
@@ -29833,7 +32089,7 @@ var createSchema10 = z31.object({
   scoreBackupRecovery: domainScore,
   scoreThirdPartyRisk: domainScore,
   scoreSecurityAwareness: domainScore,
-  recommendations: z31.string().trim().max(5e3).optional()
+  recommendations: z32.string().trim().max(5e3).optional()
 });
 var securityMaturityRouter = router({
   list: activeOrgProcedure.query(async ({ ctx }) => {
@@ -29844,10 +32100,10 @@ var securityMaturityRouter = router({
     await requireModulePermission(ctx, "security_maturity", "canView");
     return getLatestAssessment(ctx.organizationId);
   }),
-  get: activeOrgProcedure.input(z31.object({ id: z31.number().int().positive() })).query(async ({ ctx, input }) => {
+  get: activeOrgProcedure.input(z32.object({ id: z32.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "security_maturity", "canView");
     const a = await getAssessment(ctx.organizationId, input.id);
-    if (!a) throw new TRPCError26({ code: "NOT_FOUND" });
+    if (!a) throw new TRPCError28({ code: "NOT_FOUND" });
     return a;
   }),
   create: activeOrgProcedure.input(createSchema10).mutation(async ({ ctx, input }) => {
@@ -29869,13 +32125,13 @@ var securityMaturityRouter = router({
     });
     return result;
   }),
-  delete: activeOrgProcedure.input(z31.object({ id: z31.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  delete: activeOrgProcedure.input(z32.object({ id: z32.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "security_maturity", "canDelete");
     const found = await deleteAssessmentRow(
       ctx.organizationId,
       input.id
     );
-    if (!found) throw new TRPCError26({ code: "NOT_FOUND" });
+    if (!found) throw new TRPCError28({ code: "NOT_FOUND" });
     await recordAuditEvent(ctx, {
       category: "data_write",
       action: "security_maturity.delete",
@@ -29888,163 +32144,40 @@ var securityMaturityRouter = router({
 });
 
 // server/google-auth-router.ts
-import { TRPCError as TRPCError27 } from "@trpc/server";
-import { z as z32 } from "zod";
-
-// server/services/supabase.ts
-init_config_schema();
-import { createClient } from "@supabase/supabase-js";
-var _supabase = null;
-function getSupabaseClient() {
-  if (_supabase) return _supabase;
-  const url = parsedEnv.SUPABASE_URL;
-  const anonKey = parsedEnv.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-  _supabase = createClient(url, anonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: false
-    }
-  });
-  return _supabase;
-}
-
-// server/google-auth-router.ts
-init_db();
+import { TRPCError as TRPCError29 } from "@trpc/server";
+import { z as z33 } from "zod";
 init_env();
-init_const();
-init_local_jwt();
-init_sse_bus();
 var googleAuthRouter = router({
-  /** Get the Google OAuth URL for sign-in */
-  getAuthUrl: publicProcedure.input(z32.object({ redirectTo: z32.string().optional() })).query(async ({ input }) => {
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      throw new TRPCError27({
+  /** Public config for the client-side Google Identity Services button. */
+  config: publicProcedure.query(() => ({
+    enabled: googleOAuthConfigured(),
+    clientId: googleOAuthConfigured() ? ENV.googleClientId : ""
+  })),
+  /** Get the Google OAuth URL for sign-in (built on our own domain). */
+  getAuthUrl: publicProcedure.input(z33.object({ redirectTo: z33.string().optional() })).query(async ({ input }) => {
+    if (!googleOAuthConfigured()) {
+      throw new TRPCError29({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Supabase client not configured."
+        message: "Google sign-in is not configured."
       });
     }
-    const redirectUrl = `${ENV.appUrl}/api/trpc/googleAuth.callback?redirectTo=${encodeURIComponent(input.redirectTo ?? "/dashboard")}`;
-    const { data } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectUrl,
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent"
-        }
-      }
-    });
-    if (!data.url) {
-      throw new TRPCError27({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to generate Google auth URL."
-      });
-    }
-    return { url: data.url };
-  }),
-  /** Callback handler — Supabase redirects here after Google auth */
-  callback: publicProcedure.input(
-    z32.object({
-      code: z32.string().optional(),
-      redirectTo: z32.string().optional()
-    })
-  ).query(async ({ input, ctx }) => {
-    if (!input.code) {
-      throw new TRPCError27({
-        code: "BAD_REQUEST",
-        message: "No authorization code provided."
-      });
-    }
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      throw new TRPCError27({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Supabase client not configured."
-      });
-    }
-    const { data, error } = await supabase.auth.exchangeCodeForSession(
-      input.code
-    );
-    if (error || !data?.user) {
-      throw new TRPCError27({
-        code: "UNAUTHORIZED",
-        message: error?.message ?? "Google authentication failed."
-      });
-    }
-    const supabaseUser = data.user;
-    const openId = `google:${supabaseUser.id}`;
-    const email = supabaseUser.email ?? "";
-    const name = supabaseUser.user_metadata?.full_name ?? supabaseUser.email ?? "User";
-    await upsertUser({
-      openId,
-      name,
-      email,
-      loginMethod: "google",
-      role: "basic_user",
-      status: "active",
-      preferredLocale: "en"
-    });
-    const user = await getUserByOpenId(openId);
-    if (!user) {
-      throw new TRPCError27({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to create user account."
-      });
-    }
-    const token = await signJwt({
-      sub: user.id,
-      type: "oauth",
-      userType: user.role ?? "basic_user",
-      openId
-    });
-    ctx.res.cookie(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: 1e3 * 60 * 60 * 24 * 30
-      // 30 days
-    });
-    void recordAuditEvent(ctx, {
-      category: "auth",
-      action: "user.login",
-      entityType: "users",
-      entityId: user.id,
-      payload: { method: "google", email }
-    });
-    broadcastSSE("user_login", {
-      userId: user.id,
-      email,
-      method: "google",
-      ts: (/* @__PURE__ */ new Date()).toISOString()
-    });
-    return {
-      success: true,
-      redirectTo: input.redirectTo ?? "/dashboard",
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    };
+    return { url: buildGoogleAuthUrl(input.redirectTo ?? "/dashboard") };
   })
 });
 
 // server/knowledge-graph-router.ts
-import { z as z33 } from "zod";
+import { z as z34 } from "zod";
 
 // server/knowledge-graph-store.ts
 init_db();
 init_schema();
-import { and as and27, eq as eq35, or as or6, like, sql as sql5, asc as asc3, isNull as isNull4 } from "drizzle-orm";
+import { and as and30, eq as eq38, or as or6, like, sql as sql6, asc as asc3, isNull as isNull4 } from "drizzle-orm";
 async function seedKnowledgeGraph(input, organizationId) {
   const db = await getDb();
   if (!db)
     return { nodesSeeded: 0, edgesSeeded: 0, error: "Database unavailable" };
   for (const n of input.nodes) {
-    const existing = await db.select().from(knowledgeGraphNodes).where(eq35(knowledgeGraphNodes.nodeId, n.id)).limit(1);
+    const existing = await db.select().from(knowledgeGraphNodes).where(eq38(knowledgeGraphNodes.nodeId, n.id)).limit(1);
     if (existing.length === 0) {
       await db.insert(knowledgeGraphNodes).values({
         nodeId: n.id,
@@ -30058,10 +32191,10 @@ async function seedKnowledgeGraph(input, organizationId) {
   }
   for (const e of input.edges) {
     const existing = await db.select().from(knowledgeGraphEdges).where(
-      and27(
-        eq35(knowledgeGraphEdges.sourceNodeId, e.source),
-        eq35(knowledgeGraphEdges.targetNodeId, e.target),
-        eq35(knowledgeGraphEdges.relation, e.relation)
+      and30(
+        eq38(knowledgeGraphEdges.sourceNodeId, e.source),
+        eq38(knowledgeGraphEdges.targetNodeId, e.target),
+        eq38(knowledgeGraphEdges.relation, e.relation)
       )
     ).limit(1);
     if (existing.length === 0) {
@@ -30082,36 +32215,36 @@ async function queryKnowledgeGraph(query, organizationId) {
   conditions.push(
     organizationId != null ? or6(
       isNull4(knowledgeGraphNodes.organizationId),
-      eq35(knowledgeGraphNodes.organizationId, organizationId)
+      eq38(knowledgeGraphNodes.organizationId, organizationId)
     ) : isNull4(knowledgeGraphNodes.organizationId)
   );
   if (query.kinds && query.kinds.length > 0) {
     conditions.push(
-      sql5`${knowledgeGraphNodes.kind} = ANY(${query.kinds}::text[])`
+      sql6`${knowledgeGraphNodes.kind} = ANY(${query.kinds}::text[])`
     );
   }
   if (query.region) {
-    conditions.push(eq35(knowledgeGraphNodes.region, query.region));
+    conditions.push(eq38(knowledgeGraphNodes.region, query.region));
   }
   if (query.jurisdiction) {
-    conditions.push(eq35(knowledgeGraphNodes.jurisdiction, query.jurisdiction));
+    conditions.push(eq38(knowledgeGraphNodes.jurisdiction, query.jurisdiction));
   }
   if (query.search) {
     const q = `%${query.search.toLowerCase()}%`;
     const searchCond = or6(
-      like(sql5`LOWER(${knowledgeGraphNodes.label})`, q),
-      like(sql5`LOWER(${knowledgeGraphNodes.description})`, q)
+      like(sql6`LOWER(${knowledgeGraphNodes.label})`, q),
+      like(sql6`LOWER(${knowledgeGraphNodes.description})`, q)
     );
     if (searchCond) conditions.push(searchCond);
   }
   const limit = query.limit ?? 50;
   const offset = query.offset ?? 0;
-  const nodes = await db.select().from(knowledgeGraphNodes).where(conditions.length > 0 ? and27(...conditions) : void 0).limit(limit).offset(offset).orderBy(asc3(knowledgeGraphNodes.label));
+  const nodes = await db.select().from(knowledgeGraphNodes).where(conditions.length > 0 ? and30(...conditions) : void 0).limit(limit).offset(offset).orderBy(asc3(knowledgeGraphNodes.label));
   const nodeIds = nodes.map((n) => n.nodeId);
   const edges = nodeIds.length > 0 ? await db.select().from(knowledgeGraphEdges).where(
     or6(
-      sql5`${knowledgeGraphEdges.sourceNodeId} = ANY(${nodeIds}::text[])`,
-      sql5`${knowledgeGraphEdges.targetNodeId} = ANY(${nodeIds}::text[])`
+      sql6`${knowledgeGraphEdges.sourceNodeId} = ANY(${nodeIds}::text[])`,
+      sql6`${knowledgeGraphEdges.targetNodeId} = ANY(${nodeIds}::text[])`
     )
   ).limit(500) : [];
   return { nodes, edges };
@@ -30121,18 +32254,18 @@ async function getAllKnowledgeGraphNodes(organizationId) {
   if (!db) return [];
   const scope = organizationId != null ? or6(
     isNull4(knowledgeGraphNodes.organizationId),
-    eq35(knowledgeGraphNodes.organizationId, organizationId)
+    eq38(knowledgeGraphNodes.organizationId, organizationId)
   ) : isNull4(knowledgeGraphNodes.organizationId);
   return db.select().from(knowledgeGraphNodes).where(scope).orderBy(asc3(knowledgeGraphNodes.kind), asc3(knowledgeGraphNodes.label));
 }
 async function getKnowledgeGraphStats() {
   const db = await getDb();
   if (!db) return { nodes: 0, edges: 0, byKind: [] };
-  const nodeCount = await db.select({ count: sql5`count(*)::int` }).from(knowledgeGraphNodes);
-  const edgeCount = await db.select({ count: sql5`count(*)::int` }).from(knowledgeGraphEdges);
+  const nodeCount = await db.select({ count: sql6`count(*)::int` }).from(knowledgeGraphNodes);
+  const edgeCount = await db.select({ count: sql6`count(*)::int` }).from(knowledgeGraphEdges);
   const kindCounts = await db.select({
     kind: knowledgeGraphNodes.kind,
-    count: sql5`count(*)::int`
+    count: sql6`count(*)::int`
   }).from(knowledgeGraphNodes).groupBy(knowledgeGraphNodes.kind);
   return {
     nodes: Number(nodeCount[0]?.count ?? 0),
@@ -30148,11 +32281,11 @@ async function deleteKnowledgeGraphNode(nodeId) {
   if (!db) return;
   await db.delete(knowledgeGraphEdges).where(
     or6(
-      eq35(knowledgeGraphEdges.sourceNodeId, nodeId),
-      eq35(knowledgeGraphEdges.targetNodeId, nodeId)
+      eq38(knowledgeGraphEdges.sourceNodeId, nodeId),
+      eq38(knowledgeGraphEdges.targetNodeId, nodeId)
     )
   );
-  await db.delete(knowledgeGraphNodes).where(eq35(knowledgeGraphNodes.nodeId, nodeId));
+  await db.delete(knowledgeGraphNodes).where(eq38(knowledgeGraphNodes.nodeId, nodeId));
 }
 async function createCustomNode(input) {
   const db = await getDb();
@@ -30168,7 +32301,7 @@ async function createCustomEdge(input) {
 }
 
 // server/knowledge-graph-router.ts
-var nodeKindEnum = z33.enum([
+var nodeKindEnum = z34.enum([
   "region",
   "framework",
   "standard",
@@ -30186,7 +32319,7 @@ var nodeKindEnum = z33.enum([
   "industry",
   "risk_scenario"
 ]);
-var edgeRelationEnum = z33.enum([
+var edgeRelationEnum = z34.enum([
   "contains",
   "activates",
   "supports",
@@ -30210,20 +32343,20 @@ var knowledgeGraphRouter = router({
     return getAllKnowledgeGraphNodes(ctx.organizationId);
   }),
   query: protectedProcedure.input(
-    z33.object({
-      kinds: z33.array(nodeKindEnum).optional(),
-      region: z33.string().optional(),
-      jurisdiction: z33.string().optional(),
-      search: z33.string().optional(),
-      limit: z33.number().int().min(1).max(100).default(50),
-      offset: z33.number().int().min(0).default(0)
+    z34.object({
+      kinds: z34.array(nodeKindEnum).optional(),
+      region: z34.string().optional(),
+      jurisdiction: z34.string().optional(),
+      search: z34.string().optional(),
+      limit: z34.number().int().min(1).max(100).default(50),
+      offset: z34.number().int().min(0).default(0)
     })
   ).query(async ({ ctx, input }) => {
     return queryKnowledgeGraph(input, ctx.organizationId);
   }),
   seed: protectedProcedure.input(
-    z33.object({
-      organizationId: z33.number().int().positive().optional()
+    z34.object({
+      organizationId: z34.number().int().positive().optional()
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "admin_control_center", "canEdit");
@@ -30237,20 +32370,20 @@ var knowledgeGraphRouter = router({
     });
     return result;
   }),
-  deleteNode: protectedProcedure.input(z33.object({ nodeId: z33.string().min(1).max(120) })).mutation(async ({ ctx, input }) => {
+  deleteNode: protectedProcedure.input(z34.object({ nodeId: z34.string().min(1).max(120) })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "admin_control_center", "canEdit");
     await deleteKnowledgeGraphNode(input.nodeId);
     return { deleted: true };
   }),
   createNode: protectedProcedure.input(
-    z33.object({
-      nodeId: z33.string().min(1).max(120),
-      label: z33.string().min(1).max(255),
+    z34.object({
+      nodeId: z34.string().min(1).max(120),
+      label: z34.string().min(1).max(255),
       kind: nodeKindEnum,
-      region: z33.string().max(120).optional(),
-      jurisdiction: z33.string().max(120).optional(),
-      description: z33.string().max(2e3).optional(),
-      organizationId: z33.number().int().positive().optional()
+      region: z34.string().max(120).optional(),
+      jurisdiction: z34.string().max(120).optional(),
+      description: z34.string().max(2e3).optional(),
+      organizationId: z34.number().int().positive().optional()
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "admin_control_center", "canEdit");
@@ -30258,11 +32391,11 @@ var knowledgeGraphRouter = router({
     return node;
   }),
   createEdge: protectedProcedure.input(
-    z33.object({
-      sourceNodeId: z33.string().min(1).max(120),
-      targetNodeId: z33.string().min(1).max(120),
+    z34.object({
+      sourceNodeId: z34.string().min(1).max(120),
+      targetNodeId: z34.string().min(1).max(120),
       relation: edgeRelationEnum,
-      organizationId: z33.number().int().positive().optional()
+      organizationId: z34.number().int().positive().optional()
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "admin_control_center", "canEdit");
@@ -30272,13 +32405,13 @@ var knowledgeGraphRouter = router({
 });
 
 // server/regulatory-change-router.ts
-import { z as z34 } from "zod";
-import { TRPCError as TRPCError28 } from "@trpc/server";
+import { z as z35 } from "zod";
+import { TRPCError as TRPCError30 } from "@trpc/server";
 
 // server/regulatory-change-store.ts
 init_schema();
 init_db();
-import { and as and28, desc as desc20, eq as eq36, sql as sql6 } from "drizzle-orm";
+import { and as and31, desc as desc21, eq as eq39, sql as sql7 } from "drizzle-orm";
 var MEM_CHANGES = [];
 var memSeq12 = 1;
 var SEED_CHANGES = [
@@ -30637,21 +32770,21 @@ async function listRegulatoryChanges(orgId, filters) {
   }
   const conditions = [];
   if (filters?.jurisdiction) {
-    conditions.push(eq36(regulatoryChanges.jurisdiction, filters.jurisdiction));
+    conditions.push(eq39(regulatoryChanges.jurisdiction, filters.jurisdiction));
   }
   if (filters?.status) {
-    conditions.push(eq36(regulatoryChanges.status, filters.status));
+    conditions.push(eq39(regulatoryChanges.status, filters.status));
   }
   if (filters?.changeType) {
-    conditions.push(eq36(regulatoryChanges.changeType, filters.changeType));
+    conditions.push(eq39(regulatoryChanges.changeType, filters.changeType));
   }
   if (filters?.frameworkCode) {
-    conditions.push(eq36(regulatoryChanges.frameworkCode, filters.frameworkCode));
+    conditions.push(eq39(regulatoryChanges.frameworkCode, filters.frameworkCode));
   }
-  const where = conditions.length > 0 ? and28(...conditions) : void 0;
+  const where = conditions.length > 0 ? and31(...conditions) : void 0;
   const [rows, countResult] = await Promise.all([
-    db.select().from(regulatoryChanges).where(where).orderBy(desc20(regulatoryChanges.publicationDate)).limit(limit).offset(offset),
-    db.select({ count: sql6`count(*)` }).from(regulatoryChanges).where(where)
+    db.select().from(regulatoryChanges).where(where).orderBy(desc21(regulatoryChanges.publicationDate)).limit(limit).offset(offset),
+    db.select({ count: sql7`count(*)` }).from(regulatoryChanges).where(where)
   ]);
   const total = Number(countResult[0]?.count ?? 0);
   return { rows, total };
@@ -30661,7 +32794,7 @@ async function getRegulatoryChangeById(id) {
   if (!db) {
     return MEM_CHANGES.find((c) => c.id === id) ?? null;
   }
-  const rows = await db.select().from(regulatoryChanges).where(eq36(regulatoryChanges.id, id)).limit(1);
+  const rows = await db.select().from(regulatoryChanges).where(eq39(regulatoryChanges.id, id)).limit(1);
   return rows.length > 0 ? rows[0] : null;
 }
 async function getRegulatoryChangeStats() {
@@ -30680,17 +32813,17 @@ async function getRegulatoryChangeStats() {
   const [jurisdictionRows, statusRows, changeTypeRows, totalResult] = await Promise.all([
     db.select({
       jurisdiction: regulatoryChanges.jurisdiction,
-      count: sql6`count(*)`
+      count: sql7`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.jurisdiction).orderBy(regulatoryChanges.jurisdiction),
     db.select({
       status: regulatoryChanges.status,
-      count: sql6`count(*)`
+      count: sql7`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.status).orderBy(regulatoryChanges.status),
     db.select({
       changeType: regulatoryChanges.changeType,
-      count: sql6`count(*)`
+      count: sql7`count(*)`
     }).from(regulatoryChanges).groupBy(regulatoryChanges.changeType).orderBy(regulatoryChanges.changeType),
-    db.select({ count: sql6`count(*)` }).from(regulatoryChanges)
+    db.select({ count: sql7`count(*)` }).from(regulatoryChanges)
   ]);
   return {
     total: Number(totalResult[0]?.count ?? 0),
@@ -30744,7 +32877,7 @@ async function markRegulatoryChangeEffective(id) {
     return change;
   }
   await db.update(regulatoryChanges).set({ status: "in_effect", updatedAt: /* @__PURE__ */ new Date() }).where(
-    and28(eq36(regulatoryChanges.id, id), eq36(regulatoryChanges.status, "pending"))
+    and31(eq39(regulatoryChanges.id, id), eq39(regulatoryChanges.status, "pending"))
   );
   return getRegulatoryChangeById(id);
 }
@@ -30756,7 +32889,7 @@ async function removeRegulatoryChange(id) {
     MEM_CHANGES.splice(idx, 1);
     return true;
   }
-  await db.delete(regulatoryChanges).where(eq36(regulatoryChanges.id, id));
+  await db.delete(regulatoryChanges).where(eq39(regulatoryChanges.id, id));
   return true;
 }
 function aggregateJurisdictions(changes) {
@@ -30764,51 +32897,51 @@ function aggregateJurisdictions(changes) {
   for (const c of changes) {
     map.set(c.jurisdiction, (map.get(c.jurisdiction) ?? 0) + 1);
   }
-  return Array.from(map.entries()).map(([jurisdiction, count3]) => ({ jurisdiction, count: count3 })).sort((a, b) => a.jurisdiction.localeCompare(b.jurisdiction));
+  return Array.from(map.entries()).map(([jurisdiction, count6]) => ({ jurisdiction, count: count6 })).sort((a, b) => a.jurisdiction.localeCompare(b.jurisdiction));
 }
 function aggregateStatuses(changes) {
   const map = /* @__PURE__ */ new Map();
   for (const c of changes) {
     map.set(c.status, (map.get(c.status) ?? 0) + 1);
   }
-  return Array.from(map.entries()).map(([status, count3]) => ({ status, count: count3 })).sort((a, b) => a.status.localeCompare(b.status));
+  return Array.from(map.entries()).map(([status, count6]) => ({ status, count: count6 })).sort((a, b) => a.status.localeCompare(b.status));
 }
 function aggregateChangeTypes(changes) {
   const map = /* @__PURE__ */ new Map();
   for (const c of changes) {
     map.set(c.changeType, (map.get(c.changeType) ?? 0) + 1);
   }
-  return Array.from(map.entries()).map(([changeType, count3]) => ({ changeType, count: count3 })).sort((a, b) => a.changeType.localeCompare(b.changeType));
+  return Array.from(map.entries()).map(([changeType, count6]) => ({ changeType, count: count6 })).sort((a, b) => a.changeType.localeCompare(b.changeType));
 }
 
 // server/regulatory-change-router.ts
-var changeTypeEnum = z34.enum([
+var changeTypeEnum = z35.enum([
   "amendment",
   "new_regulation",
   "repeal",
   "guidance",
   "enforcement"
 ]);
-var changeStatusEnum = z34.enum(["pending", "in_effect", "superseded"]);
-var listInputSchema = z34.object({
-  jurisdiction: z34.string().optional(),
+var changeStatusEnum = z35.enum(["pending", "in_effect", "superseded"]);
+var listInputSchema = z35.object({
+  jurisdiction: z35.string().optional(),
   status: changeStatusEnum.optional(),
   changeType: changeTypeEnum.optional(),
-  frameworkCode: z34.string().optional(),
-  limit: z34.number().int().min(1).max(100).default(20),
-  offset: z34.number().int().min(0).default(0)
+  frameworkCode: z35.string().optional(),
+  limit: z35.number().int().min(1).max(100).default(20),
+  offset: z35.number().int().min(0).default(0)
 });
-var createSchema11 = z34.object({
-  frameworkCode: z34.string().min(1).max(50),
-  title: z34.string().min(1).max(500),
-  description: z34.string().min(1).max(5e3),
+var createSchema11 = z35.object({
+  frameworkCode: z35.string().min(1).max(50),
+  title: z35.string().min(1).max(500),
+  description: z35.string().min(1).max(5e3),
   changeType: changeTypeEnum,
-  jurisdiction: z34.string().min(1).max(200),
-  source: z34.string().min(1).max(300),
-  effectiveDate: z34.string(),
-  publicationDate: z34.string(),
-  impact: z34.string().min(1).max(3e3),
-  url: z34.string().url().max(1024).optional().nullable(),
+  jurisdiction: z35.string().min(1).max(200),
+  source: z35.string().min(1).max(300),
+  effectiveDate: z35.string(),
+  publicationDate: z35.string(),
+  impact: z35.string().min(1).max(3e3),
+  url: z35.string().url().max(1024).optional().nullable(),
   status: changeStatusEnum.optional()
 });
 var regulatoryChangeRouter = router({
@@ -30817,11 +32950,11 @@ var regulatoryChangeRouter = router({
     const orgId = ctx.organizationId;
     return listRegulatoryChanges(orgId, input);
   }),
-  getById: activeOrgProcedure.input(z34.object({ id: z34.number().int().positive() })).query(async ({ ctx, input }) => {
+  getById: activeOrgProcedure.input(z35.object({ id: z35.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "regulatory_changes", "canView");
     const change = await getRegulatoryChangeById(input.id);
     if (!change) {
-      throw new TRPCError28({ code: "NOT_FOUND" });
+      throw new TRPCError30({ code: "NOT_FOUND" });
     }
     return change;
   }),
@@ -30863,11 +32996,11 @@ var regulatoryChangeRouter = router({
     });
     return result;
   }),
-  markEffective: activeOrgProcedure.input(z34.object({ id: z34.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  markEffective: activeOrgProcedure.input(z35.object({ id: z35.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "regulatory_changes", "canEdit");
     const result = await markRegulatoryChangeEffective(input.id);
     if (!result) {
-      throw new TRPCError28({ code: "NOT_FOUND" });
+      throw new TRPCError30({ code: "NOT_FOUND" });
     }
     void recordAuditEvent(ctx, {
       category: "data_write",
@@ -30878,11 +33011,11 @@ var regulatoryChangeRouter = router({
     });
     return result;
   }),
-  remove: activeOrgProcedure.input(z34.object({ id: z34.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  remove: activeOrgProcedure.input(z35.object({ id: z35.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "regulatory_changes", "canDelete");
     const success = await removeRegulatoryChange(input.id);
     if (!success) {
-      throw new TRPCError28({ code: "NOT_FOUND" });
+      throw new TRPCError30({ code: "NOT_FOUND" });
     }
     void recordAuditEvent(ctx, {
       category: "data_write",
@@ -30896,13 +33029,13 @@ var regulatoryChangeRouter = router({
 });
 
 // server/compliance-simulation-router.ts
-import { z as z35 } from "zod";
-import { TRPCError as TRPCError29 } from "@trpc/server";
+import { z as z36 } from "zod";
+import { TRPCError as TRPCError31 } from "@trpc/server";
 
 // server/compliance-simulation-store.ts
 init_schema();
 init_db();
-import { and as and29, desc as desc21, eq as eq37, inArray as inArray7 } from "drizzle-orm";
+import { and as and32, desc as desc22, eq as eq40, inArray as inArray7 } from "drizzle-orm";
 var SCENARIOS = [
   {
     id: "scenario-expand-saudi",
@@ -31381,7 +33514,7 @@ async function runSimulationEngine(orgId, params, userId) {
       summary,
       createdByUserId: userId
     }).returning({ id: complianceSimulations.id });
-    const [row] = await db.select().from(complianceSimulations).where(eq37(complianceSimulations.id, inserted.id)).limit(1);
+    const [row] = await db.select().from(complianceSimulations).where(eq40(complianceSimulations.id, inserted.id)).limit(1);
     return {
       id: row.id,
       organizationId: row.organizationId,
@@ -31436,11 +33569,11 @@ async function getSimulationHistory(orgId) {
   const db = await getDb();
   if (db && orgId > 0) {
     const rows = await db.select().from(complianceSimulations).where(
-      and29(
-        eq37(complianceSimulations.organizationId, orgId),
+      and32(
+        eq40(complianceSimulations.organizationId, orgId),
         inArray7(complianceSimulations.status, ["completed", "draft"])
       )
-    ).orderBy(desc21(complianceSimulations.createdAt));
+    ).orderBy(desc22(complianceSimulations.createdAt));
     return rows.map((r) => {
       const frameworks2 = JSON.parse(r.frameworks);
       return {
@@ -31477,9 +33610,9 @@ async function getSimulationById(orgId, id) {
   const db = await getDb();
   if (db && orgId > 0) {
     const [row] = await db.select().from(complianceSimulations).where(
-      and29(
-        eq37(complianceSimulations.id, id),
-        eq37(complianceSimulations.organizationId, orgId)
+      and32(
+        eq40(complianceSimulations.id, id),
+        eq40(complianceSimulations.organizationId, orgId)
       )
     ).limit(1);
     if (!row) return null;
@@ -31516,13 +33649,13 @@ async function archiveSimulation(orgId, id) {
   const db = await getDb();
   if (db && orgId > 0) {
     const [existing] = await db.select({ id: complianceSimulations.id }).from(complianceSimulations).where(
-      and29(
-        eq37(complianceSimulations.id, id),
-        eq37(complianceSimulations.organizationId, orgId)
+      and32(
+        eq40(complianceSimulations.id, id),
+        eq40(complianceSimulations.organizationId, orgId)
       )
     ).limit(1);
     if (!existing) return false;
-    await db.update(complianceSimulations).set({ status: "archived", updatedAt: /* @__PURE__ */ new Date() }).where(eq37(complianceSimulations.id, id));
+    await db.update(complianceSimulations).set({ status: "archived", updatedAt: /* @__PURE__ */ new Date() }).where(eq40(complianceSimulations.id, id));
     return true;
   }
   const mem = MEM_SIMULATIONS.find(
@@ -31595,45 +33728,45 @@ async function compareSimulations(orgId, id1, id2) {
 
 // server/compliance-simulation-router.ts
 var knownFrameworkCodes = GLOBAL_FRAMEWORK_PACKS.map((p) => p.code);
-var simulationTypeEnum2 = z35.enum([
+var simulationTypeEnum2 = z36.enum([
   "readiness",
   "gap_analysis",
   "cost_estimate",
   "cross_border",
   "full"
 ]);
-var runEngineSchema = z35.object({
-  name: z35.string().trim().min(1).max(255),
-  description: z35.string().trim().max(2e3).optional(),
+var runEngineSchema = z36.object({
+  name: z36.string().trim().min(1).max(255),
+  description: z36.string().trim().max(2e3).optional(),
   simulationType: simulationTypeEnum2,
-  jurisdiction: z35.string().trim().min(1).max(200).refine(
+  jurisdiction: z36.string().trim().min(1).max(200).refine(
     (v) => GLOBAL_JURISDICTIONS.includes(
       v
     ),
     { message: "Invalid jurisdiction" }
   ),
-  frameworks: z35.array(z35.string().trim().min(1)).min(1).max(50).refine(
+  frameworks: z36.array(z36.string().trim().min(1)).min(1).max(50).refine(
     (frameworks2) => frameworks2.every((f) => knownFrameworkCodes.includes(f)),
     { message: "One or more frameworks are not valid" }
   ),
-  industry: z35.string().trim().max(200).optional(),
-  organizationSize: z35.enum(["startup", "sme", "enterprise"]).optional()
+  industry: z36.string().trim().max(200).optional(),
+  organizationSize: z36.enum(["startup", "sme", "enterprise"]).optional()
 });
 var complianceSimulationRouter = router({
   scenarios: activeOrgProcedure.query(async ({ ctx }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canView");
     return listSimulationScenarios();
   }),
-  getScenario: activeOrgProcedure.input(z35.object({ id: z35.string().min(1) })).query(async ({ ctx, input }) => {
+  getScenario: activeOrgProcedure.input(z36.object({ id: z36.string().min(1) })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canView");
     const scenario = getSimulationScenarioById(input.id);
-    if (!scenario) throw new TRPCError29({ code: "NOT_FOUND" });
+    if (!scenario) throw new TRPCError31({ code: "NOT_FOUND" });
     return scenario;
   }),
-  run: activeOrgProcedure.input(z35.object({ scenarioId: z35.string().min(1) })).mutation(async ({ ctx, input }) => {
+  run: activeOrgProcedure.input(z36.object({ scenarioId: z36.string().min(1) })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canCreate");
     const result = runSimulation(input.scenarioId);
-    if (!result) throw new TRPCError29({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError31({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "simulation.run_preset",
@@ -31644,10 +33777,10 @@ var complianceSimulationRouter = router({
     return result;
   }),
   runCustom: activeOrgProcedure.input(
-    z35.object({
-      name: z35.string().min(1).max(200),
-      jurisdictions: z35.array(z35.string().min(1)).min(1).max(10),
-      frameworks: z35.array(z35.string().min(1)).max(20)
+    z36.object({
+      name: z36.string().min(1).max(200),
+      jurisdictions: z36.array(z36.string().min(1)).min(1).max(10),
+      frameworks: z36.array(z36.string().min(1)).max(20)
     })
   ).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canCreate");
@@ -31681,18 +33814,18 @@ var complianceSimulationRouter = router({
     const orgId = ctx.organizationId;
     return getSimulationHistory(orgId);
   }),
-  getById: activeOrgProcedure.input(z35.object({ id: z35.number().int().positive() })).query(async ({ ctx, input }) => {
+  getById: activeOrgProcedure.input(z36.object({ id: z36.number().int().positive() })).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canView");
     const orgId = ctx.organizationId;
     const result = await getSimulationById(orgId, input.id);
-    if (!result) throw new TRPCError29({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError31({ code: "NOT_FOUND" });
     return result;
   }),
-  archive: activeOrgProcedure.input(z35.object({ id: z35.number().int().positive() })).mutation(async ({ ctx, input }) => {
+  archive: activeOrgProcedure.input(z36.object({ id: z36.number().int().positive() })).mutation(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canDelete");
     const orgId = ctx.organizationId;
     const success = await archiveSimulation(orgId, input.id);
-    if (!success) throw new TRPCError29({ code: "NOT_FOUND" });
+    if (!success) throw new TRPCError31({ code: "NOT_FOUND" });
     void recordAuditEvent(ctx, {
       category: "data_write",
       action: "simulation.archive",
@@ -31703,21 +33836,21 @@ var complianceSimulationRouter = router({
     return { success: true };
   }),
   compare: activeOrgProcedure.input(
-    z35.object({
-      id1: z35.number().int().positive(),
-      id2: z35.number().int().positive()
+    z36.object({
+      id1: z36.number().int().positive(),
+      id2: z36.number().int().positive()
     })
   ).query(async ({ ctx, input }) => {
     await requireModulePermission(ctx, "compliance_simulation", "canView");
     const orgId = ctx.organizationId;
     const result = await compareSimulations(orgId, input.id1, input.id2);
-    if (!result) throw new TRPCError29({ code: "NOT_FOUND" });
+    if (!result) throw new TRPCError31({ code: "NOT_FOUND" });
     return result;
   })
 });
 
 // server/cross-border-data-flow-router.ts
-import { z as z36 } from "zod";
+import { z as z37 } from "zod";
 
 // server/cross-border-data-flow-store.ts
 var JURISDICTION_REQUIREMENTS = {
@@ -32076,14 +34209,14 @@ var crossBorderDataFlowRouter = router({
   jurisdictions: protectedProcedure.query(() => {
     return getAllJurisdictions();
   }),
-  jurisdictionRequirements: protectedProcedure.input(z36.object({ jurisdiction: z36.string().min(1) })).query(({ input }) => {
+  jurisdictionRequirements: protectedProcedure.input(z37.object({ jurisdiction: z37.string().min(1) })).query(({ input }) => {
     return getJurisdictionRequirements(input.jurisdiction);
   }),
   analyzeRoute: protectedProcedure.input(
-    z36.object({
-      source: z36.string().min(1),
-      target: z36.string().min(1),
-      dataCategories: z36.array(z36.string()).default(["personal_data"])
+    z37.object({
+      source: z37.string().min(1),
+      target: z37.string().min(1),
+      dataCategories: z37.array(z37.string()).default(["personal_data"])
     })
   ).query(({ input }) => {
     return getDataFlowRoutes(
@@ -32100,15 +34233,15 @@ var crossBorderDataFlowRouter = router({
 // server/onboarding-router.ts
 init_schema();
 init_db();
-import { z as z37 } from "zod";
-import { eq as eq39 } from "drizzle-orm";
+import { z as z38 } from "zod";
+import { eq as eq42 } from "drizzle-orm";
 init_rateLimiter();
-import { TRPCError as TRPCError30 } from "@trpc/server";
+import { TRPCError as TRPCError32 } from "@trpc/server";
 
 // server/onboarding-service.ts
 init_db();
 init_schema();
-import { and as and30, desc as desc22, eq as eq38, or as or7, sql as sql8 } from "drizzle-orm";
+import { and as and33, desc as desc23, eq as eq41, or as or7, sql as sql9 } from "drizzle-orm";
 
 // server/services/personalization/engine.ts
 var QUESTIONNAIRE_VERSION = 1;
@@ -32337,7 +34470,7 @@ function chooseFirstAction(profile) {
 }
 
 // server/_core/onboarding-schema.ts
-import { sql as sql7 } from "drizzle-orm";
+import { sql as sql8 } from "drizzle-orm";
 var _ensured = false;
 var IDENTITY_TABLES = [
   "onboarding_responses",
@@ -32348,7 +34481,7 @@ var IDENTITY_TABLES = [
 async function ensureOnboardingSchema(db) {
   if (_ensured) return;
   const statements = [
-    sql7`
+    sql8`
       CREATE TABLE IF NOT EXISTS "onboarding_responses" (
         "id"                 serial      PRIMARY KEY,
         "user_id"            integer     REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -32366,7 +34499,7 @@ async function ensureOnboardingSchema(db) {
         "updated_at"         timestamp   NOT NULL DEFAULT now()
       )
     `,
-    sql7`
+    sql8`
       CREATE TABLE IF NOT EXISTS "onboarding_events" (
         "id"                 serial      PRIMARY KEY,
         "user_id"            integer     REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -32383,7 +34516,7 @@ async function ensureOnboardingSchema(db) {
         "created_at"         timestamp   NOT NULL DEFAULT now()
       )
     `,
-    sql7`
+    sql8`
       CREATE TABLE IF NOT EXISTS "onboarding_profile_history" (
         "id"                 serial      PRIMARY KEY,
         "user_id"            integer     REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -32399,7 +34532,7 @@ async function ensureOnboardingSchema(db) {
         "created_at"         timestamp   NOT NULL DEFAULT now()
       )
     `,
-    sql7`
+    sql8`
       CREATE TABLE IF NOT EXISTS "personalization_recommendations" (
         "id"              serial      PRIMARY KEY,
         "user_id"         integer     REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -32416,42 +34549,42 @@ async function ensureOnboardingSchema(db) {
     `,
     // Migrate pre-existing tables (created before dual-identity) — idempotent.
     ...IDENTITY_TABLES.flatMap((table) => [
-      sql7`ALTER TABLE ${sql7.identifier(table)} ADD COLUMN IF NOT EXISTS "local_user_id" integer REFERENCES "localUsers" ("id") ON DELETE CASCADE`,
-      sql7`ALTER TABLE ${sql7.identifier(table)} ALTER COLUMN "user_id" DROP NOT NULL`,
-      sql7`CREATE INDEX IF NOT EXISTS ${sql7.identifier(`${table}_local_user_idx`)} ON ${sql7.identifier(table)} ("local_user_id")`
+      sql8`ALTER TABLE ${sql8.identifier(table)} ADD COLUMN IF NOT EXISTS "local_user_id" integer REFERENCES "localUsers" ("id") ON DELETE CASCADE`,
+      sql8`ALTER TABLE ${sql8.identifier(table)} ALTER COLUMN "user_id" DROP NOT NULL`,
+      sql8`CREATE INDEX IF NOT EXISTS ${sql8.identifier(`${table}_local_user_idx`)} ON ${sql8.identifier(table)} ("local_user_id")`
     ]),
-    sql7`
+    sql8`
       CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_user_q_idx"
         ON "onboarding_responses" ("user_id", "onboarding_version", "question_id")
     `,
     // Non-partial so Postgres can infer it for ON CONFLICT (NULLs are distinct).
-    sql7`DROP INDEX IF EXISTS "onboarding_responses_local_q_idx"`,
-    sql7`
+    sql8`DROP INDEX IF EXISTS "onboarding_responses_local_q_idx"`,
+    sql8`
       CREATE UNIQUE INDEX IF NOT EXISTS "onboarding_responses_local_q_idx"
         ON "onboarding_responses" ("local_user_id", "onboarding_version", "question_id")
     `,
-    sql7`
+    sql8`
       CREATE INDEX IF NOT EXISTS "onboarding_responses_user_idx"
         ON "onboarding_responses" ("user_id")
     `,
-    sql7`
+    sql8`
       CREATE INDEX IF NOT EXISTS "onboarding_events_user_idx"
         ON "onboarding_events" ("user_id", "created_at")
     `,
-    sql7`
+    sql8`
       CREATE INDEX IF NOT EXISTS "onboarding_profile_history_user_idx"
         ON "onboarding_profile_history" ("user_id", "created_at")
     `,
-    sql7`
+    sql8`
       CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_user_module_idx"
         ON "personalization_recommendations" ("user_id", "module_id")
     `,
-    sql7`DROP INDEX IF EXISTS "personalization_recommendations_local_module_idx"`,
-    sql7`
+    sql8`DROP INDEX IF EXISTS "personalization_recommendations_local_module_idx"`,
+    sql8`
       CREATE UNIQUE INDEX IF NOT EXISTS "personalization_recommendations_local_module_idx"
         ON "personalization_recommendations" ("local_user_id", "module_id")
     `,
-    sql7`
+    sql8`
       CREATE INDEX IF NOT EXISTS "personalization_recommendations_user_idx"
         ON "personalization_recommendations" ("user_id")
     `
@@ -32506,33 +34639,33 @@ async function getOnboardingState(identity, organizationId) {
   const isLocal = identity.localUserId != null;
   try {
     const rows = await db.select().from(onboardingResponses).where(
-      and30(
-        isLocal ? eq38(onboardingResponses.localUserId, identity.localUserId) : eq38(onboardingResponses.userId, identity.userId),
-        eq38(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION)
+      and33(
+        isLocal ? eq41(onboardingResponses.localUserId, identity.localUserId) : eq41(onboardingResponses.userId, identity.userId),
+        eq41(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION)
       )
     );
     const answers = {};
     for (const row of rows) answers[row.questionId] = row.answerValue;
     const profile = deriveProfile(answers);
     const [progress] = await db.select().from(onboardingProgress).where(
-      isLocal ? eq38(onboardingProgress.userId, -(5e4 + identity.localUserId)) : eq38(onboardingProgress.userId, identity.userId)
+      isLocal ? eq41(onboardingProgress.userId, -(5e4 + identity.localUserId)) : eq41(onboardingProgress.userId, identity.userId)
     ).limit(1);
     const recs = await db.select().from(personalizationRecommendations).where(
-      and30(
-        isLocal ? eq38(
+      and33(
+        isLocal ? eq41(
           personalizationRecommendations.localUserId,
           identity.localUserId
-        ) : eq38(personalizationRecommendations.userId, identity.userId),
-        eq38(personalizationRecommendations.status, "active")
+        ) : eq41(personalizationRecommendations.userId, identity.userId),
+        eq41(personalizationRecommendations.status, "active")
       )
-    ).orderBy(desc22(personalizationRecommendations.priority));
+    ).orderBy(desc23(personalizationRecommendations.priority));
     const events = await db.select({
       eventType: onboardingEvents.eventType,
       stepNumber: onboardingEvents.stepNumber,
       createdAt: onboardingEvents.createdAt
     }).from(onboardingEvents).where(
-      isLocal ? eq38(onboardingEvents.localUserId, identity.localUserId) : eq38(onboardingEvents.userId, identity.userId)
-    ).orderBy(desc22(onboardingEvents.createdAt)).limit(50);
+      isLocal ? eq41(onboardingEvents.localUserId, identity.localUserId) : eq41(onboardingEvents.userId, identity.userId)
+    ).orderBy(desc23(onboardingEvents.createdAt)).limit(50);
     const completedEvent = events.find(
       (e) => e.eventType === "onboarding_completed"
     );
@@ -32541,7 +34674,7 @@ async function getOnboardingState(identity, organizationId) {
     const resolvedSkipped = progress?.skipped ?? skippedEvent;
     let shouldOnboard = false;
     try {
-      const account = isLocal ? (await db.select({ createdAt: localUsers.createdAt }).from(localUsers).where(eq38(localUsers.id, identity.localUserId)).limit(1))[0] : (await db.select({ createdAt: users.createdAt }).from(users).where(eq38(users.id, identity.userId)).limit(1))[0];
+      const account = isLocal ? (await db.select({ createdAt: localUsers.createdAt }).from(localUsers).where(eq41(localUsers.id, identity.localUserId)).limit(1))[0] : (await db.select({ createdAt: users.createdAt }).from(users).where(eq41(users.id, identity.userId)).limit(1))[0];
       const ageMs = account?.createdAt ? Date.now() - new Date(account.createdAt).getTime() : Number.POSITIVE_INFINITY;
       const isNewAccount = ageMs <= 14 * 24 * 60 * 60 * 1e3;
       shouldOnboard = !resolvedCompletedAt && !resolvedSkipped && Object.keys(answers).length === 0 && isNewAccount;
@@ -32598,10 +34731,10 @@ async function getOnboardingTimelineForAnyId(id, limit = 200) {
   try {
     return await db.select().from(onboardingEvents).where(
       or7(
-        eq38(onboardingEvents.userId, id),
-        eq38(onboardingEvents.localUserId, id)
+        eq41(onboardingEvents.userId, id),
+        eq41(onboardingEvents.localUserId, id)
       )
-    ).orderBy(desc22(onboardingEvents.createdAt)).limit(Math.min(Math.max(limit, 1), 500));
+    ).orderBy(desc23(onboardingEvents.createdAt)).limit(Math.min(Math.max(limit, 1), 500));
   } catch (err) {
     warnOnboarding("getTimelineForAnyId", err);
     return [];
@@ -32613,16 +34746,16 @@ async function getOnboardingResponsesForAnyId(id) {
   try {
     const responses = await db.select().from(onboardingResponses).where(
       or7(
-        eq38(onboardingResponses.userId, id),
-        eq38(onboardingResponses.localUserId, id)
+        eq41(onboardingResponses.userId, id),
+        eq41(onboardingResponses.localUserId, id)
       )
     ).orderBy(onboardingResponses.stepNumber);
     const history = await db.select().from(onboardingProfileHistory).where(
       or7(
-        eq38(onboardingProfileHistory.userId, id),
-        eq38(onboardingProfileHistory.localUserId, id)
+        eq41(onboardingProfileHistory.userId, id),
+        eq41(onboardingProfileHistory.localUserId, id)
       )
-    ).orderBy(desc22(onboardingProfileHistory.createdAt)).limit(200);
+    ).orderBy(desc23(onboardingProfileHistory.createdAt)).limit(200);
     return { responses, history };
   } catch (err) {
     warnOnboarding("getResponsesForAnyId", err);
@@ -32637,7 +34770,7 @@ function identityColumns(actor) {
 }
 function identityWhere(table, actor) {
   const t2 = table;
-  return actor.localUserId != null ? eq38(t2.localUserId, actor.localUserId) : eq38(t2.userId, actor.userId);
+  return actor.localUserId != null ? eq41(t2.localUserId, actor.localUserId) : eq41(t2.userId, actor.userId);
 }
 async function recordEvent(actor, eventType, payload = {}, stepNumber) {
   const db = await getReadyDb();
@@ -32666,10 +34799,10 @@ async function submitAnswer(actor, input) {
   const db = await getReadyDb();
   if (!db) return { ok: true, changed: false };
   try {
-    const where = and30(
+    const where = and33(
       identityWhere(onboardingResponses, actor),
-      eq38(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
-      eq38(onboardingResponses.questionId, input.questionId)
+      eq41(onboardingResponses.onboardingVersion, QUESTIONNAIRE_VERSION),
+      eq41(onboardingResponses.questionId, input.questionId)
     );
     const result = await db.transaction(async (tx) => {
       const [existing] = await tx.select({ answerValue: onboardingResponses.answerValue }).from(onboardingResponses).where(where).limit(1);
@@ -32847,9 +34980,9 @@ async function dismissRecommendation(actor, moduleId) {
   if (!db) return { ok: true };
   try {
     await db.update(personalizationRecommendations).set({ status: "dismissed", updatedAt: /* @__PURE__ */ new Date() }).where(
-      and30(
+      and33(
         identityWhere(personalizationRecommendations, actor),
-        eq38(personalizationRecommendations.moduleId, moduleId)
+        eq41(personalizationRecommendations.moduleId, moduleId)
       )
     );
     await recordEvent(actor, "recommendation_dismissed", { moduleId });
@@ -32865,21 +34998,21 @@ async function recordModuleSignal(actor, moduleId, signal) {
   try {
     if (signal === "module_opened") {
       await db.update(personalizationRecommendations).set({
-        priority: sql8`LEAST(100, ${personalizationRecommendations.priority} + 5)`,
+        priority: sql9`LEAST(100, ${personalizationRecommendations.priority} + 5)`,
         updatedAt: /* @__PURE__ */ new Date()
       }).where(
-        and30(
+        and33(
           identityWhere(personalizationRecommendations, actor),
-          eq38(personalizationRecommendations.moduleId, moduleId),
-          eq38(personalizationRecommendations.status, "active")
+          eq41(personalizationRecommendations.moduleId, moduleId),
+          eq41(personalizationRecommendations.status, "active")
         )
       );
     }
     if (signal === "first_action_completed") {
       await db.update(personalizationRecommendations).set({ status: "completed", updatedAt: /* @__PURE__ */ new Date() }).where(
-        and30(
+        and33(
           identityWhere(personalizationRecommendations, actor),
-          eq38(personalizationRecommendations.moduleId, moduleId)
+          eq41(personalizationRecommendations.moduleId, moduleId)
         )
       );
     }
@@ -32897,7 +35030,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
   }
   const days = Math.min(Math.max(windowDays, 1), 365);
   try {
-    const totals = await db.execute(sql8`
+    const totals = await db.execute(sql9`
       WITH flagged AS (
         SELECT
           COALESCE('u:' || "user_id"::text, 'l:' || "local_user_id"::text) AS actor,
@@ -32914,7 +35047,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
         COUNT(*) FILTER (WHERE NOT completed AND NOT skipped)::int AS "in_progress"
       FROM flagged
     `);
-    const byIndustry = await db.execute(sql8`
+    const byIndustry = await db.execute(sql9`
       SELECT "industry", COUNT(*)::int AS "count"
       FROM "organization_profiles_custom"
       WHERE "industry" IS NOT NULL
@@ -32922,7 +35055,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
       ORDER BY "count" DESC
       LIMIT 20
     `);
-    const byObjective = await db.execute(sql8`
+    const byObjective = await db.execute(sql9`
       SELECT value AS "objective", COUNT(*)::int AS "count"
       FROM "onboarding_responses",
         LATERAL jsonb_array_elements_text("answer_value") AS value
@@ -32931,7 +35064,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
       ORDER BY "count" DESC
       LIMIT 20
     `);
-    const byModule = await db.execute(sql8`
+    const byModule = await db.execute(sql9`
       SELECT "module_id", COUNT(*)::int AS "count"
       FROM "personalization_recommendations"
       WHERE "status" <> 'dismissed'
@@ -32939,7 +35072,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
       ORDER BY "count" DESC
       LIMIT 20
     `);
-    const newUsers = await db.execute(sql8`
+    const newUsers = await db.execute(sql9`
       SELECT day, SUM("count")::int AS "count" FROM (
         SELECT date_trunc('day', "created_at")::date AS day, COUNT(*)::int AS "count"
         FROM "localUsers"
@@ -32955,7 +35088,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
       ORDER BY day DESC
       LIMIT 60
     `);
-    const engagement = await db.execute(sql8`
+    const engagement = await db.execute(sql9`
       SELECT "event_type", COUNT(*)::int AS "count"
       FROM "onboarding_events"
       WHERE "created_at" >= now() - (${days} * interval '1 day')
@@ -32963,7 +35096,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
       ORDER BY 2 DESC
       LIMIT 30
     `);
-    const funnel = await db.execute(sql8`
+    const funnel = await db.execute(sql9`
       SELECT date_trunc('day', "created_at")::date AS "day", COUNT(*)::int AS "events"
       FROM "onboarding_events"
       WHERE "created_at" >= now() - (${days} * interval '1 day')
@@ -32996,6 +35129,7 @@ async function getOnboardingIntelligence(windowDays = 30) {
 }
 
 // server/onboarding-router.ts
+init_env();
 function actorFromCtx(ctx, sessionId) {
   const rawId = ctx.user?.id ?? 0;
   const openId = ctx.user?.openId ?? "";
@@ -33014,45 +35148,51 @@ function actorFromCtx(ctx, sessionId) {
 }
 var ONBOARD_LIMIT = 20;
 var ONBOARD_WINDOW_MS = 6e4;
-var onboardingResponsesSchema = z37.object({
-  frameworks: z37.array(z37.string().min(1)).max(20).optional(),
-  objectives: z37.array(z37.string().min(1)).max(12).optional(),
-  organization: z37.object({
-    name: z37.string().min(1).max(255).optional(),
-    industry: z37.string().max(120).optional(),
-    employeeRange: z37.string().max(30).optional(),
-    country: z37.string().max(120).optional()
+var onboardingResponsesSchema = z38.object({
+  frameworks: z38.array(z38.string().min(1)).max(20).optional(),
+  objectives: z38.array(z38.string().min(1)).max(12).optional(),
+  organization: z38.object({
+    name: z38.string().min(1).max(255).optional(),
+    industry: z38.string().max(120).optional(),
+    employeeRange: z38.string().max(30).optional(),
+    country: z38.string().max(120).optional()
   }).optional(),
-  profile: z37.object({
-    name: z37.string().max(255).optional(),
-    jobTitle: z37.string().max(255).optional(),
-    complianceExperience: z37.enum(["beginner", "intermediate", "expert"]).optional()
+  profile: z38.object({
+    name: z38.string().max(255).optional(),
+    jobTitle: z38.string().max(255).optional(),
+    complianceExperience: z38.enum(["beginner", "intermediate", "expert"]).optional()
   }).optional()
 });
 var onboardingRouter = router({
   getProgress: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError30({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const rows = await db.select().from(onboardingProgress).where(eq39(onboardingProgress.userId, ctx.user.id));
+    const rows = await db.select().from(onboardingProgress).where(eq42(onboardingProgress.userId, ctx.user.id));
     return rows[0] ?? null;
   }),
   updateProgress: protectedProcedure.input(
-    z37.object({
-      step: z37.number().int().min(0).max(6),
+    z38.object({
+      step: z38.number().int().min(0).max(6),
       responses: onboardingResponsesSchema.optional()
     })
   ).mutation(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError30({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const existing = await db.select().from(onboardingProgress).where(eq39(onboardingProgress.userId, ctx.user.id));
+    const existing = await db.select().from(onboardingProgress).where(eq42(onboardingProgress.userId, ctx.user.id));
+    if (ctx.organizationId != null && input.responses?.frameworks) {
+      await assertFrameworkCapacity(
+        ctx.organizationId,
+        input.responses.frameworks.length
+      );
+    }
     const row = existing[0];
     if (row) {
       const completed = new Set(row.completedSteps ?? []);
@@ -33062,7 +35202,7 @@ var onboardingRouter = router({
         completedSteps: Array.from(completed),
         responses: input.responses ?? void 0,
         updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq39(onboardingProgress.userId, ctx.user.id));
+      }).where(eq42(onboardingProgress.userId, ctx.user.id));
     } else {
       await db.insert(onboardingProgress).values({
         userId: ctx.user.id,
@@ -33087,33 +35227,33 @@ var onboardingRouter = router({
     }
     return { ok: true };
   }),
-  skip: protectedProcedure.input(z37.object({})).mutation(async ({ ctx, input: _input }) => {
+  skip: protectedProcedure.input(z38.object({})).mutation(async ({ ctx, input: _input }) => {
     const rl = await checkRateLimit(
       `onboard:skip:${ctx.user.id}`,
       ONBOARD_LIMIT,
       ONBOARD_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError30({
+      throw new TRPCError32({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded."
       });
     }
     const db = await getDb();
     if (!db)
-      throw new TRPCError30({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const existing = await db.select().from(onboardingProgress).where(eq39(onboardingProgress.userId, ctx.user.id));
+    const existing = await db.select().from(onboardingProgress).where(eq42(onboardingProgress.userId, ctx.user.id));
     if (existing[0]) {
       if (existing[0].skipped) {
-        throw new TRPCError30({
+        throw new TRPCError32({
           code: "CONFLICT",
           message: "Onboarding already skipped."
         });
       }
-      await db.update(onboardingProgress).set({ skipped: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq39(onboardingProgress.userId, ctx.user.id));
+      await db.update(onboardingProgress).set({ skipped: true, updatedAt: /* @__PURE__ */ new Date() }).where(eq42(onboardingProgress.userId, ctx.user.id));
     } else {
       await db.insert(onboardingProgress).values({
         userId: ctx.user.id,
@@ -33126,19 +35266,23 @@ var onboardingRouter = router({
   /** Versioned questionnaire definition (stable ids; client localizes labels). */
   getQuestionnaire: protectedProcedure.query(async () => getQuestionnaire()),
   /** Server-side state for resume + personalization. */
-  getState: protectedProcedure.query(
-    async ({ ctx }) => getOnboardingState(actorFromCtx(ctx), ctx.organizationId ?? null)
-  ),
+  getState: protectedProcedure.query(async ({ ctx }) => {
+    const state = await getOnboardingState(
+      actorFromCtx(ctx),
+      ctx.organizationId ?? null
+    );
+    return { ...state, companyProfileGate: ENV.companyProfileGate };
+  }),
   /** Persist a single answer idempotently (no duplicate rows on retry). */
   submitAnswer: protectedProcedure.input(
-    z37.object({
-      questionId: z37.string().min(1).max(80),
-      value: z37.union([
-        z37.string().max(500),
-        z37.array(z37.string().max(500)).max(20)
+    z38.object({
+      questionId: z38.string().min(1).max(80),
+      value: z38.union([
+        z38.string().max(500),
+        z38.array(z38.string().max(500)).max(20)
       ]),
-      stepNumber: z37.number().int().min(0).max(20),
-      sessionId: z37.string().min(1).max(64).optional()
+      stepNumber: z38.number().int().min(0).max(20),
+      sessionId: z38.string().min(1).max(64).optional()
     })
   ).mutation(async ({ ctx, input }) => {
     const rl = await checkRateLimit(
@@ -33147,7 +35291,7 @@ var onboardingRouter = router({
       ONBOARD_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError30({
+      throw new TRPCError32({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded."
       });
@@ -33159,7 +35303,7 @@ var onboardingRouter = router({
       stepNumber: input.stepNumber
     });
     if (!result.ok) {
-      throw new TRPCError30({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: result.error ?? "Could not save that answer."
       });
@@ -33187,12 +35331,12 @@ var onboardingRouter = router({
   }),
   /** Finalise: persist recommendations + completion atomically (idempotent). */
   complete: protectedProcedure.input(
-    z37.object({ sessionId: z37.string().min(1).max(64).optional() }).optional()
+    z38.object({ sessionId: z38.string().min(1).max(64).optional() }).optional()
   ).mutation(async ({ ctx, input }) => {
     const actor = actorFromCtx(ctx, input?.sessionId);
     const result = await completeOnboarding(actor);
     if (!result.ok) {
-      throw new TRPCError30({
+      throw new TRPCError32({
         code: "INTERNAL_SERVER_ERROR",
         message: "Could not complete onboarding."
       });
@@ -33206,14 +35350,14 @@ var onboardingRouter = router({
     return { ok: true, recommendations: result.recommendations };
   }),
   /** Dismiss a recommendation (behaviour → personalization only). */
-  dismissRecommendation: protectedProcedure.input(z37.object({ moduleId: z37.string().min(1).max(80) })).mutation(
+  dismissRecommendation: protectedProcedure.input(z38.object({ moduleId: z38.string().min(1).max(80) })).mutation(
     async ({ ctx, input }) => dismissRecommendation(actorFromCtx(ctx), input.moduleId)
   ),
   /** Record a behavioural signal; adjusts personalization, never authorization. */
   recordModuleSignal: protectedProcedure.input(
-    z37.object({
-      moduleId: z37.string().min(1).max(80),
-      signal: z37.enum([
+    z38.object({
+      moduleId: z38.string().min(1).max(80),
+      signal: z38.enum([
         "module_opened",
         "first_action_started",
         "first_action_completed"
@@ -33226,7 +35370,7 @@ var onboardingRouter = router({
       ONBOARD_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError30({
+      throw new TRPCError32({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded."
       });
@@ -33248,22 +35392,22 @@ var onboardingRouter = router({
 // server/analytics-router.ts
 init_schema();
 init_db();
-import { z as z38 } from "zod";
-import { eq as eq40, desc as desc23, sql as sql9 } from "drizzle-orm";
-import { TRPCError as TRPCError31 } from "@trpc/server";
+import { z as z39 } from "zod";
+import { eq as eq43, desc as desc24, sql as sql10 } from "drizzle-orm";
+import { TRPCError as TRPCError33 } from "@trpc/server";
 var analyticsRouter = router({
   track: protectedProcedure.input(
-    z38.object({
-      event: z38.string().min(1).max(100),
-      category: z38.string().min(1).max(50),
-      properties: z38.record(z38.string(), z38.unknown()).optional(),
-      sessionId: z38.string().max(64).optional()
+    z39.object({
+      event: z39.string().min(1).max(100),
+      category: z39.string().min(1).max(50),
+      properties: z39.record(z39.string(), z39.unknown()).optional(),
+      sessionId: z39.string().max(64).optional()
     })
   ).mutation(async ({ ctx, input }) => {
     try {
       const db = await getDb();
       if (!db)
-        throw new TRPCError31({
+        throw new TRPCError33({
           code: "INTERNAL_SERVER_ERROR",
           message: "Database unavailable"
         });
@@ -33283,31 +35427,31 @@ var analyticsRouter = router({
       }).onConflictDoUpdate({
         target: userActivitySummary.userId,
         set: {
-          totalEvents: sql9`${userActivitySummary.totalEvents} + 1`,
+          totalEvents: sql10`${userActivitySummary.totalEvents} + 1`,
           lastActiveAt: /* @__PURE__ */ new Date()
         }
       });
       return { ok: true };
     } catch {
-      throw new TRPCError31({
+      throw new TRPCError33({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to track analytics event"
       });
     }
   }),
   getUserMetrics: protectedProcedure.input(
-    z38.object({
-      days: z38.number().int().min(1).max(365).optional()
+    z39.object({
+      days: z39.number().int().min(1).max(365).optional()
     })
   ).query(async ({ ctx }) => {
     try {
       const db = await getDb();
       if (!db)
-        throw new TRPCError31({
+        throw new TRPCError33({
           code: "INTERNAL_SERVER_ERROR",
           message: "Database unavailable"
         });
-      const rows = await db.select().from(userActivitySummary).where(eq40(userActivitySummary.userId, ctx.user.id));
+      const rows = await db.select().from(userActivitySummary).where(eq43(userActivitySummary.userId, ctx.user.id));
       const summary = rows[0];
       return {
         totalEvents: summary?.totalEvents ?? 0,
@@ -33317,28 +35461,28 @@ var analyticsRouter = router({
         healthScore: summary?.healthScore ?? 0
       };
     } catch {
-      throw new TRPCError31({
+      throw new TRPCError33({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch user metrics"
       });
     }
   }),
   getRecentEvents: protectedProcedure.input(
-    z38.object({
-      limit: z38.number().int().min(1).max(500).default(50)
+    z39.object({
+      limit: z39.number().int().min(1).max(500).default(50)
     })
   ).query(async ({ ctx, input }) => {
     try {
       const db = await getDb();
       if (!db)
-        throw new TRPCError31({
+        throw new TRPCError33({
           code: "INTERNAL_SERVER_ERROR",
           message: "Database unavailable"
         });
-      const rows = await db.select().from(analyticsEvents).where(eq40(analyticsEvents.userId, ctx.user.id)).orderBy(desc23(analyticsEvents.createdAt)).limit(input.limit);
+      const rows = await db.select().from(analyticsEvents).where(eq43(analyticsEvents.userId, ctx.user.id)).orderBy(desc24(analyticsEvents.createdAt)).limit(input.limit);
       return rows;
     } catch {
-      throw new TRPCError31({
+      throw new TRPCError33({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch recent events"
       });
@@ -33349,35 +35493,35 @@ var analyticsRouter = router({
 // server/notification-router.ts
 init_schema();
 init_db();
-import { z as z39 } from "zod";
-import { eq as eq41, desc as desc24, and as and31 } from "drizzle-orm";
+import { z as z40 } from "zod";
+import { eq as eq44, desc as desc25, and as and34 } from "drizzle-orm";
 init_rateLimiter();
-import { TRPCError as TRPCError32 } from "@trpc/server";
+import { TRPCError as TRPCError34 } from "@trpc/server";
 var NOTIF_LIMIT = 30;
 var NOTIF_WINDOW_MS = 6e4;
-var unreadCountSchema = z39.object({
-  limit: z39.number().int().min(1).max(100).default(20)
+var unreadCountSchema = z40.object({
+  limit: z40.number().int().min(1).max(100).default(20)
 });
-var markAllReadSchema = z39.object({});
+var markAllReadSchema = z40.object({});
 var notificationsRouter = router({
   list: protectedProcedure.input(
-    z39.object({
-      limit: z39.number().int().min(1).max(100).default(20),
-      offset: z39.number().int().min(0).default(0),
-      unreadOnly: z39.boolean().default(false)
+    z40.object({
+      limit: z40.number().int().min(1).max(100).default(20),
+      offset: z40.number().int().min(0).default(0),
+      unreadOnly: z40.boolean().default(false)
     })
   ).query(async ({ ctx, input }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError32({
+      throw new TRPCError34({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
-    const conditions = [eq41(notifications.userId, ctx.user.id)];
+    const conditions = [eq44(notifications.userId, ctx.user.id)];
     if (input.unreadOnly) {
-      conditions.push(eq41(notifications.isRead, false));
+      conditions.push(eq44(notifications.isRead, false));
     }
-    const query = db.select().from(notifications).where(and31(...conditions)).orderBy(desc24(notifications.createdAt)).limit(input.limit);
+    const query = db.select().from(notifications).where(and34(...conditions)).orderBy(desc25(notifications.createdAt)).limit(input.limit);
     if (input.offset > 0) {
       query.offset(input.offset);
     }
@@ -33386,40 +35530,40 @@ var notificationsRouter = router({
   unreadCount: protectedProcedure.input(unreadCountSchema).query(async ({ ctx, input: _input }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError32({
+      throw new TRPCError34({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     const rows = await db.select().from(notifications).where(
-      and31(
-        eq41(notifications.userId, ctx.user.id),
-        eq41(notifications.isRead, false)
+      and34(
+        eq44(notifications.userId, ctx.user.id),
+        eq44(notifications.isRead, false)
       )
     );
     return rows.length;
   }),
-  markRead: protectedProcedure.input(z39.object({ id: z39.number().int() })).mutation(async ({ ctx, input }) => {
+  markRead: protectedProcedure.input(z40.object({ id: z40.number().int() })).mutation(async ({ ctx, input }) => {
     const rl = await checkRateLimit(
       `notif:read:${ctx.user.id}`,
       NOTIF_LIMIT,
       NOTIF_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError32({
+      throw new TRPCError34({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded. Please try again shortly."
       });
     }
     const db = await getDb();
     if (!db)
-      throw new TRPCError32({
+      throw new TRPCError34({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     await db.update(notifications).set({ isRead: true, readAt: /* @__PURE__ */ new Date() }).where(
-      and31(
-        eq41(notifications.id, input.id),
-        eq41(notifications.userId, ctx.user.id)
+      and34(
+        eq44(notifications.id, input.id),
+        eq44(notifications.userId, ctx.user.id)
       )
     );
     return { ok: true };
@@ -33431,21 +35575,21 @@ var notificationsRouter = router({
       NOTIF_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError32({
+      throw new TRPCError34({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded. Please try again shortly."
       });
     }
     const db = await getDb();
     if (!db)
-      throw new TRPCError32({
+      throw new TRPCError34({
         code: "INTERNAL_SERVER_ERROR",
         message: "Database unavailable"
       });
     await db.update(notifications).set({ isRead: true, readAt: /* @__PURE__ */ new Date() }).where(
-      and31(
-        eq41(notifications.userId, ctx.user.id),
-        eq41(notifications.isRead, false)
+      and34(
+        eq44(notifications.userId, ctx.user.id),
+        eq44(notifications.isRead, false)
       )
     );
     return { ok: true };
@@ -33453,8 +35597,8 @@ var notificationsRouter = router({
 });
 
 // server/personalization-router.ts
-import { z as z40 } from "zod";
-import { TRPCError as TRPCError33 } from "@trpc/server";
+import { z as z41 } from "zod";
+import { TRPCError as TRPCError35 } from "@trpc/server";
 
 // shared/coverage-claims.ts
 var COVERAGE = {
@@ -33614,12 +35758,12 @@ var RECO_LIMIT = 30;
 var RECO_WINDOW_MS = 6e4;
 var personalizationRouter = router({
   getRecommendations: protectedProcedure.input(
-    z40.object({
-      frameworks: z40.array(z40.string()).max(20).default([]),
-      objectives: z40.array(z40.string()).max(12).default([]),
-      industry: z40.string().default(""),
-      country: z40.string().default(""),
-      complianceMaturity: z40.enum(["beginner", "intermediate", "advanced"]).default("beginner")
+    z41.object({
+      frameworks: z41.array(z41.string()).max(20).default([]),
+      objectives: z41.array(z41.string()).max(12).default([]),
+      industry: z41.string().default(""),
+      country: z41.string().default(""),
+      complianceMaturity: z41.enum(["beginner", "intermediate", "advanced"]).default("beginner")
     })
   ).query(async ({ ctx, input }) => {
     const rl = await checkRateLimit(
@@ -33628,7 +35772,7 @@ var personalizationRouter = router({
       RECO_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError33({
+      throw new TRPCError35({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded."
       });
@@ -33640,17 +35784,17 @@ var personalizationRouter = router({
 // server/customer-360-router.ts
 init_schema();
 init_db();
-import { z as z41 } from "zod";
-import { eq as eq42, desc as desc25 } from "drizzle-orm";
+import { z as z42 } from "zod";
+import { eq as eq45, desc as desc26 } from "drizzle-orm";
 init_rateLimiter();
-import { TRPCError as TRPCError34 } from "@trpc/server";
+import { TRPCError as TRPCError36 } from "@trpc/server";
 var C360_LIMIT = 20;
 var C360_WINDOW_MS = 6e4;
 var customer360Router = router({
   list: adminProcedure.input(
-    z41.object({
-      limit: z41.number().int().min(1).max(100).default(20),
-      offset: z41.number().int().min(0).default(0)
+    z42.object({
+      limit: z42.number().int().min(1).max(100).default(20),
+      offset: z42.number().int().min(0).default(0)
     })
   ).query(async ({ ctx, input }) => {
     const rl = await checkRateLimit(
@@ -33659,14 +35803,14 @@ var customer360Router = router({
       C360_WINDOW_MS
     );
     if (!rl.allowed) {
-      throw new TRPCError34({
+      throw new TRPCError36({
         code: "TOO_MANY_REQUESTS",
         message: "Rate limit exceeded."
       });
     }
     const db = await getDb();
     if (!db)
-      throw new TRPCError34({
+      throw new TRPCError36({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable"
       });
@@ -33677,26 +35821,26 @@ var customer360Router = router({
       role: users.role,
       status: users.status,
       createdAt: users.createdAt
-    }).from(users).orderBy(desc25(users.createdAt)).limit(input.limit).offset(input.offset);
+    }).from(users).orderBy(desc26(users.createdAt)).limit(input.limit).offset(input.offset);
     return userRows;
   }),
-  getProfile: adminProcedure.input(z41.object({ userId: z41.number().int() })).query(async ({ input }) => {
+  getProfile: adminProcedure.input(z42.object({ userId: z42.number().int() })).query(async ({ input }) => {
     const db = await getDb();
     if (!db)
-      throw new TRPCError34({
+      throw new TRPCError36({
         code: "INTERNAL_SERVER_ERROR",
         message: "DB unavailable"
       });
-    const userRows = await db.select().from(users).where(eq42(users.id, input.userId)).limit(1);
+    const userRows = await db.select().from(users).where(eq45(users.id, input.userId)).limit(1);
     const user = userRows[0];
     if (!user) return null;
     let activity = null;
     try {
-      const rows = await db.select().from(userActivitySummary).where(eq42(userActivitySummary.userId, input.userId));
+      const rows = await db.select().from(userActivitySummary).where(eq45(userActivitySummary.userId, input.userId));
       activity = rows[0] ?? null;
     } catch {
     }
-    const recentEvents = await db.select().from(analyticsEvents).where(eq42(analyticsEvents.userId, input.userId)).orderBy(desc25(analyticsEvents.createdAt)).limit(20);
+    const recentEvents = await db.select().from(analyticsEvents).where(eq45(analyticsEvents.userId, input.userId)).orderBy(desc26(analyticsEvents.createdAt)).limit(20);
     return {
       user: {
         id: user.id,
@@ -33748,6 +35892,7 @@ var appRouter = router({
   rbac: rbacRouter,
   orgMembers: orgMembersRouter,
   orgSettings: orgSettingsRouter,
+  orgEntities: orgEntitiesRouter,
   scorecard: scorecardRouter,
   apiKeys: apiKeysRouter,
   remediation: remediationRouter,
@@ -33790,8 +35935,8 @@ init_db();
 init_env();
 init_sdk();
 init_local_jwt();
-import crypto3 from "crypto";
-import { and as and32, eq as eq43, isNull as isNull5 } from "drizzle-orm";
+import crypto4 from "crypto";
+import { and as and35, eq as eq46, isNull as isNull5 } from "drizzle-orm";
 async function resolveDevBypassUser() {
   const now = /* @__PURE__ */ new Date();
   return {
@@ -33818,7 +35963,7 @@ async function resolveApiKeyAuth(req) {
     return null;
   const rawKey = authHeader.slice(7);
   if (!rawKey.startsWith("djac_")) return null;
-  const keyHash = crypto3.createHash("sha256").update(rawKey).digest("hex");
+  const keyHash = crypto4.createHash("sha256").update(rawKey).digest("hex");
   const db = await getDb();
   if (!db) return null;
   const now = /* @__PURE__ */ new Date();
@@ -33828,9 +35973,9 @@ async function resolveApiKeyAuth(req) {
     revokedAt: apiKeys.revokedAt,
     expiresAt: apiKeys.expiresAt,
     scopes: apiKeys.scopes
-  }).from(apiKeys).where(and32(eq43(apiKeys.keyHash, keyHash), isNull5(apiKeys.revokedAt))).limit(1);
+  }).from(apiKeys).where(and35(eq46(apiKeys.keyHash, keyHash), isNull5(apiKeys.revokedAt))).limit(1);
   if (!keyRow || keyRow.expiresAt && keyRow.expiresAt <= now) return null;
-  db.update(apiKeys).set({ lastUsedAt: now }).where(eq43(apiKeys.id, keyRow.id)).catch(() => {
+  db.update(apiKeys).set({ lastUsedAt: now }).where(eq46(apiKeys.id, keyRow.id)).catch(() => {
   });
   const organizationRole = null;
   const user = {
@@ -33895,108 +36040,6 @@ async function resolveOAuthUser(req) {
   } catch {
     return null;
   }
-}
-
-// server/services/org-context.ts
-init_schema();
-init_db();
-import { and as and33, eq as eq44, sql as sql10 } from "drizzle-orm";
-async function createDefaultOrganizationForUser(user, localUserId) {
-  if (user.id <= 0 && !localUserId) return null;
-  const db = await getDb();
-  if (!db) return null;
-  const now = /* @__PURE__ */ new Date();
-  const defaultTrialEndsAt = trialEndsAt(now);
-  const orgName = user.organizationName && user.organizationName.trim() ? user.organizationName.trim() : `${(user.name || "New User").trim()} Organization`;
-  const ownerKey = localUserId ?? user.id;
-  const safeSlug = `org-${ownerKey}-${orgName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "default"}`;
-  return db.transaction(async (tx) => {
-    await tx.execute(
-      sql10`SELECT pg_advisory_xact_lock(hashtext(${`org-owner:${ownerKey}`}))`
-    );
-    const existingMembership = await tx.select({ organizationId: organizationMembers.organizationId }).from(organizationMembers).where(
-      localUserId != null ? eq44(organizationMembers.localUserId, localUserId) : eq44(organizationMembers.userId, user.id)
-    ).limit(1);
-    if (existingMembership.length > 0) return null;
-    const [inserted] = await tx.insert(organizations).values({
-      slug: safeSlug,
-      name: orgName,
-      billingEmail: user.email || `user-${ownerKey}@example.local`,
-      primaryJurisdiction: "Both",
-      plan: "free_trial",
-      trialStartedAt: now,
-      trialEndsAt: defaultTrialEndsAt,
-      isActive: 1,
-      maxSeats: 5
-    }).returning({ id: organizations.id });
-    const organizationId = inserted.id;
-    await tx.insert(organizationMembers).values({
-      organizationId,
-      ...localUserId != null ? { localUserId } : { userId: user.id },
-      role: "owner",
-      status: "active"
-    });
-    return { organizationId, organizationRole: "owner" };
-  });
-}
-function getLocalUserIdFromOpenId(openId) {
-  if (!openId) return null;
-  const m = /^local:(\d+)$/.exec(openId);
-  return m ? Number(m[1]) : null;
-}
-async function resolveOrganizationForUser(user) {
-  const db = await getDb();
-  if (!db) return { organizationId: null, organizationRole: null };
-  const [membership] = await db.select({
-    organizationId: organizationMembers.organizationId,
-    role: organizationMembers.role
-  }).from(organizationMembers).where(
-    and33(
-      eq44(organizationMembers.userId, user.id),
-      eq44(organizationMembers.status, "active")
-    )
-  ).limit(1);
-  if (!membership) {
-    const seeded = await createDefaultOrganizationForUser(user);
-    if (seeded) {
-      return {
-        organizationId: seeded.organizationId,
-        organizationRole: seeded.organizationRole
-      };
-    }
-  }
-  return {
-    organizationId: membership?.organizationId ?? null,
-    organizationRole: membership?.role ?? null
-  };
-}
-async function resolveOrganizationForLocalUser(user) {
-  const localUserId = getLocalUserIdFromOpenId(user.openId);
-  if (!localUserId) return { organizationId: null, organizationRole: null };
-  const db = await getDb();
-  if (!db) return { organizationId: null, organizationRole: null };
-  const [membership] = await db.select({
-    organizationId: organizationMembers.organizationId,
-    role: organizationMembers.role
-  }).from(organizationMembers).where(
-    and33(
-      eq44(organizationMembers.localUserId, localUserId),
-      eq44(organizationMembers.status, "active")
-    )
-  ).limit(1);
-  if (!membership) {
-    const seeded = await createDefaultOrganizationForUser(user, localUserId);
-    if (seeded) {
-      return {
-        organizationId: seeded.organizationId,
-        organizationRole: seeded.organizationRole
-      };
-    }
-  }
-  return {
-    organizationId: membership?.organizationId ?? null,
-    organizationRole: membership?.role ?? null
-  };
 }
 
 // server/_core/context.ts
@@ -34358,7 +36401,7 @@ function registerAssessmentWebSocketServer(server) {
 init_env();
 init_db();
 init_schema();
-import { eq as eq45 } from "drizzle-orm";
+import { eq as eq47 } from "drizzle-orm";
 function mapStripeStatus(s) {
   const valid = [
     "trialing",
@@ -34381,7 +36424,7 @@ function resolveTier(plan, interval) {
   ) ?? null;
 }
 async function upsertSubscriptionRecord(db, params) {
-  const existing = await db.select({ id: subscriptions.id }).from(subscriptions).where(eq45(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)).limit(1);
+  const existing = await db.select({ id: subscriptions.id }).from(subscriptions).where(eq47(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)).limit(1);
   const payload = {
     organizationId: params.organizationId,
     stripeSubscriptionId: params.stripeSubscriptionId,
@@ -34400,7 +36443,7 @@ async function upsertSubscriptionRecord(db, params) {
   };
   if (existing.length > 0) {
     await db.update(subscriptions).set(payload).where(
-      eq45(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
+      eq47(subscriptions.stripeSubscriptionId, params.stripeSubscriptionId)
     );
     return;
   }
@@ -34444,7 +36487,7 @@ async function stripeWebhookHandler(req, res) {
   res.json({ received: true });
 }
 async function isDuplicateBillingEvent(db, stripeEventId) {
-  const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq45(billingEvents.stripeEventId, stripeEventId)).limit(1);
+  const existing = await db.select({ id: billingEvents.id, status: billingEvents.status }).from(billingEvents).where(eq47(billingEvents.stripeEventId, stripeEventId)).limit(1);
   return existing.length > 0 && existing[0].status === "success";
 }
 async function processStripeEvent(event, db) {
@@ -34469,7 +36512,7 @@ async function processStripeEvent(event, db) {
         description: `Checkout completed \u2014 plan: ${plan}/${interval}`,
         rawPayload: JSON.stringify(event.data.object)
       }).onConflictDoNothing({ target: billingEvents.stripeEventId });
-      await db.update(organizations).set({ plan, stripeCustomerId: String(session.customer ?? "") }).where(eq45(organizations.id, orgId));
+      await db.update(organizations).set({ plan, stripeCustomerId: String(session.customer ?? "") }).where(eq47(organizations.id, orgId));
       await upsertSubscriptionRecord(db, {
         organizationId: orgId,
         stripeSubscriptionId: String(session.subscription),
@@ -34482,14 +36525,27 @@ async function processStripeEvent(event, db) {
         cancelAtPeriodEnd: 0,
         stripeMetadata: JSON.stringify(session.metadata ?? {})
       });
-      await db.update(billingEvents).set({ status: "success" }).where(eq45(billingEvents.stripeEventId, event.id));
+      await db.update(billingEvents).set({ status: "success" }).where(eq47(billingEvents.stripeEventId, event.id));
+      const customerEmail = session.customer_details?.email ?? session.customer_email ?? null;
+      if (customerEmail) {
+        const [orgRow] = await db.select({ name: organizations.name }).from(organizations).where(eq47(organizations.id, orgId)).limit(1);
+        void emailService.sendSubscriptionConfirmed(
+          {
+            name: session.customer_details?.name ?? null,
+            email: customerEmail
+          },
+          `${plan} (${interval})`,
+          orgRow?.name ?? null
+        ).catch(() => {
+        });
+      }
       break;
     }
     // ── Invoice paid → subscription active ───────────────────────────────────
     case "invoice.payment_succeeded": {
       const invoice = event.data.object;
       const orgResult = await db.select({ id: organizations.id }).from(organizations).where(
-        eq45(organizations.stripeCustomerId, String(invoice.customer ?? ""))
+        eq47(organizations.stripeCustomerId, String(invoice.customer ?? ""))
       ).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
@@ -34520,7 +36576,7 @@ async function processStripeEvent(event, db) {
           stripeMetadata: JSON.stringify(invoice.lines?.data?.[0] ?? {})
         });
       } else if (subId) {
-        await db.update(subscriptions).set({ status: "active", lastInvoiceId: invoice.id }).where(eq45(subscriptions.stripeSubscriptionId, subId));
+        await db.update(subscriptions).set({ status: "active", lastInvoiceId: invoice.id }).where(eq47(subscriptions.stripeSubscriptionId, subId));
       }
       await db.insert(billingEvents).values({
         organizationId: orgId,
@@ -34538,12 +36594,12 @@ async function processStripeEvent(event, db) {
     case "invoice.payment_failed": {
       const invoice = event.data.object;
       const orgResult = await db.select({ id: organizations.id }).from(organizations).where(
-        eq45(organizations.stripeCustomerId, String(invoice.customer ?? ""))
+        eq47(organizations.stripeCustomerId, String(invoice.customer ?? ""))
       ).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       const subIdFailed = invoice.subscription ?? invoice.parent?.subscription_details?.subscription ?? "";
-      await db.update(subscriptions).set({ status: "past_due" }).where(eq45(subscriptions.stripeSubscriptionId, subIdFailed));
+      await db.update(subscriptions).set({ status: "past_due" }).where(eq47(subscriptions.stripeSubscriptionId, subIdFailed));
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -34557,7 +36613,7 @@ async function processStripeEvent(event, db) {
     // ── Subscription updated ──────────────────────────────────────────────────
     case "customer.subscription.updated": {
       const sub = event.data.object;
-      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq45(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
+      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq47(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       const priceId = sub.items?.data?.[0]?.price?.id ?? "";
@@ -34584,7 +36640,7 @@ async function processStripeEvent(event, db) {
           cancelAtPeriodEnd: sub.cancel_at_period_end ? 1 : 0,
           stripeMetadata: JSON.stringify(sub.metadata ?? {})
         });
-        await db.update(organizations).set({ plan: planInfo.plan }).where(eq45(organizations.id, orgId));
+        await db.update(organizations).set({ plan: planInfo.plan }).where(eq47(organizations.id, orgId));
       } else {
         await db.update(subscriptions).set({
           stripePriceId: priceId || null,
@@ -34593,7 +36649,7 @@ async function processStripeEvent(event, db) {
           currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1e3) : null,
           cancelAtPeriodEnd: sub.cancel_at_period_end ? 1 : 0,
           stripeMetadata: JSON.stringify(sub.metadata ?? {})
-        }).where(eq45(subscriptions.stripeSubscriptionId, sub.id));
+        }).where(eq47(subscriptions.stripeSubscriptionId, sub.id));
       }
       await db.insert(billingEvents).values({
         organizationId: orgId,
@@ -34608,14 +36664,14 @@ async function processStripeEvent(event, db) {
     // ── Subscription cancelled ────────────────────────────────────────────────
     case "customer.subscription.deleted": {
       const sub = event.data.object;
-      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq45(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
+      const orgResult = await db.select({ id: organizations.id }).from(organizations).where(eq47(organizations.stripeCustomerId, String(sub.customer ?? ""))).limit(1);
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
       await db.update(subscriptions).set({
         status: "canceled",
         cancelAtPeriodEnd: 0,
         canceledAt: sub.canceled_at ? new Date(sub.canceled_at * 1e3) : /* @__PURE__ */ new Date()
-      }).where(eq45(subscriptions.stripeSubscriptionId, sub.id));
+      }).where(eq47(subscriptions.stripeSubscriptionId, sub.id));
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -34680,7 +36736,7 @@ init_schema();
 init_db();
 init_email();
 init_env();
-import { eq as eq46 } from "drizzle-orm";
+import { eq as eq48 } from "drizzle-orm";
 var INTERVAL_MS = 6 * 60 * 60 * 1e3;
 var DAY_MS = 24 * 60 * 60 * 1e3;
 function milestoneColumn(milestone) {
@@ -34760,7 +36816,7 @@ async function runReminderCheck() {
     trialReminderDay3Sent: organizations.trialReminderDay3Sent,
     trialReminderDay6Sent: organizations.trialReminderDay6Sent,
     trialExpiredNoticeSent: organizations.trialExpiredNoticeSent
-  }).from(organizations).where(eq46(organizations.plan, "free_trial"));
+  }).from(organizations).where(eq48(organizations.plan, "free_trial"));
   if (trialOrgs.length === 0) return;
   const pricingUrl = `${ENV.appUrl}/pricing`;
   let sent = 0;
@@ -34786,7 +36842,7 @@ async function runReminderCheck() {
         html: buildEmailHtml(org.name, milestone, pricingUrl),
         text: buildEmailText(org.name, milestone, pricingUrl)
       });
-      await db.update(organizations).set({ [col]: 1 }).where(eq46(organizations.id, org.id));
+      await db.update(organizations).set({ [col]: 1 }).where(eq48(organizations.id, org.id));
       sent++;
     } catch (err) {
       console.warn(
@@ -34823,7 +36879,7 @@ init_schema();
 init_db();
 init_email();
 init_env();
-import { and as and34, eq as eq47, lte, gte, inArray as inArray9 } from "drizzle-orm";
+import { and as and36, eq as eq49, lte, gte as gte2, inArray as inArray9 } from "drizzle-orm";
 var INTERVAL_MS2 = 2 * 60 * 60 * 1e3;
 var DAY_MS2 = 24 * 60 * 60 * 1e3;
 var sentSet = /* @__PURE__ */ new Set();
@@ -34875,9 +36931,9 @@ async function runDeadlineAlertCheck() {
   const now = /* @__PURE__ */ new Date();
   const horizon = new Date(now.getTime() + 31 * DAY_MS2);
   const upcoming = await db.select().from(complianceDeadlines).where(
-    and34(
-      eq47(complianceDeadlines.status, "upcoming"),
-      gte(complianceDeadlines.deadlineDate, now),
+    and36(
+      eq49(complianceDeadlines.status, "upcoming"),
+      gte2(complianceDeadlines.deadlineDate, now),
       lte(complianceDeadlines.deadlineDate, horizon)
     )
   );
@@ -34924,10 +36980,10 @@ async function runDeadlineAlertCheck() {
     if (!milestone) continue;
     const dedupKey = `${deadline.id}:${milestone}`;
     if (sentSet.has(dedupKey)) continue;
-    const members = await db.select({ email: users.email, name: users.name }).from(organizationMembers).innerJoin(users, eq47(organizationMembers.userId, users.id)).where(
-      and34(
-        eq47(organizationMembers.organizationId, deadline.organizationId),
-        eq47(organizationMembers.status, "active"),
+    const members = await db.select({ email: users.email, name: users.name }).from(organizationMembers).innerJoin(users, eq49(organizationMembers.userId, users.id)).where(
+      and36(
+        eq49(organizationMembers.organizationId, deadline.organizationId),
+        eq49(organizationMembers.status, "active"),
         inArray9(organizationMembers.role, [
           "owner",
           "admin",
@@ -34936,9 +36992,9 @@ async function runDeadlineAlertCheck() {
       )
     );
     const invitedEmails = await db.select({ inviteEmail: organizationMembers.inviteEmail }).from(organizationMembers).where(
-      and34(
-        eq47(organizationMembers.organizationId, deadline.organizationId),
-        eq47(organizationMembers.status, "invited"),
+      and36(
+        eq49(organizationMembers.organizationId, deadline.organizationId),
+        eq49(organizationMembers.status, "invited"),
         inArray9(organizationMembers.role, [
           "owner",
           "admin",
@@ -34987,7 +37043,7 @@ function startDeadlineAlertScheduler() {
 // server/report-scheduler.ts
 init_schema();
 init_db();
-import { eq as eq48 } from "drizzle-orm";
+import { eq as eq50 } from "drizzle-orm";
 init_env();
 var INTERVAL_MS3 = 6 * 60 * 60 * 1e3;
 var sentSet2 = /* @__PURE__ */ new Set();
@@ -35031,7 +37087,7 @@ async function runScheduledReports() {
     name: organizations.name,
     billingEmail: organizations.billingEmail,
     primaryJurisdiction: organizations.primaryJurisdiction
-  }).from(organizations).where(eq48(organizations.isActive, 1));
+  }).from(organizations).where(eq50(organizations.isActive, 1));
   for (const org of activeOrgs) {
     if (!org.billingEmail) continue;
     const jurisdiction = mapJurisdiction(org.primaryJurisdiction);
@@ -35129,14 +37185,276 @@ init_queueFactory();
 // server/_core/auto-migrate.ts
 init_db();
 init_env();
+import { sql as sql12 } from "drizzle-orm";
+
+// server/_core/fk-indexes.ts
 import { sql as sql11 } from "drizzle-orm";
+var FK_INDEXES = [
+  // Tenant scoping (organization_id / org columns)
+  {
+    name: "onboarding_responses_org_idx",
+    table: "onboarding_responses",
+    columns: ["organization_id"]
+  },
+  {
+    name: "onboarding_events_org_idx",
+    table: "onboarding_events",
+    columns: ["organization_id"]
+  },
+  {
+    name: "onboarding_profile_history_org_idx",
+    table: "onboarding_profile_history",
+    columns: ["organization_id"]
+  },
+  {
+    name: "personalization_recommendations_org_idx",
+    table: "personalization_recommendations",
+    columns: ["organization_id"]
+  },
+  {
+    name: "analytics_events_org_idx",
+    table: "analytics_events",
+    columns: ["organization_id"]
+  },
+  {
+    name: "email_log_org_idx",
+    table: "email_log",
+    columns: ["organization_id"]
+  },
+  // User identity (both OAuth users and local users)
+  {
+    name: "activityEvents_userId_idx",
+    table: "activityEvents",
+    columns: ["userId"]
+  },
+  {
+    name: "activityEvents_localUserId_idx",
+    table: "activityEvents",
+    columns: ["localUserId"]
+  },
+  { name: "auditLogs_userId_idx", table: "auditLogs", columns: ["userId"] },
+  {
+    name: "notifications_userId_idx",
+    table: "notifications",
+    columns: ["user_id"]
+  },
+  {
+    name: "userInteractionLogs_userId_idx",
+    table: "userInteractionLogs",
+    columns: ["userId"]
+  },
+  {
+    name: "userInteractionLogs_localUserId_idx",
+    table: "userInteractionLogs",
+    columns: ["localUserId"]
+  },
+  {
+    name: "userOnboarding_userId_idx",
+    table: "userOnboarding",
+    columns: ["userId"]
+  },
+  {
+    name: "userOnboarding_localUserId_idx",
+    table: "userOnboarding",
+    columns: ["localUserId"]
+  },
+  {
+    name: "analytics_events_user_idx",
+    table: "analytics_events",
+    columns: ["user_id"]
+  },
+  { name: "email_log_user_idx", table: "email_log", columns: ["user_id"] },
+  // Vendor / assessment graph
+  {
+    name: "vendorAssessments_vendorId_idx",
+    table: "vendorAssessments",
+    columns: ["vendorId"]
+  },
+  {
+    name: "vendorAssessments_frameworkId_idx",
+    table: "vendorAssessments",
+    columns: ["frameworkId"]
+  },
+  {
+    name: "techStackComponents_vendorId_idx",
+    table: "techStackComponents",
+    columns: ["vendorId"]
+  },
+  {
+    name: "continuousComplianceRuns_vendorId_idx",
+    table: "continuousComplianceRuns",
+    columns: ["vendorId"]
+  },
+  {
+    name: "assessmentGaps_assessmentId_idx",
+    table: "assessmentGaps",
+    columns: ["assessmentId"]
+  },
+  // Owner / actor lookups
+  {
+    name: "complianceReports_generatedByUserId_idx",
+    table: "complianceReports",
+    columns: ["generatedByUserId"]
+  },
+  {
+    name: "apiKeys_createdByUserId_idx",
+    table: "apiKeys",
+    columns: ["createdByUserId"]
+  },
+  {
+    name: "complianceDeadlines_assignedToUserId_idx",
+    table: "complianceDeadlines",
+    columns: ["assignedToUserId"]
+  },
+  // Remaining FK columns (full coverage so no cascade does a seq scan).
+  {
+    name: "assessmentGaps_controlId_idx",
+    table: "assessmentGaps",
+    columns: ["controlId"]
+  },
+  {
+    name: "aiAgentRuns_createdByUserId_idx",
+    table: "aiAgentRuns",
+    columns: ["createdByUserId"]
+  },
+  {
+    name: "billingEvents_subscriptionId_idx",
+    table: "billingEvents",
+    columns: ["subscriptionId"]
+  },
+  {
+    name: "complianceExposureMappings_controlId_idx",
+    table: "complianceExposureMappings",
+    columns: ["controlId"]
+  },
+  {
+    name: "complianceExposureMappings_frameworkId_idx",
+    table: "complianceExposureMappings",
+    columns: ["frameworkId"]
+  },
+  {
+    name: "complianceExposureMappings_vulnerabilityId_idx",
+    table: "complianceExposureMappings",
+    columns: ["vulnerabilityId"]
+  },
+  {
+    name: "complianceSimulations_createdByUserId_idx",
+    table: "complianceSimulations",
+    columns: ["createdByUserId"]
+  },
+  {
+    name: "consultationRequests_assignedAdminUserId_idx",
+    table: "consultationRequests",
+    columns: ["assignedAdminUserId"]
+  },
+  {
+    name: "consultationRequests_userId_idx",
+    table: "consultationRequests",
+    columns: ["userId"]
+  },
+  {
+    name: "controlMappings_sourceControlId_idx",
+    table: "controlMappings",
+    columns: ["sourceControlId"]
+  },
+  {
+    name: "controlMappings_targetControlId_idx",
+    table: "controlMappings",
+    columns: ["targetControlId"]
+  },
+  {
+    name: "ctemAssets_vendorId_idx",
+    table: "ctemAssets",
+    columns: ["vendorId"]
+  },
+  {
+    name: "ctemAttackSimulations_assetId_idx",
+    table: "ctemAttackSimulations",
+    columns: ["assetId"]
+  },
+  {
+    name: "ctemRiskScores_assetId_idx",
+    table: "ctemRiskScores",
+    columns: ["assetId"]
+  },
+  {
+    name: "regulatorOversightTargets_grantedByAdminId_idx",
+    table: "regulatorOversightTargets",
+    columns: ["grantedByAdminId"]
+  },
+  {
+    name: "regulatorOversightTargets_regulatorOrgId_idx",
+    table: "regulatorOversightTargets",
+    columns: ["regulatorOrgId"]
+  },
+  {
+    name: "regulatorOversightTargets_targetOrgId_idx",
+    table: "regulatorOversightTargets",
+    columns: ["targetOrgId"]
+  },
+  {
+    name: "reportShares_createdByUserId_idx",
+    table: "reportShares",
+    columns: ["createdByUserId"]
+  },
+  {
+    name: "rolePermissions_grantedByUserId_idx",
+    table: "rolePermissions",
+    columns: ["grantedByUserId"]
+  },
+  {
+    name: "rolePermissions_localUserId_idx",
+    table: "rolePermissions",
+    columns: ["localUserId"]
+  },
+  {
+    name: "rolePermissions_userId_idx",
+    table: "rolePermissions",
+    columns: ["userId"]
+  },
+  {
+    name: "vendorShares_allowedOrgId_idx",
+    table: "vendorShares",
+    columns: ["allowedOrgId"]
+  },
+  {
+    name: "vendorShares_createdByUserId_idx",
+    table: "vendorShares",
+    columns: ["createdByUserId"]
+  },
+  {
+    name: "vendorShares_vendorId_idx",
+    table: "vendorShares",
+    columns: ["vendorId"]
+  }
+];
+function buildCreateIndexSql(index2) {
+  return sql11`CREATE INDEX IF NOT EXISTS ${sql11.identifier(index2.name)} ON ${sql11.identifier(index2.table)} (${sql11.join(
+    index2.columns.map((column) => sql11.identifier(column)),
+    sql11`, `
+  )})`;
+}
+async function ensureForeignKeyIndexes(db) {
+  for (const index2 of FK_INDEXES) {
+    try {
+      await db.execute(buildCreateIndexSql(index2));
+    } catch (err) {
+      console.warn(
+        `[Schema] Could not ensure index ${index2.name}:`,
+        err instanceof Error ? err.message : err
+      );
+    }
+  }
+}
+
+// server/_core/auto-migrate.ts
 var migrationApplied = false;
 async function seedComplianceFrameworks(db) {
   try {
     const { complianceFrameworks: complianceFrameworks2 } = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
     let seeded = 0;
     for (const fw of complianceFrameworks2) {
-      await db.execute(sql11`
+      await db.execute(sql12`
                 INSERT INTO "frameworks" ("code", "name", "country", "description", "scope", "enforcementAuthority", "maxPenalty")
                 VALUES (${fw.code}, ${fw.name}, ${fw.country}, ${fw.description ?? null}, ${fw.scope ?? null}, ${fw.enforcementAuthority ?? null}, ${fw.maxPenalty ?? null})
                 ON CONFLICT ("code") DO UPDATE SET
@@ -35165,17 +37483,18 @@ async function ensureMigrated() {
   const db = await getDb();
   if (!db) return;
   await ensureOnboardingSchema(db);
+  await ensureForeignKeyIndexes(db);
   try {
-    await db.execute(sql11`
+    await db.execute(sql12`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "verifiedAt" timestamp
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "lastMfaVerifiedAt" timestamp
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "firstLoginEmailSent" integer DEFAULT 0 NOT NULL
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "yallaAdminSessions" (
                 "id"            varchar(64)   NOT NULL PRIMARY KEY,
                 "adminUsername" varchar(120)  NOT NULL,
@@ -35187,7 +37506,7 @@ async function ensureMigrated() {
                 "isRevoked"     integer       NOT NULL DEFAULT 0
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "yallaAdminAuditLogs" (
                 "id"            serial        PRIMARY KEY,
                 "sessionId"     varchar(64),
@@ -35199,17 +37518,17 @@ async function ensureMigrated() {
                 "createdAt"     timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             ALTER TABLE "localUsers" ADD COLUMN IF NOT EXISTS "phoneNumber" varchar(20)
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             ALTER TABLE "complianceControls" ADD COLUMN IF NOT EXISTS "applicability" varchar(255)
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE UNIQUE INDEX IF NOT EXISTS "localUsers_phoneNumber_idx"
             ON "localUsers" ("phoneNumber") WHERE "phoneNumber" IS NOT NULL
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "otpCodes" (
                 "id"         serial        PRIMARY KEY,
                 "identifier" varchar(320)  NOT NULL,
@@ -35220,7 +37539,7 @@ async function ensureMigrated() {
                 "createdAt"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "auditLogs" (
                 "id"             serial        PRIMARY KEY,
                 "userId"         integer,
@@ -35240,26 +37559,26 @@ async function ensureMigrated() {
             )
         `);
     const indexes = [
-      sql11`CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
-      sql11`CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
-      sql11`CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
-      sql11`CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
-      sql11`CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
-      sql11`CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
-      sql11`CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
-      sql11`CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
-      sql11`CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
-      sql11`CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
-      sql11`CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`
+      sql12`CREATE INDEX IF NOT EXISTS "organizations_plan_idx" ON "organizations" ("plan")`,
+      sql12`CREATE INDEX IF NOT EXISTS "organizations_stripeCustomerId_idx" ON "organizations" ("stripeCustomerId")`,
+      sql12`CREATE INDEX IF NOT EXISTS "organizationMembers_organizationId_idx" ON "organizationMembers" ("organizationId")`,
+      sql12`CREATE INDEX IF NOT EXISTS "vendors_organizationId_idx" ON "vendors" ("organizationId")`,
+      sql12`CREATE INDEX IF NOT EXISTS "auditLogs_organizationId_idx" ON "auditLogs" ("organizationId")`,
+      sql12`CREATE INDEX IF NOT EXISTS "auditLogs_createdAt_idx" ON "auditLogs" ("createdAt")`,
+      sql12`CREATE INDEX IF NOT EXISTS "subscriptions_organizationId_idx" ON "subscriptions" ("organizationId")`,
+      sql12`CREATE INDEX IF NOT EXISTS "billingEvents_organizationId_idx" ON "billingEvents" ("organizationId")`,
+      sql12`CREATE INDEX IF NOT EXISTS "riskRegister_organizationId_idx" ON "riskRegister" ("organizationId")`,
+      sql12`CREATE INDEX IF NOT EXISTS "userInteractionLogs_organizationId_idx" ON "userInteractionLogs" ("organizationId")`,
+      sql12`CREATE INDEX IF NOT EXISTS "activityEvents_createdAt_idx" ON "activityEvents" ("createdAt")`
     ];
     for (const idx of indexes) {
       await db.execute(idx);
     }
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx"
             ON "complianceControls" ("frameworkId", "controlCode")
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx"
             ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")
         `);
@@ -35290,13 +37609,13 @@ async function ensureMigrated() {
     ];
     for (const j of globalJurisdictions) {
       await db.execute(
-        sql11`ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql12`ALTER TYPE "jurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
       await db.execute(
-        sql11`ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql12`ALTER TYPE "dsrJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
       await db.execute(
-        sql11`ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
+        sql12`ALTER TYPE "deadlineJurisdiction" ADD VALUE IF NOT EXISTS ${j}`
       );
     }
     const newRegions = [
@@ -35309,21 +37628,21 @@ async function ensureMigrated() {
       "Global"
     ];
     for (const r of newRegions) {
-      await db.execute(sql11`ALTER TYPE "region" ADD VALUE IF NOT EXISTS ${r}`);
+      await db.execute(sql12`ALTER TYPE "region" ADD VALUE IF NOT EXISTS ${r}`);
     }
-    await db.execute(sql11`
+    await db.execute(sql12`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedAt" DROP DEFAULT
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedAt" DROP NOT NULL
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             ALTER TABLE "yallaAdminAccessLinkNonces"
             ALTER COLUMN "consumedByIp" DROP NOT NULL
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "onboarding_progress" (
                 "id"              serial        PRIMARY KEY,
                 "user_id"         integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -35336,7 +37655,7 @@ async function ensureMigrated() {
                 "updated_at"      timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "organization_profiles_custom" (
                 "id"                       serial        PRIMARY KEY,
                 "organization_id"          integer       NOT NULL UNIQUE REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -35350,7 +37669,7 @@ async function ensureMigrated() {
                 "updated_at"               timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "user_preferences" (
                 "id"                    serial        PRIMARY KEY,
                 "user_id"               integer       NOT NULL UNIQUE REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -35364,7 +37683,7 @@ async function ensureMigrated() {
                 "updated_at"            timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "feature_flags" (
                 "id"                   serial        PRIMARY KEY,
                 "name"                 varchar(100)  NOT NULL UNIQUE,
@@ -35376,7 +37695,7 @@ async function ensureMigrated() {
                 "updated_at"           timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "analytics_events" (
                 "id"               serial        PRIMARY KEY,
                 "user_id"          integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -35388,7 +37707,7 @@ async function ensureMigrated() {
                 "created_at"       timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "user_activity_summary" (
                 "user_id"           integer       PRIMARY KEY REFERENCES "users" ("id") ON DELETE CASCADE,
                 "total_sessions"    integer       DEFAULT 0,
@@ -35400,7 +37719,7 @@ async function ensureMigrated() {
                 "updated_at"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "email_log" (
                 "id"               serial        PRIMARY KEY,
                 "user_id"          integer       REFERENCES "users" ("id") ON DELETE SET NULL,
@@ -35416,7 +37735,7 @@ async function ensureMigrated() {
                 "created_at"       timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "notifications" (
                 "id"          serial        PRIMARY KEY,
                 "user_id"     integer       NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
@@ -35429,7 +37748,7 @@ async function ensureMigrated() {
                 "created_at"  timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             DO $$ BEGIN
                 CREATE TYPE "knowledgeGraphNodeKind" AS ENUM (
                     'region','framework','standard','edition','agent','regulator',
@@ -35439,7 +37758,7 @@ async function ensureMigrated() {
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             DO $$ BEGIN
                 CREATE TYPE "knowledgeGraphEdgeRelation" AS ENUM (
                     'contains','activates','supports','maps_to','requires','conflicts',
@@ -35449,7 +37768,7 @@ async function ensureMigrated() {
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "knowledgeGraphNodes" (
                 "id"               serial        PRIMARY KEY,
                 "nodeId"           varchar(120)  NOT NULL UNIQUE,
@@ -35465,7 +37784,7 @@ async function ensureMigrated() {
                 "updatedAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "knowledgeGraphEdges" (
                 "id"               serial        PRIMARY KEY,
                 "sourceNodeId"     varchar(120)  NOT NULL,
@@ -35477,7 +37796,7 @@ async function ensureMigrated() {
                 "createdAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "regulatoryChanges" (
                 "id"               serial        PRIMARY KEY,
                 "organizationId"   integer       REFERENCES "organizations" ("id") ON DELETE SET NULL,
@@ -35496,7 +37815,7 @@ async function ensureMigrated() {
                 "updatedAt"        timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "complianceSimulations" (
                 "id"                   serial        PRIMARY KEY,
                 "organizationId"       integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -35519,7 +37838,7 @@ async function ensureMigrated() {
                 "updatedAt"            timestamp     NOT NULL DEFAULT now()
             )
         `);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "aiAgentRuns" (
                 "id"               serial        PRIMARY KEY,
                 "organizationId"   integer       NOT NULL REFERENCES "organizations" ("id") ON DELETE CASCADE,
@@ -35551,7 +37870,7 @@ async function ensureMigrated() {
     };
     await driftExec(
       "auditLogs.chainHash",
-      sql11`ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text`
+      sql12`ALTER TABLE "auditLogs" ADD COLUMN IF NOT EXISTS "chainHash" text`
     );
     const tenantIndexTables = [
       "complianceReports",
@@ -35586,16 +37905,16 @@ async function ensureMigrated() {
       const column = tenantIndexColumns[table] ?? "organizationId";
       await driftExec(
         `index ${table}.${column}`,
-        sql11`CREATE INDEX IF NOT EXISTS ${sql11.identifier(`${table}_${column}_idx`)} ON ${sql11.identifier(table)} (${sql11.identifier(column)})`
+        sql12`CREATE INDEX IF NOT EXISTS ${sql12.identifier(`${table}_${column}_idx`)} ON ${sql12.identifier(table)} (${sql12.identifier(column)})`
       );
     }
     await driftExec(
       "index notifications.user_id",
-      sql11`CREATE INDEX IF NOT EXISTS ${sql11.identifier("notifications_user_id_idx")} ON ${sql11.identifier("notifications")} ("user_id")`
+      sql12`CREATE INDEX IF NOT EXISTS ${sql12.identifier("notifications_user_id_idx")} ON ${sql12.identifier("notifications")} ("user_id")`
     );
     await driftExec(
       "rate limit windows table",
-      sql11`CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
+      sql12`CREATE TABLE IF NOT EXISTS "rateLimitWindows" (
         "key" text NOT NULL,
         "windowIndex" bigint NOT NULL,
         "count" integer NOT NULL DEFAULT 0,
@@ -35622,196 +37941,200 @@ async function ensureMigrated() {
     for (const [typeName, values] of Object.entries(driftEnums)) {
       await driftExec(
         `create enum ${typeName}`,
-        sql11`DO $$ BEGIN
-           CREATE TYPE ${sql11.identifier(typeName)} AS ENUM (${values.map((v) => sql11`${v}`).join(",")})
+        sql12`DO $$ BEGIN
+           CREATE TYPE ${sql12.identifier(typeName)} AS ENUM (${values.map((v) => sql12`${v}`).join(",")})
          EXCEPTION WHEN duplicate_object THEN NULL;
          END $$;`
       );
       for (const v of values) {
         await driftExec(
           `enum ${typeName}.${v}`,
-          sql11`ALTER TYPE ${sql11.identifier(typeName)} ADD VALUE IF NOT EXISTS ${v}`
+          sql12`ALTER TYPE ${sql12.identifier(typeName)} ADD VALUE IF NOT EXISTS ${v}`
         );
       }
     }
     const driftColumns = [
       [
         "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`
+        sql12`ADD COLUMN IF NOT EXISTS "billingEmail" varchar(320) NOT NULL DEFAULT ''`
       ],
-      ["organizations", sql11`ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
+      ["organizations", sql12`ADD COLUMN IF NOT EXISTS "industry" varchar(120)`],
       [
         "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`
-      ],
-      [
-        "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`
+        sql12`ADD COLUMN IF NOT EXISTS "primaryJurisdiction" "jurisdiction" DEFAULT 'Both'`
       ],
       [
         "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "stripeCustomerId" varchar(64)`
       ],
       [
         "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`
-      ],
-      ["organizations", sql11`ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
-      [
-        "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "plan" "plan" DEFAULT 'free_trial' NOT NULL`
       ],
       [
         "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "trialStartedAt" timestamp`
+      ],
+      ["organizations", sql12`ADD COLUMN IF NOT EXISTS "trialEndsAt" timestamp`],
+      [
+        "organizations",
+        sql12`ADD COLUMN IF NOT EXISTS "trialReminderDay3Sent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "trialReminderDay6Sent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "trialExpiredNoticeSent" integer DEFAULT 0 NOT NULL`
       ],
       [
         "organizations",
-        sql11`ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "isActive" integer DEFAULT 1 NOT NULL`
       ],
-      ["organizations", sql11`ADD COLUMN IF NOT EXISTS "metadata" text`],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "userId" integer`],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "localUserId" integer`],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "organizationId" integer`],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
+      [
+        "organizations",
+        sql12`ADD COLUMN IF NOT EXISTS "maxSeats" integer DEFAULT 5 NOT NULL`
+      ],
+      [
+        "organizations",
+        sql12`ADD COLUMN IF NOT EXISTS "parentOrganizationId" integer`
+      ],
+      ["organizations", sql12`ADD COLUMN IF NOT EXISTS "metadata" text`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "localUserId" integer`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "organizationId" integer`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "actorRole" varchar(64)`],
       [
         "auditLogs",
-        sql11`ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "category" "auditLogCategory" DEFAULT 'system' NOT NULL`
       ],
       [
         "auditLogs",
-        sql11`ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "action" varchar(120) DEFAULT '' NOT NULL`
       ],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "entityId" integer`],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "entityType" varchar(120)`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "entityId" integer`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "targetEntity" varchar(255)`],
       [
         "auditLogs",
-        sql11`ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "outcome" "auditLogOutcome" DEFAULT 'success' NOT NULL`
       ],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "payload" text`],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
-      ["auditLogs", sql11`ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "payload" text`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "ipHash" varchar(64)`],
+      ["auditLogs", sql12`ADD COLUMN IF NOT EXISTS "userAgent" varchar(512)`],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`
-      ],
-      [
-        "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`
+        sql12`ADD COLUMN IF NOT EXISTS "stripeSubscriptionId" varchar(64)`
       ],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "stripePriceId" varchar(64)`
       ],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "plan" "paidPlan" DEFAULT 'starter' NOT NULL`
       ],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "billingInterval" "billingInterval" DEFAULT 'monthly' NOT NULL`
       ],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "amountCents" integer DEFAULT 0 NOT NULL`
       ],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD' NOT NULL`
       ],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`
+        sql12`ADD COLUMN IF NOT EXISTS "status" "subscriptionStatus" DEFAULT 'trialing' NOT NULL`
       ],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`
+        sql12`ADD COLUMN IF NOT EXISTS "currentPeriodStart" timestamp`
       ],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "currentPeriodEnd" timestamp`
       ],
-      ["subscriptions", sql11`ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
       [
         "subscriptions",
-        sql11`ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`
+        sql12`ADD COLUMN IF NOT EXISTS "cancelAtPeriodEnd" integer DEFAULT 0 NOT NULL`
       ],
-      ["subscriptions", sql11`ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
-      ["billingEvents", sql11`ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
+      ["subscriptions", sql12`ADD COLUMN IF NOT EXISTS "canceledAt" timestamp`],
+      [
+        "subscriptions",
+        sql12`ADD COLUMN IF NOT EXISTS "lastInvoiceId" varchar(64)`
+      ],
+      ["subscriptions", sql12`ADD COLUMN IF NOT EXISTS "stripeMetadata" text`],
+      ["billingEvents", sql12`ADD COLUMN IF NOT EXISTS "subscriptionId" integer`],
       [
         "billingEvents",
-        sql11`ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`
-      ],
-      [
-        "billingEvents",
-        sql11`ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "stripeEventId" varchar(64)`
       ],
       [
         "billingEvents",
-        sql11`ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`
+        sql12`ADD COLUMN IF NOT EXISTS "eventType" varchar(120) DEFAULT '' NOT NULL`
       ],
-      ["billingEvents", sql11`ADD COLUMN IF NOT EXISTS "amountCents" integer`],
       [
         "billingEvents",
-        sql11`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`
+        sql12`ADD COLUMN IF NOT EXISTS "status" "billingEventStatus" DEFAULT 'pending' NOT NULL`
       ],
-      ["billingEvents", sql11`ADD COLUMN IF NOT EXISTS "description" text`],
-      ["billingEvents", sql11`ADD COLUMN IF NOT EXISTS "rawPayload" text`],
+      ["billingEvents", sql12`ADD COLUMN IF NOT EXISTS "amountCents" integer`],
+      [
+        "billingEvents",
+        sql12`ADD COLUMN IF NOT EXISTS "currency" varchar(3) DEFAULT 'USD'`
+      ],
+      ["billingEvents", sql12`ADD COLUMN IF NOT EXISTS "description" text`],
+      ["billingEvents", sql12`ADD COLUMN IF NOT EXISTS "rawPayload" text`],
       [
         "organizationMembers",
-        sql11`ADD COLUMN IF NOT EXISTS "localUserId" integer`
+        sql12`ADD COLUMN IF NOT EXISTS "localUserId" integer`
       ],
-      ["organizationMembers", sql11`ADD COLUMN IF NOT EXISTS "userId" integer`],
+      ["organizationMembers", sql12`ADD COLUMN IF NOT EXISTS "userId" integer`],
       [
         "organizationMembers",
-        sql11`ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`
-      ],
-      [
-        "organizationMembers",
-        sql11`ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`
-      ],
-      [
-        "organizationMembers",
-        sql11`ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`
+        sql12`ADD COLUMN IF NOT EXISTS "role" "orgMemberRole" DEFAULT 'analyst' NOT NULL`
       ],
       [
         "organizationMembers",
-        sql11`ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`
+        sql12`ADD COLUMN IF NOT EXISTS "status" "orgMemberStatus" DEFAULT 'active' NOT NULL`
       ],
       [
         "organizationMembers",
-        sql11`ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`
+        sql12`ADD COLUMN IF NOT EXISTS "invitedByUserId" integer`
       ],
       [
         "organizationMembers",
-        sql11`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
+        sql12`ADD COLUMN IF NOT EXISTS "inviteEmail" varchar(320)`
+      ],
+      [
+        "organizationMembers",
+        sql12`ADD COLUMN IF NOT EXISTS "inviteToken" varchar(64)`
+      ],
+      [
+        "organizationMembers",
+        sql12`ADD COLUMN IF NOT EXISTS "inviteAcceptedAt" timestamp`
       ]
     ];
     for (const [table, clause] of driftColumns) {
       await driftExec(
         table,
-        sql11`ALTER TABLE ${sql11.identifier(table)} ${clause}`
+        sql12`ALTER TABLE ${sql12.identifier(table)} ${clause}`
       );
     }
     await driftExec(
       "subscriptions unique stripeSubscriptionId",
-      sql11`CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique" ON "subscriptions" ("stripeSubscriptionId")`
+      sql12`CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_stripeSubscriptionId_unique" ON "subscriptions" ("stripeSubscriptionId")`
     );
     await driftExec(
       "billingEvents unique stripeEventId",
-      sql11`CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique" ON "billingEvents" ("stripeEventId")`
+      sql12`CREATE UNIQUE INDEX IF NOT EXISTS "billingEvents_stripeEventId_unique" ON "billingEvents" ("stripeEventId")`
     );
     await seedComplianceFrameworks(db);
-    await db.execute(sql11`
+    await db.execute(sql12`
             CREATE TABLE IF NOT EXISTS "yallaAdminSettings" (
                 "key"       varchar(64) NOT NULL PRIMARY KEY,
                 "value"     text        NOT NULL,
@@ -35827,6 +38150,136 @@ async function ensureMigrated() {
       "[Migrate] Auto-migration failed (may already be applied):",
       err.message
     );
+  }
+}
+
+// server/_core/backup.ts
+init_db();
+import { sql as sql13 } from "drizzle-orm";
+
+// server/services/supabase.ts
+init_config_schema();
+import { createClient } from "@supabase/supabase-js";
+var _supabaseAdmin = null;
+function getSupabaseAdmin() {
+  if (_supabaseAdmin) return _supabaseAdmin;
+  const url = parsedEnv.SUPABASE_URL;
+  const serviceRoleKey = parsedEnv.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceRoleKey) return null;
+  _supabaseAdmin = createClient(url, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+  return _supabaseAdmin;
+}
+function getStorageBucket(bucket) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+  return supabase.storage.from(bucket);
+}
+
+// server/_core/backup.ts
+init_logger();
+var BACKUP_BUCKET = "backups";
+var BACKUP_ROW_CAP = 5e3;
+var BACKUP_KEEP = 14;
+var BACKUP_TABLES = [
+  "localUsers",
+  "users",
+  "organizations",
+  "organizationMembers",
+  "organization_profiles_custom",
+  "onboarding_responses",
+  "onboarding_events",
+  "onboarding_profile_history",
+  "personalization_recommendations"
+];
+function backupFileName(generatedAt) {
+  return `djac-${generatedAt.replace(/[:.]/g, "")}.json`;
+}
+function selectStaleBackups(names, keep = BACKUP_KEEP) {
+  const sorted = [...names].sort().reverse();
+  return sorted.slice(Math.max(0, keep)).reverse();
+}
+async function buildBackupSnapshot() {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const tables = {};
+  for (const table of BACKUP_TABLES) {
+    try {
+      const result = await db.execute(
+        sql13`SELECT * FROM ${sql13.identifier(table)} LIMIT ${BACKUP_ROW_CAP}`
+      );
+      tables[table] = result.rows ?? [];
+    } catch (err) {
+      logger.warn({ table, err }, "Backup: skipping table");
+      tables[table] = [];
+    }
+  }
+  return {
+    generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    version: 1,
+    tables,
+    rowCap: BACKUP_ROW_CAP
+  };
+}
+async function pruneBackups(keep = BACKUP_KEEP) {
+  const bucket = getStorageBucket(BACKUP_BUCKET);
+  if (!bucket) return 0;
+  const { data } = await bucket.list("", {
+    limit: 1e3,
+    sortBy: { column: "name", order: "desc" }
+  });
+  const stale = selectStaleBackups(
+    (data ?? []).map((f) => f.name),
+    keep
+  );
+  if (stale.length) await bucket.remove(stale);
+  return stale.length;
+}
+async function runDatabaseBackup() {
+  const admin = getSupabaseAdmin();
+  const bucket = getStorageBucket(BACKUP_BUCKET);
+  if (!admin || !bucket) {
+    return { ok: false, error: "Supabase storage is not configured" };
+  }
+  try {
+    await admin.storage.createBucket(BACKUP_BUCKET, { public: false }).catch(() => {
+    });
+    const snapshot = await buildBackupSnapshot();
+    const body = JSON.stringify(snapshot);
+    const file = backupFileName(snapshot.generatedAt);
+    const { error } = await bucket.upload(
+      file,
+      new TextEncoder().encode(body),
+      { contentType: "application/json", upsert: true }
+    );
+    if (error) return { ok: false, error: error.message };
+    const pruned = await pruneBackups();
+    const rowCount = Object.values(snapshot.tables).reduce(
+      (n, rows) => n + rows.length,
+      0
+    );
+    logger.info(
+      { file, bytes: body.length, tableCount: BACKUP_TABLES.length, rowCount },
+      "Database backup uploaded"
+    );
+    return {
+      ok: true,
+      file,
+      bytes: body.length,
+      tableCount: BACKUP_TABLES.length,
+      rowCount,
+      pruned
+    };
+  } catch (err) {
+    logger.error({ err }, "Database backup failed");
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : String(err)
+    };
   }
 }
 
@@ -35856,7 +38309,7 @@ init_logger();
 init_rateLimiter();
 init_sse_bus();
 init_sse_bus();
-import { sql as sql12 } from "drizzle-orm";
+import { sql as sql14 } from "drizzle-orm";
 var ADMIN_SECRET = ENV.yallaAdminSecret;
 var ADMIN_USERNAME = ENV.yallaAdminUsername;
 var ADMIN_PASSWORD_HASH = ENV.yallaAdminPasswordHash;
@@ -35905,7 +38358,7 @@ function touchAdminSession(sessionId) {
       const db = await getDb();
       if (!db) return;
       await db.execute(
-        sql12`UPDATE "yallaAdminSessions" SET "lastSeenAt" = NOW() WHERE id = ${sessionId}`
+        sql14`UPDATE "yallaAdminSessions" SET "lastSeenAt" = NOW() WHERE id = ${sessionId}`
       );
     } catch {
     }
@@ -35924,8 +38377,8 @@ function getClientIp5(req) {
   return req.socket.remoteAddress ?? "unknown";
 }
 async function isLoginLocked(ip, res) {
-  const count3 = await getRateLimitCount(loginFailKey(ip), LOCKOUT_WINDOW_MS);
-  if (count3 >= MAX_ATTEMPTS) {
+  const count6 = await getRateLimitCount(loginFailKey(ip), LOCKOUT_WINDOW_MS);
+  if (count6 >= MAX_ATTEMPTS) {
     const windowIndex = Math.floor(Date.now() / LOCKOUT_WINDOW_MS);
     const retryAfterSec = Math.max(
       1,
@@ -35951,7 +38404,7 @@ async function getAdminSetting(key) {
     const db = await getDb();
     if (!db) return null;
     const result = await db.execute(
-      sql12`SELECT "value" FROM "yallaAdminSettings" WHERE "key" = ${key}`
+      sql14`SELECT "value" FROM "yallaAdminSettings" WHERE "key" = ${key}`
     );
     const rows = result.rows;
     return rows?.[0]?.value ?? null;
@@ -35962,7 +38415,7 @@ async function getAdminSetting(key) {
 async function setAdminSetting(key, value) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.execute(sql12`
+  await db.execute(sql14`
             INSERT INTO "yallaAdminSettings" ("key", "value", "updatedAt")
             VALUES (${key}, ${value}, NOW())
             ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = NOW()
@@ -35973,7 +38426,7 @@ async function deleteAdminSetting(key) {
     const db = await getDb();
     if (!db) return;
     await db.execute(
-      sql12`DELETE FROM "yallaAdminSettings" WHERE "key" = ${key}`
+      sql14`DELETE FROM "yallaAdminSettings" WHERE "key" = ${key}`
     );
   } catch {
   }
@@ -35998,7 +38451,7 @@ async function createAdminSession(req, res, ip, opts = {}) {
   try {
     const db = await getDb();
     if (db) {
-      await db.execute(sql12`
+      await db.execute(sql14`
                 INSERT INTO "yallaAdminSessions" (id, "adminUsername", "ipAddress", "userAgent", "expiresAt")
                 VALUES (${sessionId}, ${ADMIN_USERNAME}, ${ip}, ${req.headers["user-agent"] ?? null}, ${expiresAt})
             `);
@@ -36020,6 +38473,12 @@ async function createAdminSession(req, res, ip, opts = {}) {
     ip,
     mfa: opts.mfaVia ?? false,
     ts: (/* @__PURE__ */ new Date()).toISOString()
+  });
+  void emailService.sendAdminLoginAlert(
+    ip,
+    String(req.headers["user-agent"] ?? "unknown"),
+    (/* @__PURE__ */ new Date()).toISOString()
+  ).catch(() => {
   });
   res.cookie(COOKIE_NAME2, token, cookieOptions2(req));
   if (opts.setGateCookie) setGateCookie(req, res);
@@ -36057,9 +38516,9 @@ async function auditLog(sessionId, adminUsername, action, ip, target, payload) {
     const db = await getDb();
     if (!db) return;
     const payloadStr = payload ? JSON.stringify(payload) : null;
-    await db.execute(sql12`
+    await db.execute(sql14`
             INSERT INTO "yallaAdminAuditLogs" ("sessionId", "adminUsername", "action", "target", "ipAddress", "payload")
-            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql12`CAST(${payloadStr} AS JSON)` : null})
+            VALUES (${sessionId}, ${adminUsername}, ${action}, ${target ?? null}, ${ip}, ${payloadStr ? sql14`CAST(${payloadStr} AS JSON)` : null})
         `);
   } catch {
   }
@@ -36136,7 +38595,7 @@ async function hasUsedOwnerLinkNonce(nonce) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    const linkResult = await db.execute(sql12`
+    const linkResult = await db.execute(sql14`
             SELECT id FROM "yallaAdminAccessLinkNonces"
             WHERE "nonceHash" = ${nonceHash}
             LIMIT 1
@@ -36156,7 +38615,7 @@ async function consumeOwnerLinkNonce(req, nonce, expiresAt, redirectTarget) {
   }
   try {
     const nonceHash = hashOwnerLinkNonce(nonce);
-    await db.execute(sql12`
+    await db.execute(sql14`
             INSERT INTO "yallaAdminAccessLinkNonces" ("nonceHash", "redirectTarget", "expiresAt", "consumedByIp")
             VALUES (${nonceHash}, ${redirectTarget}, to_timestamp(${expiresAt}), ${getClientIp5(req)})
         `);
@@ -36334,7 +38793,7 @@ async function requireSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql12`
+      const sessionResult = await db.execute(sql14`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -36490,7 +38949,7 @@ async function handleLogout(req, res) {
     try {
       const db = await getDb();
       if (db) {
-        await db.execute(sql12`
+        await db.execute(sql14`
                     UPDATE "yallaAdminSessions" SET "isRevoked" = 1 WHERE id = ${session.sessionId}
                 `);
       }
@@ -36522,7 +38981,7 @@ async function handleMe(req, res) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql12`
+      const sessionResult = await db.execute(sql14`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${session.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -36549,39 +39008,39 @@ async function handleOverview(_req, res) {
       return;
     }
     const usersResult = await db.execute(
-      sql12`SELECT COUNT(*) as total FROM "localUsers"`
+      sql14`SELECT COUNT(*) as total FROM "localUsers"`
     );
     const usersRow = usersResult.rows;
     const orgsResult = await db.execute(
-      sql12`SELECT COUNT(*) as total FROM "organizations"`
+      sql14`SELECT COUNT(*) as total FROM "organizations"`
     );
     const orgsRow = orgsResult.rows;
-    const todayLoginsResult = await db.execute(sql12`
+    const todayLoginsResult = await db.execute(sql14`
             SELECT COUNT(*) as total FROM "auditLogs"
             WHERE action = 'auth.login' AND "createdAt" >= CURRENT_DATE
         `);
     const todayLoginsRow = todayLoginsResult.rows;
-    const serviceRequestsResult = await db.execute(sql12`
+    const serviceRequestsResult = await db.execute(sql14`
             SELECT COUNT(*) as total FROM "serviceRequests" WHERE status NOT IN ('completed', 'cancelled')
         `);
     const serviceRequestsRow = serviceRequestsResult.rows;
     const assetsResult = await db.execute(
-      sql12`SELECT COUNT(*) as total FROM "assetInventory"`
+      sql14`SELECT COUNT(*) as total FROM "assetInventory"`
     );
     const assetsRow = assetsResult.rows;
-    const todaySignupsResult = await db.execute(sql12`
+    const todaySignupsResult = await db.execute(sql14`
             SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const todaySignupsRow = todaySignupsResult.rows;
-    const newOrgsResult = await db.execute(sql12`
+    const newOrgsResult = await db.execute(sql14`
             SELECT COUNT(*) as total FROM "organizations" WHERE "createdAt"::date = CURRENT_DATE
         `);
     const newOrgsRow = newOrgsResult.rows;
-    const revenueResult = await db.execute(sql12`
+    const revenueResult = await db.execute(sql14`
             SELECT COUNT(*) as total FROM "organizations" WHERE plan IN ('professional','enterprise') AND "isActive" = 1
         `);
     const revenueRow = revenueResult.rows;
-    const activeSessionsResult = await db.execute(sql12`
+    const activeSessionsResult = await db.execute(sql14`
             SELECT COUNT(*) as total FROM "yallaAdminSessions"
             WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
         `);
@@ -36613,7 +39072,7 @@ async function handleUsers(req, res) {
       200
     );
     const offset = parseInt(req.query.offset ?? "0", 10) || 0;
-    const usersDbResult = await db.execute(sql12`
+    const usersDbResult = await db.execute(sql14`
             SELECT
                 u.id,
                 u.name AS username,
@@ -36644,10 +39103,10 @@ async function handleSystem(_req, res) {
     let tableCount = 0;
     if (db) {
       try {
-        const versionResult = await db.execute(sql12`SELECT version() as v`);
+        const versionResult = await db.execute(sql14`SELECT version() as v`);
         const vRow = versionResult.rows;
         dbVersion = vRow?.[0]?.v ?? "";
-        const tableResult = await db.execute(sql12`
+        const tableResult = await db.execute(sql14`
                     SELECT COUNT(*) as c FROM information_schema.tables
                     WHERE table_schema = 'public'
                 `);
@@ -36693,7 +39152,7 @@ async function handleAudit(req, res) {
     );
     const action = req.query.action;
     const auditResult = await db.execute(
-      action ? sql12`SELECT * FROM "yallaAdminAuditLogs" WHERE action = ${action} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql12`SELECT * FROM "yallaAdminAuditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
+      action ? sql14`SELECT * FROM "yallaAdminAuditLogs" WHERE action = ${action} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql14`SELECT * FROM "yallaAdminAuditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = auditResult.rows;
     res.json(rows ?? []);
@@ -36714,7 +39173,7 @@ async function handlePlatformAudit(req, res) {
     );
     const category = req.query.category;
     const platformAuditResult = await db.execute(
-      category ? sql12`SELECT * FROM "auditLogs" WHERE category = ${category} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql12`SELECT * FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
+      category ? sql14`SELECT * FROM "auditLogs" WHERE category = ${category} ORDER BY "createdAt" DESC LIMIT ${limit}` : sql14`SELECT * FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT ${limit}`
     );
     const rows = platformAuditResult.rows;
     res.json(rows ?? []);
@@ -36736,7 +39195,7 @@ async function handleInteractions(req, res) {
     const context = req.query.context?.trim();
     const action = req.query.action?.trim();
     const interactionResult = await db.execute(
-      context && action ? sql12`
+      context && action ? sql14`
                     SELECT
                         l.id,
                         l.context,
@@ -36758,7 +39217,7 @@ async function handleInteractions(req, res) {
                     WHERE l.context = ${context} AND l.action = ${action}
                     ORDER BY l."createdAt" DESC
                     LIMIT ${limit}
-                ` : context ? sql12`
+                ` : context ? sql14`
                         SELECT
                             l.id,
                             l.context,
@@ -36780,7 +39239,7 @@ async function handleInteractions(req, res) {
                         WHERE l.context = ${context}
                         ORDER BY l."createdAt" DESC
                         LIMIT ${limit}
-                    ` : action ? sql12`
+                    ` : action ? sql14`
                             SELECT
                                 l.id,
                                 l.context,
@@ -36802,7 +39261,7 @@ async function handleInteractions(req, res) {
                             WHERE l.action = ${action}
                             ORDER BY l."createdAt" DESC
                             LIMIT ${limit}
-                        ` : sql12`
+                        ` : sql14`
                             SELECT
                                 l.id,
                                 l.context,
@@ -36844,7 +39303,7 @@ async function handleIntake(req, res) {
     ]);
     let serviceRequests2 = [];
     if (db) {
-      const srResult = await db.execute(sql12`
+      const srResult = await db.execute(sql14`
                 SELECT
                     sr.id,
                     sr."serviceType",
@@ -36892,13 +39351,13 @@ async function handleOnboarding(req, res) {
       200
     );
     const [countsResult, recentResult] = await Promise.all([
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT stage, COUNT(*) as total
                 FROM "userOnboarding"
                 GROUP BY stage
                 ORDER BY total DESC
             `),
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT
                     o.id,
                     o.stage,
@@ -36934,7 +39393,7 @@ async function handleValidationFailures(req, res) {
       parseInt(req.query.limit ?? "100", 10) || 100,
       500
     );
-    const validationResult = await db.execute(sql12`
+    const validationResult = await db.execute(sql14`
             SELECT
                 id,
                 category,
@@ -36969,7 +39428,7 @@ async function handleSubscriptions(req, res) {
       500
     );
     const [subsResult, eventsResult, summaryResult] = await Promise.all([
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT
                     s.id,
                     s.plan,
@@ -36992,7 +39451,7 @@ async function handleSubscriptions(req, res) {
                 ORDER BY s."updatedAt" DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT
                     be.id,
                     be."eventType",
@@ -37007,7 +39466,7 @@ async function handleSubscriptions(req, res) {
                 ORDER BY be."createdAt" DESC
                 LIMIT ${limit}
             `),
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT
                     plan,
                     status,
@@ -37042,7 +39501,7 @@ async function handleSignups(req, res) {
       parseInt(req.query.limit ?? "50", 10) || 50,
       200
     );
-    const signupsResult = await db.execute(sql12`
+    const signupsResult = await db.execute(sql14`
             SELECT
                 u.id,
                 u.name AS username,
@@ -37076,7 +39535,7 @@ async function handleOrgs(req, res) {
       parseInt(req.query.limit ?? "100", 10) || 100,
       500
     );
-    const orgsResult = await db.execute(sql12`
+    const orgsResult = await db.execute(sql14`
             SELECT
                 o.id,
                 o.name,
@@ -37113,12 +39572,12 @@ async function handleRealtime(_req, res) {
       return;
     }
     const [sessResult, actResult, newUsersResult] = await Promise.all([
-      db.execute(sql12`SELECT 0 as total`),
+      db.execute(sql14`SELECT 0 as total`),
       db.execute(
-        sql12`SELECT COUNT(*) as total FROM "auditLogs" WHERE "createdAt" >= NOW() - INTERVAL '5 minutes'`
+        sql14`SELECT COUNT(*) as total FROM "auditLogs" WHERE "createdAt" >= NOW() - INTERVAL '5 minutes'`
       ),
       db.execute(
-        sql12`SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt" >= NOW() - INTERVAL '60 minutes'`
+        sql14`SELECT COUNT(*) as total FROM "localUsers" WHERE "createdAt" >= NOW() - INTERVAL '60 minutes'`
       )
     ]);
     const sessRow = sessResult.rows;
@@ -37149,7 +39608,7 @@ async function handleUserDetail(req, res) {
       return;
     }
     const [userResult, sessionResult, auditResult, interactionResult] = await Promise.all([
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT u.id, u.name AS username, u.email, u."userType" AS role, u.status, u."mfaEnabled" AS "isMfaEnabled",
                        u."createdAt", u."lastSignedIn" AS "lastLoginAt", o.name AS "organizationName", o.plan AS "organizationPlan"
                 FROM "localUsers" u
@@ -37157,13 +39616,13 @@ async function handleUserDetail(req, res) {
                 LEFT JOIN "organizations" o ON o.id = om."organizationId"
                 WHERE u.id = ${userId} LIMIT 1
             `),
-      db.execute(sql12`SELECT 0 AS id LIMIT 0`),
-      db.execute(sql12`
+      db.execute(sql14`SELECT 0 AS id LIMIT 0`),
+      db.execute(sql14`
                 SELECT category, action, outcome, "createdAt"
                 FROM "auditLogs" WHERE "localUserId" = ${userId}
                 ORDER BY "createdAt" DESC LIMIT 30
             `),
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT context, action, "entityType", "createdAt", "durationMs"
                 FROM "userInteractionLogs" WHERE "localUserId" = ${userId}
                 ORDER BY "createdAt" DESC LIMIT 30
@@ -37197,12 +39656,12 @@ async function handleOrgDetail(req, res) {
       return;
     }
     const [orgResult, membersResult, subscriptionResult, auditResult] = await Promise.all([
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT id, name, slug, plan, "isActive", "trialEndsAt", "createdAt", "updatedAt",
                        industry, "billingEmail"
                 FROM "organizations" WHERE id = ${orgId} LIMIT 1
             `),
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT om.role, u.id AS "userId", u.name AS username, u.email, u.status AS "userStatus",
                        u."lastSignedIn" AS "lastLoginAt", om."createdAt" AS "joinedAt"
                 FROM "organizationMembers" om
@@ -37211,13 +39670,13 @@ async function handleOrgDetail(req, res) {
                 ORDER BY om."createdAt" ASC
                 LIMIT 50
             `),
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT id, plan, status, "currentPeriodStart", "currentPeriodEnd", "cancelAtPeriodEnd",
                        "createdAt", "updatedAt"
                 FROM "subscriptions" WHERE "organizationId" = ${orgId}
                 ORDER BY "createdAt" DESC LIMIT 1
             `),
-      db.execute(sql12`
+      db.execute(sql14`
                 SELECT category, action, outcome, "createdAt"
                 FROM "auditLogs" WHERE "organizationId" = ${orgId}
                 ORDER BY "createdAt" DESC LIMIT 30
@@ -37258,7 +39717,7 @@ async function handleSuspendUser(req, res) {
       return;
     }
     const userResult = await db.execute(
-      sql12`SELECT id, email, status FROM "localUsers" WHERE id = ${userId} LIMIT 1`
+      sql14`SELECT id, email, status FROM "localUsers" WHERE id = ${userId} LIMIT 1`
     );
     const rows = userResult.rows;
     const user = rows[0];
@@ -37268,7 +39727,7 @@ async function handleSuspendUser(req, res) {
     }
     const newStatus = suspend ? "suspended" : "active";
     await db.execute(
-      sql12`UPDATE "localUsers" SET status = ${newStatus}, "updatedAt" = NOW() WHERE id = ${userId}`
+      sql14`UPDATE "localUsers" SET status = ${newStatus}, "updatedAt" = NOW() WHERE id = ${userId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -37330,7 +39789,7 @@ async function handleSuspendOrg(req, res) {
       return;
     }
     const orgCheckResult = await db.execute(
-      sql12`SELECT id, name, "isActive" FROM "organizations" WHERE id = ${orgId} LIMIT 1`
+      sql14`SELECT id, name, "isActive" FROM "organizations" WHERE id = ${orgId} LIMIT 1`
     );
     const rows = orgCheckResult.rows;
     const org = rows[0];
@@ -37341,7 +39800,7 @@ async function handleSuspendOrg(req, res) {
     const newStatus = suspend ? "suspended" : "active";
     const newIsActive = suspend ? 0 : 1;
     await db.execute(
-      sql12`UPDATE "organizations" SET "isActive" = ${newIsActive}, "updatedAt" = NOW() WHERE id = ${orgId}`
+      sql14`UPDATE "organizations" SET "isActive" = ${newIsActive}, "updatedAt" = NOW() WHERE id = ${orgId}`
     );
     await auditLog(
       session?.sessionId ?? null,
@@ -37434,7 +39893,7 @@ async function handleSessions(req, res) {
       res.json([]);
       return;
     }
-    const result = await db.execute(sql12`
+    const result = await db.execute(sql14`
             SELECT id, "adminUsername", "ipAddress", "userAgent", "createdAt", "expiresAt", "lastSeenAt"
             FROM "yallaAdminSessions"
             WHERE "isRevoked" = 0 AND "expiresAt" > NOW()
@@ -37472,7 +39931,7 @@ async function handleRevokeAdminSession(req, res) {
       res.status(503).json({ error: "Database unavailable" });
       return;
     }
-    const result = await db.execute(sql12`
+    const result = await db.execute(sql14`
             UPDATE "yallaAdminSessions" SET "isRevoked" = 1
             WHERE id = ${targetId} AND "isRevoked" = 0
             RETURNING id
@@ -37549,13 +40008,13 @@ async function handlePasswordChange(req, res) {
   try {
     const db = await getDb();
     if (db && session) {
-      const others = await db.execute(sql12`
+      const others = await db.execute(sql14`
                 SELECT id FROM "yallaAdminSessions"
                 WHERE "isRevoked" = 0 AND id != ${session.sessionId}
             `);
       const otherIds = others.rows ?? [];
       for (const row of otherIds) revokeAdminSession(row.id);
-      await db.execute(sql12`
+      await db.execute(sql14`
                 UPDATE "yallaAdminSessions" SET "isRevoked" = 1
                 WHERE "isRevoked" = 0 AND id != ${session.sessionId}
             `);
@@ -37773,7 +40232,7 @@ async function handleExportCsv(req, res) {
     let headers;
     let filename;
     if (type === "users") {
-      const userExportResult = await db.execute(sql12`
+      const userExportResult = await db.execute(sql14`
                 SELECT id, name, email, "phoneNumber", "userType" AS role, status,
                        "companyName", "jobTitle", industry, "preferredLocale",
                        "mfaEnabled" AS "isMfaEnabled", "createdAt", "lastSignedIn" AS "lastLoginAt"
@@ -37784,7 +40243,7 @@ async function handleExportCsv(req, res) {
       headers = "id,name,email,phoneNumber,role,status,companyName,jobTitle,industry,preferredLocale,isMfaEnabled,createdAt,lastLoginAt";
       filename = "users-export.csv";
     } else if (type === "orgs") {
-      const orgExportResult = await db.execute(sql12`
+      const orgExportResult = await db.execute(sql14`
                 SELECT id, name, plan, "isActive", "trialEndsAt", "createdAt"
                 FROM "organizations" ORDER BY "createdAt" DESC LIMIT 10000
             `);
@@ -37793,7 +40252,7 @@ async function handleExportCsv(req, res) {
       headers = "id,name,plan,isActive,trialEndsAt,createdAt";
       filename = "orgs-export.csv";
     } else if (type === "subscriptions") {
-      const subExportResult = await db.execute(sql12`
+      const subExportResult = await db.execute(sql14`
                 SELECT s.id, s.plan, s.status, s."currentPeriodStart", s."currentPeriodEnd",
                        s."cancelAtPeriodEnd", o.name AS "orgName", s."createdAt"
                 FROM "subscriptions" s
@@ -37805,7 +40264,7 @@ async function handleExportCsv(req, res) {
       headers = "id,plan,status,currentPeriodStart,currentPeriodEnd,cancelAtPeriodEnd,orgName,createdAt";
       filename = "subscriptions-export.csv";
     } else if (type === "audit") {
-      const auditExportResult = await db.execute(sql12`
+      const auditExportResult = await db.execute(sql14`
                 SELECT id, category, action, outcome, "ipHash" AS "ipAddress", "createdAt"
                 FROM "auditLogs" ORDER BY "createdAt" DESC LIMIT 10000
             `);
@@ -37859,7 +40318,7 @@ function scheduleSessionCleanup() {
     try {
       const db = await getDb();
       if (!db) return;
-      await db.execute(sql12`
+      await db.execute(sql14`
                 DELETE FROM "yallaAdminSessions"
                 WHERE "expiresAt" < NOW()
                    OR ("isRevoked" = 1 AND "lastSeenAt" < NOW() - INTERVAL '7 days')
@@ -37960,17 +40419,17 @@ init_db();
 init_env();
 init_logger();
 init_rateLimiter();
-import { z as z42 } from "zod";
+import { z as z43 } from "zod";
 import express3, {
   Router
 } from "express";
-import { sql as sql16 } from "drizzle-orm";
+import { sql as sql18 } from "drizzle-orm";
 
 // server/_core/admin-dashboard-store.ts
 init_schema();
 init_db();
 init_local_jwt();
-import { and as and35, count, desc as desc26, eq as eq49, gte as gte2, like as like2, or as or8, sql as sql13 } from "drizzle-orm";
+import { and as and37, count as count4, desc as desc27, eq as eq51, gte as gte3, like as like2, or as or8, sql as sql15 } from "drizzle-orm";
 async function getUnifiedUsers(options) {
   const db = await getDb();
   if (!db) {
@@ -38016,39 +40475,39 @@ async function getUnifiedUsers(options) {
   }
   if (options.status) {
     conditions.push(
-      eq49(
+      eq51(
         localUsers.status,
         options.status
       )
     );
   }
   if (options.role) {
-    conditions.push(sql13`${localUsers.userType} = ${options.role}::"userType"`);
+    conditions.push(sql15`${localUsers.userType} = ${options.role}::"userType"`);
   }
-  const whereClause = conditions.length > 0 ? and35(...conditions) : void 0;
-  const [total] = await db.select({ count: count() }).from(localUsers).where(whereClause);
+  const whereClause = conditions.length > 0 ? and37(...conditions) : void 0;
+  const [total] = await db.select({ count: count4() }).from(localUsers).where(whereClause);
   const rows = await db.select({
     id: localUsers.id,
-    source: sql13`'local'`.as("source"),
+    source: sql15`'local'`.as("source"),
     name: localUsers.name,
     email: localUsers.email,
     phoneNumber: localUsers.phoneNumber,
-    role: sql13`${localUsers.userType}`,
-    status: sql13`${localUsers.status}`,
+    role: sql15`${localUsers.userType}`,
+    status: sql15`${localUsers.status}`,
     companyName: localUsers.companyName,
     jobTitle: localUsers.jobTitle,
     industry: localUsers.industry,
     preferredLocale: localUsers.preferredLocale,
     lastSignedIn: localUsers.lastSignedIn,
     createdAt: localUsers.createdAt
-  }).from(localUsers).where(whereClause).orderBy(desc26(localUsers.createdAt)).limit(options.limit ?? 50).offset(options.offset ?? 0);
+  }).from(localUsers).where(whereClause).orderBy(desc27(localUsers.createdAt)).limit(options.limit ?? 50).offset(options.offset ?? 0);
   const orgCounts = await db.select({
     localUserId: organizationMembers.localUserId,
-    orgCount: count()
+    orgCount: count4()
   }).from(organizationMembers).where(
-    and35(
-      sql13`${organizationMembers.localUserId} IS NOT NULL`,
-      eq49(organizationMembers.status, "active")
+    and37(
+      sql15`${organizationMembers.localUserId} IS NOT NULL`,
+      eq51(organizationMembers.status, "active")
     )
   ).groupBy(organizationMembers.localUserId);
   const orgCountMap = new Map(orgCounts.map((r) => [r.localUserId, r.orgCount]));
@@ -38074,16 +40533,16 @@ async function getUserStats() {
     };
   }
   const [localCounts] = await db.select({
-    total: count(),
-    active: sql13`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
-    suspended: sql13`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
-    pending: sql13`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
-    newThisMonth: sql13`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`
+    total: count4(),
+    active: sql15`COUNT(*) FILTER (WHERE ${localUsers.status} = 'active')`,
+    suspended: sql15`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')`,
+    pending: sql15`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')`,
+    newThisMonth: sql15`COUNT(*) FILTER (WHERE ${localUsers.createdAt} >= date_trunc('month', CURRENT_DATE))`
   }).from(localUsers);
-  const [oauthCounts] = await db.select({ total: count() }).from(users);
+  const [oauthCounts] = await db.select({ total: count4() }).from(users);
   const roleCounts = await db.select({
     role: localUsers.userType,
-    count: count()
+    count: count4()
   }).from(localUsers).groupBy(localUsers.userType);
   const byRole = {};
   for (const r of roleCounts) {
@@ -38103,7 +40562,7 @@ async function getUserStats() {
 async function getUserDetail(userId) {
   const db = await getDb();
   if (!db) return null;
-  const [user] = await db.select().from(localUsers).where(eq49(localUsers.id, userId)).limit(1);
+  const [user] = await db.select().from(localUsers).where(eq51(localUsers.id, userId)).limit(1);
   if (!user) return null;
   const memberships = await db.select({
     orgId: organizations.id,
@@ -38112,11 +40571,11 @@ async function getUserDetail(userId) {
     joinedAt: organizationMembers.createdAt
   }).from(organizationMembers).innerJoin(
     organizations,
-    eq49(organizationMembers.organizationId, organizations.id)
+    eq51(organizationMembers.organizationId, organizations.id)
   ).where(
-    and35(
-      eq49(organizationMembers.localUserId, userId),
-      eq49(organizationMembers.status, "active")
+    and37(
+      eq51(organizationMembers.localUserId, userId),
+      eq51(organizationMembers.status, "active")
     )
   );
   const activity = await db.select({
@@ -38124,7 +40583,7 @@ async function getUserDetail(userId) {
     action: auditLogs.action,
     category: auditLogs.category,
     createdAt: auditLogs.createdAt
-  }).from(auditLogs).where(eq49(auditLogs.localUserId, userId)).orderBy(desc26(auditLogs.createdAt)).limit(50);
+  }).from(auditLogs).where(eq51(auditLogs.localUserId, userId)).orderBy(desc27(auditLogs.createdAt)).limit(50);
   return {
     id: user.id,
     source: "local",
@@ -38147,7 +40606,7 @@ async function getUserDetail(userId) {
 async function toggleUserSuspension(userId, suspend) {
   const db = await getDb();
   if (!db) return false;
-  await db.update(localUsers).set({ status: suspend ? "suspended" : "active", updatedAt: /* @__PURE__ */ new Date() }).where(eq49(localUsers.id, userId));
+  await db.update(localUsers).set({ status: suspend ? "suspended" : "active", updatedAt: /* @__PURE__ */ new Date() }).where(eq51(localUsers.id, userId));
   return true;
 }
 async function updateUserRole(userId, newRole) {
@@ -38156,16 +40615,16 @@ async function updateUserRole(userId, newRole) {
   await db.update(localUsers).set({
     userType: newRole,
     updatedAt: /* @__PURE__ */ new Date()
-  }).where(eq49(localUsers.id, userId));
+  }).where(eq51(localUsers.id, userId));
   return true;
 }
 async function deleteUser(userId) {
   const db = await getDb();
   if (!db) return false;
-  await db.delete(organizationMembers).where(eq49(organizationMembers.localUserId, userId));
-  await db.delete(auditLogs).where(eq49(auditLogs.localUserId, userId));
-  await db.delete(userOnboarding).where(eq49(userOnboarding.localUserId, userId));
-  await db.delete(localUsers).where(eq49(localUsers.id, userId));
+  await db.delete(organizationMembers).where(eq51(organizationMembers.localUserId, userId));
+  await db.delete(auditLogs).where(eq51(auditLogs.localUserId, userId));
+  await db.delete(userOnboarding).where(eq51(userOnboarding.localUserId, userId));
+  await db.delete(localUsers).where(eq51(localUsers.id, userId));
   return true;
 }
 async function getRecentActivity(limit = 100) {
@@ -38181,20 +40640,20 @@ async function getRecentActivity(limit = 100) {
     outcome: auditLogs.outcome,
     ipAddress: auditLogs.ipHash,
     createdAt: auditLogs.createdAt
-  }).from(auditLogs).leftJoin(localUsers, eq49(auditLogs.localUserId, localUsers.id)).orderBy(desc26(auditLogs.createdAt)).limit(limit);
+  }).from(auditLogs).leftJoin(localUsers, eq51(auditLogs.localUserId, localUsers.id)).orderBy(desc27(auditLogs.createdAt)).limit(limit);
 }
 async function getMonthlyRegistrations(months = 12) {
   const db = await getDb();
   if (!db) return [];
   const rows = await db.select({
-    month: sql13`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
-    count: count()
+    month: sql15`to_char(${localUsers.createdAt}, 'YYYY-MM')`,
+    count: count4()
   }).from(localUsers).where(
-    gte2(
+    gte3(
       localUsers.createdAt,
-      sql13`CURRENT_DATE - INTERVAL '${sql13.raw(String(months))} months'`
+      sql15`CURRENT_DATE - INTERVAL '${sql15.raw(String(months))} months'`
     )
-  ).groupBy(sql13`1`).orderBy(sql13`1`);
+  ).groupBy(sql15`1`).orderBy(sql15`1`);
   return rows;
 }
 async function getSubscriptionData() {
@@ -38215,8 +40674,8 @@ async function getSubscriptionData() {
     updatedAt: subscriptions.updatedAt
   }).from(subscriptions).innerJoin(
     organizations,
-    eq49(subscriptions.organizationId, organizations.id)
-  ).orderBy(desc26(subscriptions.updatedAt)).limit(500);
+    eq51(subscriptions.organizationId, organizations.id)
+  ).orderBy(desc27(subscriptions.updatedAt)).limit(500);
   return {
     subscriptions: rows.map((r) => ({
       ...r,
@@ -38233,14 +40692,14 @@ async function getOrganizationData() {
     id: organizations.id,
     name: organizations.name,
     plan: organizations.plan,
-    status: sql13`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'suspended' END`,
-    memberCount: sql13`COUNT(DISTINCT ${organizationMembers.id})`,
+    status: sql15`CASE WHEN ${organizations.isActive} = 1 THEN 'active' ELSE 'suspended' END`,
+    memberCount: sql15`COUNT(DISTINCT ${organizationMembers.id})`,
     createdAt: organizations.createdAt,
-    lastActivity: sql13`MAX(${organizationMembers.createdAt})`
+    lastActivity: sql15`MAX(${organizationMembers.createdAt})`
   }).from(organizations).leftJoin(
     organizationMembers,
-    eq49(organizations.id, organizationMembers.organizationId)
-  ).groupBy(organizations.id).orderBy(desc26(organizations.createdAt)).limit(500);
+    eq51(organizations.id, organizationMembers.organizationId)
+  ).groupBy(organizations.id).orderBy(desc27(organizations.createdAt)).limit(500);
   return rows.map((r) => ({
     ...r,
     createdAt: r.createdAt?.toISOString() || "",
@@ -38260,11 +40719,11 @@ async function getSecurityEvents(limit = 200) {
     targetEntity: auditLogs.targetEntity
   }).from(auditLogs).where(
     or8(
-      eq49(auditLogs.category, "auth"),
-      eq49(auditLogs.outcome, "failure"),
-      eq49(auditLogs.outcome, "blocked")
+      eq51(auditLogs.category, "auth"),
+      eq51(auditLogs.outcome, "failure"),
+      eq51(auditLogs.outcome, "blocked")
     )
-  ).orderBy(desc26(auditLogs.createdAt)).limit(limit);
+  ).orderBy(desc27(auditLogs.createdAt)).limit(limit);
   const platformEvents = rows.map((r) => ({
     ...r,
     createdAt: r.createdAt?.toISOString() || "",
@@ -38272,7 +40731,7 @@ async function getSecurityEvents(limit = 200) {
   }));
   let adminEvents = [];
   try {
-    const adminResult = await db.execute(sql13`
+    const adminResult = await db.execute(sql15`
             SELECT id, action, "ipAddress", "createdAt", "target",
                    CASE
                        WHEN action IN ('login.failed', 'login.link_denied',
@@ -38309,7 +40768,7 @@ init_admin_insights_store();
 // server/_core/platform-monitor-store.ts
 init_schema();
 init_db();
-import { desc as desc28, eq as eq51, gte as gte4, sql as sql15 } from "drizzle-orm";
+import { desc as desc29, eq as eq53, gte as gte5, sql as sql17 } from "drizzle-orm";
 var DAY_MS3 = 24 * 60 * 60 * 1e3;
 var INTERVAL_MONTHS = {
   monthly: 1,
@@ -38394,32 +40853,32 @@ async function getTrafficMetrics(days = 30) {
   const since30d = new Date(now - 30 * DAY_MS3);
   const sinceWindow = new Date(now - days * DAY_MS3);
   const [totals] = await db.select({
-    totalEvents: sql15`COUNT(*)::int`,
-    events24h: sql15`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since24h})::int`,
-    events7d: sql15`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since7d})::int`
+    totalEvents: sql17`COUNT(*)::int`,
+    events24h: sql17`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since24h})::int`,
+    events7d: sql17`COUNT(*) FILTER (WHERE ${analyticsEvents.createdAt} >= ${since7d})::int`
   }).from(analyticsEvents);
   const daily = await db.select({
-    date: sql15`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`,
-    events: sql15`COUNT(*)::int`,
-    users: sql15`COUNT(DISTINCT ${analyticsEvents.userId})::int`
-  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(sql15`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`).orderBy(sql15`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`);
+    date: sql17`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`,
+    events: sql17`COUNT(*)::int`,
+    users: sql17`COUNT(DISTINCT ${analyticsEvents.userId})::int`
+  }).from(analyticsEvents).where(gte5(analyticsEvents.createdAt, sinceWindow)).groupBy(sql17`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`).orderBy(sql17`to_char(${analyticsEvents.createdAt}, 'YYYY-MM-DD')`);
   const signups = await db.select({
-    date: sql15`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`,
-    count: sql15`COUNT(*)::int`
-  }).from(localUsers).where(gte4(localUsers.createdAt, sinceWindow)).groupBy(sql15`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`).orderBy(sql15`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`);
+    date: sql17`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`,
+    count: sql17`COUNT(*)::int`
+  }).from(localUsers).where(gte5(localUsers.createdAt, sinceWindow)).groupBy(sql17`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`).orderBy(sql17`to_char(${localUsers.createdAt}, 'YYYY-MM-DD')`);
   const topEvents = await db.select({
     event: analyticsEvents.event,
     category: analyticsEvents.category,
-    count: sql15`COUNT(*)::int`
-  }).from(analyticsEvents).where(gte4(analyticsEvents.createdAt, sinceWindow)).groupBy(analyticsEvents.event, analyticsEvents.category).orderBy(desc28(sql15`COUNT(*)`)).limit(10);
+    count: sql17`COUNT(*)::int`
+  }).from(analyticsEvents).where(gte5(analyticsEvents.createdAt, sinceWindow)).groupBy(analyticsEvents.event, analyticsEvents.category).orderBy(desc29(sql17`COUNT(*)`)).limit(10);
   const [summary] = await db.select({
-    trackedUsers: sql15`COUNT(*)::int`,
-    totalSessions: sql15`COALESCE(SUM(${userActivitySummary.totalSessions}), 0)::int`,
-    activeUsers24h: sql15`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since24h})::int`,
-    activeUsers7d: sql15`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since7d})::int`,
-    activeUsers30d: sql15`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since30d})::int`,
-    avgActivationScore: sql15`COALESCE(AVG(${userActivitySummary.activationScore}), 0)::int`,
-    avgHealthScore: sql15`COALESCE(AVG(${userActivitySummary.healthScore}), 0)::int`
+    trackedUsers: sql17`COUNT(*)::int`,
+    totalSessions: sql17`COALESCE(SUM(${userActivitySummary.totalSessions}), 0)::int`,
+    activeUsers24h: sql17`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since24h})::int`,
+    activeUsers7d: sql17`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since7d})::int`,
+    activeUsers30d: sql17`COUNT(*) FILTER (WHERE ${userActivitySummary.lastActiveAt} >= ${since30d})::int`,
+    avgActivationScore: sql17`COALESCE(AVG(${userActivitySummary.activationScore}), 0)::int`,
+    avgHealthScore: sql17`COALESCE(AVG(${userActivitySummary.healthScore}), 0)::int`
   }).from(userActivitySummary);
   return {
     totalEvents: num(totals?.totalEvents),
@@ -38487,10 +40946,10 @@ async function getRevenueMetrics() {
     if (s.cancelAtPeriodEnd === 1) churnRisk += 1;
   }
   const [billing] = await db.select({
-    failedPayments: sql15`COUNT(*) FILTER (WHERE ${billingEvents.status} = 'failed')::int`,
-    failedAmount: sql15`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'failed'), 0)::int`,
-    refundedAmount: sql15`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'refunded'), 0)::int`
-  }).from(billingEvents).where(gte4(billingEvents.createdAt, since30d));
+    failedPayments: sql17`COUNT(*) FILTER (WHERE ${billingEvents.status} = 'failed')::int`,
+    failedAmount: sql17`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'failed'), 0)::int`,
+    refundedAmount: sql17`COALESCE(SUM(${billingEvents.amountCents}) FILTER (WHERE ${billingEvents.status} = 'refunded'), 0)::int`
+  }).from(billingEvents).where(gte5(billingEvents.createdAt, since30d));
   const recentBillingEvents = await db.select({
     id: billingEvents.id,
     eventType: billingEvents.eventType,
@@ -38499,7 +40958,7 @@ async function getRevenueMetrics() {
     currency: billingEvents.currency,
     organizationName: organizations.name,
     createdAt: billingEvents.createdAt
-  }).from(billingEvents).leftJoin(organizations, eq51(organizations.id, billingEvents.organizationId)).orderBy(desc28(billingEvents.createdAt)).limit(20);
+  }).from(billingEvents).leftJoin(organizations, eq53(organizations.id, billingEvents.organizationId)).orderBy(desc29(billingEvents.createdAt)).limit(20);
   return {
     mrrCents,
     arrCents: mrrCents * 12,
@@ -38511,7 +40970,7 @@ async function getRevenueMetrics() {
     churnRiskSubscriptions: churnRisk,
     currency,
     byPlan: [...planMap.entries()].map(([plan, v]) => ({ plan, count: v.count, mrrCents: v.mrrCents })).sort((a, b) => b.mrrCents - a.mrrCents),
-    byStatus: [...statusMap.entries()].map(([status, count3]) => ({ status, count: count3 })).sort((a, b) => b.count - a.count),
+    byStatus: [...statusMap.entries()].map(([status, count6]) => ({ status, count: count6 })).sort((a, b) => b.count - a.count),
     failedPayments30d: num(billing?.failedPayments),
     failedAmountCents30d: num(billing?.failedAmount),
     refundedAmountCents30d: num(billing?.refundedAmount),
@@ -38531,16 +40990,16 @@ async function getAiJobMetrics() {
   if (!db) return emptyAi();
   const since24h = new Date(Date.now() - DAY_MS3);
   const [counts] = await db.select({
-    total: sql15`COUNT(*)::int`,
-    queued: sql15`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'queued')::int`,
-    running: sql15`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'running')::int`,
-    completed: sql15`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'completed')::int`,
-    failed: sql15`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'failed')::int`,
-    cancelled: sql15`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'cancelled')::int`,
-    last24h: sql15`COUNT(*) FILTER (WHERE ${aiAgentRuns.createdAt} >= ${since24h})::int`,
-    avgDurationMs: sql15`COALESCE(AVG(${aiAgentRuns.durationMs}) FILTER (WHERE ${aiAgentRuns.durationMs} IS NOT NULL), 0)::int`
+    total: sql17`COUNT(*)::int`,
+    queued: sql17`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'queued')::int`,
+    running: sql17`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'running')::int`,
+    completed: sql17`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'completed')::int`,
+    failed: sql17`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'failed')::int`,
+    cancelled: sql17`COUNT(*) FILTER (WHERE ${aiAgentRuns.status} = 'cancelled')::int`,
+    last24h: sql17`COUNT(*) FILTER (WHERE ${aiAgentRuns.createdAt} >= ${since24h})::int`,
+    avgDurationMs: sql17`COALESCE(AVG(${aiAgentRuns.durationMs}) FILTER (WHERE ${aiAgentRuns.durationMs} IS NOT NULL), 0)::int`
   }).from(aiAgentRuns);
-  const durations = await db.select({ durationMs: aiAgentRuns.durationMs }).from(aiAgentRuns).where(sql15`${aiAgentRuns.durationMs} IS NOT NULL`).orderBy(desc28(aiAgentRuns.createdAt)).limit(500);
+  const durations = await db.select({ durationMs: aiAgentRuns.durationMs }).from(aiAgentRuns).where(sql17`${aiAgentRuns.durationMs} IS NOT NULL`).orderBy(desc29(aiAgentRuns.createdAt)).limit(500);
   const sorted = durations.map((d2) => num(d2.durationMs)).filter((d2) => d2 > 0).sort((a, b) => a - b);
   const p95 = sorted.length > 0 ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))] : 0;
   const recentFailures = await db.select({
@@ -38549,7 +41008,7 @@ async function getAiJobMetrics() {
     organizationId: aiAgentRuns.organizationId,
     errorMessage: aiAgentRuns.errorMessage,
     createdAt: aiAgentRuns.createdAt
-  }).from(aiAgentRuns).where(eq51(aiAgentRuns.status, "failed")).orderBy(desc28(aiAgentRuns.createdAt)).limit(10);
+  }).from(aiAgentRuns).where(eq53(aiAgentRuns.status, "failed")).orderBy(desc29(aiAgentRuns.createdAt)).limit(10);
   const completed = num(counts?.completed);
   const failed = num(counts?.failed);
   const finished = completed + failed;
@@ -38578,13 +41037,13 @@ async function getEmailMetrics() {
   if (!db) return emptyEmail();
   const since24h = new Date(Date.now() - DAY_MS3);
   const [counts] = await db.select({
-    total: sql15`COUNT(*)::int`,
-    sent: sql15`COUNT(*) FILTER (WHERE ${emailLog.status} = 'sent')::int`,
-    failed: sql15`COUNT(*) FILTER (WHERE ${emailLog.status} = 'failed')::int`,
-    queued: sql15`COUNT(*) FILTER (WHERE ${emailLog.status} = 'queued')::int`,
-    opened: sql15`COUNT(*) FILTER (WHERE ${emailLog.openedAt} IS NOT NULL)::int`,
-    clicked: sql15`COUNT(*) FILTER (WHERE ${emailLog.clickedAt} IS NOT NULL)::int`,
-    last24hSent: sql15`COUNT(*) FILTER (WHERE ${emailLog.createdAt} >= ${since24h} AND ${emailLog.status} = 'sent')::int`
+    total: sql17`COUNT(*)::int`,
+    sent: sql17`COUNT(*) FILTER (WHERE ${emailLog.status} = 'sent')::int`,
+    failed: sql17`COUNT(*) FILTER (WHERE ${emailLog.status} = 'failed')::int`,
+    queued: sql17`COUNT(*) FILTER (WHERE ${emailLog.status} = 'queued')::int`,
+    opened: sql17`COUNT(*) FILTER (WHERE ${emailLog.openedAt} IS NOT NULL)::int`,
+    clicked: sql17`COUNT(*) FILTER (WHERE ${emailLog.clickedAt} IS NOT NULL)::int`,
+    last24hSent: sql17`COUNT(*) FILTER (WHERE ${emailLog.createdAt} >= ${since24h} AND ${emailLog.status} = 'sent')::int`
   }).from(emailLog);
   const recentFailures = await db.select({
     id: emailLog.id,
@@ -38592,7 +41051,7 @@ async function getEmailMetrics() {
     recipient: emailLog.recipient,
     errorMessage: emailLog.errorMessage,
     createdAt: emailLog.createdAt
-  }).from(emailLog).where(eq51(emailLog.status, "failed")).orderBy(desc28(emailLog.createdAt)).limit(10);
+  }).from(emailLog).where(eq53(emailLog.status, "failed")).orderBy(desc29(emailLog.createdAt)).limit(10);
   const sent = num(counts?.sent);
   const opened = num(counts?.opened);
   const clicked = num(counts?.clicked);
@@ -38619,10 +41078,10 @@ async function getSecurityMetrics() {
   const db = await getDb();
   if (!db) return emptySecurity();
   const [row] = await db.select({
-    totalUsers: sql15`COUNT(*)::int`,
-    mfaEnabledUsers: sql15`COUNT(*) FILTER (WHERE ${localUsers.mfaEnabled} = 1)::int`,
-    suspendedUsers: sql15`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')::int`,
-    pendingUsers: sql15`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')::int`
+    totalUsers: sql17`COUNT(*)::int`,
+    mfaEnabledUsers: sql17`COUNT(*) FILTER (WHERE ${localUsers.mfaEnabled} = 1)::int`,
+    suspendedUsers: sql17`COUNT(*) FILTER (WHERE ${localUsers.status} = 'suspended')::int`,
+    pendingUsers: sql17`COUNT(*) FILTER (WHERE ${localUsers.status} = 'pending')::int`
   }).from(localUsers);
   const total = num(row?.totalUsers);
   const mfa = num(row?.mfaEnabledUsers);
@@ -38653,13 +41112,13 @@ async function getPlatformOverview(days = 30) {
 }
 
 // server/_core/admin-dashboard-router.ts
-var usersQuerySchema = z42.object({
-  search: z42.string().optional(),
-  status: z42.string().optional(),
-  role: z42.string().optional(),
-  source: z42.enum(["local", "oauth"]).optional(),
-  limit: z42.number().int().min(1).max(100).optional(),
-  offset: z42.number().int().min(0).optional()
+var usersQuerySchema = z43.object({
+  search: z43.string().optional(),
+  status: z43.string().optional(),
+  role: z43.string().optional(),
+  source: z43.enum(["local", "oauth"]).optional(),
+  limit: z43.number().int().min(1).max(100).optional(),
+  offset: z43.number().int().min(0).optional()
 });
 async function requireAdminSession(req, res, next) {
   const token = getAdminCookie(req);
@@ -38679,7 +41138,7 @@ async function requireAdminSession(req, res, next) {
   try {
     const db = await getDb();
     if (db) {
-      const sessionResult = await db.execute(sql16`
+      const sessionResult = await db.execute(sql18`
                 SELECT "isRevoked" FROM "yallaAdminSessions"
                 WHERE id = ${parsed.sessionId} AND "expiresAt" > NOW()
                 LIMIT 1
@@ -39407,6 +41866,14 @@ async function createApp() {
     requireCronSecret,
     runCron("trials", runReminderCheck)
   );
+  app.post(
+    "/api/cron/backup",
+    requireCronSecret,
+    runCron("backup", async () => {
+      const result = await runDatabaseBackup();
+      if (!result.ok) throw new Error(result.error ?? "backup failed");
+    })
+  );
   app.post("/api/csp-report", (req, res) => {
     let raw;
     try {
@@ -39509,7 +41976,29 @@ async function createApp() {
   app.get("/readyz", sendReadiness);
   app.get("/api/readiness", sendReadiness);
   app.get("/api/readyz", sendReadiness);
+  app.post("/api/client-error", (req, res) => {
+    try {
+      const body = req.body ?? {};
+      const clip = (v, n) => typeof v === "string" ? v.slice(0, n) : void 0;
+      logger.error(
+        {
+          clientError: {
+            id: clip(body.id, 40),
+            message: clip(body.message, 800),
+            stack: clip(body.stack, 2e3),
+            componentStack: clip(body.componentStack, 2e3),
+            url: clip(body.url, 300),
+            ua: clip(req.headers["user-agent"], 200)
+          }
+        },
+        "Client error reported"
+      );
+    } catch {
+    }
+    res.status(204).end();
+  });
   registerOAuthRoutes(app);
+  registerGoogleOAuthRoutes(app);
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -39731,6 +42220,7 @@ async function handler(req, res) {
       const dbModule = await Promise.resolve().then(() => (init_db(), db_exports));
       const db = await dbModule.getDb();
       const { ENV: ENV2 } = await Promise.resolve().then(() => (init_env(), env_exports));
+      const commitSha = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT ?? null;
       res.status(200).json({
         ok: true,
         status: "healthy",
@@ -39739,7 +42229,9 @@ async function handler(req, res) {
         node: process.version,
         uptime: process.uptime(),
         dbConnected: !!db,
-        env: ENV2.isProduction ? "production" : "development"
+        env: ENV2.isProduction ? "production" : "development",
+        commit: commitSha,
+        version: process.env.APP_VERSION ?? (commitSha ? commitSha.slice(0, 7) : "dev")
       });
     } catch (e) {
       res.status(500).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
@@ -39815,18 +42307,18 @@ async function handler(req, res) {
       };
       if (dbClient) {
         try {
-          const { sql: sql17 } = await import("drizzle-orm");
+          const { sql: sql19 } = await import("drizzle-orm");
           const userCount = await dbClient.execute(
-            sql17`SELECT COUNT(*)::int as count FROM "localUsers"`
+            sql19`SELECT COUNT(*)::int as count FROM "localUsers"`
           );
           const orgCount = await dbClient.execute(
-            sql17`SELECT COUNT(*)::int as count FROM "organizations"`
+            sql19`SELECT COUNT(*)::int as count FROM "organizations"`
           );
           const fwCount = await dbClient.execute(
-            sql17`SELECT COUNT(*)::int as count FROM "frameworks"`
+            sql19`SELECT COUNT(*)::int as count FROM "frameworks"`
           );
           const vendorCount = await dbClient.execute(
-            sql17`SELECT COUNT(*)::int as count FROM "vendors"`
+            sql19`SELECT COUNT(*)::int as count FROM "vendors"`
           );
           stats.users = userCount.rows[0].count;
           stats.organizations = orgCount.rows[0].count;
@@ -39851,8 +42343,8 @@ async function handler(req, res) {
         res.status(200).json({ ok: false, error: "Database not connected" });
         return;
       }
-      const { sql: sql17 } = await import("drizzle-orm");
-      const tables = await db.execute(sql17`
+      const { sql: sql19 } = await import("drizzle-orm");
+      const tables = await db.execute(sql19`
         SELECT table_name FROM information_schema.tables
         WHERE table_schema = 'public'
         ORDER BY table_name
@@ -39894,11 +42386,11 @@ async function handler(req, res) {
         auditLogs: [],
         otpCodes: []
       };
-      const { sql: sql17 } = await import("drizzle-orm");
+      const { sql: sql19 } = await import("drizzle-orm");
       for (const [table, cols] of Object.entries(expected)) {
         if (cols.length === 0) continue;
         const result = await db.execute(
-          sql17.raw(
+          sql19.raw(
             `SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='${table}'`
           )
         );
@@ -39928,14 +42420,14 @@ async function handler(req, res) {
       }
       const mod = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
       const { complianceRelationships: complianceRelationships2 } = mod;
-      const { sql: sql17 } = await import("drizzle-orm");
+      const { sql: sql19 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql17`SELECT "id", "code" FROM "frameworks"`
+        sql19`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql17`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
+        sql19`CREATE UNIQUE INDEX IF NOT EXISTS "frameworkRelationships_src_tgt_idx" ON "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId")`
       );
       const batchSize = 30;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -39945,11 +42437,11 @@ async function handler(req, res) {
         const srcId = codeToId.get(rel.sourceFrameworkCode);
         const tgtId = codeToId.get(rel.targetFrameworkCode);
         if (!srcId || !tgtId) continue;
-        const exist = await db.execute(sql17`
+        const exist = await db.execute(sql19`
           SELECT 1 FROM "frameworkRelationships" WHERE "sourceFrameworkId" = ${srcId} AND "targetFrameworkId" = ${tgtId} LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql17`
+        await db.execute(sql19`
           INSERT INTO "frameworkRelationships" ("sourceFrameworkId", "targetFrameworkId", "relationshipType", "description", "severity", "riskLevel", "mitigation")
           VALUES (${srcId}, ${tgtId}, ${rel.relationshipType}, ${rel.description ?? null}, ${rel.severity ?? null}, ${rel.riskLevel ?? null}, ${rel.mitigation ?? null})
         `);
@@ -39980,14 +42472,14 @@ async function handler(req, res) {
       }
       const mod = await Promise.resolve().then(() => (init_compliance_reference_data(), compliance_reference_data_exports));
       const controls = mod.complianceControls;
-      const { sql: sql17 } = await import("drizzle-orm");
+      const { sql: sql19 } = await import("drizzle-orm");
       const fwRows = await db.execute(
-        sql17`SELECT "id", "code" FROM "frameworks"`
+        sql19`SELECT "id", "code" FROM "frameworks"`
       );
       const codeToId = /* @__PURE__ */ new Map();
       for (const row of fwRows.rows) codeToId.set(row.code, row.id);
       await db.execute(
-        sql17`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
+        sql19`CREATE UNIQUE INDEX IF NOT EXISTS "complianceControls_frameworkId_controlCode_idx" ON "complianceControls" ("frameworkId", "controlCode")`
       );
       const batchSize = 50;
       const offset = parseInt(req.query?.offset || "0", 10);
@@ -39996,13 +42488,13 @@ async function handler(req, res) {
       for (const ctrl of batch) {
         const fid = codeToId.get(ctrl.frameworkCode);
         if (!fid) continue;
-        const exist = await db.execute(sql17`
+        const exist = await db.execute(sql19`
           SELECT 1 FROM "complianceControls"
           WHERE "frameworkId" = ${fid} AND "controlCode" = ${ctrl.controlCode}
           LIMIT 1
         `);
         if (exist.rows.length > 0) continue;
-        await db.execute(sql17`
+        await db.execute(sql19`
           INSERT INTO "complianceControls" ("frameworkId", "controlCode", "controlName", "category", "description", "requirement", "applicability")
           VALUES (${fid}, ${ctrl.controlCode}, ${ctrl.controlName}, ${ctrl.category ?? null}, ${ctrl.description ?? null}, ${ctrl.requirement ?? null}, ${ctrl.applicability ?? null})
         `);
