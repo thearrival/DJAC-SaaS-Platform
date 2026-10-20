@@ -19,7 +19,19 @@ import { getOrgSettings, updateOrgSettings } from "./org-settings-store";
 import { GLOBAL_JURISDICTIONS } from "./_core/jurisdictions";
 import { eq } from "drizzle-orm";
 import { getDb } from "./db";
-import { organizationMembers, organizations, vendors } from "../drizzle/schema";
+import {
+  auditSchedules,
+  complianceDeadlines,
+  complianceEvidence,
+  complianceIncidents,
+  compliancePolicies,
+  dsrRequests,
+  organizationMembers,
+  organizations,
+  remediationTasks,
+  riskRegister,
+  vendors,
+} from "../drizzle/schema";
 
 const JURISDICTION_VALUES = GLOBAL_JURISDICTIONS;
 
@@ -109,11 +121,52 @@ export const orgSettingsRouter = router({
       .from(organizationMembers)
       .where(eq(organizationMembers.organizationId, orgId));
 
+    const deadlines = await db
+      .select()
+      .from(complianceDeadlines)
+      .where(eq(complianceDeadlines.organizationId, orgId));
+    const risks = await db
+      .select()
+      .from(riskRegister)
+      .where(eq(riskRegister.organizationId, orgId));
+    const policies = await db
+      .select()
+      .from(compliancePolicies)
+      .where(eq(compliancePolicies.organizationId, orgId));
+    const incidents = await db
+      .select()
+      .from(complianceIncidents)
+      .where(eq(complianceIncidents.organizationId, orgId));
+    const dsrs = await db
+      .select()
+      .from(dsrRequests)
+      .where(eq(dsrRequests.organizationId, orgId));
+    const remediation = await db
+      .select()
+      .from(remediationTasks)
+      .where(eq(remediationTasks.organizationId, orgId));
+    const evidenceRows = await db
+      .select()
+      .from(complianceEvidence)
+      .where(eq(complianceEvidence.organizationId, orgId));
+    const schedules = await db
+      .select()
+      .from(auditSchedules)
+      .where(eq(auditSchedules.organizationId, orgId));
+
     return {
       exportedAt: new Date().toISOString(),
       organization: org ?? null,
       vendors: vendorRows,
       members: memberRows,
+      complianceDeadlines: deadlines,
+      riskRegister: risks,
+      policies,
+      incidents,
+      dsrRequests: dsrs,
+      remediationTasks: remediation,
+      evidence: evidenceRows,
+      auditSchedules: schedules,
     };
   }),
 
