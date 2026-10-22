@@ -39,6 +39,15 @@ const pages = [
   "/billing",
   "/account-settings",
   "/operations",
+  "/asset-inventory",
+  "/evidence-locker",
+  "/report-center",
+  "/service-requests",
+  "/security-maturity",
+  "/threat-intel",
+  "/dsr-tracker",
+  "/compliance-reports",
+  "/onboarding-wizard",
 ];
 
 const browser = await chromium.launch();
