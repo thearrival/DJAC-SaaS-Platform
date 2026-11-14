@@ -206,7 +206,10 @@ function ProfileTab() {
                   setName(e.target.value);
                   if (errors.name) setErrors(p => ({ ...p, name: undefined }));
                 }}
-                placeholder="Your full name"
+                placeholder={t(
+                  "accountSettings.placeholderFullName",
+                  "Your full name"
+                )}
               />
               {errors.name && (
                 <p className="text-sm text-red-400">{errors.name}</p>
@@ -226,7 +229,10 @@ function ProfileTab() {
               <Input
                 value={jobTitle}
                 onChange={e => setJobTitle(e.target.value)}
-                placeholder="e.g. Compliance Officer"
+                placeholder={t(
+                  "accountSettings.placeholderJobTitle",
+                  "e.g. Compliance Officer"
+                )}
               />
             </div>
             <div className="space-y-1.5">
@@ -238,7 +244,10 @@ function ProfileTab() {
                   if (errors.companyName)
                     setErrors(p => ({ ...p, companyName: undefined }));
                 }}
-                placeholder="Organisation name"
+                placeholder={t(
+                  "accountSettings.placeholderOrganization",
+                  "Organisation name"
+                )}
               />
               {errors.companyName && (
                 <p className="text-sm text-red-400">{errors.companyName}</p>
@@ -249,7 +258,10 @@ function ProfileTab() {
               <Input
                 value={industry}
                 onChange={e => setIndustry(e.target.value)}
-                placeholder="e.g. Technology"
+                placeholder={t(
+                  "accountSettings.placeholderIndustry",
+                  "e.g. Technology"
+                )}
               />
             </div>
             <div className="space-y-1.5">
@@ -673,7 +685,10 @@ function SecurityTab() {
                     value={disablePassword}
                     onChange={setDisablePassword}
                     autoComplete="current-password"
-                    placeholder="Current password"
+                    placeholder={t(
+                      "accountSettings.currentPassword",
+                      "Current password"
+                    )}
                   />
                 </div>
                 {disableMut.error && (
