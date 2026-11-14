@@ -2,6 +2,26 @@
 
 All notable changes to the DJAC Compliance Management SaaS Platform are documented in this file.
 
+## [2026-11-14] Billing, Regulatory Coverage & Localization Hardening
+
+### Payments & Subscriptions
+
+- **Stripe lifecycle:** `checkout.session.completed` now marks subscriptions active; `customer.subscription.deleted` downgrades the organization to `free_trial` and syncs access/entitlements; `customer.subscription.updated` syncs plan/interval/status and detects plan changes; `invoice.payment_failed` marks subscriptions `past_due`.
+- **Notifications:** added `sendPaymentFailed`, `sendPlanChanged`, and `sendSubscriptionCancelled` transactional emails (in addition to subscription-confirmed).
+- **Billing API/UI:** `getSubscriptionStatus` now returns `cancelAtPeriodEnd` and `canceledAt`; BillingAccount surfaces renewal/cancellation state and a past-due alert with an inline "Update payment method" action (commit `9578f9a`).
+
+### Regulatory Coverage
+
+- **Compliance Tracker:** replaced 7 hardcoded country tabs with a jurisdiction selector exposing all 15 timetable-supported countries, backed by the shared jurisdiction/timetable data.
+- **Coverage plumbing (verified):** `GLOBAL_JURISDICTIONS` (31) shared across client/server/DB enum; AI compliance chat accepts all 31 jurisdictions; timetable backend supports 15 countries; global compliance registry covers 34 jurisdictions.
+- **Provenance:** regulatory provenance audit reports 107/107 citations verified and within review window (no fabricated sources).
+
+### Multilingual Experience
+
+- **Locale consistency:** `LocaleProvider` remounts the UI tree on locale change to prevent stale strings; selected locale persisted with `lang`/`dir` applied (RTL for Arabic in place).
+- **Locale-aware formatting:** added `storedLocaleTag()` to `client/src/lib/intl` and migrated date rendering across user and admin pages to locale-aware helpers (`formatDate`/`localeTag`/`storedLocaleTag`) for all 9 locales at 100% key parity.
+- **Verification:** `tsc` clean, `eslint` clean, Prettier clean, `vite build` success, 723 tests passed / 35 skipped.
+
 ## [Unreleased] - 2026-08-12
 
 ### Production-Readiness Audit Fixes
