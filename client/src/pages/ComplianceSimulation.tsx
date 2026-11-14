@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +39,8 @@ const ReadinessBar = ({ score }: { score: number }) => (
 );
 
 export default function ComplianceSimulation() {
-  usePageTitle("Compliance Simulation");
+  const { t } = useLocale();
+  usePageTitle(t("simulation.title", "Compliance Simulation"));
 
   const scenariosQ = trpc.complianceSimulation.scenarios.useQuery();
   const runSimQ = trpc.complianceSimulation.run.useMutation();
@@ -133,21 +135,28 @@ export default function ComplianceSimulation() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
             <FlaskConical className="h-7 w-7 text-primary" />
-            Compliance Simulation
+            {t("simulation.title", "Compliance Simulation")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Model compliance scenarios across jurisdictions — simulate market
-            entry, regulation changes, and cross-border operations before they
-            happen.
+            {t(
+              "simulation.subtitle",
+              "Model compliance scenarios across jurisdictions — simulate market entry, regulation changes, and cross-border operations before they happen."
+            )}
           </p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full max-w-md">
-          <TabsTrigger value="preset">Preset</TabsTrigger>
-          <TabsTrigger value="custom">Custom</TabsTrigger>
-          <TabsTrigger value="digitaltwin">Digital Twin</TabsTrigger>
+          <TabsTrigger value="preset">
+            {t("simulation.tab.preset", "Preset")}
+          </TabsTrigger>
+          <TabsTrigger value="custom">
+            {t("simulation.tab.custom", "Custom")}
+          </TabsTrigger>
+          <TabsTrigger value="digitaltwin">
+            {t("simulation.tab.digitalTwin", "Digital Twin")}
+          </TabsTrigger>
         </TabsList>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
@@ -155,7 +164,9 @@ export default function ComplianceSimulation() {
             {activeTab === "preset" && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Scenarios</CardTitle>
+                  <CardTitle className="text-lg">
+                    {t("simulation.scenarios", "Scenarios")}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[400px] pr-2">
@@ -197,16 +208,23 @@ export default function ComplianceSimulation() {
             {activeTab === "custom" && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Custom Simulation</CardTitle>
+                  <CardTitle className="text-lg">
+                    {t("simulation.customSimulation", "Custom Simulation")}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Input
-                    placeholder="Simulation name..."
+                    placeholder={t(
+                      "simulation.namePlaceholder",
+                      "Simulation name..."
+                    )}
                     value={customName}
                     onChange={e => setCustomName(e.target.value)}
                   />
                   <div>
-                    <p className="text-sm font-medium mb-1">Jurisdictions</p>
+                    <p className="text-sm font-medium mb-1">
+                      {t("simulation.jurisdictions", "Jurisdictions")}
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       {jurisdictions.slice(0, 15).map(j => (
                         <Badge
@@ -223,7 +241,9 @@ export default function ComplianceSimulation() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm font-medium mb-1">Frameworks</p>
+                    <p className="text-sm font-medium mb-1">
+                      {t("simulation.frameworks", "Frameworks")}
+                    </p>
                     <div className="flex flex-wrap gap-1 max-h-[150px] overflow-y-auto">
                       {frameworks.slice(0, 30).map(fw => (
                         <Badge
@@ -251,7 +271,7 @@ export default function ComplianceSimulation() {
                     ) : (
                       <Zap className="h-4 w-4 mr-2" />
                     )}
-                    Run Simulation
+                    {t("simulation.run", "Run Simulation")}
                   </Button>
                 </CardContent>
               </Card>
@@ -268,7 +288,12 @@ export default function ComplianceSimulation() {
                 <CardContent className="space-y-4">
                   <div>
                     <div className="flex justify-between text-sm">
-                      <span>Baseline Readiness</span>
+                      <span>
+                        {t(
+                          "simulation.baselineReadiness",
+                          "Baseline Readiness"
+                        )}
+                      </span>
                       <span className="font-bold">{dtBaseline}%</span>
                     </div>
                     <input
@@ -284,7 +309,9 @@ export default function ComplianceSimulation() {
                   </div>
                   <div>
                     <div className="flex justify-between text-sm">
-                      <span>Risk Tolerance</span>
+                      <span>
+                        {t("simulation.riskTolerance", "Risk Tolerance")}
+                      </span>
                       <span className="font-bold">{dtRiskTolerance}%</span>
                     </div>
                     <input
@@ -300,7 +327,9 @@ export default function ComplianceSimulation() {
                   </div>
                   <div>
                     <div className="flex justify-between text-sm">
-                      <span>Jurisdictions</span>
+                      <span>
+                        {t("simulation.jurisdictions", "Jurisdictions")}
+                      </span>
                       <span className="font-bold">{dtJurisdictions}</span>
                     </div>
                     <input
@@ -316,7 +345,7 @@ export default function ComplianceSimulation() {
                   </div>
                   <div>
                     <div className="flex justify-between text-sm">
-                      <span>Frameworks</span>
+                      <span>{t("simulation.frameworks", "Frameworks")}</span>
                       <span className="font-bold">{dtFrameworks}</span>
                     </div>
                     <input
@@ -332,7 +361,7 @@ export default function ComplianceSimulation() {
                   </div>
                   <Button className="w-full" onClick={handleDigitalTwin}>
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    Project Impact
+                    {t("simulation.projectImpact", "Project Impact")}
                   </Button>
                 </CardContent>
               </Card>
@@ -346,7 +375,7 @@ export default function ComplianceSimulation() {
                   <CardContent className="p-8 flex items-center justify-center">
                     <LoaderCircle className="h-6 w-6 animate-spin text-muted-foreground" />
                     <span className="ml-2 text-muted-foreground">
-                      Running simulation...
+                      {t("simulation.running", "Running simulation...")}
                     </span>
                   </CardContent>
                 </Card>
@@ -359,11 +388,16 @@ export default function ComplianceSimulation() {
                   <CardContent className="p-12 text-center">
                     <FlaskConical className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
                     <h3 className="text-lg font-medium text-muted-foreground">
-                      Select a scenario or create a custom simulation
+                      {t(
+                        "simulation.emptyTitle",
+                        "Select a scenario or create a custom simulation"
+                      )}
                     </h3>
                     <p className="text-sm text-muted-foreground/60 mt-1">
-                      Model compliance risks, gaps, and costs before entering
-                      new markets.
+                      {t(
+                        "simulation.emptyDesc",
+                        "Model compliance risks, gaps, and costs before entering new markets."
+                      )}
                     </p>
                   </CardContent>
                 </Card>
@@ -376,12 +410,16 @@ export default function ComplianceSimulation() {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-lg">
-                        {result.scenarioId?.startsWith("custom")
-                          ? "Custom"
-                          : "Scenario"}{" "}
-                        Results
+                        {(result.scenarioId?.startsWith("custom")
+                          ? t("simulation.custom", "Custom")
+                          : t("simulation.scenario", "Scenario")) +
+                          " " +
+                          t("simulation.results", "Results")}
                         <Badge variant="secondary">
-                          Readiness: {result.overallReadiness}%
+                          {t(
+                            "simulation.readinessLabel",
+                            "Readiness: {score}%"
+                          ).replace("{score}", String(result.overallReadiness))}
                         </Badge>
                       </CardTitle>
                     </CardHeader>
@@ -389,7 +427,10 @@ export default function ComplianceSimulation() {
                       <div className="flex items-center gap-4">
                         <div className="flex-1">
                           <p className="text-sm text-muted-foreground">
-                            Overall Compliance Readiness
+                            {t(
+                              "simulation.overallReadiness",
+                              "Overall Compliance Readiness"
+                            )}
                           </p>
                           <ReadinessBar score={result.overallReadiness} />
                         </div>
@@ -400,7 +441,7 @@ export default function ComplianceSimulation() {
                             {result.overallReadiness}%
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            Readiness
+                            {t("simulation.readiness", "Readiness")}
                           </div>
                         </div>
                       </div>
@@ -411,7 +452,7 @@ export default function ComplianceSimulation() {
                             {result.totalGaps}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            Total Gaps
+                            {t("simulation.totalGaps", "Total Gaps")}
                           </div>
                         </div>
                         <div className="p-3 rounded-lg bg-accent/30 text-center">
@@ -420,7 +461,7 @@ export default function ComplianceSimulation() {
                             {result.criticalGaps}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            Critical Gaps
+                            {t("simulation.criticalGaps", "Critical Gaps")}
                           </div>
                         </div>
                         <div className="p-3 rounded-lg bg-accent/30 text-center">
@@ -429,13 +470,16 @@ export default function ComplianceSimulation() {
                             {result.recommendedTimeline}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            Timeline
+                            {t("simulation.timeline", "Timeline")}
                           </div>
                         </div>
                       </div>
                       <div>
                         <h4 className="text-sm font-semibold mb-2">
-                          Jurisdiction Breakdown
+                          {t(
+                            "simulation.jurisdictionBreakdown",
+                            "Jurisdiction Breakdown"
+                          )}
                         </h4>
                         {result.byJurisdiction?.map((j: any) => (
                           <div
@@ -456,7 +500,10 @@ export default function ComplianceSimulation() {
                                 {j.readiness}%
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {j.gaps} gaps
+                                {t(
+                                  "simulation.gapsCount",
+                                  "{count} gaps"
+                                ).replace("{count}", String(j.gaps))}
                               </div>
                             </div>
                           </div>
@@ -466,7 +513,10 @@ export default function ComplianceSimulation() {
                         <Sparkles className="h-5 w-5 text-primary mt-0.5" />
                         <div>
                           <h4 className="text-sm font-semibold">
-                            AI Recommendation
+                            {t(
+                              "simulation.aiRecommendation",
+                              "AI Recommendation"
+                            )}
                           </h4>
                           <p className="text-sm text-muted-foreground mt-1">
                             {result.aiRecommendation}
@@ -485,11 +535,16 @@ export default function ComplianceSimulation() {
                     <CardContent className="p-12 text-center">
                       <SplitSquareHorizontal className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
                       <h3 className="text-lg font-medium text-muted-foreground">
-                        Adjust the sliders and project impact
+                        {t(
+                          "simulation.dt.emptyTitle",
+                          "Adjust the sliders and project impact"
+                        )}
                       </h3>
                       <p className="text-sm text-muted-foreground/60 mt-1">
-                        See how changes to jurisdictions, frameworks, and risk
-                        tolerance affect your compliance posture.
+                        {t(
+                          "simulation.dt.emptyDesc",
+                          "See how changes to jurisdictions, frameworks, and risk tolerance affect your compliance posture."
+                        )}
                       </p>
                     </CardContent>
                   </Card>
@@ -500,7 +555,7 @@ export default function ComplianceSimulation() {
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
                           <SplitSquareHorizontal className="h-5 w-5" />
-                          Digital Twin Projection
+                          {t("simulation.dt.title", "Digital Twin Projection")}
                           <Badge
                             variant={
                               dtResult.projected >= 70
@@ -518,7 +573,10 @@ export default function ComplianceSimulation() {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="p-4 rounded-lg border">
                             <p className="text-xs text-muted-foreground mb-1">
-                              Current Baseline
+                              {t(
+                                "simulation.dt.currentBaseline",
+                                "Current Baseline"
+                              )}
                             </p>
                             <div className="text-2xl font-bold text-blue-500">
                               {dtResult.baseline}%
@@ -527,7 +585,10 @@ export default function ComplianceSimulation() {
                           </div>
                           <div className="p-4 rounded-lg border">
                             <p className="text-xs text-muted-foreground mb-1">
-                              Projected Readiness
+                              {t(
+                                "simulation.dt.projectedReadiness",
+                                "Projected Readiness"
+                              )}
                             </p>
                             <div
                               className={`text-2xl font-bold ${ReadinessColor(dtResult.projected)}`}
@@ -540,7 +601,7 @@ export default function ComplianceSimulation() {
                         <div className="flex items-center justify-center gap-2 text-sm">
                           <ArrowUpDown className="h-4 w-4" />
                           <span>
-                            Change:{" "}
+                            {t("simulation.dt.change", "Change:")}{" "}
                             <strong
                               className={
                                 dtResult.projected >= dtResult.baseline
@@ -562,7 +623,10 @@ export default function ComplianceSimulation() {
                               {dtResult.gaps}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              Projected Gaps
+                              {t(
+                                "simulation.dt.projectedGaps",
+                                "Projected Gaps"
+                              )}
                             </div>
                           </div>
                           <div className="p-3 rounded-lg bg-accent/30 text-center">
@@ -571,7 +635,7 @@ export default function ComplianceSimulation() {
                               {dtResult.criticalGaps}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              Critical Gaps
+                              {t("simulation.criticalGaps", "Critical Gaps")}
                             </div>
                           </div>
                           <div className="p-3 rounded-lg bg-accent/30 text-center">
@@ -580,14 +644,17 @@ export default function ComplianceSimulation() {
                               {dtResult.timeline}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              Timeline
+                              {t("simulation.timeline", "Timeline")}
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/20">
                           <DollarSign className="h-5 w-5 text-muted-foreground" />
                           <span className="text-sm">
-                            Estimated Compliance Cost:{" "}
+                            {t(
+                              "simulation.dt.estimatedCost",
+                              "Estimated Compliance Cost:"
+                            )}{" "}
                             <strong>{dtResult.cost}</strong>
                           </span>
                         </div>
@@ -595,12 +662,63 @@ export default function ComplianceSimulation() {
                           <Sparkles className="h-5 w-5 text-primary mt-0.5" />
                           <div>
                             <h4 className="text-sm font-semibold">
-                              What-If Insight
+                              {t("simulation.dt.insight", "What-If Insight")}
                             </h4>
                             <p className="text-sm text-muted-foreground mt-1">
                               {dtResult.projected >= dtResult.baseline
-                                ? `With a risk tolerance of ${dtResult.riskTolerance}% across ${dtResult.jurisdictions} jurisdiction(s) and ${dtResult.frameworks} framework(s), your compliance posture improves by ${dtResult.projected - dtResult.baseline}%. Prioritize ${dtResult.jurisdictions <= 2 ? "focused" : "broad"} market engagement.`
-                                : `Operating across ${dtResult.jurisdictions} jurisdiction(s) with ${dtResult.frameworks} framework(s) at ${dtResult.riskTolerance}% risk tolerance may reduce readiness by ${dtResult.baseline - dtResult.projected}%. Consider phased market entry or reduced scope.`}
+                                ? t(
+                                    "simulation.dt.insightPositive",
+                                    "With a risk tolerance of {riskTolerance}% across {jurisdictions} jurisdiction(s) and {frameworks} framework(s), your compliance posture improves by {delta}%. Prioritize {focus} market engagement."
+                                  )
+                                    .replace(
+                                      "{riskTolerance}",
+                                      String(dtResult.riskTolerance)
+                                    )
+                                    .replace(
+                                      "{jurisdictions}",
+                                      String(dtResult.jurisdictions)
+                                    )
+                                    .replace(
+                                      "{frameworks}",
+                                      String(dtResult.frameworks)
+                                    )
+                                    .replace(
+                                      "{delta}",
+                                      String(
+                                        dtResult.projected - dtResult.baseline
+                                      )
+                                    )
+                                    .replace(
+                                      "{focus}",
+                                      dtResult.jurisdictions <= 2
+                                        ? t(
+                                            "simulation.dt.focusFocused",
+                                            "focused"
+                                          )
+                                        : t("simulation.dt.focusBroad", "broad")
+                                    )
+                                : t(
+                                    "simulation.dt.insightNegative",
+                                    "Operating across {jurisdictions} jurisdiction(s) with {frameworks} framework(s) at {riskTolerance}% risk tolerance may reduce readiness by {delta}%. Consider phased market entry or reduced scope."
+                                  )
+                                    .replace(
+                                      "{jurisdictions}",
+                                      String(dtResult.jurisdictions)
+                                    )
+                                    .replace(
+                                      "{frameworks}",
+                                      String(dtResult.frameworks)
+                                    )
+                                    .replace(
+                                      "{riskTolerance}",
+                                      String(dtResult.riskTolerance)
+                                    )
+                                    .replace(
+                                      "{delta}",
+                                      String(
+                                        dtResult.baseline - dtResult.projected
+                                      )
+                                    )}
                             </p>
                           </div>
                         </div>
