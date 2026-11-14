@@ -90,7 +90,9 @@ function StatCard({
         {label}
       </p>
       <p className={`mt-1 text-3xl font-bold ${color}`}>
-        {typeof value === "number" ? value.toLocaleString() : value}
+        {typeof value === "number"
+          ? value.toLocaleString(storedLocaleTag())
+          : value}
       </p>
     </div>
   );
@@ -443,7 +445,7 @@ function UserDetailPanel({
                       <p className="text-muted-foreground">
                         {a.category}
                         {a.createdAt
-                          ? ` · ${new Date(a.createdAt).toLocaleString()}`
+                          ? ` · ${new Date(a.createdAt).toLocaleString(storedLocaleTag())}`
                           : ""}
                       </p>
                     </div>
@@ -797,7 +799,10 @@ export default function AdminDashboard() {
                           {a.createdAt && (
                             <span>
                               {" "}
-                              · {new Date(a.createdAt).toLocaleString()}
+                              ·{" "}
+                              {new Date(a.createdAt).toLocaleString(
+                                storedLocaleTag()
+                              )}
                             </span>
                           )}
                         </p>

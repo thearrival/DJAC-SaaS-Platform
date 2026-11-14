@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Settings,
 } from "lucide-react";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/admin-dashboard";
 const OWNER_API = "/api/yalla-admin";
@@ -153,7 +154,7 @@ export default function AdminLive() {
       setMetrics(await liveRes.json());
       if (alertsRes.ok) setAlerts(await alertsRes.json());
       setError("");
-      setUpdatedAt(new Date().toLocaleTimeString());
+      setUpdatedAt(new Date().toLocaleTimeString(storedLocaleTag()));
     } catch (e) {
       setError(`Could not load live data: ${(e as Error).message}`);
     } finally {
@@ -492,7 +493,9 @@ export default function AdminLive() {
                             {CATEGORY_ICONS[a.category]}
                             {a.category}
                             <span style={{ marginLeft: "auto" }}>
-                              {new Date(a.createdAt).toLocaleTimeString()}
+                              {new Date(a.createdAt).toLocaleTimeString(
+                                storedLocaleTag()
+                              )}
                             </span>
                           </div>
                         </div>
@@ -574,7 +577,11 @@ export default function AdminLive() {
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {ev.at ? new Date(ev.at).toLocaleTimeString() : ""}
+                          {ev.at
+                            ? new Date(ev.at).toLocaleTimeString(
+                                storedLocaleTag()
+                              )
+                            : ""}
                         </span>
                       </div>
                     ))}

@@ -43,6 +43,7 @@ import {
   RefreshCw,
   Shield,
 } from "lucide-react";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Action category badge mapping ───────────────────────────────────────────
 
@@ -278,7 +279,7 @@ const ACTION_OPTIONS = [
 function fmtDate(iso: string): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleString(undefined, {
+    return d.toLocaleString(storedLocaleTag(), {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -568,7 +569,9 @@ export default function AuditLog() {
             {query.dataUpdatedAt > 0 && (
               <span className="ml-auto text-xs">
                 {t("auditLog.lastRefreshed", "Last refreshed:")}{" "}
-                {new Date(query.dataUpdatedAt).toLocaleTimeString()}
+                {new Date(query.dataUpdatedAt).toLocaleTimeString(
+                  storedLocaleTag()
+                )}
               </span>
             )}
           </>

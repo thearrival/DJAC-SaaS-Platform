@@ -28,6 +28,7 @@ import {
   AlertTriangle,
   Gauge,
 } from "lucide-react";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/admin-dashboard";
 
@@ -234,7 +235,8 @@ export default function AdminPlatformMonitor() {
           </h1>
           {data && (
             <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
-              updated {new Date(data.generatedAt).toLocaleTimeString()}
+              updated{" "}
+              {new Date(data.generatedAt).toLocaleTimeString(storedLocaleTag())}
             </span>
           )}
         </div>
@@ -341,9 +343,9 @@ export default function AdminPlatformMonitor() {
           <KPI
             icon={<Activity size={18} />}
             label="Events (24h)"
-            value={(t?.events24h ?? 0).toLocaleString()}
+            value={(t?.events24h ?? 0).toLocaleString(storedLocaleTag())}
             color="#00d2ff"
-            sub={`7d ${(t?.events7d ?? 0).toLocaleString()} · all ${(t?.totalEvents ?? 0).toLocaleString()}`}
+            sub={`7d ${(t?.events7d ?? 0).toLocaleString(storedLocaleTag())} · all ${(t?.totalEvents ?? 0).toLocaleString(storedLocaleTag())}`}
           />
         </div>
 
@@ -640,7 +642,7 @@ function Muted({ children }: { children: React.ReactNode }) {
 function fmtTime(iso: string): string {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString();
+    return new Date(iso).toLocaleString(storedLocaleTag());
   } catch {
     return "—";
   }
@@ -761,7 +763,9 @@ function StatRow({
     >
       <span style={{ color: "var(--djac-muted)" }}>{label}</span>
       <span style={{ fontWeight: 600, color: tone || "#ffffff" }}>
-        {typeof value === "number" ? value.toLocaleString() : value}
+        {typeof value === "number"
+          ? value.toLocaleString(storedLocaleTag())
+          : value}
       </span>
     </div>
   );
@@ -824,7 +828,7 @@ function BarList({
               textAlign: "right",
             }}
           >
-            {i.display ?? i.value.toLocaleString()}
+            {i.display ?? i.value.toLocaleString(storedLocaleTag())}
           </span>
         </div>
       ))}

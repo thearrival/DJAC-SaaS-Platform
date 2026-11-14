@@ -378,7 +378,7 @@ function StatCard({
         {label}
       </p>
       <p className="text-3xl font-bold text-white tabular-nums">
-        {value.toLocaleString()}
+        {value.toLocaleString(storedLocaleTag())}
       </p>
       {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
     </div>
@@ -581,12 +581,16 @@ function UserDetailModal({
                   </span>
                   <span className="text-slate-500">Registered:</span>
                   <span className="text-white">
-                    {new Date(detail.user.createdAt).toLocaleString()}
+                    {new Date(detail.user.createdAt).toLocaleString(
+                      storedLocaleTag()
+                    )}
                   </span>
                   <span className="text-slate-500">Last Login:</span>
                   <span className="text-white">
                     {detail.user.lastLoginAt
-                      ? new Date(detail.user.lastLoginAt).toLocaleString()
+                      ? new Date(detail.user.lastLoginAt).toLocaleString(
+                          storedLocaleTag()
+                        )
                       : "Never"}
                   </span>
                   <span className="text-slate-500">Email Verified:</span>
@@ -670,8 +674,13 @@ function UserDetailModal({
                         {s.userAgent ?? "Unknown UA"}
                       </p>
                       <p className="text-slate-600 mt-0.5">
-                        {new Date(s.createdAt).toLocaleString()} →{" "}
-                        {new Date(s.expiresAt).toLocaleString()}
+                        {new Date(s.createdAt).toLocaleString(
+                          storedLocaleTag()
+                        )}{" "}
+                        →{" "}
+                        {new Date(s.expiresAt).toLocaleString(
+                          storedLocaleTag()
+                        )}
                       </p>
                     </div>
                   ))}
@@ -863,11 +872,15 @@ function OrganizationDetailModal({
                 <div className="grid grid-cols-2 gap-2 text-xs pt-2">
                   <span className="text-slate-500">Created:</span>
                   <span className="text-white">
-                    {new Date(detail.org.createdAt).toLocaleString()}
+                    {new Date(detail.org.createdAt).toLocaleString(
+                      storedLocaleTag()
+                    )}
                   </span>
                   <span className="text-slate-500">Updated:</span>
                   <span className="text-white">
-                    {new Date(detail.org.updatedAt).toLocaleString()}
+                    {new Date(detail.org.updatedAt).toLocaleString(
+                      storedLocaleTag()
+                    )}
                   </span>
                   <span className="text-slate-500">Trial Ends:</span>
                   <span className="text-white">
@@ -1137,7 +1150,8 @@ function OwnerAccessLinkPanel() {
           </div>
           {expiresAtIso && (
             <p className="text-xs text-slate-500">
-              Expires: {new Date(expiresAtIso).toLocaleString()}
+              Expires:{" "}
+              {new Date(expiresAtIso).toLocaleString(storedLocaleTag())}
             </p>
           )}
         </div>
@@ -1343,7 +1357,7 @@ function UsersTab({
                 </td>
                 <td className="px-4 py-3 text-slate-400 text-xs">
                   {u.lastLoginAt
-                    ? new Date(u.lastLoginAt).toLocaleString()
+                    ? new Date(u.lastLoginAt).toLocaleString(storedLocaleTag())
                     : "Never"}
                 </td>
                 <td className="px-4 py-3 text-sm font-medium text-white">
@@ -1558,7 +1572,7 @@ function OnboardingTab({ onboarding }: { onboarding: OnboardingData | null }) {
                   {row.selectedLocale}
                 </td>
                 <td className="px-4 py-3 text-slate-400 text-xs">
-                  {new Date(row.updatedAt).toLocaleString()}
+                  {new Date(row.updatedAt).toLocaleString(storedLocaleTag())}
                 </td>
               </tr>
             ))}
@@ -1601,7 +1615,7 @@ function InteractionsTab({ rows }: { rows: InteractionRow[] }) {
                 </p>
               </div>
               <div className="text-xs text-slate-500">
-                {new Date(row.createdAt).toLocaleString()}
+                {new Date(row.createdAt).toLocaleString(storedLocaleTag())}
                 {row.durationMs ? ` · ${row.durationMs}ms` : ""}
               </div>
             </div>
@@ -1637,7 +1651,7 @@ function PlatformAuditTab({ logs }: { logs: PlatformAuditRow[] }) {
               </p>
             </div>
             <div className="text-xs text-slate-500">
-              {new Date(log.createdAt).toLocaleString()}
+              {new Date(log.createdAt).toLocaleString(storedLocaleTag())}
             </div>
           </div>
           <JsonPreview value={log.payload} title="Payload" />
@@ -1671,7 +1685,7 @@ function ValidationTab({ rows }: { rows: ValidationRow[] }) {
               </p>
             </div>
             <div className="text-xs text-slate-500">
-              {new Date(row.createdAt).toLocaleString()}
+              {new Date(row.createdAt).toLocaleString(storedLocaleTag())}
             </div>
           </div>
           <JsonPreview value={row.payload} title="Failure Detail" />
@@ -1752,7 +1766,7 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Revenue Pool"
-          value={`$${(totalMrr / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          value={`$${(totalMrr / 100).toLocaleString(storedLocaleTag(), { minimumFractionDigits: 2 })}`}
           sub="active + trialing"
         />
         <StatCard
@@ -1943,7 +1957,7 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
                   </span>
                 )}
                 <span className="text-slate-600 flex-shrink-0">
-                  {new Date(ev.createdAt).toLocaleString()}
+                  {new Date(ev.createdAt).toLocaleString(storedLocaleTag())}
                 </span>
               </div>
             ))}
@@ -2117,11 +2131,11 @@ function SignupsTab({
                   )}
                 </td>
                 <td className="px-4 py-3 text-slate-400 text-xs">
-                  {new Date(u.createdAt).toLocaleString()}
+                  {new Date(u.createdAt).toLocaleString(storedLocaleTag())}
                 </td>
                 <td className="px-4 py-3 text-slate-400 text-xs">
                   {u.lastLoginAt
-                    ? new Date(u.lastLoginAt).toLocaleString()
+                    ? new Date(u.lastLoginAt).toLocaleString(storedLocaleTag())
                     : "Never"}
                 </td>
                 <td className="px-4 py-3 flex gap-1.5 flex-wrap">
@@ -2285,7 +2299,7 @@ function AdminAuditTab({ logs }: { logs: AdminAuditRow[] }) {
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 {log.adminUsername} · {log.ipAddress} ·{" "}
-                {new Date(log.createdAt).toLocaleString()}
+                {new Date(log.createdAt).toLocaleString(storedLocaleTag())}
               </p>
             </div>
           </div>
@@ -2344,7 +2358,7 @@ function RealtimeBar({
         DB {realtime.dbStatus}
       </span>
       <span className="flex-shrink-0 text-slate-700">
-        {new Date(realtime.ts).toLocaleTimeString()}
+        {new Date(realtime.ts).toLocaleTimeString(storedLocaleTag())}
       </span>
     </div>
   );
@@ -2525,7 +2539,7 @@ function RealtimeTab({
                     {ev.event.replace(/_/g, " ")}
                   </span>
                   <span className="text-slate-600 flex-shrink-0">
-                    {new Date(ev.ts).toLocaleTimeString()}
+                    {new Date(ev.ts).toLocaleTimeString(storedLocaleTag())}
                   </span>
                 </div>
               ))

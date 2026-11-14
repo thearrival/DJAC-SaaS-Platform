@@ -79,7 +79,7 @@ export default function AdminSubscriptions() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setData(await res.json());
       setError("");
-      setUpdatedAt(new Date().toLocaleTimeString());
+      setUpdatedAt(new Date().toLocaleTimeString(storedLocaleTag()));
     } catch (e) {
       setError(`Could not load subscriptions: ${(e as Error).message}`);
     } finally {
@@ -233,7 +233,7 @@ export default function AdminSubscriptions() {
               style={{ color: "#10b981", marginBottom: 8 }}
             />
             <div style={{ fontSize: 24, fontWeight: 800, color: "#10b981" }}>
-              ${(totalMRR / 100).toLocaleString()}
+              ${(totalMRR / 100).toLocaleString(storedLocaleTag())}
             </div>
             <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
               Est. Monthly Revenue

@@ -24,6 +24,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "@/lib/recharts-compat";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/admin-dashboard";
 
@@ -177,7 +178,7 @@ export default function AdminReports() {
           {report && (
             <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
               {report.title} · generated{" "}
-              {new Date(report.generatedAt).toLocaleString()}
+              {new Date(report.generatedAt).toLocaleString(storedLocaleTag())}
             </span>
           )}
         </div>

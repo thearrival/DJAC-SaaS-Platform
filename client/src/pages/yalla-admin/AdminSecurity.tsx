@@ -30,6 +30,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "@/lib/recharts-compat";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/admin-dashboard";
 const OWNER_API = "/api/yalla-admin";
@@ -115,7 +116,7 @@ export default function AdminSecurity() {
       const data = await res.json();
       setEvents(Array.isArray(data) ? data : []);
       setError("");
-      setUpdatedAt(new Date().toLocaleTimeString());
+      setUpdatedAt(new Date().toLocaleTimeString(storedLocaleTag()));
     } catch (e) {
       setError(`Could not load security events: ${(e as Error).message}`);
     } finally {
@@ -821,7 +822,9 @@ export default function AdminSecurity() {
                       >
                         {s.userAgent || "unknown device"} · seen{" "}
                         {s.lastSeenAt
-                          ? new Date(s.lastSeenAt).toLocaleString()
+                          ? new Date(s.lastSeenAt).toLocaleString(
+                              storedLocaleTag()
+                            )
                           : "—"}
                       </div>
                     </div>
@@ -1217,7 +1220,9 @@ export default function AdminSecurity() {
                       }}
                     >
                       {e.createdAt
-                        ? new Date(e.createdAt).toLocaleString()
+                        ? new Date(e.createdAt).toLocaleString(
+                            storedLocaleTag()
+                          )
                         : "—"}
                     </td>
                   </tr>

@@ -93,6 +93,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { sounds } from "@/lib/sounds";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -229,7 +230,7 @@ function ScoreBar({ value, max = 100 }: { value: number; max?: number }) {
 function formatRunTime(dt: Date | string | null | undefined): string {
   if (!dt) return "—";
   const d = typeof dt === "string" ? new Date(dt) : dt;
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString(storedLocaleTag(), {
     dateStyle: "short",
     timeStyle: "short",
   });

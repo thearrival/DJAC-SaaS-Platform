@@ -333,7 +333,7 @@ export default function AdminUsers() {
           </button>
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Users</h1>
           <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
-            {total.toLocaleString()} total
+            {total.toLocaleString(storedLocaleTag())} total
           </span>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -822,7 +822,9 @@ export default function AdminUsers() {
                     label="Signed Up"
                     value={
                       detail.createdAt
-                        ? new Date(detail.createdAt).toLocaleString()
+                        ? new Date(detail.createdAt).toLocaleString(
+                            storedLocaleTag()
+                          )
                         : "—"
                     }
                   />
@@ -830,7 +832,9 @@ export default function AdminUsers() {
                     label="Last Login"
                     value={
                       detail.lastSignedIn
-                        ? new Date(detail.lastSignedIn).toLocaleString()
+                        ? new Date(detail.lastSignedIn).toLocaleString(
+                            storedLocaleTag()
+                          )
                         : "Never"
                     }
                   />
@@ -942,7 +946,9 @@ export default function AdminUsers() {
                         </span>
                         <span style={{ color: "var(--djac-muted)" }}>
                           {a.createdAt
-                            ? new Date(a.createdAt).toLocaleString()
+                            ? new Date(a.createdAt).toLocaleString(
+                                storedLocaleTag()
+                              )
                             : "—"}
                         </span>
                       </div>

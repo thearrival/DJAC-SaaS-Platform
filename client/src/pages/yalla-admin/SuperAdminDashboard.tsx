@@ -25,6 +25,7 @@ import {
   Boxes,
   UserPlus,
 } from "lucide-react";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/yalla-admin";
 
@@ -483,7 +484,7 @@ function KPICard({
         </div>
       </div>
       <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1.2 }}>
-        {value.toLocaleString()}
+        {value.toLocaleString(storedLocaleTag())}
       </div>
       <div style={{ fontSize: 12, color: "var(--djac-muted)", marginTop: 4 }}>
         {label}
@@ -542,7 +543,7 @@ function MiniKPI({
             lineHeight: 1.2,
           }}
         >
-          {text ?? value?.toLocaleString()}
+          {text ?? value?.toLocaleString(storedLocaleTag())}
         </div>
         <div
           style={{

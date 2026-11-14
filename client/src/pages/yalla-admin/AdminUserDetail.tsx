@@ -346,13 +346,17 @@ export default function AdminUserDetail() {
                   <dt style={{ color: "var(--djac-muted)" }}>Joined</dt>
                   <dd style={{ margin: 0 }}>
                     {detail.createdAt
-                      ? new Date(detail.createdAt).toLocaleString()
+                      ? new Date(detail.createdAt).toLocaleString(
+                          storedLocaleTag()
+                        )
                       : "—"}
                   </dd>
                   <dt style={{ color: "var(--djac-muted)" }}>Last signed in</dt>
                   <dd style={{ margin: 0 }}>
                     {detail.lastSignedIn
-                      ? new Date(detail.lastSignedIn).toLocaleString()
+                      ? new Date(detail.lastSignedIn).toLocaleString(
+                          storedLocaleTag()
+                        )
                       : "Never"}
                   </dd>
                 </dl>
@@ -477,7 +481,9 @@ export default function AdminUserDetail() {
                             style={{ color: "var(--djac-muted)", fontSize: 11 }}
                           >
                             {a.createdAt
-                              ? new Date(a.createdAt).toLocaleString()
+                              ? new Date(a.createdAt).toLocaleString(
+                                  storedLocaleTag()
+                                )
                               : ""}
                           </span>
                         </div>
@@ -575,7 +581,9 @@ export default function AdminUserDetail() {
                         }}
                       >
                         {entry.createdAt
-                          ? new Date(entry.createdAt).toLocaleString()
+                          ? new Date(entry.createdAt).toLocaleString(
+                              storedLocaleTag()
+                            )
                           : ""}
                       </span>
                     </div>

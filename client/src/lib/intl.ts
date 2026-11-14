@@ -78,3 +78,57 @@ export function storedLocaleTag(): string {
     return "en-US";
   }
 }
+
+/** Reads the app locale code (en/ar/zh/...) from localStorage. */
+export function storedLocale(): string {
+  if (typeof window === "undefined") return "en";
+  try {
+    const stored = window.localStorage.getItem("djac-locale") ?? "";
+    return TAGS[stored] ? stored : "en";
+  } catch {
+    return "en";
+  }
+}
+
+/** Format a time using the user's UI locale. */
+export function formatTime(
+  value: Date | string | number | null | undefined,
+  locale: string | undefined = undefined,
+  options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" }
+): string {
+  if (value == null) return "—";
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return typeof value === "string" ? value : "—";
+  return new Intl.DateTimeFormat(
+    locale ? localeTag(locale) : undefined,
+    options
+  ).format(d);
+}
+
+/** Format a number using the user's UI locale. */
+export function formatNumber(
+  value: number | null | undefined,
+  locale: string | undefined = undefined,
+  options?: Intl.NumberFormatOptions
+): string {
+  if (value == null || Number.isNaN(value)) return "—";
+  return new Intl.NumberFormat(
+    locale ? localeTag(locale) : undefined,
+    options
+  ).format(value);
+}
+
+/** Format a currency amount using the user's UI locale. */
+export function formatCurrency(
+  value: number | null | undefined,
+  currency = "USD",
+  locale: string | undefined = undefined,
+  options?: Intl.NumberFormatOptions
+): string {
+  if (value == null || Number.isNaN(value)) return "—";
+  return new Intl.NumberFormat(locale ? localeTag(locale) : undefined, {
+    style: "currency",
+    currency,
+    ...options,
+  }).format(value);
+}

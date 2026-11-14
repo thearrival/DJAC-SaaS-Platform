@@ -21,6 +21,7 @@ import {
 } from "@/lib/recharts-compat";
 import { useTheme } from "@/contexts/useTheme";
 import { useLocale } from "@/contexts/useLocale";
+import { localeTag } from "@/lib/intl";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -205,7 +206,7 @@ function TypeIcon({ type }: { type: EnforcementAction["type"] }) {
 // ── Main component ────────────────────────────────────────────────────────────
 export function RegulatoryPulseMatrix() {
   const { theme } = useTheme();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const isDark = theme === "dark";
 
   const [hasPersonalData, setHasPersonalData] = useState(false);
@@ -274,7 +275,7 @@ export function RegulatoryPulseMatrix() {
 
   const formatCurrency = (n: number, currency: "sar" | "cny") => {
     const symbol = currency === "sar" ? "SAR " : "¥ ";
-    return symbol + new Intl.NumberFormat("en").format(n);
+    return symbol + new Intl.NumberFormat(localeTag(locale)).format(n);
   };
 
   return (
@@ -597,7 +598,7 @@ export function RegulatoryPulseMatrix() {
               <Tooltip
                 contentStyle={TOOLTIP_STYLE}
                 formatter={(value: number, name: string) => [
-                  new Intl.NumberFormat("en").format(value),
+                  new Intl.NumberFormat(localeTag(locale)).format(value),
                   name === "pipl"
                     ? "PIPL Exposure"
                     : name === "pdpl"

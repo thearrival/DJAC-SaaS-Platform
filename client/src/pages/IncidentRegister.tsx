@@ -1204,7 +1204,7 @@ function IncidentCard({
               {i.affectedDataSubjects != null && (
                 <span>
                   {t("incident.dataSubjects", "Data subjects")}:{" "}
-                  {i.affectedDataSubjects.toLocaleString()}
+                  {i.affectedDataSubjects.toLocaleString(storedLocaleTag())}
                 </span>
               )}
             </div>

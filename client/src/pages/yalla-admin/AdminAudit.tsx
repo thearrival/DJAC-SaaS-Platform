@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/yalla-admin";
 
@@ -74,7 +75,7 @@ export default function AdminAudit() {
       const data = await res.json();
       setLogs(Array.isArray(data) ? data : []);
       setError("");
-      setUpdatedAt(new Date().toLocaleTimeString());
+      setUpdatedAt(new Date().toLocaleTimeString(storedLocaleTag()));
     } catch (e) {
       setError(`Could not load audit logs: ${(e as Error).message}`);
     } finally {
@@ -388,7 +389,9 @@ export default function AdminAudit() {
                         }}
                       >
                         {log.createdAt
-                          ? new Date(log.createdAt).toLocaleString()
+                          ? new Date(log.createdAt).toLocaleString(
+                              storedLocaleTag()
+                            )
                           : "—"}
                       </td>
                       <td style={{ padding: "12px 16px" }}>

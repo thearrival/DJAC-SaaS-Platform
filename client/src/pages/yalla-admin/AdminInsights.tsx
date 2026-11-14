@@ -23,6 +23,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "@/lib/recharts-compat";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/admin-dashboard";
 
@@ -118,7 +119,7 @@ export default function AdminInsights() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setData(await res.json());
       setError("");
-      setUpdatedAt(new Date().toLocaleTimeString());
+      setUpdatedAt(new Date().toLocaleTimeString(storedLocaleTag()));
     } catch (e) {
       setError(`Could not load engagement metrics: ${(e as Error).message}`);
     } finally {
@@ -468,7 +469,9 @@ export default function AdminInsights() {
                             }}
                           >
                             {u.lastActiveAt
-                              ? new Date(u.lastActiveAt).toLocaleString()
+                              ? new Date(u.lastActiveAt).toLocaleString(
+                                  storedLocaleTag()
+                                )
                               : "—"}
                           </td>
                         </tr>

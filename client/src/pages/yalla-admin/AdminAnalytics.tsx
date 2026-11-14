@@ -25,6 +25,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "@/lib/recharts-compat";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/admin-dashboard";
 
@@ -85,7 +86,7 @@ export default function AdminAnalytics() {
         userStats: await statsRes.json(),
       });
       setError("");
-      setUpdatedAt(new Date().toLocaleTimeString());
+      setUpdatedAt(new Date().toLocaleTimeString(storedLocaleTag()));
     } catch (e) {
       setError(`Could not load analytics: ${(e as Error).message}`);
     } finally {
@@ -459,7 +460,7 @@ function KPI({
         {icon}
       </div>
       <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1.2 }}>
-        {value.toLocaleString()}
+        {value.toLocaleString(storedLocaleTag())}
       </div>
       <div style={{ fontSize: 12, color: "var(--djac-muted)", marginTop: 4 }}>
         {label}

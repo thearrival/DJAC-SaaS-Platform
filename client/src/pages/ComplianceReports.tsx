@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Module nav routes ───────────────────────────────────────────────────────────
 
@@ -331,7 +332,9 @@ export default function ComplianceReports() {
             {summary?.generatedAt && (
               <span className="ml-2 opacity-60">
                 · {t("reports.asOf", "as of")}{" "}
-                {new Date(summary.generatedAt).toLocaleString()}
+                {new Date(summary.generatedAt).toLocaleString(
+                  storedLocaleTag()
+                )}
               </span>
             )}
           </p>

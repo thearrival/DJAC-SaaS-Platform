@@ -10,6 +10,7 @@
 import { useMemo, useEffect, useRef, memo } from "react";
 import { useTheme } from "@/contexts/useTheme";
 import { useLocale } from "@/contexts/useLocale";
+import { localeTag } from "@/lib/intl";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -815,11 +816,14 @@ export const AIOrchestrationFeed = memo(function AIOrchestrationFeed() {
                       paddingTop: 1,
                     }}
                   >
-                    {new Date(ev.timestamp).toLocaleTimeString(locale, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                    })}
+                    {new Date(ev.timestamp).toLocaleTimeString(
+                      localeTag(locale),
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      }
+                    )}
                   </span>
                   <span
                     style={{

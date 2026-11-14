@@ -298,7 +298,9 @@ export default function AdminOnboarding() {
                         {JSON.stringify(r.answerValue)}
                       </td>
                       <td className="py-1.5 text-end text-muted-foreground">
-                        {new Date(r.updatedAt).toLocaleString()}
+                        {new Date(r.updatedAt).toLocaleString(
+                          storedLocaleTag()
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -315,7 +317,7 @@ export default function AdminOnboarding() {
                   <li key={i} className="flex justify-between gap-2">
                     <span>{e.eventType}</span>
                     <span className="text-muted-foreground">
-                      {new Date(e.createdAt).toLocaleString()}
+                      {new Date(e.createdAt).toLocaleString(storedLocaleTag())}
                     </span>
                   </li>
                 ))}

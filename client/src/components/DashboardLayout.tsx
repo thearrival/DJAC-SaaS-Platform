@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE } from "@/const";
 import { useLocale } from "@/contexts/useLocale";
+import { localeTag } from "@/lib/intl";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useLocalAuth } from "@/hooks/useLocalAuth";
 import { useNotificationBadge } from "@/hooks/useNotificationBadge";
@@ -971,14 +972,11 @@ function DashboardLayoutContent({
             <div className="flex items-center gap-3">
               {/* Current date — locale aware */}
               <span className="hidden lg:block text-xs text-muted-foreground font-medium tabular-nums">
-                {new Intl.DateTimeFormat(
-                  locale === "ar"
-                    ? "ar-SA"
-                    : locale === "zh"
-                      ? "zh-CN"
-                      : "en-US",
-                  { weekday: "short", month: "short", day: "numeric" }
-                ).format(new Date())}
+                {new Intl.DateTimeFormat(localeTag(locale), {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                }).format(new Date())}
               </span>
               <div className="djac-topbar-sep hidden lg:block" />
               {/* Live system status indicator */}
