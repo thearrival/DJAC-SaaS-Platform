@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +36,8 @@ const RISK_COLORS: Record<string, string> = {
 };
 
 export default function CrossBorderDataFlow() {
-  usePageTitle("Cross-Border Data Flow");
+  const { t } = useLocale();
+  usePageTitle(t("crossBorder.title", "Cross-Border Data Flow"));
 
   const matrixQ = trpc.crossBorderFlow.matrix.useQuery();
   const jurisdictionsQ = trpc.crossBorderFlow.jurisdictions.useQuery();
@@ -63,13 +65,13 @@ export default function CrossBorderDataFlow() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
               <ArrowLeftRight className="h-7 w-7 text-primary" />
-              Cross-Border Data Flow
+              {t("crossBorder.title", "Cross-Border Data Flow")}
             </h1>
           </div>
         </div>
         <div className="flex items-center justify-center py-20 text-muted-foreground">
           <LoaderCircle className="h-6 w-6 animate-spin mr-2" />
-          Loading cross-border data…
+          {t("crossBorder.loading", "Loading cross-border data…")}
         </div>
       </div>
     );
@@ -82,14 +84,18 @@ export default function CrossBorderDataFlow() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
               <ArrowLeftRight className="h-7 w-7 text-primary" />
-              Cross-Border Data Flow
+              {t("crossBorder.title", "Cross-Border Data Flow")}
             </h1>
           </div>
         </div>
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <XCircle className="h-8 w-8 mb-3 text-destructive" />
-          <p>Failed to load cross-border data flow information.</p>
-          <p className="text-xs mt-1">Please try again later.</p>
+          <p>
+            {t(
+              "crossBorder.loadError",
+              "Failed to load cross-border data flow information."
+            )}
+          </p>
         </div>
       </div>
     );
@@ -148,15 +154,15 @@ export default function CrossBorderDataFlow() {
         <TabsList>
           <TabsTrigger value="matrix">
             <LayoutGrid className="h-4 w-4 mr-1" />
-            Matrix
+            {t("crossBorder.tab.matrix", "Matrix")}
           </TabsTrigger>
           <TabsTrigger value="heatmap">
             <Globe className="h-4 w-4 mr-1" />
-            Heatmap
+            {t("crossBorder.tab.heatmap", "Heatmap")}
           </TabsTrigger>
           <TabsTrigger value="analyzer">
             <GitBranch className="h-4 w-4 mr-1" />
-            Route Analyzer
+            {t("crossBorder.tab.analyzer", "Route Analyzer")}
           </TabsTrigger>
         </TabsList>
 
@@ -166,7 +172,9 @@ export default function CrossBorderDataFlow() {
               <div className="lg:col-span-1 space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Filters</CardTitle>
+                    <CardTitle className="text-sm">
+                      {t("crossBorder.filters", "Filters")}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <Select
@@ -174,10 +182,14 @@ export default function CrossBorderDataFlow() {
                       onValueChange={setSourceFilter}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Source" />
+                        <SelectValue
+                          placeholder={t("crossBorder.source", "Source")}
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Sources</SelectItem>
+                        <SelectItem value="all">
+                          {t("crossBorder.allSources", "All Sources")}
+                        </SelectItem>
                         {jurisdictions.map(j => (
                           <SelectItem key={j} value={j}>
                             {j}
@@ -190,10 +202,14 @@ export default function CrossBorderDataFlow() {
                       onValueChange={setTargetFilter}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Target" />
+                        <SelectValue
+                          placeholder={t("crossBorder.target", "Target")}
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Targets</SelectItem>
+                        <SelectItem value="all">
+                          {t("crossBorder.allTargets", "All Targets")}
+                        </SelectItem>
                         {jurisdictions.map(j => (
                           <SelectItem key={j} value={j}>
                             {j}
@@ -203,28 +219,44 @@ export default function CrossBorderDataFlow() {
                     </Select>
                     <Select value={riskFilter} onValueChange={setRiskFilter}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Risk Level" />
+                        <SelectValue
+                          placeholder={t("crossBorder.riskLevel", "Risk Level")}
+                        />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Risks</SelectItem>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="critical">Critical</SelectItem>
+                        <SelectItem value="all">
+                          {t("crossBorder.allRisks", "All Risks")}
+                        </SelectItem>
+                        <SelectItem value="low">
+                          {t("crossBorder.risk.low", "Low")}
+                        </SelectItem>
+                        <SelectItem value="medium">
+                          {t("crossBorder.risk.medium", "Medium")}
+                        </SelectItem>
+                        <SelectItem value="high">
+                          {t("crossBorder.risk.high", "High")}
+                        </SelectItem>
+                        <SelectItem value="critical">
+                          {t("crossBorder.risk.critical", "Critical")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded bg-emerald-500" /> Low
+                        <div className="w-3 h-3 rounded bg-emerald-500" />{" "}
+                        {t("crossBorder.risk.low", "Low")}
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded bg-amber-400" /> Medium
+                        <div className="w-3 h-3 rounded bg-amber-400" />{" "}
+                        {t("crossBorder.risk.medium", "Medium")}
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded bg-orange-500" /> High
+                        <div className="w-3 h-3 rounded bg-orange-500" />{" "}
+                        {t("crossBorder.risk.high", "High")}
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded bg-red-500" /> Critical
+                        <div className="w-3 h-3 rounded bg-red-500" />{" "}
+                        {t("crossBorder.risk.critical", "Critical")}
                       </div>
                     </div>
                   </CardContent>
@@ -234,14 +266,20 @@ export default function CrossBorderDataFlow() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-sm">
-                      Transfer Routes ({filteredMatrix.length})
+                      {t(
+                        "crossBorder.transferRoutes",
+                        "Transfer Routes ({count})"
+                      ).replace("{count}", String(filteredMatrix.length))}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ScrollArea className="h-[500px]">
                       {filteredMatrix.length === 0 ? (
                         <div className="text-center py-8 text-muted-foreground">
-                          No routes match your filters.
+                          {t(
+                            "crossBorder.noRoutes",
+                            "No routes match your filters."
+                          )}
                         </div>
                       ) : (
                         <div className="space-y-1">
@@ -285,7 +323,10 @@ export default function CrossBorderDataFlow() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">
-                  Risk Heatmap — Source vs Target
+                  {t(
+                    "crossBorder.heatmapTitle",
+                    "Risk Heatmap — Source vs Target"
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -294,7 +335,7 @@ export default function CrossBorderDataFlow() {
                     <thead>
                       <tr>
                         <th className="p-1 text-left text-muted-foreground font-medium">
-                          Source \ Target
+                          {t("crossBorder.sourceTarget", "Source \\ Target")}
                         </th>
                         {jurs10.map(j => (
                           <th
@@ -321,8 +362,11 @@ export default function CrossBorderDataFlow() {
                                   className={`w-6 h-6 rounded mx-auto ${isSame ? "bg-muted" : risk === "critical" ? "bg-red-500" : risk === "high" ? "bg-orange-500" : risk === "medium" ? "bg-amber-400" : risk === "low" ? "bg-emerald-500" : "bg-muted"}`}
                                   title={
                                     isSame
-                                      ? "Same jurisdiction"
-                                      : `${s} → ${t}: ${risk ?? "unknown"}`
+                                      ? t(
+                                          "crossBorder.sameJurisdiction",
+                                          "Same jurisdiction"
+                                        )
+                                      : `${s} → ${t}: ${risk ?? t("crossBorder.unknown", "unknown")}`
                                   }
                                 />
                               </td>
@@ -342,19 +386,26 @@ export default function CrossBorderDataFlow() {
               <div className="lg:col-span-1 space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Route Analyzer</CardTitle>
+                    <CardTitle className="text-sm">
+                      {t("crossBorder.routeAnalyzer", "Route Analyzer")}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                        Source
+                        {t("crossBorder.source", "Source")}
                       </label>
                       <Select
                         value={selectedSource}
                         onValueChange={setSelectedSource}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select source..." />
+                          <SelectValue
+                            placeholder={t(
+                              "crossBorder.selectSource",
+                              "Select source..."
+                            )}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {jurisdictions.map(j => (
@@ -367,14 +418,19 @@ export default function CrossBorderDataFlow() {
                     </div>
                     <div>
                       <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                        Target
+                        {t("crossBorder.target", "Target")}
                       </label>
                       <Select
                         value={selectedTarget}
                         onValueChange={setSelectedTarget}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select target..." />
+                          <SelectValue
+                            placeholder={t(
+                              "crossBorder.selectTarget",
+                              "Select target..."
+                            )}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {jurisdictions.map(j => (
@@ -387,8 +443,10 @@ export default function CrossBorderDataFlow() {
                     </div>
                     {!selectedSource && !selectedTarget && !routeLoading && (
                       <div className="text-center py-4 text-sm text-muted-foreground">
-                        Select source and target to analyze data transfer
-                        requirements.
+                        {t(
+                          "crossBorder.analyzerHint",
+                          "Select source and target to analyze data transfer requirements."
+                        )}
                       </div>
                     )}
                   </CardContent>
@@ -397,7 +455,9 @@ export default function CrossBorderDataFlow() {
               <div className="lg:col-span-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Route Details</CardTitle>
+                    <CardTitle className="text-sm">
+                      {t("crossBorder.routeDetails", "Route Details")}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {routeLoading && (
@@ -426,7 +486,13 @@ export default function CrossBorderDataFlow() {
                           <Badge
                             className={RISK_COLORS[routeDetail.riskLevel] ?? ""}
                           >
-                            Risk: {routeDetail.riskLevel.toUpperCase()}
+                            {t(
+                              "crossBorder.riskBadge",
+                              "Risk: {level}"
+                            ).replace(
+                              "{level}",
+                              String(routeDetail.riskLevel).toUpperCase()
+                            )}
                           </Badge>
                           <Badge variant="outline">
                             {routeDetail.transferMechanism}
@@ -436,7 +502,7 @@ export default function CrossBorderDataFlow() {
                           <div>
                             <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                               <CheckCircle2 className="h-3 w-3 text-emerald-500" />{" "}
-                              Requirements
+                              {t("crossBorder.requirements", "Requirements")}
                             </p>
                             {routeDetail.requirements?.length > 0 ? (
                               <ul className="space-y-1">
@@ -452,14 +518,17 @@ export default function CrossBorderDataFlow() {
                               </ul>
                             ) : (
                               <p className="text-sm text-muted-foreground">
-                                None specified
+                                {t(
+                                  "crossBorder.noneSpecified",
+                                  "None specified"
+                                )}
                               </p>
                             )}
                           </div>
                           <div>
                             <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
                               <XCircle className="h-3 w-3 text-red-500" />{" "}
-                              Restrictions
+                              {t("crossBorder.restrictions", "Restrictions")}
                             </p>
                             {routeDetail.restrictions?.length > 0 ? (
                               <ul className="space-y-1">
@@ -475,7 +544,7 @@ export default function CrossBorderDataFlow() {
                               </ul>
                             ) : (
                               <p className="text-sm text-muted-foreground">
-                                None
+                                {t("crossBorder.none", "None")}
                               </p>
                             )}
                           </div>
@@ -483,7 +552,10 @@ export default function CrossBorderDataFlow() {
                         <div className="flex items-center gap-2 p-3 rounded-lg bg-accent/20">
                           <DollarSign className="h-5 w-5 text-muted-foreground" />
                           <span className="text-sm">
-                            Estimated Compliance Cost:{" "}
+                            {t(
+                              "crossBorder.estimatedCost",
+                              "Estimated Compliance Cost:"
+                            )}{" "}
                             <strong>
                               {routeDetail.estimatedComplianceCost}
                             </strong>
@@ -495,8 +567,10 @@ export default function CrossBorderDataFlow() {
                       <div className="text-center py-8 text-muted-foreground">
                         <ArrowLeftRight className="h-8 w-8 mx-auto mb-2 opacity-40" />
                         <p>
-                          Select source and target jurisdictions to begin
-                          analysis.
+                          {t(
+                            "crossBorder.analyzerEmpty",
+                            "Select source and target jurisdictions to begin analysis."
+                          )}
                         </p>
                       </div>
                     )}
