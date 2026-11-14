@@ -564,13 +564,17 @@ export default function DataSubjectRequests() {
               onValueChange={v => setFilterStatus(v as Status | "all")}
             >
               <SelectTrigger className="w-36 h-8 text-xs">
-                <SelectValue placeholder="All Statuses" />
+                <SelectValue
+                  placeholder={t("dsr.allStatuses", "All Statuses")}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="all">
+                  {t("dsr.allStatuses", "All Statuses")}
+                </SelectItem>
                 {STATUSES.map(s => (
                   <SelectItem key={s} value={s}>
-                    {STATUS_LABELS[s]}
+                    {t(`dsr.status.${s}`, STATUS_LABELS[s])}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -582,13 +586,15 @@ export default function DataSubjectRequests() {
               onValueChange={v => setFilterType(v as RequestType | "all")}
             >
               <SelectTrigger className="w-36 h-8 text-xs">
-                <SelectValue placeholder="All Types" />
+                <SelectValue placeholder={t("dsr.allTypes", "All Types")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">
+                  {t("dsr.allTypes", "All Types")}
+                </SelectItem>
                 {REQUEST_TYPES.map(rt => (
                   <SelectItem key={rt} value={rt}>
-                    {REQUEST_TYPE_LABELS[rt]}
+                    {t(`dsr.requestType.${rt}`, REQUEST_TYPE_LABELS[rt])}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -602,10 +608,14 @@ export default function DataSubjectRequests() {
               }
             >
               <SelectTrigger className="w-36 h-8 text-xs">
-                <SelectValue placeholder="All Jurisdictions" />
+                <SelectValue
+                  placeholder={t("dsr.allJurisdictions", "All Jurisdictions")}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Jurisdictions</SelectItem>
+                <SelectItem value="all">
+                  {t("dsr.allJurisdictions", "All Jurisdictions")}
+                </SelectItem>
                 {JURISDICTIONS.map(j => (
                   <SelectItem key={j} value={j}>
                     {j}
@@ -742,7 +752,10 @@ export default function DataSubjectRequests() {
                       {/* Type */}
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
-                          {REQUEST_TYPE_LABELS[item.requestType]}
+                          {t(
+                            `dsr.requestType.${item.requestType}`,
+                            REQUEST_TYPE_LABELS[item.requestType]
+                          )}
                         </Badge>
                       </TableCell>
 
@@ -787,7 +800,7 @@ export default function DataSubjectRequests() {
                           <SelectContent>
                             {STATUSES.map(s => (
                               <SelectItem key={s} value={s}>
-                                {STATUS_LABELS[s]}
+                                {t(`dsr.status.${s}`, STATUS_LABELS[s])}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -855,7 +868,10 @@ export default function DataSubjectRequests() {
               </Label>
               <Input
                 id="dsr-name"
-                placeholder="Full name of the data subject"
+                placeholder={t(
+                  "dsr.placeholderRequesterName",
+                  "Full name of the data subject"
+                )}
                 value={form.requesterName}
                 onChange={e => {
                   setForm(f => ({ ...f, requesterName: e.target.value }));
@@ -876,7 +892,10 @@ export default function DataSubjectRequests() {
               <Input
                 id="dsr-email"
                 type="email"
-                placeholder="subject@example.com"
+                placeholder={t(
+                  "dsr.placeholderRequesterEmail",
+                  "subject@example.com"
+                )}
                 value={form.requesterEmail}
                 onChange={e => {
                   setForm(f => ({ ...f, requesterEmail: e.target.value }));
@@ -905,7 +924,7 @@ export default function DataSubjectRequests() {
                   <SelectContent>
                     {REQUEST_TYPES.map(rt => (
                       <SelectItem key={rt} value={rt}>
-                        {REQUEST_TYPE_LABELS[rt]}
+                        {t(`dsr.requestType.${rt}`, REQUEST_TYPE_LABELS[rt])}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -966,11 +985,16 @@ export default function DataSubjectRequests() {
             <div className="space-y-1.5">
               <Label htmlFor="dsr-desc">
                 {t("dsr.description", "Description")}
-                <span className="text-muted-foreground ml-1">(optional)</span>
+                <span className="text-muted-foreground ml-1">
+                  {t("common.optional", "(optional)")}
+                </span>
               </Label>
               <Textarea
                 id="dsr-desc"
-                placeholder="What is the requester asking for?"
+                placeholder={t(
+                  "dsr.placeholderDescription",
+                  "What is the requester asking for?"
+                )}
                 rows={3}
                 value={form.description}
                 onChange={e =>
@@ -983,11 +1007,16 @@ export default function DataSubjectRequests() {
             <div className="space-y-1.5">
               <Label htmlFor="dsr-notes">
                 {t("dsr.notes", "Internal Notes")}
-                <span className="text-muted-foreground ml-1">(optional)</span>
+                <span className="text-muted-foreground ml-1">
+                  {t("common.optional", "(optional)")}
+                </span>
               </Label>
               <Textarea
                 id="dsr-notes"
-                placeholder="Internal handling notes..."
+                placeholder={t(
+                  "dsr.placeholderNotes",
+                  "Internal handling notes..."
+                )}
                 rows={2}
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
