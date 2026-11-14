@@ -58,6 +58,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { sounds } from "@/lib/sounds";
+import { formatDate } from "@/lib/intl";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -301,7 +302,7 @@ function RiskCard({
   onDelete: (id: number) => void;
   onSendRemediation: (r: RiskEntryData) => void;
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const score = risk.likelihood * risk.impact;
   const tier = riskColorTier(score);
   const col = TIER_COLORS[tier];
@@ -367,7 +368,7 @@ function RiskCard({
                 <span>👤 {ownerNames[risk.ownerId]}</span>
               )}
               {risk.reviewDate && (
-                <span>📅 {new Date(risk.reviewDate).toLocaleDateString()}</span>
+                <span>📅 {formatDate(risk.reviewDate, locale)}</span>
               )}
             </div>
           </div>

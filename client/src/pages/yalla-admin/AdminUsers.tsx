@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { storedLocaleTag } from "@/lib/intl";
 import {
   Search,
   ChevronLeft,
@@ -590,7 +591,9 @@ export default function AdminUsers() {
                       }}
                     >
                       {user.lastSignedIn
-                        ? new Date(user.lastSignedIn).toLocaleDateString()
+                        ? new Date(user.lastSignedIn).toLocaleDateString(
+                            storedLocaleTag()
+                          )
                         : "Never"}
                     </td>
                     <td style={{ padding: "12px 16px", textAlign: "right" }}>
@@ -885,7 +888,9 @@ export default function AdminUsers() {
                         <span style={{ color: "var(--djac-muted)" }}>
                           {m.role} ·{" "}
                           {m.joinedAt
-                            ? new Date(m.joinedAt).toLocaleDateString()
+                            ? new Date(m.joinedAt).toLocaleDateString(
+                                storedLocaleTag()
+                              )
                             : "—"}
                         </span>
                       </div>

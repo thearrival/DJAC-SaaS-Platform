@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
+import { storedLocaleTag } from "@/lib/intl";
 
 interface OverviewStats {
   totalUsers: number;
@@ -694,7 +695,9 @@ function UserDetailModal({
                         {a.action}
                       </span>
                       <span className="text-slate-600 flex-shrink-0">
-                        {new Date(a.createdAt).toLocaleDateString()}
+                        {new Date(a.createdAt).toLocaleDateString(
+                          storedLocaleTag()
+                        )}
                       </span>
                     </div>
                   ))}
@@ -869,7 +872,9 @@ function OrganizationDetailModal({
                   <span className="text-slate-500">Trial Ends:</span>
                   <span className="text-white">
                     {detail.org.trialEndsAt
-                      ? new Date(detail.org.trialEndsAt).toLocaleDateString()
+                      ? new Date(detail.org.trialEndsAt).toLocaleDateString(
+                          storedLocaleTag()
+                        )
                       : "—"}
                   </span>
                   <span className="text-slate-500">Billing Email:</span>
@@ -925,11 +930,11 @@ function OrganizationDetailModal({
                       <span className="text-white">
                         {new Date(
                           detail.subscription.currentPeriodStart
-                        ).toLocaleDateString()}{" "}
+                        ).toLocaleDateString(storedLocaleTag())}{" "}
                         –{" "}
                         {new Date(
                           detail.subscription.currentPeriodEnd
-                        ).toLocaleDateString()}
+                        ).toLocaleDateString(storedLocaleTag())}
                       </span>
                     </div>
                     {Boolean(detail.subscription.cancelAtPeriodEnd) && (
@@ -966,7 +971,9 @@ function OrganizationDetailModal({
                         )}
                       </div>
                       <span className="text-slate-600 text-[10px]">
-                        {new Date(m.joinedAt).toLocaleDateString()}
+                        {new Date(m.joinedAt).toLocaleDateString(
+                          storedLocaleTag()
+                        )}
                       </span>
                     </div>
                   ))}
@@ -990,7 +997,9 @@ function OrganizationDetailModal({
                         {a.action}
                       </span>
                       <span className="text-slate-600 flex-shrink-0">
-                        {new Date(a.createdAt).toLocaleDateString()}
+                        {new Date(a.createdAt).toLocaleDateString(
+                          storedLocaleTag()
+                        )}
                       </span>
                     </div>
                   ))}
@@ -1889,11 +1898,15 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
                   </td>
                   <td className="px-3 py-2 text-slate-400 text-xs">
                     {s.currentPeriodEnd
-                      ? new Date(s.currentPeriodEnd).toLocaleDateString()
+                      ? new Date(s.currentPeriodEnd).toLocaleDateString(
+                          storedLocaleTag()
+                        )
                       : "—"}
                   </td>
                   <td className="px-3 py-2 text-slate-400 text-xs">
-                    {new Date(s.createdAt).toLocaleDateString()}
+                    {new Date(s.createdAt).toLocaleDateString(
+                      storedLocaleTag()
+                    )}
                   </td>
                 </tr>
               ))}
@@ -2207,11 +2220,13 @@ function OrgsTab({
                 </td>
                 <td className="px-4 py-3 text-slate-400 text-xs">
                   {o.trialEndsAt
-                    ? new Date(o.trialEndsAt).toLocaleDateString()
+                    ? new Date(o.trialEndsAt).toLocaleDateString(
+                        storedLocaleTag()
+                      )
                     : "—"}
                 </td>
                 <td className="px-4 py-3 text-slate-400 text-xs">
-                  {new Date(o.createdAt).toLocaleDateString()}
+                  {new Date(o.createdAt).toLocaleDateString(storedLocaleTag())}
                 </td>
                 <td className="px-4 py-3">
                   <Badge value={o.isActive ? "active" : "inactive"} />

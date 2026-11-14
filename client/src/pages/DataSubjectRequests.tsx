@@ -66,6 +66,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -251,7 +252,7 @@ function dueDateBadge(item: DsrItem) {
 
 function formatDate(d: Date | string | null): string {
   if (!d) return "—";
-  return toDate(d).toLocaleDateString(undefined, {
+  return toDate(d).toLocaleDateString(storedLocaleTag(), {
     year: "numeric",
     month: "short",
     day: "numeric",

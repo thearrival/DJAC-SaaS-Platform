@@ -35,6 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { storedLocaleTag } from "@/lib/intl";
 import {
   Building2,
   Users,
@@ -135,7 +136,7 @@ const AVATAR_COLORS: Record<OrgRole, string> = {
 
 function formatDate(date: Date | string | null | undefined): string {
   if (!date) return "—";
-  return new Date(date).toLocaleDateString(undefined, {
+  return new Date(date).toLocaleDateString(storedLocaleTag(), {
     year: "numeric",
     month: "short",
     day: "numeric",

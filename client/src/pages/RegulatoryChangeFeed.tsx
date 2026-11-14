@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLocale } from "@/contexts/useLocale";
+import { localeTag } from "@/lib/intl";
 import {
   Select,
   SelectContent,
@@ -61,6 +63,8 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function RegulatoryChangeFeed() {
   usePageTitle("Regulatory Change Detection");
+
+  const { locale } = useLocale();
 
   const listQ = trpc.regulatoryChanges.list.useQuery({ limit: 50 });
   const statsQ = trpc.regulatoryChanges.stats.useQuery();
@@ -336,16 +340,16 @@ export default function RegulatoryChangeFeed() {
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             Effective:{" "}
-                            {new Date(
-                              change.effectiveDate
-                            ).toLocaleDateString()}
+                            {new Date(change.effectiveDate).toLocaleDateString(
+                              localeTag(locale)
+                            )}
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             Published:{" "}
                             {new Date(
                               change.publicationDate
-                            ).toLocaleDateString()}
+                            ).toLocaleDateString(localeTag(locale))}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-2 italic">

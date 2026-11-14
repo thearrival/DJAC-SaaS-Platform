@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { storedLocaleTag } from "@/lib/intl";
 import {
   RefreshCw,
   ChevronLeft,
@@ -583,9 +584,9 @@ export default function AdminSubscriptions() {
                           >
                             ENDS{" "}
                             {s.currentPeriodEnd
-                              ? new Date(
-                                  s.currentPeriodEnd
-                                ).toLocaleDateString()
+                              ? new Date(s.currentPeriodEnd).toLocaleDateString(
+                                  storedLocaleTag()
+                                )
                               : ""}
                           </span>
                         ) : null}
@@ -608,7 +609,9 @@ export default function AdminSubscriptions() {
                       }}
                     >
                       {s.currentPeriodEnd
-                        ? new Date(s.currentPeriodEnd).toLocaleDateString()
+                        ? new Date(s.currentPeriodEnd).toLocaleDateString(
+                            storedLocaleTag()
+                          )
                         : "—"}
                     </td>
                   </tr>

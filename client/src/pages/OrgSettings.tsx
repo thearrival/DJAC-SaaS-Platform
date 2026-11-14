@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { localeTag } from "@/lib/intl";
 import {
   Building2,
   Globe,
@@ -119,7 +120,7 @@ function _SectionHeading({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function OrgSettings() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   usePageTitle(t("orgSettings.title", "Organization Settings"));
 
   const orgQuery = trpc.orgSettings.get.useQuery(undefined, { retry: false });
@@ -370,11 +371,14 @@ export default function OrgSettings() {
                     {t("orgSettings.trialEnds", "Trial Ends")}
                   </p>
                   <p className="text-sm font-medium">
-                    {new Date(org.trialEndsAt).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
+                    {new Date(org.trialEndsAt).toLocaleDateString(
+                      localeTag(locale),
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
                     {trial !== null && trial <= 7 && (
                       <span className="ml-2 text-amber-600 dark:text-amber-400 text-xs font-semibold">
                         ({trial}d remaining)

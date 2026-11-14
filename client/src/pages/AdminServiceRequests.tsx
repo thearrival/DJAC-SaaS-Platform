@@ -51,6 +51,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { RoleGuard } from "@/components/RoleGuard";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -119,7 +120,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 function formatDate(d: Date | string | null) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString(undefined, {
+  return new Date(d).toLocaleDateString(storedLocaleTag(), {
     day: "2-digit",
     month: "short",
     year: "numeric",

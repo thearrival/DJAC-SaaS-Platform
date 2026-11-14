@@ -62,3 +62,19 @@ export function formatDateTime(
     DATETIME_FMT
   ).format(d);
 }
+
+/**
+ * Reads the user's selected UI locale from localStorage and returns its BCP 47
+ * tag. Falls back to "en-US" when no locale is stored or localStorage is
+ * unavailable. Useful inside module-level helper functions that don't receive
+ * the locale as a parameter.
+ */
+export function storedLocaleTag(): string {
+  if (typeof window === "undefined") return "en-US";
+  try {
+    const stored = window.localStorage.getItem("djac-locale") ?? "";
+    return TAGS[stored] ?? "en-US";
+  } catch {
+    return "en-US";
+  }
+}

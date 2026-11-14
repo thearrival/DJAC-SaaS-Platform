@@ -52,6 +52,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLocale } from "@/contexts/useLocale";
+import { localeTag } from "@/lib/intl";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,6 +138,8 @@ import type React from "react";
 
 export default function ServiceRequests() {
   usePageTitle("Service Requests");
+
+  const { locale } = useLocale();
 
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({
@@ -332,7 +336,9 @@ export default function ServiceRequests() {
                         <span>{getServiceLabel(req.serviceType)}</span>
                         <span>•</span>
                         <span>
-                          {new Date(req.createdAt).toLocaleDateString()}
+                          {new Date(req.createdAt).toLocaleDateString(
+                            localeTag(locale)
+                          )}
                         </span>
                         {req.clientResponse && (
                           <>

@@ -41,6 +41,7 @@ import {
 import { toast } from "sonner";
 import { Link } from "wouter";
 import { RoleGuard } from "@/components/RoleGuard";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ── Priority colour helpers ──────────────────────────────────────────────────
 const priorityBadge: Record<string, string> = {
@@ -143,7 +144,7 @@ function CompanyDashboardContent() {
     if (days === 1) return "Tomorrow";
     if (days <= 7) return `in ${days}d`;
     if (days <= 30) return `in ${Math.round(days / 7)}w`;
-    return date.toLocaleDateString(undefined, {
+    return date.toLocaleDateString(storedLocaleTag(), {
       month: "short",
       day: "numeric",
     });

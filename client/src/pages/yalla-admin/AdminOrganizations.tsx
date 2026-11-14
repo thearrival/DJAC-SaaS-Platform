@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { storedLocaleTag } from "@/lib/intl";
 import {
   RefreshCw,
   ChevronLeft,
@@ -439,7 +440,9 @@ export default function AdminOrganizations() {
                       }}
                     >
                       {o.createdAt
-                        ? new Date(o.createdAt).toLocaleDateString()
+                        ? new Date(o.createdAt).toLocaleDateString(
+                            storedLocaleTag()
+                          )
                         : "—"}
                     </td>
                     <td style={{ padding: "12px 16px" }}>

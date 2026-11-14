@@ -47,6 +47,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Scope =
@@ -113,7 +114,7 @@ const EXPIRY_OPTIONS = [
 function fmtDate(d: Date | string | null | undefined): string {
   if (!d) return "—";
   try {
-    return new Date(d).toLocaleDateString(undefined, {
+    return new Date(d).toLocaleDateString(storedLocaleTag(), {
       year: "numeric",
       month: "short",
       day: "numeric",

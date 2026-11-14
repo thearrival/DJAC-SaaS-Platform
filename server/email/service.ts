@@ -225,6 +225,22 @@ export const emailService = {
     );
   },
 
+  /** Sent when a subscription plan is changed (upgrade/downgrade). */
+  async sendPlanChanged(
+    user: EmailUser,
+    planName: string,
+    orgName?: string | null
+  ) {
+    const html = baseTemplate(`
+      <h2>Plan updated</h2>
+      <p>Your DJAC subscription${orgName ? ` for <strong>${orgName}</strong>` : ""} has been updated to the <strong>${planName}</strong> plan.</p>
+      <p>Your new entitlements are active immediately. You can manage your subscription at any time.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/billing" class="btn">Manage Billing →</a>
+      <p style="margin-top:12px;font-size:11px;color:#94a3b8;">Questions? Contact hello@yalla-hack.com.</p>
+    `);
+    return send(user, "Your DJAC plan was updated", html, "plan-changed");
+  },
+
   /** Sent after a subscription becomes active (Stripe checkout completed). */
   async sendSubscriptionConfirmed(
     user: EmailUser,
@@ -268,6 +284,39 @@ export const emailService = {
       "DJAC owner console sign-in",
       html,
       "admin-login-alert"
+    );
+  },
+  /** Sent when a subscription invoice payment fails. */
+  async sendPaymentFailed(user: EmailUser, orgName?: string | null) {
+    const html = baseTemplate(`
+      <h2>Payment failed</h2>
+      <p>We couldn&rsquo;t process the payment for your DJAC subscription${orgName ? ` for <strong>${orgName}</strong>` : ""}.</p>
+      <p>Your account remains active for now, but please update your payment method to avoid interruption to your compliance workflows.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/billing" class="btn" style="background:#dc2626;">Update Payment Method →</a>
+      <p style="margin-top:12px;font-size:11px;color:#94a3b8;">If you believe this is an error, contact hello@yalla-hack.com.</p>
+    `);
+    return send(
+      user,
+      "DJAC payment failed — action required",
+      html,
+      "payment-failed"
+    );
+  },
+
+  /** Sent when a subscription is cancelled. */
+  async sendSubscriptionCancelled(user: EmailUser, orgName?: string | null) {
+    const html = baseTemplate(`
+      <h2>Subscription cancelled</h2>
+      <p>Your DJAC subscription${orgName ? ` for <strong>${orgName}</strong>` : ""} has been cancelled and your account has been moved to the Free Trial plan.</p>
+      <p>You can resubscribe at any time to restore full access to DJAC&rsquo;s compliance, risk, vendor, audit and reporting modules.</p>
+      <a href="${process.env.APP_URL || "https://app.yalla-hack.ae"}/pricing" class="btn">View Plans →</a>
+      <p style="margin-top:12px;font-size:11px;color:#94a3b8;">Questions? Contact hello@yalla-hack.com.</p>
+    `);
+    return send(
+      user,
+      "Your DJAC subscription was cancelled",
+      html,
+      "subscription-cancelled"
     );
   },
 };

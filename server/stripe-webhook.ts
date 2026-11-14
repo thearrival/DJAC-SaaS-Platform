@@ -242,7 +242,7 @@ export async function processStripeEvent(
         interval,
         amountCents: tier?.amountCents ?? 0,
         currency: session.currency ?? "usd",
-        status: "trialing",
+        status: "active",
         cancelAtPeriodEnd: 0,
         stripeMetadata: JSON.stringify(session.metadata ?? {}),
       });
@@ -380,6 +380,24 @@ export async function processStripeEvent(
         description: "Invoice payment failed",
         rawPayload: JSON.stringify(event.data.object),
       });
+
+      // Notify the billing contact about the failed payment (fire-and-forget).
+      const [failedOrgRow] = await db
+        .select({
+          name: organizations.name,
+          billingEmail: organizations.billingEmail,
+        })
+        .from(organizations)
+        .where(eq(organizations.id, orgId))
+        .limit(1);
+      if (failedOrgRow?.billingEmail) {
+        void emailService
+          .sendPaymentFailed(
+            { name: null, email: failedOrgRow.billingEmail },
+            failedOrgRow.name
+          )
+          .catch(() => {});
+      }
       break;
     }
 
@@ -388,13 +406,20 @@ export async function processStripeEvent(
       const sub = event.data.object as AnyObj;
 
       const orgResult = await db
-        .select({ id: organizations.id })
+        .select({
+          id: organizations.id,
+          plan: organizations.plan,
+          billingEmail: organizations.billingEmail,
+        })
         .from(organizations)
         .where(eq(organizations.stripeCustomerId, String(sub.customer ?? "")))
         .limit(1);
 
       const orgId = orgResult[0]?.id;
       if (!orgId) break;
+
+      const previousPlan = orgResult[0]?.plan;
+      const billingEmail = orgResult[0]?.billingEmail;
 
       const priceId: string = sub.items?.data?.[0]?.price?.id ?? "";
       const planInfo = resolvePlanFromPriceId(priceId);
@@ -430,6 +455,17 @@ export async function processStripeEvent(
           .update(organizations)
           .set({ plan: planInfo.plan })
           .where(eq(organizations.id, orgId));
+
+        // Notify the billing contact when the plan actually changes.
+        if (billingEmail && previousPlan && previousPlan !== planInfo.plan) {
+          void emailService
+            .sendPlanChanged(
+              { name: null, email: billingEmail },
+              `${planInfo.plan} (${planInfo.interval})`,
+              null
+            )
+            .catch(() => {});
+        }
       } else {
         await db
           .update(subscriptions)
@@ -483,6 +519,11 @@ export async function processStripeEvent(
         })
         .where(eq(subscriptions.stripeSubscriptionId, sub.id));
 
+      await db
+        .update(organizations)
+        .set({ plan: "free_trial" })
+        .where(eq(organizations.id, orgId));
+
       await db.insert(billingEvents).values({
         organizationId: orgId,
         stripeEventId: event.id,
@@ -491,6 +532,23 @@ export async function processStripeEvent(
         description: "Subscription cancelled",
         rawPayload: JSON.stringify(event.data.object),
       });
+
+      const [orgRow] = await db
+        .select({
+          name: organizations.name,
+          billingEmail: organizations.billingEmail,
+        })
+        .from(organizations)
+        .where(eq(organizations.id, orgId))
+        .limit(1);
+      if (orgRow?.billingEmail) {
+        void emailService
+          .sendSubscriptionCancelled(
+            { name: null, email: orgRow.billingEmail },
+            orgRow.name
+          )
+          .catch(() => {});
+      }
       break;
     }
 

@@ -323,6 +323,8 @@ export const billingRouter = router({
       subscriptionStatus: sub?.status ?? null,
       billingInterval: sub?.billingInterval ?? null,
       currentPeriodEnd: sub?.currentPeriodEnd?.toISOString() ?? null,
+      cancelAtPeriodEnd: sub?.cancelAtPeriodEnd === 1,
+      canceledAt: sub?.canceledAt?.toISOString() ?? null,
       organizationId: org.id,
       organizationName: org.name,
     };

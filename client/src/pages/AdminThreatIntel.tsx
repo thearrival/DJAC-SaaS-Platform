@@ -51,6 +51,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { RoleGuard } from "@/components/RoleGuard";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -128,7 +129,7 @@ type ThreatIntelItem = {
 
 function fmt(d: Date | string | null) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString(undefined, {
+  return new Date(d).toLocaleDateString(storedLocaleTag(), {
     day: "2-digit",
     month: "short",
     year: "numeric",

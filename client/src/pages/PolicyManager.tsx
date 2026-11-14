@@ -64,6 +64,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { sounds } from "@/lib/sounds";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -141,7 +142,7 @@ function formatDate(d: Date | string | null | undefined): string {
   if (!d) return "—";
   const date = new Date(d);
   if (isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(storedLocaleTag(), {
     year: "numeric",
     month: "short",
     day: "numeric",

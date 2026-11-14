@@ -166,7 +166,7 @@ function SourceBadge({ sourceType }: { sourceType: SourceType }) {
 function formatDate(d: Date | string | null): string {
   if (!d) return "—";
   const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(storedLocaleTag(), {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -700,3 +700,4 @@ export default function EvidenceLocker() {
 
 // Needed for JSX element type inference
 import type React from "react";
+import { storedLocaleTag } from "@/lib/intl";

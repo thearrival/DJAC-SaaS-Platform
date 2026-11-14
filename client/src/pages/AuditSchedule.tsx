@@ -67,6 +67,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { sounds } from "@/lib/sounds";
+import { storedLocaleTag } from "@/lib/intl";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -143,7 +144,7 @@ function parseScope(v: string | null | undefined): string[] {
 function formatDate(d: Date | string | null | undefined): string {
   if (!d) return "—";
   const dt = d instanceof Date ? d : new Date(String(d));
-  return dt.toLocaleDateString(undefined, {
+  return dt.toLocaleDateString(storedLocaleTag(), {
     day: "2-digit",
     month: "short",
     year: "numeric",

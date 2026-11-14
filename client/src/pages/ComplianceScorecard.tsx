@@ -45,6 +45,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { storedLocaleTag } from "@/lib/intl";
 import {
   BarChart2,
   Shield,
@@ -165,7 +166,7 @@ function riskBadge(level: string | null) {
 
 function fmtDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return new Date(iso).toLocaleDateString(storedLocaleTag(), {
       year: "numeric",
       month: "short",
       day: "numeric",

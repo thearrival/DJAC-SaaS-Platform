@@ -52,6 +52,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, Plus, Shield, Trash2, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { useLocale } from "@/contexts/useLocale";
+import { localeTag } from "@/lib/intl";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -151,6 +153,8 @@ const DEFAULT_SCORES: DefaultScores = {
 
 export default function SecurityMaturity() {
   usePageTitle("Security Maturity");
+
+  const { locale } = useLocale();
 
   const [showCreate, setShowCreate] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -289,7 +293,10 @@ export default function SecurityMaturity() {
                 </p>
               )}
               <p className="text-xs text-zinc-600 text-center">
-                Assessed {new Date(latest.createdAt).toLocaleDateString()}
+                Assessed{" "}
+                {new Date(latest.createdAt).toLocaleDateString(
+                  localeTag(locale)
+                )}
               </p>
             </CardContent>
           </Card>
@@ -391,11 +398,14 @@ export default function SecurityMaturity() {
                         {a.title}
                       </p>
                       <p className="text-xs text-zinc-500 mt-0.5">
-                        {new Date(a.createdAt).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {new Date(a.createdAt).toLocaleDateString(
+                          localeTag(locale),
+                          {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )}
                         {a.frameworkRef && ` · ${a.frameworkRef}`}
                       </p>
                     </div>

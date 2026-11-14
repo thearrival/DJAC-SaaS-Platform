@@ -119,11 +119,15 @@ const CATEGORIES = [
 ] as const;
 
 import type React from "react";
+import { useLocale } from "@/contexts/useLocale";
+import { localeTag } from "@/lib/intl";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ThreatIntelFeed() {
   usePageTitle("Threat Intelligence Feed");
+
+  const { locale } = useLocale();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
@@ -338,7 +342,7 @@ export default function ThreatIntelFeed() {
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-xs text-zinc-600 hidden sm:block">
                         {new Date(item.publishedAt).toLocaleDateString(
-                          "en-GB",
+                          localeTag(locale),
                           {
                             day: "numeric",
                             month: "short",

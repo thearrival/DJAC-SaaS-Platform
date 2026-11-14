@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { storedLocaleTag } from "@/lib/intl";
 import {
   RefreshCw,
   ChevronLeft,
@@ -404,7 +405,7 @@ export default function AdminUserDetail() {
                         >
                           {m.role}
                           {m.joinedAt
-                            ? ` · ${new Date(m.joinedAt).toLocaleDateString()}`
+                            ? ` · ${new Date(m.joinedAt).toLocaleDateString(storedLocaleTag())}`
                             : ""}
                         </span>
                       </div>

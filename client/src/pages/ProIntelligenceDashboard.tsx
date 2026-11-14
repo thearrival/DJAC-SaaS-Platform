@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
+import { localeTag } from "@/lib/intl";
 
 type ThreatLevel = "NORMAL" | "ELEVATED" | "HIGH" | "CRITICAL";
 
@@ -1074,7 +1075,7 @@ function corridorsSummary(opts: {
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
   usePageTitle("Pro Intelligence");
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [, navigate] = useLocation();
@@ -1085,7 +1086,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
-  const datePart = now.toLocaleDateString("en-GB", {
+  const datePart = now.toLocaleDateString(localeTag(locale), {
     weekday: "short",
     day: "2-digit",
     month: "short",

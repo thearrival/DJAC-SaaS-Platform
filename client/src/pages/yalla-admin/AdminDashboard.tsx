@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { storedLocaleTag } from "@/lib/intl";
 
 type UnifiedUser = {
   id: number;
@@ -350,7 +351,9 @@ function UserDetailPanel({
               <span className="text-muted-foreground">Joined</span>
               <p className="font-medium">
                 {user.createdAt
-                  ? new Date(user.createdAt).toLocaleDateString()
+                  ? new Date(user.createdAt).toLocaleDateString(
+                      storedLocaleTag()
+                    )
                   : "—"}
               </p>
             </div>
@@ -358,7 +361,9 @@ function UserDetailPanel({
               <span className="text-muted-foreground">Last Active</span>
               <p className="font-medium">
                 {user.lastSignedIn
-                  ? new Date(user.lastSignedIn).toLocaleDateString()
+                  ? new Date(user.lastSignedIn).toLocaleDateString(
+                      storedLocaleTag()
+                    )
                   : "—"}
               </p>
             </div>
@@ -411,7 +416,9 @@ function UserDetailPanel({
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {m.joinedAt
-                      ? new Date(m.joinedAt).toLocaleDateString()
+                      ? new Date(m.joinedAt).toLocaleDateString(
+                          storedLocaleTag()
+                        )
                       : ""}
                   </span>
                 </div>
@@ -694,7 +701,9 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
                             {u.createdAt
-                              ? new Date(u.createdAt).toLocaleDateString()
+                              ? new Date(u.createdAt).toLocaleDateString(
+                                  storedLocaleTag()
+                                )
                               : "—"}
                           </td>
                           <td className="px-4 py-3 text-right">

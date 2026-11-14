@@ -697,7 +697,9 @@ export default function BillingAccount() {
                   size={12}
                   style={{ display: "inline", marginRight: 4 }}
                 />
-                {t("billing.renews", "Renews")}{" "}
+                {status.cancelAtPeriodEnd
+                  ? `${t("billing.cancelsOn", "Cancels on")} `
+                  : `${t("billing.renews", "Renews")} `}
                 {formatDate(status.currentPeriodEnd, locale)}
                 {status.billingInterval && ` · ${status.billingInterval}`}
               </div>
@@ -1017,6 +1019,55 @@ export default function BillingAccount() {
               >
                 {t("billing.viewPlansCta", "View plans ->")}
               </Link>
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Payment Failed ── */}
+      {status?.subscriptionStatus === "past_due" && orgId && (
+        <div
+          style={{
+            padding: "12px 18px",
+            borderRadius: 10,
+            background: "rgba(245,158,11,0.1)",
+            border: "1px solid rgba(245,158,11,0.3)",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            fontSize: 13,
+            marginBottom: 24,
+          }}
+        >
+          <AlertTriangle
+            size={16}
+            style={{ color: "#f59e0b", flexShrink: 0 }}
+          />
+          <div>
+            <strong style={{ color: "#f59e0b" }}>
+              {t("billing.paymentFailed", "Payment failed")}
+            </strong>
+            <span style={{ color: "var(--djac-muted)" }}>
+              {" "}
+              -{" "}
+              {t(
+                "billing.paymentFailedDesc",
+                "Your last payment did not succeed. Please update your payment method to keep your subscription active."
+              )}{" "}
+              <button
+                onClick={() => portalMutation.mutate({ organizationId: orgId })}
+                style={{
+                  color: "#d900ff",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                  font: "inherit",
+                  textDecoration: "underline",
+                }}
+              >
+                {t("billing.updatePaymentMethod", "Update payment method")}
+              </button>
             </span>
           </div>
         </div>

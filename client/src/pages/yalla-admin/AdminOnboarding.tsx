@@ -9,6 +9,7 @@ import type React from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { RefreshCw, Search, Sparkles } from "lucide-react";
+import { storedLocaleTag } from "@/lib/intl";
 
 const ADMIN_API = "/api/admin-dashboard";
 const BASE = "/yalla-hack-owners-console";
@@ -154,7 +155,7 @@ export default function AdminOnboarding() {
                 {data.funnel.map((row: any) => (
                   <tr key={String(row.day)} className="border-b border-border">
                     <td className="py-1.5">
-                      {new Date(row.day).toLocaleDateString()}
+                      {new Date(row.day).toLocaleDateString(storedLocaleTag())}
                     </td>
                     <td className="py-1.5 text-end text-muted-foreground">
                       {row.events}
