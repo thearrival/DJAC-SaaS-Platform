@@ -13,6 +13,7 @@
 
 import { useState, useMemo } from "react";
 import type React from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { trpc } from "@/lib/trpc";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
@@ -139,7 +140,8 @@ const EMPTY_FORM = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AssetInventory() {
-  usePageTitle("Asset Inventory");
+  const { t } = useLocale();
+  usePageTitle(t("assetInventory.title", "Asset Inventory"));
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -159,7 +161,7 @@ export default function AssetInventory() {
 
   const createMutation = trpc.assetInventory.create.useMutation({
     onSuccess: () => {
-      toast.success("Asset added.");
+      toast.success(t("assetInventory.toast.added", "Asset added."));
       utils.assetInventory.list.invalidate();
       utils.assetInventory.summary.invalidate();
       closeForm();
@@ -169,7 +171,7 @@ export default function AssetInventory() {
 
   const patchMutation = trpc.assetInventory.patch.useMutation({
     onSuccess: () => {
-      toast.success("Asset updated.");
+      toast.success(t("assetInventory.toast.updated", "Asset updated."));
       utils.assetInventory.list.invalidate();
       utils.assetInventory.summary.invalidate();
       closeForm();
@@ -179,7 +181,7 @@ export default function AssetInventory() {
 
   const removeMutation = trpc.assetInventory.remove.useMutation({
     onSuccess: () => {
-      toast.success("Asset removed.");
+      toast.success(t("assetInventory.toast.removed", "Asset removed."));
       utils.assetInventory.list.invalidate();
       utils.assetInventory.summary.invalidate();
       setDeleteId(null);
@@ -256,8 +258,8 @@ export default function AssetInventory() {
   const getCriticalityStyle = (c: string) =>
     CRITICALITY_LEVELS.find(l => l.value === c)?.color ?? "";
 
-  const getAssetLabel = (t: string) =>
-    ASSET_TYPES.find(a => a.value === t)?.label ?? t;
+  const getAssetLabel = (type: string) =>
+    ASSET_TYPES.find(a => a.value === type)?.label ?? type;
 
   const deleteTarget =
     deleteId !== null ? assets.find(a => a.id === deleteId) : null;
@@ -267,14 +269,19 @@ export default function AssetInventory() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Asset Inventory</h1>
+          <h1 className="text-2xl font-bold text-white">
+            {t("assetInventory.title", "Asset Inventory")}
+          </h1>
           <p className="text-sm text-zinc-400 mt-1">
-            Manage your organization's IT/OT/Cloud asset register
+            {t(
+              "assetInventory.subtitle",
+              "Manage your organization's IT/OT/Cloud asset register"
+            )}
           </p>
         </div>
         <Button onClick={openCreate} className="gap-2">
           <Plus className="size-4" />
-          Add Asset
+          {t("assetInventory.addAsset", "Add Asset")}
         </Button>
       </div>
 
@@ -283,7 +290,11 @@ export default function AssetInventory() {
         <Card className="bg-zinc-900 border-zinc-800">
           <CardContent className="py-4 flex items-center justify-between gap-3">
             <p className="text-sm text-zinc-400">
-              {summaryQuery.error?.message ?? "Failed to load asset summary."}
+              {summaryQuery.error?.message ??
+                t(
+                  "assetInventory.summaryError",
+                  "Failed to load asset summary."
+                )}
             </p>
             <Button
               variant="outline"
@@ -293,14 +304,14 @@ export default function AssetInventory() {
                 void summaryQuery.refetch();
               }}
             >
-              Retry
+              {t("assetInventory.retry", "Retry")}
             </Button>
           </CardContent>
         </Card>
       )}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Total Assets"
+          title={t("assetInventory.totalAssets", "Total Assets")}
           value={
             summaryQuery.isLoading || summaryQuery.isError
               ? 0
@@ -314,7 +325,7 @@ export default function AssetInventory() {
           }
         />
         <StatCard
-          title="Critical Assets"
+          title={t("assetInventory.criticalAssets", "Critical Assets")}
           value={
             summaryQuery.isLoading || summaryQuery.isError
               ? 0
@@ -328,7 +339,7 @@ export default function AssetInventory() {
           }
         />
         <StatCard
-          title="Internet Facing"
+          title={t("assetInventory.internetFacing", "Internet Facing")}
           value={
             summaryQuery.isLoading || summaryQuery.isError
               ? 0
@@ -342,7 +353,7 @@ export default function AssetInventory() {
           }
         />
         <StatCard
-          title="Avg Risk Score"
+          title={t("assetInventory.avgRiskScore", "Avg Risk Score")}
           value={
             summaryQuery.isLoading || summaryQuery.isError
               ? 0
@@ -358,7 +369,9 @@ export default function AssetInventory() {
         />
       </div>
       {summaryQuery.isLoading && (
-        <p className="text-xs text-zinc-500">Loading summary metrics...</p>
+        <p className="text-xs text-zinc-500">
+          {t("assetInventory.loadingSummary", "Loading summary metrics...")}
+        </p>
       )}
 
       {/* Asset Table */}
@@ -366,13 +379,20 @@ export default function AssetInventory() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <CardTitle className="text-white">Assets</CardTitle>
+              <CardTitle className="text-white">
+                {t("assetInventory.assets", "Assets")}
+              </CardTitle>
               <CardDescription>
-                {filtered.length} of {assets.length} assets
+                {t("assetInventory.assetsCount", "{filtered} of {total} assets")
+                  .replace("{filtered}", String(filtered.length))
+                  .replace("{total}", String(assets.length))}
               </CardDescription>
             </div>
             <Input
-              placeholder="Filter by name, type, or owner…"
+              placeholder={t(
+                "assetInventory.filterPlaceholder",
+                "Filter by name, type, or owner…"
+              )}
               value={filter}
               onChange={e => setFilter(e.target.value)}
               className="bg-zinc-800 border-zinc-700 w-64"
@@ -383,7 +403,7 @@ export default function AssetInventory() {
           {isError ? (
             <div className="text-center py-12 text-zinc-500">
               <ShieldAlert className="size-12 mx-auto mb-3 opacity-30" />
-              <p>Failed to load assets.</p>
+              <p>{t("assetInventory.loadError", "Failed to load assets.")}</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -392,20 +412,23 @@ export default function AssetInventory() {
                   void refetch();
                 }}
               >
-                Retry
+                {t("assetInventory.retry", "Retry")}
               </Button>
             </div>
           ) : isLoading ? (
             <div className="text-center py-12 text-zinc-500">
-              Loading assets…
+              {t("assetInventory.loading", "Loading assets…")}
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-12 text-zinc-500">
               <Server className="size-12 mx-auto mb-3 opacity-30" />
               <p>
                 {assets.length === 0
-                  ? "No assets registered yet."
-                  : "No assets match your filter."}
+                  ? t("assetInventory.empty", "No assets registered yet.")
+                  : t(
+                      "assetInventory.emptyFiltered",
+                      "No assets match your filter."
+                    )}
               </p>
             </div>
           ) : (
@@ -413,17 +436,27 @@ export default function AssetInventory() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-xs text-zinc-500 uppercase border-b border-zinc-800">
-                    <th className="text-left py-2 pr-4 font-medium">Asset</th>
-                    <th className="text-left py-2 pr-4 font-medium">Type</th>
-                    <th className="text-left py-2 pr-4 font-medium">Owner</th>
                     <th className="text-left py-2 pr-4 font-medium">
-                      Criticality
+                      {t("assetInventory.col.asset", "Asset")}
                     </th>
                     <th className="text-left py-2 pr-4 font-medium">
-                      Exposure
+                      {t("assetInventory.col.type", "Type")}
                     </th>
-                    <th className="text-right py-2 pr-4 font-medium">Risk</th>
-                    <th className="text-right py-2 font-medium">Actions</th>
+                    <th className="text-left py-2 pr-4 font-medium">
+                      {t("assetInventory.col.owner", "Owner")}
+                    </th>
+                    <th className="text-left py-2 pr-4 font-medium">
+                      {t("assetInventory.col.criticality", "Criticality")}
+                    </th>
+                    <th className="text-left py-2 pr-4 font-medium">
+                      {t("assetInventory.col.exposure", "Exposure")}
+                    </th>
+                    <th className="text-right py-2 pr-4 font-medium">
+                      {t("assetInventory.col.risk", "Risk")}
+                    </th>
+                    <th className="text-right py-2 font-medium">
+                      {t("assetInventory.col.actions", "Actions")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800/50">
@@ -443,7 +476,10 @@ export default function AssetInventory() {
                         )}
                       </td>
                       <td className="py-3 pr-4 text-zinc-400">
-                        {getAssetLabel(asset.assetType)}
+                        {t(
+                          `assetInventory.type.${asset.assetType}`,
+                          getAssetLabel(asset.assetType)
+                        )}
                       </td>
                       <td className="py-3 pr-4 text-zinc-400">
                         {asset.owner ?? "—"}
@@ -452,11 +488,17 @@ export default function AssetInventory() {
                         <Badge
                           className={`text-xs ${getCriticalityStyle(asset.criticality)}`}
                         >
-                          {asset.criticality}
+                          {t(
+                            `assetInventory.criticality.${asset.criticality}`,
+                            asset.criticality
+                          )}
                         </Badge>
                       </td>
                       <td className="py-3 pr-4 text-zinc-400 capitalize">
-                        {asset.exposure.replace(/_/g, " ")}
+                        {t(
+                          `assetInventory.exposure.${asset.exposure}`,
+                          asset.exposure.replace(/_/g, " ")
+                        )}
                       </td>
                       <td className="py-3 pr-4 text-right">
                         <Badge
@@ -471,7 +513,10 @@ export default function AssetInventory() {
                             variant="ghost"
                             size="icon"
                             className="size-7"
-                            aria-label="Edit asset"
+                            aria-label={t(
+                              "assetInventory.editAction",
+                              "Edit asset"
+                            )}
                             onClick={() => openEdit(asset)}
                           >
                             <Pencil className="size-3.5" />
@@ -480,7 +525,10 @@ export default function AssetInventory() {
                             variant="ghost"
                             size="icon"
                             className="size-7 text-red-400 hover:text-red-300"
-                            aria-label="Delete asset"
+                            aria-label={t(
+                              "assetInventory.deleteAction",
+                              "Delete asset"
+                            )}
                             onClick={() => setDeleteId(asset.id)}
                           >
                             <Trash2 className="size-3.5" />
@@ -506,27 +554,38 @@ export default function AssetInventory() {
         <DialogContent className="bg-zinc-900 border-zinc-800 sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-white">
-              {editingId ? "Edit Asset" : "Register Asset"}
+              {editingId
+                ? t("assetInventory.editAsset", "Edit Asset")
+                : t("assetInventory.registerAsset", "Register Asset")}
             </DialogTitle>
             <DialogDescription>
               {editingId
-                ? "Update asset details and risk attributes."
-                : "Add a new asset to your inventory."}
+                ? t(
+                    "assetInventory.editDesc",
+                    "Update asset details and risk attributes."
+                  )
+                : t(
+                    "assetInventory.createDesc",
+                    "Add a new asset to your inventory."
+                  )}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Asset Name</Label>
+                <Label>{t("assetInventory.field.name", "Asset Name")}</Label>
                 <Input
-                  placeholder="e.g. Production API Server"
+                  placeholder={t(
+                    "assetInventory.placeholder.name",
+                    "e.g. Production API Server"
+                  )}
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   className="bg-zinc-800 border-zinc-700"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Asset Type</Label>
+                <Label>{t("assetInventory.field.type", "Asset Type")}</Label>
                 <Select
                   value={form.assetType}
                   onValueChange={v => setForm(f => ({ ...f, assetType: v }))}
@@ -535,9 +594,9 @@ export default function AssetInventory() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {ASSET_TYPES.map(t => (
-                      <SelectItem key={t.value} value={t.value}>
-                        {t.label}
+                    {ASSET_TYPES.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {t(`assetInventory.type.${type.value}`, type.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -546,11 +605,19 @@ export default function AssetInventory() {
             </div>
             <div className="space-y-1.5">
               <Label>
-                Identifier{" "}
-                <span className="text-zinc-500">(IP, hostname, URL)</span>
+                {t("assetInventory.field.identifier", "Identifier")}{" "}
+                <span className="text-zinc-500">
+                  {t(
+                    "assetInventory.field.identifierHint",
+                    "(IP, hostname, URL)"
+                  )}
+                </span>
               </Label>
               <Input
-                placeholder="e.g. 10.0.1.5 or api.example.com"
+                placeholder={t(
+                  "assetInventory.placeholder.identifier",
+                  "e.g. 10.0.1.5 or api.example.com"
+                )}
                 value={form.identifier}
                 onChange={e =>
                   setForm(f => ({ ...f, identifier: e.target.value }))
@@ -560,7 +627,9 @@ export default function AssetInventory() {
             </div>
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <Label>Criticality</Label>
+                <Label>
+                  {t("assetInventory.field.criticality", "Criticality")}
+                </Label>
                 <Select
                   value={form.criticality}
                   onValueChange={v => setForm(f => ({ ...f, criticality: v }))}
@@ -571,14 +640,14 @@ export default function AssetInventory() {
                   <SelectContent className="bg-zinc-800 border-zinc-700">
                     {CRITICALITY_LEVELS.map(c => (
                       <SelectItem key={c.value} value={c.value}>
-                        {c.label}
+                        {t(`assetInventory.criticality.${c.value}`, c.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Exposure</Label>
+                <Label>{t("assetInventory.field.exposure", "Exposure")}</Label>
                 <Select
                   value={form.exposure}
                   onValueChange={v => setForm(f => ({ ...f, exposure: v }))}
@@ -589,14 +658,14 @@ export default function AssetInventory() {
                   <SelectContent className="bg-zinc-800 border-zinc-700">
                     {EXPOSURE_LEVELS.map(e => (
                       <SelectItem key={e.value} value={e.value}>
-                        {e.label}
+                        {t(`assetInventory.exposure.${e.value}`, e.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Status</Label>
+                <Label>{t("assetInventory.field.status", "Status")}</Label>
                 <Select
                   value={form.status}
                   onValueChange={v => setForm(f => ({ ...f, status: v }))}
@@ -607,7 +676,7 @@ export default function AssetInventory() {
                   <SelectContent className="bg-zinc-800 border-zinc-700">
                     {ASSET_STATUSES.map(s => (
                       <SelectItem key={s.value} value={s.value}>
-                        {s.label}
+                        {t(`assetInventory.status.${s.value}`, s.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -616,58 +685,74 @@ export default function AssetInventory() {
             </div>
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <Label>Owner / Team</Label>
+                <Label>{t("assetInventory.field.owner", "Owner / Team")}</Label>
                 <Input
                   value={form.owner}
                   onChange={e =>
                     setForm(f => ({ ...f, owner: e.target.value }))
                   }
                   className="bg-zinc-800 border-zinc-700"
-                  placeholder="e.g. DevOps"
+                  placeholder={t(
+                    "assetInventory.placeholder.owner",
+                    "e.g. DevOps"
+                  )}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Platform / OS</Label>
+                <Label>
+                  {t("assetInventory.field.platform", "Platform / OS")}
+                </Label>
                 <Input
                   value={form.platform}
                   onChange={e =>
                     setForm(f => ({ ...f, platform: e.target.value }))
                   }
                   className="bg-zinc-800 border-zinc-700"
-                  placeholder="e.g. Ubuntu 22.04"
+                  placeholder={t(
+                    "assetInventory.placeholder.platform",
+                    "e.g. Ubuntu 22.04"
+                  )}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Version</Label>
+                <Label>{t("assetInventory.field.version", "Version")}</Label>
                 <Input
                   value={form.version}
                   onChange={e =>
                     setForm(f => ({ ...f, version: e.target.value }))
                   }
                   className="bg-zinc-800 border-zinc-700"
-                  placeholder="e.g. 1.4.2"
+                  placeholder={t(
+                    "assetInventory.placeholder.version",
+                    "e.g. 1.4.2"
+                  )}
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Notes</Label>
+              <Label>{t("assetInventory.field.notes", "Notes")}</Label>
               <Textarea
                 rows={2}
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                 className="bg-zinc-800 border-zinc-700 resize-none"
-                placeholder="Any additional context, risk notes, or dependencies."
+                placeholder={t(
+                  "assetInventory.placeholder.notes",
+                  "Any additional context, risk notes, or dependencies."
+                )}
               />
             </div>
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={closeForm}>
-                Cancel
+                {t("common.cancel", "Cancel")}
               </Button>
               <Button
                 type="submit"
                 disabled={createMutation.isPending || patchMutation.isPending}
               >
-                {editingId ? "Save Changes" : "Add Asset"}
+                {editingId
+                  ? t("assetInventory.saveChanges", "Save Changes")
+                  : t("assetInventory.addAsset", "Add Asset")}
               </Button>
             </DialogFooter>
           </form>
@@ -683,22 +768,39 @@ export default function AssetInventory() {
       >
         <AlertDialogContent className="bg-zinc-900 border-zinc-800">
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Asset</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("assetInventory.removeTitle", "Remove Asset")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove{" "}
-              <strong>{deleteTarget?.name}</strong> from the inventory? This
-              action cannot be undone.
+              {(() => {
+                const tmpl = t(
+                  "assetInventory.removeDesc",
+                  "Are you sure you want to remove {name} from the inventory? This action cannot be undone."
+                );
+                const parts = tmpl.split("{name}");
+                return parts.length === 2 ? (
+                  <>
+                    {parts[0]}
+                    <strong>{deleteTarget?.name ?? ""}</strong>
+                    {parts[1]}
+                  </>
+                ) : (
+                  tmpl.replace("{name}", deleteTarget?.name ?? "")
+                );
+              })()}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("common.cancel", "Cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
               onClick={() =>
                 deleteId !== null && removeMutation.mutate({ id: deleteId })
               }
             >
-              Remove
+              {t("assetInventory.remove", "Remove")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
