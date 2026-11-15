@@ -9,6 +9,7 @@
  */
 
 import { useState } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { trpc } from "@/lib/trpc";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
@@ -154,6 +155,7 @@ function PriorityBadge({ priority }: { priority: string }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function AdminServiceRequests() {
+  const { t } = useLocale();
   usePageTitle("Admin · Service Requests");
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -317,7 +319,10 @@ export default function AdminServiceRequests() {
                 <Input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Search by title, type, or org ID…"
+                  placeholder={t(
+                    "adminServiceRequests.placeholder.search",
+                    "Search by title, type, or org ID…"
+                  )}
                   className="pl-9"
                 />
               </div>
@@ -537,7 +542,10 @@ export default function AdminServiceRequests() {
                     value={editNotes}
                     onChange={e => setEditNotes(e.target.value)}
                     rows={3}
-                    placeholder="Add internal team notes…"
+                    placeholder={t(
+                      "adminServiceRequests.placeholder.internalNotes",
+                      "Add internal team notes."
+                    )}
                   />
                 </div>
 
@@ -552,7 +560,10 @@ export default function AdminServiceRequests() {
                     value={editResponse}
                     onChange={e => setEditResponse(e.target.value)}
                     rows={4}
-                    placeholder="Send a message / update to the client…"
+                    placeholder={t(
+                      "adminServiceRequests.placeholder.clientMessage",
+                      "Send a message / update to the client."
+                    )}
                   />
                 </div>
               </div>

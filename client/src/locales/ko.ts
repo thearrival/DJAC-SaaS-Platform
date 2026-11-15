@@ -3519,5 +3519,21 @@ const messages: Record<string, string> = {
   "vendorDetail.placeholder.tier": "등급 선택",
   "common.otpPlaceholder": "000000",
   "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
+  "adminServiceRequests.placeholder.search": "제목, 유형 또는 조직 ID로 검색…",
+  "adminServiceRequests.placeholder.internalNotes":
+    "내부 팀 메모를 추가하세요.",
+  "adminServiceRequests.placeholder.clientMessage":
+    "클라이언트에게 메시지/업데이트를 보내세요.",
+  "adminThreatIntel.placeholder.title": "예: Apache HTTPD의 치명적 RCE",
+  "adminThreatIntel.placeholder.summary": "위협을 자세히 설명하세요.",
+  "adminThreatIntel.placeholder.threatActor": "예: APT29, Lazarus Group",
+  "adminThreatIntel.placeholder.cve": "CVE-2024-XXXXX",
+  "adminThreatIntel.placeholder.cvss": "9.8",
+  "adminThreatIntel.placeholder.sectors": "금융, 의료 등",
+  "adminThreatIntel.placeholder.indicators":
+    "줄당 하나의 지표: IP, 해시, 도메인, 파일 이름…",
+  "adminThreatIntel.placeholder.referenceUrl":
+    "https://nvd.nist.gov/vuln/detail/…",
+  "adminThreatIntel.placeholder.scope": "전역(비워 두기)",
 };
 export default messages;

@@ -3704,5 +3704,23 @@ const messages: Record<string, string> = {
   "vendorDetail.placeholder.tier": "Stufe auswählen",
   "common.otpPlaceholder": "000000",
   "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
+  "adminServiceRequests.placeholder.search":
+    "Nach Titel, Typ oder Organisations-ID suchen…",
+  "adminServiceRequests.placeholder.internalNotes":
+    "Interne Teamnotizen hinzufügen.",
+  "adminServiceRequests.placeholder.clientMessage":
+    "Senden Sie eine Nachricht / ein Update an den Kunden.",
+  "adminThreatIntel.placeholder.title": "z. B. Kritische RCE in Apache HTTPD",
+  "adminThreatIntel.placeholder.summary":
+    "Beschreiben Sie die Bedrohung im Detail.",
+  "adminThreatIntel.placeholder.threatActor": "z. B. APT29, Lazarus Group",
+  "adminThreatIntel.placeholder.cve": "CVE-2024-XXXXX",
+  "adminThreatIntel.placeholder.cvss": "9.8",
+  "adminThreatIntel.placeholder.sectors": "Finanzen, Gesundheitswesen, …",
+  "adminThreatIntel.placeholder.indicators":
+    "Ein Indikator pro Zeile: IP, Hash, Domain, Dateiname…",
+  "adminThreatIntel.placeholder.referenceUrl":
+    "https://nvd.nist.gov/vuln/detail/…",
+  "adminThreatIntel.placeholder.scope": "Global (leer lassen)",
 };
 export default messages;

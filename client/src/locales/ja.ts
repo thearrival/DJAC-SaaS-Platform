@@ -3612,5 +3612,21 @@ const messages: Record<string, string> = {
   "vendorDetail.placeholder.tier": "ティアを選択",
   "common.otpPlaceholder": "000000",
   "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
+  "adminServiceRequests.placeholder.search": "タイトル、種類、組織IDで検索…",
+  "adminServiceRequests.placeholder.internalNotes":
+    "内部チームメモを追加します。",
+  "adminServiceRequests.placeholder.clientMessage":
+    "クライアントにメッセージ/更新を送信します。",
+  "adminThreatIntel.placeholder.title": "例：Apache HTTPD の重大なRCE",
+  "adminThreatIntel.placeholder.summary": "脅威を詳細に説明してください。",
+  "adminThreatIntel.placeholder.threatActor": "例：APT29、Lazarus Group",
+  "adminThreatIntel.placeholder.cve": "CVE-2024-XXXXX",
+  "adminThreatIntel.placeholder.cvss": "9.8",
+  "adminThreatIntel.placeholder.sectors": "金融、医療など",
+  "adminThreatIntel.placeholder.indicators":
+    "1行に1つの指標：IP、ハッシュ、ドメイン、ファイル名…",
+  "adminThreatIntel.placeholder.referenceUrl":
+    "https://nvd.nist.gov/vuln/detail/…",
+  "adminThreatIntel.placeholder.scope": "グローバル（空欄のまま）",
 };
 export default messages;

@@ -3499,5 +3499,23 @@ const messages: Record<string, string> = {
   "vendorDetail.placeholder.tier": "اختر الفئة",
   "common.otpPlaceholder": "000000",
   "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
+  "adminServiceRequests.placeholder.search":
+    "ابحث بالعنوان أو النوع أو معرّف المؤسسة…",
+  "adminServiceRequests.placeholder.internalNotes":
+    "أضف ملاحظات داخلية للفريق.",
+  "adminServiceRequests.placeholder.clientMessage":
+    "أرسل رسالة / تحديثاً إلى العميل.",
+  "adminThreatIntel.placeholder.title":
+    "مثال: تنفيذ تعليمات برمجية عن بُعد حرج في Apache HTTPD",
+  "adminThreatIntel.placeholder.summary": "صف التهديد بالتفصيل.",
+  "adminThreatIntel.placeholder.threatActor": "مثال: APT29، Lazarus Group",
+  "adminThreatIntel.placeholder.cve": "CVE-2024-XXXXX",
+  "adminThreatIntel.placeholder.cvss": "9.8",
+  "adminThreatIntel.placeholder.sectors": "المالية، الرعاية الصحية، …",
+  "adminThreatIntel.placeholder.indicators":
+    "مؤشر واحد في كل سطر: IP أو تجزئة أو نطاق أو اسم ملف…",
+  "adminThreatIntel.placeholder.referenceUrl":
+    "https://nvd.nist.gov/vuln/detail/…",
+  "adminThreatIntel.placeholder.scope": "عام (اتركه فارغاً)",
 };
 export default messages;

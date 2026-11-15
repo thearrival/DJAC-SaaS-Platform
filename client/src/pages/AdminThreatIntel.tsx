@@ -9,6 +9,7 @@
  */
 
 import { useState } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { trpc } from "@/lib/trpc";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { toast } from "sonner";
@@ -161,6 +162,7 @@ function ItemFormFields({
   form: ItemForm;
   onChange: (f: Partial<ItemForm>) => void;
 }) {
+  const { t } = useLocale();
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
@@ -168,7 +170,10 @@ function ItemFormFields({
         <Input
           value={form.title}
           onChange={e => onChange({ title: e.target.value })}
-          placeholder="e.g. Critical RCE in Apache HTTPD…"
+          placeholder={t(
+            "adminThreatIntel.placeholder.title",
+            "e.g. Critical RCE in Apache HTTPD"
+          )}
         />
       </div>
 
@@ -178,7 +183,10 @@ function ItemFormFields({
           value={form.summary}
           onChange={e => onChange({ summary: e.target.value })}
           rows={4}
-          placeholder="Describe the threat in detail…"
+          placeholder={t(
+            "adminThreatIntel.placeholder.summary",
+            "Describe the threat in detail."
+          )}
         />
       </div>
 
@@ -249,7 +257,10 @@ function ItemFormFields({
           <Input
             value={form.threatActor}
             onChange={e => onChange({ threatActor: e.target.value })}
-            placeholder="e.g. APT29, Lazarus Group"
+            placeholder={t(
+              "adminThreatIntel.placeholder.threatActor",
+              "e.g. APT29, Lazarus Group"
+            )}
           />
         </div>
         <div className="space-y-1.5">
@@ -257,7 +268,10 @@ function ItemFormFields({
           <Input
             value={form.cveId}
             onChange={e => onChange({ cveId: e.target.value })}
-            placeholder="CVE-2024-XXXXX"
+            placeholder={t(
+              "adminThreatIntel.placeholder.cve",
+              "CVE-2024-XXXXX"
+            )}
           />
         </div>
       </div>
@@ -268,7 +282,7 @@ function ItemFormFields({
           <Input
             value={form.cvssScore}
             onChange={e => onChange({ cvssScore: e.target.value })}
-            placeholder="9.8"
+            placeholder={t("adminThreatIntel.placeholder.cvss", "9.8")}
           />
         </div>
         <div className="space-y-1.5">
@@ -276,7 +290,10 @@ function ItemFormFields({
           <Input
             value={form.affectedSectors}
             onChange={e => onChange({ affectedSectors: e.target.value })}
-            placeholder="finance, healthcare, …"
+            placeholder={t(
+              "adminThreatIntel.placeholder.sectors",
+              "finance, healthcare, …"
+            )}
           />
         </div>
       </div>
@@ -287,7 +304,10 @@ function ItemFormFields({
           value={form.indicators}
           onChange={e => onChange({ indicators: e.target.value })}
           rows={3}
-          placeholder="One indicator per line: IP, hash, domain, file name…"
+          placeholder={t(
+            "adminThreatIntel.placeholder.indicators",
+            "One indicator per line: IP, hash, domain, file name…"
+          )}
         />
       </div>
 
@@ -296,7 +316,10 @@ function ItemFormFields({
         <Input
           value={form.referenceUrl}
           onChange={e => onChange({ referenceUrl: e.target.value })}
-          placeholder="https://nvd.nist.gov/vuln/detail/…"
+          placeholder={t(
+            "adminThreatIntel.placeholder.referenceUrl",
+            "https://nvd.nist.gov/vuln/detail/…"
+          )}
         />
       </div>
 
@@ -314,7 +337,10 @@ function ItemFormFields({
               organizationId: e.target.value ? parseInt(e.target.value) : null,
             })
           }
-          placeholder="Global (leave empty)"
+          placeholder={t(
+            "adminThreatIntel.placeholder.scope",
+            "Global (leave empty)"
+          )}
         />
       </div>
     </div>

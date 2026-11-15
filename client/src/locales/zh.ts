@@ -3328,5 +3328,19 @@ const messages: Record<string, string> = {
   "vendorDetail.placeholder.tier": "选择层级",
   "common.otpPlaceholder": "000000",
   "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
+  "adminServiceRequests.placeholder.search": "按标题、类型或组织 ID 搜索…",
+  "adminServiceRequests.placeholder.internalNotes": "添加内部团队备注。",
+  "adminServiceRequests.placeholder.clientMessage": "向客户发送消息/更新。",
+  "adminThreatIntel.placeholder.title": "例如：Apache HTTPD 中的严重 RCE",
+  "adminThreatIntel.placeholder.summary": "详细描述该威胁。",
+  "adminThreatIntel.placeholder.threatActor": "例如：APT29、Lazarus Group",
+  "adminThreatIntel.placeholder.cve": "CVE-2024-XXXXX",
+  "adminThreatIntel.placeholder.cvss": "9.8",
+  "adminThreatIntel.placeholder.sectors": "金融、医疗保健等",
+  "adminThreatIntel.placeholder.indicators":
+    "每行一个指标：IP、哈希、域名、文件名…",
+  "adminThreatIntel.placeholder.referenceUrl":
+    "https://nvd.nist.gov/vuln/detail/…",
+  "adminThreatIntel.placeholder.scope": "全局（留空）",
 };
 export default messages;
