@@ -12,7 +12,7 @@ const ADMIN_API = "/api/yalla-admin";
 
 export default function AdminMFASetup() {
   const { t } = useLocale();
-  usePageTitle("MFA Setup — Yalla Hack Admin");
+  usePageTitle(t("yallaAdmin.mfa.pageTitle", "MFA Setup — Yalla Hack Admin"));
   const [, navigate] = useLocation();
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [secret, setSecret] = useState("");
@@ -44,7 +44,7 @@ export default function AdminMFASetup() {
       });
       if (!res.ok) {
         const d = await res.json();
-        setError(d.error || "Setup failed");
+        setError(d.error || t("yallaAdmin.mfa.setupFailed", "Setup failed"));
         return;
       }
       const data = await res.json();
@@ -52,7 +52,9 @@ export default function AdminMFASetup() {
       setSecret(data.secret);
       setStep("confirm");
     } catch {
-      setError("Network error");
+      setError(
+        t("yallaAdmin.common.networkError", "Network error. Please try again.")
+      );
     } finally {
       setBusy(false);
     }
@@ -70,7 +72,7 @@ export default function AdminMFASetup() {
       });
       if (!res.ok) {
         const d = await res.json();
-        setError(d.error || "Invalid code");
+        setError(d.error || t("yallaAdmin.mfa.invalidCode", "Invalid code"));
         return;
       }
       const data = await res.json();
@@ -78,7 +80,9 @@ export default function AdminMFASetup() {
       setEnabled(true);
       setStep("done");
     } catch {
-      setError("Network error");
+      setError(
+        t("yallaAdmin.common.networkError", "Network error. Please try again.")
+      );
     } finally {
       setBusy(false);
     }
@@ -96,14 +100,18 @@ export default function AdminMFASetup() {
       });
       if (!res.ok) {
         const d = await res.json();
-        setError(d.error || "Could not disable 2FA");
+        setError(
+          d.error || t("yallaAdmin.mfa.disableFailed", "Could not disable 2FA")
+        );
         return;
       }
       setEnabled(false);
       setDisablePassword("");
       setStep("setup");
     } catch {
-      setError("Network error");
+      setError(
+        t("yallaAdmin.common.networkError", "Network error. Please try again.")
+      );
     } finally {
       setBusy(false);
     }
@@ -147,11 +155,12 @@ export default function AdminMFASetup() {
               color: "var(--djac-muted)",
               cursor: "pointer",
             }}
+            aria-label={t("common.back", "Back")}
           >
             ←
           </button>
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
-            Two-Factor Authentication
+            {t("yallaAdmin.mfa.title", "Two-Factor Authentication")}
           </h1>
           {enabled === true && (
             <span
@@ -165,7 +174,7 @@ export default function AdminMFASetup() {
                 padding: "3px 10px",
               }}
             >
-              ENABLED
+              {t("yallaAdmin.mfa.enabled", "ENABLED")}
             </span>
           )}
           {enabled === false && (
@@ -180,7 +189,7 @@ export default function AdminMFASetup() {
                 padding: "3px 10px",
               }}
             >
-              DISABLED
+              {t("yallaAdmin.mfa.disabled", "DISABLED")}
             </span>
           )}
         </div>
@@ -218,7 +227,10 @@ export default function AdminMFASetup() {
           >
             <Shield size={48} style={{ color: "#10b981", marginBottom: 16 }} />
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
-              2FA Is Protecting Your Account
+              {t(
+                "yallaAdmin.mfa.protectingTitle",
+                "2FA Is Protecting Your Account"
+              )}
             </h2>
             <p
               style={{
@@ -227,8 +239,10 @@ export default function AdminMFASetup() {
                 margin: "0 0 24px",
               }}
             >
-              Sign-in requires a time-based code from your authenticator app.
-              Keep your backup codes somewhere safe.
+              {t(
+                "yallaAdmin.mfa.protectingDesc",
+                "Sign-in requires a time-based code from your authenticator app. Keep your backup codes somewhere safe."
+              )}
             </p>
             <div
               style={{
@@ -247,7 +261,10 @@ export default function AdminMFASetup() {
                   fontWeight: 600,
                 }}
               >
-                Confirm your password to disable 2FA
+                {t(
+                  "yallaAdmin.mfa.confirmDisableLabel",
+                  "Confirm your password to disable 2FA"
+                )}
               </label>
               <input
                 type="password"
@@ -285,7 +302,9 @@ export default function AdminMFASetup() {
                 }}
               >
                 <ShieldOff size={15} />
-                {busy ? "Disabling…" : "Disable 2FA"}
+                {busy
+                  ? t("yallaAdmin.mfa.disabling", "Disabling…")
+                  : t("yallaAdmin.mfa.disable2fa", "Disable 2FA")}
               </button>
             </div>
           </div>
@@ -302,7 +321,7 @@ export default function AdminMFASetup() {
           >
             <Shield size={48} style={{ color: "#d900ff", marginBottom: 16 }} />
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
-              Secure Your Account
+              {t("yallaAdmin.mfa.secureTitle", "Secure Your Account")}
             </h2>
             <p
               style={{
@@ -311,7 +330,10 @@ export default function AdminMFASetup() {
                 margin: "0 0 24px",
               }}
             >
-              Add an extra layer of security using an authenticator app.
+              {t(
+                "yallaAdmin.mfa.secureDesc",
+                "Add an extra layer of security using an authenticator app."
+              )}
             </p>
             <button
               onClick={handleSetup}
@@ -328,7 +350,9 @@ export default function AdminMFASetup() {
                 opacity: busy ? 0.7 : 1,
               }}
             >
-              {busy ? "Starting…" : "Begin Setup"}
+              {busy
+                ? t("yallaAdmin.mfa.starting", "Starting…")
+                : t("yallaAdmin.mfa.beginSetup", "Begin Setup")}
             </button>
           </div>
         )}
@@ -344,7 +368,7 @@ export default function AdminMFASetup() {
           >
             <img
               src={qrDataUrl}
-              alt="MFA QR Code"
+              alt={t("yallaAdmin.mfa.title", "Two-Factor Authentication")}
               style={{
                 width: 120,
                 height: 120,
@@ -361,7 +385,7 @@ export default function AdminMFASetup() {
                 marginBottom: 8,
               }}
             >
-              Or enter manually:
+              {t("yallaAdmin.mfa.enterManually", "Or enter manually:")}
             </p>
             <code
               style={{ fontSize: 11, color: "#d900ff", wordBreak: "break-all" }}
@@ -411,7 +435,7 @@ export default function AdminMFASetup() {
                 cursor: code.length === 6 ? "pointer" : "not-allowed",
               }}
             >
-              Verify & Enable
+              {t("yallaAdmin.mfa.verifyEnable", "Verify & Enable")}
             </button>
           </div>
         )}
@@ -430,7 +454,7 @@ export default function AdminMFASetup() {
               style={{ color: "#10b981", marginBottom: 16 }}
             />
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 8px" }}>
-              MFA Enabled
+              {t("yallaAdmin.mfa.enabledTitle", "MFA Enabled")}
             </h2>
             <p
               style={{
@@ -439,8 +463,10 @@ export default function AdminMFASetup() {
                 margin: "0 0 16px",
               }}
             >
-              Save these backup codes securely. They can each be used once if
-              you lose access to your authenticator.
+              {t(
+                "yallaAdmin.mfa.backupDesc",
+                "Save these backup codes securely. They can each be used once if you lose access to your authenticator."
+              )}
             </p>
             <div
               style={{
@@ -482,7 +508,7 @@ export default function AdminMFASetup() {
                 cursor: "pointer",
               }}
             >
-              Done
+              {t("yallaAdmin.mfa.done", "Done")}
             </button>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLocale } from "@/contexts/useLocale";
 import { useLocation } from "wouter";
 import { storedLocaleTag } from "@/lib/intl";
@@ -142,10 +143,14 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 function AreaChart({ data }: { data: RegistrationData[] }) {
+  const { t } = useLocale();
   if (!data.length)
     return (
       <p className="text-sm text-muted-foreground py-8 text-center">
-        No registration data available
+        {t(
+          "yallaAdmin.dashboard.noRegistrationData",
+          "No registration data available"
+        )}
       </p>
     );
   const max = Math.max(...data.map(d => d.count), 1);
@@ -187,10 +192,13 @@ function AreaChart({ data }: { data: RegistrationData[] }) {
 }
 
 function PieChart({ data }: { data: Record<string, number> }) {
+  const { t } = useLocale();
   const entries = Object.entries(data).filter(([, v]) => v > 0);
   if (!entries.length)
     return (
-      <p className="text-sm text-muted-foreground py-8 text-center">No data</p>
+      <p className="text-sm text-muted-foreground py-8 text-center">
+        {t("yallaAdmin.dashboard.noData", "No data")}
+      </p>
     );
   const total = entries.reduce((s, [, v]) => s + v, 0);
   const colors = [
@@ -257,6 +265,7 @@ function UserDetailPanel({
   user: UserDetail;
   onClose: () => void;
 }) {
+  const { t } = useLocale();
   const [suspending, setSuspending] = useState(false);
 
   const handleSuspend = async () => {
@@ -290,7 +299,9 @@ function UserDetailPanel({
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="relative w-full max-w-lg bg-background border-l border-border shadow-xl overflow-y-auto">
         <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">User Detail</h2>
+          <h2 className="text-lg font-semibold">
+            {t("yallaAdmin.dashboard.userDetail", "User Detail")}
+          </h2>
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground text-xl leading-none"
@@ -373,7 +384,9 @@ function UserDetailPanel({
           </div>
 
           <div className="border-t border-border pt-4 space-y-3">
-            <h3 className="font-semibold text-sm">Actions</h3>
+            <h3 className="font-semibold text-sm">
+              {t("yallaAdmin.dashboard.actions", "Actions")}
+            </h3>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleSuspend}
@@ -392,20 +405,32 @@ function UserDetailPanel({
                 className="px-3 py-1.5 text-xs font-medium rounded-lg border border-border bg-background"
               >
                 <option value="" disabled>
-                  Change Role
+                  {t("yallaAdmin.dashboard.changeRole", "Change Role")}
                 </option>
-                <option value="basic_user">Basic User</option>
-                <option value="professional_user">Professional</option>
-                <option value="company_admin">Company Admin</option>
-                <option value="platform_admin">Platform Admin</option>
-                <option value="super_admin">Super Admin</option>
+                <option value="basic_user">
+                  {t("yallaAdmin.dashboard.basicUser", "Basic User")}
+                </option>
+                <option value="professional_user">
+                  {t("yallaAdmin.dashboard.professional", "Professional")}
+                </option>
+                <option value="company_admin">
+                  {t("yallaAdmin.dashboard.companyAdmin", "Company Admin")}
+                </option>
+                <option value="platform_admin">
+                  {t("yallaAdmin.dashboard.platformAdmin", "Platform Admin")}
+                </option>
+                <option value="super_admin">
+                  {t("yallaAdmin.dashboard.superAdmin", "Super Admin")}
+                </option>
               </select>
             </div>
           </div>
 
           {user.organizationMemberships.length > 0 && (
             <div className="border-t border-border pt-4 space-y-3">
-              <h3 className="font-semibold text-sm">Organizations</h3>
+              <h3 className="font-semibold text-sm">
+                {t("yallaAdmin.dashboard.organizations", "Organizations")}
+              </h3>
               {user.organizationMemberships.map(m => (
                 <div
                   key={m.orgId}
@@ -431,7 +456,9 @@ function UserDetailPanel({
 
           {user.recentActivity.length > 0 && (
             <div className="border-t border-border pt-4 space-y-3">
-              <h3 className="font-semibold text-sm">Recent Activity</h3>
+              <h3 className="font-semibold text-sm">
+                {t("yallaAdmin.dashboard.recentActivity", "Recent Activity")}
+              </h3>
               <div className="max-h-60 overflow-y-auto space-y-2">
                 {user.recentActivity.map(a => (
                   <div
@@ -463,6 +490,9 @@ function UserDetailPanel({
 
 export default function AdminDashboard() {
   const { t } = useLocale();
+  usePageTitle(
+    t("yallaAdmin.dashboard.pageTitle", "Admin Dashboard — Yalla Hack")
+  );
   const [, navigate] = useLocation();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [users, setUsers] = useState<UnifiedUser[]>([]);
@@ -496,7 +526,11 @@ export default function AdminDashboard() {
       setActivity(activityData);
       setRegistrations(regData);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load data");
+      setError(
+        e instanceof Error
+          ? e.message
+          : t("yallaAdmin.dashboard.failedLoad", "Failed to load data")
+      );
     } finally {
       setLoading(false);
     }
@@ -509,7 +543,10 @@ export default function AdminDashboard() {
   const handleDelete = async (userId: number) => {
     if (
       !confirm(
-        "Are you sure you want to permanently delete this user? This action cannot be undone."
+        t(
+          "yallaAdmin.dashboard.deleteConfirm",
+          "Are you sure you want to permanently delete this user? This action cannot be undone."
+        )
       )
     )
       return;

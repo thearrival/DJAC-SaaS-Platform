@@ -24,7 +24,9 @@ const cardStyle: React.CSSProperties = {
 
 export default function AdminOnboarding() {
   const { t } = useLocale();
-  usePageTitle("Onboarding — Owners Console");
+  usePageTitle(
+    t("yallaAdmin.onboarding.pageTitle", "Onboarding — Owners Console")
+  );
   const [, navigate] = useLocation();
   const [days, setDays] = useState(30);
   const [data, setData] = useState<any>(null);
@@ -60,7 +62,9 @@ export default function AdminOnboarding() {
     setUserData(null);
     const id = Number(userId);
     if (!Number.isFinite(id) || id <= 0) {
-      setUserError("Enter a valid user id");
+      setUserError(
+        t("yallaAdmin.onboarding.invalidUserId", "Enter a valid user id")
+      );
       return;
     }
     const res = await fetch(`${ADMIN_API}/onboarding/users/${id}`, {
@@ -71,7 +75,12 @@ export default function AdminOnboarding() {
       return;
     }
     if (!res.ok) {
-      setUserError("Could not load this user's onboarding");
+      setUserError(
+        t(
+          "yallaAdmin.onboarding.loadUserError",
+          "Could not load this user's onboarding"
+        )
+      );
       return;
     }
     setUserData(await res.json());
@@ -83,18 +92,22 @@ export default function AdminOnboarding() {
     <div className="p-6 space-y-6" style={{ color: "#e5e7eb" }}>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-xl font-semibold flex items-center gap-2">
-          <Sparkles className="h-5 w-5" /> Onboarding Intelligence
+          <Sparkles className="h-5 w-5" />{" "}
+          {t("yallaAdmin.onboarding.title", "Onboarding Intelligence")}
         </h1>
         <div className="flex items-center gap-2">
           <select
             value={days}
             onChange={e => setDays(Number(e.target.value))}
             className="rounded-md border border-border bg-black/30 px-3 py-1.5 text-sm"
-            aria-label="Time window"
+            aria-label={t("yallaAdmin.onboarding.timeWindow", "Time window")}
           >
             {[7, 30, 90, 365].map(d => (
               <option key={d} value={d}>
-                Last {d} days
+                {t(
+                  "yallaAdmin.onboarding.lastDays",
+                  "Last {days} days"
+                ).replace("{days}", String(d))}
               </option>
             ))}
           </select>
@@ -103,17 +116,29 @@ export default function AdminOnboarding() {
             className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            {t("yallaAdmin.common.refresh", "Refresh")}
           </button>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Started", value: totals.started },
-          { label: "Completed", value: totals.completed },
-          { label: "In progress", value: totals.in_progress },
-          { label: "Skipped", value: totals.skipped },
+          {
+            label: t("yallaAdmin.onboarding.started", "Started"),
+            value: totals.started,
+          },
+          {
+            label: t("yallaAdmin.onboarding.completed", "Completed"),
+            value: totals.completed,
+          },
+          {
+            label: t("yallaAdmin.onboarding.inProgress", "In progress"),
+            value: totals.in_progress,
+          },
+          {
+            label: t("yallaAdmin.onboarding.skipped", "Skipped"),
+            value: totals.skipped,
+          },
         ].map(k => (
           <div key={k.label} style={cardStyle}>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -128,9 +153,13 @@ export default function AdminOnboarding() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div style={cardStyle}>
-          <p className="mb-3 text-sm font-medium">Industries</p>
+          <p className="mb-3 text-sm font-medium">
+            {t("yallaAdmin.onboarding.industries", "Industries")}
+          </p>
           {(data?.byIndustry ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No data yet.</p>
+            <p className="text-sm text-muted-foreground">
+              {t("yallaAdmin.onboarding.noDataYet", "No data yet.")}
+            </p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
@@ -148,9 +177,16 @@ export default function AdminOnboarding() {
         </div>
 
         <div style={cardStyle}>
-          <p className="mb-3 text-sm font-medium">Recent onboarding events</p>
+          <p className="mb-3 text-sm font-medium">
+            {t(
+              "yallaAdmin.onboarding.recentEvents",
+              "Recent onboarding events"
+            )}
+          </p>
           {(data?.funnel ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No events yet.</p>
+            <p className="text-sm text-muted-foreground">
+              {t("yallaAdmin.onboarding.noEventsYet", "No events yet.")}
+            </p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
@@ -172,9 +208,13 @@ export default function AdminOnboarding() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div style={cardStyle}>
-          <p className="mb-3 text-sm font-medium">Objectives</p>
+          <p className="mb-3 text-sm font-medium">
+            {t("yallaAdmin.onboarding.objectives", "Objectives")}
+          </p>
           {(data?.byObjective ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No data yet.</p>
+            <p className="text-sm text-muted-foreground">
+              {t("yallaAdmin.onboarding.noDataYet", "No data yet.")}
+            </p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
@@ -191,9 +231,13 @@ export default function AdminOnboarding() {
           )}
         </div>
         <div style={cardStyle}>
-          <p className="mb-3 text-sm font-medium">Top recommended modules</p>
+          <p className="mb-3 text-sm font-medium">
+            {t("yallaAdmin.onboarding.topModules", "Top recommended modules")}
+          </p>
           {(data?.byModule ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No data yet.</p>
+            <p className="text-sm text-muted-foreground">
+              {t("yallaAdmin.onboarding.noDataYet", "No data yet.")}
+            </p>
           ) : (
             <table className="w-full text-sm">
               <tbody>
@@ -212,9 +256,13 @@ export default function AdminOnboarding() {
       </div>
 
       <div style={cardStyle}>
-        <p className="mb-3 text-sm font-medium">Personalization engagement</p>
+        <p className="mb-3 text-sm font-medium">
+          {t("yallaAdmin.onboarding.engagement", "Personalization engagement")}
+        </p>
         {(data?.engagement ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">No data yet.</p>
+          <p className="text-sm text-muted-foreground">
+            {t("yallaAdmin.onboarding.noDataYet", "No data yet.")}
+          </p>
         ) : (
           <table className="w-full text-sm">
             <tbody>
@@ -232,20 +280,26 @@ export default function AdminOnboarding() {
       </div>
 
       <div style={cardStyle}>
-        <p className="mb-3 text-sm font-medium">Inspect a user's onboarding</p>
+        <p className="mb-3 text-sm font-medium">
+          {t(
+            "yallaAdmin.onboarding.inspectTitle",
+            "Inspect a user's onboarding"
+          )}
+        </p>
         <div className="flex items-center gap-2 max-w-md">
           <input
             value={userId}
             onChange={e => setUserId(e.target.value)}
             placeholder={t("yallaAdmin.placeholder.userId", "User ID")}
-            aria-label="User ID"
+            aria-label={t("yallaAdmin.placeholder.userId", "User ID")}
             className="w-40 rounded-md border border-border bg-black/30 px-3 py-1.5 text-sm"
           />
           <button
             onClick={() => void inspect()}
             className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
           >
-            <Search className="h-4 w-4" /> Inspect
+            <Search className="h-4 w-4" />{" "}
+            {t("yallaAdmin.onboarding.inspect", "Inspect")}
           </button>
         </div>
         {userError && (
@@ -259,7 +313,7 @@ export default function AdminOnboarding() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <p className="text-xs uppercase text-muted-foreground">
-                  Derived profile
+                  {t("yallaAdmin.onboarding.derivedProfile", "Derived profile")}
                 </p>
                 <pre className="mt-1 overflow-auto rounded bg-black/30 p-2 text-xs">
                   {JSON.stringify(userData.state?.profile ?? {}, null, 2)}
@@ -267,7 +321,10 @@ export default function AdminOnboarding() {
               </div>
               <div>
                 <p className="text-xs uppercase text-muted-foreground">
-                  Recommendations
+                  {t(
+                    "yallaAdmin.onboarding.recommendations",
+                    "Recommendations"
+                  )}
                 </p>
                 <ul className="mt-1 space-y-1 text-xs">
                   {(userData.state?.recommendations ?? []).map((r: any) => (
@@ -282,14 +339,20 @@ export default function AdminOnboarding() {
 
             <div>
               <p className="mb-2 text-xs uppercase text-muted-foreground">
-                Responses
+                {t("yallaAdmin.onboarding.responses", "Responses")}
               </p>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-muted-foreground">
-                    <th className="text-start">Question</th>
-                    <th className="text-start">Answer</th>
-                    <th className="text-end">Updated</th>
+                    <th className="text-start">
+                      {t("yallaAdmin.onboarding.col.question", "Question")}
+                    </th>
+                    <th className="text-start">
+                      {t("yallaAdmin.onboarding.col.answer", "Answer")}
+                    </th>
+                    <th className="text-end">
+                      {t("yallaAdmin.onboarding.col.updated", "Updated")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -312,7 +375,7 @@ export default function AdminOnboarding() {
 
             <div>
               <p className="mb-2 text-xs uppercase text-muted-foreground">
-                Timeline
+                {t("yallaAdmin.onboarding.timeline", "Timeline")}
               </p>
               <ul className="space-y-1 text-xs">
                 {(userData.timeline ?? []).map((e: any, i: number) => (
