@@ -626,7 +626,10 @@ export default function PolicyManager() {
               <Input
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. Data Retention Policy"
+                placeholder={t(
+                  "policy.placeholder.title",
+                  "e.g. Data Retention Policy"
+                )}
               />
             </div>
 
@@ -638,7 +641,7 @@ export default function PolicyManager() {
                 onChange={e =>
                   setForm(f => ({ ...f, policyCode: e.target.value }))
                 }
-                placeholder="POL-PIPL-001"
+                placeholder={t("policy.placeholder.code", "POL-PIPL-001")}
               />
             </div>
 
@@ -650,7 +653,7 @@ export default function PolicyManager() {
                 onChange={e =>
                   setForm(f => ({ ...f, version: e.target.value }))
                 }
-                placeholder="1.0"
+                placeholder={t("policy.placeholder.version", "1.0")}
               />
             </div>
 
@@ -759,7 +762,10 @@ export default function PolicyManager() {
                 onChange={e =>
                   setForm(f => ({ ...f, controlReferences: e.target.value }))
                 }
-                placeholder="PIPL Art.28, NCA ECC-2-1-1, ISO27001 A.8.1, GDPR Art.32"
+                placeholder={t(
+                  "policy.placeholder.controls",
+                  "PIPL Art.28, NCA ECC-2-1-1, ISO27001 A.8.1, GDPR Art.32"
+                )}
               />
               <p className="text-xs text-muted-foreground">
                 {t("policy.controlsHint", "Comma-separated control IDs")}

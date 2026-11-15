@@ -3300,5 +3300,22 @@ const messages: Record<string, string> = {
   "incident.placeholder.title": "例如：未经授权访问客户数据库",
   "incident.placeholder.code": "INC-2026-001",
   "incident.placeholder.affectedSubjects": "0",
+  "risk.placeholder.gapCode": "PIPL-DPO-001",
+  "risk.placeholder.controlRef":
+    "PIPL 第28条、NCA ECC-2-1-1、GDPR 第32条、CCPA 1798.100。",
+  "policy.placeholder.title": "例如：数据保留政策",
+  "policy.placeholder.code": "POL-PIPL-001",
+  "policy.placeholder.version": "1.0",
+  "policy.placeholder.controls":
+    "PIPL 第28条、NCA ECC-2-1-1、ISO27001 A.8.1、GDPR 第32条",
+  "policy.placeholder.docUrl": "https://sharepoint.example.com/",
+  "securityMaturity.placeholder.title": "例如：2026 年第二季度自评",
+  "securityMaturity.placeholder.framework": "选择框架",
+  "securityMaturity.placeholder.recommendations":
+    "主要发现、优先改进项或后续步骤。",
+  "regulatoryChange.placeholder.search": "按标题、司法辖区、框架搜索变更...",
+  "regulatoryChange.allJurisdictions": "所有司法辖区",
+  "regulatoryChange.allTypes": "所有类型",
+  "regulatoryChange.allStatus": "所有状态",
 };
 export default messages;

@@ -3680,5 +3680,23 @@ const messages: Record<string, string> = {
     "p. ej. Acceso no autorizado a la base de datos de clientes",
   "incident.placeholder.code": "INC-2026-001",
   "incident.placeholder.affectedSubjects": "0",
+  "risk.placeholder.gapCode": "PIPL-DPO-001",
+  "risk.placeholder.controlRef":
+    "PIPL Art.28, NCA ECC-2-1-1, GDPR Art.32, CCPA 1798.100.",
+  "policy.placeholder.title": "p. ej. Política de retención de datos",
+  "policy.placeholder.code": "POL-PIPL-001",
+  "policy.placeholder.version": "1.0",
+  "policy.placeholder.controls":
+    "PIPL Art.28, NCA ECC-2-1-1, ISO27001 A.8.1, GDPR Art.32",
+  "policy.placeholder.docUrl": "https://sharepoint.example.com/",
+  "securityMaturity.placeholder.title": "p. ej. Autoevaluación T2 2026",
+  "securityMaturity.placeholder.framework": "Seleccionar marco",
+  "securityMaturity.placeholder.recommendations":
+    "Hallazgos clave, mejoras prioritarias o próximos pasos.",
+  "regulatoryChange.placeholder.search":
+    "Buscar cambios por título, jurisdicción, marco...",
+  "regulatoryChange.allJurisdictions": "Todas las jurisdicciones",
+  "regulatoryChange.allTypes": "Todos los tipos",
+  "regulatoryChange.allStatus": "Todos los estados",
 };
 export default messages;

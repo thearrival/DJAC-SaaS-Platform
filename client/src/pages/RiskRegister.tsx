@@ -723,7 +723,7 @@ function RiskFormDialog({
               <Input
                 value={form.gapCode}
                 onChange={e => set("gapCode")(e.target.value)}
-                placeholder="PIPL-DPO-001"
+                placeholder={t("risk.placeholder.gapCode", "PIPL-DPO-001")}
                 className="font-mono text-sm"
               />
             </div>

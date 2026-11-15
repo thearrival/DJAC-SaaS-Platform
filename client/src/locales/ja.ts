@@ -3583,5 +3583,23 @@ const messages: Record<string, string> = {
   "incident.placeholder.title": "例：顧客データベースへの不正アクセス",
   "incident.placeholder.code": "INC-2026-001",
   "incident.placeholder.affectedSubjects": "0",
+  "risk.placeholder.gapCode": "PIPL-DPO-001",
+  "risk.placeholder.controlRef":
+    "PIPL 第28条、NCA ECC-2-1-1、GDPR 第32条、CCPA 1798.100。",
+  "policy.placeholder.title": "例：データ保持ポリシー",
+  "policy.placeholder.code": "POL-PIPL-001",
+  "policy.placeholder.version": "1.0",
+  "policy.placeholder.controls":
+    "PIPL 第28条、NCA ECC-2-1-1、ISO27001 A.8.1、GDPR 第32条",
+  "policy.placeholder.docUrl": "https://sharepoint.example.com/",
+  "securityMaturity.placeholder.title": "例：2026年第2四半期自己評価",
+  "securityMaturity.placeholder.framework": "フレームワークを選択",
+  "securityMaturity.placeholder.recommendations":
+    "主な所見、優先改善事項、次のステップ。",
+  "regulatoryChange.placeholder.search":
+    "タイトル、管轄区域、フレームワークで変更を検索...",
+  "regulatoryChange.allJurisdictions": "すべての管轄区域",
+  "regulatoryChange.allTypes": "すべての種類",
+  "regulatoryChange.allStatus": "すべてのステータス",
 };
 export default messages;

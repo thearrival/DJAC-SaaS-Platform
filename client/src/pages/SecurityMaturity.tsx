@@ -457,7 +457,10 @@ export default function SecurityMaturity() {
               <div className="space-y-1.5">
                 <Label>Assessment Title</Label>
                 <Input
-                  placeholder="e.g. Q2 2026 Self-Assessment"
+                  placeholder={t(
+                    "securityMaturity.placeholder.title",
+                    "e.g. Q2 2026 Self-Assessment"
+                  )}
                   value={title}
                   onChange={e => {
                     setTitle(e.target.value);
@@ -476,7 +479,12 @@ export default function SecurityMaturity() {
                 </Label>
                 <Select value={framework} onValueChange={setFramework}>
                   <SelectTrigger className="bg-zinc-800 border-zinc-700">
-                    <SelectValue placeholder="Select framework…" />
+                    <SelectValue
+                      placeholder={t(
+                        "securityMaturity.placeholder.framework",
+                        "Select framework"
+                      )}
+                    />
                   </SelectTrigger>
                   <SelectContent className="bg-zinc-800 border-zinc-700">
                     {FRAMEWORKS.map(f => (
@@ -553,7 +561,10 @@ export default function SecurityMaturity() {
               </Label>
               <Textarea
                 rows={3}
-                placeholder="Key findings, priority improvements, or next steps…"
+                placeholder={t(
+                  "securityMaturity.placeholder.recommendations",
+                  "Key findings, priority improvements, or next steps."
+                )}
                 value={recommendations}
                 onChange={e => setRecommendations(e.target.value)}
                 className="bg-zinc-800 border-zinc-700 resize-none"

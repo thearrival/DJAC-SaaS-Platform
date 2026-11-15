@@ -219,7 +219,10 @@ export default function RegulatoryChangeFeed() {
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search changes by title, jurisdiction, framework..."
+            placeholder={t(
+              "regulatoryChange.placeholder.search",
+              "Search changes by title, jurisdiction, framework..."
+            )}
             className="pl-9"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -230,10 +233,17 @@ export default function RegulatoryChangeFeed() {
           onValueChange={setJurisdictionFilter}
         >
           <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="All Jurisdictions" />
+            <SelectValue
+              placeholder={t(
+                "regulatoryChange.allJurisdictions",
+                "All Jurisdictions"
+              )}
+            />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Jurisdictions</SelectItem>
+            <SelectItem value="all">
+              {t("regulatoryChange.allJurisdictions", "All Jurisdictions")}
+            </SelectItem>
             {jurisdictions.map(j => (
               <SelectItem key={j} value={j}>
                 {j}
@@ -243,10 +253,14 @@ export default function RegulatoryChangeFeed() {
         </Select>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="All Types" />
+            <SelectValue
+              placeholder={t("regulatoryChange.allTypes", "All Types")}
+            />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="all">
+              {t("regulatoryChange.allTypes", "All Types")}
+            </SelectItem>
             <SelectItem value="amendment">Amendment</SelectItem>
             <SelectItem value="new_regulation">New Regulation</SelectItem>
             <SelectItem value="repeal">Repeal</SelectItem>
@@ -256,10 +270,14 @@ export default function RegulatoryChangeFeed() {
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="All Status" />
+            <SelectValue
+              placeholder={t("regulatoryChange.allStatus", "All Status")}
+            />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="all">
+              {t("regulatoryChange.allStatus", "All Status")}
+            </SelectItem>
             <SelectItem value="in_effect">In Effect</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="superseded">Superseded</SelectItem>

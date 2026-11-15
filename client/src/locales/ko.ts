@@ -3490,5 +3490,23 @@ const messages: Record<string, string> = {
   "incident.placeholder.title": "예: 고객 데이터베이스에 대한 무단 액세스",
   "incident.placeholder.code": "INC-2026-001",
   "incident.placeholder.affectedSubjects": "0",
+  "risk.placeholder.gapCode": "PIPL-DPO-001",
+  "risk.placeholder.controlRef":
+    "PIPL 제28조, NCA ECC-2-1-1, GDPR 제32조, CCPA 1798.100.",
+  "policy.placeholder.title": "예: 데이터 보존 정책",
+  "policy.placeholder.code": "POL-PIPL-001",
+  "policy.placeholder.version": "1.0",
+  "policy.placeholder.controls":
+    "PIPL 제28조, NCA ECC-2-1-1, ISO27001 A.8.1, GDPR 제32조",
+  "policy.placeholder.docUrl": "https://sharepoint.example.com/",
+  "securityMaturity.placeholder.title": "예: 2026년 2분기 자체 평가",
+  "securityMaturity.placeholder.framework": "프레임워크 선택",
+  "securityMaturity.placeholder.recommendations":
+    "주요 결과, 우선 개선 사항 또는 다음 단계.",
+  "regulatoryChange.placeholder.search":
+    "제목, 관할권, 프레임워크로 변경 사항 검색...",
+  "regulatoryChange.allJurisdictions": "모든 관할권",
+  "regulatoryChange.allTypes": "모든 유형",
+  "regulatoryChange.allStatus": "모든 상태",
 };
 export default messages;
