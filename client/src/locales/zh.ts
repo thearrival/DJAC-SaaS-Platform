@@ -3250,5 +3250,16 @@ const messages: Record<string, string> = {
   "assetInventory.status.decommissioned": "已停用",
   "assetInventory.status.under_review": "审核中",
   "assetInventory.status.unknown": "未知",
+  "ctem.placeholderAssetName": "例如：客户 API 网关",
+  "ctem.placeholderIdentifier": "例如：10.0.0.1 或 api.company.com",
+  "ctem.placeholderNone": "无",
+  "ctem.placeholderSelectAsset": "选择资产",
+  "ctem.placeholderCve": "CVE-2024-XXXXX",
+  "ctem.placeholderVulnTitle": "例如：登录端点中的 SQL 注入",
+  "ctem.vendorOptional": "供应商（可选）",
+  "ctem.notes": "备注",
+  "ctem.statusInactive": "非活跃",
+  "ctem.allRegions": "所有区域",
+  "ctem.allTiers": "所有等级",
 };
 export default messages;

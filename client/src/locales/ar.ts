@@ -3414,5 +3414,16 @@ const messages: Record<string, string> = {
   "assetInventory.status.decommissioned": "تم إيقافه",
   "assetInventory.status.under_review": "قيد المراجعة",
   "assetInventory.status.unknown": "غير معروف",
+  "ctem.placeholderAssetName": "مثال: بوابة واجهة برمجة تطبيقات العملاء",
+  "ctem.placeholderIdentifier": "مثال: 10.0.0.1 أو api.company.com",
+  "ctem.placeholderNone": "لا شيء",
+  "ctem.placeholderSelectAsset": "اختر أصلاً",
+  "ctem.placeholderCve": "CVE-2024-XXXXX",
+  "ctem.placeholderVulnTitle": "مثال: حقن SQL في نقطة نهاية تسجيل الدخول",
+  "ctem.vendorOptional": "المورّد (اختياري)",
+  "ctem.notes": "ملاحظات",
+  "ctem.statusInactive": "غير نشط",
+  "ctem.allRegions": "كل المناطق",
+  "ctem.allTiers": "كل المستويات",
 };
 export default messages;

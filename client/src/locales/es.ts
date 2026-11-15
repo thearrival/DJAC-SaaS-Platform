@@ -3620,5 +3620,17 @@ const messages: Record<string, string> = {
   "assetInventory.status.decommissioned": "Dado de baja",
   "assetInventory.status.under_review": "En revisión",
   "assetInventory.status.unknown": "Desconocido",
+  "ctem.placeholderAssetName": "p. ej. Puerta de enlace de API de clientes",
+  "ctem.placeholderIdentifier": "p. ej. 10.0.0.1 o api.company.com",
+  "ctem.placeholderNone": "Ninguno",
+  "ctem.placeholderSelectAsset": "Seleccionar activo",
+  "ctem.placeholderCve": "CVE-2024-XXXXX",
+  "ctem.placeholderVulnTitle":
+    "p. ej. Inyección SQL en el endpoint de inicio de sesión",
+  "ctem.vendorOptional": "Proveedor (opcional)",
+  "ctem.notes": "Notas",
+  "ctem.statusInactive": "Inactivo",
+  "ctem.allRegions": "Todas las regiones",
+  "ctem.allTiers": "Todos los niveles",
 };
 export default messages;

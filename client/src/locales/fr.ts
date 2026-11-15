@@ -3653,5 +3653,17 @@ const messages: Record<string, string> = {
   "assetInventory.status.decommissioned": "Déclassé",
   "assetInventory.status.under_review": "En cours d'examen",
   "assetInventory.status.unknown": "Inconnu",
+  "ctem.placeholderAssetName": "ex. Passerelle API client",
+  "ctem.placeholderIdentifier": "ex. 10.0.0.1 ou api.company.com",
+  "ctem.placeholderNone": "Aucun",
+  "ctem.placeholderSelectAsset": "Sélectionner un actif",
+  "ctem.placeholderCve": "CVE-2024-XXXXX",
+  "ctem.placeholderVulnTitle":
+    "ex. Injection SQL dans le point de terminaison de connexion",
+  "ctem.vendorOptional": "Fournisseur (facultatif)",
+  "ctem.notes": "Notes",
+  "ctem.statusInactive": "Inactif",
+  "ctem.allRegions": "Toutes les régions",
+  "ctem.allTiers": "Tous les niveaux",
 };
 export default messages;

@@ -3529,5 +3529,17 @@ const messages: Record<string, string> = {
   "assetInventory.status.decommissioned": "廃止",
   "assetInventory.status.under_review": "レビュー中",
   "assetInventory.status.unknown": "不明",
+  "ctem.placeholderAssetName": "例：顧客APIゲートウェイ",
+  "ctem.placeholderIdentifier": "例：10.0.0.1 または api.company.com",
+  "ctem.placeholderNone": "なし",
+  "ctem.placeholderSelectAsset": "資産を選択",
+  "ctem.placeholderCve": "CVE-2024-XXXXX",
+  "ctem.placeholderVulnTitle":
+    "例：ログインエンドポイントのSQLインジェクション",
+  "ctem.vendorOptional": "ベンダー（任意）",
+  "ctem.notes": "メモ",
+  "ctem.statusInactive": "無効",
+  "ctem.allRegions": "すべての地域",
+  "ctem.allTiers": "すべてのティア",
 };
 export default messages;

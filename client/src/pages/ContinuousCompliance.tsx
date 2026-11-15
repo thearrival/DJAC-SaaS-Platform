@@ -732,7 +732,9 @@ export default function ContinuousCompliance() {
             <SelectValue placeholder={t("ctem.filterRegion", "Region")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Regions</SelectItem>
+            <SelectItem value="all">
+              {t("ctem.allRegions", "All Regions")}
+            </SelectItem>
             {REGIONS.map(r => (
               <SelectItem key={r} value={r}>
                 {r}
@@ -749,7 +751,9 @@ export default function ContinuousCompliance() {
             <SelectValue placeholder={t("ctem.filterSeverity", "Severity")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Tiers</SelectItem>
+            <SelectItem value="all">
+              {t("ctem.allTiers", "All Tiers")}
+            </SelectItem>
             <SelectItem value="critical">
               {t("ctem.tierCritical", "Critical")}
             </SelectItem>
@@ -1287,7 +1291,10 @@ export default function ContinuousCompliance() {
                   onChange={e =>
                     setAssetForm({ ...assetForm, assetName: e.target.value })
                   }
-                  placeholder="e.g. Customer API Gateway"
+                  placeholder={t(
+                    "ctem.placeholderAssetName",
+                    "e.g. Customer API Gateway"
+                  )}
                 />
               </div>
               <div className="space-y-1">
@@ -1338,7 +1345,10 @@ export default function ContinuousCompliance() {
                   onChange={e =>
                     setAssetForm({ ...assetForm, ipDomain: e.target.value })
                   }
-                  placeholder="e.g. 10.0.0.1 or api.company.com"
+                  placeholder={t(
+                    "ctem.placeholderIdentifier",
+                    "e.g. 10.0.0.1 or api.company.com"
+                  )}
                 />
               </div>
               <div className="space-y-1">
@@ -1351,10 +1361,17 @@ export default function ContinuousCompliance() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="active">
+                      {t("assetInventory.status.active", "Active")}
+                    </SelectItem>
+                    <SelectItem value="inactive">
+                      {t("ctem.statusInactive", "Inactive")}
+                    </SelectItem>
                     <SelectItem value="decommissioned">
-                      Decommissioned
+                      {t(
+                        "assetInventory.status.decommissioned",
+                        "Decommissioned"
+                      )}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -1381,7 +1398,7 @@ export default function ContinuousCompliance() {
               </div>
               {vendorsQ.data && vendorsQ.data.length > 0 && (
                 <div className="col-span-2 space-y-1">
-                  <Label>Vendor (optional)</Label>
+                  <Label>{t("ctem.vendorOptional", "Vendor (optional)")}</Label>
                   <Select
                     value={assetForm.vendorId}
                     onValueChange={v =>
@@ -1389,7 +1406,9 @@ export default function ContinuousCompliance() {
                     }
                   >
                     <SelectTrigger className="text-xs">
-                      <SelectValue placeholder="None" />
+                      <SelectValue
+                        placeholder={t("ctem.placeholderNone", "None")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">None</SelectItem>
@@ -1443,7 +1462,7 @@ export default function ContinuousCompliance() {
               </div>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="assetNotes">Notes</Label>
+              <Label htmlFor="assetNotes">{t("ctem.notes", "Notes")}</Label>
               <Textarea
                 id="assetNotes"
                 rows={2}
@@ -1529,7 +1548,12 @@ export default function ContinuousCompliance() {
                 onValueChange={v => setVulnForm({ ...vulnForm, assetId: v })}
               >
                 <SelectTrigger className="text-xs">
-                  <SelectValue placeholder="Select asset…" />
+                  <SelectValue
+                    placeholder={t(
+                      "ctem.placeholderSelectAsset",
+                      "Select asset"
+                    )}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {(assetsQ.data ?? []).map((a: any) => (
@@ -1549,7 +1573,7 @@ export default function ContinuousCompliance() {
                   onChange={e =>
                     setVulnForm({ ...vulnForm, cveId: e.target.value })
                   }
-                  placeholder="CVE-2024-XXXXX"
+                  placeholder={t("ctem.placeholderCve", "CVE-2024-XXXXX")}
                 />
               </div>
               <div className="space-y-1">
@@ -1581,7 +1605,10 @@ export default function ContinuousCompliance() {
                 onChange={e =>
                   setVulnForm({ ...vulnForm, title: e.target.value })
                 }
-                placeholder="e.g. SQL Injection in login endpoint"
+                placeholder={t(
+                  "ctem.placeholderVulnTitle",
+                  "e.g. SQL Injection in login endpoint"
+                )}
               />
             </div>
             <div className="space-y-1">
@@ -1629,7 +1656,7 @@ export default function ContinuousCompliance() {
               </div>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="vulnNotes">Notes</Label>
+              <Label htmlFor="vulnNotes">{t("ctem.notes", "Notes")}</Label>
               <Textarea
                 id="vulnNotes"
                 rows={2}

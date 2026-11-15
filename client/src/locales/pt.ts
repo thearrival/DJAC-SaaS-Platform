@@ -3593,5 +3593,16 @@ const messages: Record<string, string> = {
   "assetInventory.status.decommissioned": "Desativado",
   "assetInventory.status.under_review": "Em revisão",
   "assetInventory.status.unknown": "Desconhecido",
+  "ctem.placeholderAssetName": "ex.: Gateway de API do cliente",
+  "ctem.placeholderIdentifier": "ex.: 10.0.0.1 ou api.company.com",
+  "ctem.placeholderNone": "Nenhum",
+  "ctem.placeholderSelectAsset": "Selecionar ativo",
+  "ctem.placeholderCve": "CVE-2024-XXXXX",
+  "ctem.placeholderVulnTitle": "ex.: Injeção de SQL no endpoint de login",
+  "ctem.vendorOptional": "Fornecedor (opcional)",
+  "ctem.notes": "Notas",
+  "ctem.statusInactive": "Inativo",
+  "ctem.allRegions": "Todas as regiões",
+  "ctem.allTiers": "Todos os níveis",
 };
 export default messages;

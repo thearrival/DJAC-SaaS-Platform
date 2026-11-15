@@ -3439,5 +3439,16 @@ const messages: Record<string, string> = {
   "assetInventory.status.decommissioned": "폐기됨",
   "assetInventory.status.under_review": "검토 중",
   "assetInventory.status.unknown": "알 수 없음",
+  "ctem.placeholderAssetName": "예: 고객 API 게이트웨이",
+  "ctem.placeholderIdentifier": "예: 10.0.0.1 또는 api.company.com",
+  "ctem.placeholderNone": "없음",
+  "ctem.placeholderSelectAsset": "자산 선택",
+  "ctem.placeholderCve": "CVE-2024-XXXXX",
+  "ctem.placeholderVulnTitle": "예: 로그인 엔드포인트의 SQL 인젝션",
+  "ctem.vendorOptional": "공급업체(선택 사항)",
+  "ctem.notes": "메모",
+  "ctem.statusInactive": "비활성",
+  "ctem.allRegions": "모든 지역",
+  "ctem.allTiers": "모든 등급",
 };
 export default messages;
