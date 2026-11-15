@@ -33,7 +33,9 @@ interface Org {
 
 export default function AdminOrganizations() {
   const { t } = useLocale();
-  usePageTitle("Organizations — Yalla Hack Admin");
+  usePageTitle(
+    t("yallaAdmin.orgs.pageTitle", "Organizations — Yalla Hack Admin")
+  );
   const [, navigate] = useLocation();
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [search, setSearch] = useState("");
@@ -66,7 +68,12 @@ export default function AdminOrganizations() {
       setOrgs(await res.json());
       setLoadError("");
     } catch (e) {
-      setLoadError(`Could not load organizations: ${(e as Error).message}`);
+      setLoadError(
+        t(
+          "yallaAdmin.orgs.loadError",
+          "Could not load organizations: {message}"
+        ).replace("{message}", (e as Error).message)
+      );
     } finally {
       setLoading(false);
     }
@@ -91,11 +98,24 @@ export default function AdminOrganizations() {
         flash(
           "error",
           data?.error ||
-            `Failed to ${suspend ? "suspend" : "reactivate"} organization.`
+            t(
+              suspend
+                ? "yallaAdmin.orgs.suspendTitle"
+                : "yallaAdmin.orgs.reactivateTitle",
+              suspend ? "Suspend organization" : "Reactivate organization"
+            )
         );
         return;
       }
-      flash("ok", `${org.name} ${suspend ? "suspended" : "reactivated"}.`);
+      flash(
+        "ok",
+        t(
+          suspend
+            ? "yallaAdmin.orgs.orgSuspended"
+            : "yallaAdmin.orgs.orgReactivated",
+          `{name} ${suspend ? "suspended" : "reactivated"}.`
+        ).replace("{name}", org.name)
+      );
       setOrgs(prev =>
         prev.map(o =>
           o.id === org.id
@@ -104,7 +124,10 @@ export default function AdminOrganizations() {
         )
       );
     } catch {
-      flash("error", "Network error. Please try again.");
+      flash(
+        "error",
+        t("yallaAdmin.common.networkError", "Network error. Please try again.")
+      );
     } finally {
       setBusyIds(prev => {
         const next = new Set(prev);
@@ -180,17 +203,17 @@ export default function AdminOrganizations() {
             <ChevronLeft size={18} />
           </button>
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
-            Organizations
+            {t("yallaAdmin.orgs.title", "Organizations")}
           </h1>
           <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
-            {orgs.length} total
+            {orgs.length} {t("yallaAdmin.common.total", "total")}
           </span>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button
             onClick={exportCsv}
             disabled={filtered.length === 0}
-            title="Export CSV"
+            title={t("yallaAdmin.common.exportCsv", "Export CSV")}
             style={{
               background: "none",
               border: "1px solid var(--djac-border)",
@@ -323,7 +346,7 @@ export default function AdminOrganizations() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Organization
+                  {t("yallaAdmin.orgs.col.org", "Organization")}
                 </th>
                 <th
                   style={{
@@ -334,7 +357,7 @@ export default function AdminOrganizations() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Plan
+                  {t("yallaAdmin.orgs.col.plan", "Plan")}
                 </th>
                 <th
                   style={{
@@ -345,7 +368,7 @@ export default function AdminOrganizations() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Members
+                  {t("yallaAdmin.orgs.col.members", "Members")}
                 </th>
                 <th
                   style={{
@@ -356,7 +379,7 @@ export default function AdminOrganizations() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Created
+                  {t("yallaAdmin.common.created", "Created")}
                 </th>
                 <th
                   style={{
@@ -367,7 +390,7 @@ export default function AdminOrganizations() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Status
+                  {t("yallaAdmin.common.status", "Status")}
                 </th>
                 <th
                   style={{
@@ -378,7 +401,7 @@ export default function AdminOrganizations() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Actions
+                  {t("yallaAdmin.common.actions", "Actions")}
                 </th>
               </tr>
             </thead>
@@ -393,7 +416,7 @@ export default function AdminOrganizations() {
                       color: "var(--djac-muted)",
                     }}
                   >
-                    Loading...
+                    {t("yallaAdmin.common.loading", "Loading...")}
                   </td>
                 </tr>
               ) : pageFiltered.length === 0 ? (
@@ -406,7 +429,7 @@ export default function AdminOrganizations() {
                       color: "var(--djac-muted)",
                     }}
                   >
-                    No organizations found
+                    {t("yallaAdmin.orgs.none", "No organizations found")}
                   </td>
                 </tr>
               ) : (
@@ -457,8 +480,14 @@ export default function AdminOrganizations() {
                       <button
                         title={
                           o.status === "suspended"
-                            ? "Reactivate organization"
-                            : "Suspend organization"
+                            ? t(
+                                "yallaAdmin.orgs.reactivateTitle",
+                                "Reactivate organization"
+                              )
+                            : t(
+                                "yallaAdmin.orgs.suspendTitle",
+                                "Suspend organization"
+                              )
                         }
                         onClick={() => toggleSuspend(o)}
                         disabled={busyIds.has(o.id)}
@@ -486,11 +515,13 @@ export default function AdminOrganizations() {
                       >
                         {o.status === "suspended" ? (
                           <>
-                            <CheckCircle2 size={13} /> Reactivate
+                            <CheckCircle2 size={13} />{" "}
+                            {t("yallaAdmin.orgs.reactivate", "Reactivate")}
                           </>
                         ) : (
                           <>
-                            <Ban size={13} /> Suspend
+                            <Ban size={13} />{" "}
+                            {t("yallaAdmin.orgs.suspend", "Suspend")}
                           </>
                         )}
                       </button>
@@ -529,7 +560,14 @@ export default function AdminOrganizations() {
               <ChevronLeft size={14} />
             </button>
             <span style={{ fontSize: 13, color: "var(--djac-muted)" }}>
-              Page {page + 1} of {totalPages} · {filtered.length} orgs
+              {t("yallaAdmin.common.pageOf", "Page {page} of {total}")
+                .replace("{page}", String(page + 1))
+                .replace("{total}", String(totalPages))}{" "}
+              ·{" "}
+              {t("yallaAdmin.orgs.orgsCount", "{count} orgs").replace(
+                "{count}",
+                String(filtered.length)
+              )}
             </span>
             <button
               onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
@@ -554,6 +592,7 @@ export default function AdminOrganizations() {
 }
 
 function OrgStatusBadge({ status }: { status: string }) {
+  const { t } = useLocale();
   const isActive = status === "active";
   return (
     <span
@@ -570,7 +609,9 @@ function OrgStatusBadge({ status }: { status: string }) {
         color: isActive ? "#10b981" : "#ef4444",
       }}
     >
-      {isActive ? "active" : "suspended"}
+      {isActive
+        ? t("yallaAdmin.orgs.active", "active")
+        : t("yallaAdmin.orgs.suspended", "suspended")}
     </span>
   );
 }

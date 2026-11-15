@@ -81,7 +81,9 @@ const thStyle: React.CSSProperties = {
 
 export default function AdminSecurity() {
   const { t } = useLocale();
-  usePageTitle("Security Monitor — Yalla Hack Admin");
+  usePageTitle(
+    t("yallaAdmin.security.pageTitle", "Security Monitor — Yalla Hack Admin")
+  );
   const [, navigate] = useLocation();
   const [events, setEvents] = useState<SecurityEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,7 +122,12 @@ export default function AdminSecurity() {
       setError("");
       setUpdatedAt(new Date().toLocaleTimeString(storedLocaleTag()));
     } catch (e) {
-      setError(`Could not load security events: ${(e as Error).message}`);
+      setError(
+        t(
+          "yallaAdmin.security.loadError",
+          "Could not load security events: {message}"
+        ).replace("{message}", (e as Error).message)
+      );
     } finally {
       setLoading(false);
     }

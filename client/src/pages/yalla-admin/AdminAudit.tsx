@@ -38,7 +38,9 @@ function csvEscape(v: unknown): string {
 
 export default function AdminAudit() {
   const { t } = useLocale();
-  usePageTitle("Audit Logs — Yalla Hack Admin");
+  usePageTitle(
+    t("yallaAdmin.audit.pageTitle", "Audit Logs — Yalla Hack Admin")
+  );
   const [, navigate] = useLocation();
   const [logs, setLogs] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,7 +81,12 @@ export default function AdminAudit() {
       setError("");
       setUpdatedAt(new Date().toLocaleTimeString(storedLocaleTag()));
     } catch (e) {
-      setError(`Could not load audit logs: ${(e as Error).message}`);
+      setError(
+        t(
+          "yallaAdmin.audit.loadError",
+          "Could not load audit logs: {message}"
+        ).replace("{message}", (e as Error).message)
+      );
     } finally {
       setLoading(false);
     }
@@ -132,7 +139,10 @@ export default function AdminAudit() {
   }
 
   const countLabel = useMemo(
-    () => `showing ${Math.min(logs.length, 200)} of ${logs.length} entries`,
+    () =>
+      t("yallaAdmin.audit.showing", "showing {shown} of {total} entries")
+        .replace("{shown}", String(Math.min(logs.length, 200)))
+        .replace("{total}", String(logs.length)),
     [logs]
   );
 
@@ -176,11 +186,14 @@ export default function AdminAudit() {
             <ChevronLeft size={18} />
           </button>
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
-            Audit Logs
+            {t("yallaAdmin.audit.title", "Audit Logs")}
           </h1>
           {updatedAt && (
             <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
-              updated {updatedAt}
+              {t("yallaAdmin.audit.updated", "updated {time}").replace(
+                "{time}",
+                updatedAt
+              )}
             </span>
           )}
         </div>
@@ -217,7 +230,11 @@ export default function AdminAudit() {
           </div>
           <button
             onClick={() => setAutoRefresh(v => !v)}
-            title={autoRefresh ? "Pause auto-refresh" : "Resume auto-refresh"}
+            title={
+              autoRefresh
+                ? t("yallaAdmin.audit.pauseAuto", "Pause auto-refresh")
+                : t("yallaAdmin.audit.resumeAuto", "Resume auto-refresh")
+            }
             style={{
               background: autoRefresh ? "rgba(16,185,129,0.12)" : "none",
               border: "1px solid",

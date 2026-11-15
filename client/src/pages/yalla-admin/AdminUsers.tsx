@@ -71,7 +71,9 @@ interface UserDetail extends AdminUser {
 
 export default function AdminUsers() {
   const { t } = useLocale();
-  usePageTitle("User Management — Yalla Hack Admin");
+  usePageTitle(
+    t("yallaAdmin.users.pageTitle", "User Management — Yalla Hack Admin")
+  );
   const [, navigate] = useLocation();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [total, setTotal] = useState(0);
@@ -136,7 +138,12 @@ export default function AdminUsers() {
       setTotal(data.total || 0);
       setLoadError("");
     } catch (e) {
-      setLoadError(`Could not load users: ${(e as Error).message}`);
+      setLoadError(
+        t(
+          "yallaAdmin.users.loadError",
+          "Could not load users: {message}"
+        ).replace("{message}", (e as Error).message)
+      );
     } finally {
       setLoading(false);
     }
@@ -191,13 +198,24 @@ export default function AdminUsers() {
       if (!res.ok) {
         flash(
           "error",
-          data?.error || `Failed to ${suspend ? "suspend" : "reactivate"} user.`
+          data?.error ||
+            t(
+              suspend
+                ? "yallaAdmin.users.suspend"
+                : "yallaAdmin.users.reactivate",
+              suspend ? "Suspend" : "Reactivate"
+            )
         );
         return;
       }
       flash(
         "ok",
-        `${user.email || user.name} ${suspend ? "suspended" : "reactivated"}.`
+        t(
+          suspend
+            ? "yallaAdmin.users.userSuspended"
+            : "yallaAdmin.users.userReactivated",
+          `{name} ${suspend ? "suspended" : "reactivated"}.`
+        ).replace("{name}", user.email || user.name || "")
       );
       setUsers(prev =>
         prev.map(u =>
@@ -207,7 +225,10 @@ export default function AdminUsers() {
         )
       );
     } catch {
-      flash("error", "Network error. Please try again.");
+      flash(
+        "error",
+        t("yallaAdmin.common.networkError", "Network error. Please try again.")
+      );
     } finally {
       unmarkBusy(user.id);
     }
@@ -224,13 +245,25 @@ export default function AdminUsers() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        flash("error", data?.error || "Failed to change role.");
+        flash(
+          "error",
+          data?.error || t("yallaAdmin.users.changeRole", "Change role")
+        );
         return;
       }
-      flash("ok", `Role updated to ${role}.`);
+      flash(
+        "ok",
+        t("yallaAdmin.users.roleUpdated", "Role updated to {role}.").replace(
+          "{role}",
+          role
+        )
+      );
       setUsers(prev => prev.map(u => (u.id === user.id ? { ...u, role } : u)));
     } catch {
-      flash("error", "Network error. Please try again.");
+      flash(
+        "error",
+        t("yallaAdmin.common.networkError", "Network error. Please try again.")
+      );
     } finally {
       unmarkBusy(user.id);
     }
@@ -245,15 +278,21 @@ export default function AdminUsers() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        flash("error", data?.error || "Failed to delete user.");
+        flash(
+          "error",
+          data?.error || t("yallaAdmin.users.delete", "Delete user")
+        );
         return;
       }
-      flash("ok", "User deleted.");
+      flash("ok", t("yallaAdmin.users.deleted", "User deleted."));
       setConfirmDelete(null);
       setSelectedUser(null);
       loadUsers();
     } catch {
-      flash("error", "Network error. Please try again.");
+      flash(
+        "error",
+        t("yallaAdmin.common.networkError", "Network error. Please try again.")
+      );
     } finally {
       unmarkBusy(user.id);
     }
@@ -333,16 +372,22 @@ export default function AdminUsers() {
           >
             <ChevronLeft size={18} />
           </button>
-          <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Users</h1>
+          <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
+            {t("yallaAdmin.users.title", "Users")}
+          </h1>
           <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
-            {total.toLocaleString(storedLocaleTag())} total
+            {total.toLocaleString(storedLocaleTag())}{" "}
+            {t("yallaAdmin.common.total", "total")}
           </span>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button
             onClick={exportCsv}
             disabled={users.length === 0}
-            title="Export current page as CSV"
+            title={t(
+              "yallaAdmin.users.exportPage",
+              "Export current page as CSV"
+            )}
             style={{
               background: "none",
               border: "1px solid var(--djac-border)",
@@ -479,10 +524,18 @@ export default function AdminUsers() {
               outline: "none",
             }}
           >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="suspended">Suspended</option>
+            <option value="">
+              {t("yallaAdmin.users.allStatus", "All Status")}
+            </option>
+            <option value="active">
+              {t("yallaAdmin.users.active", "Active")}
+            </option>
+            <option value="pending">
+              {t("yallaAdmin.users.pending", "Pending")}
+            </option>
+            <option value="suspended">
+              {t("yallaAdmin.users.suspended", "Suspended")}
+            </option>
           </select>
           <select
             value={roleFilter}
@@ -500,7 +553,9 @@ export default function AdminUsers() {
               outline: "none",
             }}
           >
-            <option value="">All Roles</option>
+            <option value="">
+              {t("yallaAdmin.users.allRoles", "All Roles")}
+            </option>
             {ROLES.map(r => (
               <option key={r} value={r}>
                 {r}
@@ -522,12 +577,24 @@ export default function AdminUsers() {
           >
             <thead>
               <tr style={{ background: "var(--djac-card-hi)" }}>
-                <th style={thStyle}>User</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Role</th>
-                <th style={thStyle}>Orgs</th>
-                <th style={thStyle}>Last Login</th>
-                <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.users.col.user", "User")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.common.status", "Status")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.users.col.role", "Role")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.users.col.orgs", "Orgs")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.users.col.lastLogin", "Last Login")}
+                </th>
+                <th style={{ ...thStyle, textAlign: "right" }}>
+                  {t("yallaAdmin.common.actions", "Actions")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -541,7 +608,7 @@ export default function AdminUsers() {
                       color: "var(--djac-muted)",
                     }}
                   >
-                    Loading...
+                    {t("yallaAdmin.common.loading", "Loading...")}
                   </td>
                 </tr>
               ) : users.length === 0 ? (
@@ -554,7 +621,7 @@ export default function AdminUsers() {
                       color: "var(--djac-muted)",
                     }}
                   >
-                    No users found
+                    {t("yallaAdmin.users.none", "No users found")}
                   </td>
                 </tr>
               ) : (
@@ -599,7 +666,7 @@ export default function AdminUsers() {
                         ? new Date(user.lastSignedIn).toLocaleDateString(
                             storedLocaleTag()
                           )
-                        : "Never"}
+                        : t("yallaAdmin.common.never", "Never")}
                     </td>
                     <td style={{ padding: "12px 16px", textAlign: "right" }}>
                       <div
@@ -610,7 +677,10 @@ export default function AdminUsers() {
                         }}
                       >
                         <ActionButton
-                          title="Open full timeline"
+                          title={t(
+                            "yallaAdmin.users.openTimeline",
+                            "Open full timeline"
+                          )}
                           onClick={() =>
                             navigate(
                               `/yalla-hack-owners-console/users/${user.id}`
@@ -620,7 +690,10 @@ export default function AdminUsers() {
                           <Eye size={14} />
                         </ActionButton>
                         <ActionButton
-                          title="Quick profile"
+                          title={t(
+                            "yallaAdmin.users.quickProfile",
+                            "Quick profile"
+                          )}
                           onClick={() => setSelectedUser(user)}
                         >
                           <UserCog size={14} />
@@ -628,8 +701,8 @@ export default function AdminUsers() {
                         <ActionButton
                           title={
                             user.status === "suspended"
-                              ? "Reactivate"
-                              : "Suspend"
+                              ? t("yallaAdmin.users.reactivate", "Reactivate")
+                              : t("yallaAdmin.users.suspend", "Suspend")
                           }
                           danger={user.status !== "suspended"}
                           disabled={busyIds.has(user.id)}
@@ -642,7 +715,10 @@ export default function AdminUsers() {
                           )}
                         </ActionButton>
                         <select
-                          title="Change role"
+                          title={t(
+                            "yallaAdmin.users.changeRole",
+                            "Change role"
+                          )}
                           value={user.role}
                           disabled={busyIds.has(user.id)}
                           onChange={e => changeRole(user, e.target.value)}
@@ -664,7 +740,7 @@ export default function AdminUsers() {
                           ))}
                         </select>
                         <ActionButton
-                          title="Delete user"
+                          title={t("yallaAdmin.users.delete", "Delete user")}
                           danger
                           disabled={busyIds.has(user.id)}
                           onClick={() => setConfirmDelete(user)}
@@ -707,7 +783,9 @@ export default function AdminUsers() {
               <ChevronLeft size={14} />
             </button>
             <span style={{ fontSize: 13, color: "var(--djac-muted)" }}>
-              Page {page + 1} of {totalPages}
+              {t("yallaAdmin.common.pageOf", "Page {page} of {total}")
+                .replace("{page}", String(page + 1))
+                .replace("{total}", String(totalPages))}
             </span>
             <button
               onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
@@ -789,7 +867,7 @@ export default function AdminUsers() {
 
             {detailLoading ? (
               <p style={{ fontSize: 13, color: "var(--djac-muted)" }}>
-                Loading details...
+                {t("yallaAdmin.users.loadingDetails", "Loading details...")}
               </p>
             ) : detail ? (
               <>
