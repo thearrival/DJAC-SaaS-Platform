@@ -154,7 +154,7 @@ const DEFAULT_SCORES: DefaultScores = {
 export default function SecurityMaturity() {
   usePageTitle("Security Maturity");
 
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
 
   const [showCreate, setShowCreate] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);

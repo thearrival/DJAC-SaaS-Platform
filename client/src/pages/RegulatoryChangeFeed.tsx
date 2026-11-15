@@ -64,7 +64,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default function RegulatoryChangeFeed() {
   usePageTitle("Regulatory Change Detection");
 
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
 
   const listQ = trpc.regulatoryChanges.list.useQuery({ limit: 50 });
   const statsQ = trpc.regulatoryChanges.stats.useQuery();

@@ -732,7 +732,10 @@ function RiskFormDialog({
               <Input
                 value={form.controlReference}
                 onChange={e => set("controlReference")(e.target.value)}
-                placeholder="PIPL Art.28, NCA ECC-2-1-1, GDPR Art.32, CCPA 1798.100…"
+                placeholder={t(
+                  "risk.placeholder.controlRef",
+                  "PIPL Art.28, NCA ECC-2-1-1, GDPR Art.32, CCPA 1798.100."
+                )}
               />
             </div>
           </div>

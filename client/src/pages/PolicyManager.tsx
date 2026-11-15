@@ -781,7 +781,10 @@ export default function PolicyManager() {
                 onChange={e =>
                   setForm(f => ({ ...f, documentUrl: e.target.value }))
                 }
-                placeholder="https://sharepoint.example.com/…"
+                placeholder={t(
+                  "policy.placeholder.docUrl",
+                  "https://sharepoint.example.com/"
+                )}
               />
             </div>
 
