@@ -1157,7 +1157,12 @@ export default function VendorDetail() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select level…" />
+                  <SelectValue
+                    placeholder={t(
+                      "vendorDetail.placeholder.level",
+                      "Select level"
+                    )}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {vendorCriticalityLevelOptions.map(opt => (
@@ -1177,7 +1182,12 @@ export default function VendorDetail() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select tier…" />
+                  <SelectValue
+                    placeholder={t(
+                      "vendorDetail.placeholder.tier",
+                      "Select tier"
+                    )}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {vendorRiskTierOptions.map(opt => (
