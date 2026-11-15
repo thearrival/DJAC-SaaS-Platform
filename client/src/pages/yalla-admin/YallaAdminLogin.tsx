@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { useLocation } from "wouter";
 
 export default function YallaAdminLogin() {
+  const { t } = useLocale();
   const [username, setUsername] = useState("yalla_admin");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -107,7 +109,10 @@ export default function YallaAdminLogin() {
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 className="w-full bg-slate-800/60 border border-slate-700/60 rounded-lg px-3.5 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30 transition"
-                placeholder="admin username"
+                placeholder={t(
+                  "yallaAdmin.placeholder.adminUsername",
+                  "admin username"
+                )}
                 autoComplete="username"
                 required
               />
@@ -122,7 +127,10 @@ export default function YallaAdminLogin() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className="w-full bg-slate-800/60 border border-slate-700/60 rounded-lg px-3.5 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/30 transition"
-                placeholder="••••••••••••"
+                placeholder={t(
+                  "yallaAdmin.placeholder.maskedPassword",
+                  "••••••••"
+                )}
                 autoComplete="current-password"
                 required
               />

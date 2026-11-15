@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { useLocation } from "wouter";
 import { storedLocaleTag } from "@/lib/intl";
 
@@ -461,6 +462,7 @@ function UserDetailPanel({
 }
 
 export default function AdminDashboard() {
+  const { t } = useLocale();
   const [, navigate] = useLocation();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [users, setUsers] = useState<UnifiedUser[]>([]);
@@ -609,7 +611,10 @@ export default function AdminDashboard() {
                 <div className="flex gap-2 w-full sm:w-auto">
                   <input
                     type="text"
-                    placeholder="Search name, email, company..."
+                    placeholder={t(
+                      "yallaAdmin.placeholder.searchNameEmailCompany",
+                      "Search name, email, company..."
+                    )}
                     value={search}
                     onChange={e => {
                       setSearch(e.target.value);

@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLocation } from "wouter";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   RefreshCw,
@@ -36,6 +37,7 @@ function csvEscape(v: unknown): string {
 }
 
 export default function AdminAudit() {
+  const { t } = useLocale();
   usePageTitle("Audit Logs — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [logs, setLogs] = useState<AuditEntry[]>([]);
@@ -197,7 +199,10 @@ export default function AdminAudit() {
             <input
               value={actionFilter}
               onChange={e => setActionFilter(e.target.value)}
-              placeholder="Filter by action..."
+              placeholder={t(
+                "yallaAdmin.placeholder.filterAction",
+                "Filter by action..."
+              )}
               style={{
                 padding: "6px 10px 6px 26px",
                 borderRadius: 6,

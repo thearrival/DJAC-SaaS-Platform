@@ -6,6 +6,7 @@
  */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { storedLocaleTag } from "@/lib/intl";
 import {
@@ -69,6 +70,7 @@ interface UserDetail extends AdminUser {
 }
 
 export default function AdminUsers() {
+  const { t } = useLocale();
   usePageTitle("User Management — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -444,7 +446,10 @@ export default function AdminUsers() {
                 setSearch(e.target.value);
                 setPage(0);
               }}
-              placeholder="Search by name, email, company..."
+              placeholder={t(
+                "yallaAdmin.placeholder.searchNameEmailCompanyShort",
+                "Search by name, email, company..."
+              )}
               style={{
                 width: "100%",
                 padding: "10px 14px 10px 36px",

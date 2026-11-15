@@ -3535,5 +3535,23 @@ const messages: Record<string, string> = {
   "adminThreatIntel.placeholder.referenceUrl":
     "https://nvd.nist.gov/vuln/detail/…",
   "adminThreatIntel.placeholder.scope": "전역(비워 두기)",
+  "yallaAdmin.placeholder.filterAction": "작업으로 필터링...",
+  "yallaAdmin.placeholder.searchNameEmailCompany": "이름, 이메일, 회사 검색...",
+  "yallaAdmin.placeholder.currentPassword": "현재 비밀번호",
+  "yallaAdmin.placeholder.newPasswordReq": "새 비밀번호(최소 12자, 문자+숫자)",
+  "yallaAdmin.placeholder.confirmNewPassword": "새 비밀번호 확인",
+  "yallaAdmin.placeholder.userId": "사용자 ID",
+  "yallaAdmin.placeholder.searchOrganizations": "조직 검색...",
+  "yallaAdmin.placeholder.searchNameEmailCompanyShort":
+    "이름, 이메일, 회사로 검색...",
+  "yallaAdmin.placeholder.username": "사용자 이름 입력",
+  "yallaAdmin.placeholder.password": "비밀번호 입력",
+  "yallaAdmin.placeholder.adminUsername": "관리자 사용자 이름",
+  "yallaAdmin.placeholder.filterUsers":
+    "사용자 이름, 이메일 또는 역할로 필터링...",
+  "yallaAdmin.placeholder.filterEmailUsername":
+    "이메일 또는 사용자 이름으로 필터링...",
+  "yallaAdmin.placeholder.filterNamePlan": "이름 또는 요금제로 필터링...",
+  "yallaAdmin.placeholder.maskedPassword": "••••••••",
 };
 export default messages;

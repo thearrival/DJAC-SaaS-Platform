@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { useLocation } from "wouter";
 import { storedLocaleTag } from "@/lib/intl";
 
@@ -1278,6 +1279,7 @@ function UsersTab({
   users: UserRow[];
   onSelect: (id: number) => void;
 }) {
+  const { t } = useLocale();
   const [filter, setFilter] = useState("");
   const filtered = users.filter(
     u =>
@@ -1291,7 +1293,10 @@ function UsersTab({
       <div className="flex items-center gap-3">
         <input
           type="text"
-          placeholder="Filter by username, email, or role..."
+          placeholder={t(
+            "yallaAdmin.placeholder.filterUsers",
+            "Filter by username, email, or role..."
+          )}
           value={filter}
           onChange={e => setFilter(e.target.value)}
           className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
@@ -2061,6 +2066,7 @@ function SignupsTab({
   rows: SignupRow[];
   onSelect: (id: number) => void;
 }) {
+  const { t } = useLocale();
   const [filter, setFilter] = useState("");
   const filtered = rows.filter(
     r => !filter || r.email.includes(filter) || r.username.includes(filter)
@@ -2070,7 +2076,10 @@ function SignupsTab({
       <div className="flex items-center gap-3">
         <input
           type="text"
-          placeholder="Filter by email or username..."
+          placeholder={t(
+            "yallaAdmin.placeholder.filterEmailUsername",
+            "Filter by email or username..."
+          )}
           value={filter}
           onChange={e => setFilter(e.target.value)}
           className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
@@ -2166,6 +2175,7 @@ function OrgsTab({
   rows: OrgRow[];
   onSelect: (id: number) => void;
 }) {
+  const { t } = useLocale();
   const [filter, setFilter] = useState("");
   const filtered = rows.filter(
     r =>
@@ -2178,7 +2188,10 @@ function OrgsTab({
       <div className="flex items-center gap-3">
         <input
           type="text"
-          placeholder="Filter by name or plan..."
+          placeholder={t(
+            "yallaAdmin.placeholder.filterNamePlan",
+            "Filter by name or plan..."
+          )}
           value={filter}
           onChange={e => setFilter(e.target.value)}
           className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"

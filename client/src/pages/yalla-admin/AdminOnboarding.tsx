@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type React from "react";
 import { useLocation } from "wouter";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { RefreshCw, Search, Sparkles } from "lucide-react";
 import { storedLocaleTag } from "@/lib/intl";
@@ -22,6 +23,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 export default function AdminOnboarding() {
+  const { t } = useLocale();
   usePageTitle("Onboarding — Owners Console");
   const [, navigate] = useLocation();
   const [days, setDays] = useState(30);
@@ -235,7 +237,7 @@ export default function AdminOnboarding() {
           <input
             value={userId}
             onChange={e => setUserId(e.target.value)}
-            placeholder="User ID"
+            placeholder={t("yallaAdmin.placeholder.userId", "User ID")}
             aria-label="User ID"
             className="w-40 rounded-md border border-border bg-black/30 px-3 py-1.5 text-sm"
           />

@@ -3757,5 +3757,27 @@ const messages: Record<string, string> = {
   "adminThreatIntel.placeholder.referenceUrl":
     "https://nvd.nist.gov/vuln/detail/…",
   "adminThreatIntel.placeholder.scope": "Global (laisser vide)",
+  "yallaAdmin.placeholder.filterAction": "Filtrer par action...",
+  "yallaAdmin.placeholder.searchNameEmailCompany":
+    "Rechercher nom, e-mail, entreprise...",
+  "yallaAdmin.placeholder.currentPassword": "Mot de passe actuel",
+  "yallaAdmin.placeholder.newPasswordReq":
+    "Nouveau mot de passe (min. 12 caractères, lettre + chiffre)",
+  "yallaAdmin.placeholder.confirmNewPassword":
+    "Confirmer le nouveau mot de passe",
+  "yallaAdmin.placeholder.userId": "ID utilisateur",
+  "yallaAdmin.placeholder.searchOrganizations":
+    "Rechercher des organisations...",
+  "yallaAdmin.placeholder.searchNameEmailCompanyShort":
+    "Rechercher par nom, e-mail, entreprise...",
+  "yallaAdmin.placeholder.username": "Entrez votre nom d'utilisateur",
+  "yallaAdmin.placeholder.password": "Entrez votre mot de passe",
+  "yallaAdmin.placeholder.adminUsername": "nom d'utilisateur admin",
+  "yallaAdmin.placeholder.filterUsers":
+    "Filtrer par nom d'utilisateur, e-mail ou rôle...",
+  "yallaAdmin.placeholder.filterEmailUsername":
+    "Filtrer par e-mail ou nom d'utilisateur...",
+  "yallaAdmin.placeholder.filterNamePlan": "Filtrer par nom ou forfait...",
+  "yallaAdmin.placeholder.maskedPassword": "••••••••",
 };
 export default messages;

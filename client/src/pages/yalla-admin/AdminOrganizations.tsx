@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { storedLocaleTag } from "@/lib/intl";
 import {
@@ -31,6 +32,7 @@ interface Org {
 }
 
 export default function AdminOrganizations() {
+  const { t } = useLocale();
   usePageTitle("Organizations — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [orgs, setOrgs] = useState<Org[]>([]);
@@ -282,7 +284,10 @@ export default function AdminOrganizations() {
               setSearch(e.target.value);
               setPage(0);
             }}
-            placeholder="Search organizations..."
+            placeholder={t(
+              "yallaAdmin.placeholder.searchOrganizations",
+              "Search organizations..."
+            )}
             style={{
               width: "100%",
               padding: "10px 14px 10px 36px",

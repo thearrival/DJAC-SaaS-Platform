@@ -4,12 +4,14 @@
  */
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Shield, CheckCircle2, AlertTriangle, ShieldOff } from "lucide-react";
 
 const ADMIN_API = "/api/yalla-admin";
 
 export default function AdminMFASetup() {
+  const { t } = useLocale();
   usePageTitle("MFA Setup — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [qrDataUrl, setQrDataUrl] = useState("");
@@ -251,7 +253,10 @@ export default function AdminMFASetup() {
                 type="password"
                 value={disablePassword}
                 onChange={e => setDisablePassword(e.target.value)}
-                placeholder="Current password"
+                placeholder={t(
+                  "yallaAdmin.placeholder.currentPassword",
+                  "Current password"
+                )}
                 autoComplete="current-password"
                 style={inputStyle}
               />
@@ -371,7 +376,7 @@ export default function AdminMFASetup() {
                 onChange={e =>
                   setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
                 }
-                placeholder="000000"
+                placeholder={t("common.otpPlaceholder", "000000")}
                 maxLength={6}
                 style={{
                   width: "100%",

@@ -7,6 +7,7 @@ import { useState } from "react";
 import type React from "react";
 import { useLocation } from "wouter";
 import { APP_TITLE, APP_LOGO } from "@/const";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   Shield,
@@ -24,6 +25,7 @@ import {
 const ADMIN_API = "/api/yalla-admin";
 
 export default function FoundersLogin() {
+  const { t } = useLocale();
   usePageTitle("Yalla Hack Founders — DJAC Admin");
   const [, navigate] = useLocation();
   const [username, setUsername] = useState("");
@@ -337,7 +339,7 @@ export default function FoundersLogin() {
                     autoFocus
                     autoComplete="one-time-code"
                     inputMode="numeric"
-                    placeholder="000000"
+                    placeholder={t("common.otpPlaceholder", "000000")}
                     style={{
                       width: "100%",
                       padding: "12px 14px 12px 40px",
@@ -449,7 +451,10 @@ export default function FoundersLogin() {
                   required
                   autoFocus
                   autoComplete="username"
-                  placeholder="Enter your username"
+                  placeholder={t(
+                    "yallaAdmin.placeholder.username",
+                    "Enter your username"
+                  )}
                   style={{
                     width: "100%",
                     padding: "12px 14px",
@@ -492,7 +497,10 @@ export default function FoundersLogin() {
                     onChange={e => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    placeholder="Enter your password"
+                    placeholder={t(
+                      "yallaAdmin.placeholder.password",
+                      "Enter your password"
+                    )}
                     style={{
                       width: "100%",
                       padding: "12px 14px 12px 40px",

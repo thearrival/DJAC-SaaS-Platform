@@ -5,6 +5,7 @@
  */
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   RefreshCw,
@@ -79,6 +80,7 @@ const thStyle: React.CSSProperties = {
 };
 
 export default function AdminSecurity() {
+  const { t } = useLocale();
   usePageTitle("Security Monitor — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [events, setEvents] = useState<SecurityEvent[]>([]);
@@ -946,7 +948,10 @@ export default function AdminSecurity() {
                 type="password"
                 value={currentPassword}
                 onChange={e => setCurrentPassword(e.target.value)}
-                placeholder="Current password"
+                placeholder={t(
+                  "yallaAdmin.placeholder.currentPassword",
+                  "Current password"
+                )}
                 autoComplete="current-password"
                 required
                 style={inputStyle}
@@ -955,7 +960,10 @@ export default function AdminSecurity() {
                 type="password"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
-                placeholder="New password (min 12 chars, letter + number)"
+                placeholder={t(
+                  "yallaAdmin.placeholder.newPasswordReq",
+                  "New password (min 12 chars, letter + number)"
+                )}
                 autoComplete="new-password"
                 required
                 minLength={12}
@@ -965,7 +973,10 @@ export default function AdminSecurity() {
                 type="password"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
+                placeholder={t(
+                  "yallaAdmin.placeholder.confirmNewPassword",
+                  "Confirm new password"
+                )}
                 autoComplete="new-password"
                 required
                 style={inputStyle}
