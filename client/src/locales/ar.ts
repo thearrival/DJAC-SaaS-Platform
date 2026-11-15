@@ -3457,5 +3457,16 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.critical": "حرج",
   "common.submitting": "جارٍ الإرسال…",
   "serviceRequests.submit": "إرسال الطلب",
+  "evidence.placeholder.title":
+    "مثال: تقرير تدقيق الربع الثاني — الامتثال للائحة GDPR",
+  "evidence.placeholder.url": "https://...",
+  "evidence.placeholder.sourceId": "مثال: 42",
+  "evidence.placeholder.description": "وصف مختصر لوثيقة الدليل...",
+  "evidence.placeholder.tags": "مثال: pipl, china, q2-2025",
+  "evidence.optionalCommaSeparated": "(اختياري، مفصول بفواصل)",
+  "incident.placeholder.title":
+    "مثال: وصول غير مصرح به إلى قاعدة بيانات العملاء",
+  "incident.placeholder.code": "INC-2026-001",
+  "incident.placeholder.affectedSubjects": "0",
 };
 export default messages;

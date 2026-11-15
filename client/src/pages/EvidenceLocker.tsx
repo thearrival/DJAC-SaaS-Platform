@@ -567,7 +567,10 @@ export default function EvidenceLocker() {
               </Label>
               <Input
                 id="ev-title"
-                placeholder="e.g. Q2 Audit Report – GDPR Compliance"
+                placeholder={t(
+                  "evidence.placeholder.title",
+                  "e.g. Q2 Audit Report — GDPR Compliance"
+                )}
                 value={form.title}
                 onChange={e => {
                   setForm(f => ({ ...f, title: e.target.value }));
@@ -588,7 +591,7 @@ export default function EvidenceLocker() {
               <Input
                 id="ev-url"
                 type="url"
-                placeholder="https://..."
+                placeholder={t("evidence.placeholder.url", "https://...")}
                 value={form.url}
                 onChange={e => {
                   setForm(f => ({ ...f, url: e.target.value }));
@@ -628,13 +631,15 @@ export default function EvidenceLocker() {
               <div className="space-y-1.5">
                 <Label htmlFor="ev-sid">
                   {t("evidence.addSourceId", "Source ID")}
-                  <span className="text-muted-foreground ml-1">(optional)</span>
+                  <span className="text-muted-foreground ml-1">
+                    {t("common.optional", "(optional)")}
+                  </span>
                 </Label>
                 <Input
                   id="ev-sid"
                   type="number"
                   min={1}
-                  placeholder="e.g. 42"
+                  placeholder={t("evidence.placeholder.sourceId", "e.g. 42")}
                   value={form.sourceId}
                   onChange={e =>
                     setForm(f => ({ ...f, sourceId: e.target.value }))
@@ -647,11 +652,16 @@ export default function EvidenceLocker() {
             <div className="space-y-1.5">
               <Label htmlFor="ev-desc">
                 {t("evidence.addDescription", "Description")}
-                <span className="text-muted-foreground ml-1">(optional)</span>
+                <span className="text-muted-foreground ml-1">
+                  {t("common.optional", "(optional)")}
+                </span>
               </Label>
               <Textarea
                 id="ev-desc"
-                placeholder="Short description of the evidence document..."
+                placeholder={t(
+                  "evidence.placeholder.description",
+                  "Short description of the evidence document..."
+                )}
                 rows={3}
                 value={form.description}
                 onChange={e =>
@@ -665,12 +675,18 @@ export default function EvidenceLocker() {
               <Label htmlFor="ev-tags">
                 {t("evidence.addTags", "Tags")}
                 <span className="text-muted-foreground ml-1">
-                  (optional, comma-separated)
+                  {t(
+                    "evidence.optionalCommaSeparated",
+                    "(optional, comma-separated)"
+                  )}
                 </span>
               </Label>
               <Input
                 id="ev-tags"
-                placeholder="e.g. pipl, china, q2-2025"
+                placeholder={t(
+                  "evidence.placeholder.tags",
+                  "e.g. pipl, china, q2-2025"
+                )}
                 value={form.tags}
                 onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
               />

@@ -3481,5 +3481,14 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.critical": "긴급",
   "common.submitting": "제출 중…",
   "serviceRequests.submit": "요청 제출",
+  "evidence.placeholder.title": "예: 2분기 감사 보고서 — GDPR 준수",
+  "evidence.placeholder.url": "https://...",
+  "evidence.placeholder.sourceId": "예: 42",
+  "evidence.placeholder.description": "증거 문서에 대한 간단한 설명...",
+  "evidence.placeholder.tags": "예: pipl, china, q2-2025",
+  "evidence.optionalCommaSeparated": "(선택 사항, 쉼표로 구분)",
+  "incident.placeholder.title": "예: 고객 데이터베이스에 대한 무단 액세스",
+  "incident.placeholder.code": "INC-2026-001",
+  "incident.placeholder.affectedSubjects": "0",
 };
 export default messages;

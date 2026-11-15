@@ -727,7 +727,10 @@ export default function IncidentRegister() {
               <Input
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. Unauthorised access to customer database"
+                placeholder={t(
+                  "incident.placeholder.title",
+                  "e.g. Unauthorised access to customer database"
+                )}
               />
             </div>
 
@@ -739,7 +742,7 @@ export default function IncidentRegister() {
                 onChange={e =>
                   setForm(f => ({ ...f, incidentCode: e.target.value }))
                 }
-                placeholder="INC-2026-001"
+                placeholder={t("incident.placeholder.code", "INC-2026-001")}
               />
             </div>
 
@@ -845,7 +848,7 @@ export default function IncidentRegister() {
                 onChange={e =>
                   setForm(f => ({ ...f, affectedDataSubjects: e.target.value }))
                 }
-                placeholder="0"
+                placeholder={t("incident.placeholder.affectedSubjects", "0")}
               />
             </div>
 

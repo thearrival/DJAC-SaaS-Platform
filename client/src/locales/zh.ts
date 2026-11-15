@@ -3291,5 +3291,14 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.critical": "紧急",
   "common.submitting": "正在提交…",
   "serviceRequests.submit": "提交请求",
+  "evidence.placeholder.title": "例如：第二季度审计报告 — GDPR 合规",
+  "evidence.placeholder.url": "https://...",
+  "evidence.placeholder.sourceId": "例如：42",
+  "evidence.placeholder.description": "证据文档的简短描述...",
+  "evidence.placeholder.tags": "例如：pipl, china, q2-2025",
+  "evidence.optionalCommaSeparated": "（可选，逗号分隔）",
+  "incident.placeholder.title": "例如：未经授权访问客户数据库",
+  "incident.placeholder.code": "INC-2026-001",
+  "incident.placeholder.affectedSubjects": "0",
 };
 export default messages;

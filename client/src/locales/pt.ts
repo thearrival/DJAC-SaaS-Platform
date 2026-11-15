@@ -3638,5 +3638,17 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.critical": "Crítica",
   "common.submitting": "Enviando…",
   "serviceRequests.submit": "Enviar solicitação",
+  "evidence.placeholder.title":
+    "ex.: Relatório de auditoria T2 — Conformidade GDPR",
+  "evidence.placeholder.url": "https://...",
+  "evidence.placeholder.sourceId": "ex.: 42",
+  "evidence.placeholder.description":
+    "Breve descrição do documento de evidência...",
+  "evidence.placeholder.tags": "ex.: pipl, china, q2-2025",
+  "evidence.optionalCommaSeparated": "(opcional, separados por vírgula)",
+  "incident.placeholder.title":
+    "ex.: Acesso não autorizado ao banco de dados de clientes",
+  "incident.placeholder.code": "INC-2026-001",
+  "incident.placeholder.affectedSubjects": "0",
 };
 export default messages;

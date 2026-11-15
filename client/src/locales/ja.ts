@@ -3574,5 +3574,14 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.critical": "緊急",
   "common.submitting": "送信中…",
   "serviceRequests.submit": "リクエストを送信",
+  "evidence.placeholder.title": "例：第2四半期監査レポート — GDPR準拠",
+  "evidence.placeholder.url": "https://...",
+  "evidence.placeholder.sourceId": "例：42",
+  "evidence.placeholder.description": "証拠文書の簡単な説明...",
+  "evidence.placeholder.tags": "例：pipl, china, q2-2025",
+  "evidence.optionalCommaSeparated": "（任意、カンマ区切り）",
+  "incident.placeholder.title": "例：顧客データベースへの不正アクセス",
+  "incident.placeholder.code": "INC-2026-001",
+  "incident.placeholder.affectedSubjects": "0",
 };
 export default messages;

@@ -3529,5 +3529,15 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.critical": "Critical",
   "common.submitting": "Submitting…",
   "serviceRequests.submit": "Submit Request",
+  "evidence.placeholder.title": "e.g. Q2 Audit Report — GDPR Compliance",
+  "evidence.placeholder.url": "https://...",
+  "evidence.placeholder.sourceId": "e.g. 42",
+  "evidence.placeholder.description":
+    "Short description of the evidence document...",
+  "evidence.placeholder.tags": "e.g. pipl, china, q2-2025",
+  "evidence.optionalCommaSeparated": "(optional, comma-separated)",
+  "incident.placeholder.title": "e.g. Unauthorised access to customer database",
+  "incident.placeholder.code": "INC-2026-001",
+  "incident.placeholder.affectedSubjects": "0",
 };
 export default messages;
