@@ -353,11 +353,11 @@ export default function CrossBorderDataFlow() {
                           <td className="p-1 font-medium text-muted-foreground whitespace-nowrap">
                             {s}
                           </td>
-                          {jurs10.map(t => {
-                            const risk = riskMatrix.map[s]?.[t];
-                            const isSame = s === t;
+                          {jurs10.map(target => {
+                            const risk = riskMatrix.map[s]?.[target];
+                            const isSame = s === target;
                             return (
-                              <td key={t} className="p-1">
+                              <td key={target} className="p-1">
                                 <div
                                   className={`w-6 h-6 rounded mx-auto ${isSame ? "bg-muted" : risk === "critical" ? "bg-red-500" : risk === "high" ? "bg-orange-500" : risk === "medium" ? "bg-amber-400" : risk === "low" ? "bg-emerald-500" : "bg-muted"}`}
                                   title={
@@ -366,7 +366,7 @@ export default function CrossBorderDataFlow() {
                                           "crossBorder.sameJurisdiction",
                                           "Same jurisdiction"
                                         )
-                                      : `${s} → ${t}: ${risk ?? t("crossBorder.unknown", "unknown")}`
+                                      : `${s} → ${target}: ${risk ?? t("crossBorder.unknown", "unknown")}`
                                   }
                                 />
                               </td>
