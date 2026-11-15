@@ -180,7 +180,10 @@ export default function AdminSecurity() {
   async function handleRevoke(sessionId: string) {
     if (
       !window.confirm(
-        "Revoke this session? That device will be signed out immediately."
+        t(
+          "yallaAdmin.security.sessions.revokeConfirm",
+          "Revoke this session? That device will be signed out immediately."
+        )
       )
     )
       return;
@@ -202,10 +205,23 @@ export default function AdminSecurity() {
         }
       } else {
         const d = await res.json().catch(() => null);
-        setError(d?.error || "Could not revoke session");
+        setError(
+          d?.error ||
+            t(
+              "yallaAdmin.security.sessions.revokeError",
+              "Could not revoke session"
+            )
+        );
       }
     } catch (e) {
-      setError(`Could not revoke session: ${(e as Error).message}`);
+      setError(
+        t(
+          "yallaAdmin.security.sessions.revokeError",
+          "Could not revoke session"
+        ) +
+          ": " +
+          (e as Error).message
+      );
     } finally {
       setRevoking(null);
     }
@@ -215,7 +231,13 @@ export default function AdminSecurity() {
     e.preventDefault();
     setPwMessage(null);
     if (newPassword !== confirmPassword) {
-      setPwMessage({ ok: false, text: "New passwords do not match." });
+      setPwMessage({
+        ok: false,
+        text: t(
+          "yallaAdmin.security.password.mismatch",
+          "New passwords do not match."
+        ),
+      });
       return;
     }
     setPwBusy(true);
@@ -230,22 +252,33 @@ export default function AdminSecurity() {
       if (!res.ok) {
         setPwMessage({
           ok: false,
-          text: data?.error || `Password change failed (${res.status}).`,
+          text:
+            data?.error ||
+            t(
+              "yallaAdmin.security.password.failed",
+              "Password change failed ({status})."
+            ).replace("{status}", String(res.status)),
         });
         return;
       }
       setPwMessage({
         ok: true,
-        text: "Password changed. All other sessions were signed out.",
+        text: t(
+          "yallaAdmin.security.password.changed",
+          "Password changed. All other sessions were signed out."
+        ),
       });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       void loadSessions();
-    } catch (err) {
+    } catch {
       setPwMessage({
         ok: false,
-        text: `Network error: ${(err as Error).message}`,
+        text: t(
+          "yallaAdmin.common.networkError",
+          "Network error. Please try again."
+        ),
       });
     } finally {
       setPwBusy(false);
@@ -308,9 +341,21 @@ export default function AdminSecurity() {
   const outcomePie = useMemo(
     () =>
       [
-        { name: "Success", value: summary.success, color: "#10b981" },
-        { name: "Failures", value: summary.failures, color: "#f59e0b" },
-        { name: "Blocked", value: summary.blocked, color: "#ef4444" },
+        {
+          name: t("yallaAdmin.security.chart.success", "Success"),
+          value: summary.success,
+          color: "#10b981",
+        },
+        {
+          name: t("yallaAdmin.security.chart.failures", "Failures"),
+          value: summary.failures,
+          color: "#f59e0b",
+        },
+        {
+          name: t("yallaAdmin.security.chart.blocked", "Blocked"),
+          value: summary.blocked,
+          color: "#ef4444",
+        },
       ].filter(s => s.value > 0),
     [summary]
   );
@@ -373,11 +418,14 @@ export default function AdminSecurity() {
             <ChevronLeft size={18} />
           </button>
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
-            Security Monitor
+            {t("yallaAdmin.security.headerTitle", "Security Monitor")}
           </h1>
           {updatedAt && (
             <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
-              updated {updatedAt}
+              {t("yallaAdmin.security.updated", "updated {time}").replace(
+                "{time}",
+                updatedAt
+              )}
             </span>
           )}
         </div>
@@ -397,9 +445,15 @@ export default function AdminSecurity() {
               fontSize: 11,
               fontWeight: 600,
             }}
-            title={autoRefresh ? "Pause auto-refresh" : "Resume auto-refresh"}
+            title={
+              autoRefresh
+                ? t("yallaAdmin.security.pauseAuto", "Pause auto-refresh")
+                : t("yallaAdmin.security.resumeAuto", "Resume auto-refresh")
+            }
           >
-            {autoRefresh ? "Auto 30s" : "Paused"}
+            {autoRefresh
+              ? t("yallaAdmin.security.auto30s", "Auto 30s")
+              : t("yallaAdmin.security.paused", "Paused")}
           </button>
           <button
             onClick={() => {
@@ -453,28 +507,39 @@ export default function AdminSecurity() {
         >
           {[
             {
-              label: "Events (24h window)",
+              label: t(
+                "yallaAdmin.security.kpi.events24h",
+                "Events (24h window)"
+              ),
               value: summary.total,
               color: "var(--djac-text)",
             },
             {
-              label: "Failures",
+              label: t("yallaAdmin.security.kpi.failures", "Failures"),
               value: summary.failures,
               color: summary.failures > 0 ? "#f59e0b" : "#10b981",
             },
             {
-              label: "Blocked",
+              label: t("yallaAdmin.security.kpi.blocked", "Blocked"),
               value: summary.blocked,
               color: summary.blocked > 0 ? "#ef4444" : "#10b981",
             },
             {
-              label: "Active sessions",
+              label: t(
+                "yallaAdmin.security.kpi.activeSessions",
+                "Active sessions"
+              ),
               value: sessions.length,
               color: "#00d2ff",
             },
             {
-              label: "2FA",
-              value: mfaEnabled === null ? "…" : mfaEnabled ? "Enabled" : "Off",
+              label: t("yallaAdmin.security.kpi.twoFa", "2FA"),
+              value:
+                mfaEnabled === null
+                  ? t("yallaAdmin.common.notAvailable", "—")
+                  : mfaEnabled
+                    ? t("yallaAdmin.security.kpi.enabled", "Enabled")
+                    : t("yallaAdmin.security.kpi.off", "Off"),
               color:
                 mfaEnabled === null
                   ? "#94a3b8"
@@ -519,7 +584,10 @@ export default function AdminSecurity() {
                 marginBottom: 12,
               }}
             >
-              Security events — last 14 days
+              {t(
+                "yallaAdmin.security.chart.events14d",
+                "Security events — last 14 days"
+              )}
             </div>
             <ResponsiveContainer width="100%" height={160}>
               <AreaChart
@@ -562,7 +630,7 @@ export default function AdminSecurity() {
                 <Area
                   type="monotone"
                   dataKey="count"
-                  name="Events"
+                  name={t("yallaAdmin.security.chart.events", "Events")}
                   stroke="#d900ff"
                   strokeWidth={2}
                   fill="url(#secFill)"
@@ -580,7 +648,7 @@ export default function AdminSecurity() {
                 marginBottom: 12,
               }}
             >
-              Outcomes
+              {t("yallaAdmin.security.chart.outcomes", "Outcomes")}
             </div>
             {outcomePie.length === 0 ? (
               <div
@@ -591,7 +659,7 @@ export default function AdminSecurity() {
                   textAlign: "center",
                 }}
               >
-                No events yet
+                {t("yallaAdmin.security.chart.noEvents", "No events yet")}
               </div>
             ) : (
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -666,7 +734,7 @@ export default function AdminSecurity() {
                 marginBottom: 12,
               }}
             >
-              Top source IPs
+              {t("yallaAdmin.security.chart.topIps", "Top source IPs")}
             </div>
             {topIps.length === 0 ? (
               <div
@@ -677,7 +745,7 @@ export default function AdminSecurity() {
                   textAlign: "center",
                 }}
               >
-                No IP data yet
+                {t("yallaAdmin.security.chart.noIpData", "No IP data yet")}
               </div>
             ) : (
               <div
@@ -764,12 +832,18 @@ export default function AdminSecurity() {
                 }}
               >
                 <MonitorSmartphone size={14} color="#00d2ff" />
-                Active founder sessions ({sessions.length})
+                {t(
+                  "yallaAdmin.security.sessions.title",
+                  "Active founder sessions ({count})"
+                ).replace("{count}", String(sessions.length))}
               </div>
             </div>
             {sessions.length === 0 ? (
               <div style={{ color: "var(--djac-muted)", fontSize: 13 }}>
-                No active sessions found.
+                {t(
+                  "yallaAdmin.security.sessions.none",
+                  "No active sessions found."
+                )}
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -815,7 +889,10 @@ export default function AdminSecurity() {
                               padding: "1px 8px",
                             }}
                           >
-                            THIS DEVICE
+                            {t(
+                              "yallaAdmin.security.sessions.thisDevice",
+                              "THIS DEVICE"
+                            )}
                           </span>
                         )}
                       </div>
@@ -829,18 +906,32 @@ export default function AdminSecurity() {
                           marginTop: 2,
                         }}
                       >
-                        {s.userAgent || "unknown device"} · seen{" "}
-                        {s.lastSeenAt
-                          ? new Date(s.lastSeenAt).toLocaleString(
-                              storedLocaleTag()
-                            )
-                          : "—"}
+                        {s.userAgent ||
+                          t(
+                            "yallaAdmin.security.sessions.unknownDevice",
+                            "unknown device"
+                          )}{" "}
+                        ·{" "}
+                        {t(
+                          "yallaAdmin.security.sessions.seen",
+                          "seen {time}"
+                        ).replace(
+                          "{time}",
+                          s.lastSeenAt
+                            ? new Date(s.lastSeenAt).toLocaleString(
+                                storedLocaleTag()
+                              )
+                            : t("yallaAdmin.common.notAvailable", "—")
+                        )}
                       </div>
                     </div>
                     <button
                       onClick={() => void handleRevoke(s.id)}
                       disabled={revoking === s.id}
-                      title="Revoke session"
+                      title={t(
+                        "yallaAdmin.security.sessions.revokeTitle",
+                        "Revoke session"
+                      )}
                       style={{
                         background: "rgba(239,68,68,0.10)",
                         border: "1px solid rgba(239,68,68,0.30)",
@@ -856,7 +947,9 @@ export default function AdminSecurity() {
                       }}
                     >
                       <Ban size={12} />
-                      {revoking === s.id ? "…" : "Revoke"}
+                      {revoking === s.id
+                        ? "…"
+                        : t("yallaAdmin.security.sessions.revoke", "Revoke")}
                     </button>
                   </div>
                 ))}
@@ -878,7 +971,7 @@ export default function AdminSecurity() {
               }}
             >
               <ShieldCheck size={14} color="#10b981" />
-              Security settings
+              {t("yallaAdmin.security.settings.title", "Security settings")}
             </div>
 
             {/* MFA status */}
@@ -902,14 +995,23 @@ export default function AdminSecurity() {
                 )}
                 <div>
                   <div style={{ fontSize: 12.5, fontWeight: 600 }}>
-                    Two-factor authentication
+                    {t(
+                      "yallaAdmin.security.mfa.title",
+                      "Two-factor authentication"
+                    )}
                   </div>
                   <div style={{ fontSize: 11, color: "var(--djac-muted)" }}>
                     {mfaEnabled === null
-                      ? "Checking…"
+                      ? t("yallaAdmin.security.mfa.checking", "Checking…")
                       : mfaEnabled
-                        ? "TOTP is required at sign-in"
-                        : "Not enabled — strongly recommended"}
+                        ? t(
+                            "yallaAdmin.security.mfa.required",
+                            "TOTP is required at sign-in"
+                          )
+                        : t(
+                            "yallaAdmin.security.mfa.notEnabled",
+                            "Not enabled — strongly recommended"
+                          )}
                   </div>
                 </div>
               </div>
@@ -932,7 +1034,9 @@ export default function AdminSecurity() {
                   cursor: "pointer",
                 }}
               >
-                {mfaEnabled ? "Manage" : "Enable 2FA"}
+                {mfaEnabled
+                  ? t("yallaAdmin.security.mfa.manage", "Manage")
+                  : t("yallaAdmin.security.mfa.enable", "Enable 2FA")}
                 {!mfaEnabled && <Plus size={12} style={{ marginLeft: 4 }} />}
               </button>
             </div>
@@ -949,7 +1053,10 @@ export default function AdminSecurity() {
                   fontWeight: 600,
                 }}
               >
-                Change founders password
+                {t(
+                  "yallaAdmin.security.password.title",
+                  "Change founders password"
+                )}
               </div>
               <input
                 type="password"
@@ -1052,10 +1159,11 @@ export default function AdminSecurity() {
                       gap: 6,
                     }}
                   >
-                    <Clock size={13} /> Updating…
+                    <Clock size={13} />{" "}
+                    {t("yallaAdmin.security.password.updating", "Updating…")}
                   </span>
                 ) : (
-                  "Change password"
+                  t("yallaAdmin.security.password.change", "Change password")
                 )}
               </button>
             </form>
@@ -1072,27 +1180,30 @@ export default function AdminSecurity() {
             alignItems: "center",
           }}
         >
-          {["all", "failed", "auth", "password", "mfa", "admin"].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              style={{
-                padding: "6px 14px",
-                borderRadius: 20,
-                fontSize: 12,
-                fontWeight: 600,
-                border: "1px solid",
-                borderColor: filter === f ? "#d900ff" : "rgba(255,255,255,0.1)",
-                background:
-                  filter === f ? "rgba(99,102,241,0.15)" : "transparent",
-                color: filter === f ? "#d900ff" : "#94a3b8",
-                cursor: "pointer",
-                textTransform: "capitalize",
-              }}
-            >
-              {f}
-            </button>
-          ))}
+          {(["all", "failed", "auth", "password", "mfa", "admin"] as const).map(
+            f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  border: "1px solid",
+                  borderColor:
+                    filter === f ? "#d900ff" : "rgba(255,255,255,0.1)",
+                  background:
+                    filter === f ? "rgba(99,102,241,0.15)" : "transparent",
+                  color: filter === f ? "#d900ff" : "#94a3b8",
+                  cursor: "pointer",
+                  textTransform: "capitalize",
+                }}
+              >
+                {t(`yallaAdmin.security.filters.${f}`, f)}
+              </button>
+            )
+          )}
           <span
             style={{
               fontSize: 11.5,
@@ -1100,7 +1211,12 @@ export default function AdminSecurity() {
               marginLeft: "auto",
             }}
           >
-            showing {Math.min(filtered.length, 100)} of {filtered.length} events
+            {t(
+              "yallaAdmin.security.showingEvents",
+              "showing {shown} of {total} events"
+            )
+              .replace("{shown}", String(Math.min(filtered.length, 100)))
+              .replace("{total}", String(filtered.length))}
           </span>
         </div>
 
@@ -1117,12 +1233,24 @@ export default function AdminSecurity() {
           >
             <thead>
               <tr style={{ background: "var(--djac-card-hi)" }}>
-                <th style={thStyle}>Event</th>
-                <th style={thStyle}>Source</th>
-                <th style={thStyle}>Outcome</th>
-                <th style={thStyle}>IP</th>
-                <th style={thStyle}>Target</th>
-                <th style={thStyle}>Time</th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.security.table.event", "Event")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.security.table.source", "Source")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.security.table.outcome", "Outcome")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.security.table.ip", "IP")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.security.table.target", "Target")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.security.table.time", "Time")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -1136,7 +1264,7 @@ export default function AdminSecurity() {
                       color: "var(--djac-muted)",
                     }}
                   >
-                    Loading...
+                    {t("yallaAdmin.common.loading", "Loading...")}
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
@@ -1149,7 +1277,7 @@ export default function AdminSecurity() {
                       color: "var(--djac-muted)",
                     }}
                   >
-                    No events found
+                    {t("yallaAdmin.security.noEventsFound", "No events found")}
                   </td>
                 </tr>
               ) : (
@@ -1197,7 +1325,12 @@ export default function AdminSecurity() {
                           textTransform: "uppercase",
                         }}
                       >
-                        {e.source === "admin" ? "founder" : "platform"}
+                        {t(
+                          e.source === "admin"
+                            ? "yallaAdmin.security.source.founder"
+                            : "yallaAdmin.security.source.platform",
+                          e.source === "admin" ? "founder" : "platform"
+                        )}
                       </span>
                     </td>
                     <td style={{ padding: "12px 16px" }}>
@@ -1208,7 +1341,7 @@ export default function AdminSecurity() {
                           color: OUTCOME_COLORS[e.outcome] ?? "#94a3b8",
                         }}
                       >
-                        {e.outcome || "—"}
+                        {e.outcome || t("yallaAdmin.common.notAvailable", "—")}
                       </span>
                     </td>
                     <td
@@ -1219,7 +1352,7 @@ export default function AdminSecurity() {
                         fontFamily: "monospace",
                       }}
                     >
-                      {e.ipAddress || "—"}
+                      {e.ipAddress || t("yallaAdmin.common.notAvailable", "—")}
                     </td>
                     <td
                       style={{
@@ -1228,7 +1361,8 @@ export default function AdminSecurity() {
                         fontSize: 12,
                       }}
                     >
-                      {e.targetEntity || "—"}
+                      {e.targetEntity ||
+                        t("yallaAdmin.common.notAvailable", "—")}
                     </td>
                     <td
                       style={{
