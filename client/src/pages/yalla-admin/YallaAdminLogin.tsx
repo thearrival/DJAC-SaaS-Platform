@@ -37,12 +37,14 @@ export default function YallaAdminLogin() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Login failed");
+        setError(data.error ?? t("yallaAdmin.login.failed", "Login failed"));
         return;
       }
       navigate(portalPath);
     } catch {
-      setError("Network error. Please try again.");
+      setError(
+        t("yallaAdmin.login.networkError", "Network error. Please try again.")
+      );
     } finally {
       setLoading(false);
     }
@@ -87,13 +89,14 @@ export default function YallaAdminLogin() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">
-            Internal Operations
+            {t("yallaAdmin.login.title", "Internal Operations")}
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            Yalla-Admin Control Panel
+            {t("yallaAdmin.login.subtitle", "Yalla-Admin Control Panel")}
           </p>
           <p className="text-slate-700 text-xs mt-3">
-            Private entry: {ownerEntryPath}
+            {t("yallaAdmin.login.privateEntry", "Private entry:")}{" "}
+            {ownerEntryPath}
           </p>
         </div>
 
@@ -102,7 +105,7 @@ export default function YallaAdminLogin() {
           <form onSubmit={e => void handleSubmit(e)} className="space-y-5">
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
-                Username
+                {t("yallaAdmin.login.usernameLabel", "Username")}
               </label>
               <input
                 type="text"
@@ -120,7 +123,7 @@ export default function YallaAdminLogin() {
 
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">
-                Password
+                {t("yallaAdmin.login.passwordLabel", "Password")}
               </label>
               <input
                 type="password"
@@ -163,7 +166,7 @@ export default function YallaAdminLogin() {
               {loading ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Authenticating...
+                  {t("yallaAdmin.login.authenticating", "Authenticating...")}
                 </>
               ) : (
                 <>
@@ -180,7 +183,7 @@ export default function YallaAdminLogin() {
                       d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
                     />
                   </svg>
-                  Sign In
+                  {t("yallaAdmin.login.signIn", "Sign In")}
                 </>
               )}
             </button>
@@ -188,7 +191,10 @@ export default function YallaAdminLogin() {
         </div>
 
         <p className="text-center text-slate-700 text-xs mt-6">
-          Authorized personnel only. All access is logged and monitored.
+          {t(
+            "yallaAdmin.login.authorizedOnly",
+            "Authorized personnel only. All access is logged and monitored."
+          )}
         </p>
       </div>
     </div>

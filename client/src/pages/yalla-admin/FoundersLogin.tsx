@@ -1,5 +1,5 @@
 /**
- * Yalla Hack Founders Portal — Login Page
+ * Yalla Hack Founders Portal Login Page
  * Professional login for Yalla Hack founders and managers.
  * Manages all DJAC platform users, subscriptions, and operations.
  */
@@ -26,7 +26,9 @@ const ADMIN_API = "/api/yalla-admin";
 
 export default function FoundersLogin() {
   const { t } = useLocale();
-  usePageTitle("Yalla Hack Founders — DJAC Admin");
+  usePageTitle(
+    t("foundersLogin.pageTitle", "Yalla Hack Founders — DJAC Admin")
+  );
   const [, navigate] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -51,7 +53,11 @@ export default function FoundersLogin() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(data?.error || `Login failed (${res.status}).`);
+        setError(
+          data?.error ||
+            t("foundersLogin.loginFailed", "Login failed") +
+              (res.status ? ` (${res.status})` : "")
+        );
         return;
       }
       if (data?.mfaRequired && data?.pendingToken) {
@@ -63,9 +69,11 @@ export default function FoundersLogin() {
         navigate("/yalla-hack-owners-console/dashboard", { replace: true });
         return;
       }
-      setError(data?.error || "Login failed.");
+      setError(data?.error || t("foundersLogin.loginFailed", "Login failed"));
     } catch {
-      setError("Network error. Please try again.");
+      setError(
+        t("foundersLogin.networkError", "Network error. Please try again.")
+      );
     } finally {
       setLoading(false);
     }
@@ -85,16 +93,60 @@ export default function FoundersLogin() {
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
-        setError(data?.error || `Verification failed (${res.status}).`);
+        setError(
+          data?.error ||
+            t("foundersLogin.verifyFailed", "Verification failed") +
+              (res.status ? ` (${res.status})` : "")
+        );
         return;
       }
       navigate("/yalla-hack-owners-console/dashboard", { replace: true });
     } catch {
-      setError("Network error. Please try again.");
+      setError(
+        t("foundersLogin.networkError", "Network error. Please try again.")
+      );
     } finally {
       setMfaLoading(false);
     }
   }
+
+  const features = [
+    {
+      icon: <Users size={16} />,
+      label: t("foundersLogin.feature.userManagement", "User Management"),
+      desc: t(
+        "foundersLogin.feature.userManagementDesc",
+        "View, suspend, and manage all users"
+      ),
+    },
+    {
+      icon: <CreditCard size={16} />,
+      label: t(
+        "foundersLogin.feature.subscriptionControl",
+        "Subscription Control"
+      ),
+      desc: t(
+        "foundersLogin.feature.subscriptionControlDesc",
+        "Monitor plans, revenue, and billing"
+      ),
+    },
+    {
+      icon: <Building2 size={16} />,
+      label: t("foundersLogin.feature.orgOversight", "Organization Oversight"),
+      desc: t(
+        "foundersLogin.feature.orgOversightDesc",
+        "Manage tenant orgs and members"
+      ),
+    },
+    {
+      icon: <BarChart3 size={16} />,
+      label: t("foundersLogin.feature.analytics", "Platform Analytics"),
+      desc: t(
+        "foundersLogin.feature.analyticsDesc",
+        "Track usage, growth, and trends"
+      ),
+    },
+  ];
 
   return (
     <div
@@ -156,7 +208,7 @@ export default function FoundersLogin() {
               margin: "0 0 16px",
             }}
           >
-            Yalla Hack
+            {t("foundersLogin.brandTitle", "Yalla Hack")}
             <br />
             <span
               style={{
@@ -165,7 +217,7 @@ export default function FoundersLogin() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Founders Portal
+              {t("foundersLogin.brandSubtitle", "Founders Portal")}
             </span>
           </h1>
           <p
@@ -177,32 +229,13 @@ export default function FoundersLogin() {
               maxWidth: 380,
             }}
           >
-            Manage all DJAC platform users, subscriptions, and operations. Full
-            visibility and control from A to Z.
+            {t(
+              "foundersLogin.brandDesc",
+              "Manage all DJAC platform users, subscriptions, and operations. Full visibility and control from A to Z."
+            )}
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {[
-              {
-                icon: <Users size={16} />,
-                label: "User Management",
-                desc: "View, suspend, and manage all users",
-              },
-              {
-                icon: <CreditCard size={16} />,
-                label: "Subscription Control",
-                desc: "Monitor plans, revenue, and billing",
-              },
-              {
-                icon: <Building2 size={16} />,
-                label: "Organization Oversight",
-                desc: "Manage tenant orgs and members",
-              },
-              {
-                icon: <BarChart3 size={16} />,
-                label: "Platform Analytics",
-                desc: "Track usage, growth, and trends",
-              },
-            ].map((item, i) => (
+            {features.map((item, i) => (
               <div
                 key={i}
                 style={{
@@ -281,7 +314,7 @@ export default function FoundersLogin() {
               }}
             >
               <Shield size={12} />
-              SECURE ACCESS
+              {t("foundersLogin.secureAccess", "SECURE ACCESS")}
             </div>
             <h2
               style={{
@@ -291,12 +324,20 @@ export default function FoundersLogin() {
                 margin: "0 0 8px",
               }}
             >
-              {pendingToken ? "Two-Factor Check" : "Welcome Back"}
+              {pendingToken
+                ? t("foundersLogin.mfaTitle", "Two-Factor Check")
+                : t("foundersLogin.welcomeBack", "Welcome Back")}
             </h2>
             <p style={{ fontSize: 14, color: "var(--djac-muted)", margin: 0 }}>
               {pendingToken
-                ? "Enter the 6-digit code from your authenticator app"
-                : "Sign in to the Yalla Hack Founders Portal"}
+                ? t(
+                    "foundersLogin.mfaDesc",
+                    "Enter the 6-digit code from your authenticator app"
+                  )
+                : t(
+                    "foundersLogin.signInDesc",
+                    "Sign in to the Yalla Hack Founders Portal"
+                  )}
             </p>
           </div>
 
@@ -315,7 +356,7 @@ export default function FoundersLogin() {
                     marginBottom: 6,
                   }}
                 >
-                  Authentication code
+                  {t("foundersLogin.authCodeLabel", "Authentication code")}
                 </label>
                 <div style={{ position: "relative" }}>
                   <KeyRound
@@ -362,7 +403,10 @@ export default function FoundersLogin() {
                     margin: "6px 0 0",
                   }}
                 >
-                  A 6-digit TOTP code, or one of your backup codes.
+                  {t(
+                    "foundersLogin.mfaHint",
+                    "A 6-digit TOTP code, or one of your backup codes."
+                  )}
                 </p>
               </div>
 
@@ -407,7 +451,9 @@ export default function FoundersLogin() {
                   marginTop: 8,
                 }}
               >
-                {mfaLoading ? "Verifying..." : "Verify & Enter Portal"}
+                {mfaLoading
+                  ? t("foundersLogin.verifying", "Verifying...")
+                  : t("foundersLogin.verifyEnter", "Verify & Enter Portal")}
               </button>
               <button
                 type="button"
@@ -425,7 +471,10 @@ export default function FoundersLogin() {
                   padding: 4,
                 }}
               >
-                ← Back to password sign-in
+                {t(
+                  "foundersLogin.backToPassword",
+                  "← Back to password sign-in"
+                )}
               </button>
             </form>
           ) : (
@@ -443,7 +492,7 @@ export default function FoundersLogin() {
                     marginBottom: 6,
                   }}
                 >
-                  Username
+                  {t("foundersLogin.usernameLabel", "Username")}
                 </label>
                 <input
                   value={username}
@@ -478,7 +527,7 @@ export default function FoundersLogin() {
                     marginBottom: 6,
                   }}
                 >
-                  Password
+                  {t("foundersLogin.passwordLabel", "Password")}
                 </label>
                 <div style={{ position: "relative" }}>
                   <Lock
@@ -517,7 +566,9 @@ export default function FoundersLogin() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={
-                      showPassword ? "Hide password" : "Show password"
+                      showPassword
+                        ? t("foundersLogin.hidePassword", "Hide password")
+                        : t("foundersLogin.showPassword", "Show password")
                     }
                     style={{
                       position: "absolute",
@@ -573,7 +624,9 @@ export default function FoundersLogin() {
                   marginTop: 8,
                 }}
               >
-                {loading ? "Authenticating..." : "Sign In to Founders Portal"}
+                {loading
+                  ? t("foundersLogin.authenticating", "Authenticating...")
+                  : t("foundersLogin.signIn", "Sign In to Founders Portal")}
               </button>
             </form>
           )}
@@ -587,8 +640,10 @@ export default function FoundersLogin() {
               marginBottom: 0,
             }}
           >
-            Protected by IP allowlist, rate limiting, and session controls. All
-            actions are logged.
+            {t(
+              "foundersLogin.footer",
+              "Protected by IP allowlist, rate limiting, and session controls. All actions are logged."
+            )}
           </p>
         </div>
       </div>

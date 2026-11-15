@@ -3717,5 +3717,55 @@ const messages: Record<string, string> = {
     "Filtrar por e-mail ou usuário...",
   "yallaAdmin.placeholder.filterNamePlan": "Filtrar por nome ou plano...",
   "yallaAdmin.placeholder.maskedPassword": "••••••••",
+  "yallaAdmin.login.title": "Operações internas",
+  "yallaAdmin.login.subtitle": "Painel de controle Yalla-Admin",
+  "yallaAdmin.login.privateEntry": "Entrada privada:",
+  "yallaAdmin.login.usernameLabel": "Nome de usuário",
+  "yallaAdmin.login.passwordLabel": "Senha",
+  "yallaAdmin.login.authenticating": "Autenticando...",
+  "yallaAdmin.login.signIn": "Entrar",
+  "yallaAdmin.login.authorizedOnly":
+    "Somente pessoal autorizado. Todos os acessos são registrados e monitorados.",
+  "yallaAdmin.login.failed": "Falha no login",
+  "yallaAdmin.login.networkError": "Erro de rede. Tente novamente.",
+  "foundersLogin.pageTitle": "Fundadores Yalla Hack — Admin DJAC",
+  "foundersLogin.brandTitle": "Yalla Hack",
+  "foundersLogin.brandSubtitle": "Portal dos Fundadores",
+  "foundersLogin.brandDesc":
+    "Gerencie todos os usuários, assinaturas e operações da plataforma DJAC. Visibilidade e controle total de A a Z.",
+  "foundersLogin.feature.userManagement": "Gerenciamento de usuários",
+  "foundersLogin.feature.userManagementDesc":
+    "Visualize, suspenda e gerencie todos os usuários",
+  "foundersLogin.feature.subscriptionControl": "Controle de assinaturas",
+  "foundersLogin.feature.subscriptionControlDesc":
+    "Monitore planos, receita e faturamento",
+  "foundersLogin.feature.orgOversight": "Supervisão de organizações",
+  "foundersLogin.feature.orgOversightDesc": "Gerencie organizações e membros",
+  "foundersLogin.feature.analytics": "Análises da plataforma",
+  "foundersLogin.feature.analyticsDesc":
+    "Acompanhe uso, crescimento e tendências",
+  "foundersLogin.secureAccess": "ACESSO SEGURO",
+  "foundersLogin.mfaTitle": "Verificação em duas etapas",
+  "foundersLogin.welcomeBack": "Bem-vindo de volta",
+  "foundersLogin.mfaDesc":
+    "Digite o código de 6 dígitos do seu aplicativo autenticador",
+  "foundersLogin.signInDesc": "Entre no Portal dos Fundadores Yalla Hack",
+  "foundersLogin.authCodeLabel": "Código de autenticação",
+  "foundersLogin.mfaHint":
+    "Um código TOTP de 6 dígitos ou um dos seus códigos de backup.",
+  "foundersLogin.verifying": "Verificando...",
+  "foundersLogin.verifyEnter": "Verificar e entrar no portal",
+  "foundersLogin.backToPassword": "← Voltar ao login com senha",
+  "foundersLogin.usernameLabel": "Nome de usuário",
+  "foundersLogin.passwordLabel": "Senha",
+  "foundersLogin.showPassword": "Mostrar senha",
+  "foundersLogin.hidePassword": "Ocultar senha",
+  "foundersLogin.authenticating": "Autenticando...",
+  "foundersLogin.signIn": "Entrar no Portal dos Fundadores",
+  "foundersLogin.footer":
+    "Protegido por lista de IPs permitidos, limitação de taxa e controles de sessão. Todas as ações são registradas.",
+  "foundersLogin.loginFailed": "Falha no login",
+  "foundersLogin.networkError": "Erro de rede. Tente novamente.",
+  "foundersLogin.verifyFailed": "Falha na verificação",
 };
 export default messages;

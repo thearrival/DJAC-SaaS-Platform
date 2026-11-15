@@ -3742,5 +3742,59 @@ const messages: Record<string, string> = {
     "Nach E-Mail oder Benutzername filtern...",
   "yallaAdmin.placeholder.filterNamePlan": "Nach Name oder Plan filtern...",
   "yallaAdmin.placeholder.maskedPassword": "••••••••",
+  "yallaAdmin.login.title": "Interne Abläufe",
+  "yallaAdmin.login.subtitle": "Yalla-Admin-Kontrollzentrum",
+  "yallaAdmin.login.privateEntry": "Privater Zugang:",
+  "yallaAdmin.login.usernameLabel": "Benutzername",
+  "yallaAdmin.login.passwordLabel": "Passwort",
+  "yallaAdmin.login.authenticating": "Authentifizierung...",
+  "yallaAdmin.login.signIn": "Anmelden",
+  "yallaAdmin.login.authorizedOnly":
+    "Nur autorisiertes Personal. Alle Zugriffe werden protokolliert und überwacht.",
+  "yallaAdmin.login.failed": "Anmeldung fehlgeschlagen",
+  "yallaAdmin.login.networkError":
+    "Netzwerkfehler. Bitte versuchen Sie es erneut.",
+  "foundersLogin.pageTitle": "Yalla Hack Gründer — DJAC Admin",
+  "foundersLogin.brandTitle": "Yalla Hack",
+  "foundersLogin.brandSubtitle": "Gründerportal",
+  "foundersLogin.brandDesc":
+    "Verwalten Sie alle DJAC-Plattformbenutzer, Abonnements und Abläufe. Volle Transparenz und Kontrolle von A bis Z.",
+  "foundersLogin.feature.userManagement": "Benutzerverwaltung",
+  "foundersLogin.feature.userManagementDesc":
+    "Alle Benutzer anzeigen, sperren und verwalten",
+  "foundersLogin.feature.subscriptionControl": "Abonnementverwaltung",
+  "foundersLogin.feature.subscriptionControlDesc":
+    "Pläne, Umsatz und Abrechnung überwachen",
+  "foundersLogin.feature.orgOversight": "Organisationsaufsicht",
+  "foundersLogin.feature.orgOversightDesc":
+    "Mandantenorganisationen und Mitglieder verwalten",
+  "foundersLogin.feature.analytics": "Plattformanalysen",
+  "foundersLogin.feature.analyticsDesc":
+    "Nutzung, Wachstum und Trends verfolgen",
+  "foundersLogin.secureAccess": "SICHERER ZUGANG",
+  "foundersLogin.mfaTitle": "Zwei-Faktor-Prüfung",
+  "foundersLogin.welcomeBack": "Willkommen zurück",
+  "foundersLogin.mfaDesc":
+    "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein",
+  "foundersLogin.signInDesc":
+    "Melden Sie sich beim Yalla Hack Gründerportal an",
+  "foundersLogin.authCodeLabel": "Authentifizierungscode",
+  "foundersLogin.mfaHint":
+    "Ein 6-stelliger TOTP-Code oder einer Ihrer Backup-Codes.",
+  "foundersLogin.verifying": "Wird geprüft...",
+  "foundersLogin.verifyEnter": "Prüfen und Portal betreten",
+  "foundersLogin.backToPassword": "← Zurück zur Passwortanmeldung",
+  "foundersLogin.usernameLabel": "Benutzername",
+  "foundersLogin.passwordLabel": "Passwort",
+  "foundersLogin.showPassword": "Passwort anzeigen",
+  "foundersLogin.hidePassword": "Passwort ausblenden",
+  "foundersLogin.authenticating": "Authentifizierung...",
+  "foundersLogin.signIn": "Beim Gründerportal anmelden",
+  "foundersLogin.footer":
+    "Geschützt durch IP-Allowlist, Ratenbegrenzung und Sitzungskontrollen. Alle Aktionen werden protokolliert.",
+  "foundersLogin.loginFailed": "Anmeldung fehlgeschlagen",
+  "foundersLogin.networkError":
+    "Netzwerkfehler. Bitte versuchen Sie es erneut.",
+  "foundersLogin.verifyFailed": "Verifizierung fehlgeschlagen",
 };
 export default messages;
