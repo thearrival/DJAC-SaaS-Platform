@@ -127,7 +127,7 @@ import { localeTag } from "@/lib/intl";
 export default function ThreatIntelFeed() {
   usePageTitle("Threat Intelligence Feed");
 
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
