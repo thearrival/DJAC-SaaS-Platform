@@ -3289,5 +3289,7 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.medium": "中",
   "serviceRequests.priority.high": "高",
   "serviceRequests.priority.critical": "紧急",
+  "common.submitting": "正在提交…",
+  "serviceRequests.submit": "提交请求",
 };
 export default messages;

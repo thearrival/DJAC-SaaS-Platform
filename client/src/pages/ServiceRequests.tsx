@@ -139,7 +139,7 @@ import type React from "react";
 export default function ServiceRequests() {
   usePageTitle("Service Requests");
 
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
 
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({
@@ -531,7 +531,9 @@ export default function ServiceRequests() {
                 {t("common.cancel", "Cancel")}
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? "Submitting…" : "Submit Request"}
+                {createMutation.isPending
+                  ? t("common.submitting", "Submitting…")
+                  : t("serviceRequests.submit", "Submit Request")}
               </Button>
             </DialogFooter>
           </form>

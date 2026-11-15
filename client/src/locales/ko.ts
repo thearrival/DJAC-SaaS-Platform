@@ -3479,5 +3479,7 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.medium": "보통",
   "serviceRequests.priority.high": "높음",
   "serviceRequests.priority.critical": "긴급",
+  "common.submitting": "제출 중…",
+  "serviceRequests.submit": "요청 제출",
 };
 export default messages;

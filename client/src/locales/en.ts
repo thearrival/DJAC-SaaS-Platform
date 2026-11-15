@@ -3527,5 +3527,7 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.medium": "Medium",
   "serviceRequests.priority.high": "High",
   "serviceRequests.priority.critical": "Critical",
+  "common.submitting": "Submitting…",
+  "serviceRequests.submit": "Submit Request",
 };
 export default messages;

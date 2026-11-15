@@ -3572,5 +3572,7 @@ const messages: Record<string, string> = {
   "serviceRequests.priority.medium": "中",
   "serviceRequests.priority.high": "高",
   "serviceRequests.priority.critical": "緊急",
+  "common.submitting": "送信中…",
+  "serviceRequests.submit": "リクエストを送信",
 };
 export default messages;
