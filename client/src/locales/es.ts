@@ -3632,5 +3632,39 @@ const messages: Record<string, string> = {
   "ctem.statusInactive": "Inactivo",
   "ctem.allRegions": "Todas las regiones",
   "ctem.allTiers": "Todos los niveles",
+  "serviceRequests.loadError":
+    "No se pudieron cargar las solicitudes de servicio.",
+  "serviceRequests.empty": "Aún no hay solicitudes de servicio.",
+  "serviceRequests.field.serviceType": "Tipo de servicio",
+  "serviceRequests.field.priority": "Prioridad",
+  "serviceRequests.field.title": "Título de la solicitud",
+  "serviceRequests.field.description": "Descripción y objetivos",
+  "serviceRequests.field.scope": "Detalles del alcance",
+  "serviceRequests.field.startDate": "Fecha de inicio preferida",
+  "serviceRequests.field.budget": "Rango presupuestario",
+  "serviceRequests.placeholder.title":
+    "p. ej. Prueba de penetración externa para el entorno de producción",
+  "serviceRequests.placeholder.description":
+    "Describa lo que necesita, sus objetivos, requisitos de cumplimiento, etc.",
+  "serviceRequests.placeholder.scope":
+    "Enumere sistemas, rangos IP, dominios o aplicaciones en el alcance.",
+  "serviceRequests.placeholder.budget": "p. ej. $5,000 - $15,000",
+  "serviceRequests.type.penetration_test": "Prueba de penetración",
+  "serviceRequests.type.red_team": "Ejercicio de equipo rojo",
+  "serviceRequests.type.security_audit": "Auditoría de seguridad",
+  "serviceRequests.type.soc_support": "Soporte SOC",
+  "serviceRequests.type.incident_response": "Respuesta a incidentes",
+  "serviceRequests.type.consulting": "Consultoría de seguridad",
+  "serviceRequests.type.phishing_simulation": "Simulación de phishing",
+  "serviceRequests.type.cloud_security_review":
+    "Revisión de seguridad en la nube",
+  "serviceRequests.type.vulnerability_assessment":
+    "Evaluación de vulnerabilidades",
+  "serviceRequests.type.compliance_gap_assessment":
+    "Evaluación de brechas de cumplimiento",
+  "serviceRequests.priority.low": "Baja",
+  "serviceRequests.priority.medium": "Media",
+  "serviceRequests.priority.high": "Alta",
+  "serviceRequests.priority.critical": "Crítica",
 };
 export default messages;

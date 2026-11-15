@@ -3604,5 +3604,37 @@ const messages: Record<string, string> = {
   "ctem.statusInactive": "Inativo",
   "ctem.allRegions": "Todas as regiões",
   "ctem.allTiers": "Todos os níveis",
+  "serviceRequests.loadError": "Falha ao carregar solicitações de serviço.",
+  "serviceRequests.empty": "Ainda não há solicitações de serviço.",
+  "serviceRequests.field.serviceType": "Tipo de serviço",
+  "serviceRequests.field.priority": "Prioridade",
+  "serviceRequests.field.title": "Título da solicitação",
+  "serviceRequests.field.description": "Descrição e objetivos",
+  "serviceRequests.field.scope": "Detalhes do escopo",
+  "serviceRequests.field.startDate": "Data de início preferida",
+  "serviceRequests.field.budget": "Faixa de orçamento",
+  "serviceRequests.placeholder.title":
+    "ex.: Teste de penetração externo para ambiente de produção",
+  "serviceRequests.placeholder.description":
+    "Descreva o que você precisa, seus objetivos, requisitos de conformidade etc.",
+  "serviceRequests.placeholder.scope":
+    "Liste sistemas, intervalos de IP, domínios ou aplicativos no escopo.",
+  "serviceRequests.placeholder.budget": "ex.: US$ 5.000 - US$ 15.000",
+  "serviceRequests.type.penetration_test": "Teste de penetração",
+  "serviceRequests.type.red_team": "Exercício de Red Team",
+  "serviceRequests.type.security_audit": "Auditoria de segurança",
+  "serviceRequests.type.soc_support": "Suporte SOC",
+  "serviceRequests.type.incident_response": "Resposta a incidentes",
+  "serviceRequests.type.consulting": "Consultoria de segurança",
+  "serviceRequests.type.phishing_simulation": "Simulação de phishing",
+  "serviceRequests.type.cloud_security_review": "Revisão de segurança em nuvem",
+  "serviceRequests.type.vulnerability_assessment":
+    "Avaliação de vulnerabilidades",
+  "serviceRequests.type.compliance_gap_assessment":
+    "Avaliação de lacunas de conformidade",
+  "serviceRequests.priority.low": "Baixa",
+  "serviceRequests.priority.medium": "Média",
+  "serviceRequests.priority.high": "Alta",
+  "serviceRequests.priority.critical": "Crítica",
 };
 export default messages;

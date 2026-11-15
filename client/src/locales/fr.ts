@@ -3665,5 +3665,37 @@ const messages: Record<string, string> = {
   "ctem.statusInactive": "Inactif",
   "ctem.allRegions": "Toutes les régions",
   "ctem.allTiers": "Tous les niveaux",
+  "serviceRequests.loadError": "Échec du chargement des demandes de service.",
+  "serviceRequests.empty": "Aucune demande de service pour le moment.",
+  "serviceRequests.field.serviceType": "Type de service",
+  "serviceRequests.field.priority": "Priorité",
+  "serviceRequests.field.title": "Titre de la demande",
+  "serviceRequests.field.description": "Description et objectifs",
+  "serviceRequests.field.scope": "Détails du périmètre",
+  "serviceRequests.field.startDate": "Date de début souhaitée",
+  "serviceRequests.field.budget": "Fourchette budgétaire",
+  "serviceRequests.placeholder.title":
+    "ex. Test d'intrusion externe pour l'environnement de production",
+  "serviceRequests.placeholder.description":
+    "Décrivez vos besoins, vos objectifs, les exigences de conformité, etc.",
+  "serviceRequests.placeholder.scope":
+    "Listez les systèmes, plages IP, domaines ou applications concernés.",
+  "serviceRequests.placeholder.budget": "ex. 5 000 $ - 15 000 $",
+  "serviceRequests.type.penetration_test": "Test d'intrusion",
+  "serviceRequests.type.red_team": "Exercice Red Team",
+  "serviceRequests.type.security_audit": "Audit de sécurité",
+  "serviceRequests.type.soc_support": "Support SOC",
+  "serviceRequests.type.incident_response": "Réponse aux incidents",
+  "serviceRequests.type.consulting": "Conseil en sécurité",
+  "serviceRequests.type.phishing_simulation": "Simulation de phishing",
+  "serviceRequests.type.cloud_security_review": "Revue de sécurité cloud",
+  "serviceRequests.type.vulnerability_assessment":
+    "Évaluation des vulnérabilités",
+  "serviceRequests.type.compliance_gap_assessment":
+    "Évaluation des écarts de conformité",
+  "serviceRequests.priority.low": "Faible",
+  "serviceRequests.priority.medium": "Moyenne",
+  "serviceRequests.priority.high": "Élevée",
+  "serviceRequests.priority.critical": "Critique",
 };
 export default messages;

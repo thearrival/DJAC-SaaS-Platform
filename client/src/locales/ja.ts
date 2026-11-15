@@ -3541,5 +3541,36 @@ const messages: Record<string, string> = {
   "ctem.statusInactive": "無効",
   "ctem.allRegions": "すべての地域",
   "ctem.allTiers": "すべてのティア",
+  "serviceRequests.loadError": "サービスリクエストの読み込みに失敗しました。",
+  "serviceRequests.empty": "まだサービスリクエストはありません。",
+  "serviceRequests.field.serviceType": "サービスタイプ",
+  "serviceRequests.field.priority": "優先度",
+  "serviceRequests.field.title": "リクエストのタイトル",
+  "serviceRequests.field.description": "説明と目的",
+  "serviceRequests.field.scope": "スコープの詳細",
+  "serviceRequests.field.startDate": "希望開始日",
+  "serviceRequests.field.budget": "予算範囲",
+  "serviceRequests.placeholder.title":
+    "例：本番環境の外部ペネトレーションテスト",
+  "serviceRequests.placeholder.description":
+    "必要な内容、目標、コンプライアンス要件などを記載してください。",
+  "serviceRequests.placeholder.scope":
+    "対象のシステム、IP範囲、ドメイン、アプリケーションを記載してください。",
+  "serviceRequests.placeholder.budget": "例：$5,000 - $15,000",
+  "serviceRequests.type.penetration_test": "侵入テスト",
+  "serviceRequests.type.red_team": "レッドチーム演習",
+  "serviceRequests.type.security_audit": "セキュリティ監査",
+  "serviceRequests.type.soc_support": "SOCサポート",
+  "serviceRequests.type.incident_response": "インシデント対応",
+  "serviceRequests.type.consulting": "セキュリティコンサルティング",
+  "serviceRequests.type.phishing_simulation": "フィッシングシミュレーション",
+  "serviceRequests.type.cloud_security_review": "クラウドセキュリティレビュー",
+  "serviceRequests.type.vulnerability_assessment": "脆弱性評価",
+  "serviceRequests.type.compliance_gap_assessment":
+    "コンプライアンスギャップ評価",
+  "serviceRequests.priority.low": "低",
+  "serviceRequests.priority.medium": "中",
+  "serviceRequests.priority.high": "高",
+  "serviceRequests.priority.critical": "緊急",
 };
 export default messages;

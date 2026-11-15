@@ -3630,5 +3630,36 @@ const messages: Record<string, string> = {
   "ctem.statusInactive": "Inaktiv",
   "ctem.allRegions": "Alle Regionen",
   "ctem.allTiers": "Alle Stufen",
+  "serviceRequests.loadError": "Serviceanfragen konnten nicht geladen werden.",
+  "serviceRequests.empty": "Noch keine Serviceanfragen.",
+  "serviceRequests.field.serviceType": "Serviceart",
+  "serviceRequests.field.priority": "Priorität",
+  "serviceRequests.field.title": "Anfragetitel",
+  "serviceRequests.field.description": "Beschreibung und Ziele",
+  "serviceRequests.field.scope": "Umfangsdetails",
+  "serviceRequests.field.startDate": "Bevorzugtes Startdatum",
+  "serviceRequests.field.budget": "Budgetrahmen",
+  "serviceRequests.placeholder.title":
+    "z. B. Externer Penetrationstest für die Produktionsumgebung",
+  "serviceRequests.placeholder.description":
+    "Beschreiben Sie Ihren Bedarf, Ihre Ziele, Compliance-Anforderungen usw.",
+  "serviceRequests.placeholder.scope":
+    "Listen Sie Systeme, IP-Bereiche, Domains oder Anwendungen im Umfang auf.",
+  "serviceRequests.placeholder.budget": "z. B. 5.000 $ – 15.000 $",
+  "serviceRequests.type.penetration_test": "Penetrationstest",
+  "serviceRequests.type.red_team": "Red-Team-Übung",
+  "serviceRequests.type.security_audit": "Sicherheitsaudit",
+  "serviceRequests.type.soc_support": "SOC-Unterstützung",
+  "serviceRequests.type.incident_response": "Incident Response",
+  "serviceRequests.type.consulting": "Sicherheitsberatung",
+  "serviceRequests.type.phishing_simulation": "Phishing-Simulation",
+  "serviceRequests.type.cloud_security_review": "Cloud-Sicherheitsüberprüfung",
+  "serviceRequests.type.vulnerability_assessment": "Schwachstellenbewertung",
+  "serviceRequests.type.compliance_gap_assessment":
+    "Compliance-Lückenbewertung",
+  "serviceRequests.priority.low": "Niedrig",
+  "serviceRequests.priority.medium": "Mittel",
+  "serviceRequests.priority.high": "Hoch",
+  "serviceRequests.priority.critical": "Kritisch",
 };
 export default messages;

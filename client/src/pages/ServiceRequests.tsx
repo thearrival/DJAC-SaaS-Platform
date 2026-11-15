@@ -283,7 +283,12 @@ export default function ServiceRequests() {
           {isError ? (
             <div className="text-center py-12 text-zinc-500">
               <Shield className="size-12 mx-auto mb-3 opacity-30" />
-              <p>Failed to load service requests.</p>
+              <p>
+                {t(
+                  "serviceRequests.loadError",
+                  "Failed to load service requests."
+                )}
+              </p>
               <Button
                 variant="outline"
                 size="sm"
@@ -302,7 +307,7 @@ export default function ServiceRequests() {
           ) : requests.length === 0 ? (
             <div className="text-center py-12 text-zinc-500">
               <Shield className="size-12 mx-auto mb-3 opacity-30" />
-              <p>No service requests yet.</p>
+              <p>{t("serviceRequests.empty", "No service requests yet.")}</p>
               <p className="text-xs mt-1">
                 Submit a request to get started with a cybersecurity engagement.
               </p>
@@ -390,7 +395,9 @@ export default function ServiceRequests() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Service Type</Label>
+                <Label>
+                  {t("serviceRequests.field.serviceType", "Service Type")}
+                </Label>
                 <Select
                   value={form.serviceType}
                   onValueChange={v => setForm(f => ({ ...f, serviceType: v }))}
@@ -401,14 +408,14 @@ export default function ServiceRequests() {
                   <SelectContent className="bg-zinc-800 border-zinc-700">
                     {SERVICE_TYPES.map(s => (
                       <SelectItem key={s.value} value={s.value}>
-                        {s.label}
+                        {t(`serviceRequests.type.${s.value}`, s.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Priority</Label>
+                <Label>{t("serviceRequests.field.priority", "Priority")}</Label>
                 <Select
                   value={form.priority}
                   onValueChange={v => setForm(f => ({ ...f, priority: v }))}
@@ -419,7 +426,7 @@ export default function ServiceRequests() {
                   <SelectContent className="bg-zinc-800 border-zinc-700">
                     {PRIORITIES.map(p => (
                       <SelectItem key={p.value} value={p.value}>
-                        {p.label}
+                        {t(`serviceRequests.priority.${p.value}`, p.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -427,18 +434,29 @@ export default function ServiceRequests() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Request Title</Label>
+              <Label>{t("serviceRequests.field.title", "Request Title")}</Label>
               <Input
-                placeholder="e.g. External penetration test for production environment"
+                placeholder={t(
+                  "serviceRequests.placeholder.title",
+                  "e.g. External penetration test for production environment"
+                )}
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                 className="bg-zinc-800 border-zinc-700"
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Description & Objectives</Label>
+              <Label>
+                {t(
+                  "serviceRequests.field.description",
+                  "Description & Objectives"
+                )}
+              </Label>
               <Textarea
-                placeholder="Describe what you need, your goals, any compliance requirements, etc."
+                placeholder={t(
+                  "serviceRequests.placeholder.description",
+                  "Describe what you need, your goals, any compliance requirements, etc."
+                )}
                 rows={4}
                 value={form.description}
                 onChange={e =>
@@ -449,10 +467,16 @@ export default function ServiceRequests() {
             </div>
             <div className="space-y-1.5">
               <Label>
-                Scope Details <span className="text-zinc-500">(optional)</span>
+                {t("serviceRequests.field.scope", "Scope Details")}{" "}
+                <span className="text-zinc-500">
+                  {t("common.optional", "(optional)")}
+                </span>
               </Label>
               <Textarea
-                placeholder="List systems, IP ranges, domains, or applications in scope."
+                placeholder={t(
+                  "serviceRequests.placeholder.scope",
+                  "List systems, IP ranges, domains, or applications in scope."
+                )}
                 rows={3}
                 value={form.scopeDetails}
                 onChange={e =>
@@ -464,8 +488,10 @@ export default function ServiceRequests() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>
-                  Preferred Start Date{" "}
-                  <span className="text-zinc-500">(optional)</span>
+                  {t("serviceRequests.field.startDate", "Preferred Start Date")}{" "}
+                  <span className="text-zinc-500">
+                    {t("common.optional", "(optional)")}
+                  </span>
                 </Label>
                 <Input
                   type="date"
@@ -478,10 +504,16 @@ export default function ServiceRequests() {
               </div>
               <div className="space-y-1.5">
                 <Label>
-                  Budget Range <span className="text-zinc-500">(optional)</span>
+                  {t("serviceRequests.field.budget", "Budget Range")}{" "}
+                  <span className="text-zinc-500">
+                    {t("common.optional", "(optional)")}
+                  </span>
                 </Label>
                 <Input
-                  placeholder="e.g. $5,000 – $15,000"
+                  placeholder={t(
+                    "serviceRequests.placeholder.budget",
+                    "e.g. $5,000 - $15,000"
+                  )}
                   value={form.budgetRange}
                   onChange={e =>
                     setForm(f => ({ ...f, budgetRange: e.target.value }))
@@ -496,7 +528,7 @@ export default function ServiceRequests() {
                 variant="ghost"
                 onClick={() => setShowCreate(false)}
               >
-                Cancel
+                {t("common.cancel", "Cancel")}
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending ? "Submitting…" : "Submit Request"}
