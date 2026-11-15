@@ -3557,5 +3557,16 @@ const messages: Record<string, string> = {
   "regulatoryChange.allJurisdictions": "All Jurisdictions",
   "regulatoryChange.allTypes": "All Types",
   "regulatoryChange.allStatus": "All Status",
+  "remediation.placeholder.gapCode": "e.g. PIPL-DPO-001",
+  "threatIntel.placeholder.search": "Search bulletins, CVEs, threat actors…",
+  "threatIntel.allSeverities": "All severities",
+  "threatIntel.allCategories": "All categories",
+  "threatIntel.allSeveritiesItem": "All Severities",
+  "threatIntel.allCategoriesItem": "All Categories",
+  "transferChecker.selectPlaceholder": "- Select -",
+  "vendorDetail.placeholder.level": "Select level",
+  "vendorDetail.placeholder.tier": "Select tier",
+  "common.otpPlaceholder": "000000",
+  "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
 };
 export default messages;

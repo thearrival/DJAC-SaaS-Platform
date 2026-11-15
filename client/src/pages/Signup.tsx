@@ -1435,7 +1435,7 @@ function RoleRegisterForm({
                 onChange={e =>
                   setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
                 }
-                placeholder="000000"
+                placeholder={t("common.otpPlaceholder", "000000")}
                 style={mkWithIcon(C, dir)}
                 autoComplete="one-time-code"
                 autoFocus

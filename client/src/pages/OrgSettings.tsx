@@ -457,7 +457,10 @@ export default function OrgSettings() {
                     setErrors(p => ({ ...p, billingEmail: undefined }));
                   markDirty();
                 }}
-                placeholder="billing@yourcompany.com"
+                placeholder={t(
+                  "orgSettings.placeholder.billingEmail",
+                  "billing@yourcompany.com"
+                )}
                 disabled={!isAdmin || updateMut.isPending}
                 maxLength={320}
               />

@@ -900,10 +900,17 @@ export default function TransferChecker() {
                       "Source Jurisdiction"
                     )}
                   >
-                    <SelectValue placeholder="— Select —" />
+                    <SelectValue
+                      placeholder={t(
+                        "transferChecker.selectPlaceholder",
+                        "- Select -"
+                      )}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__empty__">— Select —</SelectItem>
+                    <SelectItem value="__empty__">
+                      {t("transferChecker.selectPlaceholder", "- Select -")}
+                    </SelectItem>
                     {JURISDICTIONS.map(j => (
                       <SelectItem key={j.value} value={j.value}>
                         {j.flag} {j.label}
@@ -950,10 +957,17 @@ export default function TransferChecker() {
                       "Destination Jurisdiction"
                     )}
                   >
-                    <SelectValue placeholder="— Select —" />
+                    <SelectValue
+                      placeholder={t(
+                        "transferChecker.selectPlaceholder",
+                        "- Select -"
+                      )}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__empty__">— Select —</SelectItem>
+                    <SelectItem value="__empty__">
+                      {t("transferChecker.selectPlaceholder", "- Select -")}
+                    </SelectItem>
                     {JURISDICTIONS.filter(j => j.value !== from).map(j => (
                       <SelectItem key={j.value} value={j.value}>
                         {j.flag} {j.label}

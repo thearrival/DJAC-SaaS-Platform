@@ -401,7 +401,7 @@ export default function ForgotPassword() {
                     onChange={e =>
                       setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
-                    placeholder="000000"
+                    placeholder={t("common.otpPlaceholder", "000000")}
                     required
                     autoComplete="one-time-code"
                     autoFocus

@@ -582,7 +582,10 @@ function TaskFormDialog({
                 id="rm-gapcode"
                 value={f.gapCode}
                 onChange={e => setF("gapCode", e.target.value)}
-                placeholder="e.g. PIPL-DPO-001"
+                placeholder={t(
+                  "remediation.placeholder.gapCode",
+                  "e.g. PIPL-DPO-001"
+                )}
                 maxLength={64}
               />
             </div>

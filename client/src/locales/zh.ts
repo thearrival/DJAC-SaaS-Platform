@@ -3317,5 +3317,16 @@ const messages: Record<string, string> = {
   "regulatoryChange.allJurisdictions": "所有司法辖区",
   "regulatoryChange.allTypes": "所有类型",
   "regulatoryChange.allStatus": "所有状态",
+  "remediation.placeholder.gapCode": "例如：PIPL-DPO-001",
+  "threatIntel.placeholder.search": "搜索公告、CVE、威胁行为者…",
+  "threatIntel.allSeverities": "所有严重级别",
+  "threatIntel.allCategories": "所有类别",
+  "threatIntel.allSeveritiesItem": "所有严重级别",
+  "threatIntel.allCategoriesItem": "所有类别",
+  "transferChecker.selectPlaceholder": "- 请选择 -",
+  "vendorDetail.placeholder.level": "选择级别",
+  "vendorDetail.placeholder.tier": "选择层级",
+  "common.otpPlaceholder": "000000",
+  "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
 };
 export default messages;

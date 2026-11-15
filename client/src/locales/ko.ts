@@ -3508,5 +3508,16 @@ const messages: Record<string, string> = {
   "regulatoryChange.allJurisdictions": "모든 관할권",
   "regulatoryChange.allTypes": "모든 유형",
   "regulatoryChange.allStatus": "모든 상태",
+  "remediation.placeholder.gapCode": "예: PIPL-DPO-001",
+  "threatIntel.placeholder.search": "공지, CVE, 위협 행위자 검색…",
+  "threatIntel.allSeverities": "모든 심각도",
+  "threatIntel.allCategories": "모든 범주",
+  "threatIntel.allSeveritiesItem": "모든 심각도",
+  "threatIntel.allCategoriesItem": "모든 범주",
+  "transferChecker.selectPlaceholder": "- 선택 -",
+  "vendorDetail.placeholder.level": "수준 선택",
+  "vendorDetail.placeholder.tier": "등급 선택",
+  "common.otpPlaceholder": "000000",
+  "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
 };
 export default messages;

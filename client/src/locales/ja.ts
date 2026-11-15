@@ -3601,5 +3601,16 @@ const messages: Record<string, string> = {
   "regulatoryChange.allJurisdictions": "すべての管轄区域",
   "regulatoryChange.allTypes": "すべての種類",
   "regulatoryChange.allStatus": "すべてのステータス",
+  "remediation.placeholder.gapCode": "例：PIPL-DPO-001",
+  "threatIntel.placeholder.search": "速報、CVE、脅威アクターを検索…",
+  "threatIntel.allSeverities": "すべての重大度",
+  "threatIntel.allCategories": "すべてのカテゴリ",
+  "threatIntel.allSeveritiesItem": "すべての重大度",
+  "threatIntel.allCategoriesItem": "すべてのカテゴリ",
+  "transferChecker.selectPlaceholder": "- 選択 -",
+  "vendorDetail.placeholder.level": "レベルを選択",
+  "vendorDetail.placeholder.tier": "ティアを選択",
+  "common.otpPlaceholder": "000000",
+  "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
 };
 export default messages;

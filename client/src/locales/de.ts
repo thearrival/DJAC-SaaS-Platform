@@ -3692,5 +3692,17 @@ const messages: Record<string, string> = {
   "regulatoryChange.allJurisdictions": "Alle Rechtsordnungen",
   "regulatoryChange.allTypes": "Alle Typen",
   "regulatoryChange.allStatus": "Alle Status",
+  "remediation.placeholder.gapCode": "z. B. PIPL-DPO-001",
+  "threatIntel.placeholder.search":
+    "Bulletins, CVEs, Bedrohungsakteure suchen…",
+  "threatIntel.allSeverities": "Alle Schweregrade",
+  "threatIntel.allCategories": "Alle Kategorien",
+  "threatIntel.allSeveritiesItem": "Alle Schweregrade",
+  "threatIntel.allCategoriesItem": "Alle Kategorien",
+  "transferChecker.selectPlaceholder": "- Auswählen -",
+  "vendorDetail.placeholder.level": "Stufe auswählen",
+  "vendorDetail.placeholder.tier": "Stufe auswählen",
+  "common.otpPlaceholder": "000000",
+  "orgSettings.placeholder.billingEmail": "billing@yourcompany.com",
 };
 export default messages;

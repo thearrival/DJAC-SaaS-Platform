@@ -204,7 +204,10 @@ export default function ThreatIntelFeed() {
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
           <Input
-            placeholder="Search bulletins, CVEs, threat actors…"
+            placeholder={t(
+              "threatIntel.placeholder.search",
+              "Search bulletins, CVEs, threat actors…"
+            )}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="pl-9 bg-zinc-800 border-zinc-700"
@@ -212,10 +215,14 @@ export default function ThreatIntelFeed() {
         </div>
         <Select value={severityFilter} onValueChange={setSeverityFilter}>
           <SelectTrigger className="w-40 bg-zinc-800 border-zinc-700">
-            <SelectValue placeholder="All severities" />
+            <SelectValue
+              placeholder={t("threatIntel.allSeverities", "All severities")}
+            />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all">All Severities</SelectItem>
+            <SelectItem value="all">
+              {t("threatIntel.allSeveritiesItem", "All Severities")}
+            </SelectItem>
             {SEVERITIES.map(s => (
               <SelectItem key={s} value={s} className="capitalize">
                 {s}
@@ -225,10 +232,14 @@ export default function ThreatIntelFeed() {
         </Select>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-44 bg-zinc-800 border-zinc-700">
-            <SelectValue placeholder="All categories" />
+            <SelectValue
+              placeholder={t("threatIntel.allCategories", "All categories")}
+            />
           </SelectTrigger>
           <SelectContent className="bg-zinc-800 border-zinc-700">
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="all">
+              {t("threatIntel.allCategoriesItem", "All Categories")}
+            </SelectItem>
             {CATEGORIES.map(c => (
               <SelectItem key={c} value={c}>
                 {CATEGORY_CONFIG[c]?.label ?? c}
