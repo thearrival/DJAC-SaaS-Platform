@@ -4419,5 +4419,26 @@ const messages: Record<string, string> = {
   "globalAIAgents.searchPlaceholder":
     "名前、フォーカス、地域でエージェントを検索...",
   "lawLibrary.clearSearch": "検索をクリア",
+  "saasMetrics.showFormula": "数式を表示",
+  "saasMetrics.calc.mrrArr": "MRR・ARR計算ツール",
+  "saasMetrics.calc.ltv": "LTV計算ツール",
+  "saasMetrics.calc.cacLtv": "CAC・CAC:LTV計算ツール",
+  "saasMetrics.calc.churn": "チャーン率計算ツール",
+  "saasMetrics.calc.nrr": "NRR計算ツール",
+  "saasMetrics.calc.cacPayback": "CAC回収期間計算ツール",
+  "saasMetrics.calc.ruleOf40": "Rule of 40計算ツール",
+  "saasMetrics.calc.magicNumber": "マジックナンバー（LTV/CAC効率）",
+  "saasMetrics.calc.burnMultiple": "バーン・マルチプル",
+  "saasMetrics.calc.growthRule": "3-3-2-2-2成長ルールチェッカー",
+  "saasMetrics.calc.cohortAnalysis": "コホート分析",
+  "saasMetrics.calc.engagementScore": "顧客エンゲージメントスコア",
+  "saasMetrics.calc.healthScore": "顧客ヘルススコア",
+  "saasMetrics.calc.compliancePrivacy":
+    "コンプライアンス・プライバシーメトリクス",
+  "saasMetrics.calc.pmfSignal": "プロダクトマーケットフィットシグナル",
+  "saasMetrics.calc.revenueQuality": "収益品質スコア",
+  "proIntel.aria.radarChart": "フレームワーク準拠レーダーチャート",
+  "proIntel.aria.clearComparison": "比較をクリア",
+  "proIntel.aria.closePanel": "パネルを閉じる",
 };
 export default messages;

@@ -86,6 +86,7 @@ function MetricCard({
   trendValue,
   formula,
 }: MetricCardProps) {
+  const { t } = useLocale();
   const [showFormula, setShowFormula] = useState(false);
   return (
     <div
@@ -172,7 +173,7 @@ function MetricCard({
                 padding: 2,
                 color: "var(--djac-muted)",
               }}
-              title="Show formula"
+              title={t("saasMetrics.showFormula", "Show formula")}
             >
               <Info style={{ width: 13, height: 13 }} />
             </button>
@@ -1062,7 +1063,7 @@ export default function SaaSMetrics() {
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
         >
           <CalcCard
-            title="MRR & ARR Calculator"
+            title={t("saasMetrics.calc.mrrArr", "MRR & ARR Calculator")}
             accent={C.green}
             fields={[
               {
@@ -1086,7 +1087,7 @@ export default function SaaSMetrics() {
             }}
           />
           <CalcCard
-            title="LTV Calculator"
+            title={t("saasMetrics.calc.ltv", "LTV Calculator")}
             accent={C.yellow}
             fields={[
               {
@@ -1115,7 +1116,7 @@ export default function SaaSMetrics() {
             }}
           />
           <CalcCard
-            title="CAC & CAC:LTV Calculator"
+            title={t("saasMetrics.calc.cacLtv", "CAC & CAC:LTV Calculator")}
             accent={C.purple}
             fields={[
               {
@@ -1146,7 +1147,7 @@ export default function SaaSMetrics() {
             }}
           />
           <CalcCard
-            title="Churn Rate Calculator"
+            title={t("saasMetrics.calc.churn", "Churn Rate Calculator")}
             accent={C.red}
             fields={[
               { key: "lost", label: "Customers Lost", placeholder: "e.g. 5" },
@@ -1180,7 +1181,7 @@ export default function SaaSMetrics() {
             }}
           />
           <CalcCard
-            title="NRR Calculator"
+            title={t("saasMetrics.calc.nrr", "NRR Calculator")}
             accent={C.cyan}
             fields={[
               {
@@ -1219,7 +1220,7 @@ export default function SaaSMetrics() {
             }}
           />
           <CalcCard
-            title="CAC Payback Calculator"
+            title={t("saasMetrics.calc.cacPayback", "CAC Payback Calculator")}
             accent={C.orange}
             fields={[
               {
@@ -1275,7 +1276,7 @@ export default function SaaSMetrics() {
           }}
         >
           <CalcCard
-            title="Rule of 40 Calculator"
+            title={t("saasMetrics.calc.ruleOf40", "Rule of 40 Calculator")}
             accent={C.purple}
             fields={[
               {
@@ -1300,7 +1301,10 @@ export default function SaaSMetrics() {
             }}
           />
           <CalcCard
-            title="Magic Number (LTV/CAC Efficiency)"
+            title={t(
+              "saasMetrics.calc.magicNumber",
+              "Magic Number (LTV/CAC Efficiency)"
+            )}
             accent={C.yellow}
             fields={[
               {
@@ -1329,7 +1333,7 @@ export default function SaaSMetrics() {
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
         >
           <CalcCard
-            title="Burn Multiple"
+            title={t("saasMetrics.calc.burnMultiple", "Burn Multiple")}
             accent={C.red}
             fields={[
               {
@@ -1354,7 +1358,10 @@ export default function SaaSMetrics() {
             }}
           />
           <CalcCard
-            title="3-3-2-2-2 Growth Rule Checker"
+            title={t(
+              "saasMetrics.calc.growthRule",
+              "3-3-2-2-2 Growth Rule Checker"
+            )}
             accent={C.cyan}
             fields={[
               {
@@ -1416,7 +1423,7 @@ export default function SaaSMetrics() {
               <BarChart3 style={{ width: 14, height: 14, color: C.cyan }} />
             }
             accent={C.cyan}
-            title="Cohort Analysis"
+            title={t("saasMetrics.calc.cohortAnalysis", "Cohort Analysis")}
             body="Track customer groups by sign-up date to assess retention trends, LTV by segment, and onboarding effectiveness over time. Surfaces which cohorts retain best and where drop-off occurs."
             badges={[
               "Retention Trends",
@@ -1427,7 +1434,10 @@ export default function SaaSMetrics() {
           <InfoPanel
             icon={<Users style={{ width: 14, height: 14, color: C.green }} />}
             accent={C.green}
-            title="Customer Engagement Score"
+            title={t(
+              "saasMetrics.calc.engagementScore",
+              "Customer Engagement Score"
+            )}
             body="Measures how actively users interact with your product. Predicts churn risk early, enabling proactive outreach to at-risk accounts before they cancel."
             badges={["Login Frequency", "Feature Usage", "Churn Prediction"]}
           />
@@ -1436,14 +1446,17 @@ export default function SaaSMetrics() {
               <ShieldCheck style={{ width: 14, height: 14, color: C.purple }} />
             }
             accent={C.purple}
-            title="Customer Health Score"
+            title={t("saasMetrics.calc.healthScore", "Customer Health Score")}
             body="Combines usage, support interactions, and NPS into a real-time signal. Helps prioritize retention outreach and identify high-risk accounts automatically."
             badges={["NPS", "Usage Frequency", "Support Signals"]}
           />
           <InfoPanel
             icon={<Globe2 style={{ width: 14, height: 14, color: C.yellow }} />}
             accent={C.yellow}
-            title="Compliance Privacy Metrics"
+            title={t(
+              "saasMetrics.calc.compliancePrivacy",
+              "Compliance Privacy Metrics"
+            )}
             body="As regulations evolve (PDPL, PIPL, GDPR), track data access frequency, regional data usage, and user activity patterns to ensure data privacy compliance aligns with subscription obligations."
             badges={["Data Residency", "Access Frequency", "Regional Usage"]}
             rule="DJAC live tracking: cross-border data flows between CN ↔ SA jurisdictions"
@@ -1453,7 +1466,7 @@ export default function SaaSMetrics() {
               <TrendingUp style={{ width: 14, height: 14, color: C.orange }} />
             }
             accent={C.orange}
-            title="Product-Market Fit Signal"
+            title={t("saasMetrics.calc.pmfSignal", "Product-Market Fit Signal")}
             body="High NRR (>120%), low churn, and strong engagement scores collectively indicate strong product-market fit. For DJAC, this maps to framework adoption breadth and compliance posture improvement over time."
             badges={["NRR >120%", "Low Churn", "Framework Adoption"]}
           />
@@ -1462,7 +1475,10 @@ export default function SaaSMetrics() {
               <CheckCircle2 style={{ width: 14, height: 14, color: C.red }} />
             }
             accent={C.red}
-            title="Revenue Quality Score"
+            title={t(
+              "saasMetrics.calc.revenueQuality",
+              "Revenue Quality Score"
+            )}
             body="Assesses whether revenue is sticky (subscription), diversified (multi-framework), and defensible (audit-ready). High-quality SaaS revenue has low concentration risk and strong contractual commitments."
             badges={["Contractual ARR", "Multi-jurisdiction", "Audit-ready"]}
           />

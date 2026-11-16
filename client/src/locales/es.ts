@@ -4534,5 +4534,26 @@ const messages: Record<string, string> = {
   "globalAIAgents.searchPlaceholder":
     "Buscar agentes por nombre, enfoque o región...",
   "lawLibrary.clearSearch": "Borrar búsqueda",
+  "saasMetrics.showFormula": "Mostrar fórmula",
+  "saasMetrics.calc.mrrArr": "Calculadora de MRR y ARR",
+  "saasMetrics.calc.ltv": "Calculadora de LTV",
+  "saasMetrics.calc.cacLtv": "Calculadora de CAC y CAC:LTV",
+  "saasMetrics.calc.churn": "Calculadora de tasa de cancelación",
+  "saasMetrics.calc.nrr": "Calculadora de NRR",
+  "saasMetrics.calc.cacPayback": "Calculadora de recuperación de CAC",
+  "saasMetrics.calc.ruleOf40": "Calculadora de la regla del 40",
+  "saasMetrics.calc.magicNumber": "Número mágico (eficiencia LTV/CAC)",
+  "saasMetrics.calc.burnMultiple": "Múltiplo de consumo",
+  "saasMetrics.calc.growthRule":
+    "Verificador de la regla de crecimiento 3-3-2-2-2",
+  "saasMetrics.calc.cohortAnalysis": "Análisis de cohortes",
+  "saasMetrics.calc.engagementScore": "Puntuación de interacción del cliente",
+  "saasMetrics.calc.healthScore": "Puntuación de salud del cliente",
+  "saasMetrics.calc.compliancePrivacy": "Métricas de privacidad y cumplimiento",
+  "saasMetrics.calc.pmfSignal": "Señal de ajuste producto-mercado",
+  "saasMetrics.calc.revenueQuality": "Puntuación de calidad de ingresos",
+  "proIntel.aria.radarChart": "Gráfico de radar de cumplimiento de marcos",
+  "proIntel.aria.clearComparison": "Borrar comparación",
+  "proIntel.aria.closePanel": "Cerrar panel",
 };
 export default messages;

@@ -4496,5 +4496,27 @@ const messages: Record<string, string> = {
   "globalAIAgents.searchPlaceholder":
     "Pesquisar agentes por nome, foco ou região...",
   "lawLibrary.clearSearch": "Limpar pesquisa",
+  "saasMetrics.showFormula": "Mostrar fórmula",
+  "saasMetrics.calc.mrrArr": "Calculadora de MRR e ARR",
+  "saasMetrics.calc.ltv": "Calculadora de LTV",
+  "saasMetrics.calc.cacLtv": "Calculadora de CAC e CAC:LTV",
+  "saasMetrics.calc.churn": "Calculadora de taxa de churn",
+  "saasMetrics.calc.nrr": "Calculadora de NRR",
+  "saasMetrics.calc.cacPayback": "Calculadora de payback do CAC",
+  "saasMetrics.calc.ruleOf40": "Calculadora da Regra dos 40",
+  "saasMetrics.calc.magicNumber": "Número mágico (eficiência LTV/CAC)",
+  "saasMetrics.calc.burnMultiple": "Múltiplo de queima",
+  "saasMetrics.calc.growthRule":
+    "Verificador da regra de crescimento 3-3-2-2-2",
+  "saasMetrics.calc.cohortAnalysis": "Análise de coorte",
+  "saasMetrics.calc.engagementScore": "Pontuação de engajamento do cliente",
+  "saasMetrics.calc.healthScore": "Pontuação de saúde do cliente",
+  "saasMetrics.calc.compliancePrivacy":
+    "Métricas de privacidade e conformidade",
+  "saasMetrics.calc.pmfSignal": "Sinal de product-market fit",
+  "saasMetrics.calc.revenueQuality": "Pontuação de qualidade da receita",
+  "proIntel.aria.radarChart": "Gráfico de radar de conformidade de frameworks",
+  "proIntel.aria.clearComparison": "Limpar comparação",
+  "proIntel.aria.closePanel": "Fechar painel",
 };
 export default messages;

@@ -561,6 +561,7 @@ function SectionLabel({
 
 // ── Framework Coverage Radar (SVG hexagonal) ──────────────────────────────────
 function FrameworkRadar({ C, isDark }: { C: Colors; isDark: boolean }) {
+  const { t } = useLocale();
   const cx = 110,
     cy = 100,
     maxR = 72;
@@ -646,7 +647,10 @@ function FrameworkRadar({ C, isDark }: { C: Colors; isDark: boolean }) {
             animation: "djac-fade-up 0.6s 0.15s both",
           }}
           role="img"
-          aria-label="Framework compliance radar chart"
+          aria-label={t(
+            "proIntel.aria.radarChart",
+            "Framework compliance radar chart"
+          )}
         >
           {/* Grid rings */}
           {rings.map((r, ri) => (
@@ -2098,7 +2102,10 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                 <button
                   type="button"
                   onClick={() => setCompare([])}
-                  aria-label="Clear comparison"
+                  aria-label={t(
+                    "proIntel.aria.clearComparison",
+                    "Clear comparison"
+                  )}
                   style={{
                     background: "transparent",
                     border: "none",
@@ -2277,7 +2284,7 @@ const ProIntelligenceDashboard = memo(function ProIntelligenceDashboard() {
                   <button
                     type="button"
                     onClick={() => setGlobeSel(null)}
-                    aria-label="Close panel"
+                    aria-label={t("proIntel.aria.closePanel", "Close panel")}
                     style={{
                       marginInlineStart: "auto",
                       background: "transparent",

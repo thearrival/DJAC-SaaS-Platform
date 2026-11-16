@@ -4568,5 +4568,27 @@ const messages: Record<string, string> = {
   "globalAIAgents.searchPlaceholder":
     "Rechercher des agents par nom, domaine ou région...",
   "lawLibrary.clearSearch": "Effacer la recherche",
+  "saasMetrics.showFormula": "Afficher la formule",
+  "saasMetrics.calc.mrrArr": "Calculateur MRR et ARR",
+  "saasMetrics.calc.ltv": "Calculateur LTV",
+  "saasMetrics.calc.cacLtv": "Calculateur CAC et CAC:LTV",
+  "saasMetrics.calc.churn": "Calculateur de taux de désabonnement",
+  "saasMetrics.calc.nrr": "Calculateur NRR",
+  "saasMetrics.calc.cacPayback": "Calculateur de retour sur CAC",
+  "saasMetrics.calc.ruleOf40": "Calculateur de la règle des 40",
+  "saasMetrics.calc.magicNumber": "Nombre magique (efficacité LTV/CAC)",
+  "saasMetrics.calc.burnMultiple": "Multiple de consommation",
+  "saasMetrics.calc.growthRule":
+    "Vérificateur de la règle de croissance 3-3-2-2-2",
+  "saasMetrics.calc.cohortAnalysis": "Analyse de cohortes",
+  "saasMetrics.calc.engagementScore": "Score d'engagement client",
+  "saasMetrics.calc.healthScore": "Score de santé client",
+  "saasMetrics.calc.compliancePrivacy":
+    "Métriques de confidentialité et conformité",
+  "saasMetrics.calc.pmfSignal": "Signal d'adéquation produit-marché",
+  "saasMetrics.calc.revenueQuality": "Score de qualité des revenus",
+  "proIntel.aria.radarChart": "Graphique radar de conformité des cadres",
+  "proIntel.aria.clearComparison": "Effacer la comparaison",
+  "proIntel.aria.closePanel": "Fermer le panneau",
 };
 export default messages;
