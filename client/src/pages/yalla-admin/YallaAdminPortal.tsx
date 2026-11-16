@@ -758,6 +758,7 @@ function OrganizationDetailModal({
   orgId: number;
   onClose: () => void;
 }) {
+  const { t } = useLocale();
   const [detail, setDetail] = useState<OrgDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
