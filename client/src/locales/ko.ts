@@ -4087,7 +4087,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.count": "{count}개 항목",
   "yallaAdmin.audit.filteredBy": "필터 기준",
   "yallaAdmin.audit.col.timestamp": "타임스탬프",
-  "yallaAdmin.audit.col.ip": "IP",
   "yallaAdmin.audit.loading": "로딩 중...",
   "yallaAdmin.audit.noEntries": "감사 항목을 찾을 수 없습니다",
   "yallaAdmin.audit.payload": "페이로드",

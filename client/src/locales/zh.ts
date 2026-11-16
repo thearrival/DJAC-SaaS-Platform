@@ -3879,7 +3879,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.count": "{count} 条记录",
   "yallaAdmin.audit.filteredBy": "筛选条件",
   "yallaAdmin.audit.col.timestamp": "时间戳",
-  "yallaAdmin.audit.col.ip": "IP",
   "yallaAdmin.audit.loading": "加载中...",
   "yallaAdmin.audit.noEntries": "未找到审计记录",
   "yallaAdmin.audit.payload": "负载",

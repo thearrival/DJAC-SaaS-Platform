@@ -4285,7 +4285,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.count": "{count} entradas",
   "yallaAdmin.audit.filteredBy": "filtrado por",
   "yallaAdmin.audit.col.timestamp": "Carimbo de data/hora",
-  "yallaAdmin.audit.col.ip": "IP",
   "yallaAdmin.audit.loading": "Carregando...",
   "yallaAdmin.audit.noEntries": "Nenhuma entrada de auditoria encontrada",
   "yallaAdmin.audit.payload": "Payload",

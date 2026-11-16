@@ -4087,7 +4087,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.count": "{count} إدخالات",
   "yallaAdmin.audit.filteredBy": "تمت التصفية حسب",
   "yallaAdmin.audit.col.timestamp": "الطابع الزمني",
-  "yallaAdmin.audit.col.ip": "IP",
   "yallaAdmin.audit.loading": "جارٍ التحميل...",
   "yallaAdmin.audit.noEntries": "لم يتم العثور على سجلات تدقيق",
   "yallaAdmin.audit.payload": "الحمولة",

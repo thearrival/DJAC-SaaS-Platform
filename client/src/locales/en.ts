@@ -4144,7 +4144,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.count": "{count} entries",
   "yallaAdmin.audit.filteredBy": "filtered by",
   "yallaAdmin.audit.col.timestamp": "Timestamp",
-  "yallaAdmin.audit.col.ip": "IP",
   "yallaAdmin.audit.loading": "Loading...",
   "yallaAdmin.audit.noEntries": "No audit entries found",
   "yallaAdmin.audit.payload": "Payload",

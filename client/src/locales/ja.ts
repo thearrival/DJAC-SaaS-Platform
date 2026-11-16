@@ -4211,7 +4211,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.count": "{count} 件",
   "yallaAdmin.audit.filteredBy": "フィルター",
   "yallaAdmin.audit.col.timestamp": "タイムスタンプ",
-  "yallaAdmin.audit.col.ip": "IP",
   "yallaAdmin.audit.loading": "読み込み中...",
   "yallaAdmin.audit.noEntries": "監査エントリが見つかりません",
   "yallaAdmin.audit.payload": "ペイロード",
