@@ -3505,21 +3505,45 @@ export default function YallaAdminPortal() {
                 </h2>
                 <p className="text-slate-500 text-sm mt-0.5">
                   {activeTab === "overview" &&
-                    "Platform-wide owner visibility across users, requests, validation, and infrastructure."}
+                    t(
+                      "yallaAdmin.portal.desc.overview",
+                      "Platform-wide owner visibility across users, requests, validation, and infrastructure."
+                    )}
                   {activeTab === "signups" &&
-                    "Every user registration with role, organization, and email-verification status."}
+                    t(
+                      "yallaAdmin.portal.desc.signups",
+                      "Every user registration with role, organization, and email-verification status."
+                    )}
                   {activeTab === "users" &&
-                    "All registered users and their current session posture."}
+                    t(
+                      "yallaAdmin.portal.desc.users",
+                      "All registered users and their current session posture."
+                    )}
                   {activeTab === "orgs" &&
-                    "All organizations with member count, plan, and active session breakdown."}
+                    t(
+                      "yallaAdmin.portal.desc.orgs",
+                      "All organizations with member count, plan, and active session breakdown."
+                    )}
                   {activeTab === "intake" &&
-                    "Inbound commercial and access requests across public and authenticated surfaces."}
+                    t(
+                      "yallaAdmin.portal.desc.intake",
+                      "Inbound commercial and access requests across public and authenticated surfaces."
+                    )}
                   {activeTab === "onboarding" &&
-                    "Track user progression through onboarding stages and drop-off points."}
+                    t(
+                      "yallaAdmin.portal.desc.onboarding",
+                      "Track user progression through onboarding stages and drop-off points."
+                    )}
                   {activeTab === "subscriptions" &&
-                    "Full billing lifecycle: plan breakdown, subscription status, churn, revenue pool, and Stripe webhook event log."}
+                    t(
+                      "yallaAdmin.portal.desc.subscriptions",
+                      "Full billing lifecycle: plan breakdown, subscription status, churn, revenue pool, and Stripe webhook event log."
+                    )}
                   {activeTab === "interactions" &&
-                    "Sanitized user input snapshots and output references recorded by the platform."}
+                    t(
+                      "yallaAdmin.portal.desc.interactions",
+                      "Sanitized user input snapshots and output references recorded by the platform."
+                    )}
                   {activeTab === "platformAudit" &&
                     t(
                       "yallaAdmin.portal.desc.platformAudit",
