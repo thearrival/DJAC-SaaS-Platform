@@ -453,6 +453,7 @@ function UserDetailModal({
   userId: number;
   onClose: () => void;
 }) {
+  const { t } = useLocale();
   const [detail, setDetail] = useState<UserDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -2394,6 +2395,7 @@ function OrgsTab({
 }
 
 function AdminAuditTab({ logs }: { logs: AdminAuditRow[] }) {
+  const { t } = useLocale();
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-end">
