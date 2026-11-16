@@ -4592,5 +4592,31 @@ const messages: Record<string, string> = {
   "proIntel.aria.closePanel": "Fermer le panneau",
   "signup.aria.uscoRecord":
     "Voir le dossier d'enregistrement du Bureau américain du droit d'auteur",
+  "hero.coreCapabilities": "CAPACITÉS CLÉS",
+  "hero.sectionTitle": "Tous les modules dont votre équipe conformité a besoin",
+  "hero.card.ai.title": "Moteur d'évaluation IA",
+  "hero.card.ai.desc":
+    "Orchestration multi-modèles avec DeepSeek, Gemini et Claude. Analyse parallèle des cadres avec détection automatique des écarts et notation de remédiation.",
+  "hero.card.ai.item1": "Analyse simultanée GDPR · CCPA · LGPD · PIPL",
+  "hero.card.ai.item2":
+    "Notation automatique des écarts de contrôle de 0 à 100",
+  "hero.card.ai.item3": "Feuilles de route de remédiation générées par l'IA",
+  "hero.card.ai.item4": "Cartographie des contrôles entre cadres",
+  "hero.card.jur.title": "Intelligence juridictionnelle",
+  "hero.card.jur.desc":
+    "Graphe de connaissances juridiques en temps réel couvrant {{count}} juridictions. Évaluation des risques de transfert transfrontalier et alertes proactives de changements réglementaires.",
+  "hero.card.jur.item1":
+    "{{count}} juridictions · mises à jour réglementaires en direct",
+  "hero.card.jur.item2": "Vérifications d'adéquation SCCs / BCRs GDPR",
+  "hero.card.jur.item3": "Calculateur de risque de transfert UE→US, UE→SA",
+  "hero.card.jur.item4":
+    "Bibliothèque juridique avec recherche alimentée par l'IA",
+  "hero.card.rbac.title": "RBAC d'entreprise",
+  "hero.card.rbac.desc":
+    "Architecture de rôles multicouche avec permissions granulaires par module, portes d'intégration, jetons de partage fournisseur et supervision réglementaire.",
+  "hero.card.rbac.item1": "7 rôles plateforme · 4 rôles organisation",
+  "hero.card.rbac.item2": "Remplacements de permissions par module",
+  "hero.card.rbac.item3": "Jetons de partage fournisseur avec expiration",
+  "hero.card.rbac.item4": "Relations de supervision réglementaire",
 };
 export default messages;

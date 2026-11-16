@@ -4093,5 +4093,28 @@ const messages: Record<string, string> = {
   "proIntel.aria.clearComparison": "清除比较",
   "proIntel.aria.closePanel": "关闭面板",
   "signup.aria.uscoRecord": "查看美国版权局注册记录",
+  "hero.coreCapabilities": "核心能力",
+  "hero.sectionTitle": "合规团队所需的每个模块",
+  "hero.card.ai.title": "AI 评估引擎",
+  "hero.card.ai.desc":
+    "跨 DeepSeek、Gemini 和 Claude 的多模型编排。并行框架分析，自动检测差距并评分修复。",
+  "hero.card.ai.item1": "GDPR · CCPA · LGPD · PIPL 同步扫描",
+  "hero.card.ai.item2": "自动化控制差距评分 0–100",
+  "hero.card.ai.item3": "AI 生成的修复路线图",
+  "hero.card.ai.item4": "框架间控制映射",
+  "hero.card.jur.title": "司法辖区情报",
+  "hero.card.jur.desc":
+    "覆盖 {{count}} 个司法辖区的实时法律知识图谱。跨境传输风险评分和主动监管变更提醒。",
+  "hero.card.jur.item1": "{{count}} 个司法辖区 · 实时监管更新",
+  "hero.card.jur.item2": "GDPR SCCs / BCRs 充分性检查",
+  "hero.card.jur.item3": "传输风险计算器 EU→US, EU→SA",
+  "hero.card.jur.item4": "具备 AI 搜索的法律库",
+  "hero.card.rbac.title": "企业 RBAC",
+  "hero.card.rbac.desc":
+    "多层角色架构，具备细粒度模块权限、入门门控、供应商共享令牌和监管监督。",
+  "hero.card.rbac.item1": "7 个平台角色 · 4 个组织角色",
+  "hero.card.rbac.item2": "按模块权限覆盖",
+  "hero.card.rbac.item3": "带过期时间的供应商共享令牌",
+  "hero.card.rbac.item4": "监管机构监督关系",
 };
 export default messages;

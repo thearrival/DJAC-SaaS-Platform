@@ -4311,5 +4311,29 @@ const messages: Record<string, string> = {
   "proIntel.aria.clearComparison": "مسح المقارنة",
   "proIntel.aria.closePanel": "إغلاق اللوحة",
   "signup.aria.uscoRecord": "عرض سجل تسجيل مكتب حقوق الطبع والنشر الأمريكي",
+  "hero.coreCapabilities": "القدرات الأساسية",
+  "hero.sectionTitle": "كل وحدة يحتاجها فريق الامتثال لديك",
+  "hero.card.ai.title": "محرك التقييم بالذكاء الاصطناعي",
+  "hero.card.ai.desc":
+    "تنسيق متعدد النماذج عبر DeepSeek وGemini وClaude. تحليل متوازي للأطر مع اكتشاف تلقائي للفجوات وتقييم المعالجة.",
+  "hero.card.ai.item1": "فحص متزامن لـ GDPR وCCPA وLGPD وPIPL",
+  "hero.card.ai.item2": "تسجيل تلقائي لفجوات الضوابط من 0 إلى 100",
+  "hero.card.ai.item3": "خرائط طريق للمعالجة مُنشأة بالذكاء الاصطناعي",
+  "hero.card.ai.item4": "ربط الضوابط بين الأطر",
+  "hero.card.jur.title": "ذكاء الاختصاصات القضائية",
+  "hero.card.jur.desc":
+    "رسم بياني معرفي قانوني في الوقت الفعلي يغطي {{count}} اختصاصًا قضائيًا. تقييم مخاطر النقل عبر الحدود وتنبيهات استباقية بالتغييرات التنظيمية.",
+  "hero.card.jur.item1": "{{count}} اختصاصًا · تحديثات تنظيمية مباشرة",
+  "hero.card.jur.item2": "فحوصات كفاية SCCs/BCRs بموجب GDPR",
+  "hero.card.jur.item3":
+    "حاسبة مخاطر النقل الاتحاد الأوروبي→الولايات المتحدة، الاتحاد الأوروبي→السعودية",
+  "hero.card.jur.item4": "مكتبة قوانين مع بحث مدعوم بالذكاء الاصطناعي",
+  "hero.card.rbac.title": "التحكم في الوصول القائم على الأدوار للمؤسسات",
+  "hero.card.rbac.desc":
+    "بنية أدوار متعددة الطبقات مع أذونات دقيقة لكل وحدة وبوابات تأهيل ورموز مشاركة الموردين وإشراف الجهات التنظيمية.",
+  "hero.card.rbac.item1": "7 أدوار منصة · 4 أدوار مؤسسة",
+  "hero.card.rbac.item2": "تجاوزات أذونات لكل وحدة",
+  "hero.card.rbac.item3": "رموز مشاركة الموردين مع انتهاء الصلاحية",
+  "hero.card.rbac.item4": "علاقات إشراف الجهات التنظيمية",
 };
 export default messages;

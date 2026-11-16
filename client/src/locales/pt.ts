@@ -4520,5 +4520,32 @@ const messages: Record<string, string> = {
   "proIntel.aria.closePanel": "Fechar painel",
   "signup.aria.uscoRecord":
     "Ver o registro do Escritório de Direitos Autorais dos EUA",
+  "hero.coreCapabilities": "CAPACIDADES PRINCIPAIS",
+  "hero.sectionTitle":
+    "Todos os módulos que sua equipe de conformidade precisa",
+  "hero.card.ai.title": "Motor de avaliação com IA",
+  "hero.card.ai.desc":
+    "Orquestração multimodelo com DeepSeek, Gemini e Claude. Análise paralela de frameworks com detecção automática de lacunas e pontuação de remediação.",
+  "hero.card.ai.item1": "Varredura simultânea de GDPR · CCPA · LGPD · PIPL",
+  "hero.card.ai.item2":
+    "Pontuação automática de lacunas de controle de 0 a 100",
+  "hero.card.ai.item3": "Roteiros de remediação gerados por IA",
+  "hero.card.ai.item4": "Mapeamento de controles entre frameworks",
+  "hero.card.jur.title": "Inteligência jurisdicional",
+  "hero.card.jur.desc":
+    "Grafo de conhecimento jurídico em tempo real cobrindo {{count}} jurisdições. Pontuação de risco de transferência transfronteiriça e alertas proativos de mudanças regulatórias.",
+  "hero.card.jur.item1":
+    "{{count}} jurisdições · atualizações regulatórias ao vivo",
+  "hero.card.jur.item2": "Verificações de adequação SCCs / BCRs do GDPR",
+  "hero.card.jur.item3": "Calculadora de risco de transferência UE→EUA, UE→SA",
+  "hero.card.jur.item4": "Biblioteca jurídica com busca com IA",
+  "hero.card.rbac.title": "RBAC empresarial",
+  "hero.card.rbac.desc":
+    "Arquitetura de funções em múltiplas camadas com permissões granulares por módulo, gates de onboarding, tokens de compartilhamento com fornecedores e supervisão regulatória.",
+  "hero.card.rbac.item1": "7 funções de plataforma · 4 funções de organização",
+  "hero.card.rbac.item2": "Substituições de permissão por módulo",
+  "hero.card.rbac.item3":
+    "Tokens de compartilhamento com fornecedores com expiração",
+  "hero.card.rbac.item4": "Relações de supervisão regulatória",
 };
 export default messages;

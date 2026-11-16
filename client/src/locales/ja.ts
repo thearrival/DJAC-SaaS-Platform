@@ -4441,5 +4441,28 @@ const messages: Record<string, string> = {
   "proIntel.aria.clearComparison": "比較をクリア",
   "proIntel.aria.closePanel": "パネルを閉じる",
   "signup.aria.uscoRecord": "米国著作権局の登録記録を表示",
+  "hero.coreCapabilities": "コア機能",
+  "hero.sectionTitle": "コンプライアンスチームに必要なすべてのモジュール",
+  "hero.card.ai.title": "AI評価エンジン",
+  "hero.card.ai.desc":
+    "DeepSeek、Gemini、Claude によるマルチモデルオーケストレーション。ギャップの自動検出と是正スコアリングを備えた並列フレームワーク分析。",
+  "hero.card.ai.item1": "GDPR・CCPA・LGPD・PIPL の同時スキャン",
+  "hero.card.ai.item2": "コントロールギャップの自動スコアリング 0–100",
+  "hero.card.ai.item3": "AI生成の是正ロードマップ",
+  "hero.card.ai.item4": "フレームワーク間のコントロールマッピング",
+  "hero.card.jur.title": "管轄区域インテリジェンス",
+  "hero.card.jur.desc":
+    "{{count}} の管轄区域をカバーするリアルタイム法律ナレッジグラフ。国境を越える移転リスク評価と規制変更のプロアクティブな通知。",
+  "hero.card.jur.item1": "{{count}} の管轄区域・ライブ規制更新",
+  "hero.card.jur.item2": "GDPR SCCs / BCRs 適切性チェック",
+  "hero.card.jur.item3": "移転リスク計算ツール EU→US, EU→SA",
+  "hero.card.jur.item4": "AI検索搭載の法令ライブラリ",
+  "hero.card.rbac.title": "エンタープライズRBAC",
+  "hero.card.rbac.desc":
+    "モジュール単位のきめ細かな権限、オンボーディングゲート、ベンダー共有トークン、規制監督を備えた多層ロールアーキテクチャ。",
+  "hero.card.rbac.item1": "7つのプラットフォームロール・4つの組織ロール",
+  "hero.card.rbac.item2": "モジュール単位の権限オーバーライド",
+  "hero.card.rbac.item3": "有効期限付きベンダー共有トークン",
+  "hero.card.rbac.item4": "規制当局の監督関係",
 };
 export default messages;

@@ -4544,5 +4544,28 @@ const messages: Record<string, string> = {
   "proIntel.aria.clearComparison": "Vergleich löschen",
   "proIntel.aria.closePanel": "Panel schließen",
   "signup.aria.uscoRecord": "Den Eintrag des US-Urheberrechtsamts anzeigen",
+  "hero.coreCapabilities": "KERNFUNKTIONEN",
+  "hero.sectionTitle": "Jedes Modul, das Ihr Compliance-Team benötigt",
+  "hero.card.ai.title": "KI-Bewertungs-Engine",
+  "hero.card.ai.desc":
+    "Multi-Modell-Orchestrierung über DeepSeek, Gemini und Claude. Parallele Framework-Analyse mit automatischer Lückenerkennung und Remediation-Bewertung.",
+  "hero.card.ai.item1": "Gleichzeitiger Scan von GDPR · CCPA · LGPD · PIPL",
+  "hero.card.ai.item2": "Automatisierte Bewertung von Kontrolllücken von 0–100",
+  "hero.card.ai.item3": "KI-generierte Remediation-Roadmaps",
+  "hero.card.ai.item4": "Kontrollzuordnung zwischen Frameworks",
+  "hero.card.jur.title": "Jurisdiktions-Intelligenz",
+  "hero.card.jur.desc":
+    "Echtzeit-Rechtswissensgraph für {{count}} Jurisdiktionen. Risikobewertung grenzüberschreitender Transfers und proaktive Warnungen bei regulatorischen Änderungen.",
+  "hero.card.jur.item1": "{{count}} Jurisdiktionen · Live-Regulierungsupdates",
+  "hero.card.jur.item2": "GDPR-SCCs/BCRs-Angemessenheitsprüfungen",
+  "hero.card.jur.item3": "Transfer-Risikorechner EU→US, EU→SA",
+  "hero.card.jur.item4": "Gesetzesbibliothek mit KI-gestützter Suche",
+  "hero.card.rbac.title": "Unternehmens-RBAC",
+  "hero.card.rbac.desc":
+    "Mehrschichtige Rollenarchitektur mit feingranularen Modulberechtigungen, Onboarding-Gates, Anbieterfreigabe-Tokens und Regulierungsaufsicht.",
+  "hero.card.rbac.item1": "7 Plattformrollen · 4 Organisationsrollen",
+  "hero.card.rbac.item2": "Modulspezifische Berechtigungsüberschreibungen",
+  "hero.card.rbac.item3": "Anbieterfreigabe-Tokens mit Ablauf",
+  "hero.card.rbac.item4": "Beziehungen zur Regulierungsaufsicht",
 };
 export default messages;

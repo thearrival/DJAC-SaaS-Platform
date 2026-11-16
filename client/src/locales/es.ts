@@ -4557,5 +4557,32 @@ const messages: Record<string, string> = {
   "proIntel.aria.closePanel": "Cerrar panel",
   "signup.aria.uscoRecord":
     "Ver el registro de la Oficina de Derechos de Autor de EE. UU.",
+  "hero.coreCapabilities": "CAPACIDADES PRINCIPALES",
+  "hero.sectionTitle": "Cada módulo que necesita su equipo de cumplimiento",
+  "hero.card.ai.title": "Motor de evaluación con IA",
+  "hero.card.ai.desc":
+    "Orquestación multimodelo con DeepSeek, Gemini y Claude. Análisis paralelo de marcos con detección automática de brechas y puntuación de remediación.",
+  "hero.card.ai.item1": "Escaneo simultáneo de GDPR · CCPA · LGPD · PIPL",
+  "hero.card.ai.item2":
+    "Puntuación automática de brechas de control de 0 a 100",
+  "hero.card.ai.item3": "Hojas de ruta de remediación generadas por IA",
+  "hero.card.ai.item4": "Mapeo de controles entre marcos",
+  "hero.card.jur.title": "Inteligencia jurisdiccional",
+  "hero.card.jur.desc":
+    "Grafo de conocimiento legal en tiempo real que cubre {{count}} jurisdicciones. Puntuación de riesgo de transferencia transfronteriza y alertas proactivas de cambios regulatorios.",
+  "hero.card.jur.item1":
+    "{{count}} jurisdicciones · actualizaciones regulatorias en vivo",
+  "hero.card.jur.item2": "Verificaciones de adecuación SCCs / BCRs del RGPD",
+  "hero.card.jur.item3":
+    "Calculadora de riesgo de transferencia UE→EE. UU., UE→SA",
+  "hero.card.jur.item4": "Biblioteca legal con búsqueda impulsada por IA",
+  "hero.card.rbac.title": "RBAC empresarial",
+  "hero.card.rbac.desc":
+    "Arquitectura de roles multicapa con permisos granulares por módulo, puertas de incorporación, tokens de compartición con proveedores y supervisión regulatoria.",
+  "hero.card.rbac.item1": "7 roles de plataforma · 4 roles de organización",
+  "hero.card.rbac.item2": "Anulaciones de permisos por módulo",
+  "hero.card.rbac.item3":
+    "Tokens de compartición con proveedores con caducidad",
+  "hero.card.rbac.item4": "Relaciones de supervisión regulatoria",
 };
 export default messages;

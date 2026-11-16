@@ -4370,5 +4370,28 @@ const messages: Record<string, string> = {
   "proIntel.aria.closePanel": "Close panel",
   "signup.aria.uscoRecord":
     "View the U.S. Copyright Office registration record",
+  "hero.coreCapabilities": "CORE CAPABILITIES",
+  "hero.sectionTitle": "Every module your compliance team needs",
+  "hero.card.ai.title": "AI Assessment Engine",
+  "hero.card.ai.desc":
+    "Multi-model orchestration across DeepSeek, Gemini, and Claude. Parallel framework analysis with automatic gap detection and remediation scoring.",
+  "hero.card.ai.item1": "GDPR · CCPA · LGPD · PIPL simultaneous scan",
+  "hero.card.ai.item2": "Automated control gap scoring 0–100",
+  "hero.card.ai.item3": "AI-generated remediation roadmaps",
+  "hero.card.ai.item4": "Framework-to-framework control mapping",
+  "hero.card.jur.title": "Jurisdiction Intelligence",
+  "hero.card.jur.desc":
+    "Real-time legal knowledge graph covering {{count}} jurisdictions. Cross-border transfer risk scoring and proactive regulatory change alerts.",
+  "hero.card.jur.item1": "{{count}} jurisdictions · live regulatory updates",
+  "hero.card.jur.item2": "GDPR SCCs / BCRs adequacy checks",
+  "hero.card.jur.item3": "Transfer risk calculator EU→US, EU→SA",
+  "hero.card.jur.item4": "Law library with AI-powered search",
+  "hero.card.rbac.title": "Enterprise RBAC",
+  "hero.card.rbac.desc":
+    "Multi-layer role architecture with fine-grained per-module permissions, onboarding gates, vendor sharing tokens, and regulator oversight.",
+  "hero.card.rbac.item1": "7 platform roles · 4 org roles",
+  "hero.card.rbac.item2": "Per-module permission overrides",
+  "hero.card.rbac.item3": "Vendor share tokens with expiry",
+  "hero.card.rbac.item4": "Regulator oversight relationships",
 };
 export default messages;

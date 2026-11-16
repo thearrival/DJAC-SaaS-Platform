@@ -4309,5 +4309,28 @@ const messages: Record<string, string> = {
   "proIntel.aria.clearComparison": "비교 지우기",
   "proIntel.aria.closePanel": "패널 닫기",
   "signup.aria.uscoRecord": "미국 저작권청 등록 기록 보기",
+  "hero.coreCapabilities": "핵심 기능",
+  "hero.sectionTitle": "컴플라이언스 팀에 필요한 모든 모듈",
+  "hero.card.ai.title": "AI 평가 엔진",
+  "hero.card.ai.desc":
+    "DeepSeek, Gemini, Claude 전반의 다중 모델 오케스트레이션. 자동 격차 탐지 및 개선 점수가 포함된 병렬 프레임워크 분석.",
+  "hero.card.ai.item1": "GDPR · CCPA · LGPD · PIPL 동시 스캔",
+  "hero.card.ai.item2": "자동 통제 격차 점수 0–100",
+  "hero.card.ai.item3": "AI 생성 개선 로드맵",
+  "hero.card.ai.item4": "프레임워크 간 통제 매핑",
+  "hero.card.jur.title": "관할권 인텔리전스",
+  "hero.card.jur.desc":
+    "{{count}}개 관할권을 포괄하는 실시간 법률 지식 그래프. 국경 간 이전 위험 점수 및 규제 변경 사전 알림.",
+  "hero.card.jur.item1": "{{count}}개 관할권 · 실시간 규제 업데이트",
+  "hero.card.jur.item2": "GDPR SCCs / BCRs 적정성 검사",
+  "hero.card.jur.item3": "이전 위험 계산기 EU→US, EU→SA",
+  "hero.card.jur.item4": "AI 기반 검색이 포함된 법률 라이브러리",
+  "hero.card.rbac.title": "엔터프라이즈 RBAC",
+  "hero.card.rbac.desc":
+    "세분화된 모듈별 권한, 온보딩 게이트, 공급업체 공유 토큰 및 규제 감독이 포함된 다계층 역할 아키텍처.",
+  "hero.card.rbac.item1": "7개 플랫폼 역할 · 4개 조직 역할",
+  "hero.card.rbac.item2": "모듈별 권한 재정의",
+  "hero.card.rbac.item3": "만료 기능이 있는 공급업체 공유 토큰",
+  "hero.card.rbac.item4": "규제 기관 감독 관계",
 };
 export default messages;

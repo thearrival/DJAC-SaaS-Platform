@@ -24,6 +24,7 @@
  */
 
 import React, { useEffect, useRef, useState, type ReactNode } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { COVERAGE } from "../../../shared/coverage-claims";
 import {
   Shield,
@@ -846,6 +847,7 @@ function ScoreGauge({ score = 98.4 }: { score?: number }) {
 // ─── Main hero page ────────────────────────────────────────────────────────────
 
 export default function DJACHero() {
+  const { t } = useLocale();
   const headline = useTyping(
     "Enterprise Compliance,\nRedefined by AI.",
     48,
@@ -1103,51 +1105,84 @@ export default function DJACHero() {
                 style={{ color: "hsl(var(--muted-foreground))", opacity: 0.6 }}
               >
                 <div className="h-px w-8 bg-current" />
-                CORE CAPABILITIES
+                {t("hero.coreCapabilities", "CORE CAPABILITIES")}
                 <div className="h-px w-8 bg-current" />
               </div>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                Every module your compliance team needs
+                {t(
+                  "hero.sectionTitle",
+                  "Every module your compliance team needs"
+                )}
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <FeatureCard
                 icon={<Shield size={24} color="#00d2ff" />}
-                title="AI Assessment Engine"
-                description="Multi-model orchestration across DeepSeek, Gemini, and Claude. Parallel framework analysis with automatic gap detection and remediation scoring."
+                title={t("hero.card.ai.title", "AI Assessment Engine")}
+                description={t(
+                  "hero.card.ai.desc",
+                  "Multi-model orchestration across DeepSeek, Gemini, and Claude. Parallel framework analysis with automatic gap detection and remediation scoring."
+                )}
                 accent="#00d2ff"
                 items={[
-                  "GDPR · CCPA · LGPD · PIPL simultaneous scan",
-                  "Automated control gap scoring 0–100",
-                  "AI-generated remediation roadmaps",
-                  "Framework-to-framework control mapping",
+                  t(
+                    "hero.card.ai.item1",
+                    "GDPR · CCPA · LGPD · PIPL simultaneous scan"
+                  ),
+                  t(
+                    "hero.card.ai.item2",
+                    "Automated control gap scoring 0–100"
+                  ),
+                  t("hero.card.ai.item3", "AI-generated remediation roadmaps"),
+                  t(
+                    "hero.card.ai.item4",
+                    "Framework-to-framework control mapping"
+                  ),
                 ]}
                 delay={100}
               />
               <FeatureCard
                 icon={<Scale size={24} color="#10b981" />}
-                title="Jurisdiction Intelligence"
-                description={`Real-time legal knowledge graph covering ${COVERAGE.jurisdictions} jurisdictions. Cross-border transfer risk scoring and proactive regulatory change alerts.`}
+                title={t("hero.card.jur.title", "Jurisdiction Intelligence")}
+                description={t(
+                  "hero.card.jur.desc",
+                  "Real-time legal knowledge graph covering {{count}} jurisdictions. Cross-border transfer risk scoring and proactive regulatory change alerts."
+                ).replace("{{count}}", String(COVERAGE.jurisdictions))}
                 accent="#10b981"
                 items={[
-                  `${COVERAGE.jurisdictions} jurisdictions · live regulatory updates`,
-                  "GDPR SCCs / BCRs adequacy checks",
-                  "Transfer risk calculator EU→US, EU→SA",
-                  "Law library with AI-powered search",
+                  t(
+                    "hero.card.jur.item1",
+                    "{{count}} jurisdictions · live regulatory updates"
+                  ).replace("{{count}}", String(COVERAGE.jurisdictions)),
+                  t("hero.card.jur.item2", "GDPR SCCs / BCRs adequacy checks"),
+                  t(
+                    "hero.card.jur.item3",
+                    "Transfer risk calculator EU→US, EU→SA"
+                  ),
+                  t(
+                    "hero.card.jur.item4",
+                    "Law library with AI-powered search"
+                  ),
                 ]}
                 delay={250}
               />
               <FeatureCard
                 icon={<Lock size={24} color="#d900ff" />}
-                title="Enterprise RBAC"
-                description="Multi-layer role architecture with fine-grained per-module permissions, onboarding gates, vendor sharing tokens, and regulator oversight."
+                title={t("hero.card.rbac.title", "Enterprise RBAC")}
+                description={t(
+                  "hero.card.rbac.desc",
+                  "Multi-layer role architecture with fine-grained per-module permissions, onboarding gates, vendor sharing tokens, and regulator oversight."
+                )}
                 accent="#d900ff"
                 items={[
-                  "7 platform roles · 4 org roles",
-                  "Per-module permission overrides",
-                  "Vendor share tokens with expiry",
-                  "Regulator oversight relationships",
+                  t("hero.card.rbac.item1", "7 platform roles · 4 org roles"),
+                  t("hero.card.rbac.item2", "Per-module permission overrides"),
+                  t("hero.card.rbac.item3", "Vendor share tokens with expiry"),
+                  t(
+                    "hero.card.rbac.item4",
+                    "Regulator oversight relationships"
+                  ),
                 ]}
                 delay={400}
               />
