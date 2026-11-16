@@ -4507,5 +4507,21 @@ const messages: Record<string, string> = {
     "Consola de operaciones del propietario",
   "yallaAdmin.portal.sidebar.liveFeed": "Feed en vivo",
   "yallaAdmin.portal.sidebar.waitingEvents": "Esperando eventos...",
+  "notifications.unread": "No leído",
+  "notifications.markRead": "Marcar como leído",
+  "incident.edit": "Editar incidente",
+  "incident.delete": "Eliminar incidente",
+  "policy.openDocument": "Abrir documento de política",
+  "policy.edit": "Editar política",
+  "policy.delete": "Eliminar política",
+  "remediation.deleteTask": "Eliminar tarea",
+  "audit.edit": "Editar auditoría",
+  "audit.delete": "Eliminar auditoría",
+  "team.removeMember": "Eliminar miembro",
+  "team.refresh": "Actualizar",
+  "adminReports.downloadCsv": "Descargar CSV",
+  "adminSubscriptions.cancelsAtPeriodEnd":
+    "Se cancela al final del período actual",
+  "founders.openNavigation": "Abrir navegación",
 };
 export default messages;

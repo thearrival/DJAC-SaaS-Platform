@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { storedLocaleTag } from "@/lib/intl";
+import { useLocale } from "@/contexts/useLocale";
 import {
   RefreshCw,
   ChevronLeft,
@@ -59,6 +60,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 export default function AdminSubscriptions() {
+  const { t } = useLocale();
   usePageTitle("Subscriptions — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [data, setData] = useState<SubSummary | null>(null);
@@ -571,7 +573,10 @@ export default function AdminSubscriptions() {
                         <SubStatus status={s.status} />
                         {s.cancelAtPeriodEnd ? (
                           <span
-                            title="Cancels at end of current period"
+                            title={t(
+                              "adminSubscriptions.cancelsAtPeriodEnd",
+                              "Cancels at end of current period"
+                            )}
                             style={{
                               fontSize: 10,
                               fontWeight: 700,

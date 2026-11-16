@@ -294,7 +294,7 @@ function TaskCard({
           </button>
           <button
             type="button"
-            aria-label="Delete task"
+            aria-label={t("remediation.deleteTask", "Delete task")}
             onClick={() => onDelete(task)}
             style={{
               padding: "3px 6px",

@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useLocale } from "@/contexts/useLocale";
 import {
   RefreshCw,
   ChevronLeft,
@@ -70,6 +71,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 export default function AdminReports() {
+  const { t } = useLocale();
   usePageTitle("Reports — Yalla Hack Admin");
   const [, navigate] = useLocation();
   const [type, setType] = useState<ReportType>("growth");
@@ -203,7 +205,7 @@ export default function AdminReports() {
           <button
             onClick={downloadCsv}
             disabled={downloading}
-            title="Download CSV"
+            title={t("adminReports.downloadCsv", "Download CSV")}
             style={{
               display: "flex",
               alignItems: "center",

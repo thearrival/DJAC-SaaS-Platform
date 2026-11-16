@@ -425,7 +425,7 @@ export default function Notifications() {
                             style={{
                               background: SEVERITY_COLOR[notif.severity],
                             }}
-                            aria-label="Unread"
+                            aria-label={t("notifications.unread", "Unread")}
                           />
                         )}
                       </p>
@@ -454,7 +454,7 @@ export default function Notifications() {
                   {!isRead && (
                     <button
                       className="hidden group-hover:flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors shrink-0"
-                      aria-label="Mark as read"
+                      aria-label={t("notifications.markRead", "Mark as read")}
                       onClick={e => {
                         e.stopPropagation();
                         markRead(notif.id);

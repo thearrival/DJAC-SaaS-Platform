@@ -4541,5 +4541,21 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.sidebar.ownerConsole": "Console d'opérations propriétaire",
   "yallaAdmin.portal.sidebar.liveFeed": "Flux en direct",
   "yallaAdmin.portal.sidebar.waitingEvents": "En attente d'événements...",
+  "notifications.unread": "Non lu",
+  "notifications.markRead": "Marquer comme lu",
+  "incident.edit": "Modifier l'incident",
+  "incident.delete": "Supprimer l'incident",
+  "policy.openDocument": "Ouvrir le document de politique",
+  "policy.edit": "Modifier la politique",
+  "policy.delete": "Supprimer la politique",
+  "remediation.deleteTask": "Supprimer la tâche",
+  "audit.edit": "Modifier l'audit",
+  "audit.delete": "Supprimer l'audit",
+  "team.removeMember": "Retirer le membre",
+  "team.refresh": "Actualiser",
+  "adminReports.downloadCsv": "Télécharger CSV",
+  "adminSubscriptions.cancelsAtPeriodEnd":
+    "Annulation à la fin de la période en cours",
+  "founders.openNavigation": "Ouvrir la navigation",
 };
 export default messages;

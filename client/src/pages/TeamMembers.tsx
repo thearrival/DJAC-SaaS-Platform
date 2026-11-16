@@ -346,7 +346,7 @@ function MemberCard({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                aria-label="Remove member"
+                aria-label={t("team.removeMember", "Remove member")}
                 disabled={removePending}
               >
                 {removePending ? (
@@ -571,8 +571,8 @@ export default function TeamMembers() {
             variant="ghost"
             size="icon"
             className="h-9 w-9"
-            aria-label="Refresh"
-            title="Refresh"
+            aria-label={t("team.refresh", "Refresh")}
+            title={t("team.refresh", "Refresh")}
             onClick={() => {
               void orgQuery.refetch();
               void listQuery.refetch();

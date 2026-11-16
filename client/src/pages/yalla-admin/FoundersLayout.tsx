@@ -5,6 +5,7 @@
  */
 import { useEffect, useState, type ReactNode } from "react";
 import { useLocation } from "wouter";
+import { useLocale } from "@/contexts/useLocale";
 import {
   LayoutDashboard,
   Users,
@@ -41,6 +42,7 @@ const NAV_ITEMS = [
 ];
 
 export default function FoundersLayout({ children }: { children: ReactNode }) {
+  const { t } = useLocale();
   const [location, navigate] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
@@ -367,7 +369,7 @@ export default function FoundersLayout({ children }: { children: ReactNode }) {
         >
           <button
             onClick={() => setMenuOpen(true)}
-            aria-label="Open navigation"
+            aria-label={t("founders.openNavigation", "Open navigation")}
             style={{
               background: "none",
               border: "none",
