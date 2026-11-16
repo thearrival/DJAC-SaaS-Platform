@@ -4488,5 +4488,13 @@ const messages: Record<string, string> = {
   "threatIntel.retry": "Erneut versuchen",
   "threatIntel.loading": "Bedrohungsinformationen werden geladen...",
   "threatIntel.noMatch": "Keine Bulletins entsprechen Ihren Filtern.",
+  "yallaAdmin.portal.system.environment": "Umgebung",
+  "yallaAdmin.portal.system.nodeEnv": "Node-Umgebung:",
+  "yallaAdmin.portal.system.aiQueue": "KI-Warteschlange:",
+  "yallaAdmin.portal.system.redis": "Redis:",
+  "yallaAdmin.portal.sidebar.brandName": "Yalla-Admin",
+  "yallaAdmin.portal.sidebar.ownerConsole": "Eigentümer-Betriebskonsole",
+  "yallaAdmin.portal.sidebar.liveFeed": "Live-Feed",
+  "yallaAdmin.portal.sidebar.waitingEvents": "Warten auf Ereignisse...",
 };
 export default messages;

@@ -4386,5 +4386,13 @@ const messages: Record<string, string> = {
   "threatIntel.retry": "再試行",
   "threatIntel.loading": "脅威インテリジェンスを読み込み中...",
   "threatIntel.noMatch": "フィルターに一致する速報はありません。",
+  "yallaAdmin.portal.system.environment": "環境",
+  "yallaAdmin.portal.system.nodeEnv": "Node環境:",
+  "yallaAdmin.portal.system.aiQueue": "AIキュー:",
+  "yallaAdmin.portal.system.redis": "Redis:",
+  "yallaAdmin.portal.sidebar.brandName": "Yalla-Admin",
+  "yallaAdmin.portal.sidebar.ownerConsole": "オーナー運用コンソール",
+  "yallaAdmin.portal.sidebar.liveFeed": "ライブフィード",
+  "yallaAdmin.portal.sidebar.waitingEvents": "イベントを待機中...",
 };
 export default messages;

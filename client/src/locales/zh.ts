@@ -4040,5 +4040,13 @@ const messages: Record<string, string> = {
   "threatIntel.retry": "重试",
   "threatIntel.loading": "正在加载威胁情报...",
   "threatIntel.noMatch": "没有符合筛选条件的公告。",
+  "yallaAdmin.portal.system.environment": "环境",
+  "yallaAdmin.portal.system.nodeEnv": "Node 环境：",
+  "yallaAdmin.portal.system.aiQueue": "AI 队列：",
+  "yallaAdmin.portal.system.redis": "Redis：",
+  "yallaAdmin.portal.sidebar.brandName": "Yalla-Admin",
+  "yallaAdmin.portal.sidebar.ownerConsole": "所有者运营控制台",
+  "yallaAdmin.portal.sidebar.liveFeed": "实时动态",
+  "yallaAdmin.portal.sidebar.waitingEvents": "等待事件...",
 };
 export default messages;

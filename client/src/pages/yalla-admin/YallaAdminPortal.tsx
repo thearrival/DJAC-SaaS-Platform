@@ -2422,16 +2422,22 @@ function SystemTab({ system }: { system: SystemInfo | null }) {
       </div>
       <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5">
         <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
-          Environment
+          {t("yallaAdmin.portal.system.environment", "Environment")}
         </p>
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <span className="text-slate-400">Node Env:</span>
+          <span className="text-slate-400">
+            {t("yallaAdmin.portal.system.nodeEnv", "Node Env:")}
+          </span>
           <span className="text-white font-medium">{system.env.nodeEnv}</span>
-          <span className="text-slate-400">AI Queue:</span>
+          <span className="text-slate-400">
+            {t("yallaAdmin.portal.system.aiQueue", "AI Queue:")}
+          </span>
           <span className="text-white font-medium">
             {system.env.aiQueueMode}
           </span>
-          <span className="text-slate-400">Redis:</span>
+          <span className="text-slate-400">
+            {t("yallaAdmin.portal.system.redis", "Redis:")}
+          </span>
           <span
             className={
               system.env.redisConfigured ? "text-emerald-400" : "text-red-400"
@@ -3354,9 +3360,14 @@ export default function YallaAdminPortal() {
                 </svg>
               </div>
               <div>
-                <p className="text-white text-sm font-semibold">Yalla-Admin</p>
+                <p className="text-white text-sm font-semibold">
+                  {t("yallaAdmin.portal.sidebar.brandName", "Yalla-Admin")}
+                </p>
                 <p className="text-slate-600 text-xs">
-                  Owner Operations Console
+                  {t(
+                    "yallaAdmin.portal.sidebar.ownerConsole",
+                    "Owner Operations Console"
+                  )}
                 </p>
               </div>
               <div className="ml-auto flex items-center gap-1.5">
@@ -3393,11 +3404,16 @@ export default function YallaAdminPortal() {
           </nav>
           <div className="border-t border-slate-800/60 p-3">
             <p className="text-xs text-slate-600 uppercase tracking-wider mb-2">
-              Live Feed
+              {t("yallaAdmin.portal.sidebar.liveFeed", "Live Feed")}
             </p>
             <div className="space-y-1 max-h-40 overflow-y-auto">
               {liveEvents.length === 0 ? (
-                <p className="text-xs text-slate-700">Waiting for events...</p>
+                <p className="text-xs text-slate-700">
+                  {t(
+                    "yallaAdmin.portal.sidebar.waitingEvents",
+                    "Waiting for events..."
+                  )}
+                </p>
               ) : (
                 liveEvents.slice(0, 8).map(ev => {
                   const dot: Record<string, string> = {

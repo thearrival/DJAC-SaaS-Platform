@@ -4257,5 +4257,13 @@ const messages: Record<string, string> = {
   "threatIntel.retry": "إعادة المحاولة",
   "threatIntel.loading": "جارٍ تحميل استخبارات التهديدات...",
   "threatIntel.noMatch": "لا توجد نشرات تطابق عوامل التصفية.",
+  "yallaAdmin.portal.system.environment": "البيئة",
+  "yallaAdmin.portal.system.nodeEnv": "بيئة Node:",
+  "yallaAdmin.portal.system.aiQueue": "طابور الذكاء الاصطناعي:",
+  "yallaAdmin.portal.system.redis": "Redis:",
+  "yallaAdmin.portal.sidebar.brandName": "Yalla-Admin",
+  "yallaAdmin.portal.sidebar.ownerConsole": "وحدة عمليات المالك",
+  "yallaAdmin.portal.sidebar.liveFeed": "البث المباشر",
+  "yallaAdmin.portal.sidebar.waitingEvents": "في انتظار الأحداث...",
 };
 export default messages;

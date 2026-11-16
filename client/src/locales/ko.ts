@@ -4255,5 +4255,13 @@ const messages: Record<string, string> = {
   "threatIntel.retry": "다시 시도",
   "threatIntel.loading": "위협 인텔리전스 로드 중...",
   "threatIntel.noMatch": "필터와 일치하는 게시판이 없습니다.",
+  "yallaAdmin.portal.system.environment": "환경",
+  "yallaAdmin.portal.system.nodeEnv": "Node 환경:",
+  "yallaAdmin.portal.system.aiQueue": "AI 큐:",
+  "yallaAdmin.portal.system.redis": "Redis:",
+  "yallaAdmin.portal.sidebar.brandName": "Yalla-Admin",
+  "yallaAdmin.portal.sidebar.ownerConsole": "소유자 운영 콘솔",
+  "yallaAdmin.portal.sidebar.liveFeed": "라이브 피드",
+  "yallaAdmin.portal.sidebar.waitingEvents": "이벤트 대기 중...",
 };
 export default messages;

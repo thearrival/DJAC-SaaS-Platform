@@ -4461,5 +4461,14 @@ const messages: Record<string, string> = {
   "threatIntel.retry": "Tentar novamente",
   "threatIntel.loading": "Carregando inteligência de ameaças...",
   "threatIntel.noMatch": "Nenhum boletim corresponde aos seus filtros.",
+  "yallaAdmin.portal.system.environment": "Ambiente",
+  "yallaAdmin.portal.system.nodeEnv": "Ambiente Node:",
+  "yallaAdmin.portal.system.aiQueue": "Fila de IA:",
+  "yallaAdmin.portal.system.redis": "Redis:",
+  "yallaAdmin.portal.sidebar.brandName": "Yalla-Admin",
+  "yallaAdmin.portal.sidebar.ownerConsole":
+    "Console de operações do proprietário",
+  "yallaAdmin.portal.sidebar.liveFeed": "Feed ao vivo",
+  "yallaAdmin.portal.sidebar.waitingEvents": "Aguardando eventos...",
 };
 export default messages;

@@ -4314,5 +4314,13 @@ const messages: Record<string, string> = {
   "threatIntel.retry": "Retry",
   "threatIntel.loading": "Loading threat intelligence...",
   "threatIntel.noMatch": "No bulletins match your filters.",
+  "yallaAdmin.portal.system.environment": "Environment",
+  "yallaAdmin.portal.system.nodeEnv": "Node Env:",
+  "yallaAdmin.portal.system.aiQueue": "AI Queue:",
+  "yallaAdmin.portal.system.redis": "Redis:",
+  "yallaAdmin.portal.sidebar.brandName": "Yalla-Admin",
+  "yallaAdmin.portal.sidebar.ownerConsole": "Owner Operations Console",
+  "yallaAdmin.portal.sidebar.liveFeed": "Live Feed",
+  "yallaAdmin.portal.sidebar.waitingEvents": "Waiting for events...",
 };
 export default messages;

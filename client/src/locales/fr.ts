@@ -4533,5 +4533,13 @@ const messages: Record<string, string> = {
   "threatIntel.retry": "Réessayer",
   "threatIntel.loading": "Chargement du renseignement sur les menaces...",
   "threatIntel.noMatch": "Aucun bulletin ne correspond à vos filtres.",
+  "yallaAdmin.portal.system.environment": "Environnement",
+  "yallaAdmin.portal.system.nodeEnv": "Env. Node :",
+  "yallaAdmin.portal.system.aiQueue": "File IA :",
+  "yallaAdmin.portal.system.redis": "Redis :",
+  "yallaAdmin.portal.sidebar.brandName": "Yalla-Admin",
+  "yallaAdmin.portal.sidebar.ownerConsole": "Console d'opérations propriétaire",
+  "yallaAdmin.portal.sidebar.liveFeed": "Flux en direct",
+  "yallaAdmin.portal.sidebar.waitingEvents": "En attente d'événements...",
 };
 export default messages;
