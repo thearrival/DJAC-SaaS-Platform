@@ -1170,78 +1170,135 @@ function OverviewTab({
   intake: IntakeData | null;
   validationCount: number;
 }) {
+  const { t } = useLocale();
   if (!stats)
     return (
       <div className="text-slate-500 text-sm p-8 text-center">
-        Loading overview...
+        {t("yallaAdmin.portal.overview.loading", "Loading overview...")}
       </div>
     );
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Users" value={stats.totalUsers} />
         <StatCard
-          label="Signups Today"
+          label={t("yallaAdmin.portal.overview.totalUsers", "Total Users")}
+          value={stats.totalUsers}
+        />
+        <StatCard
+          label={t("yallaAdmin.portal.overview.signupsToday", "Signups Today")}
           value={stats.todaySignups ?? 0}
-          sub="new registrations"
+          sub={t(
+            "yallaAdmin.portal.overview.newRegistrations",
+            "new registrations"
+          )}
         />
-        <StatCard label="Active Sessions" value={stats.activeSessions} />
-        <StatCard label="Logins Today" value={stats.todayLogins} />
-        <StatCard label="Organizations" value={stats.totalOrgs} />
-        <StatCard label="New Orgs Today" value={stats.newOrgsToday ?? 0} />
         <StatCard
-          label="Paid Plans"
+          label={t(
+            "yallaAdmin.portal.overview.activeSessions",
+            "Active Sessions"
+          )}
+          value={stats.activeSessions}
+        />
+        <StatCard
+          label={t("yallaAdmin.portal.overview.loginsToday", "Logins Today")}
+          value={stats.todayLogins}
+        />
+        <StatCard
+          label={t("yallaAdmin.portal.overview.organizations", "Organizations")}
+          value={stats.totalOrgs}
+        />
+        <StatCard
+          label={t("yallaAdmin.portal.overview.newOrgsToday", "New Orgs Today")}
+          value={stats.newOrgsToday ?? 0}
+        />
+        <StatCard
+          label={t("yallaAdmin.portal.overview.paidPlans", "Paid Plans")}
           value={stats.paidOrgs ?? 0}
-          sub="non-free orgs"
+          sub={t("yallaAdmin.portal.overview.nonFreeOrgs", "non-free orgs")}
         />
-        <StatCard label="Assets Tracked" value={stats.totalAssets} />
         <StatCard
-          label="Open Requests"
+          label={t(
+            "yallaAdmin.portal.overview.assetsTracked",
+            "Assets Tracked"
+          )}
+          value={stats.totalAssets}
+        />
+        <StatCard
+          label={t("yallaAdmin.portal.overview.openRequests", "Open Requests")}
           value={stats.openServiceRequests}
-          sub="service requests"
+          sub={t(
+            "yallaAdmin.portal.overview.serviceRequests",
+            "service requests"
+          )}
         />
         <StatCard
-          label="Inbound Intake"
+          label={t(
+            "yallaAdmin.portal.overview.inboundIntake",
+            "Inbound Intake"
+          )}
           value={
             (intake?.counts.accessRequests ?? 0) +
             (intake?.counts.consultationRequests ?? 0)
           }
-          sub="access + consultations"
+          sub={t(
+            "yallaAdmin.portal.overview.accessConsultations",
+            "access + consultations"
+          )}
         />
         <StatCard
-          label="Blocked Events"
+          label={t(
+            "yallaAdmin.portal.overview.blockedEvents",
+            "Blocked Events"
+          )}
           value={validationCount}
-          sub="validation failures"
+          sub={t(
+            "yallaAdmin.portal.overview.validationFailures",
+            "validation failures"
+          )}
         />
       </div>
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">
-            Owner focus for this console
+            {t(
+              "yallaAdmin.portal.overview.ownerFocus",
+              "Owner focus for this console"
+            )}
           </h3>
           <div className="space-y-2 text-sm text-slate-400">
             <p>
-              Monitor platform-wide user activity and what inputs are being
-              submitted.
+              {t(
+                "yallaAdmin.portal.overview.focus1",
+                "Monitor platform-wide user activity and what inputs are being submitted."
+              )}
             </p>
             <p>
-              Review validation failures and blocked requests without digging
-              through server logs.
+              {t(
+                "yallaAdmin.portal.overview.focus2",
+                "Review validation failures and blocked requests without digging through server logs."
+              )}
             </p>
             <p>
-              Track inbound requests across public portal and authenticated
-              service-request flows.
+              {t(
+                "yallaAdmin.portal.overview.focus3",
+                "Track inbound requests across public portal and authenticated service-request flows."
+              )}
             </p>
             <p>
-              Follow onboarding progression to spot support or activation
-              bottlenecks.
+              {t(
+                "yallaAdmin.portal.overview.focus4",
+                "Follow onboarding progression to spot support or activation bottlenecks."
+              )}
             </p>
           </div>
         </div>
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">
-            Current intake snapshot
+            {t(
+              "yallaAdmin.portal.overview.intakeSnapshot",
+              "Current intake snapshot"
+            )}
           </h3>
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="rounded-lg bg-slate-900/60 p-4">
@@ -1249,20 +1306,33 @@ function OverviewTab({
                 {intake?.counts.serviceRequests ?? 0}
               </div>
               <div className="text-xs text-slate-500 mt-1">
-                Service requests
+                {t(
+                  "yallaAdmin.portal.overview.serviceRequestsLabel",
+                  "Service requests"
+                )}
               </div>
             </div>
             <div className="rounded-lg bg-slate-900/60 p-4">
               <div className="text-2xl font-bold text-white">
                 {intake?.counts.accessRequests ?? 0}
               </div>
-              <div className="text-xs text-slate-500 mt-1">Access requests</div>
+              <div className="text-xs text-slate-500 mt-1">
+                {t(
+                  "yallaAdmin.portal.overview.accessRequestsLabel",
+                  "Access requests"
+                )}
+              </div>
             </div>
             <div className="rounded-lg bg-slate-900/60 p-4">
               <div className="text-2xl font-bold text-white">
                 {intake?.counts.consultationRequests ?? 0}
               </div>
-              <div className="text-xs text-slate-500 mt-1">Consultations</div>
+              <div className="text-xs text-slate-500 mt-1">
+                {t(
+                  "yallaAdmin.portal.overview.consultationRequestsLabel",
+                  "Consultations"
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1301,7 +1371,12 @@ function UsersTab({
           onChange={e => setFilter(e.target.value)}
           className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
         />
-        <span className="text-xs text-slate-500">{filtered.length} users</span>
+        <span className="text-xs text-slate-500">
+          {t("yallaAdmin.portal.usersCount", "{count} users").replace(
+            "{count}",
+            String(filtered.length)
+          )}
+        </span>
         <button
           onClick={() => {
             fetch("/api/yalla-admin/export/csv?type=users", {
@@ -1330,19 +1405,19 @@ function UsersTab({
           <thead>
             <tr className="border-b border-slate-700/40">
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                User
+                {t("yallaAdmin.portal.signups.col.user", "User")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Role
+                {t("yallaAdmin.portal.signups.col.role", "Role")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Last Login
+                {t("yallaAdmin.portal.signups.col.lastLogin", "Last Login")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
                 Sessions
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Flags
+                {t("yallaAdmin.portal.signups.col.flags", "Flags")}
               </th>
             </tr>
           </thead>
@@ -1518,6 +1593,7 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
 }
 
 function OnboardingTab({ onboarding }: { onboarding: OnboardingData | null }) {
+  const { t } = useLocale();
   if (!onboarding)
     return (
       <div className="text-slate-500 text-sm p-8 text-center">
@@ -1541,7 +1617,7 @@ function OnboardingTab({ onboarding }: { onboarding: OnboardingData | null }) {
           <thead>
             <tr className="border-b border-slate-700/40">
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                User
+                {t("yallaAdmin.portal.signups.col.user", "User")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
                 Stage
@@ -2084,32 +2160,40 @@ function SignupsTab({
           onChange={e => setFilter(e.target.value)}
           className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
         />
-        <span className="text-xs text-slate-500">{filtered.length} users</span>
+        <span className="text-xs text-slate-500">
+          {t("yallaAdmin.portal.usersCount", "{count} users").replace(
+            "{count}",
+            String(filtered.length)
+          )}
+        </span>
       </div>
       <div className="overflow-x-auto rounded-xl border border-slate-700/40">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700/40">
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                User
+                {t("yallaAdmin.portal.signups.col.user", "User")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Role
+                {t("yallaAdmin.portal.signups.col.role", "Role")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Organization
+                {t(
+                  "yallaAdmin.portal.signups.col.organization",
+                  "Organization"
+                )}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Plan
+                {t("yallaAdmin.portal.signups.col.plan", "Plan")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Registered
+                {t("yallaAdmin.portal.signups.col.registered", "Registered")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Last Login
+                {t("yallaAdmin.portal.signups.col.lastLogin", "Last Login")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Flags
+                {t("yallaAdmin.portal.signups.col.flags", "Flags")}
               </th>
             </tr>
           </thead>
@@ -2203,10 +2287,13 @@ function OrgsTab({
           <thead>
             <tr className="border-b border-slate-700/40">
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Organization
+                {t(
+                  "yallaAdmin.portal.signups.col.organization",
+                  "Organization"
+                )}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Plan
+                {t("yallaAdmin.portal.signups.col.plan", "Plan")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
                 Members

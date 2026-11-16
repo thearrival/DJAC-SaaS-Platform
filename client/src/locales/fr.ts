@@ -4053,5 +4053,45 @@ const messages: Record<string, string> = {
   "yallaAdmin.platformMonitor.aiWorkload": "Charge IA",
   "yallaAdmin.platformMonitor.emailDeliverability": "Délivrabilité des e-mails",
   "yallaAdmin.platformMonitor.securityPosture": "Posture de sécurité",
+  "yallaAdmin.portal.overview.loading": "Chargement de l'aperçu...",
+  "yallaAdmin.portal.overview.totalUsers": "Utilisateurs totaux",
+  "yallaAdmin.portal.overview.signupsToday": "Inscriptions aujourd'hui",
+  "yallaAdmin.portal.overview.newRegistrations": "nouvelles inscriptions",
+  "yallaAdmin.portal.overview.activeSessions": "Sessions actives",
+  "yallaAdmin.portal.overview.loginsToday": "Connexions aujourd'hui",
+  "yallaAdmin.portal.overview.organizations": "Organisations",
+  "yallaAdmin.portal.overview.newOrgsToday": "Nouvelles orgs aujourd'hui",
+  "yallaAdmin.portal.overview.paidPlans": "Forfaits payants",
+  "yallaAdmin.portal.overview.nonFreeOrgs": "orgs non gratuites",
+  "yallaAdmin.portal.overview.assetsTracked": "Actifs suivis",
+  "yallaAdmin.portal.overview.openRequests": "Demandes ouvertes",
+  "yallaAdmin.portal.overview.serviceRequests": "demandes de service",
+  "yallaAdmin.portal.overview.inboundIntake": "Admissions entrantes",
+  "yallaAdmin.portal.overview.accessConsultations": "accès + consultations",
+  "yallaAdmin.portal.overview.blockedEvents": "Événements bloqués",
+  "yallaAdmin.portal.overview.validationFailures": "échecs de validation",
+  "yallaAdmin.portal.overview.ownerFocus":
+    "Priorités propriétaire pour cette console",
+  "yallaAdmin.portal.overview.focus1":
+    "Surveillez l'activité des utilisateurs sur la plateforme et les entrées soumises.",
+  "yallaAdmin.portal.overview.focus2":
+    "Examinez les échecs de validation et les requêtes bloquées sans fouiller les journaux serveur.",
+  "yallaAdmin.portal.overview.focus3":
+    "Suivez les demandes entrantes via le portail public et les flux de demandes de service authentifiés.",
+  "yallaAdmin.portal.overview.focus4":
+    "Suivez la progression de l'intégration pour repérer les goulots d'étranglement.",
+  "yallaAdmin.portal.overview.intakeSnapshot":
+    "Instantané des admissions actuelles",
+  "yallaAdmin.portal.overview.serviceRequestsLabel": "Demandes de service",
+  "yallaAdmin.portal.overview.accessRequestsLabel": "Demandes d'accès",
+  "yallaAdmin.portal.overview.consultationRequestsLabel": "Consultations",
+  "yallaAdmin.portal.usersCount": "{count} utilisateurs",
+  "yallaAdmin.portal.signups.col.user": "Utilisateur",
+  "yallaAdmin.portal.signups.col.role": "Rôle",
+  "yallaAdmin.portal.signups.col.organization": "Organisation",
+  "yallaAdmin.portal.signups.col.plan": "Forfait",
+  "yallaAdmin.portal.signups.col.registered": "Inscrit",
+  "yallaAdmin.portal.signups.col.lastLogin": "Dernière connexion",
+  "yallaAdmin.portal.signups.col.flags": "Indicateurs",
 };
 export default messages;

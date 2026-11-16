@@ -4017,5 +4017,45 @@ const messages: Record<string, string> = {
   "yallaAdmin.platformMonitor.aiWorkload": "Carga de IA",
   "yallaAdmin.platformMonitor.emailDeliverability": "Entregabilidad de correo",
   "yallaAdmin.platformMonitor.securityPosture": "Postura de seguridad",
+  "yallaAdmin.portal.overview.loading": "Cargando resumen...",
+  "yallaAdmin.portal.overview.totalUsers": "Usuarios totales",
+  "yallaAdmin.portal.overview.signupsToday": "Registros hoy",
+  "yallaAdmin.portal.overview.newRegistrations": "nuevos registros",
+  "yallaAdmin.portal.overview.activeSessions": "Sesiones activas",
+  "yallaAdmin.portal.overview.loginsToday": "Inicios de sesión hoy",
+  "yallaAdmin.portal.overview.organizations": "Organizaciones",
+  "yallaAdmin.portal.overview.newOrgsToday": "Nuevas orgs hoy",
+  "yallaAdmin.portal.overview.paidPlans": "Planes de pago",
+  "yallaAdmin.portal.overview.nonFreeOrgs": "orgs no gratuitas",
+  "yallaAdmin.portal.overview.assetsTracked": "Activos rastreados",
+  "yallaAdmin.portal.overview.openRequests": "Solicitudes abiertas",
+  "yallaAdmin.portal.overview.serviceRequests": "solicitudes de servicio",
+  "yallaAdmin.portal.overview.inboundIntake": "Recepción entrante",
+  "yallaAdmin.portal.overview.accessConsultations": "acceso + consultas",
+  "yallaAdmin.portal.overview.blockedEvents": "Eventos bloqueados",
+  "yallaAdmin.portal.overview.validationFailures": "fallos de validación",
+  "yallaAdmin.portal.overview.ownerFocus":
+    "Enfoque del propietario para esta consola",
+  "yallaAdmin.portal.overview.focus1":
+    "Supervise la actividad de usuarios en la plataforma y las entradas enviadas.",
+  "yallaAdmin.portal.overview.focus2":
+    "Revise fallos de validación y solicitudes bloqueadas sin buscar en registros del servidor.",
+  "yallaAdmin.portal.overview.focus3":
+    "Rastree solicitudes entrantes en el portal público y flujos de servicio autenticados.",
+  "yallaAdmin.portal.overview.focus4":
+    "Siga la progresión de incorporación para detectar cuellos de botella.",
+  "yallaAdmin.portal.overview.intakeSnapshot":
+    "Instantánea de recepción actual",
+  "yallaAdmin.portal.overview.serviceRequestsLabel": "Solicitudes de servicio",
+  "yallaAdmin.portal.overview.accessRequestsLabel": "Solicitudes de acceso",
+  "yallaAdmin.portal.overview.consultationRequestsLabel": "Consultas",
+  "yallaAdmin.portal.usersCount": "{count} usuarios",
+  "yallaAdmin.portal.signups.col.user": "Usuario",
+  "yallaAdmin.portal.signups.col.role": "Rol",
+  "yallaAdmin.portal.signups.col.organization": "Organización",
+  "yallaAdmin.portal.signups.col.plan": "Plan",
+  "yallaAdmin.portal.signups.col.registered": "Registrado",
+  "yallaAdmin.portal.signups.col.lastLogin": "Último acceso",
+  "yallaAdmin.portal.signups.col.flags": "Indicadores",
 };
 export default messages;

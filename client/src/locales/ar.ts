@@ -3795,5 +3795,43 @@ const messages: Record<string, string> = {
   "yallaAdmin.platformMonitor.emailDeliverability":
     "إمكانية تسليم البريد الإلكتروني",
   "yallaAdmin.platformMonitor.securityPosture": "الوضع الأمني",
+  "yallaAdmin.portal.overview.loading": "جارٍ تحميل النظرة العامة...",
+  "yallaAdmin.portal.overview.totalUsers": "إجمالي المستخدمين",
+  "yallaAdmin.portal.overview.signupsToday": "التسجيلات اليوم",
+  "yallaAdmin.portal.overview.newRegistrations": "تسجيلات جديدة",
+  "yallaAdmin.portal.overview.activeSessions": "الجلسات النشطة",
+  "yallaAdmin.portal.overview.loginsToday": "تسجيلات الدخول اليوم",
+  "yallaAdmin.portal.overview.organizations": "المؤسسات",
+  "yallaAdmin.portal.overview.newOrgsToday": "مؤسسات جديدة اليوم",
+  "yallaAdmin.portal.overview.paidPlans": "الخطط المدفوعة",
+  "yallaAdmin.portal.overview.nonFreeOrgs": "مؤسسات غير مجانية",
+  "yallaAdmin.portal.overview.assetsTracked": "الأصول المتتبعة",
+  "yallaAdmin.portal.overview.openRequests": "الطلبات المفتوحة",
+  "yallaAdmin.portal.overview.serviceRequests": "طلبات الخدمة",
+  "yallaAdmin.portal.overview.inboundIntake": "الاستقبال الوارد",
+  "yallaAdmin.portal.overview.accessConsultations": "الوصول + الاستشارات",
+  "yallaAdmin.portal.overview.blockedEvents": "الأحداث المحظورة",
+  "yallaAdmin.portal.overview.validationFailures": "إخفاقات التحقق",
+  "yallaAdmin.portal.overview.ownerFocus": "تركيز المالك لهذه اللوحة",
+  "yallaAdmin.portal.overview.focus1":
+    "راقب نشاط المستخدمين على مستوى المنصة والمدخلات المقدمة.",
+  "yallaAdmin.portal.overview.focus2":
+    "راجع إخفاقات التحقق والطلبات المحظورة دون البحث في سجلات الخادم.",
+  "yallaAdmin.portal.overview.focus3":
+    "تتبع الطلبات الواردة عبر البوابة العامة وتدفقات طلبات الخدمة المصادق عليها.",
+  "yallaAdmin.portal.overview.focus4":
+    "تابع تقدم الإعداد الأولي لاكتشاف اختناقات الدعم أو التفعيل.",
+  "yallaAdmin.portal.overview.intakeSnapshot": "لقطة الاستقبال الحالية",
+  "yallaAdmin.portal.overview.serviceRequestsLabel": "طلبات الخدمة",
+  "yallaAdmin.portal.overview.accessRequestsLabel": "طلبات الوصول",
+  "yallaAdmin.portal.overview.consultationRequestsLabel": "الاستشارات",
+  "yallaAdmin.portal.usersCount": "{count} مستخدم",
+  "yallaAdmin.portal.signups.col.user": "المستخدم",
+  "yallaAdmin.portal.signups.col.role": "الدور",
+  "yallaAdmin.portal.signups.col.organization": "المؤسسة",
+  "yallaAdmin.portal.signups.col.plan": "الخطة",
+  "yallaAdmin.portal.signups.col.registered": "مسجّل",
+  "yallaAdmin.portal.signups.col.lastLogin": "آخر تسجيل دخول",
+  "yallaAdmin.portal.signups.col.flags": "العلامات",
 };
 export default messages;
