@@ -275,27 +275,34 @@ export default function ThreatIntelFeed() {
           className="border-red-900/60 bg-zinc-950/70 text-red-200"
         >
           <ShieldAlert className="size-4" />
-          <AlertTitle>Threat feed unavailable</AlertTitle>
+          <AlertTitle>
+            {t("threatIntel.feedUnavailable", "Threat feed unavailable")}
+          </AlertTitle>
           <AlertDescription>
-            <p>Failed to load threat intelligence bulletins.</p>
+            <p>
+              {t(
+                "threatIntel.loadError",
+                "Failed to load threat intelligence bulletins."
+              )}
+            </p>
             <Button
               variant="outline"
               size="sm"
               className="mt-2 border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"
               onClick={() => refetch()}
             >
-              Retry
+              {t("threatIntel.retry", "Retry")}
             </Button>
           </AlertDescription>
         </Alert>
       ) : isLoading ? (
         <div className="text-center py-16 text-zinc-500">
-          Loading threat intelligence…
+          {t("threatIntel.loading", "Loading threat intelligence...")}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-zinc-500">
           <ShieldAlert className="size-12 mx-auto mb-3 opacity-30" />
-          <p>No bulletins match your filters.</p>
+          <p>{t("threatIntel.noMatch", "No bulletins match your filters.")}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">

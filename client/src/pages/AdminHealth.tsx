@@ -10,8 +10,10 @@ import {
   Clock,
   HardDrive,
 } from "lucide-react";
+import { useLocale } from "@/contexts/useLocale";
 
 export default function AdminHealth() {
+  const { t } = useLocale();
   const [status, setStatus] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -38,13 +40,22 @@ export default function AdminHealth() {
   }, []);
 
   const services = [
-    { label: "Database", ok: stats?.dbConnected, icon: Database },
     {
-      label: "Frameworks",
+      label: t("adminHealth.database", "Database"),
+      ok: stats?.dbConnected,
+      icon: Database,
+    },
+    {
+      label: t("adminHealth.frameworks", "Frameworks"),
       ok: (stats?.frameworks as number) > 0,
       icon: BookOpen,
     },
-    { label: "Users", ok: true, icon: Users, detail: stats?.users },
+    {
+      label: t("adminHealth.users", "Users"),
+      ok: true,
+      icon: Users,
+      detail: stats?.users,
+    },
   ];
 
   if (loading && !stats) {
@@ -76,10 +87,13 @@ export default function AdminHealth() {
         }}
       >
         <Activity size={22} style={{ color: "#d900ff" }} />
-        System Health
+        {t("adminHealth.systemHealth", "System Health")}
       </h1>
       <p style={{ fontSize: 14, color: "var(--djac-muted)", marginBottom: 28 }}>
-        Real-time platform status and diagnostics
+        {t(
+          "adminHealth.realTimeStatus",
+          "Real-time platform status and diagnostics"
+        )}
       </p>
 
       <div
@@ -125,12 +139,17 @@ export default function AdminHealth() {
                   color: s.ok ? "#10b981" : "var(--djac-destructive)",
                 }}
               >
-                {s.ok ? "OK" : "Down"}
+                {s.ok
+                  ? t("adminHealth.ok", "OK")
+                  : t("adminHealth.down", "Down")}
               </span>
             </div>
             {s.detail !== undefined && (
               <span style={{ fontSize: 12, color: "var(--djac-muted)" }}>
-                {String(s.detail)} total
+                {t("adminHealth.total", "{{count}} total").replace(
+                  "{{count}}",
+                  String(s.detail)
+                )}
               </span>
             )}
           </div>
@@ -158,7 +177,7 @@ export default function AdminHealth() {
             }}
           >
             <Server size={16} />
-            Production Readiness
+            {t("adminHealth.productionReadiness", "Production Readiness")}
           </h3>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             {Object.entries(status.checks ?? {}).map(([k, v]) => (
@@ -203,7 +222,7 @@ export default function AdminHealth() {
             }}
           >
             <HardDrive size={16} />
-            Runtime Metrics
+            {t("adminHealth.runtimeMetrics", "Runtime Metrics")}
           </h3>
           <div
             style={{
@@ -214,22 +233,30 @@ export default function AdminHealth() {
           >
             {[
               {
-                label: "Uptime",
+                label: t("adminHealth.uptime", "Uptime"),
                 value: `${Math.floor((stats.uptime as number) / 60)}m ${Math.floor((stats.uptime as number) % 60)}s`,
                 icon: Clock,
               },
-              { label: "Users", value: String(stats.users ?? 0), icon: Users },
               {
-                label: "Frameworks",
+                label: t("adminHealth.users", "Users"),
+                value: String(stats.users ?? 0),
+                icon: Users,
+              },
+              {
+                label: t("adminHealth.frameworks", "Frameworks"),
                 value: String(stats.frameworks ?? 0),
                 icon: BookOpen,
               },
               {
-                label: "Memory RSS",
+                label: t("adminHealth.memoryRss", "Memory RSS"),
                 value: `${Math.round(((stats.memory as { rss?: number })?.rss ?? 0) / 1024 / 1024)} MB`,
                 icon: HardDrive,
               },
-              { label: "Node", value: String(stats.node), icon: Server },
+              {
+                label: t("adminHealth.node", "Node"),
+                value: String(stats.node),
+                icon: Server,
+              },
             ].map(m => (
               <div
                 key={m.label}

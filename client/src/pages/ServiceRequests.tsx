@@ -240,31 +240,31 @@ export default function ServiceRequests() {
         </div>
         <Button onClick={() => setShowCreate(true)} className="gap-2">
           <Plus className="size-4" />
-          New Request
+          {t("serviceRequests.newRequest", "New Request")}
         </Button>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Total Requests"
+          title={t("serviceRequests.stats.total", "Total Requests")}
           value={isLoading ? "—" : requests.length}
           icon={<ClipboardList className="size-5 text-zinc-400" />}
         />
         <StatCard
-          title="Active"
+          title={t("serviceRequests.stats.active", "Active")}
           value={isLoading ? "—" : activeCount}
           icon={<Shield className="size-5 text-blue-400" />}
           accent="text-blue-400"
         />
         <StatCard
-          title="Pending Review"
+          title={t("serviceRequests.stats.pendingReview", "Pending Review")}
           value={isLoading ? "—" : pendingReviewCount}
           icon={<Clock className="size-5 text-yellow-400" />}
           accent="text-yellow-400"
         />
         <StatCard
-          title="Completed"
+          title={t("serviceRequests.stats.completed", "Completed")}
           value={isLoading ? "—" : completedCount}
           icon={<CheckCircle2 className="size-5 text-green-400" />}
           accent="text-green-400"
@@ -274,9 +274,14 @@ export default function ServiceRequests() {
       {/* Request List */}
       <Card className="bg-zinc-900 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-white">Your Requests</CardTitle>
+          <CardTitle className="text-white">
+            {t("serviceRequests.yourRequests", "Your Requests")}
+          </CardTitle>
           <CardDescription>
-            Track the status of your cybersecurity service engagements
+            {t(
+              "serviceRequests.yourRequestsDesc",
+              "Track the status of your cybersecurity service engagements"
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -297,12 +302,12 @@ export default function ServiceRequests() {
                   void refetch();
                 }}
               >
-                Retry
+                {t("serviceRequests.retry", "Retry")}
               </Button>
             </div>
           ) : isLoading ? (
             <div className="text-center py-12 text-zinc-500">
-              Loading requests…
+              {t("serviceRequests.loading", "Loading requests...")}
             </div>
           ) : requests.length === 0 ? (
             <div className="text-center py-12 text-zinc-500">
