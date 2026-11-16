@@ -4092,5 +4092,6 @@ const messages: Record<string, string> = {
   "proIntel.aria.radarChart": "框架合规雷达图",
   "proIntel.aria.clearComparison": "清除比较",
   "proIntel.aria.closePanel": "关闭面板",
+  "signup.aria.uscoRecord": "查看美国版权局注册记录",
 };
 export default messages;

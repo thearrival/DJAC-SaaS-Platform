@@ -4368,5 +4368,7 @@ const messages: Record<string, string> = {
   "proIntel.aria.radarChart": "Framework compliance radar chart",
   "proIntel.aria.clearComparison": "Clear comparison",
   "proIntel.aria.closePanel": "Close panel",
+  "signup.aria.uscoRecord":
+    "View the U.S. Copyright Office registration record",
 };
 export default messages;

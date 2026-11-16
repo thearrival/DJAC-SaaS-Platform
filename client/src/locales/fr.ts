@@ -4590,5 +4590,7 @@ const messages: Record<string, string> = {
   "proIntel.aria.radarChart": "Graphique radar de conformité des cadres",
   "proIntel.aria.clearComparison": "Effacer la comparaison",
   "proIntel.aria.closePanel": "Fermer le panneau",
+  "signup.aria.uscoRecord":
+    "Voir le dossier d'enregistrement du Bureau américain du droit d'auteur",
 };
 export default messages;

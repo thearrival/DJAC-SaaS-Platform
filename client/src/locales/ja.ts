@@ -4440,5 +4440,6 @@ const messages: Record<string, string> = {
   "proIntel.aria.radarChart": "フレームワーク準拠レーダーチャート",
   "proIntel.aria.clearComparison": "比較をクリア",
   "proIntel.aria.closePanel": "パネルを閉じる",
+  "signup.aria.uscoRecord": "米国著作権局の登録記録を表示",
 };
 export default messages;

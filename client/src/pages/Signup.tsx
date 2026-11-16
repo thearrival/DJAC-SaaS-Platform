@@ -3141,7 +3141,10 @@ export default function Signup() {
                 href="https://publicrecords.copyright.gov/detailed-record/siebel_TXu002560878"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="View the U.S. Copyright Office registration record"
+                aria-label={t(
+                  "signup.aria.uscoRecord",
+                  "View the U.S. Copyright Office registration record"
+                )}
                 style={{ display: "inline-flex", alignItems: "center" }}
               >
                 <img

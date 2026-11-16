@@ -4543,5 +4543,6 @@ const messages: Record<string, string> = {
   "proIntel.aria.radarChart": "Radar-Diagramm zur Framework-Compliance",
   "proIntel.aria.clearComparison": "Vergleich löschen",
   "proIntel.aria.closePanel": "Panel schließen",
+  "signup.aria.uscoRecord": "Den Eintrag des US-Urheberrechtsamts anzeigen",
 };
 export default messages;

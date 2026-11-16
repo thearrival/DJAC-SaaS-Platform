@@ -4310,5 +4310,6 @@ const messages: Record<string, string> = {
   "proIntel.aria.radarChart": "مخطط رادار امتثال الأطر",
   "proIntel.aria.clearComparison": "مسح المقارنة",
   "proIntel.aria.closePanel": "إغلاق اللوحة",
+  "signup.aria.uscoRecord": "عرض سجل تسجيل مكتب حقوق الطبع والنشر الأمريكي",
 };
 export default messages;

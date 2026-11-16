@@ -4308,5 +4308,6 @@ const messages: Record<string, string> = {
   "proIntel.aria.radarChart": "프레임워크 준수 레이더 차트",
   "proIntel.aria.clearComparison": "비교 지우기",
   "proIntel.aria.closePanel": "패널 닫기",
+  "signup.aria.uscoRecord": "미국 저작권청 등록 기록 보기",
 };
 export default messages;
