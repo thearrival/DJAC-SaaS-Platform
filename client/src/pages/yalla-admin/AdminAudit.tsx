@@ -316,7 +316,7 @@ export default function AdminAudit() {
           {debouncedFilter && (
             <span>
               {" "}
-              · filtered by{" "}
+              • {t("yallaAdmin.audit.filteredBy", "filtered by")}{" "}
               <code style={{ color: "#d900ff" }}>"{debouncedFilter}"</code>
             </span>
           )}
@@ -409,7 +409,7 @@ export default function AdminAudit() {
                             />
                           )
                         ) : (
-                          <span style={{ color: "#334155" }}>·</span>
+                          <span style={{ color: "#334155" }}>•</span>
                         )}
                       </td>
                       <td
@@ -424,10 +424,11 @@ export default function AdminAudit() {
                           ? new Date(log.createdAt).toLocaleString(
                               storedLocaleTag()
                             )
-                          : "—"}
+                          : t("yallaAdmin.common.notAvailable", "—")}
                       </td>
                       <td style={{ padding: "12px 16px" }}>
-                        {log.adminUsername || "—"}
+                        {log.adminUsername ||
+                          t("yallaAdmin.common.notAvailable", "—")}
                       </td>
                       <td style={{ padding: "12px 16px" }}>
                         <code
@@ -449,7 +450,7 @@ export default function AdminAudit() {
                           fontSize: 12,
                         }}
                       >
-                        {log.target || "—"}
+                        {log.target || t("yallaAdmin.common.notAvailable", "—")}
                       </td>
                       <td
                         style={{
@@ -459,7 +460,8 @@ export default function AdminAudit() {
                           fontFamily: "monospace",
                         }}
                       >
-                        {log.ipAddress || "—"}
+                        {log.ipAddress ||
+                          t("yallaAdmin.common.notAvailable", "—")}
                       </td>
                     </tr>,
                   ];
