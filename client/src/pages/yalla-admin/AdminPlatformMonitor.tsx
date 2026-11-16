@@ -340,31 +340,66 @@ export default function AdminPlatformMonitor() {
         <div style={gridStyle}>
           <KPI
             icon={<CreditCard size={18} />}
-            label="MRR (interval-normalised)"
+            label={t(
+              "yallaAdmin.platformMonitor.kpi.mrr",
+              "MRR (interval-normalised)"
+            )}
             value={money(r?.mrrCents ?? 0, r?.currency)}
             color="#d900ff"
-            sub={`${r?.payingSubscriptions ?? 0} paying · ARPU ${money(r?.arpuCents ?? 0, r?.currency)}`}
+            sub={t(
+              "yallaAdmin.platformMonitor.sub.payingArpu",
+              "{count} paying • ARPU {arpu}"
+            )
+              .replace("{count}", String(r?.payingSubscriptions ?? 0))
+              .replace("{arpu}", money(r?.arpuCents ?? 0, r?.currency))}
           />
           <KPI
             icon={<TrendingUp size={18} />}
-            label="ARR"
+            label={t("yallaAdmin.platformMonitor.kpi.arr", "ARR")}
             value={money(r?.arrCents ?? 0, r?.currency)}
             color="#00d2ff"
-            sub={`${r?.trialingSubscriptions ?? 0} trialing · ${r?.pastDueSubscriptions ?? 0} past due`}
+            sub={t(
+              "yallaAdmin.platformMonitor.sub.trialingPastDue",
+              "{trialing} trialing • {pastDue} past due"
+            )
+              .replace("{trialing}", String(r?.trialingSubscriptions ?? 0))
+              .replace("{pastDue}", String(r?.pastDueSubscriptions ?? 0))}
           />
           <KPI
             icon={<Users size={18} />}
-            label="Active users (24h)"
+            label={t(
+              "yallaAdmin.platformMonitor.kpi.activeUsers24h",
+              "Active users (24h)"
+            )}
             value={String(traffic?.activeUsers24h ?? 0)}
             color="#10b981"
-            sub={`7d ${traffic?.activeUsers7d ?? 0} · 30d ${traffic?.activeUsers30d ?? 0}`}
+            sub={t(
+              "yallaAdmin.platformMonitor.sub.activeUsers",
+              "7d {d7} • 30d {d30}"
+            )
+              .replace("{d7}", String(traffic?.activeUsers7d ?? 0))
+              .replace("{d30}", String(traffic?.activeUsers30d ?? 0))}
           />
           <KPI
             icon={<Activity size={18} />}
-            label="Events (24h)"
+            label={t(
+              "yallaAdmin.platformMonitor.kpi.events24h",
+              "Events (24h)"
+            )}
             value={(traffic?.events24h ?? 0).toLocaleString(storedLocaleTag())}
             color="#00d2ff"
-            sub={`7d ${(traffic?.events7d ?? 0).toLocaleString(storedLocaleTag())} · all ${(traffic?.totalEvents ?? 0).toLocaleString(storedLocaleTag())}`}
+            sub={t(
+              "yallaAdmin.platformMonitor.sub.events",
+              "7d {d7} • all {all}"
+            )
+              .replace(
+                "{d7}",
+                (traffic?.events7d ?? 0).toLocaleString(storedLocaleTag())
+              )
+              .replace(
+                "{all}",
+                (traffic?.totalEvents ?? 0).toLocaleString(storedLocaleTag())
+              )}
           />
         </div>
 
@@ -378,35 +413,69 @@ export default function AdminPlatformMonitor() {
         <div style={gridStyle}>
           <KPI
             icon={<AlertTriangle size={18} />}
-            label="Failed payments (30d)"
+            label={t(
+              "yallaAdmin.platformMonitor.kpi.failedPayments30d",
+              "Failed payments (30d)"
+            )}
             value={String(r?.failedPayments30d ?? 0)}
             color={r && r.failedPayments30d > 0 ? "#ef4444" : "#10b981"}
-            sub={`${money(r?.failedAmountCents30d ?? 0, r?.currency)} at risk`}
+            sub={t(
+              "yallaAdmin.platformMonitor.sub.atRisk",
+              "{amount} at risk"
+            ).replace(
+              "{amount}",
+              money(r?.failedAmountCents30d ?? 0, r?.currency)
+            )}
           />
           <KPI
             icon={<Bot size={18} />}
-            label="AI success rate"
+            label={t(
+              "yallaAdmin.platformMonitor.kpi.aiSuccessRate",
+              "AI success rate"
+            )}
             value={`${ai?.successRate ?? 0}%`}
             color={
               ai && ai.successRate < 90 && ai.completed + ai.failed > 0
                 ? "#f59e0b"
                 : "#10b981"
             }
-            sub={`${ai?.completed ?? 0} ok · ${ai?.failed ?? 0} failed · p95 ${ms(ai?.p95DurationMs ?? 0)}`}
+            sub={t(
+              "yallaAdmin.platformMonitor.sub.aiStats",
+              "{ok} ok • {failed} failed • p95 {p95}"
+            )
+              .replace("{ok}", String(ai?.completed ?? 0))
+              .replace("{failed}", String(ai?.failed ?? 0))
+              .replace("{p95}", ms(ai?.p95DurationMs ?? 0))}
           />
           <KPI
             icon={<Mail size={18} />}
-            label="Email open rate"
+            label={t(
+              "yallaAdmin.platformMonitor.kpi.emailOpenRate",
+              "Email open rate"
+            )}
             value={`${em?.openRate ?? 0}%`}
             color="#00d2ff"
-            sub={`${em?.sent ?? 0} sent · ${em?.failed ?? 0} failed`}
+            sub={t(
+              "yallaAdmin.platformMonitor.sub.emailStats",
+              "{sent} sent • {failed} failed"
+            )
+              .replace("{sent}", String(em?.sent ?? 0))
+              .replace("{failed}", String(em?.failed ?? 0))}
           />
           <KPI
             icon={<ShieldCheck size={18} />}
-            label="MFA adoption"
+            label={t(
+              "yallaAdmin.platformMonitor.kpi.mfaAdoption",
+              "MFA adoption"
+            )}
             value={`${sec?.mfaAdoptionRate ?? 0}%`}
             color={sec && sec.mfaAdoptionRate < 25 ? "#f59e0b" : "#10b981"}
-            sub={`${sec?.mfaEnabledUsers ?? 0}/${sec?.totalUsers ?? 0} users`}
+            sub={t(
+              "yallaAdmin.platformMonitor.sub.mfaUsers",
+              "{enabled}/{total} users"
+            )
+              .replace("{enabled}", String(sec?.mfaEnabledUsers ?? 0))
+              .replace("{total}", String(sec?.totalUsers ?? 0))}
           />
         </div>
 
@@ -418,11 +487,25 @@ export default function AdminPlatformMonitor() {
           )}
         </SectionLabel>
         <div style={gridStyle}>
-          <Panel title="Daily events" icon={<Activity size={16} />} wide>
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.dailyEvents",
+              "Daily events"
+            )}
+            icon={<Activity size={16} />}
+            wide
+          >
             {loading ? (
-              <Muted>Loading…</Muted>
+              <Muted>
+                {t("yallaAdmin.platformMonitor.loading", "Loading…")}
+              </Muted>
             ) : (traffic?.daily || []).length === 0 ? (
-              <Muted>No analytics events recorded yet.</Muted>
+              <Muted>
+                {t(
+                  "yallaAdmin.platformMonitor.empty.noAnalytics",
+                  "No analytics events recorded yet."
+                )}
+              </Muted>
             ) : (
               <>
                 <div
@@ -436,7 +519,13 @@ export default function AdminPlatformMonitor() {
                   {(traffic?.daily || []).map(d => (
                     <div
                       key={d.date}
-                      title={`${d.date}: ${d.events} events, ${d.users} users`}
+                      title={t(
+                        "yallaAdmin.platformMonitor.tooltip.eventsUsers",
+                        "{date}: {events} events, {users} users"
+                      )
+                        .replace("{date}", d.date)
+                        .replace("{events}", String(d.events))
+                        .replace("{users}", String(d.users))}
                       style={{
                         flex: 1,
                         display: "flex",
@@ -473,23 +562,41 @@ export default function AdminPlatformMonitor() {
             )}
           </Panel>
 
-          <Panel title="Top events" icon={<Gauge size={16} />}>
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.topEvents",
+              "Top events"
+            )}
+            icon={<Gauge size={16} />}
+          >
             <BarList
               items={(traffic?.topEvents || []).map(e => ({
-                label: `${e.event} · ${e.category}`,
+                label: `${e.event} • ${e.category}`,
                 value: e.count,
               }))}
-              empty="No events yet."
+              empty={t(
+                "yallaAdmin.platformMonitor.empty.noEvents",
+                "No events yet."
+              )}
             />
           </Panel>
 
-          <Panel title="New signups" icon={<Users size={16} />}>
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.newSignups",
+              "New signups"
+            )}
+            icon={<Users size={16} />}
+          >
             <BarList
               items={(traffic?.signups || []).map(s => ({
                 label: s.date,
                 value: s.count,
               }))}
-              empty="No signups in this window."
+              empty={t(
+                "yallaAdmin.platformMonitor.empty.noSignups",
+                "No signups in this window."
+              )}
             />
           </Panel>
         </div>
@@ -502,41 +609,72 @@ export default function AdminPlatformMonitor() {
           )}
         </SectionLabel>
         <div style={gridStyle}>
-          <Panel title="MRR by plan" icon={<CreditCard size={16} />}>
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.mrrByPlan",
+              "MRR by plan"
+            )}
+            icon={<CreditCard size={16} />}
+          >
             <BarList
               items={(r?.byPlan || []).map(p => ({
                 label: `${p.plan} (${p.count})`,
                 value: p.mrrCents,
                 display: money(p.mrrCents, r?.currency),
               }))}
-              empty="No active subscriptions."
+              empty={t(
+                "yallaAdmin.platformMonitor.empty.noActiveSubs",
+                "No active subscriptions."
+              )}
             />
           </Panel>
 
-          <Panel title="Subscriptions by status" icon={<Activity size={16} />}>
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.subsByStatus",
+              "Subscriptions by status"
+            )}
+            icon={<Activity size={16} />}
+          >
             <BarList
               items={(r?.byStatus || []).map(s => ({
                 label: s.status,
                 value: s.count,
               }))}
-              empty="No subscriptions."
+              empty={t(
+                "yallaAdmin.platformMonitor.empty.noSubs",
+                "No subscriptions."
+              )}
             />
           </Panel>
 
           <Panel
-            title="Recent billing events"
+            title={t(
+              "yallaAdmin.platformMonitor.panel.recentBillingEvents",
+              "Recent billing events"
+            )}
             icon={<CreditCard size={16} />}
             wide
           >
             <Table
-              head={["When", "Event", "Status", "Amount"]}
+              head={[
+                t("yallaAdmin.platformMonitor.table.when", "When"),
+                t("yallaAdmin.platformMonitor.table.event", "Event"),
+                t("yallaAdmin.platformMonitor.table.status", "Status"),
+                t("yallaAdmin.platformMonitor.table.amount", "Amount"),
+              ]}
               rows={(r?.recentBillingEvents || []).map(b => [
                 fmtTime(b.createdAt),
                 b.eventType,
                 b.status,
-                b.amountCents != null ? money(b.amountCents, b.currency) : "—",
+                b.amountCents != null
+                  ? money(b.amountCents, b.currency)
+                  : t("yallaAdmin.common.notAvailable", "—"),
               ])}
-              empty="No billing events."
+              empty={t(
+                "yallaAdmin.platformMonitor.empty.noBillingEvents",
+                "No billing events."
+              )}
             />
           </Panel>
         </div>
@@ -549,42 +687,132 @@ export default function AdminPlatformMonitor() {
           )}
         </SectionLabel>
         <div style={gridStyle}>
-          <Panel title="AI agent runs" icon={<Bot size={16} />}>
-            <StatRow label="Queued" value={ai?.queued ?? 0} />
-            <StatRow label="Running" value={ai?.running ?? 0} />
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.aiAgentRuns",
+              "AI agent runs"
+            )}
+            icon={<Bot size={16} />}
+          >
             <StatRow
-              label="Completed"
+              label={t("yallaAdmin.platformMonitor.stat.queued", "Queued")}
+              value={ai?.queued ?? 0}
+            />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.running", "Running")}
+              value={ai?.running ?? 0}
+            />
+            <StatRow
+              label={t(
+                "yallaAdmin.platformMonitor.stat.completed",
+                "Completed"
+              )}
               value={ai?.completed ?? 0}
               tone="#10b981"
             />
-            <StatRow label="Failed" value={ai?.failed ?? 0} tone="#ef4444" />
-            <StatRow label="Cancelled" value={ai?.cancelled ?? 0} />
-            <StatRow label="Avg duration" value={ms(ai?.avgDurationMs ?? 0)} />
-            <StatRow label="p95 duration" value={ms(ai?.p95DurationMs ?? 0)} />
-            <StatRow label="Last 24h" value={ai?.last24h ?? 0} />
-          </Panel>
-
-          <Panel title="Recent AI failures" icon={<AlertTriangle size={16} />}>
-            <Table
-              head={["When", "Agent", "Error"]}
-              rows={(ai?.recentFailures || []).map(f => [
-                fmtTime(f.createdAt),
-                f.agentName,
-                (f.errorMessage || "—").slice(0, 80),
-              ])}
-              empty="No recent failures."
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.failed", "Failed")}
+              value={ai?.failed ?? 0}
+              tone="#ef4444"
+            />
+            <StatRow
+              label={t(
+                "yallaAdmin.platformMonitor.stat.cancelled",
+                "Cancelled"
+              )}
+              value={ai?.cancelled ?? 0}
+            />
+            <StatRow
+              label={t(
+                "yallaAdmin.platformMonitor.stat.avgDuration",
+                "Avg duration"
+              )}
+              value={ms(ai?.avgDurationMs ?? 0)}
+            />
+            <StatRow
+              label={t(
+                "yallaAdmin.platformMonitor.stat.p95Duration",
+                "p95 duration"
+              )}
+              value={ms(ai?.p95DurationMs ?? 0)}
+            />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.last24h", "Last 24h")}
+              value={ai?.last24h ?? 0}
             />
           </Panel>
 
-          <Panel title="Email delivery" icon={<Mail size={16} />}>
-            <StatRow label="Sent" value={em?.sent ?? 0} tone="#10b981" />
-            <StatRow label="Queued" value={em?.queued ?? 0} />
-            <StatRow label="Failed" value={em?.failed ?? 0} tone="#ef4444" />
-            <StatRow label="Opened" value={em?.opened ?? 0} />
-            <StatRow label="Clicked" value={em?.clicked ?? 0} />
-            <StatRow label="Open rate" value={`${em?.openRate ?? 0}%`} />
-            <StatRow label="Click rate" value={`${em?.clickRate ?? 0}%`} />
-            <StatRow label="Sent 24h" value={em?.last24hSent ?? 0} />
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.recentAiFailures",
+              "Recent AI failures"
+            )}
+            icon={<AlertTriangle size={16} />}
+          >
+            <Table
+              head={[
+                t("yallaAdmin.platformMonitor.table.when", "When"),
+                t("yallaAdmin.platformMonitor.table.agent", "Agent"),
+                t("yallaAdmin.platformMonitor.table.error", "Error"),
+              ]}
+              rows={(ai?.recentFailures || []).map(f => [
+                fmtTime(f.createdAt),
+                f.agentName,
+                (
+                  f.errorMessage || t("yallaAdmin.common.notAvailable", "—")
+                ).slice(0, 80),
+              ])}
+              empty={t(
+                "yallaAdmin.platformMonitor.empty.noRecentFailures",
+                "No recent failures."
+              )}
+            />
+          </Panel>
+
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.emailDelivery",
+              "Email delivery"
+            )}
+            icon={<Mail size={16} />}
+          >
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.sent", "Sent")}
+              value={em?.sent ?? 0}
+              tone="#10b981"
+            />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.queued", "Queued")}
+              value={em?.queued ?? 0}
+            />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.failed", "Failed")}
+              value={em?.failed ?? 0}
+              tone="#ef4444"
+            />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.opened", "Opened")}
+              value={em?.opened ?? 0}
+            />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.clicked", "Clicked")}
+              value={em?.clicked ?? 0}
+            />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.openRate", "Open rate")}
+              value={`${em?.openRate ?? 0}%`}
+            />
+            <StatRow
+              label={t(
+                "yallaAdmin.platformMonitor.stat.clickRate",
+                "Click rate"
+              )}
+              value={`${em?.clickRate ?? 0}%`}
+            />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.sent24h", "Sent 24h")}
+              value={em?.last24hSent ?? 0}
+            />
           </Panel>
         </div>
 
@@ -593,59 +821,120 @@ export default function AdminPlatformMonitor() {
           {t("yallaAdmin.platformMonitor.securityPosture", "Security posture")}
         </SectionLabel>
         <div style={gridStyle}>
-          <Panel title="Accounts" icon={<ShieldCheck size={16} />}>
-            <StatRow label="Total users" value={sec?.totalUsers ?? 0} />
-            <StatRow label="MFA enabled" value={sec?.mfaEnabledUsers ?? 0} />
+          <Panel
+            title={t("yallaAdmin.platformMonitor.panel.accounts", "Accounts")}
+            icon={<ShieldCheck size={16} />}
+          >
             <StatRow
-              label="MFA adoption"
+              label={t(
+                "yallaAdmin.platformMonitor.stat.totalUsers",
+                "Total users"
+              )}
+              value={sec?.totalUsers ?? 0}
+            />
+            <StatRow
+              label={t(
+                "yallaAdmin.platformMonitor.stat.mfaEnabled",
+                "MFA enabled"
+              )}
+              value={sec?.mfaEnabledUsers ?? 0}
+            />
+            <StatRow
+              label={t(
+                "yallaAdmin.platformMonitor.kpi.mfaAdoption",
+                "MFA adoption"
+              )}
               value={`${sec?.mfaAdoptionRate ?? 0}%`}
               tone={sec && sec.mfaAdoptionRate < 25 ? "#f59e0b" : "#10b981"}
             />
             <StatRow
-              label="Suspended"
+              label={t(
+                "yallaAdmin.platformMonitor.stat.suspended",
+                "Suspended"
+              )}
               value={sec?.suspendedUsers ?? 0}
               tone="#ef4444"
             />
-            <StatRow label="Pending" value={sec?.pendingUsers ?? 0} />
+            <StatRow
+              label={t("yallaAdmin.platformMonitor.stat.pending", "Pending")}
+              value={sec?.pendingUsers ?? 0}
+            />
           </Panel>
 
-          <Panel title="Engagement quality" icon={<Gauge size={16} />}>
-            <StatRow label="Tracked users" value={traffic?.trackedUsers ?? 0} />
+          <Panel
+            title={t(
+              "yallaAdmin.platformMonitor.panel.engagementQuality",
+              "Engagement quality"
+            )}
+            icon={<Gauge size={16} />}
+          >
             <StatRow
-              label="Total sessions"
+              label={t(
+                "yallaAdmin.platformMonitor.stat.trackedUsers",
+                "Tracked users"
+              )}
+              value={traffic?.trackedUsers ?? 0}
+            />
+            <StatRow
+              label={t(
+                "yallaAdmin.platformMonitor.stat.totalSessions",
+                "Total sessions"
+              )}
               value={traffic?.totalSessions ?? 0}
             />
             <StatRow
-              label="Avg activation score"
+              label={t(
+                "yallaAdmin.platformMonitor.stat.avgActivation",
+                "Avg activation score"
+              )}
               value={traffic?.avgActivationScore ?? 0}
             />
             <StatRow
-              label="Avg health score"
+              label={t(
+                "yallaAdmin.platformMonitor.stat.avgHealth",
+                "Avg health score"
+              )}
               value={traffic?.avgHealthScore ?? 0}
             />
             <StatRow
-              label="Churn risk (cancel at period end)"
+              label={t(
+                "yallaAdmin.platformMonitor.stat.churnRisk",
+                "Churn risk (cancel at period end)"
+              )}
               value={r?.churnRiskSubscriptions ?? 0}
               tone={r && r.churnRiskSubscriptions > 0 ? "#f59e0b" : "#10b981"}
             />
             <StatRow
-              label="Refunded 30d"
+              label={t(
+                "yallaAdmin.platformMonitor.stat.refunded30d",
+                "Refunded 30d"
+              )}
               value={money(r?.refundedAmountCents30d ?? 0, r?.currency)}
             />
           </Panel>
 
           <Panel
-            title="Recent email failures"
+            title={t(
+              "yallaAdmin.platformMonitor.panel.recentEmailFailures",
+              "Recent email failures"
+            )}
             icon={<AlertTriangle size={16} />}
           >
             <Table
-              head={["When", "Template", "Recipient"]}
+              head={[
+                t("yallaAdmin.platformMonitor.table.when", "When"),
+                t("yallaAdmin.platformMonitor.table.template", "Template"),
+                t("yallaAdmin.platformMonitor.table.recipient", "Recipient"),
+              ]}
               rows={(em?.recentFailures || []).map(f => [
                 fmtTime(f.createdAt),
                 f.template,
                 f.recipient,
               ])}
-              empty="No recent failures."
+              empty={t(
+                "yallaAdmin.platformMonitor.empty.noRecentFailures",
+                "No recent failures."
+              )}
             />
           </Panel>
         </div>

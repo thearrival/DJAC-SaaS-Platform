@@ -4224,5 +4224,87 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.ownerAccess.copied": "Link in die Zwischenablage kopiert.",
   "yallaAdmin.portal.ownerAccess.copyFailed":
     "Kopieren fehlgeschlagen. Bitte kopieren Sie den Link manuell.",
+  "yallaAdmin.platformMonitor.kpi.mrr": "MRR (intervallnormalisiert)",
+  "yallaAdmin.platformMonitor.kpi.arr": "ARR",
+  "yallaAdmin.platformMonitor.kpi.activeUsers24h": "Aktive Nutzer (24h)",
+  "yallaAdmin.platformMonitor.kpi.events24h": "Ereignisse (24h)",
+  "yallaAdmin.platformMonitor.kpi.failedPayments30d":
+    "Fehlgeschlagene Zahlungen (30T)",
+  "yallaAdmin.platformMonitor.kpi.aiSuccessRate": "KI-Erfolgsrate",
+  "yallaAdmin.platformMonitor.kpi.emailOpenRate": "E-Mail-Öffnungsrate",
+  "yallaAdmin.platformMonitor.kpi.mfaAdoption": "MFA-Einführung",
+  "yallaAdmin.platformMonitor.sub.payingArpu": "{count} zahlend • ARPU {arpu}",
+  "yallaAdmin.platformMonitor.sub.trialingPastDue":
+    "{trialing} in Testphase • {pastDue} überfällig",
+  "yallaAdmin.platformMonitor.sub.activeUsers": "7T {d7} • 30T {d30}",
+  "yallaAdmin.platformMonitor.sub.events": "7T {d7} • gesamt {all}",
+  "yallaAdmin.platformMonitor.sub.atRisk": "{amount} gefährdet",
+  "yallaAdmin.platformMonitor.sub.aiStats":
+    "{ok} ok • {failed} fehlgeschlagen • p95 {p95}",
+  "yallaAdmin.platformMonitor.sub.emailStats":
+    "{sent} gesendet • {failed} fehlgeschlagen",
+  "yallaAdmin.platformMonitor.sub.mfaUsers": "{enabled}/{total} Nutzer",
+  "yallaAdmin.platformMonitor.panel.dailyEvents": "Tägliche Ereignisse",
+  "yallaAdmin.platformMonitor.panel.topEvents": "Top-Ereignisse",
+  "yallaAdmin.platformMonitor.panel.newSignups": "Neue Anmeldungen",
+  "yallaAdmin.platformMonitor.panel.mrrByPlan": "MRR nach Plan",
+  "yallaAdmin.platformMonitor.panel.subsByStatus": "Abonnements nach Status",
+  "yallaAdmin.platformMonitor.panel.recentBillingEvents":
+    "Letzte Abrechnungsereignisse",
+  "yallaAdmin.platformMonitor.panel.aiAgentRuns": "KI-Agentenläufe",
+  "yallaAdmin.platformMonitor.panel.recentAiFailures": "Letzte KI-Fehler",
+  "yallaAdmin.platformMonitor.panel.emailDelivery": "E-Mail-Zustellung",
+  "yallaAdmin.platformMonitor.panel.accounts": "Konten",
+  "yallaAdmin.platformMonitor.panel.engagementQuality": "Engagement-Qualität",
+  "yallaAdmin.platformMonitor.panel.recentEmailFailures":
+    "Letzte E-Mail-Fehler",
+  "yallaAdmin.platformMonitor.loading": "Wird geladen…",
+  "yallaAdmin.platformMonitor.empty.noAnalytics":
+    "Noch keine Analyseereignisse aufgezeichnet.",
+  "yallaAdmin.platformMonitor.empty.noEvents": "Noch keine Ereignisse.",
+  "yallaAdmin.platformMonitor.empty.noSignups":
+    "Keine Anmeldungen in diesem Zeitraum.",
+  "yallaAdmin.platformMonitor.empty.noActiveSubs": "Keine aktiven Abonnements.",
+  "yallaAdmin.platformMonitor.empty.noSubs": "Keine Abonnements.",
+  "yallaAdmin.platformMonitor.empty.noBillingEvents":
+    "Keine Abrechnungsereignisse.",
+  "yallaAdmin.platformMonitor.empty.noRecentFailures":
+    "Keine aktuellen Fehler.",
+  "yallaAdmin.platformMonitor.stat.queued": "In Warteschlange",
+  "yallaAdmin.platformMonitor.stat.running": "Läuft",
+  "yallaAdmin.platformMonitor.stat.completed": "Abgeschlossen",
+  "yallaAdmin.platformMonitor.stat.failed": "Fehlgeschlagen",
+  "yallaAdmin.platformMonitor.stat.cancelled": "Abgebrochen",
+  "yallaAdmin.platformMonitor.stat.avgDuration": "Durchschnittsdauer",
+  "yallaAdmin.platformMonitor.stat.p95Duration": "p95-Dauer",
+  "yallaAdmin.platformMonitor.stat.last24h": "Letzte 24h",
+  "yallaAdmin.platformMonitor.stat.sent": "Gesendet",
+  "yallaAdmin.platformMonitor.stat.opened": "Geöffnet",
+  "yallaAdmin.platformMonitor.stat.clicked": "Geklickt",
+  "yallaAdmin.platformMonitor.stat.openRate": "Öffnungsrate",
+  "yallaAdmin.platformMonitor.stat.clickRate": "Klickrate",
+  "yallaAdmin.platformMonitor.stat.sent24h": "Gesendet 24h",
+  "yallaAdmin.platformMonitor.stat.totalUsers": "Nutzer gesamt",
+  "yallaAdmin.platformMonitor.stat.mfaEnabled": "MFA aktiviert",
+  "yallaAdmin.platformMonitor.stat.suspended": "Gesperrt",
+  "yallaAdmin.platformMonitor.stat.pending": "Ausstehend",
+  "yallaAdmin.platformMonitor.stat.trackedUsers": "Verfolgte Nutzer",
+  "yallaAdmin.platformMonitor.stat.totalSessions": "Sitzungen gesamt",
+  "yallaAdmin.platformMonitor.stat.avgActivation":
+    "Durchschn. Aktivierungsscore",
+  "yallaAdmin.platformMonitor.stat.avgHealth": "Durchschn. Gesundheitsscore",
+  "yallaAdmin.platformMonitor.stat.churnRisk":
+    "Abwanderungsrisiko (Kündigung zum Periodenende)",
+  "yallaAdmin.platformMonitor.stat.refunded30d": "Erstattet 30T",
+  "yallaAdmin.platformMonitor.table.when": "Wann",
+  "yallaAdmin.platformMonitor.table.event": "Ereignis",
+  "yallaAdmin.platformMonitor.table.status": "Status",
+  "yallaAdmin.platformMonitor.table.amount": "Betrag",
+  "yallaAdmin.platformMonitor.table.agent": "Agent",
+  "yallaAdmin.platformMonitor.table.error": "Fehler",
+  "yallaAdmin.platformMonitor.table.template": "Vorlage",
+  "yallaAdmin.platformMonitor.table.recipient": "Empfänger",
+  "yallaAdmin.platformMonitor.tooltip.eventsUsers":
+    "{date}: {events} Ereignisse, {users} Nutzer",
 };
 export default messages;
