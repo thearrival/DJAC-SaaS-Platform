@@ -4397,5 +4397,35 @@ const messages: Record<string, string> = {
   "adminThreatIntel.form.scope": "Escopo",
   "adminThreatIntel.form.scopeHelp":
     "Deixe o ID da organização em branco para publicar um boletim global visível para todas as organizações.",
+  "yallaAdmin.portal.loadError": "Falha ao acessar a API",
+  "yallaAdmin.portal.ownerConsole": "console do proprietário",
+  "yallaAdmin.portal.signOut": "Sair",
+  "yallaAdmin.portal.refreshAll": "Atualizar todos os dados",
+  "yallaAdmin.portal.desc.overview":
+    "Visão geral de usuários, organizações, intake, auditoria e atividade recente do proprietário.",
+  "yallaAdmin.portal.desc.users":
+    "Navegue por todos os usuários e veja perfil, sessões, trilha de auditoria e interações.",
+  "yallaAdmin.portal.desc.signups":
+    "Cadastros mais recentes com e-mail, empresa e estado de verificação.",
+  "yallaAdmin.portal.desc.orgs":
+    "Perfis de organização, estado de cobrança, membros e controles rápidos de suspensão.",
+  "yallaAdmin.portal.desc.subscriptions":
+    "Distribuição de planos, receita, eventos de pagamento recentes e saúde das assinaturas.",
+  "yallaAdmin.portal.desc.intake":
+    "Solicitações de serviço e demanda de consultoria entrando na plataforma.",
+  "yallaAdmin.portal.desc.onboarding":
+    "Progresso da configuração guiada, bloqueios e jornadas selecionadas.",
+  "yallaAdmin.portal.desc.interactions":
+    "Interações recentes do produto com snapshots seguros para suporte e diagnóstico.",
+  "yallaAdmin.portal.desc.platformAudit":
+    "Eventos de auditoria imutáveis da plataforma em auth, gravações, cobrança, sistema e falhas.",
+  "yallaAdmin.portal.desc.validation":
+    "Solicitações bloqueadas ou com falha recentes, incluindo telemetria de validação central.",
+  "yallaAdmin.portal.desc.system":
+    "Saúde de runtime, perfil de memória e prontidão do ambiente.",
+  "yallaAdmin.portal.desc.audit":
+    "Ações realizadas dentro do próprio portal isolado do proprietário.",
+  "yallaAdmin.portal.desc.realtime":
+    "Métricas da plataforma ao vivo: sessões ativas, ações recentes, novos usuários e fluxo de eventos em tempo real.",
 };
 export default messages;

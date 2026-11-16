@@ -4194,5 +4194,34 @@ const messages: Record<string, string> = {
   "adminThreatIntel.form.scope": "범위",
   "adminThreatIntel.form.scopeHelp":
     "조직 ID를 비워 두면 모든 조직에 표시되는 전역 공지를 게시합니다.",
+  "yallaAdmin.portal.loadError": "API에 연결하지 못했습니다",
+  "yallaAdmin.portal.ownerConsole": "소유자 콘솔",
+  "yallaAdmin.portal.signOut": "로그아웃",
+  "yallaAdmin.portal.refreshAll": "모든 데이터 새로고침",
+  "yallaAdmin.portal.desc.overview":
+    "사용자, 조직, 접수, 감사 및 최근 소유자 활동의 전체 개요.",
+  "yallaAdmin.portal.desc.users":
+    "모든 사용자를 탐색하고 프로필, 세션, 감사 기록 및 상호작용을 확인합니다.",
+  "yallaAdmin.portal.desc.signups":
+    "이메일, 회사, 인증 상태가 포함된 최신 가입.",
+  "yallaAdmin.portal.desc.orgs":
+    "조직 프로필, 결제 상태, 멤버 및 빠른 정지 제어.",
+  "yallaAdmin.portal.desc.subscriptions":
+    "플랜 분포, 결제 수익, 최근 결제 이벤트 및 구독 상태.",
+  "yallaAdmin.portal.desc.intake":
+    "플랫폼으로 유입되는 서비스 요청 및 상담 수요.",
+  "yallaAdmin.portal.desc.onboarding":
+    "가이드 설정 진행 상황, 차단 요소 및 선택한 여정.",
+  "yallaAdmin.portal.desc.interactions":
+    "플랫폼 지원 및 진단을 위한 개인정보 보호 스냅샷이 포함된 최근 제품 상호작용.",
+  "yallaAdmin.portal.desc.platformAudit":
+    "인증, 쓰기, 결제, 시스템 및 실패 전반의 변경 불가능한 플랫폼 감사 이벤트.",
+  "yallaAdmin.portal.desc.validation":
+    "중앙 검증 원격 측정을 포함한 최근 차단 또는 실패 요청.",
+  "yallaAdmin.portal.desc.system":
+    "런타임 상태, 메모리 프로필 및 환경 수준 준비 상태.",
+  "yallaAdmin.portal.desc.audit": "격리된 소유자 포털 자체에서 수행된 작업.",
+  "yallaAdmin.portal.desc.realtime":
+    "라이브 플랫폼 지표: 활성 세션, 최근 작업, 신규 사용자 및 실시간 이벤트 스트림.",
 };
 export default messages;

@@ -3151,7 +3151,7 @@ export default function YallaAdminPortal() {
       if (rt.status === "fulfilled") setRealtime(rt.value);
       if (subsData.status === "fulfilled") setSubscriptionsData(subsData.value);
     } catch {
-      setLoadError("Failed to reach the API");
+      setLoadError(t("yallaAdmin.portal.loadError", "Failed to reach the API"));
     }
   }, []);
 
@@ -3431,12 +3431,14 @@ export default function YallaAdminPortal() {
           <div className="border-t border-slate-800/60 px-4 py-3 flex items-center justify-between">
             <div>
               <p className="text-xs font-medium text-white">{adminUsername}</p>
-              <p className="text-xs text-slate-600">owner console</p>
+              <p className="text-xs text-slate-600">
+                {t("yallaAdmin.portal.ownerConsole", "owner console")}
+              </p>
             </div>
             <button
               onClick={() => void handleLogout()}
               className="text-xs text-slate-500 hover:text-red-400 transition"
-              title="Sign out"
+              title={t("yallaAdmin.portal.signOut", "Sign out")}
             >
               <svg
                 className="w-4 h-4"
@@ -3519,20 +3521,35 @@ export default function YallaAdminPortal() {
                   {activeTab === "interactions" &&
                     "Sanitized user input snapshots and output references recorded by the platform."}
                   {activeTab === "platformAudit" &&
-                    "Immutable platform audit events across auth, writes, billing, system, and failures."}
+                    t(
+                      "yallaAdmin.portal.desc.platformAudit",
+                      "Immutable platform audit events across auth, writes, billing, system, and failures."
+                    )}
                   {activeTab === "validation" &&
-                    "Recent blocked or failed requests, including central validation telemetry."}
+                    t(
+                      "yallaAdmin.portal.desc.validation",
+                      "Recent blocked or failed requests, including central validation telemetry."
+                    )}
                   {activeTab === "system" &&
-                    "Runtime health, memory profile, and environment-level readiness."}
+                    t(
+                      "yallaAdmin.portal.desc.system",
+                      "Runtime health, memory profile, and environment-level readiness."
+                    )}
                   {activeTab === "audit" &&
-                    "Actions taken inside the isolated owner portal itself."}
+                    t(
+                      "yallaAdmin.portal.desc.audit",
+                      "Actions taken inside the isolated owner portal itself."
+                    )}
                   {activeTab === "realtime" &&
-                    "Live platform metrics: active sessions, recent actions, new users, and the real-time event stream."}
+                    t(
+                      "yallaAdmin.portal.desc.realtime",
+                      "Live platform metrics: active sessions, recent actions, new users, and the real-time event stream."
+                    )}
                 </p>
               </div>
               <button
                 onClick={() => void loadAllData()}
-                title="Refresh all data"
+                title={t("yallaAdmin.portal.refreshAll", "Refresh all data")}
                 className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-slate-400 border border-slate-700/50 hover:border-cyan-500/40 hover:text-cyan-400 transition"
               >
                 <svg

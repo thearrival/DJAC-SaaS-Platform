@@ -4325,5 +4325,34 @@ const messages: Record<string, string> = {
   "adminThreatIntel.form.scope": "スコープ",
   "adminThreatIntel.form.scopeHelp":
     "組織IDを空のままにすると、すべての組織に表示されるグローバル速報を公開します。",
+  "yallaAdmin.portal.loadError": "APIに接続できませんでした",
+  "yallaAdmin.portal.ownerConsole": "オーナーコンソール",
+  "yallaAdmin.portal.signOut": "サインアウト",
+  "yallaAdmin.portal.refreshAll": "すべてのデータを更新",
+  "yallaAdmin.portal.desc.overview":
+    "ユーザー、組織、受付、監査、最近のオーナー活動の全体概要。",
+  "yallaAdmin.portal.desc.users":
+    "すべてのユーザーを閲覧し、プロフィール、セッション、監査記録、対話を確認します。",
+  "yallaAdmin.portal.desc.signups": "最新の登録（メール、会社、確認状態）。",
+  "yallaAdmin.portal.desc.orgs":
+    "組織プロフィール、請求状態、メンバー、クイック停止コントロール。",
+  "yallaAdmin.portal.desc.subscriptions":
+    "プラン分布、請求収益、最近の支払いイベント、サブスクリプションの健全性。",
+  "yallaAdmin.portal.desc.intake":
+    "プラットフォームに入るサービスリクエストと相談需要。",
+  "yallaAdmin.portal.desc.onboarding":
+    "ガイド付きセットアップの進捗、ブロッカー、選択されたジャーニー。",
+  "yallaAdmin.portal.desc.interactions":
+    "プラットフォームサポートと診断のための、プライバシーに配慮したスナップショット付き最近の製品操作。",
+  "yallaAdmin.portal.desc.platformAudit":
+    "認証、書き込み、請求、システム、失敗にわたる不変のプラットフォーム監査イベント。",
+  "yallaAdmin.portal.desc.validation":
+    "中央検証テレメトリを含む、最近のブロックまたは失敗したリクエスト。",
+  "yallaAdmin.portal.desc.system":
+    "ランタイムの健全性、メモリプロファイル、環境レベルの準備状況。",
+  "yallaAdmin.portal.desc.audit":
+    "分離されたオーナーポータル内で実行された操作。",
+  "yallaAdmin.portal.desc.realtime":
+    "ライブプラットフォーム指標：アクティブセッション、最近の操作、新規ユーザー、リアルタイムイベントストリーム。",
 };
 export default messages;

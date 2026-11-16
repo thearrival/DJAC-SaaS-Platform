@@ -4469,5 +4469,35 @@ const messages: Record<string, string> = {
   "adminThreatIntel.form.scope": "Portée",
   "adminThreatIntel.form.scopeHelp":
     "Laissez l'ID d'organisation vide pour publier un bulletin global visible par toutes les organisations.",
+  "yallaAdmin.portal.loadError": "Impossible d'atteindre l'API",
+  "yallaAdmin.portal.ownerConsole": "console propriétaire",
+  "yallaAdmin.portal.signOut": "Se déconnecter",
+  "yallaAdmin.portal.refreshAll": "Actualiser toutes les données",
+  "yallaAdmin.portal.desc.overview":
+    "Vue d'ensemble des utilisateurs, organisations, admissions, audits et activité récente du propriétaire.",
+  "yallaAdmin.portal.desc.users":
+    "Parcourez tous les utilisateurs et consultez profil, sessions, piste d'audit et interactions.",
+  "yallaAdmin.portal.desc.signups":
+    "Inscriptions les plus récentes avec e-mail, entreprise et état de vérification.",
+  "yallaAdmin.portal.desc.orgs":
+    "Profils d'organisation, état de facturation, membres et contrôles de suspension rapides.",
+  "yallaAdmin.portal.desc.subscriptions":
+    "Répartition des forfaits, revenus, événements de paiement récents et santé des abonnements.",
+  "yallaAdmin.portal.desc.intake":
+    "Demandes de service et de consultation entrant sur la plateforme.",
+  "yallaAdmin.portal.desc.onboarding":
+    "Progression de la configuration guidée, blocages et parcours sélectionnés.",
+  "yallaAdmin.portal.desc.interactions":
+    "Interactions produit récentes avec instantanés respectueux de la confidentialité pour support et diagnostic.",
+  "yallaAdmin.portal.desc.platformAudit":
+    "Événements d'audit immuables de la plateforme couvrant auth, écritures, facturation, système et échecs.",
+  "yallaAdmin.portal.desc.validation":
+    "Demandes bloquées ou échouées récentes, y compris la télémétrie de validation centrale.",
+  "yallaAdmin.portal.desc.system":
+    "Santé d'exécution, profil mémoire et préparation au niveau de l'environnement.",
+  "yallaAdmin.portal.desc.audit":
+    "Actions effectuées dans le portail propriétaire isolé lui-même.",
+  "yallaAdmin.portal.desc.realtime":
+    "Métriques de plateforme en direct : sessions actives, actions récentes, nouveaux utilisateurs et flux d'événements en temps réel.",
 };
 export default messages;

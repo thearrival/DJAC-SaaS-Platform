@@ -3985,5 +3985,29 @@ const messages: Record<string, string> = {
   "adminThreatIntel.form.scope": "范围",
   "adminThreatIntel.form.scopeHelp":
     "将组织 ID 留空可发布对所有组织可见的全局公告。",
+  "yallaAdmin.portal.loadError": "无法访问 API",
+  "yallaAdmin.portal.ownerConsole": "所有者控制台",
+  "yallaAdmin.portal.signOut": "退出登录",
+  "yallaAdmin.portal.refreshAll": "刷新所有数据",
+  "yallaAdmin.portal.desc.overview":
+    "用户、组织、接入、审计和近期所有者活动的全局概览。",
+  "yallaAdmin.portal.desc.users":
+    "浏览所有用户，并深入查看个人资料、会话、审计记录和平台交互。",
+  "yallaAdmin.portal.desc.signups": "最新注册用户及其邮箱、公司和验证状态。",
+  "yallaAdmin.portal.desc.orgs": "组织资料、计费状态、成员和快速暂停控制。",
+  "yallaAdmin.portal.desc.subscriptions":
+    "套餐分布、计费收入、最近支付事件和订阅健康状况。",
+  "yallaAdmin.portal.desc.intake": "进入平台的服务请求和咨询需求。",
+  "yallaAdmin.portal.desc.onboarding": "引导式设置进度、阻碍和所选流程。",
+  "yallaAdmin.portal.desc.interactions":
+    "近期产品交互及隐私安全快照，用于平台支持和诊断。",
+  "yallaAdmin.portal.desc.platformAudit":
+    "涵盖认证、写入、计费、系统和故障的不可变平台审计事件。",
+  "yallaAdmin.portal.desc.validation":
+    "最近被阻止或失败的请求，包括集中验证遥测。",
+  "yallaAdmin.portal.desc.system": "运行时健康状况、内存概况和环境级就绪状态。",
+  "yallaAdmin.portal.desc.audit": "在隔离的所有者门户内执行的操作。",
+  "yallaAdmin.portal.desc.realtime":
+    "实时平台指标：活跃会话、最近操作、新用户和实时事件流。",
 };
 export default messages;

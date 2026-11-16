@@ -4252,5 +4252,35 @@ const messages: Record<string, string> = {
   "adminThreatIntel.form.scope": "Scope",
   "adminThreatIntel.form.scopeHelp":
     "Leave Organization ID empty to publish a global bulletin visible to all orgs.",
+  "yallaAdmin.portal.loadError": "Failed to reach the API",
+  "yallaAdmin.portal.ownerConsole": "owner console",
+  "yallaAdmin.portal.signOut": "Sign out",
+  "yallaAdmin.portal.refreshAll": "Refresh all data",
+  "yallaAdmin.portal.desc.overview":
+    "Global overview of users, organizations, intake, audit, and recent owner activity.",
+  "yallaAdmin.portal.desc.users":
+    "Browse all users and drill into profile, sessions, audit trail, and platform interactions.",
+  "yallaAdmin.portal.desc.signups":
+    "Most recent registrations with email, company and verification state.",
+  "yallaAdmin.portal.desc.orgs":
+    "Organization profiles, billing state, members, and quick suspend controls.",
+  "yallaAdmin.portal.desc.subscriptions":
+    "Plan distribution, billing revenue, recent payment events, and subscription health.",
+  "yallaAdmin.portal.desc.intake":
+    "Service requests and consultation demand entering the platform.",
+  "yallaAdmin.portal.desc.onboarding":
+    "Guided-setup progress, blockers, and selected journeys.",
+  "yallaAdmin.portal.desc.interactions":
+    "Recent product interactions with privacy-safe snapshots for platform support and diagnosis.",
+  "yallaAdmin.portal.desc.platformAudit":
+    "Immutable platform audit events across auth, writes, billing, system, and failures.",
+  "yallaAdmin.portal.desc.validation":
+    "Recent blocked or failed requests, including central validation telemetry.",
+  "yallaAdmin.portal.desc.system":
+    "Runtime health, memory profile, and environment-level readiness.",
+  "yallaAdmin.portal.desc.audit":
+    "Actions taken inside the isolated owner portal itself.",
+  "yallaAdmin.portal.desc.realtime":
+    "Live platform metrics: active sessions, recent actions, new users, and the real-time event stream.",
 };
 export default messages;

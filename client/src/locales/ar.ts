@@ -4195,5 +4195,35 @@ const messages: Record<string, string> = {
   "adminThreatIntel.form.scope": "النطاق",
   "adminThreatIntel.form.scopeHelp":
     "اترك معرّف المؤسسة فارغًا لنشر نشرة عامة مرئية لجميع المؤسسات.",
+  "yallaAdmin.portal.loadError": "فشل الوصول إلى واجهة برمجة التطبيقات",
+  "yallaAdmin.portal.ownerConsole": "وحدة تحكم المالك",
+  "yallaAdmin.portal.signOut": "تسجيل الخروج",
+  "yallaAdmin.portal.refreshAll": "تحديث كل البيانات",
+  "yallaAdmin.portal.desc.overview":
+    "نظرة عامة شاملة على المستخدمين والمؤسسات والطلبات والتدقيق والنشاط الأخير للمالك.",
+  "yallaAdmin.portal.desc.users":
+    "تصفح جميع المستخدمين واطلع على الملف الشخصي والجلسات وسجل التدقيق وتفاعلات المنصة.",
+  "yallaAdmin.portal.desc.signups":
+    "أحدث التسجيلات مع البريد الإلكتروني والشركة وحالة التحقق.",
+  "yallaAdmin.portal.desc.orgs":
+    "ملفات المؤسسات وحالة الفوترة والأعضاء وعناصر التحكم السريعة في التعليق.",
+  "yallaAdmin.portal.desc.subscriptions":
+    "توزيع الخطط وإيرادات الفوترة وأحداث الدفع الأخيرة وصحة الاشتراكات.",
+  "yallaAdmin.portal.desc.intake":
+    "طلبات الخدمة والطلب على الاستشارات الواردة إلى المنصة.",
+  "yallaAdmin.portal.desc.onboarding":
+    "تقدم الإعداد الموجه والعوائق والمسارات المختارة.",
+  "yallaAdmin.portal.desc.interactions":
+    "تفاعلات المنتج الأخيرة مع لقطات آمنة للخصوصية لدعم المنصة والتشخيص.",
+  "yallaAdmin.portal.desc.platformAudit":
+    "أحداث تدقيق المنصة غير القابلة للتغيير عبر المصادقة والكتابة والفوترة والنظام والإخفاقات.",
+  "yallaAdmin.portal.desc.validation":
+    "الطلبات المحظورة أو الفاشلة الأخيرة، بما في ذلك قياسات التحقق المركزية.",
+  "yallaAdmin.portal.desc.system":
+    "صحة وقت التشغيل وملف الذاكرة وجاهزية مستوى البيئة.",
+  "yallaAdmin.portal.desc.audit":
+    "الإجراءات المتخذة داخل بوابة المالك المعزولة نفسها.",
+  "yallaAdmin.portal.desc.realtime":
+    "مقاييس المنصة المباشرة: الجلسات النشطة والإجراءات الأخيرة والمستخدمون الجدد وبث الأحداث في الوقت الفعلي.",
 };
 export default messages;

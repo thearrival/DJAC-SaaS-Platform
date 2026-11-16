@@ -4425,5 +4425,35 @@ const messages: Record<string, string> = {
   "adminThreatIntel.form.scope": "Umfang",
   "adminThreatIntel.form.scopeHelp":
     "Lassen Sie die Organisations-ID leer, um ein globales Bulletin für alle Organisationen zu veröffentlichen.",
+  "yallaAdmin.portal.loadError": "API konnte nicht erreicht werden",
+  "yallaAdmin.portal.ownerConsole": "Eigentümerkonsole",
+  "yallaAdmin.portal.signOut": "Abmelden",
+  "yallaAdmin.portal.refreshAll": "Alle Daten aktualisieren",
+  "yallaAdmin.portal.desc.overview":
+    "Globale Übersicht über Nutzer, Organisationen, Intake, Audit und aktuelle Eigentümeraktivität.",
+  "yallaAdmin.portal.desc.users":
+    "Durchsuchen Sie alle Nutzer und sehen Sie Profil, Sitzungen, Prüfprotokoll und Interaktionen.",
+  "yallaAdmin.portal.desc.signups":
+    "Neueste Registrierungen mit E-Mail, Unternehmen und Verifizierungsstatus.",
+  "yallaAdmin.portal.desc.orgs":
+    "Organisationsprofile, Abrechnungsstatus, Mitglieder und schnelle Sperrsteuerung.",
+  "yallaAdmin.portal.desc.subscriptions":
+    "Planverteilung, Abrechnungserlöse, aktuelle Zahlungsereignisse und Abonnementstatus.",
+  "yallaAdmin.portal.desc.intake":
+    "Serviceanfragen und Beratungsbedarf, die auf der Plattform eingehen.",
+  "yallaAdmin.portal.desc.onboarding":
+    "Fortschritt der geführten Einrichtung, Blocker und ausgewählte Abläufe.",
+  "yallaAdmin.portal.desc.interactions":
+    "Aktuelle Produktinteraktionen mit datenschutzsicheren Snapshots für Support und Diagnose.",
+  "yallaAdmin.portal.desc.platformAudit":
+    "Unveränderliche Plattform-Audit-Ereignisse für Auth, Schreibvorgänge, Abrechnung, System und Fehler.",
+  "yallaAdmin.portal.desc.validation":
+    "Kürzlich blockierte oder fehlgeschlagene Anfragen, einschließlich zentraler Validierungstelemetrie.",
+  "yallaAdmin.portal.desc.system":
+    "Laufzeitgesundheit, Speicherprofil und Bereitschaft auf Umgebungsebene.",
+  "yallaAdmin.portal.desc.audit":
+    "Aktionen, die im isolierten Eigentümerportal selbst ausgeführt wurden.",
+  "yallaAdmin.portal.desc.realtime":
+    "Live-Plattformmetriken: aktive Sitzungen, letzte Aktionen, neue Nutzer und Echtzeit-Ereignisstream.",
 };
 export default messages;
