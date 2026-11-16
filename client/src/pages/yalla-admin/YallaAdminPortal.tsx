@@ -1633,7 +1633,10 @@ function OnboardingTab({ onboarding }: { onboarding: OnboardingData | null }) {
   if (!onboarding)
     return (
       <div className="text-slate-500 text-sm p-8 text-center">
-        Loading onboarding data...
+        {t(
+          "yallaAdmin.portal.onboarding.loading",
+          "Loading onboarding data..."
+        )}
       </div>
     );
 
@@ -1656,16 +1659,16 @@ function OnboardingTab({ onboarding }: { onboarding: OnboardingData | null }) {
                 {t("yallaAdmin.portal.signups.col.user", "User")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Stage
+                {t("yallaAdmin.portal.onboarding.col.stage", "Stage")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Intent
+                {t("yallaAdmin.portal.onboarding.col.intent", "Intent")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Locale
+                {t("yallaAdmin.portal.onboarding.col.locale", "Locale")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Updated
+                {t("yallaAdmin.portal.onboarding.col.updated", "Updated")}
               </th>
             </tr>
           </thead>
@@ -2528,6 +2531,7 @@ function RealtimeBar({
   realtime: RealtimeStats | null;
   sseConnected: boolean;
 }) {
+  const { t } = useLocale();
   if (!realtime) return null;
   return (
     <div className="mb-5 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-slate-900/60 border border-slate-800/60 text-xs overflow-x-auto">
@@ -2537,26 +2541,28 @@ function RealtimeBar({
         <span
           className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${sseConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`}
         />
-        {sseConnected ? "Live" : "Reconnecting"}
+        {sseConnected
+          ? t("yallaAdmin.portal.realtime.live", "Live")
+          : t("yallaAdmin.portal.realtime.reconnecting", "Reconnecting")}
       </span>
       <span className="text-slate-700 flex-shrink-0">|</span>
       <span className="flex-shrink-0 text-slate-400">
         <span className="text-white font-semibold tabular-nums">
           {realtime.activeSessions}
         </span>{" "}
-        sessions
+        {t("yallaAdmin.portal.realtime.sessions", "sessions")}
       </span>
       <span className="flex-shrink-0 text-slate-400">
         <span className="text-white font-semibold tabular-nums">
           {realtime.recentActions}
         </span>{" "}
-        actions /5min
+        {t("yallaAdmin.portal.realtime.actions5min", "actions /5min")}
       </span>
       <span className="flex-shrink-0 text-slate-400">
         <span className="text-white font-semibold tabular-nums">
           {realtime.newUsersLastHour}
         </span>{" "}
-        new users /hr
+        {t("yallaAdmin.portal.realtime.newUsersHr", "new users /hr")}
       </span>
       <span className="flex-shrink-0 text-slate-400">
         <span className="text-white font-semibold tabular-nums">
@@ -2589,6 +2595,7 @@ function RealtimeTab({
   liveEvents: LiveEvent[];
   onRefresh: () => void;
 }) {
+  const { t } = useLocale();
   const eventColors: Record<string, string> = {
     interaction_logged: "text-cyan-400",
     platform_event: "text-purple-400",
@@ -2610,49 +2617,62 @@ function RealtimeTab({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 text-center">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
-            Active Sessions
+            {t("yallaAdmin.portal.realtime.activeSessions", "Active Sessions")}
           </p>
           <p className="text-4xl font-bold text-white tabular-nums">
             {realtime?.activeSessions ?? "\u2014"}
           </p>
-          <p className="text-xs text-slate-600 mt-1">users online now</p>
+          <p className="text-xs text-slate-600 mt-1">
+            {t("yallaAdmin.portal.realtime.usersOnlineNow", "users online now")}
+          </p>
         </div>
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 text-center">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
-            Recent Actions
+            {t("yallaAdmin.portal.realtime.recentActions", "Recent Actions")}
           </p>
           <p className="text-4xl font-bold text-cyan-400 tabular-nums">
             {realtime?.recentActions ?? "\u2014"}
           </p>
-          <p className="text-xs text-slate-600 mt-1">last 5 minutes</p>
+          <p className="text-xs text-slate-600 mt-1">
+            {t("yallaAdmin.portal.realtime.last5Minutes", "last 5 minutes")}
+          </p>
         </div>
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 text-center">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
-            New Users
+            {t("yallaAdmin.portal.realtime.newUsers", "New Users")}
           </p>
           <p className="text-4xl font-bold text-emerald-400 tabular-nums">
             {realtime?.newUsersLastHour ?? "\u2014"}
           </p>
-          <p className="text-xs text-slate-600 mt-1">last hour</p>
+          <p className="text-xs text-slate-600 mt-1">
+            {t("yallaAdmin.portal.realtime.lastHour", "last hour")}
+          </p>
         </div>
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 text-center">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
-            SSE Clients
+            {t("yallaAdmin.portal.realtime.sseClients", "SSE Clients")}
           </p>
           <p className="text-4xl font-bold text-purple-400 tabular-nums">
             {realtime?.sseClients ?? "\u2014"}
           </p>
-          <p className="text-xs text-slate-600 mt-1">open streams</p>
+          <p className="text-xs text-slate-600 mt-1">
+            {t("yallaAdmin.portal.realtime.openStreams", "open streams")}
+          </p>
         </div>
       </div>
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-white">
-            Infrastructure Status
+            {t(
+              "yallaAdmin.portal.realtime.infrastructureStatus",
+              "Infrastructure Status"
+            )}
           </h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">SSE stream</span>
+              <span className="text-slate-400">
+                {t("yallaAdmin.portal.realtime.sseStream", "SSE stream")}
+              </span>
               <span
                 className={`flex items-center gap-1.5 font-medium ${sseConnected ? "text-emerald-400" : "text-amber-400"}`}
               >
