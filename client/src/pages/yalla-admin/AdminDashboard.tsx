@@ -784,7 +784,7 @@ export default function AdminDashboard() {
                               ? new Date(u.createdAt).toLocaleDateString(
                                   storedLocaleTag()
                                 )
-                              : "—"}
+                              : t("yallaAdmin.common.notAvailable", "—")}
                           </td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex items-center justify-end gap-1">
@@ -823,8 +823,16 @@ export default function AdminDashboard() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t border-border">
                   <p className="text-xs text-muted-foreground">
-                    Showing {page * PAGE_SIZE + 1}–
-                    {Math.min((page + 1) * PAGE_SIZE, total)} of {total}
+                    {t(
+                      "yallaAdmin.dashboard.showing",
+                      "Showing {start}–{end} of {total}"
+                    )
+                      .replace("{start}", String(page * PAGE_SIZE + 1))
+                      .replace(
+                        "{end}",
+                        String(Math.min((page + 1) * PAGE_SIZE, total))
+                      )
+                      .replace("{total}", String(total))}
                   </p>
                   <div className="flex gap-1">
                     <button
