@@ -631,9 +631,11 @@ export default function AdminUsers() {
                     style={{ borderTop: "1px solid var(--djac-border)" }}
                   >
                     <td style={{ padding: "12px 16px" }}>
-                      <div style={{ fontWeight: 500 }}>{user.name || "—"}</div>
+                      <div style={{ fontWeight: 500 }}>
+                        {user.name || t("yallaAdmin.common.notAvailable", "—")}
+                      </div>
                       <div style={{ fontSize: 12, color: "var(--djac-muted)" }}>
-                        {user.email || "—"}
+                        {user.email || t("yallaAdmin.common.notAvailable", "—")}
                       </div>
                     </td>
                     <td style={{ padding: "12px 16px" }}>
@@ -879,30 +881,50 @@ export default function AdminUsers() {
                     marginBottom: 20,
                   }}
                 >
-                  <DetailField label="Email" value={detail.email || "—"} />
                   <DetailField
-                    label="Phone"
-                    value={detail.phoneNumber || "—"}
+                    label={t("yallaAdmin.users.detail.email", "Email")}
+                    value={
+                      detail.email || t("yallaAdmin.common.notAvailable", "—")
+                    }
+                  />
+                  <DetailField
+                    label={t("yallaAdmin.users.detail.phone", "Phone")}
+                    value={
+                      detail.phoneNumber ||
+                      t("yallaAdmin.common.notAvailable", "—")
+                    }
                   />
                   <DetailField
                     label={t("yallaAdmin.users.detail.role", "Role")}
                     value={detail.role}
                   />
                   <DetailField
-                    label="Company"
-                    value={detail.companyName || "—"}
+                    label={t("yallaAdmin.users.detail.company", "Company")}
+                    value={
+                      detail.companyName ||
+                      t("yallaAdmin.common.notAvailable", "—")
+                    }
                   />
                   <DetailField
-                    label="Job Title"
-                    value={detail.jobTitle || "—"}
+                    label={t("yallaAdmin.users.detail.jobTitle", "Job Title")}
+                    value={
+                      detail.jobTitle ||
+                      t("yallaAdmin.common.notAvailable", "—")
+                    }
                   />
                   <DetailField
-                    label="Industry"
-                    value={detail.industry || "—"}
+                    label={t("yallaAdmin.users.detail.industry", "Industry")}
+                    value={
+                      detail.industry ||
+                      t("yallaAdmin.common.notAvailable", "—")
+                    }
                   />
                   <DetailField
-                    label="Locale"
-                    value={detail.preferredLocale || "—"}
+                    label={t("yallaAdmin.users.detail.locale", "Locale")}
+                    value={
+                      detail.preferredLocale ||
+                      t("yallaAdmin.common.notAvailable", "—")
+                    }
                   />
                   <DetailField
                     label={t("yallaAdmin.users.detail.signedUp", "Signed Up")}
@@ -911,11 +933,11 @@ export default function AdminUsers() {
                         ? new Date(detail.createdAt).toLocaleString(
                             storedLocaleTag()
                           )
-                        : "—"
+                        : t("yallaAdmin.common.notAvailable", "—")
                     }
                   />
                   <DetailField
-                    label="Last Login"
+                    label={t("yallaAdmin.users.detail.lastLogin", "Last Login")}
                     value={
                       detail.lastSignedIn
                         ? new Date(detail.lastSignedIn).toLocaleString(
@@ -985,12 +1007,12 @@ export default function AdminUsers() {
                           {m.orgName}
                         </span>
                         <span style={{ color: "var(--djac-muted)" }}>
-                          {m.role} ·{" "}
+                          {m.role} •{" "}
                           {m.joinedAt
                             ? new Date(m.joinedAt).toLocaleDateString(
                                 storedLocaleTag()
                               )
-                            : "—"}
+                            : t("yallaAdmin.common.notAvailable", "—")}
                         </span>
                       </div>
                     ))}
@@ -1050,7 +1072,7 @@ export default function AdminUsers() {
                             ? new Date(a.createdAt).toLocaleString(
                                 storedLocaleTag()
                               )
-                            : "—"}
+                            : t("yallaAdmin.common.notAvailable", "—")}
                         </span>
                       </div>
                     ))}
