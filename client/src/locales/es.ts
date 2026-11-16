@@ -4316,5 +4316,18 @@ const messages: Record<string, string> = {
   "yallaAdmin.platformMonitor.table.recipient": "Destinatario",
   "yallaAdmin.platformMonitor.tooltip.eventsUsers":
     "{date}: {events} eventos, {users} usuarios",
+  "yallaAdmin.audit.auto45s": "Auto 45s",
+  "yallaAdmin.audit.paused": "Pausado",
+  "yallaAdmin.audit.exportCsv": "Exportar CSV",
+  "yallaAdmin.audit.count": "{count} entradas",
+  "yallaAdmin.audit.filteredBy": "filtrado por",
+  "yallaAdmin.audit.col.timestamp": "Marca de tiempo",
+  "yallaAdmin.audit.col.admin": "Admin",
+  "yallaAdmin.audit.col.action": "Acción",
+  "yallaAdmin.audit.col.target": "Objetivo",
+  "yallaAdmin.audit.col.ip": "IP",
+  "yallaAdmin.audit.loading": "Cargando...",
+  "yallaAdmin.audit.noEntries": "No se encontraron entradas de auditoría",
+  "yallaAdmin.audit.payload": "Carga útil",
 };
 export default messages;

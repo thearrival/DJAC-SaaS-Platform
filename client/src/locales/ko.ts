@@ -4081,5 +4081,18 @@ const messages: Record<string, string> = {
   "yallaAdmin.platformMonitor.table.recipient": "수신자",
   "yallaAdmin.platformMonitor.tooltip.eventsUsers":
     "{date}: 이벤트 {events}개, 사용자 {users}명",
+  "yallaAdmin.audit.auto45s": "자동 45초",
+  "yallaAdmin.audit.paused": "일시 중지",
+  "yallaAdmin.audit.exportCsv": "CSV 내보내기",
+  "yallaAdmin.audit.count": "{count}개 항목",
+  "yallaAdmin.audit.filteredBy": "필터 기준",
+  "yallaAdmin.audit.col.timestamp": "타임스탬프",
+  "yallaAdmin.audit.col.admin": "관리자",
+  "yallaAdmin.audit.col.action": "작업",
+  "yallaAdmin.audit.col.target": "대상",
+  "yallaAdmin.audit.col.ip": "IP",
+  "yallaAdmin.audit.loading": "로딩 중...",
+  "yallaAdmin.audit.noEntries": "감사 항목을 찾을 수 없습니다",
+  "yallaAdmin.audit.payload": "페이로드",
 };
 export default messages;

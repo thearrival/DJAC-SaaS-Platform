@@ -249,12 +249,14 @@ export default function AdminAudit() {
               fontWeight: 600,
             }}
           >
-            {autoRefresh ? "Auto 45s" : "Paused"}
+            {autoRefresh
+              ? t("yallaAdmin.audit.auto45s", "Auto 45s")
+              : t("yallaAdmin.audit.paused", "Paused")}
           </button>
           <button
             onClick={exportCsv}
             disabled={logs.length === 0}
-            title="Export CSV"
+            title={t("yallaAdmin.audit.exportCsv", "Export CSV")}
             style={{
               background: "none",
               border: "1px solid var(--djac-border)",
@@ -333,11 +335,19 @@ export default function AdminAudit() {
             <thead>
               <tr style={{ background: "var(--djac-card-hi)" }}>
                 <th style={{ ...thStyle, width: 36 }}></th>
-                <th style={thStyle}>Timestamp</th>
-                <th style={thStyle}>Admin</th>
-                <th style={thStyle}>Action</th>
-                <th style={thStyle}>Target</th>
-                <th style={thStyle}>IP</th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.audit.col.timestamp", "Timestamp")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.audit.col.admin", "Admin")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.audit.col.action", "Action")}
+                </th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.audit.col.target", "Target")}
+                </th>
+                <th style={thStyle}>{t("yallaAdmin.audit.col.ip", "IP")}</th>
               </tr>
             </thead>
             <tbody>
@@ -351,7 +361,7 @@ export default function AdminAudit() {
                       color: "var(--djac-muted)",
                     }}
                   >
-                    Loading...
+                    {t("yallaAdmin.audit.loading", "Loading...")}
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
@@ -364,7 +374,7 @@ export default function AdminAudit() {
                       color: "var(--djac-muted)",
                     }}
                   >
-                    No audit entries found
+                    {t("yallaAdmin.audit.noEntries", "No audit entries found")}
                   </td>
                 </tr>
               ) : (
@@ -473,7 +483,7 @@ export default function AdminAudit() {
                               letterSpacing: 0.5,
                             }}
                           >
-                            Payload
+                            {t("yallaAdmin.audit.payload", "Payload")}
                           </div>
                           <pre
                             style={{

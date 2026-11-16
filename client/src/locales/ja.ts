@@ -4205,5 +4205,18 @@ const messages: Record<string, string> = {
   "yallaAdmin.platformMonitor.table.recipient": "受信者",
   "yallaAdmin.platformMonitor.tooltip.eventsUsers":
     "{date}：{events} イベント、{users} ユーザー",
+  "yallaAdmin.audit.auto45s": "自動 45秒",
+  "yallaAdmin.audit.paused": "一時停止",
+  "yallaAdmin.audit.exportCsv": "CSVを書き出し",
+  "yallaAdmin.audit.count": "{count} 件",
+  "yallaAdmin.audit.filteredBy": "フィルター",
+  "yallaAdmin.audit.col.timestamp": "タイムスタンプ",
+  "yallaAdmin.audit.col.admin": "管理者",
+  "yallaAdmin.audit.col.action": "操作",
+  "yallaAdmin.audit.col.target": "対象",
+  "yallaAdmin.audit.col.ip": "IP",
+  "yallaAdmin.audit.loading": "読み込み中...",
+  "yallaAdmin.audit.noEntries": "監査エントリが見つかりません",
+  "yallaAdmin.audit.payload": "ペイロード",
 };
 export default messages;

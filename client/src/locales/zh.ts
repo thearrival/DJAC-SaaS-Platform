@@ -3873,5 +3873,18 @@ const messages: Record<string, string> = {
   "yallaAdmin.platformMonitor.table.recipient": "收件人",
   "yallaAdmin.platformMonitor.tooltip.eventsUsers":
     "{date}：{events} 个事件，{users} 个用户",
+  "yallaAdmin.audit.auto45s": "自动 45秒",
+  "yallaAdmin.audit.paused": "已暂停",
+  "yallaAdmin.audit.exportCsv": "导出 CSV",
+  "yallaAdmin.audit.count": "{count} 条记录",
+  "yallaAdmin.audit.filteredBy": "筛选条件",
+  "yallaAdmin.audit.col.timestamp": "时间戳",
+  "yallaAdmin.audit.col.admin": "管理员",
+  "yallaAdmin.audit.col.action": "操作",
+  "yallaAdmin.audit.col.target": "目标",
+  "yallaAdmin.audit.col.ip": "IP",
+  "yallaAdmin.audit.loading": "加载中...",
+  "yallaAdmin.audit.noEntries": "未找到审计记录",
+  "yallaAdmin.audit.payload": "负载",
 };
 export default messages;
