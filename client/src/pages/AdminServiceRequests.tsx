@@ -177,7 +177,7 @@ export default function AdminServiceRequests() {
 
   const updateMutation = trpc.serviceRequests.adminUpdate.useMutation({
     onSuccess: () => {
-      toast.success("Request updated");
+      toast.success(t("adminServiceRequests.toast.updated", "Request updated"));
       setSelected(null);
       refetch();
     },
@@ -251,10 +251,13 @@ export default function AdminServiceRequests() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
               <Briefcase className="h-6 w-6 text-orange-500" />
-              Service Requests
+              {t("adminServiceRequests.title", "Service Requests")}
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Manage engagement requests across all client organizations
+              {t(
+                "adminServiceRequests.subtitle",
+                "Manage engagement requests across all client organizations"
+              )}
             </p>
           </div>
           <Button
@@ -266,7 +269,7 @@ export default function AdminServiceRequests() {
             <RefreshCw
               className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
             />
-            Refresh
+            {t("adminServiceRequests.refresh", "Refresh")}
           </Button>
         </div>
 
@@ -274,25 +277,25 @@ export default function AdminServiceRequests() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             {
-              label: "Total",
+              label: t("adminServiceRequests.stats.total", "Total"),
               value: stats.total,
               icon: Briefcase,
               color: "text-slate-400",
             },
             {
-              label: "Open",
+              label: t("adminServiceRequests.stats.open", "Open"),
               value: stats.open,
               icon: Clock,
               color: "text-blue-400",
             },
             {
-              label: "In Progress",
+              label: t("adminServiceRequests.stats.inProgress", "In Progress"),
               value: stats.inProgress,
               icon: RefreshCw,
               color: "text-orange-400",
             },
             {
-              label: "Completed",
+              label: t("adminServiceRequests.stats.completed", "Completed"),
               value: stats.completed,
               icon: CheckCircle2,
               color: "text-emerald-400",
@@ -335,7 +338,12 @@ export default function AdminServiceRequests() {
                   <SelectContent>
                     {STATUS_OPTIONS.map(s => (
                       <SelectItem key={s} value={s}>
-                        {s === "all" ? "All Statuses" : s.replace(/_/g, " ")}
+                        {s === "all"
+                          ? t(
+                              "adminServiceRequests.filter.allStatuses",
+                              "All Statuses"
+                            )
+                          : s.replace(/_/g, " ")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -349,14 +357,22 @@ export default function AdminServiceRequests() {
         <Card className="border-border/60">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">
-              {filtered.length} request{filtered.length !== 1 ? "s" : ""}
+              {(filtered.length === 1
+                ? t("adminServiceRequests.countOne", "{count} request")
+                : t("adminServiceRequests.count", "{count} requests")
+              ).replace("{count}", String(filtered.length))}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {isError ? (
               <div className="text-center py-16 text-muted-foreground">
                 <Briefcase className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Failed to load service requests.</p>
+                <p className="text-sm">
+                  {t(
+                    "adminServiceRequests.loadFailed",
+                    "Failed to load service requests."
+                  )}
+                </p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -366,7 +382,7 @@ export default function AdminServiceRequests() {
                   className="mt-3"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry
+                  {t("adminServiceRequests.retry", "Retry")}
                 </Button>
               </div>
             ) : isLoading ? (
@@ -377,7 +393,10 @@ export default function AdminServiceRequests() {
               <div className="text-center py-16 text-muted-foreground">
                 <Briefcase className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">
-                  No requests match the current filters.
+                  {t(
+                    "adminServiceRequests.empty",
+                    "No requests match the current filters."
+                  )}
                 </p>
               </div>
             ) : (
@@ -385,14 +404,33 @@ export default function AdminServiceRequests() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12">#</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Service Type</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Org</TableHead>
-                      <TableHead>Submitted</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="w-12">
+                        {t("adminServiceRequests.col.id", "#")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminServiceRequests.col.title", "Title")}
+                      </TableHead>
+                      <TableHead>
+                        {t(
+                          "adminServiceRequests.col.serviceType",
+                          "Service Type"
+                        )}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminServiceRequests.col.priority", "Priority")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminServiceRequests.col.status", "Status")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminServiceRequests.col.org", "Org")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminServiceRequests.col.submitted", "Submitted")}
+                      </TableHead>
+                      <TableHead className="text-right">
+                        {t("adminServiceRequests.col.actions", "Actions")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -418,7 +456,10 @@ export default function AdminServiceRequests() {
                           <StatusBadge status={req.status} />
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          Org {req.organizationId}
+                          {t(
+                            "adminServiceRequests.orgLabel",
+                            "Org {id}"
+                          ).replace("{id}", String(req.organizationId))}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {formatDate(req.createdAt)}
@@ -453,7 +494,12 @@ export default function AdminServiceRequests() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-orange-500" />
-                Request #{selected?.id} — {selected?.title}
+                {t(
+                  "adminServiceRequests.dialog.title",
+                  "Request #{id} — {title}"
+                )
+                  .replace("{id}", String(selected?.id ?? ""))
+                  .replace("{title}", String(selected?.title ?? ""))}
               </DialogTitle>
             </DialogHeader>
 
@@ -462,32 +508,51 @@ export default function AdminServiceRequests() {
                 {/* Read-only details */}
                 <div className="grid grid-cols-2 gap-3 text-sm bg-muted/30 rounded-lg p-4">
                   <div>
-                    <span className="text-muted-foreground">Service Type</span>
+                    <span className="text-muted-foreground">
+                      {t(
+                        "adminServiceRequests.detail.serviceType",
+                        "Service Type"
+                      )}
+                    </span>
                     <p className="font-medium mt-0.5">
                       {formatServiceType(selected.serviceType)}
                     </p>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Organization</span>
+                    <span className="text-muted-foreground">
+                      {t(
+                        "adminServiceRequests.detail.organization",
+                        "Organization"
+                      )}
+                    </span>
                     <p className="font-medium mt-0.5">
                       ID {selected.organizationId}
                     </p>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-muted-foreground">Description</span>
+                    <span className="text-muted-foreground">
+                      {t(
+                        "adminServiceRequests.detail.description",
+                        "Description"
+                      )}
+                    </span>
                     <p className="mt-0.5 leading-relaxed">
                       {selected.description}
                     </p>
                   </div>
                   {selected.scopeDetails && (
                     <div className="col-span-2">
-                      <span className="text-muted-foreground">Scope</span>
+                      <span className="text-muted-foreground">
+                        {t("adminServiceRequests.detail.scope", "Scope")}
+                      </span>
                       <p className="mt-0.5">{selected.scopeDetails}</p>
                     </div>
                   )}
                   {selected.budgetRange && (
                     <div>
-                      <span className="text-muted-foreground">Budget</span>
+                      <span className="text-muted-foreground">
+                        {t("adminServiceRequests.detail.budget", "Budget")}
+                      </span>
                       <p className="mt-0.5">{selected.budgetRange}</p>
                     </div>
                   )}
@@ -496,7 +561,9 @@ export default function AdminServiceRequests() {
                 {/* Editable fields */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Status</Label>
+                    <Label>
+                      {t("adminServiceRequests.field.status", "Status")}
+                    </Label>
                     <Select value={editStatus} onValueChange={setEditStatus}>
                       <SelectTrigger>
                         <SelectValue />
@@ -512,7 +579,9 @@ export default function AdminServiceRequests() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Priority</Label>
+                    <Label>
+                      {t("adminServiceRequests.field.priority", "Priority")}
+                    </Label>
                     <Select
                       value={editPriority}
                       onValueChange={setEditPriority}
@@ -533,9 +602,15 @@ export default function AdminServiceRequests() {
 
                 <div className="space-y-1.5">
                   <Label>
-                    Internal Notes{" "}
+                    {t(
+                      "adminServiceRequests.field.internalNotes",
+                      "Internal Notes"
+                    )}{" "}
                     <span className="text-muted-foreground text-xs">
-                      (not visible to client)
+                      {t(
+                        "adminServiceRequests.field.internalNotesHint",
+                        "(not visible to client)"
+                      )}
                     </span>
                   </Label>
                   <Textarea
@@ -551,9 +626,15 @@ export default function AdminServiceRequests() {
 
                 <div className="space-y-1.5">
                   <Label>
-                    Client Response{" "}
+                    {t(
+                      "adminServiceRequests.field.clientResponse",
+                      "Client Response"
+                    )}{" "}
                     <span className="text-muted-foreground text-xs">
-                      (visible to client)
+                      {t(
+                        "adminServiceRequests.field.clientResponseHint",
+                        "(visible to client)"
+                      )}
                     </span>
                   </Label>
                   <Textarea
@@ -572,7 +653,7 @@ export default function AdminServiceRequests() {
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => setSelected(null)}>
                 <XCircle className="h-4 w-4 mr-2" />
-                Cancel
+                {t("adminServiceRequests.cancel", "Cancel")}
               </Button>
               <Button
                 onClick={handleSave}
@@ -584,7 +665,7 @@ export default function AdminServiceRequests() {
                 ) : (
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                 )}
-                Save Changes
+                {t("adminServiceRequests.saveChanges", "Save Changes")}
               </Button>
             </DialogFooter>
           </DialogContent>
