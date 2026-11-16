@@ -4093,5 +4093,30 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.signups.col.registered": "Inscrit",
   "yallaAdmin.portal.signups.col.lastLogin": "Dernière connexion",
   "yallaAdmin.portal.signups.col.flags": "Indicateurs",
+  "yallaAdmin.portal.common.exportCsv": "Exporter CSV",
+  "yallaAdmin.portal.common.never": "Jamais",
+  "yallaAdmin.portal.common.sessions": "Sessions",
+  "yallaAdmin.portal.common.members": "Membres",
+  "yallaAdmin.portal.common.activeSessions": "Sessions actives",
+  "yallaAdmin.portal.common.trialEnds": "Fin de l'essai",
+  "yallaAdmin.portal.common.created": "Créé",
+  "yallaAdmin.portal.common.status": "Statut",
+  "yallaAdmin.portal.common.suspended": "Suspendu",
+  "yallaAdmin.portal.common.verified": "Vérifié",
+  "yallaAdmin.portal.orgsCount": "{count} orgs",
+  "yallaAdmin.portal.intake.loading": "Chargement des données d'admission...",
+  "yallaAdmin.portal.intake.serviceRequests": "Demandes de service",
+  "yallaAdmin.portal.intake.accessRequests": "Demandes d'accès",
+  "yallaAdmin.portal.intake.consultations": "Consultations",
+  "yallaAdmin.portal.intake.noServiceRequests":
+    "Aucune demande de service pour l'instant.",
+  "yallaAdmin.portal.intake.noAccessRequests":
+    "Aucune demande d'accès pour l'instant.",
+  "yallaAdmin.portal.intake.noConsultations":
+    "Aucune consultation pour l'instant.",
+  "yallaAdmin.portal.intake.unknownOrg": "Organisation inconnue",
+  "yallaAdmin.portal.intake.unknownUser": "Utilisateur inconnu",
+  "yallaAdmin.portal.subscriptions.loading":
+    "Chargement des données d'abonnement...",
 };
 export default messages;

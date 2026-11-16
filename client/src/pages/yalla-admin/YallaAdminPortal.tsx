@@ -592,7 +592,7 @@ function UserDetailModal({
                       ? new Date(detail.user.lastLoginAt).toLocaleString(
                           storedLocaleTag()
                         )
-                      : "Never"}
+                      : t("yallaAdmin.portal.common.never", "Never")}
                   </span>
                   <span className="text-slate-500">Email Verified:</span>
                   <span
@@ -1397,7 +1397,7 @@ function UsersTab({
           }}
           className="text-xs text-cyan-400 hover:text-cyan-300 transition"
         >
-          Export CSV
+          {t("yallaAdmin.portal.common.exportCsv", "Export CSV")}
         </button>
       </div>
       <div className="overflow-x-auto rounded-xl border border-slate-700/40">
@@ -1414,7 +1414,7 @@ function UsersTab({
                 {t("yallaAdmin.portal.signups.col.lastLogin", "Last Login")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Sessions
+                {t("yallaAdmin.portal.common.sessions", "Sessions")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
                 {t("yallaAdmin.portal.signups.col.flags", "Flags")}
@@ -1438,7 +1438,7 @@ function UsersTab({
                 <td className="px-4 py-3 text-slate-400 text-xs">
                   {u.lastLoginAt
                     ? new Date(u.lastLoginAt).toLocaleString(storedLocaleTag())
-                    : "Never"}
+                    : t("yallaAdmin.portal.common.never", "Never")}
                 </td>
                 <td className="px-4 py-3 text-sm font-medium text-white">
                   {u.activeSessions}
@@ -1446,7 +1446,7 @@ function UsersTab({
                 <td className="px-4 py-3 flex gap-1.5">
                   {u.status === "suspended" && (
                     <span className="px-1.5 py-0.5 text-xs rounded bg-red-500/15 text-red-400 border border-red-500/20">
-                      Suspended
+                      {t("yallaAdmin.portal.common.suspended", "Suspended")}
                     </span>
                   )}
                   {Boolean(u.isMfaEnabled) && (
@@ -1456,7 +1456,7 @@ function UsersTab({
                   )}
                   {Boolean(u.isEmailVerified) && (
                     <span className="px-1.5 py-0.5 text-xs rounded bg-blue-500/15 text-blue-400 border border-blue-500/20">
-                      Verified
+                      {t("yallaAdmin.portal.common.verified", "Verified")}
                     </span>
                   )}
                 </td>
@@ -1470,10 +1470,11 @@ function UsersTab({
 }
 
 function IntakeTab({ intake }: { intake: IntakeData | null }) {
+  const { t } = useLocale();
   if (!intake)
     return (
       <div className="text-slate-500 text-sm p-8 text-center">
-        Loading intake data...
+        {t("yallaAdmin.portal.intake.loading", "Loading intake data...")}
       </div>
     );
 
@@ -1481,23 +1482,39 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
     <div className="space-y-6">
       <div className="grid grid-cols-3 gap-4">
         <StatCard
-          label="Service Requests"
+          label={t(
+            "yallaAdmin.portal.intake.serviceRequests",
+            "Service Requests"
+          )}
           value={intake.counts.serviceRequests}
         />
         <StatCard
-          label="Access Requests"
+          label={t(
+            "yallaAdmin.portal.intake.accessRequests",
+            "Access Requests"
+          )}
           value={intake.counts.accessRequests}
         />
         <StatCard
-          label="Consultations"
+          label={t("yallaAdmin.portal.intake.consultations", "Consultations")}
           value={intake.counts.consultationRequests}
         />
       </div>
       <div className="grid xl:grid-cols-3 gap-6">
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-white">Service requests</h3>
+          <h3 className="text-sm font-semibold text-white">
+            {t(
+              "yallaAdmin.portal.overview.serviceRequestsLabel",
+              "Service requests"
+            )}
+          </h3>
           {intake.serviceRequests.length === 0 ? (
-            <p className="text-slate-600 text-sm">No service requests yet.</p>
+            <p className="text-slate-600 text-sm">
+              {t(
+                "yallaAdmin.portal.intake.noServiceRequests",
+                "No service requests yet."
+              )}
+            </p>
           ) : (
             intake.serviceRequests.map(row => (
               <div
@@ -1528,9 +1545,19 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
           )}
         </div>
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-white">Access requests</h3>
+          <h3 className="text-sm font-semibold text-white">
+            {t(
+              "yallaAdmin.portal.overview.accessRequestsLabel",
+              "Access requests"
+            )}
+          </h3>
           {intake.accessRequests.length === 0 ? (
-            <p className="text-slate-600 text-sm">No access requests yet.</p>
+            <p className="text-slate-600 text-sm">
+              {t(
+                "yallaAdmin.portal.intake.noAccessRequests",
+                "No access requests yet."
+              )}
+            </p>
           ) : (
             intake.accessRequests.map(row => (
               <div
@@ -1777,10 +1804,14 @@ function ValidationTab({ rows }: { rows: ValidationRow[] }) {
 }
 
 function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
+  const { t } = useLocale();
   if (!data)
     return (
       <div className="text-slate-500 text-sm p-8 text-center">
-        Loading subscription data...
+        {t(
+          "yallaAdmin.portal.subscriptions.loading",
+          "Loading subscription data..."
+        )}
       </div>
     );
 
@@ -1841,7 +1872,7 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
           }}
           className="text-xs text-cyan-400 hover:text-cyan-300 transition"
         >
-          Export CSV
+          {t("yallaAdmin.portal.common.exportCsv", "Export CSV")}
         </button>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -2229,7 +2260,7 @@ function SignupsTab({
                 <td className="px-4 py-3 text-slate-400 text-xs">
                   {u.lastLoginAt
                     ? new Date(u.lastLoginAt).toLocaleString(storedLocaleTag())
-                    : "Never"}
+                    : t("yallaAdmin.portal.common.never", "Never")}
                 </td>
                 <td className="px-4 py-3 flex gap-1.5 flex-wrap">
                   {Boolean(u.isMfaEnabled) && (
@@ -2239,7 +2270,7 @@ function SignupsTab({
                   )}
                   {Boolean(u.isEmailVerified) && (
                     <span className="px-1.5 py-0.5 text-xs rounded bg-blue-500/15 text-blue-400 border border-blue-500/20">
-                      Verified
+                      {t("yallaAdmin.portal.common.verified", "Verified")}
                     </span>
                   )}
                 </td>
@@ -2280,7 +2311,12 @@ function OrgsTab({
           onChange={e => setFilter(e.target.value)}
           className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
         />
-        <span className="text-xs text-slate-500">{filtered.length} orgs</span>
+        <span className="text-xs text-slate-500">
+          {t("yallaAdmin.portal.orgsCount", "{count} orgs").replace(
+            "{count}",
+            String(filtered.length)
+          )}
+        </span>
       </div>
       <div className="overflow-x-auto rounded-xl border border-slate-700/40">
         <table className="w-full text-sm">
@@ -2296,19 +2332,22 @@ function OrgsTab({
                 {t("yallaAdmin.portal.signups.col.plan", "Plan")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Members
+                {t("yallaAdmin.portal.common.members", "Members")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Active Sessions
+                {t(
+                  "yallaAdmin.portal.common.activeSessions",
+                  "Active Sessions"
+                )}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Trial Ends
+                {t("yallaAdmin.portal.common.trialEnds", "Trial Ends")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Created
+                {t("yallaAdmin.portal.common.created", "Created")}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Status
+                {t("yallaAdmin.portal.common.status", "Status")}
               </th>
             </tr>
           </thead>
@@ -2378,7 +2417,7 @@ function AdminAuditTab({ logs }: { logs: AdminAuditRow[] }) {
           }}
           className="text-xs text-cyan-400 hover:text-cyan-300 transition"
         >
-          Export CSV
+          {t("yallaAdmin.portal.common.exportCsv", "Export CSV")}
         </button>
       </div>
       <div className="space-y-3">

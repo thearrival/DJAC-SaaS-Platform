@@ -3955,5 +3955,29 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.signups.col.registered": "登録日",
   "yallaAdmin.portal.signups.col.lastLogin": "最終ログイン",
   "yallaAdmin.portal.signups.col.flags": "フラグ",
+  "yallaAdmin.portal.common.exportCsv": "CSVを書き出し",
+  "yallaAdmin.portal.common.never": "なし",
+  "yallaAdmin.portal.common.sessions": "セッション",
+  "yallaAdmin.portal.common.members": "メンバー",
+  "yallaAdmin.portal.common.activeSessions": "アクティブセッション",
+  "yallaAdmin.portal.common.trialEnds": "トライアル終了",
+  "yallaAdmin.portal.common.created": "作成日",
+  "yallaAdmin.portal.common.status": "ステータス",
+  "yallaAdmin.portal.common.suspended": "停止中",
+  "yallaAdmin.portal.common.verified": "確認済み",
+  "yallaAdmin.portal.orgsCount": "{count} 組織",
+  "yallaAdmin.portal.intake.loading": "受付データを読み込み中...",
+  "yallaAdmin.portal.intake.serviceRequests": "サービスリクエスト",
+  "yallaAdmin.portal.intake.accessRequests": "アクセスリクエスト",
+  "yallaAdmin.portal.intake.consultations": "相談",
+  "yallaAdmin.portal.intake.noServiceRequests":
+    "サービスリクエストはまだありません。",
+  "yallaAdmin.portal.intake.noAccessRequests":
+    "アクセスリクエストはまだありません。",
+  "yallaAdmin.portal.intake.noConsultations": "相談はまだありません。",
+  "yallaAdmin.portal.intake.unknownOrg": "不明な組織",
+  "yallaAdmin.portal.intake.unknownUser": "不明なユーザー",
+  "yallaAdmin.portal.subscriptions.loading":
+    "サブスクリプションデータを読み込み中...",
 };
 export default messages;

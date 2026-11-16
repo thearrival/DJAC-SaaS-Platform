@@ -4057,5 +4057,28 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.signups.col.registered": "Registrado",
   "yallaAdmin.portal.signups.col.lastLogin": "Último acceso",
   "yallaAdmin.portal.signups.col.flags": "Indicadores",
+  "yallaAdmin.portal.common.exportCsv": "Exportar CSV",
+  "yallaAdmin.portal.common.never": "Nunca",
+  "yallaAdmin.portal.common.sessions": "Sesiones",
+  "yallaAdmin.portal.common.members": "Miembros",
+  "yallaAdmin.portal.common.activeSessions": "Sesiones activas",
+  "yallaAdmin.portal.common.trialEnds": "Fin de prueba",
+  "yallaAdmin.portal.common.created": "Creado",
+  "yallaAdmin.portal.common.status": "Estado",
+  "yallaAdmin.portal.common.suspended": "Suspendido",
+  "yallaAdmin.portal.common.verified": "Verificado",
+  "yallaAdmin.portal.orgsCount": "{count} orgs",
+  "yallaAdmin.portal.intake.loading": "Cargando datos de recepción...",
+  "yallaAdmin.portal.intake.serviceRequests": "Solicitudes de servicio",
+  "yallaAdmin.portal.intake.accessRequests": "Solicitudes de acceso",
+  "yallaAdmin.portal.intake.consultations": "Consultas",
+  "yallaAdmin.portal.intake.noServiceRequests":
+    "Aún no hay solicitudes de servicio.",
+  "yallaAdmin.portal.intake.noAccessRequests":
+    "Aún no hay solicitudes de acceso.",
+  "yallaAdmin.portal.intake.noConsultations": "Aún no hay consultas.",
+  "yallaAdmin.portal.intake.unknownOrg": "Organización desconocida",
+  "yallaAdmin.portal.intake.unknownUser": "Usuario desconocido",
+  "yallaAdmin.portal.subscriptions.loading": "Cargando datos de suscripción...",
 };
 export default messages;
