@@ -3979,5 +3979,23 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.memberSuspended": "معلق",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "أحداث الفوترة الأخيرة ({count})",
+  "yallaAdmin.portal.ownerAccess.title": "إنشاء رابط وصول المالك",
+  "yallaAdmin.portal.ownerAccess.description":
+    "أنشئ روابط موقعة منتهية الصلاحية للدخول المعزول إلى وحدة تحكم المالك.",
+  "yallaAdmin.portal.ownerAccess.expiresInMinutes": "تنتهي الصلاحية خلال دقائق",
+  "yallaAdmin.portal.ownerAccess.redirectPath":
+    "مسار إعادة التوجيه بعد البوابة",
+  "yallaAdmin.portal.ownerAccess.oneTimeLink": "رابط لمرة واحدة",
+  "yallaAdmin.portal.ownerAccess.generating": "جارٍ الإنشاء...",
+  "yallaAdmin.portal.ownerAccess.generateLink": "إنشاء رابط",
+  "yallaAdmin.portal.ownerAccess.generatedUrl": "الرابط المُنشأ",
+  "yallaAdmin.portal.ownerAccess.copy": "نسخ",
+  "yallaAdmin.portal.ownerAccess.expires": "تنتهي الصلاحية:",
+  "yallaAdmin.portal.ownerAccess.generated":
+    "تم إنشاء رابط وصول المالك الموقّع.",
+  "yallaAdmin.portal.ownerAccess.generateFailed": "فشل إنشاء الرابط",
+  "yallaAdmin.portal.ownerAccess.copied": "تم نسخ الرابط إلى الحافظة.",
+  "yallaAdmin.portal.ownerAccess.copyFailed":
+    "فشل النسخ. يرجى نسخ الرابط يدويًا.",
 };
 export default messages;

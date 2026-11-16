@@ -3991,5 +3991,22 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.memberSuspended": "정지됨",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "최근 청구 이벤트 ({count})",
+  "yallaAdmin.portal.ownerAccess.title": "소유자 액세스 링크 생성",
+  "yallaAdmin.portal.ownerAccess.description":
+    "격리된 소유자 콘솔 진입을 위한 만료 서명 링크를 생성합니다.",
+  "yallaAdmin.portal.ownerAccess.expiresInMinutes": "만료 시간(분)",
+  "yallaAdmin.portal.ownerAccess.redirectPath": "게이트 후 리디렉션 경로",
+  "yallaAdmin.portal.ownerAccess.oneTimeLink": "일회용 링크",
+  "yallaAdmin.portal.ownerAccess.generating": "생성 중...",
+  "yallaAdmin.portal.ownerAccess.generateLink": "링크 생성",
+  "yallaAdmin.portal.ownerAccess.generatedUrl": "생성된 URL",
+  "yallaAdmin.portal.ownerAccess.copy": "복사",
+  "yallaAdmin.portal.ownerAccess.expires": "만료:",
+  "yallaAdmin.portal.ownerAccess.generated":
+    "서명된 소유자 액세스 링크가 생성되었습니다.",
+  "yallaAdmin.portal.ownerAccess.generateFailed": "링크 생성 실패",
+  "yallaAdmin.portal.ownerAccess.copied": "링크가 클립보드에 복사되었습니다.",
+  "yallaAdmin.portal.ownerAccess.copyFailed":
+    "복사에 실패했습니다. 링크를 수동으로 복사하세요.",
 };
 export default messages;

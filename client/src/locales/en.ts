@@ -4045,5 +4045,22 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.memberSuspended": "Suspended",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "Recent Billing Events ({count})",
+  "yallaAdmin.portal.ownerAccess.title": "Generate Owner Access Link",
+  "yallaAdmin.portal.ownerAccess.description":
+    "Create expiring signed links for isolated owner-console entry.",
+  "yallaAdmin.portal.ownerAccess.expiresInMinutes": "Expires in minutes",
+  "yallaAdmin.portal.ownerAccess.redirectPath": "Redirect path after gate",
+  "yallaAdmin.portal.ownerAccess.oneTimeLink": "One-time link",
+  "yallaAdmin.portal.ownerAccess.generating": "Generating...",
+  "yallaAdmin.portal.ownerAccess.generateLink": "Generate Link",
+  "yallaAdmin.portal.ownerAccess.generatedUrl": "Generated URL",
+  "yallaAdmin.portal.ownerAccess.copy": "Copy",
+  "yallaAdmin.portal.ownerAccess.expires": "Expires:",
+  "yallaAdmin.portal.ownerAccess.generated":
+    "Signed owner access link generated.",
+  "yallaAdmin.portal.ownerAccess.generateFailed": "Failed to generate link",
+  "yallaAdmin.portal.ownerAccess.copied": "Link copied to clipboard.",
+  "yallaAdmin.portal.ownerAccess.copyFailed":
+    "Copy failed. Please copy the link manually.",
 };
 export default messages;

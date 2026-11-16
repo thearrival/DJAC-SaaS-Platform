@@ -1181,6 +1181,7 @@ function OrganizationDetailModal({
 }
 
 function OwnerAccessLinkPanel() {
+  const { t } = useLocale();
   const [expiresInMinutes, setExpiresInMinutes] = useState(30);
   const [oneTime, setOneTime] = useState(true);
   const [redirectTarget, setRedirectTarget] = useState(
@@ -1209,9 +1210,21 @@ function OwnerAccessLinkPanel() {
       );
       setGeneratedUrl(result.url);
       setExpiresAtIso(result.expiresAtIso);
-      setMessage("Signed owner access link generated.");
+      setMessage(
+        t(
+          "yallaAdmin.portal.ownerAccess.generated",
+          "Signed owner access link generated."
+        )
+      );
     } catch (e: unknown) {
-      setMessage(e instanceof Error ? e.message : "Failed to generate link");
+      setMessage(
+        e instanceof Error
+          ? e.message
+          : t(
+              "yallaAdmin.portal.ownerAccess.generateFailed",
+              "Failed to generate link"
+            )
+      );
     } finally {
       setLoading(false);
     }
@@ -1221,9 +1234,16 @@ function OwnerAccessLinkPanel() {
     if (!generatedUrl) return;
     try {
       await navigator.clipboard.writeText(generatedUrl);
-      setMessage("Link copied to clipboard.");
+      setMessage(
+        t("yallaAdmin.portal.ownerAccess.copied", "Link copied to clipboard.")
+      );
     } catch {
-      setMessage("Copy failed. Please copy the link manually.");
+      setMessage(
+        t(
+          "yallaAdmin.portal.ownerAccess.copyFailed",
+          "Copy failed. Please copy the link manually."
+        )
+      );
     }
   };
 
@@ -1231,16 +1251,27 @@ function OwnerAccessLinkPanel() {
     <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 space-y-4">
       <div>
         <h3 className="text-sm font-semibold text-white">
-          Generate Owner Access Link
+          {t(
+            "yallaAdmin.portal.ownerAccess.title",
+            "Generate Owner Access Link"
+          )}
         </h3>
         <p className="text-xs text-slate-500 mt-1">
-          Create expiring signed links for isolated owner-console entry.
+          {t(
+            "yallaAdmin.portal.ownerAccess.description",
+            "Create expiring signed links for isolated owner-console entry."
+          )}
         </p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-3">
         <label className="text-xs text-slate-400 space-y-1">
-          <span>Expires in minutes</span>
+          <span>
+            {t(
+              "yallaAdmin.portal.ownerAccess.expiresInMinutes",
+              "Expires in minutes"
+            )}
+          </span>
           <input
             type="number"
             min={1}
@@ -1255,7 +1286,12 @@ function OwnerAccessLinkPanel() {
           />
         </label>
         <label className="text-xs text-slate-400 space-y-1 lg:col-span-2">
-          <span>Redirect path after gate</span>
+          <span>
+            {t(
+              "yallaAdmin.portal.ownerAccess.redirectPath",
+              "Redirect path after gate"
+            )}
+          </span>
           <input
             type="text"
             value={redirectTarget}
@@ -1273,21 +1309,25 @@ function OwnerAccessLinkPanel() {
             onChange={e => setOneTime(e.target.checked)}
             className="rounded border-slate-600 bg-slate-900"
           />
-          One-time link
+          {t("yallaAdmin.portal.ownerAccess.oneTimeLink", "One-time link")}
         </label>
         <button
           onClick={() => void generateLink()}
           disabled={loading}
           className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/25 disabled:opacity-50 transition"
         >
-          {loading ? "Generating..." : "Generate Link"}
+          {loading
+            ? t("yallaAdmin.portal.ownerAccess.generating", "Generating...")
+            : t("yallaAdmin.portal.ownerAccess.generateLink", "Generate Link")}
         </button>
         {message && <span className="text-xs text-slate-400">{message}</span>}
       </div>
 
       {generatedUrl && (
         <div className="space-y-2">
-          <label className="block text-xs text-slate-500">Generated URL</label>
+          <label className="block text-xs text-slate-500">
+            {t("yallaAdmin.portal.ownerAccess.generatedUrl", "Generated URL")}
+          </label>
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -1299,12 +1339,12 @@ function OwnerAccessLinkPanel() {
               onClick={() => void copyLink()}
               className="px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition"
             >
-              Copy
+              {t("yallaAdmin.portal.ownerAccess.copy", "Copy")}
             </button>
           </div>
           {expiresAtIso && (
             <p className="text-xs text-slate-500">
-              Expires:{" "}
+              {t("yallaAdmin.portal.ownerAccess.expires", "Expires:")}{" "}
               {new Date(expiresAtIso).toLocaleString(storedLocaleTag())}
             </p>
           )}

@@ -4108,5 +4108,23 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.memberSuspended": "停止中",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "最近の請求イベント（{count}）",
+  "yallaAdmin.portal.ownerAccess.title": "オーナーアクセスリンクを生成",
+  "yallaAdmin.portal.ownerAccess.description":
+    "分離されたオーナーコンソールへのエントリ用に、有効期限付きの署名済みリンクを作成します。",
+  "yallaAdmin.portal.ownerAccess.expiresInMinutes": "有効期限（分）",
+  "yallaAdmin.portal.ownerAccess.redirectPath": "ゲート後のリダイレクトパス",
+  "yallaAdmin.portal.ownerAccess.oneTimeLink": "使い捨てリンク",
+  "yallaAdmin.portal.ownerAccess.generating": "生成中...",
+  "yallaAdmin.portal.ownerAccess.generateLink": "リンクを生成",
+  "yallaAdmin.portal.ownerAccess.generatedUrl": "生成されたURL",
+  "yallaAdmin.portal.ownerAccess.copy": "コピー",
+  "yallaAdmin.portal.ownerAccess.expires": "有効期限：",
+  "yallaAdmin.portal.ownerAccess.generated":
+    "署名済みオーナーアクセスリンクを生成しました。",
+  "yallaAdmin.portal.ownerAccess.generateFailed": "リンクの生成に失敗しました",
+  "yallaAdmin.portal.ownerAccess.copied":
+    "リンクをクリップボードにコピーしました。",
+  "yallaAdmin.portal.ownerAccess.copyFailed":
+    "コピーに失敗しました。リンクを手動でコピーしてください。",
 };
 export default messages;

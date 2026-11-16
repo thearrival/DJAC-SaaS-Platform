@@ -3786,5 +3786,20 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.memberSuspended": "已暂停",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "最近计费事件（{count}）",
+  "yallaAdmin.portal.ownerAccess.title": "生成所有者访问链接",
+  "yallaAdmin.portal.ownerAccess.description":
+    "为隔离的所有者控制台入口创建会过期的签名链接。",
+  "yallaAdmin.portal.ownerAccess.expiresInMinutes": "过期时间（分钟）",
+  "yallaAdmin.portal.ownerAccess.redirectPath": "通过入口后的重定向路径",
+  "yallaAdmin.portal.ownerAccess.oneTimeLink": "一次性链接",
+  "yallaAdmin.portal.ownerAccess.generating": "正在生成...",
+  "yallaAdmin.portal.ownerAccess.generateLink": "生成链接",
+  "yallaAdmin.portal.ownerAccess.generatedUrl": "生成的 URL",
+  "yallaAdmin.portal.ownerAccess.copy": "复制",
+  "yallaAdmin.portal.ownerAccess.expires": "过期时间：",
+  "yallaAdmin.portal.ownerAccess.generated": "已生成已签名的所有者访问链接。",
+  "yallaAdmin.portal.ownerAccess.generateFailed": "生成链接失败",
+  "yallaAdmin.portal.ownerAccess.copied": "链接已复制到剪贴板。",
+  "yallaAdmin.portal.ownerAccess.copyFailed": "复制失败。请手动复制链接。",
 };
 export default messages;

@@ -4253,5 +4253,24 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.memberSuspended": "Suspendu",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "Événements de facturation récents ({count})",
+  "yallaAdmin.portal.ownerAccess.title": "Générer un lien d'accès propriétaire",
+  "yallaAdmin.portal.ownerAccess.description":
+    "Créez des liens signés expirants pour l'entrée isolée de la console propriétaire.",
+  "yallaAdmin.portal.ownerAccess.expiresInMinutes": "Expire dans (minutes)",
+  "yallaAdmin.portal.ownerAccess.redirectPath":
+    "Chemin de redirection après la porte",
+  "yallaAdmin.portal.ownerAccess.oneTimeLink": "Lien à usage unique",
+  "yallaAdmin.portal.ownerAccess.generating": "Génération...",
+  "yallaAdmin.portal.ownerAccess.generateLink": "Générer le lien",
+  "yallaAdmin.portal.ownerAccess.generatedUrl": "URL générée",
+  "yallaAdmin.portal.ownerAccess.copy": "Copier",
+  "yallaAdmin.portal.ownerAccess.expires": "Expire :",
+  "yallaAdmin.portal.ownerAccess.generated":
+    "Lien d'accès propriétaire signé généré.",
+  "yallaAdmin.portal.ownerAccess.generateFailed":
+    "Échec de la génération du lien",
+  "yallaAdmin.portal.ownerAccess.copied": "Lien copié dans le presse-papiers.",
+  "yallaAdmin.portal.ownerAccess.copyFailed":
+    "Échec de la copie. Veuillez copier le lien manuellement.",
 };
 export default messages;
