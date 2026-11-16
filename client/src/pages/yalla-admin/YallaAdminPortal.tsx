@@ -1720,10 +1720,12 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
                       {row.title}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
-                      {row.organizationName ?? "Unknown org"} ·{" "}
+                      {row.organizationName ??
+                        t("yallaAdmin.common.unknownOrg", "Unknown org")}{" "}
+                      •{" "}
                       {row.requestedByUsername ??
                         row.requestedByEmail ??
-                        "Unknown user"}
+                        t("yallaAdmin.common.unknownUser", "Unknown user")}
                     </p>
                   </div>
                   <Badge value={row.status} />
