@@ -3981,6 +3981,5 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "업데이트:",
   "yallaAdmin.portal.org.trialEnds": "체험 종료:",
   "yallaAdmin.portal.org.billingEmail": "청구 이메일:",
-  "yallaAdmin.portal.common.never": "없음",
 };
 export default messages;

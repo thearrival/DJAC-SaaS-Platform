@@ -4098,6 +4098,5 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "更新日：",
   "yallaAdmin.portal.org.trialEnds": "トライアル終了：",
   "yallaAdmin.portal.org.billingEmail": "請求メール：",
-  "yallaAdmin.portal.common.never": "なし",
 };
 export default messages;

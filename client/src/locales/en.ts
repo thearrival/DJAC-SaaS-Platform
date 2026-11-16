@@ -4035,6 +4035,5 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "Updated:",
   "yallaAdmin.portal.org.trialEnds": "Trial Ends:",
   "yallaAdmin.portal.org.billingEmail": "Billing Email:",
-  "yallaAdmin.portal.common.never": "Never",
 };
 export default messages;

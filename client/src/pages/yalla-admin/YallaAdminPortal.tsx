@@ -599,13 +599,23 @@ function UserDetailModal({
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs pt-2">
-                  <span className="text-slate-500">Organization:</span>
-                  <span className="text-white">
-                    {detail.user.organizationName ?? "—"}
+                  <span className="text-slate-500">
+                    {t(
+                      "yallaAdmin.portal.userDetail.organization",
+                      "Organization"
+                    )}
+                    :
                   </span>
-                  <span className="text-slate-500">Plan:</span>
                   <span className="text-white">
-                    {detail.user.organizationPlan ?? "—"}
+                    {detail.user.organizationName ??
+                      t("yallaAdmin.common.notAvailable", "—")}
+                  </span>
+                  <span className="text-slate-500">
+                    {t("yallaAdmin.portal.userDetail.plan", "Plan")}:
+                  </span>
+                  <span className="text-white">
+                    {detail.user.organizationPlan ??
+                      t("yallaAdmin.common.notAvailable", "—")}
                   </span>
                   <span className="text-slate-500">
                     {t("yallaAdmin.portal.userDetail.registered", "Registered")}
@@ -696,8 +706,11 @@ function UserDetailModal({
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 disabled:opacity-50 transition"
                   >
                     {actionLoading === "revoke"
-                      ? "Revoking…"
-                      : "Revoke All Sessions"}
+                      ? t("yallaAdmin.portal.userDetail.revoking", "Revoking…")
+                      : t(
+                          "yallaAdmin.portal.userDetail.revokeAllSessions",
+                          "Revoke All Sessions"
+                        )}
                   </button>
                   {actionMsg && (
                     <span className="text-xs text-slate-400 ml-1">
@@ -994,7 +1007,8 @@ function OrganizationDetailModal({
                     {t("yallaAdmin.portal.org.billingEmail", "Billing Email:")}
                   </span>
                   <span className="text-white truncate">
-                    {detail.org.billingEmail ?? "—"}
+                    {detail.org.billingEmail ??
+                      t("yallaAdmin.common.notAvailable", "—")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 pt-3 border-t border-slate-700/40">

@@ -3969,6 +3969,5 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "محدّث:",
   "yallaAdmin.portal.org.trialEnds": "تنتهي التجربة:",
   "yallaAdmin.portal.org.billingEmail": "بريد الفوترة:",
-  "yallaAdmin.portal.common.never": "أبدًا",
 };
 export default messages;

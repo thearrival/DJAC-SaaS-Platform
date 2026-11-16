@@ -4195,6 +4195,5 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "Aktualisiert:",
   "yallaAdmin.portal.org.trialEnds": "Test endet:",
   "yallaAdmin.portal.org.billingEmail": "Abrechnungs-E-Mail:",
-  "yallaAdmin.portal.common.never": "Nie",
 };
 export default messages;
