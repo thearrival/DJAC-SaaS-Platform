@@ -4278,5 +4278,15 @@ const messages: Record<string, string> = {
   "adminReports.downloadCsv": "CSV 다운로드",
   "adminSubscriptions.cancelsAtPeriodEnd": "현재 기간 종료 시 취소",
   "founders.openNavigation": "내비게이션 열기",
+  "globalRegistry.searchPlaceholder": "프레임워크, 기관, 관할권 검색...",
+  "globalRegistry.filterByRegion": "지역별 필터",
+  "globalRegistry.allRegions": "모든 지역",
+  "globalRegistry.filterByJurisdiction": "관할권별 필터",
+  "globalRegistry.allJurisdictions": "모든 관할권",
+  "globalRegistry.filterByCategory": "카테고리별 필터",
+  "globalRegistry.allCategories": "모든 카테고리",
+  "globalAIAgents.searchPlaceholder":
+    "이름, 초점 또는 지역별로 에이전트 검색...",
+  "lawLibrary.clearSearch": "검색 지우기",
 };
 export default messages;

@@ -4280,5 +4280,15 @@ const messages: Record<string, string> = {
   "adminReports.downloadCsv": "تنزيل CSV",
   "adminSubscriptions.cancelsAtPeriodEnd": "يُلغى في نهاية الفترة الحالية",
   "founders.openNavigation": "فتح التنقل",
+  "globalRegistry.searchPlaceholder": "ابحث عن الأطر والجهات والاختصاصات...",
+  "globalRegistry.filterByRegion": "تصفية حسب المنطقة",
+  "globalRegistry.allRegions": "كل المناطق",
+  "globalRegistry.filterByJurisdiction": "تصفية حسب الاختصاص",
+  "globalRegistry.allJurisdictions": "كل الاختصاصات",
+  "globalRegistry.filterByCategory": "تصفية حسب الفئة",
+  "globalRegistry.allCategories": "كل الفئات",
+  "globalAIAgents.searchPlaceholder":
+    "ابحث عن الوكلاء بالاسم أو التركيز أو المنطقة...",
+  "lawLibrary.clearSearch": "مسح البحث",
 };
 export default messages;

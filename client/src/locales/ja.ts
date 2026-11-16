@@ -4409,5 +4409,15 @@ const messages: Record<string, string> = {
   "adminReports.downloadCsv": "CSVをダウンロード",
   "adminSubscriptions.cancelsAtPeriodEnd": "現在の期間終了時に解約",
   "founders.openNavigation": "ナビゲーションを開く",
+  "globalRegistry.searchPlaceholder": "フレームワーク、当局、管轄区域を検索...",
+  "globalRegistry.filterByRegion": "地域で絞り込み",
+  "globalRegistry.allRegions": "すべての地域",
+  "globalRegistry.filterByJurisdiction": "管轄区域で絞り込み",
+  "globalRegistry.allJurisdictions": "すべての管轄区域",
+  "globalRegistry.filterByCategory": "カテゴリで絞り込み",
+  "globalRegistry.allCategories": "すべてのカテゴリ",
+  "globalAIAgents.searchPlaceholder":
+    "名前、フォーカス、地域でエージェントを検索...",
+  "lawLibrary.clearSearch": "検索をクリア",
 };
 export default messages;

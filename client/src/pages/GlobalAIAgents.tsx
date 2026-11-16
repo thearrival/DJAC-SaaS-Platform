@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
@@ -84,6 +85,7 @@ const AGENT_COLORS: Record<string, string> = {
 };
 
 export default function GlobalAIAgents() {
+  const { t } = useLocale();
   usePageTitle("AI Agent Network");
 
   const agentsQ = trpc.compliance.globalAiAgents.useQuery();
@@ -136,7 +138,10 @@ export default function GlobalAIAgents() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search agents by name, focus, or region..."
+            placeholder={t(
+              "globalAIAgents.searchPlaceholder",
+              "Search agents by name, focus, or region..."
+            )}
             className="pl-9"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}

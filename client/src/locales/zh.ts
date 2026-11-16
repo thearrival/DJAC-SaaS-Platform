@@ -4063,5 +4063,14 @@ const messages: Record<string, string> = {
   "adminReports.downloadCsv": "下载 CSV",
   "adminSubscriptions.cancelsAtPeriodEnd": "将在当前周期结束时取消",
   "founders.openNavigation": "打开导航",
+  "globalRegistry.searchPlaceholder": "搜索框架、机构、司法辖区...",
+  "globalRegistry.filterByRegion": "按地区筛选",
+  "globalRegistry.allRegions": "所有地区",
+  "globalRegistry.filterByJurisdiction": "按司法辖区筛选",
+  "globalRegistry.allJurisdictions": "所有司法辖区",
+  "globalRegistry.filterByCategory": "按类别筛选",
+  "globalRegistry.allCategories": "所有类别",
+  "globalAIAgents.searchPlaceholder": "按名称、重点或地区搜索代理...",
+  "lawLibrary.clearSearch": "清除搜索",
 };
 export default messages;

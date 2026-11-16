@@ -4512,5 +4512,16 @@ const messages: Record<string, string> = {
   "adminSubscriptions.cancelsAtPeriodEnd":
     "Wird am Ende des aktuellen Zeitraums gekündigt",
   "founders.openNavigation": "Navigation öffnen",
+  "globalRegistry.searchPlaceholder":
+    "Frameworks, Behörden, Zuständigkeiten suchen...",
+  "globalRegistry.filterByRegion": "Nach Region filtern",
+  "globalRegistry.allRegions": "Alle Regionen",
+  "globalRegistry.filterByJurisdiction": "Nach Zuständigkeit filtern",
+  "globalRegistry.allJurisdictions": "Alle Zuständigkeiten",
+  "globalRegistry.filterByCategory": "Nach Kategorie filtern",
+  "globalRegistry.allCategories": "Alle Kategorien",
+  "globalAIAgents.searchPlaceholder":
+    "Agenten nach Name, Fokus oder Region suchen...",
+  "lawLibrary.clearSearch": "Suche löschen",
 };
 export default messages;

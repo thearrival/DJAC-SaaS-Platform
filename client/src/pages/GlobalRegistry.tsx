@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { trpc } from "@/lib/trpc";
 import { DESIGNATED_REVIEWER } from "@shared/regulatory-provenance";
@@ -96,6 +97,7 @@ function getCategoryIcon(category: string) {
 }
 
 export default function GlobalRegistry() {
+  const { t } = useLocale();
   usePageTitle("Global Compliance Registry");
 
   const summaryQ = trpc.compliance.globalRegistrySummary.useQuery();
@@ -272,7 +274,10 @@ export default function GlobalRegistry() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search frameworks, authorities, jurisdictions..."
+                placeholder={t(
+                  "globalRegistry.searchPlaceholder",
+                  "Search frameworks, authorities, jurisdictions..."
+                )}
                 className="pl-9"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
@@ -281,12 +286,19 @@ export default function GlobalRegistry() {
             <Select value={regionFilter} onValueChange={setRegionFilter}>
               <SelectTrigger
                 className="w-[160px]"
-                aria-label="Filter by region"
+                aria-label={t(
+                  "globalRegistry.filterByRegion",
+                  "Filter by region"
+                )}
               >
-                <SelectValue placeholder="All Regions" />
+                <SelectValue
+                  placeholder={t("globalRegistry.allRegions", "All Regions")}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Regions</SelectItem>
+                <SelectItem value="all">
+                  {t("globalRegistry.allRegions", "All Regions")}
+                </SelectItem>
                 {regions
                   .filter(r => r !== "all")
                   .map(r => (
@@ -302,12 +314,22 @@ export default function GlobalRegistry() {
             >
               <SelectTrigger
                 className="w-[180px]"
-                aria-label="Filter by jurisdiction"
+                aria-label={t(
+                  "globalRegistry.filterByJurisdiction",
+                  "Filter by jurisdiction"
+                )}
               >
-                <SelectValue placeholder="All Jurisdictions" />
+                <SelectValue
+                  placeholder={t(
+                    "globalRegistry.allJurisdictions",
+                    "All Jurisdictions"
+                  )}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Jurisdictions</SelectItem>
+                <SelectItem value="all">
+                  {t("globalRegistry.allJurisdictions", "All Jurisdictions")}
+                </SelectItem>
                 {jurisdictions.map(j => (
                   <SelectItem key={j} value={j}>
                     {j}
@@ -318,12 +340,22 @@ export default function GlobalRegistry() {
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger
                 className="w-[180px]"
-                aria-label="Filter by category"
+                aria-label={t(
+                  "globalRegistry.filterByCategory",
+                  "Filter by category"
+                )}
               >
-                <SelectValue placeholder="All Categories" />
+                <SelectValue
+                  placeholder={t(
+                    "globalRegistry.allCategories",
+                    "All Categories"
+                  )}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">
+                  {t("globalRegistry.allCategories", "All Categories")}
+                </SelectItem>
                 {categories.map(c => (
                   <SelectItem key={c} value={c}>
                     {c}

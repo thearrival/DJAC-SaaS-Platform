@@ -4337,5 +4337,16 @@ const messages: Record<string, string> = {
   "adminReports.downloadCsv": "Download CSV",
   "adminSubscriptions.cancelsAtPeriodEnd": "Cancels at end of current period",
   "founders.openNavigation": "Open navigation",
+  "globalRegistry.searchPlaceholder":
+    "Search frameworks, authorities, jurisdictions...",
+  "globalRegistry.filterByRegion": "Filter by region",
+  "globalRegistry.allRegions": "All Regions",
+  "globalRegistry.filterByJurisdiction": "Filter by jurisdiction",
+  "globalRegistry.allJurisdictions": "All Jurisdictions",
+  "globalRegistry.filterByCategory": "Filter by category",
+  "globalRegistry.allCategories": "All Categories",
+  "globalAIAgents.searchPlaceholder":
+    "Search agents by name, focus, or region...",
+  "lawLibrary.clearSearch": "Clear search",
 };
 export default messages;

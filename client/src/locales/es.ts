@@ -4523,5 +4523,16 @@ const messages: Record<string, string> = {
   "adminSubscriptions.cancelsAtPeriodEnd":
     "Se cancela al final del período actual",
   "founders.openNavigation": "Abrir navegación",
+  "globalRegistry.searchPlaceholder":
+    "Buscar marcos, autoridades, jurisdicciones...",
+  "globalRegistry.filterByRegion": "Filtrar por región",
+  "globalRegistry.allRegions": "Todas las regiones",
+  "globalRegistry.filterByJurisdiction": "Filtrar por jurisdicción",
+  "globalRegistry.allJurisdictions": "Todas las jurisdicciones",
+  "globalRegistry.filterByCategory": "Filtrar por categoría",
+  "globalRegistry.allCategories": "Todas las categorías",
+  "globalAIAgents.searchPlaceholder":
+    "Buscar agentes por nombre, enfoque o región...",
+  "lawLibrary.clearSearch": "Borrar búsqueda",
 };
 export default messages;

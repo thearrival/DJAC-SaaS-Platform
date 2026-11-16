@@ -542,7 +542,7 @@ export default function LawLibrary() {
             <button
               onClick={() => setQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-sm leading-none"
-              aria-label="Clear search"
+              aria-label={t("lawLibrary.clearSearch", "Clear search")}
             >
               âœ•
             </button>
