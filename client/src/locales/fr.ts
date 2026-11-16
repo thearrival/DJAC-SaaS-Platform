@@ -4177,5 +4177,38 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.realtime.openStreams": "flux ouverts",
   "yallaAdmin.portal.realtime.infrastructureStatus": "État de l'infrastructure",
   "yallaAdmin.portal.realtime.sseStream": "Flux SSE",
+  "yallaAdmin.portal.subscriptions.allSubscriptions":
+    "Tous les abonnements ({count})",
+  "yallaAdmin.portal.subscriptions.col.organization": "Organisation",
+  "yallaAdmin.portal.subscriptions.col.interval": "Intervalle",
+  "yallaAdmin.portal.subscriptions.col.amount": "Montant",
+  "yallaAdmin.portal.subscriptions.col.periodEnd": "Fin de période",
+  "yallaAdmin.portal.subscriptions.col.created": "Créé",
+  "yallaAdmin.portal.realtime.connected": "Connecté",
+  "yallaAdmin.portal.realtime.database": "Base de données",
+  "yallaAdmin.portal.realtime.unknown": "inconnu",
+  "yallaAdmin.portal.realtime.serverUptime":
+    "Temps de fonctionnement du serveur",
+  "yallaAdmin.portal.realtime.heapUsage": "Utilisation du tas",
+  "yallaAdmin.portal.realtime.redis": "Redis",
+  "yallaAdmin.portal.realtime.configured": "Configuré",
+  "yallaAdmin.portal.realtime.notConfigured": "Non configuré",
+  "yallaAdmin.portal.realtime.dbPool": "Pool BD",
+  "yallaAdmin.portal.realtime.connections": "{count} connexions",
+  "yallaAdmin.portal.realtime.liveEventStream": "Flux d'événements en direct",
+  "yallaAdmin.portal.realtime.captured": "{count} capturé(s)",
+  "yallaAdmin.portal.realtime.waitingActivity":
+    "En attente d'activité de la plateforme…",
+  "yallaAdmin.portal.userDetail.title": "Détails de l'utilisateur",
+  "yallaAdmin.portal.userDetail.loadFailed": "Échec du chargement",
+  "yallaAdmin.portal.userDetail.suspended": "Utilisateur suspendu.",
+  "yallaAdmin.portal.userDetail.unsuspended": "Utilisateur réactivé.",
+  "yallaAdmin.portal.userDetail.actionFailed": "Échec de l'action",
+  "yallaAdmin.portal.userDetail.sessionsRevoked":
+    "Toutes les sessions ont été révoquées.",
+  "yallaAdmin.portal.org.unsuspending": "Réactivation…",
+  "yallaAdmin.portal.org.unsuspend": "Réactiver l'organisation",
+  "yallaAdmin.portal.org.suspending": "Suspension…",
+  "yallaAdmin.portal.org.suspend": "Suspendre l'organisation",
 };
 export default messages;

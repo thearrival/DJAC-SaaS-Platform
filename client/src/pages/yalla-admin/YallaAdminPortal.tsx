@@ -469,7 +469,11 @@ function UserDetailModal({
         setLoading(false);
       })
       .catch((e: unknown) => {
-        setError(e instanceof Error ? e.message : "Failed to load");
+        setError(
+          e instanceof Error
+            ? e.message
+            : t("yallaAdmin.portal.userDetail.loadFailed", "Failed to load")
+        );
         setLoading(false);
       });
   };
@@ -487,10 +491,18 @@ function UserDetailModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ suspend }),
       });
-      setActionMsg(suspend ? "User suspended." : "User unsuspended.");
+      setActionMsg(
+        suspend
+          ? t("yallaAdmin.portal.userDetail.suspended", "User suspended.")
+          : t("yallaAdmin.portal.userDetail.unsuspended", "User unsuspended.")
+      );
       loadDetail();
     } catch (e: unknown) {
-      setActionMsg(e instanceof Error ? e.message : "Action failed");
+      setActionMsg(
+        e instanceof Error
+          ? e.message
+          : t("yallaAdmin.portal.userDetail.actionFailed", "Action failed")
+      );
     } finally {
       setActionLoading(null);
     }
@@ -501,10 +513,19 @@ function UserDetailModal({
     setActionMsg(null);
     try {
       await apiFetch(`/users/${userId}/revoke-sessions`, { method: "POST" });
-      setActionMsg("All sessions revoked.");
+      setActionMsg(
+        t(
+          "yallaAdmin.portal.userDetail.sessionsRevoked",
+          "All sessions revoked."
+        )
+      );
       loadDetail();
     } catch (e: unknown) {
-      setActionMsg(e instanceof Error ? e.message : "Action failed");
+      setActionMsg(
+        e instanceof Error
+          ? e.message
+          : t("yallaAdmin.portal.userDetail.actionFailed", "Action failed")
+      );
     } finally {
       setActionLoading(null);
     }
@@ -521,7 +542,9 @@ function UserDetailModal({
         onClick={e => e.stopPropagation()}
       >
         <div className="sticky top-0 bg-[#050508] border-b border-slate-800/60 px-6 py-4 flex items-center justify-between z-10">
-          <h3 className="text-sm font-semibold text-white">User Detail</h3>
+          <h3 className="text-sm font-semibold text-white">
+            {t("yallaAdmin.portal.userDetail.title", "User Detail")}
+          </h3>
           <button
             onClick={onClose}
             className="text-slate-500 hover:text-white transition"
@@ -774,7 +797,11 @@ function OrganizationDetailModal({
         setLoading(false);
       })
       .catch((e: unknown) => {
-        setError(e instanceof Error ? e.message : "Failed to load");
+        setError(
+          e instanceof Error
+            ? e.message
+            : t("yallaAdmin.portal.userDetail.loadFailed", "Failed to load")
+        );
         setLoading(false);
       });
   };
@@ -797,7 +824,11 @@ function OrganizationDetailModal({
       );
       loadDetail();
     } catch (e: unknown) {
-      setActionMsg(e instanceof Error ? e.message : "Action failed");
+      setActionMsg(
+        e instanceof Error
+          ? e.message
+          : t("yallaAdmin.portal.userDetail.actionFailed", "Action failed")
+      );
     } finally {
       setActionLoading(null);
     }
@@ -906,8 +937,14 @@ function OrganizationDetailModal({
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 disabled:opacity-50 transition"
                     >
                       {actionLoading === "unsuspend"
-                        ? "Unsuspending…"
-                        : "Unsuspend Organization"}
+                        ? t(
+                            "yallaAdmin.portal.org.unsuspending",
+                            "Unsuspending…"
+                          )
+                        : t(
+                            "yallaAdmin.portal.org.unsuspend",
+                            "Unsuspend Organization"
+                          )}
                     </button>
                   ) : (
                     <button
@@ -916,8 +953,11 @@ function OrganizationDetailModal({
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 disabled:opacity-50 transition"
                     >
                       {actionLoading === "suspend"
-                        ? "Suspending…"
-                        : "Suspend Organization"}
+                        ? t("yallaAdmin.portal.org.suspending", "Suspending…")
+                        : t(
+                            "yallaAdmin.portal.org.suspend",
+                            "Suspend Organization"
+                          )}
                     </button>
                   )}
                   {actionMsg && (
@@ -2025,14 +2065,20 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
 
       <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-white mb-4">
-          All Subscriptions ({data.subscriptions.length})
+          {t(
+            "yallaAdmin.portal.subscriptions.allSubscriptions",
+            "All Subscriptions ({count})"
+          ).replace("{count}", String(data.subscriptions.length))}
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-700/40">
                 <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Organization
+                  {t(
+                    "yallaAdmin.portal.subscriptions.col.organization",
+                    "Organization"
+                  )}
                 </th>
                 <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Plan
@@ -2041,16 +2087,22 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
                   Status
                 </th>
                 <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Interval
+                  {t(
+                    "yallaAdmin.portal.subscriptions.col.interval",
+                    "Interval"
+                  )}
                 </th>
                 <th className="text-right px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Amount
+                  {t("yallaAdmin.portal.subscriptions.col.amount", "Amount")}
                 </th>
                 <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Period End
+                  {t(
+                    "yallaAdmin.portal.subscriptions.col.periodEnd",
+                    "Period End"
+                  )}
                 </th>
                 <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Created
+                  {t("yallaAdmin.portal.subscriptions.col.created", "Created")}
                 </th>
               </tr>
             </thead>
@@ -2229,11 +2281,18 @@ function SystemTab({ system }: { system: SystemInfo | null }) {
               system.env.redisConfigured ? "text-emerald-400" : "text-red-400"
             }
           >
-            {system.env.redisConfigured ? "Configured" : "Not configured"}
+            {system.env.redisConfigured
+              ? t("yallaAdmin.portal.realtime.configured", "Configured")
+              : t("yallaAdmin.portal.realtime.notConfigured", "Not configured")}
           </span>
-          <span className="text-slate-400">DB Pool:</span>
+          <span className="text-slate-400">
+            {t("yallaAdmin.portal.realtime.dbPool", "DB pool")}:
+          </span>
           <span className="text-white font-medium">
-            {system.env.databasePoolSize} connections
+            {t(
+              "yallaAdmin.portal.realtime.connections",
+              "{count} connections"
+            ).replace("{count}", String(system.env.databasePoolSize))}
           </span>
         </div>
       </div>
@@ -2679,28 +2738,43 @@ function RealtimeTab({
                 <span
                   className={`w-2 h-2 rounded-full ${sseConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`}
                 />
-                {sseConnected ? "Connected" : "Reconnecting"}
+                {sseConnected
+                  ? t("yallaAdmin.portal.realtime.connected", "Connected")
+                  : t(
+                      "yallaAdmin.portal.realtime.reconnecting",
+                      "Reconnecting"
+                    )}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Database</span>
+              <span className="text-slate-400">
+                {t("yallaAdmin.portal.realtime.database", "Database")}
+              </span>
               <span
                 className={`font-medium ${realtime?.dbStatus === "healthy" ? "text-emerald-400" : "text-red-400"}`}
               >
-                {realtime?.dbStatus ?? "unknown"}
+                {realtime?.dbStatus ??
+                  t("yallaAdmin.portal.realtime.unknown", "unknown")}
               </span>
             </div>
             {system && (
               <>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-400">Server uptime</span>
+                  <span className="text-slate-400">
+                    {t(
+                      "yallaAdmin.portal.realtime.serverUptime",
+                      "Server uptime"
+                    )}
+                  </span>
                   <span className="text-white font-medium">
                     {system.uptimeFormatted}
                   </span>
                 </div>
                 <div>
                   <div className="flex items-center justify-between text-sm mb-1.5">
-                    <span className="text-slate-400">Heap usage</span>
+                    <span className="text-slate-400">
+                      {t("yallaAdmin.portal.realtime.heapUsage", "Heap usage")}
+                    </span>
                     <span className="text-white font-medium text-xs">
                       {system.memory.heapUsed} / {system.memory.heapTotal} MB (
                       {Math.round(
@@ -2719,7 +2793,9 @@ function RealtimeTab({
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-400">Redis</span>
+                  <span className="text-slate-400">
+                    {t("yallaAdmin.portal.realtime.redis", "Redis")}
+                  </span>
                   <span
                     className={
                       system.env.redisConfigured
@@ -2728,14 +2804,22 @@ function RealtimeTab({
                     }
                   >
                     {system.env.redisConfigured
-                      ? "Configured"
-                      : "Not configured"}
+                      ? t("yallaAdmin.portal.realtime.configured", "Configured")
+                      : t(
+                          "yallaAdmin.portal.realtime.notConfigured",
+                          "Not configured"
+                        )}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-400">DB pool</span>
+                  <span className="text-slate-400">
+                    {t("yallaAdmin.portal.realtime.dbPool", "DB pool")}
+                  </span>
                   <span className="text-white font-medium">
-                    {system.env.databasePoolSize} connections
+                    {t(
+                      "yallaAdmin.portal.realtime.connections",
+                      "{count} connections"
+                    ).replace("{count}", String(system.env.databasePoolSize))}
                   </span>
                 </div>
               </>
@@ -2745,16 +2829,25 @@ function RealtimeTab({
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 flex flex-col">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-white">
-              Live Event Stream
+              {t(
+                "yallaAdmin.portal.realtime.liveEventStream",
+                "Live Event Stream"
+              )}
             </h3>
             <span className="text-xs text-slate-600">
-              {liveEvents.length} captured
+              {t(
+                "yallaAdmin.portal.realtime.captured",
+                "{count} captured"
+              ).replace("{count}", String(liveEvents.length))}
             </span>
           </div>
           <div className="flex-1 space-y-0 overflow-y-auto max-h-72 pr-1">
             {liveEvents.length === 0 ? (
               <p className="text-xs text-slate-600 py-6 text-center">
-                Waiting for platform activity…
+                {t(
+                  "yallaAdmin.portal.realtime.waitingActivity",
+                  "Waiting for platform activity…"
+                )}
               </p>
             ) : (
               liveEvents.map(ev => (

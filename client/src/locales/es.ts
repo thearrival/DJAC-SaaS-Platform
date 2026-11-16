@@ -4139,5 +4139,37 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.realtime.infrastructureStatus":
     "Estado de la infraestructura",
   "yallaAdmin.portal.realtime.sseStream": "Flujo SSE",
+  "yallaAdmin.portal.subscriptions.allSubscriptions":
+    "Todas las suscripciones ({count})",
+  "yallaAdmin.portal.subscriptions.col.organization": "Organización",
+  "yallaAdmin.portal.subscriptions.col.interval": "Intervalo",
+  "yallaAdmin.portal.subscriptions.col.amount": "Monto",
+  "yallaAdmin.portal.subscriptions.col.periodEnd": "Fin del período",
+  "yallaAdmin.portal.subscriptions.col.created": "Creado",
+  "yallaAdmin.portal.realtime.connected": "Conectado",
+  "yallaAdmin.portal.realtime.database": "Base de datos",
+  "yallaAdmin.portal.realtime.unknown": "desconocido",
+  "yallaAdmin.portal.realtime.serverUptime": "Tiempo activo del servidor",
+  "yallaAdmin.portal.realtime.heapUsage": "Uso de heap",
+  "yallaAdmin.portal.realtime.redis": "Redis",
+  "yallaAdmin.portal.realtime.configured": "Configurado",
+  "yallaAdmin.portal.realtime.notConfigured": "No configurado",
+  "yallaAdmin.portal.realtime.dbPool": "Pool de BD",
+  "yallaAdmin.portal.realtime.connections": "{count} conexiones",
+  "yallaAdmin.portal.realtime.liveEventStream": "Flujo de eventos en vivo",
+  "yallaAdmin.portal.realtime.captured": "{count} capturados",
+  "yallaAdmin.portal.realtime.waitingActivity":
+    "Esperando actividad de la plataforma…",
+  "yallaAdmin.portal.userDetail.title": "Detalle de usuario",
+  "yallaAdmin.portal.userDetail.loadFailed": "Error al cargar",
+  "yallaAdmin.portal.userDetail.suspended": "Usuario suspendido.",
+  "yallaAdmin.portal.userDetail.unsuspended": "Usuario reactivado.",
+  "yallaAdmin.portal.userDetail.actionFailed": "Acción fallida",
+  "yallaAdmin.portal.userDetail.sessionsRevoked":
+    "Todas las sesiones revocadas.",
+  "yallaAdmin.portal.org.unsuspending": "Reactivando…",
+  "yallaAdmin.portal.org.unsuspend": "Reactivar organización",
+  "yallaAdmin.portal.org.suspending": "Suspendiendo…",
+  "yallaAdmin.portal.org.suspend": "Suspender organización",
 };
 export default messages;
