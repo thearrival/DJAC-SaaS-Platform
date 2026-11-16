@@ -4225,5 +4225,7 @@ const messages: Record<string, string> = {
     "الإجراءات المتخذة داخل بوابة المالك المعزولة نفسها.",
   "yallaAdmin.portal.desc.realtime":
     "مقاييس المنصة المباشرة: الجلسات النشطة والإجراءات الأخيرة والمستخدمون الجدد وبث الأحداث في الوقت الفعلي.",
+  "yallaAdmin.portal.tab.users": "المستخدمون النشطون",
+  "yallaAdmin.portal.tab.subsBilling": "الاشتراكات والفوترة",
 };
 export default messages;

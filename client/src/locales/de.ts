@@ -4455,5 +4455,7 @@ const messages: Record<string, string> = {
     "Aktionen, die im isolierten Eigentümerportal selbst ausgeführt wurden.",
   "yallaAdmin.portal.desc.realtime":
     "Live-Plattformmetriken: aktive Sitzungen, letzte Aktionen, neue Nutzer und Echtzeit-Ereignisstream.",
+  "yallaAdmin.portal.tab.users": "Aktive Nutzer",
+  "yallaAdmin.portal.tab.subsBilling": "Abonnements & Abrechnung",
 };
 export default messages;

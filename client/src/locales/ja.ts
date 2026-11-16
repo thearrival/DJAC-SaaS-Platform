@@ -4354,5 +4354,7 @@ const messages: Record<string, string> = {
     "分離されたオーナーポータル内で実行された操作。",
   "yallaAdmin.portal.desc.realtime":
     "ライブプラットフォーム指標：アクティブセッション、最近の操作、新規ユーザー、リアルタイムイベントストリーム。",
+  "yallaAdmin.portal.tab.users": "アクティブユーザー",
+  "yallaAdmin.portal.tab.subsBilling": "サブスクリプションと請求",
 };
 export default messages;

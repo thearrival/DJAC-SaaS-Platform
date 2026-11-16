@@ -3487,19 +3487,37 @@ export default function YallaAdminPortal() {
                 <h2 className="text-xl font-bold text-white">
                   {
                     {
-                      overview: "Overview",
-                      signups: "Signups",
-                      users: "Active Users",
-                      orgs: "Organizations",
-                      subscriptions: "Subscriptions & Billing",
-                      intake: "Intake",
-                      onboarding: "Onboarding",
-                      interactions: "Interactions",
-                      platformAudit: "Platform Audit",
-                      validation: "Validations",
-                      system: "System",
-                      audit: "Admin Audit",
-                      realtime: "Live Monitor",
+                      overview: t("yallaAdmin.portal.tab.overview", "Overview"),
+                      signups: t("yallaAdmin.portal.tab.signups", "Signups"),
+                      users: t("yallaAdmin.portal.tab.users", "Active Users"),
+                      orgs: t("yallaAdmin.portal.tab.orgs", "Organizations"),
+                      subscriptions: t(
+                        "yallaAdmin.portal.tab.subsBilling",
+                        "Subscriptions & Billing"
+                      ),
+                      intake: t("yallaAdmin.portal.tab.intake", "Intake"),
+                      onboarding: t(
+                        "yallaAdmin.portal.tab.onboarding",
+                        "Onboarding"
+                      ),
+                      interactions: t(
+                        "yallaAdmin.portal.tab.interactions",
+                        "Interactions"
+                      ),
+                      platformAudit: t(
+                        "yallaAdmin.portal.tab.platformAudit",
+                        "Platform Audit"
+                      ),
+                      validation: t(
+                        "yallaAdmin.portal.tab.validation",
+                        "Validations"
+                      ),
+                      system: t("yallaAdmin.portal.tab.system", "System"),
+                      audit: t("yallaAdmin.portal.tab.audit", "Admin Audit"),
+                      realtime: t(
+                        "yallaAdmin.portal.tab.realtime",
+                        "Live Monitor"
+                      ),
                     }[activeTab]
                   }
                 </h2>

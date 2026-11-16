@@ -4223,5 +4223,7 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.desc.audit": "격리된 소유자 포털 자체에서 수행된 작업.",
   "yallaAdmin.portal.desc.realtime":
     "라이브 플랫폼 지표: 활성 세션, 최근 작업, 신규 사용자 및 실시간 이벤트 스트림.",
+  "yallaAdmin.portal.tab.users": "활성 사용자",
+  "yallaAdmin.portal.tab.subsBilling": "구독 및 결제",
 };
 export default messages;

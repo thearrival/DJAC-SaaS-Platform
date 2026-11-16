@@ -4009,5 +4009,7 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.desc.audit": "在隔离的所有者门户内执行的操作。",
   "yallaAdmin.portal.desc.realtime":
     "实时平台指标：活跃会话、最近操作、新用户和实时事件流。",
+  "yallaAdmin.portal.tab.users": "活跃用户",
+  "yallaAdmin.portal.tab.subsBilling": "订阅与计费",
 };
 export default messages;
