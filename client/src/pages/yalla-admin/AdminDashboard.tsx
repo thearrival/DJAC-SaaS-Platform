@@ -581,14 +581,17 @@ export default function AdminDashboard() {
               onClick={() => navigate("/yalla-hack-owners-console")}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              &larr; Portal
+              &larr; {t("yallaAdmin.dashboard.backToPortal", "Portal")}
             </button>
             <h1 className="text-xl font-bold tracking-tight">
-              Admin Dashboard
+              {t("yallaAdmin.dashboard.title", "Admin Dashboard")}
             </h1>
           </div>
           <span className="text-xs text-muted-foreground">
-            Yalla Hack Management Console
+            {t(
+              "yallaAdmin.dashboard.subtitle",
+              "Yalla Hack Management Console"
+            )}
           </span>
         </div>
       </header>
@@ -607,22 +610,25 @@ export default function AdminDashboard() {
             {stats && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard
-                  label="Total Users"
+                  label={t("yallaAdmin.dashboard.totalUsers", "Total Users")}
                   value={stats.totalUsers}
                   color="text-foreground"
                 />
                 <StatCard
-                  label="Active"
+                  label={t("yallaAdmin.dashboard.active", "Active")}
                   value={stats.activeUsers}
                   color="text-emerald-600"
                 />
                 <StatCard
-                  label="New This Month"
+                  label={t(
+                    "yallaAdmin.dashboard.newThisMonth",
+                    "New This Month"
+                  )}
                   value={stats.newThisMonth}
                   color="text-blue-600"
                 />
                 <StatCard
-                  label="Suspended"
+                  label={t("yallaAdmin.dashboard.suspended", "Suspended")}
                   value={stats.suspendedUsers}
                   color="text-red-600"
                 />
@@ -632,19 +638,29 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5">
                 <h2 className="text-sm font-semibold mb-3">
-                  User Growth (12 Months)
+                  {t(
+                    "yallaAdmin.dashboard.userGrowth",
+                    "User Growth (12 Months)"
+                  )}
                 </h2>
                 <AreaChart data={registrations} />
               </div>
               <div className="rounded-xl border border-border bg-card p-5">
-                <h2 className="text-sm font-semibold mb-3">User Types</h2>
+                <h2 className="text-sm font-semibold mb-3">
+                  {t("yallaAdmin.dashboard.userTypes", "User Types")}
+                </h2>
                 {stats && <PieChart data={stats.byRole} />}
               </div>
             </div>
 
             <div className="rounded-xl border border-border bg-card">
               <div className="p-5 border-b border-border flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-                <h2 className="text-sm font-semibold">All Registered Users</h2>
+                <h2 className="text-sm font-semibold">
+                  {t(
+                    "yallaAdmin.dashboard.allRegisteredUsers",
+                    "All Registered Users"
+                  )}
+                </h2>
                 <div className="flex gap-2 w-full sm:w-auto">
                   <input
                     type="text"
@@ -667,10 +683,18 @@ export default function AdminDashboard() {
                     }}
                     className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="pending">Pending</option>
+                    <option value="">
+                      {t("yallaAdmin.dashboard.allStatus", "All Status")}
+                    </option>
+                    <option value="active">
+                      {t("yallaAdmin.dashboard.active", "Active")}
+                    </option>
+                    <option value="suspended">
+                      {t("yallaAdmin.dashboard.suspended", "Suspended")}
+                    </option>
+                    <option value="pending">
+                      {t("yallaAdmin.dashboard.statusPending", "Pending")}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -680,22 +704,22 @@ export default function AdminDashboard() {
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                        User
+                        {t("yallaAdmin.dashboard.col.user", "User")}
                       </th>
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">
-                        Contact
+                        {t("yallaAdmin.dashboard.col.contact", "Contact")}
                       </th>
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                        Role
+                        {t("yallaAdmin.dashboard.col.role", "Role")}
                       </th>
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                        Status
+                        {t("yallaAdmin.dashboard.col.status", "Status")}
                       </th>
                       <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">
-                        Joined
+                        {t("yallaAdmin.dashboard.col.joined", "Joined")}
                       </th>
                       <th className="text-right px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                        Actions
+                        {t("yallaAdmin.dashboard.col.actions", "Actions")}
                       </th>
                     </tr>
                   </thead>
@@ -706,7 +730,10 @@ export default function AdminDashboard() {
                           colSpan={6}
                           className="text-center py-12 text-muted-foreground text-sm"
                         >
-                          No users found
+                          {t(
+                            "yallaAdmin.dashboard.noUsersFound",
+                            "No users found"
+                          )}
                         </td>
                       </tr>
                     ) : (
@@ -725,16 +752,25 @@ export default function AdminDashboard() {
                               </div>
                               <div>
                                 <p className="font-medium text-sm hover:text-primary transition-colors">
-                                  {u.name ?? "Unknown"}
+                                  {u.name ??
+                                    t(
+                                      "yallaAdmin.dashboard.unknown",
+                                      "Unknown"
+                                    )}
                                 </p>
                                 <p className="text-xs text-muted-foreground capitalize">
-                                  {u.source} · {u.companyName ?? "—"}
+                                  {u.source} •{" "}
+                                  {u.companyName ??
+                                    t("yallaAdmin.common.notAvailable", "—")}
                                 </p>
                               </div>
                             </button>
                           </td>
                           <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
-                            <p className="text-xs">{u.email ?? "—"}</p>
+                            <p className="text-xs">
+                              {u.email ??
+                                t("yallaAdmin.common.notAvailable", "—")}
+                            </p>
                             <p className="text-xs">{u.phoneNumber ?? ""}</p>
                           </td>
                           <td className="px-4 py-3">
@@ -755,17 +791,25 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() => openUserDetail(u.id)}
                                 className="px-2 py-1 text-xs rounded-md hover:bg-muted transition-colors"
-                                title="View details"
+                                title={t(
+                                  "yallaAdmin.dashboard.viewDetails",
+                                  "View details"
+                                )}
                               >
-                                View
+                                {t("yallaAdmin.dashboard.view", "View")}
                               </button>
                               <button
                                 onClick={() => handleDelete(u.id)}
                                 disabled={deleting === u.id}
                                 className="px-2 py-1 text-xs rounded-md hover:bg-red-500/10 hover:text-red-600 transition-colors disabled:opacity-50"
-                                title="Delete user"
+                                title={t(
+                                  "yallaAdmin.dashboard.deleteUser",
+                                  "Delete user"
+                                )}
                               >
-                                {deleting === u.id ? "..." : "Delete"}
+                                {deleting === u.id
+                                  ? "..."
+                                  : t("yallaAdmin.dashboard.delete", "Delete")}
                               </button>
                             </div>
                           </td>
@@ -788,14 +832,14 @@ export default function AdminDashboard() {
                       onClick={() => setPage(p => p - 1)}
                       className="px-3 py-1 text-xs rounded-md border border-border hover:bg-muted disabled:opacity-30 transition-colors"
                     >
-                      Previous
+                      {t("yallaAdmin.dashboard.previous", "Previous")}
                     </button>
                     <button
                       disabled={page >= totalPages - 1}
                       onClick={() => setPage(p => p + 1)}
                       className="px-3 py-1 text-xs rounded-md border border-border hover:bg-muted disabled:opacity-30 transition-colors"
                     >
-                      Next
+                      {t("yallaAdmin.dashboard.next", "Next")}
                     </button>
                   </div>
                 </div>
@@ -804,11 +848,17 @@ export default function AdminDashboard() {
 
             <div className="rounded-xl border border-border bg-card p-5">
               <h2 className="text-sm font-semibold mb-4">
-                Recent Platform Activity
+                {t(
+                  "yallaAdmin.dashboard.recentActivity",
+                  "Recent Platform Activity"
+                )}
               </h2>
               {activity.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No recent activity
+                  {t(
+                    "yallaAdmin.dashboard.noRecentActivity",
+                    "No recent activity"
+                  )}
                 </p>
               ) : (
                 <div className="space-y-1 max-h-80 overflow-y-auto">
@@ -823,7 +873,8 @@ export default function AdminDashboard() {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs">
                           <span className="font-medium">
-                            {a.userName ?? "System"}
+                            {a.userName ??
+                              t("yallaAdmin.dashboard.system", "System")}
                           </span>
                           <span className="text-muted-foreground">
                             {" "}
@@ -832,7 +883,8 @@ export default function AdminDashboard() {
                           {a.target && (
                             <span className="text-muted-foreground">
                               {" "}
-                              on <span className="font-medium">{a.target}</span>
+                              {t("yallaAdmin.dashboard.on", "on")}{" "}
+                              <span className="font-medium">{a.target}</span>
                             </span>
                           )}
                         </p>
