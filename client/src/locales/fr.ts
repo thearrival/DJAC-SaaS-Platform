@@ -4210,5 +4210,38 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.unsuspend": "Réactiver l'organisation",
   "yallaAdmin.portal.org.suspending": "Suspension…",
   "yallaAdmin.portal.org.suspend": "Suspendre l'organisation",
+  "yallaAdmin.portal.userDetail.organization": "Organisation",
+  "yallaAdmin.portal.userDetail.plan": "Forfait",
+  "yallaAdmin.portal.userDetail.registered": "Inscrit",
+  "yallaAdmin.portal.userDetail.lastLogin": "Dernière connexion",
+  "yallaAdmin.portal.userDetail.emailVerified": "E-mail vérifié",
+  "yallaAdmin.portal.userDetail.mfa": "MFA",
+  "yallaAdmin.portal.userDetail.yes": "Oui",
+  "yallaAdmin.portal.userDetail.no": "Non",
+  "yallaAdmin.portal.userDetail.enabled": "Activé",
+  "yallaAdmin.portal.userDetail.disabled": "Désactivé",
+  "yallaAdmin.portal.userDetail.suspendedBadge": "SUSPENDU",
+  "yallaAdmin.portal.userDetail.unsuspendUser": "Réactiver l'utilisateur",
+  "yallaAdmin.portal.userDetail.suspendUser": "Suspendre l'utilisateur",
+  "yallaAdmin.portal.userDetail.revoking": "Révocation…",
+  "yallaAdmin.portal.userDetail.revokeAllSessions":
+    "Révoquer toutes les sessions",
+  "yallaAdmin.portal.userDetail.sessions": "Sessions ({count})",
+  "yallaAdmin.portal.userDetail.noSessions": "Aucune session enregistrée.",
+  "yallaAdmin.portal.userDetail.unknownUA": "UA inconnu",
+  "yallaAdmin.portal.userDetail.recentAuditTrail":
+    "Piste d'audit récente ({count})",
+  "yallaAdmin.portal.userDetail.noAuditEvents": "Aucun événement d'audit.",
+  "yallaAdmin.portal.userDetail.recentInteractions":
+    "Interactions récentes ({count})",
+  "yallaAdmin.portal.userDetail.noInteractions":
+    "Aucune interaction enregistrée.",
+  "yallaAdmin.portal.org.noContactEmail": "Aucun e-mail de contact",
+  "yallaAdmin.portal.org.inactiveBadge": "INACTIF",
+  "yallaAdmin.portal.org.created": "Créé :",
+  "yallaAdmin.portal.org.updated": "Mis à jour :",
+  "yallaAdmin.portal.org.trialEnds": "Fin d'essai :",
+  "yallaAdmin.portal.org.billingEmail": "E-mail de facturation :",
+  "yallaAdmin.portal.common.never": "Jamais",
 };
 export default messages;

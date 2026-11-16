@@ -590,7 +590,10 @@ function UserDetailModal({
                     <Badge value={detail.user.role} />
                     {detail.user.status === "suspended" && (
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
-                        SUSPENDED
+                        {t(
+                          "yallaAdmin.portal.userDetail.suspendedBadge",
+                          "SUSPENDED"
+                        )}
                       </span>
                     )}
                   </div>
@@ -604,13 +607,18 @@ function UserDetailModal({
                   <span className="text-white">
                     {detail.user.organizationPlan ?? "—"}
                   </span>
-                  <span className="text-slate-500">Registered:</span>
+                  <span className="text-slate-500">
+                    {t("yallaAdmin.portal.userDetail.registered", "Registered")}
+                    :
+                  </span>
                   <span className="text-white">
                     {new Date(detail.user.createdAt).toLocaleString(
                       storedLocaleTag()
                     )}
                   </span>
-                  <span className="text-slate-500">Last Login:</span>
+                  <span className="text-slate-500">
+                    {t("yallaAdmin.portal.userDetail.lastLogin", "Last Login")}:
+                  </span>
                   <span className="text-white">
                     {detail.user.lastLoginAt
                       ? new Date(detail.user.lastLoginAt).toLocaleString(
@@ -618,7 +626,13 @@ function UserDetailModal({
                         )
                       : t("yallaAdmin.portal.common.never", "Never")}
                   </span>
-                  <span className="text-slate-500">Email Verified:</span>
+                  <span className="text-slate-500">
+                    {t(
+                      "yallaAdmin.portal.userDetail.emailVerified",
+                      "Email Verified"
+                    )}
+                    :
+                  </span>
                   <span
                     className={
                       detail.user.isEmailVerified
@@ -626,9 +640,13 @@ function UserDetailModal({
                         : "text-red-400"
                     }
                   >
-                    {detail.user.isEmailVerified ? "Yes" : "No"}
+                    {detail.user.isEmailVerified
+                      ? t("yallaAdmin.portal.userDetail.yes", "Yes")
+                      : t("yallaAdmin.portal.userDetail.no", "No")}
                   </span>
-                  <span className="text-slate-500">MFA:</span>
+                  <span className="text-slate-500">
+                    {t("yallaAdmin.portal.userDetail.mfa", "MFA")}:
+                  </span>
                   <span
                     className={
                       detail.user.isMfaEnabled
@@ -636,7 +654,9 @@ function UserDetailModal({
                         : "text-slate-500"
                     }
                   >
-                    {detail.user.isMfaEnabled ? "Enabled" : "Disabled"}
+                    {detail.user.isMfaEnabled
+                      ? t("yallaAdmin.portal.userDetail.enabled", "Enabled")
+                      : t("yallaAdmin.portal.userDetail.disabled", "Disabled")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 pt-3 border-t border-slate-700/40">
@@ -647,8 +667,14 @@ function UserDetailModal({
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 disabled:opacity-50 transition"
                     >
                       {actionLoading === "unsuspend"
-                        ? "Unsuspending…"
-                        : "Unsuspend User"}
+                        ? t(
+                            "yallaAdmin.portal.org.unsuspending",
+                            "Unsuspending…"
+                          )
+                        : t(
+                            "yallaAdmin.portal.userDetail.unsuspendUser",
+                            "Unsuspend User"
+                          )}
                     </button>
                   ) : (
                     <button
@@ -657,8 +683,11 @@ function UserDetailModal({
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 disabled:opacity-50 transition"
                     >
                       {actionLoading === "suspend"
-                        ? "Suspending…"
-                        : "Suspend User"}
+                        ? t("yallaAdmin.portal.org.suspending", "Suspending…")
+                        : t(
+                            "yallaAdmin.portal.userDetail.suspendUser",
+                            "Suspend User"
+                          )}
                     </button>
                   )}
                   <button
@@ -679,12 +708,18 @@ function UserDetailModal({
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                  Sessions ({detail.sessions.length})
+                  {t(
+                    "yallaAdmin.portal.userDetail.sessions",
+                    "Sessions ({count})"
+                  ).replace("{count}", String(detail.sessions.length))}
                 </p>
                 <div className="space-y-2">
                   {detail.sessions.length === 0 && (
                     <p className="text-slate-600 text-xs">
-                      No sessions recorded.
+                      {t(
+                        "yallaAdmin.portal.userDetail.noSessions",
+                        "No sessions recorded."
+                      )}
                     </p>
                   )}
                   {detail.sessions.map(s => (
@@ -696,7 +731,11 @@ function UserDetailModal({
                         {s.ipAddress}
                       </p>
                       <p className="text-slate-500 mt-0.5 truncate">
-                        {s.userAgent ?? "Unknown UA"}
+                        {s.userAgent ??
+                          t(
+                            "yallaAdmin.portal.userDetail.unknownUA",
+                            "Unknown UA"
+                          )}
                       </p>
                       <p className="text-slate-600 mt-0.5">
                         {new Date(s.createdAt).toLocaleString(
@@ -713,11 +752,19 @@ function UserDetailModal({
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                  Recent Audit Trail ({detail.auditTrail.length})
+                  {t(
+                    "yallaAdmin.portal.userDetail.recentAuditTrail",
+                    "Recent Audit Trail ({count})"
+                  ).replace("{count}", String(detail.auditTrail.length))}
                 </p>
                 <div className="space-y-1">
                   {detail.auditTrail.length === 0 && (
-                    <p className="text-slate-600 text-xs">No audit events.</p>
+                    <p className="text-slate-600 text-xs">
+                      {t(
+                        "yallaAdmin.portal.userDetail.noAuditEvents",
+                        "No audit events."
+                      )}
+                    </p>
                   )}
                   {detail.auditTrail.map((a, i) => (
                     <div
@@ -739,12 +786,18 @@ function UserDetailModal({
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                  Recent Interactions ({detail.interactions.length})
+                  {t(
+                    "yallaAdmin.portal.userDetail.recentInteractions",
+                    "Recent Interactions ({count})"
+                  ).replace("{count}", String(detail.interactions.length))}
                 </p>
                 <div className="space-y-1">
                   {detail.interactions.length === 0 && (
                     <p className="text-slate-600 text-xs">
-                      No interactions recorded.
+                      {t(
+                        "yallaAdmin.portal.userDetail.noInteractions",
+                        "No interactions recorded."
+                      )}
                     </p>
                   )}
                   {detail.interactions.map((ia, i) => (
@@ -886,37 +939,50 @@ function OrganizationDetailModal({
                       {detail.org.name}
                     </p>
                     <p className="text-slate-500 text-xs">
-                      {detail.org.contactEmail ?? "No contact email"}
+                      {detail.org.contactEmail ??
+                        t(
+                          "yallaAdmin.portal.org.noContactEmail",
+                          "No contact email"
+                        )}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge value={detail.org.plan} />
                     {detail.org.status === "suspended" && (
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
-                        SUSPENDED
+                        {t(
+                          "yallaAdmin.portal.userDetail.suspendedBadge",
+                          "SUSPENDED"
+                        )}
                       </span>
                     )}
                     {!detail.org.isActive && (
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                        INACTIVE
+                        {t("yallaAdmin.portal.org.inactiveBadge", "INACTIVE")}
                       </span>
                     )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs pt-2">
-                  <span className="text-slate-500">Created:</span>
+                  <span className="text-slate-500">
+                    {t("yallaAdmin.portal.org.created", "Created:")}
+                  </span>
                   <span className="text-white">
                     {new Date(detail.org.createdAt).toLocaleString(
                       storedLocaleTag()
                     )}
                   </span>
-                  <span className="text-slate-500">Updated:</span>
+                  <span className="text-slate-500">
+                    {t("yallaAdmin.portal.org.updated", "Updated:")}
+                  </span>
                   <span className="text-white">
                     {new Date(detail.org.updatedAt).toLocaleString(
                       storedLocaleTag()
                     )}
                   </span>
-                  <span className="text-slate-500">Trial Ends:</span>
+                  <span className="text-slate-500">
+                    {t("yallaAdmin.portal.org.trialEnds", "Trial Ends:")}
+                  </span>
                   <span className="text-white">
                     {detail.org.trialEndsAt
                       ? new Date(detail.org.trialEndsAt).toLocaleDateString(
@@ -924,7 +990,9 @@ function OrganizationDetailModal({
                         )
                       : t("yallaAdmin.common.notAvailable", "—")}
                   </span>
-                  <span className="text-slate-500">Billing Email:</span>
+                  <span className="text-slate-500">
+                    {t("yallaAdmin.portal.org.billingEmail", "Billing Email:")}
+                  </span>
                   <span className="text-white truncate">
                     {detail.org.billingEmail ?? "—"}
                   </span>
@@ -1037,11 +1105,19 @@ function OrganizationDetailModal({
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                  Recent Audit Trail ({detail.auditTrail.length})
+                  {t(
+                    "yallaAdmin.portal.userDetail.recentAuditTrail",
+                    "Recent Audit Trail ({count})"
+                  ).replace("{count}", String(detail.auditTrail.length))}
                 </p>
                 <div className="space-y-1">
                   {detail.auditTrail.length === 0 && (
-                    <p className="text-slate-600 text-xs">No audit events.</p>
+                    <p className="text-slate-600 text-xs">
+                      {t(
+                        "yallaAdmin.portal.userDetail.noAuditEvents",
+                        "No audit events."
+                      )}
+                    </p>
                   )}
                   {detail.auditTrail.map((a, i) => (
                     <div

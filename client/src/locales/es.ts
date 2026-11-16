@@ -4171,5 +4171,38 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.unsuspend": "Reactivar organización",
   "yallaAdmin.portal.org.suspending": "Suspendiendo…",
   "yallaAdmin.portal.org.suspend": "Suspender organización",
+  "yallaAdmin.portal.userDetail.organization": "Organización",
+  "yallaAdmin.portal.userDetail.plan": "Plan",
+  "yallaAdmin.portal.userDetail.registered": "Registrado",
+  "yallaAdmin.portal.userDetail.lastLogin": "Último acceso",
+  "yallaAdmin.portal.userDetail.emailVerified": "Correo verificado",
+  "yallaAdmin.portal.userDetail.mfa": "MFA",
+  "yallaAdmin.portal.userDetail.yes": "Sí",
+  "yallaAdmin.portal.userDetail.no": "No",
+  "yallaAdmin.portal.userDetail.enabled": "Activado",
+  "yallaAdmin.portal.userDetail.disabled": "Desactivado",
+  "yallaAdmin.portal.userDetail.suspendedBadge": "SUSPENDIDO",
+  "yallaAdmin.portal.userDetail.unsuspendUser": "Reactivar usuario",
+  "yallaAdmin.portal.userDetail.suspendUser": "Suspender usuario",
+  "yallaAdmin.portal.userDetail.revoking": "Revocando…",
+  "yallaAdmin.portal.userDetail.revokeAllSessions":
+    "Revocar todas las sesiones",
+  "yallaAdmin.portal.userDetail.sessions": "Sesiones ({count})",
+  "yallaAdmin.portal.userDetail.noSessions": "No hay sesiones registradas.",
+  "yallaAdmin.portal.userDetail.unknownUA": "UA desconocido",
+  "yallaAdmin.portal.userDetail.recentAuditTrail":
+    "Registro de auditoría reciente ({count})",
+  "yallaAdmin.portal.userDetail.noAuditEvents": "No hay eventos de auditoría.",
+  "yallaAdmin.portal.userDetail.recentInteractions":
+    "Interacciones recientes ({count})",
+  "yallaAdmin.portal.userDetail.noInteractions":
+    "No hay interacciones registradas.",
+  "yallaAdmin.portal.org.noContactEmail": "Sin correo de contacto",
+  "yallaAdmin.portal.org.inactiveBadge": "INACTIVO",
+  "yallaAdmin.portal.org.created": "Creado:",
+  "yallaAdmin.portal.org.updated": "Actualizado:",
+  "yallaAdmin.portal.org.trialEnds": "Fin de prueba:",
+  "yallaAdmin.portal.org.billingEmail": "Correo de facturación:",
+  "yallaAdmin.portal.common.never": "Nunca",
 };
 export default messages;
