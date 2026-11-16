@@ -4011,5 +4011,7 @@ const messages: Record<string, string> = {
     "实时平台指标：活跃会话、最近操作、新用户和实时事件流。",
   "yallaAdmin.portal.tab.users": "活跃用户",
   "yallaAdmin.portal.tab.subsBilling": "订阅与计费",
+  "yallaAdmin.common.unknownOrg": "未知组织",
+  "yallaAdmin.common.unknownUser": "未知用户",
 };
 export default messages;

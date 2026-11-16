@@ -1763,7 +1763,7 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
                       {row.fullName}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
-                      {row.organizationName} · {row.email}
+                      {row.organizationName} • {row.email}
                     </p>
                   </div>
                   <Badge value={row.status} />
@@ -1802,7 +1802,7 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
                       {row.topic}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
-                      {row.contactName} · {row.organizationName}
+                      {row.contactName} • {row.organizationName}
                     </p>
                   </div>
                   <Badge value={row.status} />

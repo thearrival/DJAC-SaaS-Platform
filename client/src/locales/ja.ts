@@ -4356,5 +4356,7 @@ const messages: Record<string, string> = {
     "ライブプラットフォーム指標：アクティブセッション、最近の操作、新規ユーザー、リアルタイムイベントストリーム。",
   "yallaAdmin.portal.tab.users": "アクティブユーザー",
   "yallaAdmin.portal.tab.subsBilling": "サブスクリプションと請求",
+  "yallaAdmin.common.unknownOrg": "不明な組織",
+  "yallaAdmin.common.unknownUser": "不明なユーザー",
 };
 export default messages;

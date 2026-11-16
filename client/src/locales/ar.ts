@@ -4227,5 +4227,7 @@ const messages: Record<string, string> = {
     "مقاييس المنصة المباشرة: الجلسات النشطة والإجراءات الأخيرة والمستخدمون الجدد وبث الأحداث في الوقت الفعلي.",
   "yallaAdmin.portal.tab.users": "المستخدمون النشطون",
   "yallaAdmin.portal.tab.subsBilling": "الاشتراكات والفوترة",
+  "yallaAdmin.common.unknownOrg": "مؤسسة غير معروفة",
+  "yallaAdmin.common.unknownUser": "مستخدم غير معروف",
 };
 export default messages;

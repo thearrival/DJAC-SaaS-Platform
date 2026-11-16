@@ -4457,5 +4457,7 @@ const messages: Record<string, string> = {
     "Live-Plattformmetriken: aktive Sitzungen, letzte Aktionen, neue Nutzer und Echtzeit-Ereignisstream.",
   "yallaAdmin.portal.tab.users": "Aktive Nutzer",
   "yallaAdmin.portal.tab.subsBilling": "Abonnements & Abrechnung",
+  "yallaAdmin.common.unknownOrg": "Unbekannte Organisation",
+  "yallaAdmin.common.unknownUser": "Unbekannter Benutzer",
 };
 export default messages;

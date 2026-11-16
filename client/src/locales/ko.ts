@@ -4225,5 +4225,7 @@ const messages: Record<string, string> = {
     "라이브 플랫폼 지표: 활성 세션, 최근 작업, 신규 사용자 및 실시간 이벤트 스트림.",
   "yallaAdmin.portal.tab.users": "활성 사용자",
   "yallaAdmin.portal.tab.subsBilling": "구독 및 결제",
+  "yallaAdmin.common.unknownOrg": "알 수 없는 조직",
+  "yallaAdmin.common.unknownUser": "알 수 없는 사용자",
 };
 export default messages;
