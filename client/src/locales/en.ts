@@ -3943,5 +3943,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.system.tables": "{count} tables",
   "yallaAdmin.portal.system.memoryUsage": "Memory Usage",
   "yallaAdmin.portal.system.heap": "Heap",
+  "yallaAdmin.portal.interactions.intro":
+    "{count} recent interaction records with sanitized user input snapshots.",
+  "yallaAdmin.portal.interactions.noEmail": "no email",
+  "yallaAdmin.portal.interactions.noOrg": "No org",
+  "yallaAdmin.portal.interactions.inputSnapshot": "Input Snapshot",
+  "yallaAdmin.portal.interactions.outputReference": "Output Reference",
+  "yallaAdmin.portal.platformAudit.payload": "Payload",
+  "yallaAdmin.portal.validation.intro":
+    "Recent blocked requests, validation failures, and request errors recorded at the platform boundary.",
+  "yallaAdmin.portal.validation.unknownTarget": "unknown target",
+  "yallaAdmin.portal.validation.failureDetail": "Failure Detail",
 };
 export default messages;

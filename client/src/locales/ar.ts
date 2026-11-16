@@ -3878,5 +3878,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.system.tables": "{count} جداول",
   "yallaAdmin.portal.system.memoryUsage": "استخدام الذاكرة",
   "yallaAdmin.portal.system.heap": "الكومة",
+  "yallaAdmin.portal.interactions.intro":
+    "{count} سجلات تفاعل حديثة مع لقطات مدخلات مستخدم مُعقمة.",
+  "yallaAdmin.portal.interactions.noEmail": "لا يوجد بريد إلكتروني",
+  "yallaAdmin.portal.interactions.noOrg": "لا توجد مؤسسة",
+  "yallaAdmin.portal.interactions.inputSnapshot": "لقطة الإدخال",
+  "yallaAdmin.portal.interactions.outputReference": "مرجع الإخراج",
+  "yallaAdmin.portal.platformAudit.payload": "الحمولة",
+  "yallaAdmin.portal.validation.intro":
+    "الطلبات المحظورة الأخيرة وإخفاقات التحقق وأخطاء الطلبات المسجلة على حدود المنصة.",
+  "yallaAdmin.portal.validation.unknownTarget": "هدف غير معروف",
+  "yallaAdmin.portal.validation.failureDetail": "تفاصيل الفشل",
 };
 export default messages;

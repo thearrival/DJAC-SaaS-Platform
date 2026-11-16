@@ -4107,5 +4107,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.system.tables": "{count} tablas",
   "yallaAdmin.portal.system.memoryUsage": "Uso de memoria",
   "yallaAdmin.portal.system.heap": "Heap",
+  "yallaAdmin.portal.interactions.intro":
+    "{count} registros de interacción recientes con instantáneas de entrada de usuario saneadas.",
+  "yallaAdmin.portal.interactions.noEmail": "sin correo",
+  "yallaAdmin.portal.interactions.noOrg": "Sin org",
+  "yallaAdmin.portal.interactions.inputSnapshot": "Instantánea de entrada",
+  "yallaAdmin.portal.interactions.outputReference": "Referencia de salida",
+  "yallaAdmin.portal.platformAudit.payload": "Carga útil",
+  "yallaAdmin.portal.validation.intro":
+    "Solicitudes bloqueadas recientes, fallos de validación y errores registrados en el límite de la plataforma.",
+  "yallaAdmin.portal.validation.unknownTarget": "objetivo desconocido",
+  "yallaAdmin.portal.validation.failureDetail": "Detalle del fallo",
 };
 export default messages;

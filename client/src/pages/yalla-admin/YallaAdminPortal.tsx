@@ -890,7 +890,7 @@ function OrganizationDetailModal({
                       ? new Date(detail.org.trialEndsAt).toLocaleDateString(
                           storedLocaleTag()
                         )
-                      : "—"}
+                      : t("yallaAdmin.common.notAvailable", "—")}
                   </span>
                   <span className="text-slate-500">Billing Email:</span>
                   <span className="text-white truncate">
@@ -1700,11 +1700,14 @@ function OnboardingTab({ onboarding }: { onboarding: OnboardingData | null }) {
 }
 
 function InteractionsTab({ rows }: { rows: InteractionRow[] }) {
+  const { t } = useLocale();
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-400">
-        {rows.length} recent interaction records with sanitized user input
-        snapshots.
+        {t(
+          "yallaAdmin.portal.interactions.intro",
+          "{count} recent interaction records with sanitized user input snapshots."
+        ).replace("{count}", String(rows.length))}
       </p>
       <div className="space-y-3">
         {rows.map(row => (
@@ -1736,8 +1739,20 @@ function InteractionsTab({ rows }: { rows: InteractionRow[] }) {
               </div>
             </div>
             <div className="grid lg:grid-cols-2 gap-3">
-              <JsonPreview value={row.inputSnapshot} title="Input Snapshot" />
-              <JsonPreview value={row.outputRef} title="Output Reference" />
+              <JsonPreview
+                value={row.inputSnapshot}
+                title={t(
+                  "yallaAdmin.portal.interactions.inputSnapshot",
+                  "Input Snapshot"
+                )}
+              />
+              <JsonPreview
+                value={row.outputRef}
+                title={t(
+                  "yallaAdmin.portal.interactions.outputReference",
+                  "Output Reference"
+                )}
+              />
             </div>
           </div>
         ))}
@@ -1747,6 +1762,7 @@ function InteractionsTab({ rows }: { rows: InteractionRow[] }) {
 }
 
 function PlatformAuditTab({ logs }: { logs: PlatformAuditRow[] }) {
+  const { t } = useLocale();
   return (
     <div className="space-y-3">
       {logs.map(log => (
@@ -1770,7 +1786,10 @@ function PlatformAuditTab({ logs }: { logs: PlatformAuditRow[] }) {
               {new Date(log.createdAt).toLocaleString(storedLocaleTag())}
             </div>
           </div>
-          <JsonPreview value={log.payload} title="Payload" />
+          <JsonPreview
+            value={log.payload}
+            title={t("yallaAdmin.portal.platformAudit.payload", "Payload")}
+          />
         </div>
       ))}
     </div>
@@ -1778,11 +1797,14 @@ function PlatformAuditTab({ logs }: { logs: PlatformAuditRow[] }) {
 }
 
 function ValidationTab({ rows }: { rows: ValidationRow[] }) {
+  const { t } = useLocale();
   return (
     <div className="space-y-3">
       <p className="text-sm text-slate-400">
-        Recent blocked requests, validation failures, and request errors
-        recorded at the platform boundary.
+        {t(
+          "yallaAdmin.portal.validation.intro",
+          "Recent blocked requests, validation failures, and request errors recorded at the platform boundary."
+        )}
       </p>
       {rows.map(row => (
         <div
@@ -1797,14 +1819,25 @@ function ValidationTab({ rows }: { rows: ValidationRow[] }) {
                 {row.actorRole && <Badge value={row.actorRole} />}
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                {row.targetEntity ?? row.entityType ?? "unknown target"}
+                {row.targetEntity ??
+                  row.entityType ??
+                  t(
+                    "yallaAdmin.portal.validation.unknownTarget",
+                    "unknown target"
+                  )}
               </p>
             </div>
             <div className="text-xs text-slate-500">
               {new Date(row.createdAt).toLocaleString(storedLocaleTag())}
             </div>
           </div>
-          <JsonPreview value={row.payload} title="Failure Detail" />
+          <JsonPreview
+            value={row.payload}
+            title={t(
+              "yallaAdmin.portal.validation.failureDetail",
+              "Failure Detail"
+            )}
+          />
         </div>
       ))}
     </div>
@@ -2057,7 +2090,7 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
                       ? new Date(s.currentPeriodEnd).toLocaleDateString(
                           storedLocaleTag()
                         )
-                      : "—"}
+                      : t("yallaAdmin.common.notAvailable", "—")}
                   </td>
                   <td className="px-3 py-2 text-slate-400 text-xs">
                     {new Date(s.createdAt).toLocaleDateString(
@@ -2414,7 +2447,7 @@ function OrgsTab({
                     ? new Date(o.trialEndsAt).toLocaleDateString(
                         storedLocaleTag()
                       )
-                    : "—"}
+                    : t("yallaAdmin.common.notAvailable", "—")}
                 </td>
                 <td className="px-4 py-3 text-slate-400 text-xs">
                   {new Date(o.createdAt).toLocaleDateString(storedLocaleTag())}

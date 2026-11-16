@@ -3893,5 +3893,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.system.tables": "{count}개 테이블",
   "yallaAdmin.portal.system.memoryUsage": "메모리 사용량",
   "yallaAdmin.portal.system.heap": "힙",
+  "yallaAdmin.portal.interactions.intro":
+    "정제된 사용자 입력 스냅샷이 포함된 최근 상호작용 기록 {count}개.",
+  "yallaAdmin.portal.interactions.noEmail": "이메일 없음",
+  "yallaAdmin.portal.interactions.noOrg": "조직 없음",
+  "yallaAdmin.portal.interactions.inputSnapshot": "입력 스냅샷",
+  "yallaAdmin.portal.interactions.outputReference": "출력 참조",
+  "yallaAdmin.portal.platformAudit.payload": "페이로드",
+  "yallaAdmin.portal.validation.intro":
+    "플랫폼 경계에서 기록된 최근 차단 요청, 검증 실패 및 요청 오류.",
+  "yallaAdmin.portal.validation.unknownTarget": "알 수 없는 대상",
+  "yallaAdmin.portal.validation.failureDetail": "실패 상세",
 };
 export default messages;

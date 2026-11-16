@@ -3688,5 +3688,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.system.tables": "{count} 个表",
   "yallaAdmin.portal.system.memoryUsage": "内存使用",
   "yallaAdmin.portal.system.heap": "堆",
+  "yallaAdmin.portal.interactions.intro":
+    "{count} 条近期交互记录，包含脱敏的用户输入快照。",
+  "yallaAdmin.portal.interactions.noEmail": "无邮箱",
+  "yallaAdmin.portal.interactions.noOrg": "无组织",
+  "yallaAdmin.portal.interactions.inputSnapshot": "输入快照",
+  "yallaAdmin.portal.interactions.outputReference": "输出引用",
+  "yallaAdmin.portal.platformAudit.payload": "负载",
+  "yallaAdmin.portal.validation.intro":
+    "最近在平台边界记录的被阻止请求、验证失败和请求错误。",
+  "yallaAdmin.portal.validation.unknownTarget": "未知目标",
+  "yallaAdmin.portal.validation.failureDetail": "失败详情",
 };
 export default messages;

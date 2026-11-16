@@ -4005,5 +4005,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.system.tables": "{count} テーブル",
   "yallaAdmin.portal.system.memoryUsage": "メモリ使用量",
   "yallaAdmin.portal.system.heap": "ヒープ",
+  "yallaAdmin.portal.interactions.intro":
+    "サニタイズされたユーザー入力スナップショットを含む最近の対話記録 {count} 件。",
+  "yallaAdmin.portal.interactions.noEmail": "メールなし",
+  "yallaAdmin.portal.interactions.noOrg": "組織なし",
+  "yallaAdmin.portal.interactions.inputSnapshot": "入力スナップショット",
+  "yallaAdmin.portal.interactions.outputReference": "出力参照",
+  "yallaAdmin.portal.platformAudit.payload": "ペイロード",
+  "yallaAdmin.portal.validation.intro":
+    "プラットフォーム境界で記録された最近のブロック済みリクエスト、検証失敗、リクエストエラー。",
+  "yallaAdmin.portal.validation.unknownTarget": "不明な対象",
+  "yallaAdmin.portal.validation.failureDetail": "失敗の詳細",
 };
 export default messages;
