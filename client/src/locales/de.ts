@@ -4078,5 +4078,30 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.intake.unknownUser": "Unbekannter Benutzer",
   "yallaAdmin.portal.subscriptions.loading":
     "Abonnementdaten werden geladen...",
+  "yallaAdmin.portal.intake.consultationRequestsTitle": "Beratungsanfragen",
+  "yallaAdmin.portal.intake.noConsultationRequests":
+    "Noch keine Beratungsanfragen.",
+  "yallaAdmin.portal.intake.localeLabel": "Sprache:",
+  "yallaAdmin.portal.subscriptions.totalRevenuePool": "Gesamter Umsatzpool",
+  "yallaAdmin.portal.subscriptions.activeTrialing": "aktiv + Testphase",
+  "yallaAdmin.portal.subscriptions.active": "Aktiv",
+  "yallaAdmin.portal.subscriptions.livePaying": "aktive zahlende Abonnements",
+  "yallaAdmin.portal.subscriptions.trialing": "Testphase",
+  "yallaAdmin.portal.subscriptions.freeTrialAccounts": "kostenlose Testkonten",
+  "yallaAdmin.portal.subscriptions.canceled": "Gekündigt",
+  "yallaAdmin.portal.subscriptions.churn": "Abwanderung",
+  "yallaAdmin.portal.subscriptions.planStatusBreakdown":
+    "Plan × Status Aufschlüsselung",
+  "yallaAdmin.portal.subscriptions.col.plan": "Plan",
+  "yallaAdmin.portal.subscriptions.col.status": "Status",
+  "yallaAdmin.portal.subscriptions.col.count": "Anzahl",
+  "yallaAdmin.portal.subscriptions.col.totalValue": "Gesamtwert",
+  "yallaAdmin.portal.system.loading": "Systeminformationen werden geladen...",
+  "yallaAdmin.portal.system.process": "Prozess",
+  "yallaAdmin.portal.system.uptime": "Betriebszeit",
+  "yallaAdmin.portal.system.database": "Datenbank",
+  "yallaAdmin.portal.system.tables": "{count} Tabellen",
+  "yallaAdmin.portal.system.memoryUsage": "Speichernutzung",
+  "yallaAdmin.portal.system.heap": "Heap",
 };
 export default messages;

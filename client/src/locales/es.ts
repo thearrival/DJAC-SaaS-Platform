@@ -4080,5 +4080,32 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.intake.unknownOrg": "Organización desconocida",
   "yallaAdmin.portal.intake.unknownUser": "Usuario desconocido",
   "yallaAdmin.portal.subscriptions.loading": "Cargando datos de suscripción...",
+  "yallaAdmin.portal.intake.consultationRequestsTitle":
+    "Solicitudes de consulta",
+  "yallaAdmin.portal.intake.noConsultationRequests":
+    "Aún no hay solicitudes de consulta.",
+  "yallaAdmin.portal.intake.localeLabel": "Idioma:",
+  "yallaAdmin.portal.subscriptions.totalRevenuePool": "Pool total de ingresos",
+  "yallaAdmin.portal.subscriptions.activeTrialing": "activo + prueba",
+  "yallaAdmin.portal.subscriptions.active": "Activo",
+  "yallaAdmin.portal.subscriptions.livePaying": "suscripciones de pago activas",
+  "yallaAdmin.portal.subscriptions.trialing": "En prueba",
+  "yallaAdmin.portal.subscriptions.freeTrialAccounts":
+    "cuentas de prueba gratuitas",
+  "yallaAdmin.portal.subscriptions.canceled": "Cancelado",
+  "yallaAdmin.portal.subscriptions.churn": "baja",
+  "yallaAdmin.portal.subscriptions.planStatusBreakdown":
+    "Desglose plan × estado",
+  "yallaAdmin.portal.subscriptions.col.plan": "Plan",
+  "yallaAdmin.portal.subscriptions.col.status": "Estado",
+  "yallaAdmin.portal.subscriptions.col.count": "Cantidad",
+  "yallaAdmin.portal.subscriptions.col.totalValue": "Valor total",
+  "yallaAdmin.portal.system.loading": "Cargando información del sistema...",
+  "yallaAdmin.portal.system.process": "Proceso",
+  "yallaAdmin.portal.system.uptime": "Tiempo activo",
+  "yallaAdmin.portal.system.database": "Base de datos",
+  "yallaAdmin.portal.system.tables": "{count} tablas",
+  "yallaAdmin.portal.system.memoryUsage": "Uso de memoria",
+  "yallaAdmin.portal.system.heap": "Heap",
 };
 export default messages;

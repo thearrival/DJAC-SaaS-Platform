@@ -1577,7 +1577,8 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
                   <Badge value={row.status} />
                 </div>
                 <p className="text-xs text-slate-400 mt-2">
-                  Locale: {row.preferredLocale ?? "-"}
+                  {t("yallaAdmin.portal.intake.localeLabel", "Locale:")}{" "}
+                  {row.preferredLocale ?? "-"}
                 </p>
               </div>
             ))
@@ -1585,11 +1586,17 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
         </div>
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 space-y-3">
           <h3 className="text-sm font-semibold text-white">
-            Consultation requests
+            {t(
+              "yallaAdmin.portal.intake.consultationRequestsTitle",
+              "Consultation requests"
+            )}
           </h3>
           {intake.consultationRequests.length === 0 ? (
             <p className="text-slate-600 text-sm">
-              No consultation requests yet.
+              {t(
+                "yallaAdmin.portal.intake.noConsultationRequests",
+                "No consultation requests yet."
+              )}
             </p>
           ) : (
             intake.consultationRequests.map(row => (
@@ -1878,43 +1885,65 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Total Revenue Pool"
+          label={t(
+            "yallaAdmin.portal.subscriptions.totalRevenuePool",
+            "Total Revenue Pool"
+          )}
           value={`$${(totalMrr / 100).toLocaleString(storedLocaleTag(), { minimumFractionDigits: 2 })}`}
-          sub="active + trialing"
+          sub={t(
+            "yallaAdmin.portal.subscriptions.activeTrialing",
+            "active + trialing"
+          )}
         />
         <StatCard
-          label="Active"
+          label={t("yallaAdmin.portal.subscriptions.active", "Active")}
           value={activeCount}
-          sub="live paying subscriptions"
+          sub={t(
+            "yallaAdmin.portal.subscriptions.livePaying",
+            "live paying subscriptions"
+          )}
         />
         <StatCard
-          label="Trialing"
+          label={t("yallaAdmin.portal.subscriptions.trialing", "Trialing")}
           value={trialingCount}
-          sub="free trial accounts"
+          sub={t(
+            "yallaAdmin.portal.subscriptions.freeTrialAccounts",
+            "free trial accounts"
+          )}
         />
-        <StatCard label="Canceled" value={canceledCount} sub="churn" />
+        <StatCard
+          label={t("yallaAdmin.portal.subscriptions.canceled", "Canceled")}
+          value={canceledCount}
+          sub={t("yallaAdmin.portal.subscriptions.churn", "churn")}
+        />
       </div>
 
       {data.summary.length > 0 && (
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">
-            Plan × Status Breakdown
+            {t(
+              "yallaAdmin.portal.subscriptions.planStatusBreakdown",
+              "Plan × Status Breakdown"
+            )}
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-700/40">
                   <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Plan
+                    {t("yallaAdmin.portal.subscriptions.col.plan", "Plan")}
                   </th>
                   <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Status
+                    {t("yallaAdmin.portal.subscriptions.col.status", "Status")}
                   </th>
                   <th className="text-right px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Count
+                    {t("yallaAdmin.portal.subscriptions.col.count", "Count")}
                   </th>
                   <th className="text-right px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                    Total Value
+                    {t(
+                      "yallaAdmin.portal.subscriptions.col.totalValue",
+                      "Total Value"
+                    )}
                   </th>
                 </tr>
               </thead>
@@ -2082,10 +2111,11 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
 }
 
 function SystemTab({ system }: { system: SystemInfo | null }) {
+  const { t } = useLocale();
   if (!system)
     return (
       <div className="text-slate-500 text-sm p-8 text-center">
-        Loading system info...
+        {t("yallaAdmin.portal.system.loading", "Loading system info...")}
       </div>
     );
   const heapPct = Math.round(
@@ -2097,31 +2127,38 @@ function SystemTab({ system }: { system: SystemInfo | null }) {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
-            Process
+            {t("yallaAdmin.portal.system.process", "Process")}
           </p>
           <p className="text-2xl font-bold text-white mb-1">
             {system.uptimeFormatted}
           </p>
-          <p className="text-xs text-slate-500">Uptime</p>
+          <p className="text-xs text-slate-500">
+            {t("yallaAdmin.portal.system.uptime", "Uptime")}
+          </p>
         </div>
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
-            Database
+            {t("yallaAdmin.portal.system.database", "Database")}
           </p>
           <Badge value={system.db.status} />
           <p className="text-xs text-slate-500 mt-2">
-            {system.db.version} · {system.db.tableCount} tables
+            {system.db.version} ·{" "}
+            {t("yallaAdmin.portal.system.tables", "{count} tables").replace(
+              "{count}",
+              String(system.db.tableCount)
+            )}
           </p>
         </div>
       </div>
       <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5 space-y-3">
         <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          Memory Usage
+          {t("yallaAdmin.portal.system.memoryUsage", "Memory Usage")}
         </p>
         <div>
           <div className="flex justify-between text-xs text-slate-400 mb-1">
             <span>
-              Heap {system.memory.heapUsed} MB / {system.memory.heapTotal} MB
+              {t("yallaAdmin.portal.system.heap", "Heap")}{" "}
+              {system.memory.heapUsed} MB / {system.memory.heapTotal} MB
             </span>
             <span>{heapPct}%</span>
           </div>

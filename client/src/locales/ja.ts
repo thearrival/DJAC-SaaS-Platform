@@ -3979,5 +3979,31 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.intake.unknownUser": "不明なユーザー",
   "yallaAdmin.portal.subscriptions.loading":
     "サブスクリプションデータを読み込み中...",
+  "yallaAdmin.portal.intake.consultationRequestsTitle": "相談リクエスト",
+  "yallaAdmin.portal.intake.noConsultationRequests":
+    "相談リクエストはまだありません。",
+  "yallaAdmin.portal.intake.localeLabel": "ロケール:",
+  "yallaAdmin.portal.subscriptions.totalRevenuePool": "総収益プール",
+  "yallaAdmin.portal.subscriptions.activeTrialing": "アクティブ + トライアル",
+  "yallaAdmin.portal.subscriptions.active": "アクティブ",
+  "yallaAdmin.portal.subscriptions.livePaying": "有効な有料サブスクリプション",
+  "yallaAdmin.portal.subscriptions.trialing": "トライアル中",
+  "yallaAdmin.portal.subscriptions.freeTrialAccounts":
+    "無料トライアルアカウント",
+  "yallaAdmin.portal.subscriptions.canceled": "キャンセル済み",
+  "yallaAdmin.portal.subscriptions.churn": "解約",
+  "yallaAdmin.portal.subscriptions.planStatusBreakdown":
+    "プラン×ステータス内訳",
+  "yallaAdmin.portal.subscriptions.col.plan": "プラン",
+  "yallaAdmin.portal.subscriptions.col.status": "ステータス",
+  "yallaAdmin.portal.subscriptions.col.count": "件数",
+  "yallaAdmin.portal.subscriptions.col.totalValue": "合計金額",
+  "yallaAdmin.portal.system.loading": "システム情報を読み込み中...",
+  "yallaAdmin.portal.system.process": "プロセス",
+  "yallaAdmin.portal.system.uptime": "稼働時間",
+  "yallaAdmin.portal.system.database": "データベース",
+  "yallaAdmin.portal.system.tables": "{count} テーブル",
+  "yallaAdmin.portal.system.memoryUsage": "メモリ使用量",
+  "yallaAdmin.portal.system.heap": "ヒープ",
 };
 export default messages;
