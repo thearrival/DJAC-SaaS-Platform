@@ -166,7 +166,7 @@ function ItemFormFields({
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label>Title *</Label>
+        <Label>{t("adminThreatIntel.form.title", "Title *")}</Label>
         <Input
           value={form.title}
           onChange={e => onChange({ title: e.target.value })}
@@ -178,7 +178,7 @@ function ItemFormFields({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Summary *</Label>
+        <Label>{t("adminThreatIntel.form.summary", "Summary *")}</Label>
         <Textarea
           value={form.summary}
           onChange={e => onChange({ summary: e.target.value })}
@@ -192,7 +192,7 @@ function ItemFormFields({
 
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1.5">
-          <Label>Category *</Label>
+          <Label>{t("adminThreatIntel.form.category", "Category *")}</Label>
           <Select
             value={form.category}
             onValueChange={v =>
@@ -212,7 +212,7 @@ function ItemFormFields({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>Severity *</Label>
+          <Label>{t("adminThreatIntel.form.severity", "Severity *")}</Label>
           <Select
             value={form.severity}
             onValueChange={v =>
@@ -232,7 +232,7 @@ function ItemFormFields({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>TLP *</Label>
+          <Label>{t("adminThreatIntel.form.tlp", "TLP *")}</Label>
           <Select
             value={form.tlp}
             onValueChange={v => onChange({ tlp: v as ItemForm["tlp"] })}
@@ -253,7 +253,9 @@ function ItemFormFields({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label>Threat Actor</Label>
+          <Label>
+            {t("adminThreatIntel.form.threatActor", "Threat Actor")}
+          </Label>
           <Input
             value={form.threatActor}
             onChange={e => onChange({ threatActor: e.target.value })}
@@ -264,7 +266,7 @@ function ItemFormFields({
           />
         </div>
         <div className="space-y-1.5">
-          <Label>CVE ID</Label>
+          <Label>{t("adminThreatIntel.form.cveId", "CVE ID")}</Label>
           <Input
             value={form.cveId}
             onChange={e => onChange({ cveId: e.target.value })}
@@ -278,7 +280,7 @@ function ItemFormFields({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label>CVSS Score</Label>
+          <Label>{t("adminThreatIntel.form.cvssScore", "CVSS Score")}</Label>
           <Input
             value={form.cvssScore}
             onChange={e => onChange({ cvssScore: e.target.value })}
@@ -286,7 +288,9 @@ function ItemFormFields({
           />
         </div>
         <div className="space-y-1.5">
-          <Label>Affected Sectors</Label>
+          <Label>
+            {t("adminThreatIntel.form.affectedSectors", "Affected Sectors")}
+          </Label>
           <Input
             value={form.affectedSectors}
             onChange={e => onChange({ affectedSectors: e.target.value })}
@@ -299,7 +303,9 @@ function ItemFormFields({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Indicators of Compromise</Label>
+        <Label>
+          {t("adminThreatIntel.form.indicators", "Indicators of Compromise")}
+        </Label>
         <Textarea
           value={form.indicators}
           onChange={e => onChange({ indicators: e.target.value })}
@@ -312,7 +318,9 @@ function ItemFormFields({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Reference URL</Label>
+        <Label>
+          {t("adminThreatIntel.form.referenceUrl", "Reference URL")}
+        </Label>
         <Input
           value={form.referenceUrl}
           onChange={e => onChange({ referenceUrl: e.target.value })}
@@ -324,10 +332,12 @@ function ItemFormFields({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Scope</Label>
+        <Label>{t("adminThreatIntel.form.scope", "Scope")}</Label>
         <p className="text-xs text-muted-foreground">
-          Leave Organization ID empty to publish a global bulletin visible to
-          all orgs.
+          {t(
+            "adminThreatIntel.form.scopeHelp",
+            "Leave Organization ID empty to publish a global bulletin visible to all orgs."
+          )}
         </p>
         <Input
           type="number"
@@ -350,7 +360,8 @@ function ItemFormFields({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function AdminThreatIntel() {
-  usePageTitle("Admin · Threat Intelligence");
+  const { t } = useLocale();
+  usePageTitle(t("adminThreatIntel.pageTitle", "Admin — Threat Intelligence"));
 
   const [showDialog, setShowDialog] = useState(false);
   const [editItem, setEditItem] = useState<ThreatIntelItem | null>(null);
@@ -371,7 +382,9 @@ export default function AdminThreatIntel() {
 
   const createMutation = trpc.threatIntel.adminCreate.useMutation({
     onSuccess: () => {
-      toast.success("Bulletin published");
+      toast.success(
+        t("adminThreatIntel.toast.published", "Bulletin published")
+      );
       setShowDialog(false);
       setForm({ ...emptyForm });
       refetch();
@@ -381,7 +394,7 @@ export default function AdminThreatIntel() {
 
   const updateMutation = trpc.threatIntel.adminUpdate.useMutation({
     onSuccess: () => {
-      toast.success("Bulletin updated");
+      toast.success(t("adminThreatIntel.toast.updated", "Bulletin updated"));
       setEditItem(null);
       refetch();
     },
@@ -390,7 +403,7 @@ export default function AdminThreatIntel() {
 
   const removeMutation = trpc.threatIntel.adminRemove.useMutation({
     onSuccess: () => {
-      toast.success("Bulletin archived");
+      toast.success(t("adminThreatIntel.toast.archived", "Bulletin archived"));
       refetch();
     },
     onError: err => toast.error(err.message),
@@ -450,11 +463,13 @@ export default function AdminThreatIntel() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
               <ShieldAlert className="h-6 w-6 text-orange-500" />
-              Threat Intelligence Publisher
+              {t("adminThreatIntel.title", "Threat Intelligence Publisher")}
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Publish and manage threat bulletins visible to client
-              organizations
+              {t(
+                "adminThreatIntel.subtitle",
+                "Publish and manage threat bulletins visible to client organizations"
+              )}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -467,7 +482,7 @@ export default function AdminThreatIntel() {
               <RefreshCw
                 className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
               />
-              Refresh
+              {t("adminThreatIntel.refresh", "Refresh")}
             </Button>
             <Button
               size="sm"
@@ -475,7 +490,7 @@ export default function AdminThreatIntel() {
               onClick={openCreate}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Publish Bulletin
+              {t("adminThreatIntel.publishBulletin", "Publish Bulletin")}
             </Button>
           </div>
         </div>
@@ -484,14 +499,22 @@ export default function AdminThreatIntel() {
         <Card className="border-border/60">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">
-              {feedItems.length} bulletin{feedItems.length !== 1 ? "s" : ""}
+              {(feedItems.length === 1
+                ? t("adminThreatIntel.countOne", "{count} bulletin")
+                : t("adminThreatIntel.count", "{count} bulletins")
+              ).replace("{count}", String(feedItems.length))}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {isError ? (
               <div className="text-center py-16 text-muted-foreground">
                 <ShieldAlert className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Failed to load threat bulletins.</p>
+                <p className="text-sm">
+                  {t(
+                    "adminThreatIntel.loadFailed",
+                    "Failed to load threat bulletins."
+                  )}
+                </p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -501,7 +524,7 @@ export default function AdminThreatIntel() {
                   className="mt-3"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry
+                  {t("adminThreatIntel.retry", "Retry")}
                 </Button>
               </div>
             ) : isLoading ? (
@@ -511,14 +534,19 @@ export default function AdminThreatIntel() {
             ) : feedItems.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground">
                 <ShieldAlert className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No bulletins published yet.</p>
+                <p className="text-sm">
+                  {t("adminThreatIntel.empty", "No bulletins published yet.")}
+                </p>
                 <Button
                   variant="link"
                   size="sm"
                   onClick={openCreate}
                   className="mt-2"
                 >
-                  Publish the first one →
+                  {t(
+                    "adminThreatIntel.publishFirst",
+                    "Publish the first one →"
+                  )}
                 </Button>
               </div>
             ) : (
@@ -527,13 +555,27 @@ export default function AdminThreatIntel() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12">#</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Severity</TableHead>
-                      <TableHead>TLP</TableHead>
-                      <TableHead>Scope</TableHead>
-                      <TableHead>Published</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>
+                        {t("adminThreatIntel.col.title", "Title")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminThreatIntel.col.category", "Category")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminThreatIntel.col.severity", "Severity")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminThreatIntel.col.tlp", "TLP")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminThreatIntel.col.scope", "Scope")}
+                      </TableHead>
+                      <TableHead>
+                        {t("adminThreatIntel.col.published", "Published")}
+                      </TableHead>
+                      <TableHead className="text-right">
+                        {t("adminThreatIntel.col.actions", "Actions")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -561,8 +603,11 @@ export default function AdminThreatIntel() {
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {item.organizationId
-                            ? `Org ${item.organizationId}`
-                            : "Global"}
+                            ? t(
+                                "adminThreatIntel.scope.org",
+                                "Org {id}"
+                              ).replace("{id}", String(item.organizationId))
+                            : t("adminThreatIntel.scope.global", "Global")}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {fmt(item.publishedAt)}
@@ -573,7 +618,7 @@ export default function AdminThreatIntel() {
                               size="icon"
                               variant="ghost"
                               className="h-7 w-7"
-                              title="Edit"
+                              title={t("adminThreatIntel.action.edit", "Edit")}
                               onClick={() => openEdit(item)}
                             >
                               <Edit className="h-3.5 w-3.5" />
@@ -583,7 +628,15 @@ export default function AdminThreatIntel() {
                               variant="ghost"
                               className="h-7 w-7 text-rose-400 hover:text-rose-300"
                               title={
-                                item.isActive ? "Archive" : "Already archived"
+                                item.isActive
+                                  ? t(
+                                      "adminThreatIntel.action.archive",
+                                      "Archive"
+                                    )
+                                  : t(
+                                      "adminThreatIntel.action.alreadyArchived",
+                                      "Already archived"
+                                    )
                               }
                               disabled={
                                 !item.isActive || removeMutation.isPending
@@ -624,8 +677,14 @@ export default function AdminThreatIntel() {
               <DialogTitle className="flex items-center gap-2">
                 <ShieldAlert className="h-5 w-5 text-orange-500" />
                 {editItem
-                  ? `Edit Bulletin #${editItem.id}`
-                  : "Publish New Bulletin"}
+                  ? t(
+                      "adminThreatIntel.dialog.edit",
+                      "Edit Bulletin #{id}"
+                    ).replace("{id}", String(editItem.id))
+                  : t(
+                      "adminThreatIntel.dialog.publishNew",
+                      "Publish New Bulletin"
+                    )}
               </DialogTitle>
             </DialogHeader>
 
@@ -642,7 +701,7 @@ export default function AdminThreatIntel() {
                   setEditItem(null);
                 }}
               >
-                Cancel
+                {t("adminThreatIntel.cancel", "Cancel")}
               </Button>
               <Button
                 onClick={handleSubmit}
@@ -654,7 +713,9 @@ export default function AdminThreatIntel() {
                 ) : (
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                 )}
-                {editItem ? "Save Changes" : "Publish"}
+                {editItem
+                  ? t("adminThreatIntel.saveChanges", "Save Changes")
+                  : t("adminThreatIntel.publish", "Publish")}
               </Button>
             </DialogFooter>
           </DialogContent>
