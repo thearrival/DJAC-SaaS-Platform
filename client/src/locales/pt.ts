@@ -4177,8 +4177,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.members": "Membros ({count})",
   "yallaAdmin.portal.org.noMembers": "Nenhum membro.",
   "yallaAdmin.portal.org.memberSuspended": "Suspenso",
-  "yallaAdmin.portal.subscriptions.col.plan": "Plano",
-  "yallaAdmin.portal.subscriptions.col.status": "Status",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "Eventos de cobrança recentes ({count})",
 };

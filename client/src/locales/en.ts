@@ -4043,8 +4043,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.members": "Members ({count})",
   "yallaAdmin.portal.org.noMembers": "No members.",
   "yallaAdmin.portal.org.memberSuspended": "Suspended",
-  "yallaAdmin.portal.subscriptions.col.plan": "Plan",
-  "yallaAdmin.portal.subscriptions.col.status": "Status",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "Recent Billing Events ({count})",
 };

@@ -1086,7 +1086,11 @@ function OrganizationDetailModal({
                     </div>
                     {Boolean(detail.subscription.cancelAtPeriodEnd) && (
                       <p className="text-amber-400 text-xs">
-                        ⚠ Will cancel at period end
+                        ⚠{" "}
+                        {t(
+                          "yallaAdmin.portal.org.cancelAtPeriodEnd",
+                          "Will cancel at period end"
+                        )}
                       </p>
                     )}
                   </div>

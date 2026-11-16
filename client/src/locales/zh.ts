@@ -3784,8 +3784,6 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.members": "成员（{count}）",
   "yallaAdmin.portal.org.noMembers": "暂无成员。",
   "yallaAdmin.portal.org.memberSuspended": "已暂停",
-  "yallaAdmin.portal.subscriptions.col.plan": "套餐",
-  "yallaAdmin.portal.subscriptions.col.status": "状态",
   "yallaAdmin.portal.subscriptions.recentBillingEvents":
     "最近计费事件（{count}）",
 };
