@@ -2584,6 +2584,7 @@ function RealtimeTab({
 }
 
 export default function YallaAdminPortal() {
+  const { t } = useLocale();
   const [, navigate] = useLocation();
   const loginPath = "/yalla-hack-owners-console/login";
   const [activeTab, setActiveTab] = useState<Tab>("overview");
@@ -2780,19 +2781,67 @@ export default function YallaAdminPortal() {
   }
 
   const tabs: { id: Tab; label: string; group?: string }[] = [
-    { id: "overview", label: "Overview" },
-    { id: "signups", label: "Signups", group: "Users" },
-    { id: "users", label: "Active Users", group: "Users" },
-    { id: "orgs", label: "Organizations", group: "Users" },
-    { id: "subscriptions", label: "Subscriptions", group: "Billing" },
-    { id: "intake", label: "Intake", group: "Activity" },
-    { id: "onboarding", label: "Onboarding", group: "Activity" },
-    { id: "interactions", label: "Interactions", group: "Activity" },
-    { id: "platformAudit", label: "Platform Audit", group: "Logs" },
-    { id: "validation", label: "Validations", group: "Logs" },
-    { id: "system", label: "System", group: "Logs" },
-    { id: "audit", label: "Admin Audit", group: "Logs" },
-    { id: "realtime", label: "Live Monitor", group: "Logs" },
+    { id: "overview", label: t("yallaAdmin.portal.tab.overview", "Overview") },
+    {
+      id: "signups",
+      label: t("yallaAdmin.portal.tab.signups", "Signups"),
+      group: t("yallaAdmin.portal.group.users", "Users"),
+    },
+    {
+      id: "users",
+      label: t("yallaAdmin.portal.tab.activeUsers", "Active Users"),
+      group: t("yallaAdmin.portal.group.users", "Users"),
+    },
+    {
+      id: "orgs",
+      label: t("yallaAdmin.portal.tab.organizations", "Organizations"),
+      group: t("yallaAdmin.portal.group.users", "Users"),
+    },
+    {
+      id: "subscriptions",
+      label: t("yallaAdmin.portal.tab.subscriptions", "Subscriptions"),
+      group: t("yallaAdmin.portal.group.billing", "Billing"),
+    },
+    {
+      id: "intake",
+      label: t("yallaAdmin.portal.tab.intake", "Intake"),
+      group: t("yallaAdmin.portal.group.activity", "Activity"),
+    },
+    {
+      id: "onboarding",
+      label: t("yallaAdmin.portal.tab.onboarding", "Onboarding"),
+      group: t("yallaAdmin.portal.group.activity", "Activity"),
+    },
+    {
+      id: "interactions",
+      label: t("yallaAdmin.portal.tab.interactions", "Interactions"),
+      group: t("yallaAdmin.portal.group.activity", "Activity"),
+    },
+    {
+      id: "platformAudit",
+      label: t("yallaAdmin.portal.tab.platformAudit", "Platform Audit"),
+      group: t("yallaAdmin.portal.group.logs", "Logs"),
+    },
+    {
+      id: "validation",
+      label: t("yallaAdmin.portal.tab.validations", "Validations"),
+      group: t("yallaAdmin.portal.group.logs", "Logs"),
+    },
+    {
+      id: "system",
+      label: t("yallaAdmin.portal.tab.system", "System"),
+      group: t("yallaAdmin.portal.group.logs", "Logs"),
+    },
+    {
+      id: "audit",
+      label: t("yallaAdmin.portal.tab.adminAudit", "Admin Audit"),
+      group: t("yallaAdmin.portal.group.logs", "Logs"),
+    },
+    {
+      id: "realtime",
+      label: t("yallaAdmin.portal.tab.liveMonitor", "Live Monitor"),
+      group: t("yallaAdmin.portal.group.logs", "Logs"),
+    },
   ];
 
   return (

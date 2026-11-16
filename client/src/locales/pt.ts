@@ -3974,5 +3974,17 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.companyAdmin": "Admin da empresa",
   "yallaAdmin.dashboard.platformAdmin": "Admin da plataforma",
   "yallaAdmin.dashboard.superAdmin": "Super admin",
+  "yallaAdmin.platformMonitor.pageTitle":
+    "Monitor da plataforma — Admin Yalla Hack",
+  "yallaAdmin.platformMonitor.title": "Monitor da plataforma",
+  "yallaAdmin.platformMonitor.lastDays": "Últimos {days} d",
+  "yallaAdmin.platformMonitor.auto60s": "Auto 60 s",
+  "yallaAdmin.platformMonitor.loadError":
+    "Não foi possível carregar as métricas da plataforma: {message}",
+  "yallaAdmin.platformMonitor.businessHealth": "Saúde do negócio",
+  "yallaAdmin.platformMonitor.trafficEngagement": "Tráfego e engajamento",
+  "yallaAdmin.platformMonitor.aiWorkload": "Carga de trabalho de IA",
+  "yallaAdmin.platformMonitor.emailDeliverability": "Entregabilidade de e-mail",
+  "yallaAdmin.platformMonitor.securityPosture": "Postura de segurança",
 };
 export default messages;

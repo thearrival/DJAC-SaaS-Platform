@@ -3598,5 +3598,15 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.companyAdmin": "公司管理员",
   "yallaAdmin.dashboard.platformAdmin": "平台管理员",
   "yallaAdmin.dashboard.superAdmin": "超级管理员",
+  "yallaAdmin.platformMonitor.pageTitle": "平台监控 — Yalla Hack 管理",
+  "yallaAdmin.platformMonitor.title": "平台监控",
+  "yallaAdmin.platformMonitor.lastDays": "最近 {days} 天",
+  "yallaAdmin.platformMonitor.auto60s": "自动 60 秒",
+  "yallaAdmin.platformMonitor.loadError": "无法加载平台指标：{message}",
+  "yallaAdmin.platformMonitor.businessHealth": "业务健康",
+  "yallaAdmin.platformMonitor.trafficEngagement": "流量与参与度",
+  "yallaAdmin.platformMonitor.aiWorkload": "AI 工作负载",
+  "yallaAdmin.platformMonitor.emailDeliverability": "邮件送达率",
+  "yallaAdmin.platformMonitor.securityPosture": "安全态势",
 };
 export default messages;

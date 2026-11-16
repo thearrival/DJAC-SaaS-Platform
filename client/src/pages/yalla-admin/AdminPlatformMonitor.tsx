@@ -15,6 +15,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useLocale } from "@/contexts/useLocale";
 import {
   Activity,
   RefreshCw,
@@ -143,7 +144,13 @@ const ms = (v: number): string => {
 };
 
 export default function AdminPlatformMonitor() {
-  usePageTitle("Platform Monitor — Yalla Hack Admin");
+  const { t } = useLocale();
+  usePageTitle(
+    t(
+      "yallaAdmin.platformMonitor.pageTitle",
+      "Platform Monitor — Yalla Hack Admin"
+    )
+  );
   const [, navigate] = useLocation();
   const [data, setData] = useState<PlatformOverview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -180,15 +187,15 @@ export default function AdminPlatformMonitor() {
     return () => window.clearInterval(id);
   }, [autoRefresh, loadData]);
 
-  const t = data?.traffic;
+  const traffic = data?.traffic;
   const r = data?.revenue;
   const ai = data?.ai;
   const em = data?.email;
   const sec = data?.security;
 
   const maxDaily = useMemo(
-    () => Math.max(1, ...(t?.daily || []).map(d => d.events)),
-    [t]
+    () => Math.max(1, ...(traffic?.daily || []).map(d => d.events)),
+    [traffic]
   );
 
   return (
@@ -226,17 +233,19 @@ export default function AdminPlatformMonitor() {
               padding: 0,
               display: "flex",
             }}
-            aria-label="Back to dashboard"
+            aria-label={t("common.back", "Back")}
           >
             <ChevronLeft size={18} />
           </button>
           <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>
-            Platform Monitor
+            {t("yallaAdmin.platformMonitor.title", "Platform Monitor")}
           </h1>
           {data && (
             <span style={{ fontSize: 11, color: "var(--djac-muted)" }}>
-              updated{" "}
-              {new Date(data.generatedAt).toLocaleTimeString(storedLocaleTag())}
+              {t("yallaAdmin.security.updated", "updated {time}").replace(
+                "{time}",
+                new Date(data.generatedAt).toLocaleTimeString(storedLocaleTag())
+              )}
             </span>
           )}
         </div>
@@ -261,7 +270,10 @@ export default function AdminPlatformMonitor() {
                 value={d}
                 style={{ background: "var(--djac-bg-deep)" }}
               >
-                Last {d}d
+                {t(
+                  "yallaAdmin.platformMonitor.lastDays",
+                  "Last {days}d"
+                ).replace("{days}", String(d))}
               </option>
             ))}
           </select>
@@ -279,7 +291,9 @@ export default function AdminPlatformMonitor() {
               fontSize: 12,
             }}
           >
-            {autoRefresh ? "Auto 60s" : "Paused"}
+            {autoRefresh
+              ? t("yallaAdmin.platformMonitor.auto60s", "Auto 60s")
+              : t("yallaAdmin.security.paused", "Paused")}
           </button>
           <button
             onClick={loadData}
@@ -292,7 +306,7 @@ export default function AdminPlatformMonitor() {
               cursor: "pointer",
               display: "flex",
             }}
-            aria-label="Refresh"
+            aria-label={t("yallaAdmin.common.refresh", "Refresh")}
           >
             <RefreshCw size={14} />
           </button>
@@ -312,12 +326,17 @@ export default function AdminPlatformMonitor() {
               fontSize: 13,
             }}
           >
-            Could not load platform metrics: {error}
+            {t(
+              "yallaAdmin.platformMonitor.loadError",
+              "Could not load platform metrics: {message}"
+            ).replace("{message}", String(error))}
           </div>
         )}
 
         {/* ── Headline KPIs ─────────────────────────────────────────── */}
-        <SectionLabel>Business health</SectionLabel>
+        <SectionLabel>
+          {t("yallaAdmin.platformMonitor.businessHealth", "Business health")}
+        </SectionLabel>
         <div style={gridStyle}>
           <KPI
             icon={<CreditCard size={18} />}
@@ -336,21 +355,26 @@ export default function AdminPlatformMonitor() {
           <KPI
             icon={<Users size={18} />}
             label="Active users (24h)"
-            value={String(t?.activeUsers24h ?? 0)}
+            value={String(traffic?.activeUsers24h ?? 0)}
             color="#10b981"
-            sub={`7d ${t?.activeUsers7d ?? 0} · 30d ${t?.activeUsers30d ?? 0}`}
+            sub={`7d ${traffic?.activeUsers7d ?? 0} · 30d ${traffic?.activeUsers30d ?? 0}`}
           />
           <KPI
             icon={<Activity size={18} />}
             label="Events (24h)"
-            value={(t?.events24h ?? 0).toLocaleString(storedLocaleTag())}
+            value={(traffic?.events24h ?? 0).toLocaleString(storedLocaleTag())}
             color="#00d2ff"
-            sub={`7d ${(t?.events7d ?? 0).toLocaleString(storedLocaleTag())} · all ${(t?.totalEvents ?? 0).toLocaleString(storedLocaleTag())}`}
+            sub={`7d ${(traffic?.events7d ?? 0).toLocaleString(storedLocaleTag())} · all ${(traffic?.totalEvents ?? 0).toLocaleString(storedLocaleTag())}`}
           />
         </div>
 
         {/* ── Risk KPIs ─────────────────────────────────────────────── */}
-        <SectionLabel>Risk &amp; reliability</SectionLabel>
+        <SectionLabel>
+          {t(
+            "yallaAdmin.platformMonitor.riskReliability",
+            "Risk & reliability"
+          )}
+        </SectionLabel>
         <div style={gridStyle}>
           <KPI
             icon={<AlertTriangle size={18} />}
@@ -387,12 +411,17 @@ export default function AdminPlatformMonitor() {
         </div>
 
         {/* ── Traffic ───────────────────────────────────────────────── */}
-        <SectionLabel>Traffic &amp; engagement</SectionLabel>
+        <SectionLabel>
+          {t(
+            "yallaAdmin.platformMonitor.trafficEngagement",
+            "Traffic & engagement"
+          )}
+        </SectionLabel>
         <div style={gridStyle}>
           <Panel title="Daily events" icon={<Activity size={16} />} wide>
             {loading ? (
               <Muted>Loading…</Muted>
-            ) : (t?.daily || []).length === 0 ? (
+            ) : (traffic?.daily || []).length === 0 ? (
               <Muted>No analytics events recorded yet.</Muted>
             ) : (
               <>
@@ -404,7 +433,7 @@ export default function AdminPlatformMonitor() {
                     height: 150,
                   }}
                 >
-                  {(t?.daily || []).map(d => (
+                  {(traffic?.daily || []).map(d => (
                     <div
                       key={d.date}
                       title={`${d.date}: ${d.events} events, ${d.users} users`}
@@ -437,8 +466,8 @@ export default function AdminPlatformMonitor() {
                     color: "var(--djac-muted)",
                   }}
                 >
-                  <span>{(t?.daily || [])[0]?.date}</span>
-                  <span>{(t?.daily || []).slice(-1)[0]?.date}</span>
+                  <span>{(traffic?.daily || [])[0]?.date}</span>
+                  <span>{(traffic?.daily || []).slice(-1)[0]?.date}</span>
                 </div>
               </>
             )}
@@ -446,7 +475,7 @@ export default function AdminPlatformMonitor() {
 
           <Panel title="Top events" icon={<Gauge size={16} />}>
             <BarList
-              items={(t?.topEvents || []).map(e => ({
+              items={(traffic?.topEvents || []).map(e => ({
                 label: `${e.event} · ${e.category}`,
                 value: e.count,
               }))}
@@ -456,7 +485,7 @@ export default function AdminPlatformMonitor() {
 
           <Panel title="New signups" icon={<Users size={16} />}>
             <BarList
-              items={(t?.signups || []).map(s => ({
+              items={(traffic?.signups || []).map(s => ({
                 label: s.date,
                 value: s.count,
               }))}
@@ -466,7 +495,12 @@ export default function AdminPlatformMonitor() {
         </div>
 
         {/* ── Revenue ───────────────────────────────────────────────── */}
-        <SectionLabel>Revenue breakdown</SectionLabel>
+        <SectionLabel>
+          {t(
+            "yallaAdmin.platformMonitor.revenueBreakdown",
+            "Revenue breakdown"
+          )}
+        </SectionLabel>
         <div style={gridStyle}>
           <Panel title="MRR by plan" icon={<CreditCard size={16} />}>
             <BarList
@@ -508,7 +542,12 @@ export default function AdminPlatformMonitor() {
         </div>
 
         {/* ── AI + Email ────────────────────────────────────────────── */}
-        <SectionLabel>AI workload &amp; email deliverability</SectionLabel>
+        <SectionLabel>
+          {t(
+            "yallaAdmin.platformMonitor.aiEmail",
+            "AI workload & email deliverability"
+          )}
+        </SectionLabel>
         <div style={gridStyle}>
           <Panel title="AI agent runs" icon={<Bot size={16} />}>
             <StatRow label="Queued" value={ai?.queued ?? 0} />
@@ -550,7 +589,9 @@ export default function AdminPlatformMonitor() {
         </div>
 
         {/* ── Security ──────────────────────────────────────────────── */}
-        <SectionLabel>Security posture</SectionLabel>
+        <SectionLabel>
+          {t("yallaAdmin.platformMonitor.securityPosture", "Security posture")}
+        </SectionLabel>
         <div style={gridStyle}>
           <Panel title="Accounts" icon={<ShieldCheck size={16} />}>
             <StatRow label="Total users" value={sec?.totalUsers ?? 0} />
@@ -569,13 +610,19 @@ export default function AdminPlatformMonitor() {
           </Panel>
 
           <Panel title="Engagement quality" icon={<Gauge size={16} />}>
-            <StatRow label="Tracked users" value={t?.trackedUsers ?? 0} />
-            <StatRow label="Total sessions" value={t?.totalSessions ?? 0} />
+            <StatRow label="Tracked users" value={traffic?.trackedUsers ?? 0} />
+            <StatRow
+              label="Total sessions"
+              value={traffic?.totalSessions ?? 0}
+            />
             <StatRow
               label="Avg activation score"
-              value={t?.avgActivationScore ?? 0}
+              value={traffic?.avgActivationScore ?? 0}
             />
-            <StatRow label="Avg health score" value={t?.avgHealthScore ?? 0} />
+            <StatRow
+              label="Avg health score"
+              value={traffic?.avgHealthScore ?? 0}
+            />
             <StatRow
               label="Churn risk (cancel at period end)"
               value={r?.churnRiskSubscriptions ?? 0}

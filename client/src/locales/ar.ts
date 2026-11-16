@@ -3784,5 +3784,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.companyAdmin": "مسؤول الشركة",
   "yallaAdmin.dashboard.platformAdmin": "مسؤول المنصة",
   "yallaAdmin.dashboard.superAdmin": "مسؤول فائق",
+  "yallaAdmin.platformMonitor.pageTitle": "مراقب المنصة — إدارة Yalla Hack",
+  "yallaAdmin.platformMonitor.title": "مراقب المنصة",
+  "yallaAdmin.platformMonitor.lastDays": "آخر {days} يوم",
+  "yallaAdmin.platformMonitor.auto60s": "تلقائي 60ث",
+  "yallaAdmin.platformMonitor.loadError": "تعذر تحميل مقاييس المنصة: {message}",
+  "yallaAdmin.platformMonitor.businessHealth": "صحة الأعمال",
+  "yallaAdmin.platformMonitor.trafficEngagement": "حركة المرور والمشاركة",
+  "yallaAdmin.platformMonitor.aiWorkload": "عبء عمل الذكاء الاصطناعي",
+  "yallaAdmin.platformMonitor.emailDeliverability":
+    "إمكانية تسليم البريد الإلكتروني",
+  "yallaAdmin.platformMonitor.securityPosture": "الوضع الأمني",
 };
 export default messages;

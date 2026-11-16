@@ -3799,5 +3799,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.companyAdmin": "회사 관리자",
   "yallaAdmin.dashboard.platformAdmin": "플랫폼 관리자",
   "yallaAdmin.dashboard.superAdmin": "슈퍼 관리자",
+  "yallaAdmin.platformMonitor.pageTitle": "플랫폼 모니터 — Yalla Hack 관리자",
+  "yallaAdmin.platformMonitor.title": "플랫폼 모니터",
+  "yallaAdmin.platformMonitor.lastDays": "최근 {days}일",
+  "yallaAdmin.platformMonitor.auto60s": "자동 60초",
+  "yallaAdmin.platformMonitor.loadError":
+    "플랫폼 지표를 불러올 수 없습니다: {message}",
+  "yallaAdmin.platformMonitor.businessHealth": "비즈니스 상태",
+  "yallaAdmin.platformMonitor.trafficEngagement": "트래픽 및 참여",
+  "yallaAdmin.platformMonitor.aiWorkload": "AI 워크로드",
+  "yallaAdmin.platformMonitor.emailDeliverability": "이메일 전달률",
+  "yallaAdmin.platformMonitor.securityPosture": "보안 태세",
 };
 export default messages;

@@ -3848,5 +3848,16 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.companyAdmin": "Company Admin",
   "yallaAdmin.dashboard.platformAdmin": "Platform Admin",
   "yallaAdmin.dashboard.superAdmin": "Super Admin",
+  "yallaAdmin.platformMonitor.pageTitle": "Platform Monitor — Yalla Hack Admin",
+  "yallaAdmin.platformMonitor.title": "Platform Monitor",
+  "yallaAdmin.platformMonitor.lastDays": "Last {days}d",
+  "yallaAdmin.platformMonitor.auto60s": "Auto 60s",
+  "yallaAdmin.platformMonitor.loadError":
+    "Could not load platform metrics: {message}",
+  "yallaAdmin.platformMonitor.businessHealth": "Business health",
+  "yallaAdmin.platformMonitor.trafficEngagement": "Traffic & engagement",
+  "yallaAdmin.platformMonitor.aiWorkload": "AI workload",
+  "yallaAdmin.platformMonitor.emailDeliverability": "Email deliverability",
+  "yallaAdmin.platformMonitor.securityPosture": "Security posture",
 };
 export default messages;

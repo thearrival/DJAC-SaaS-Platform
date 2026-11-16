@@ -3903,5 +3903,18 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.companyAdmin": "会社管理者",
   "yallaAdmin.dashboard.platformAdmin": "プラットフォーム管理者",
   "yallaAdmin.dashboard.superAdmin": "スーパー管理者",
+  "yallaAdmin.platformMonitor.pageTitle":
+    "プラットフォームモニター — Yalla Hack 管理",
+  "yallaAdmin.platformMonitor.title": "プラットフォームモニター",
+  "yallaAdmin.platformMonitor.lastDays": "過去{days}日",
+  "yallaAdmin.platformMonitor.auto60s": "自動 60秒",
+  "yallaAdmin.platformMonitor.loadError":
+    "プラットフォーム指標を読み込めませんでした: {message}",
+  "yallaAdmin.platformMonitor.businessHealth": "ビジネス健全性",
+  "yallaAdmin.platformMonitor.trafficEngagement":
+    "トラフィックとエンゲージメント",
+  "yallaAdmin.platformMonitor.aiWorkload": "AIワークロード",
+  "yallaAdmin.platformMonitor.emailDeliverability": "メール到達性",
+  "yallaAdmin.platformMonitor.securityPosture": "セキュリティ態勢",
 };
 export default messages;
