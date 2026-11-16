@@ -156,7 +156,7 @@ function PriorityBadge({ priority }: { priority: string }) {
 
 export default function AdminServiceRequests() {
   const { t } = useLocale();
-  usePageTitle("Admin · Service Requests");
+  usePageTitle(t("adminServiceRequests.pageTitle", "Admin — Service Requests"));
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
