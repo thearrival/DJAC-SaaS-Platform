@@ -4214,5 +4214,27 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.loading": "読み込み中...",
   "yallaAdmin.audit.noEntries": "監査エントリが見つかりません",
   "yallaAdmin.audit.payload": "ペイロード",
+  "yallaAdmin.users.detail.email": "メール",
+  "yallaAdmin.users.detail.phone": "電話",
+  "yallaAdmin.users.detail.role": "役割",
+  "yallaAdmin.users.detail.company": "会社",
+  "yallaAdmin.users.detail.jobTitle": "役職",
+  "yallaAdmin.users.detail.industry": "業界",
+  "yallaAdmin.users.detail.locale": "ロケール",
+  "yallaAdmin.users.detail.signedUp": "登録日",
+  "yallaAdmin.users.detail.lastLogin": "最終ログイン",
+  "yallaAdmin.users.detail.organizations": "組織",
+  "yallaAdmin.users.detail.memberships": "組織メンバーシップ",
+  "yallaAdmin.users.detail.noMemberships":
+    "アクティブなメンバーシップはありません。",
+  "yallaAdmin.users.detail.recentActivity": "最近の活動",
+  "yallaAdmin.users.detail.noRecentActivity": "最近の活動はありません。",
+  "yallaAdmin.users.detail.loadFailed":
+    "ユーザー詳細の読み込みに失敗しました。",
+  "yallaAdmin.users.delete.title": "ユーザーを削除しますか？",
+  "yallaAdmin.users.delete.desc":
+    "これにより {name} とそのメンバーシップ、オンボーディングデータ、監査記録が完全に削除されます。この操作は元に戻せません。",
+  "yallaAdmin.common.cancel": "キャンセル",
+  "yallaAdmin.users.delete.permanently": "完全に削除",
 };
 export default messages;

@@ -4090,5 +4090,26 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.loading": "로딩 중...",
   "yallaAdmin.audit.noEntries": "감사 항목을 찾을 수 없습니다",
   "yallaAdmin.audit.payload": "페이로드",
+  "yallaAdmin.users.detail.email": "이메일",
+  "yallaAdmin.users.detail.phone": "전화",
+  "yallaAdmin.users.detail.role": "역할",
+  "yallaAdmin.users.detail.company": "회사",
+  "yallaAdmin.users.detail.jobTitle": "직함",
+  "yallaAdmin.users.detail.industry": "산업",
+  "yallaAdmin.users.detail.locale": "로케일",
+  "yallaAdmin.users.detail.signedUp": "가입일",
+  "yallaAdmin.users.detail.lastLogin": "마지막 로그인",
+  "yallaAdmin.users.detail.organizations": "조직",
+  "yallaAdmin.users.detail.memberships": "조직 멤버십",
+  "yallaAdmin.users.detail.noMemberships": "활성 멤버십이 없습니다.",
+  "yallaAdmin.users.detail.recentActivity": "최근 활동",
+  "yallaAdmin.users.detail.noRecentActivity": "최근 활동이 없습니다.",
+  "yallaAdmin.users.detail.loadFailed":
+    "사용자 상세 정보를 불러오지 못했습니다.",
+  "yallaAdmin.users.delete.title": "사용자를 삭제하시겠습니까?",
+  "yallaAdmin.users.delete.desc":
+    "{name} 및 해당 멤버십, 온보딩 데이터, 감사 기록이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
+  "yallaAdmin.common.cancel": "취소",
+  "yallaAdmin.users.delete.permanently": "영구 삭제",
 };
 export default messages;

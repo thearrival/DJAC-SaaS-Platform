@@ -4361,5 +4361,26 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.loading": "Chargement...",
   "yallaAdmin.audit.noEntries": "Aucune entrée d'audit trouvée",
   "yallaAdmin.audit.payload": "Charge utile",
+  "yallaAdmin.users.detail.email": "E-mail",
+  "yallaAdmin.users.detail.phone": "Téléphone",
+  "yallaAdmin.users.detail.role": "Rôle",
+  "yallaAdmin.users.detail.company": "Entreprise",
+  "yallaAdmin.users.detail.jobTitle": "Intitulé du poste",
+  "yallaAdmin.users.detail.industry": "Secteur",
+  "yallaAdmin.users.detail.locale": "Langue",
+  "yallaAdmin.users.detail.signedUp": "Inscrit le",
+  "yallaAdmin.users.detail.lastLogin": "Dernière connexion",
+  "yallaAdmin.users.detail.organizations": "Organisations",
+  "yallaAdmin.users.detail.memberships": "Adhésions aux organisations",
+  "yallaAdmin.users.detail.noMemberships": "Aucune adhésion active.",
+  "yallaAdmin.users.detail.recentActivity": "Activité récente",
+  "yallaAdmin.users.detail.noRecentActivity": "Aucune activité récente.",
+  "yallaAdmin.users.detail.loadFailed":
+    "Échec du chargement des détails de l'utilisateur.",
+  "yallaAdmin.users.delete.title": "Supprimer l'utilisateur ?",
+  "yallaAdmin.users.delete.desc":
+    "Cela supprime définitivement {name} ainsi que ses adhésions, données d'intégration et piste d'audit. Cette action est irréversible.",
+  "yallaAdmin.common.cancel": "Annuler",
+  "yallaAdmin.users.delete.permanently": "Supprimer définitivement",
 };
 export default messages;

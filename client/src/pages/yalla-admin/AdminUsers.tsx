@@ -884,7 +884,10 @@ export default function AdminUsers() {
                     label="Phone"
                     value={detail.phoneNumber || "—"}
                   />
-                  <DetailField label="Role" value={detail.role} />
+                  <DetailField
+                    label={t("yallaAdmin.users.detail.role", "Role")}
+                    value={detail.role}
+                  />
                   <DetailField
                     label="Company"
                     value={detail.companyName || "—"}
@@ -902,7 +905,7 @@ export default function AdminUsers() {
                     value={detail.preferredLocale || "—"}
                   />
                   <DetailField
-                    label="Signed Up"
+                    label={t("yallaAdmin.users.detail.signedUp", "Signed Up")}
                     value={
                       detail.createdAt
                         ? new Date(detail.createdAt).toLocaleString(
@@ -918,11 +921,14 @@ export default function AdminUsers() {
                         ? new Date(detail.lastSignedIn).toLocaleString(
                             storedLocaleTag()
                           )
-                        : "Never"
+                        : t("yallaAdmin.common.never", "Never")
                     }
                   />
                   <DetailField
-                    label="Organizations"
+                    label={t(
+                      "yallaAdmin.users.detail.organizations",
+                      "Organizations"
+                    )}
                     value={String(detail.orgCount)}
                   />
                 </div>
@@ -935,7 +941,10 @@ export default function AdminUsers() {
                     margin: "0 0 10px",
                   }}
                 >
-                  Organization Memberships
+                  {t(
+                    "yallaAdmin.users.detail.memberships",
+                    "Organization Memberships"
+                  )}
                 </h3>
                 {detail.organizationMemberships.length === 0 ? (
                   <p
@@ -945,7 +954,10 @@ export default function AdminUsers() {
                       margin: "0 0 20px",
                     }}
                   >
-                    No active memberships.
+                    {t(
+                      "yallaAdmin.users.detail.noMemberships",
+                      "No active memberships."
+                    )}
                   </p>
                 ) : (
                   <div
@@ -993,7 +1005,10 @@ export default function AdminUsers() {
                     margin: "0 0 10px",
                   }}
                 >
-                  Recent Activity
+                  {t(
+                    "yallaAdmin.users.detail.recentActivity",
+                    "Recent Activity"
+                  )}
                 </h3>
                 {detail.recentActivity.length === 0 ? (
                   <p
@@ -1003,7 +1018,10 @@ export default function AdminUsers() {
                       margin: 0,
                     }}
                   >
-                    No recent activity.
+                    {t(
+                      "yallaAdmin.users.detail.noRecentActivity",
+                      "No recent activity."
+                    )}
                   </p>
                 ) : (
                   <div
@@ -1041,7 +1059,10 @@ export default function AdminUsers() {
               </>
             ) : (
               <p style={{ fontSize: 13, color: "#ef4444" }}>
-                Failed to load user details.
+                {t(
+                  "yallaAdmin.users.detail.loadFailed",
+                  "Failed to load user details."
+                )}
               </p>
             )}
           </div>
@@ -1075,7 +1096,7 @@ export default function AdminUsers() {
             onClick={e => e.stopPropagation()}
           >
             <h2 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 10px" }}>
-              Delete user?
+              {t("yallaAdmin.users.delete.title", "Delete user?")}
             </h2>
             <p
               style={{
@@ -1084,12 +1105,13 @@ export default function AdminUsers() {
                 margin: "0 0 20px",
               }}
             >
-              This permanently deletes{" "}
-              <strong style={{ color: "var(--djac-text)" }}>
-                {confirmDelete.name || confirmDelete.email}
-              </strong>{" "}
-              and their memberships, onboarding data and audit trail. This
-              cannot be undone.
+              {t(
+                "yallaAdmin.users.delete.desc",
+                "This permanently deletes {name} and their memberships, onboarding data and audit trail. This cannot be undone."
+              ).replace(
+                "{name}",
+                confirmDelete.name || confirmDelete.email || ""
+              )}
             </p>
             <div
               style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}
@@ -1106,7 +1128,7 @@ export default function AdminUsers() {
                   cursor: "pointer",
                 }}
               >
-                Cancel
+                {t("yallaAdmin.common.cancel", "Cancel")}
               </button>
               <button
                 onClick={() => deleteUser(confirmDelete)}
@@ -1125,7 +1147,7 @@ export default function AdminUsers() {
                   opacity: busyIds.has(confirmDelete.id) ? 0.6 : 1,
                 }}
               >
-                Delete permanently
+                {t("yallaAdmin.users.delete.permanently", "Delete permanently")}
               </button>
             </div>
           </div>

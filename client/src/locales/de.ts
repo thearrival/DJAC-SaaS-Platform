@@ -4315,5 +4315,26 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.loading": "Wird geladen...",
   "yallaAdmin.audit.noEntries": "Keine Prüfprotokolleinträge gefunden",
   "yallaAdmin.audit.payload": "Nutzlast",
+  "yallaAdmin.users.detail.email": "E-Mail",
+  "yallaAdmin.users.detail.phone": "Telefon",
+  "yallaAdmin.users.detail.role": "Rolle",
+  "yallaAdmin.users.detail.company": "Unternehmen",
+  "yallaAdmin.users.detail.jobTitle": "Berufsbezeichnung",
+  "yallaAdmin.users.detail.industry": "Branche",
+  "yallaAdmin.users.detail.locale": "Sprache",
+  "yallaAdmin.users.detail.signedUp": "Registriert am",
+  "yallaAdmin.users.detail.lastLogin": "Letzte Anmeldung",
+  "yallaAdmin.users.detail.organizations": "Organisationen",
+  "yallaAdmin.users.detail.memberships": "Organisationsmitgliedschaften",
+  "yallaAdmin.users.detail.noMemberships": "Keine aktiven Mitgliedschaften.",
+  "yallaAdmin.users.detail.recentActivity": "Letzte Aktivität",
+  "yallaAdmin.users.detail.noRecentActivity": "Keine aktuelle Aktivität.",
+  "yallaAdmin.users.detail.loadFailed":
+    "Benutzerdetails konnten nicht geladen werden.",
+  "yallaAdmin.users.delete.title": "Benutzer löschen?",
+  "yallaAdmin.users.delete.desc":
+    "Dadurch werden {name} sowie Mitgliedschaften, Onboarding-Daten und Prüfprotokoll dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+  "yallaAdmin.common.cancel": "Abbrechen",
+  "yallaAdmin.users.delete.permanently": "Dauerhaft löschen",
 };
 export default messages;

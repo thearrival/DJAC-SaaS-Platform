@@ -4325,5 +4325,26 @@ const messages: Record<string, string> = {
   "yallaAdmin.audit.loading": "Cargando...",
   "yallaAdmin.audit.noEntries": "No se encontraron entradas de auditoría",
   "yallaAdmin.audit.payload": "Carga útil",
+  "yallaAdmin.users.detail.email": "Correo",
+  "yallaAdmin.users.detail.phone": "Teléfono",
+  "yallaAdmin.users.detail.role": "Rol",
+  "yallaAdmin.users.detail.company": "Empresa",
+  "yallaAdmin.users.detail.jobTitle": "Cargo",
+  "yallaAdmin.users.detail.industry": "Industria",
+  "yallaAdmin.users.detail.locale": "Idioma",
+  "yallaAdmin.users.detail.signedUp": "Registrado",
+  "yallaAdmin.users.detail.lastLogin": "Último acceso",
+  "yallaAdmin.users.detail.organizations": "Organizaciones",
+  "yallaAdmin.users.detail.memberships": "Membresías de organización",
+  "yallaAdmin.users.detail.noMemberships": "Sin membresías activas.",
+  "yallaAdmin.users.detail.recentActivity": "Actividad reciente",
+  "yallaAdmin.users.detail.noRecentActivity": "Sin actividad reciente.",
+  "yallaAdmin.users.detail.loadFailed":
+    "Error al cargar los detalles del usuario.",
+  "yallaAdmin.users.delete.title": "¿Eliminar usuario?",
+  "yallaAdmin.users.delete.desc":
+    "Esto elimina permanentemente a {name} y sus membresías, datos de incorporación y registro de auditoría. Esto no se puede deshacer.",
+  "yallaAdmin.common.cancel": "Cancelar",
+  "yallaAdmin.users.delete.permanently": "Eliminar permanentemente",
 };
 export default messages;
