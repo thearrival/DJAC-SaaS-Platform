@@ -1052,19 +1052,28 @@ function OrganizationDetailModal({
               {detail.subscription && (
                 <div>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                    Current Subscription
+                    {t(
+                      "yallaAdmin.portal.org.currentSubscription",
+                      "Current Subscription"
+                    )}
                   </p>
                   <div className="bg-slate-900/60 border border-slate-800/60 rounded-lg p-3 space-y-1.5 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Plan:</span>
+                      <span className="text-slate-400">
+                        {t("yallaAdmin.portal.org.plan", "Plan:")}
+                      </span>
                       <Badge value={detail.subscription.plan} />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Status:</span>
+                      <span className="text-slate-400">
+                        {t("yallaAdmin.portal.org.status", "Status:")}
+                      </span>
                       <Badge value={detail.subscription.status} />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Period:</span>
+                      <span className="text-slate-400">
+                        {t("yallaAdmin.portal.org.period", "Period:")}
+                      </span>
                       <span className="text-white">
                         {new Date(
                           detail.subscription.currentPeriodStart
@@ -1085,11 +1094,16 @@ function OrganizationDetailModal({
               )}
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                  Members ({detail.members.length})
+                  {t(
+                    "yallaAdmin.portal.org.members",
+                    "Members ({count})"
+                  ).replace("{count}", String(detail.members.length))}
                 </p>
                 <div className="space-y-2">
                   {detail.members.length === 0 && (
-                    <p className="text-slate-600 text-xs">No members.</p>
+                    <p className="text-slate-600 text-xs">
+                      {t("yallaAdmin.portal.org.noMembers", "No members.")}
+                    </p>
                   )}
                   {detail.members.map(m => (
                     <div
@@ -1104,7 +1118,10 @@ function OrganizationDetailModal({
                         <Badge value={m.role} />
                         {m.userStatus === "suspended" && (
                           <span className="px-1 py-0.5 rounded text-[9px] bg-red-500/15 text-red-400">
-                            Suspended
+                            {t(
+                              "yallaAdmin.portal.org.memberSuspended",
+                              "Suspended"
+                            )}
                           </span>
                         )}
                       </div>
@@ -2171,10 +2188,10 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
                   )}
                 </th>
                 <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Plan
+                  {t("yallaAdmin.portal.subscriptions.col.plan", "Plan")}
                 </th>
                 <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Status
+                  {t("yallaAdmin.portal.subscriptions.col.status", "Status")}
                 </th>
                 <th className="text-left px-3 py-2 text-xs font-medium text-slate-500 uppercase tracking-wider">
                   {t(
@@ -2253,7 +2270,10 @@ function SubscriptionsTab({ data }: { data: SubscriptionsData | null }) {
       {data.billingEvents.length > 0 && (
         <div className="bg-slate-800/50 border border-slate-700/40 rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">
-            Recent Billing Events ({data.billingEvents.length})
+            {t(
+              "yallaAdmin.portal.subscriptions.recentBillingEvents",
+              "Recent Billing Events ({count})"
+            ).replace("{count}", String(data.billingEvents.length))}
           </h3>
           <div className="space-y-1">
             {data.billingEvents.slice(0, 50).map(ev => (

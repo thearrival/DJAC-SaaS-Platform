@@ -4035,5 +4035,17 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "Updated:",
   "yallaAdmin.portal.org.trialEnds": "Trial Ends:",
   "yallaAdmin.portal.org.billingEmail": "Billing Email:",
+  "yallaAdmin.portal.org.currentSubscription": "Current Subscription",
+  "yallaAdmin.portal.org.plan": "Plan:",
+  "yallaAdmin.portal.org.status": "Status:",
+  "yallaAdmin.portal.org.period": "Period:",
+  "yallaAdmin.portal.org.cancelAtPeriodEnd": "Will cancel at period end",
+  "yallaAdmin.portal.org.members": "Members ({count})",
+  "yallaAdmin.portal.org.noMembers": "No members.",
+  "yallaAdmin.portal.org.memberSuspended": "Suspended",
+  "yallaAdmin.portal.subscriptions.col.plan": "Plan",
+  "yallaAdmin.portal.subscriptions.col.status": "Status",
+  "yallaAdmin.portal.subscriptions.recentBillingEvents":
+    "Recent Billing Events ({count})",
 };
 export default messages;

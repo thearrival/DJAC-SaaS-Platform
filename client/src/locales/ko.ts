@@ -3981,5 +3981,17 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "업데이트:",
   "yallaAdmin.portal.org.trialEnds": "체험 종료:",
   "yallaAdmin.portal.org.billingEmail": "청구 이메일:",
+  "yallaAdmin.portal.org.currentSubscription": "현재 구독",
+  "yallaAdmin.portal.org.plan": "플랜:",
+  "yallaAdmin.portal.org.status": "상태:",
+  "yallaAdmin.portal.org.period": "기간:",
+  "yallaAdmin.portal.org.cancelAtPeriodEnd": "기간 종료 시 취소됩니다",
+  "yallaAdmin.portal.org.members": "멤버 ({count})",
+  "yallaAdmin.portal.org.noMembers": "멤버가 없습니다.",
+  "yallaAdmin.portal.org.memberSuspended": "정지됨",
+  "yallaAdmin.portal.subscriptions.col.plan": "플랜",
+  "yallaAdmin.portal.subscriptions.col.status": "상태",
+  "yallaAdmin.portal.subscriptions.recentBillingEvents":
+    "최근 청구 이벤트 ({count})",
 };
 export default messages;

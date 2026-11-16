@@ -4098,5 +4098,17 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "更新日：",
   "yallaAdmin.portal.org.trialEnds": "トライアル終了：",
   "yallaAdmin.portal.org.billingEmail": "請求メール：",
+  "yallaAdmin.portal.org.currentSubscription": "現在のサブスクリプション",
+  "yallaAdmin.portal.org.plan": "プラン：",
+  "yallaAdmin.portal.org.status": "ステータス：",
+  "yallaAdmin.portal.org.period": "期間：",
+  "yallaAdmin.portal.org.cancelAtPeriodEnd": "期間終了時に解約されます",
+  "yallaAdmin.portal.org.members": "メンバー（{count}）",
+  "yallaAdmin.portal.org.noMembers": "メンバーはいません。",
+  "yallaAdmin.portal.org.memberSuspended": "停止中",
+  "yallaAdmin.portal.subscriptions.col.plan": "プラン",
+  "yallaAdmin.portal.subscriptions.col.status": "ステータス",
+  "yallaAdmin.portal.subscriptions.recentBillingEvents":
+    "最近の請求イベント（{count}）",
 };
 export default messages;

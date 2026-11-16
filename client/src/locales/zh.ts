@@ -3776,5 +3776,17 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.org.updated": "更新时间：",
   "yallaAdmin.portal.org.trialEnds": "试用结束：",
   "yallaAdmin.portal.org.billingEmail": "账单邮箱：",
+  "yallaAdmin.portal.org.currentSubscription": "当前订阅",
+  "yallaAdmin.portal.org.plan": "套餐：",
+  "yallaAdmin.portal.org.status": "状态：",
+  "yallaAdmin.portal.org.period": "周期：",
+  "yallaAdmin.portal.org.cancelAtPeriodEnd": "将在周期结束时取消",
+  "yallaAdmin.portal.org.members": "成员（{count}）",
+  "yallaAdmin.portal.org.noMembers": "暂无成员。",
+  "yallaAdmin.portal.org.memberSuspended": "已暂停",
+  "yallaAdmin.portal.subscriptions.col.plan": "套餐",
+  "yallaAdmin.portal.subscriptions.col.status": "状态",
+  "yallaAdmin.portal.subscriptions.recentBillingEvents":
+    "最近计费事件（{count}）",
 };
 export default messages;
