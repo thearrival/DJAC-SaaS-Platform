@@ -1393,7 +1393,7 @@ function getExecutiveSummary(
 
 export default function VendorAssessment() {
   usePageTitle("Vendor Assessment");
-  const { locale = "en", direction = "ltr" } = useLocale();
+  const { t, locale = "en", direction = "ltr" } = useLocale();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const localeKey = (

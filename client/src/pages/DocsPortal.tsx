@@ -1629,7 +1629,7 @@ function BreadcrumbNav({
    ────────────────────────────────────────────────────────────────────────── */
 
 export default function DocsPortal() {
-  const { locale } = useLocale();
+  const { t, locale } = useLocale();
   const ui = DOCS_UI[locale] ?? DOCS_UI.en;
   usePageTitle(ui.docs_title);
   const [location, navigate] = useLocation();

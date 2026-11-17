@@ -179,6 +179,7 @@ function ArticleDetailPanel({
   slug: string;
   onJumpTo: (slug: string) => void;
 }) {
+  const { t } = useLocale();
   const q = trpc.compliance.lawBySlug.useQuery(
     { slug },
     { refetchOnWindowFocus: false }

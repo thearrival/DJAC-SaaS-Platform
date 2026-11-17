@@ -638,6 +638,7 @@ const FEED: { t: string; msg: string; s: "ok" | "warn" | "err" }[] = [
 ];
 
 function DataFeed() {
+  const { t } = useLocale();
   const [shown, setShown] = useState<number[]>([]);
 
   useEffect(() => {
