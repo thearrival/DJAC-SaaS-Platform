@@ -484,11 +484,21 @@ export default function AdminSubscriptions() {
               fontSize: 13,
             }}
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="trialing">Trialing</option>
-            <option value="past_due">Past Due</option>
-            <option value="canceled">Canceled</option>
+            <option value="all">
+              {t("yallaAdmin.subs.allStatus", "All Status")}
+            </option>
+            <option value="active">
+              {t("yallaAdmin.subs.active", "Active")}
+            </option>
+            <option value="trialing">
+              {t("yallaAdmin.subs.trialing", "Trialing")}
+            </option>
+            <option value="past_due">
+              {t("yallaAdmin.subs.pastDue", "Past Due")}
+            </option>
+            <option value="canceled">
+              {t("yallaAdmin.subs.canceled", "Canceled")}
+            </option>
           </select>
         </div>
 
@@ -505,11 +515,15 @@ export default function AdminSubscriptions() {
           >
             <thead>
               <tr style={{ background: "var(--djac-card-hi)" }}>
-                <th style={thStyle}>Organization</th>
-                <th style={thStyle}>Plan</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Amount</th>
-                <th style={thStyle}>Period End</th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.subs.organization", "Organization")}
+                </th>
+                <th style={thStyle}>{t("yallaAdmin.subs.plan", "Plan")}</th>
+                <th style={thStyle}>{t("yallaAdmin.subs.status", "Status")}</th>
+                <th style={thStyle}>{t("yallaAdmin.subs.amount", "Amount")}</th>
+                <th style={thStyle}>
+                  {t("yallaAdmin.subs.periodEnd", "Period End")}
+                </th>
               </tr>
             </thead>
             <tbody>

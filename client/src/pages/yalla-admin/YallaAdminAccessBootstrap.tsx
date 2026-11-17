@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { useLocale } from "@/contexts/useLocale";
 
 type BootstrapResponse = {
   ok: boolean;
@@ -9,6 +10,7 @@ type BootstrapResponse = {
 };
 
 export default function YallaAdminAccessBootstrap() {
+  const { t } = useLocale();
   const [location, navigate] = useLocation();
   const [error, setError] = useState("");
   const [working, setWorking] = useState(true);
@@ -84,7 +86,9 @@ export default function YallaAdminAccessBootstrap() {
           </svg>
         </div>
 
-        <h1 className="text-xl font-bold text-white">Owner Access Check</h1>
+        <h1 className="text-xl font-bold text-white">
+          {t("yallaAdmin.access.ownerCheck", "Owner Access Check")}
+        </h1>
         <p className="mt-2 text-sm text-slate-500">
           {working
             ? "Validating the private owner link and preparing the isolated console."
@@ -94,7 +98,9 @@ export default function YallaAdminAccessBootstrap() {
         {working ? (
           <div className="mt-6 flex items-center justify-center gap-3 text-cyan-400">
             <span className="h-5 w-5 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
-            <span className="text-sm">Checking access token...</span>
+            <span className="text-sm">
+              {t("yallaAdmin.access.checkingToken", "Checking access token...")}
+            </span>
           </div>
         ) : (
           <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-left">

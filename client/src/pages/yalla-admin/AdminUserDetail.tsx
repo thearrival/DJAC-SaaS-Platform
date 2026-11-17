@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { storedLocaleTag } from "@/lib/intl";
+import { useLocale } from "@/contexts/useLocale";
 import {
   RefreshCw,
   ChevronLeft,
@@ -127,6 +128,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminUserDetail() {
+  const { t } = useLocale();
   const [location, navigate] = useLocation();
   const userIdMatch = location.match(/\/users\/(\d+)/);
   const userId = userIdMatch ? Number(userIdMatch[1]) : null;
@@ -325,25 +327,43 @@ export default function AdminUserDetail() {
                     margin: 0,
                   }}
                 >
-                  <dt style={{ color: "var(--djac-muted)" }}>Email</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.email", "Email")}
+                  </dt>
                   <dd style={{ margin: 0, color: "var(--djac-text)" }}>
                     {detail.email || "—"}
                   </dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Phone</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.phone", "Phone")}
+                  </dt>
                   <dd style={{ margin: 0 }}>{detail.phoneNumber || "—"}</dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Role</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.role", "Role")}
+                  </dt>
                   <dd style={{ margin: 0 }}>{detail.role}</dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Source</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.source", "Source")}
+                  </dt>
                   <dd style={{ margin: 0 }}>{detail.source}</dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Company</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.company", "Company")}
+                  </dt>
                   <dd style={{ margin: 0 }}>{detail.companyName || "—"}</dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Job title</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.jobTitle", "Job title")}
+                  </dt>
                   <dd style={{ margin: 0 }}>{detail.jobTitle || "—"}</dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Industry</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.industry", "Industry")}
+                  </dt>
                   <dd style={{ margin: 0 }}>{detail.industry || "—"}</dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Locale</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.locale", "Locale")}
+                  </dt>
                   <dd style={{ margin: 0 }}>{detail.preferredLocale}</dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Joined</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.joined", "Joined")}
+                  </dt>
                   <dd style={{ margin: 0 }}>
                     {detail.createdAt
                       ? new Date(detail.createdAt).toLocaleString(
@@ -351,7 +371,9 @@ export default function AdminUserDetail() {
                         )
                       : "—"}
                   </dd>
-                  <dt style={{ color: "var(--djac-muted)" }}>Last signed in</dt>
+                  <dt style={{ color: "var(--djac-muted)" }}>
+                    {t("yallaAdmin.detail.lastSignedIn", "Last signed in")}
+                  </dt>
                   <dd style={{ margin: 0 }}>
                     {detail.lastSignedIn
                       ? new Date(detail.lastSignedIn).toLocaleString(

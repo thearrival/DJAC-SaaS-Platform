@@ -322,47 +322,69 @@ function UserDetailPanel({
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-muted-foreground">ID</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.id", "ID")}
+              </span>
               <p className="font-medium">{user.id}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Source</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.source", "Source")}
+              </span>
               <p className="font-medium capitalize">{user.source}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Status</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.status", "Status")}
+              </span>
               <Badge variant={user.status} />
             </div>
             <div>
-              <span className="text-muted-foreground">Role</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.role", "Role")}
+              </span>
               <RoleBadge role={user.role} />
             </div>
             <div>
-              <span className="text-muted-foreground">Phone</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.phone", "Phone")}
+              </span>
               <p className="font-medium">{user.phoneNumber ?? "—"}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Locale</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.locale", "Locale")}
+              </span>
               <p className="font-medium uppercase">{user.preferredLocale}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Company</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.company", "Company")}
+              </span>
               <p className="font-medium">{user.companyName ?? "—"}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Job Title</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.jobTitle", "Job Title")}
+              </span>
               <p className="font-medium">{user.jobTitle ?? "—"}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Industry</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.industry", "Industry")}
+              </span>
               <p className="font-medium">{user.industry ?? "—"}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Organizations</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.organizations", "Organizations")}
+              </span>
               <p className="font-medium">{user.orgCount}</p>
             </div>
             <div>
-              <span className="text-muted-foreground">Joined</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.joined", "Joined")}
+              </span>
               <p className="font-medium">
                 {user.createdAt
                   ? new Date(user.createdAt).toLocaleDateString(
@@ -372,7 +394,9 @@ function UserDetailPanel({
               </p>
             </div>
             <div>
-              <span className="text-muted-foreground">Last Active</span>
+              <span className="text-muted-foreground">
+                {t("yallaAdmin.dashboard.lastActive", "Last Active")}
+              </span>
               <p className="font-medium">
                 {user.lastSignedIn
                   ? new Date(user.lastSignedIn).toLocaleDateString(
