@@ -851,13 +851,27 @@ export default function ContinuousCompliance() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">Asset</TableHead>
-                    <TableHead className="text-xs">Type</TableHead>
-                    <TableHead className="text-xs">Region</TableHead>
-                    <TableHead className="text-xs">Tier</TableHead>
-                    <TableHead className="text-xs">Risk Score</TableHead>
-                    <TableHead className="text-xs">Internet</TableHead>
-                    <TableHead className="text-xs">PII</TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.asset", "Asset")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.type", "Type")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.region", "Region")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.tier", "Tier")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.riskScore", "Risk Score")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.internet", "Internet")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.pii", "PII")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -896,7 +910,9 @@ export default function ContinuousCompliance() {
                               <TooltipTrigger>
                                 <Wifi size={14} className="text-orange-500" />
                               </TooltipTrigger>
-                              <TooltipContent>Internet-facing</TooltipContent>
+                              <TooltipContent>
+                                {t("ctem.internetFacing", "Internet-facing")}
+                              </TooltipContent>
                             </Tooltip>
                           ) : (
                             <span className="text-xs text-muted-foreground/40">
@@ -993,12 +1009,24 @@ export default function ContinuousCompliance() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">CVE / Title</TableHead>
-                    <TableHead className="text-xs">Severity</TableHead>
-                    <TableHead className="text-xs">CVSS</TableHead>
-                    <TableHead className="text-xs">Exploit</TableHead>
-                    <TableHead className="text-xs">Discovered</TableHead>
-                    <TableHead className="text-xs">Action</TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.cveTitle", "CVE / Title")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.severity", "Severity")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.cvss", "CVSS")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.exploit", "Exploit")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.discovered", "Discovered")}
+                    </TableHead>
+                    <TableHead className="text-xs">
+                      {t("ctem.action", "Action")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1191,13 +1219,25 @@ export default function ContinuousCompliance() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs">Started</TableHead>
+                      <TableHead className="text-xs">
+                        {t("ctem.started", "Started")}
+                      </TableHead>
                       <TableHead className="text-xs">Status</TableHead>
-                      <TableHead className="text-xs">Triggered by</TableHead>
-                      <TableHead className="text-xs">Assets</TableHead>
-                      <TableHead className="text-xs">Vulns</TableHead>
-                      <TableHead className="text-xs">Avg Score</TableHead>
-                      <TableHead className="text-xs">Drift</TableHead>
+                      <TableHead className="text-xs">
+                        {t("ctem.triggeredBy", "Triggered by")}
+                      </TableHead>
+                      <TableHead className="text-xs">
+                        {t("ctem.assets", "Assets")}
+                      </TableHead>
+                      <TableHead className="text-xs">
+                        {t("ctem.vulns", "Vulns")}
+                      </TableHead>
+                      <TableHead className="text-xs">
+                        {t("ctem.avgScore", "Avg Score")}
+                      </TableHead>
+                      <TableHead className="text-xs">
+                        {t("ctem.drift", "Drift")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1411,7 +1451,7 @@ export default function ContinuousCompliance() {
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="">{t("ctem.none", "None")}</SelectItem>
                       {vendorsQ.data.map((v: any) => (
                         <SelectItem key={v.id} value={String(v.id)}>
                           {v.vendorName}
