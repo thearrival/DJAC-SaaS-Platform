@@ -4389,5 +4389,18 @@ const messages: Record<string, string> = {
   "regulatoryChange.status.inEffect": "시행 중",
   "regulatoryChange.status.pending": "대기 중",
   "regulatoryChange.status.superseded": "대체됨",
+  "common.remove": "제거",
+  "vendorAssessment.insightPreview": "인사이트 미리보기",
+  "serviceRequests.title": "서비스 요청",
+  "home.hero.tool": "도구",
+  "globalRegistry.sourceVerificationInProgress": "출처 확인이 진행 중입니다.",
+  "globalAIAgents.allRegions": "모든 지역",
+  "globalAIAgents.agentOrchestration": "에이전트 오케스트레이션",
+  "lawLibrary.loadingFullArticle": "전체 문서 로드 중…",
+  "lawLibrary.noRecordFound": "기록을 찾을 수 없습니다.",
+  "hero.statusActive": "활성",
+  "hero.brandName": "DJAC 플랫폼",
+  "docsPortal.keyEsc": "Esc",
+  "docsPortal.keyEnter": "Enter",
 };
 export default messages;

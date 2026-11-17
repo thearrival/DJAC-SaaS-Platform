@@ -4450,5 +4450,19 @@ const messages: Record<string, string> = {
   "regulatoryChange.status.inEffect": "In Effect",
   "regulatoryChange.status.pending": "Pending",
   "regulatoryChange.status.superseded": "Superseded",
+  "common.remove": "Remove",
+  "vendorAssessment.insightPreview": "Insight preview",
+  "serviceRequests.title": "Service Requests",
+  "home.hero.tool": "Tool",
+  "globalRegistry.sourceVerificationInProgress":
+    "Source verification is in progress.",
+  "globalAIAgents.allRegions": "All Regions",
+  "globalAIAgents.agentOrchestration": "Agent Orchestration",
+  "lawLibrary.loadingFullArticle": "Loading full article…",
+  "lawLibrary.noRecordFound": "No record found.",
+  "hero.statusActive": "ACTIVE",
+  "hero.brandName": "DJAC Platform",
+  "docsPortal.keyEsc": "Esc",
+  "docsPortal.keyEnter": "Enter",
 };
 export default messages;

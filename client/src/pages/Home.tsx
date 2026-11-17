@@ -342,7 +342,10 @@ export default function Home() {
                 letterSpacing: "-0.025em",
               }}
             >
-              DJAC <span style={{ color: C.cyan }}>Tool</span>
+              DJAC{" "}
+              <span style={{ color: C.cyan }}>
+                {t("home.hero.tool", "Tool")}
+              </span>
             </span>
           </div>
           <div

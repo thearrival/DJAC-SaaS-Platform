@@ -1958,7 +1958,7 @@ export default function DocsPortal() {
             placeholder={ui.palette_placeholder}
             className="djac-docs-palette-input"
           />
-          <kbd>Esc</kbd>
+          <kbd>{t("docsPortal.keyEsc", "Esc")}</kbd>
         </div>
         <div className="djac-docs-palette-results">
           {paletteResults.length === 0 ? (
@@ -1997,10 +1997,10 @@ export default function DocsPortal() {
             <kbd>↓</kbd> {ui.palette_navigate}
           </span>
           <span>
-            <kbd>Enter</kbd> {ui.palette_open}
+            <kbd>{t("docsPortal.keyEnter", "Enter")}</kbd> {ui.palette_open}
           </span>
           <span>
-            <kbd>Esc</kbd> {ui.palette_close}
+            <kbd>{t("docsPortal.keyEsc", "Esc")}</kbd> {ui.palette_close}
           </span>
         </div>
       </div>
@@ -2948,7 +2948,7 @@ export default function DocsPortal() {
                         </tr>
                         <tr>
                           <td>
-                            <kbd>Esc</kbd>
+                            <kbd>{t("docsPortal.keyEsc", "Esc")}</kbd>
                           </td>
                           <td>{ui.sh_close}</td>
                         </tr>

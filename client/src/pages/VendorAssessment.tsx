@@ -1852,7 +1852,9 @@ export default function VendorAssessment() {
               <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-900 p-5 shadow-sm">
                 <div className="flex items-center gap-2 text-foreground dark:text-slate-100">
                   <FileCheck className="h-4 w-4 text-red-600" />
-                  <p className="text-sm font-semibold">Insight preview</p>
+                  <p className="text-sm font-semibold">
+                    {t("vendorAssessment.insightPreview", "Insight preview")}
+                  </p>
                 </div>
                 <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-400">
                   <li>

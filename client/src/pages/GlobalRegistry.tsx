@@ -224,7 +224,12 @@ export default function GlobalRegistry() {
         <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-foreground">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
           <p className="leading-relaxed">
-            <strong>Source verification is in progress.</strong>{" "}
+            <strong>
+              {t(
+                "globalRegistry.sourceVerificationInProgress",
+                "Source verification is in progress."
+              )}
+            </strong>{" "}
             {summary.provenance.verified} of {summary.provenance.total}{" "}
             framework citations currently carry a verified official source
             {summary.provenance.pendingReview > 0 && (

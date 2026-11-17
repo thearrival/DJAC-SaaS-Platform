@@ -200,7 +200,9 @@ function ArticleDetailPanel({
     return (
       <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
         <LoaderCircle className="h-4 w-4 animate-spin" />
-        <span>Loading full article…</span>
+        <span>
+          {t("lawLibrary.loadingFullArticle", "Loading full article…")}
+        </span>
       </div>
     );
   }
@@ -226,7 +228,9 @@ function ArticleDetailPanel({
   const law = q.data;
   if (!law)
     return (
-      <p className="py-3 text-sm text-muted-foreground">No record found.</p>
+      <p className="py-3 text-sm text-muted-foreground">
+        {t("lawLibrary.noRecordFound", "No record found.")}
+      </p>
     );
 
   return (

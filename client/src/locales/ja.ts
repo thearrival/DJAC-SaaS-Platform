@@ -4522,5 +4522,18 @@ const messages: Record<string, string> = {
   "regulatoryChange.status.inEffect": "施行中",
   "regulatoryChange.status.pending": "保留中",
   "regulatoryChange.status.superseded": "置き換え済み",
+  "common.remove": "削除",
+  "vendorAssessment.insightPreview": "インサイトプレビュー",
+  "serviceRequests.title": "サービスリクエスト",
+  "home.hero.tool": "ツール",
+  "globalRegistry.sourceVerificationInProgress": "ソース検証を実行中です。",
+  "globalAIAgents.allRegions": "すべての地域",
+  "globalAIAgents.agentOrchestration": "エージェントオーケストレーション",
+  "lawLibrary.loadingFullArticle": "記事全文を読み込み中…",
+  "lawLibrary.noRecordFound": "レコードが見つかりません。",
+  "hero.statusActive": "稼働中",
+  "hero.brandName": "DJACプラットフォーム",
+  "docsPortal.keyEsc": "Esc",
+  "docsPortal.keyEnter": "Enter",
 };
 export default messages;

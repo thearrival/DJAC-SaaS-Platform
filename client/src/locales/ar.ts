@@ -4392,5 +4392,18 @@ const messages: Record<string, string> = {
   "regulatoryChange.status.inEffect": "ساري المفعول",
   "regulatoryChange.status.pending": "قيد الانتظار",
   "regulatoryChange.status.superseded": "تم استبداله",
+  "common.remove": "إزالة",
+  "vendorAssessment.insightPreview": "معاينة الرؤى",
+  "serviceRequests.title": "طلبات الخدمة",
+  "home.hero.tool": "الأداة",
+  "globalRegistry.sourceVerificationInProgress": "جارٍ التحقق من المصدر.",
+  "globalAIAgents.allRegions": "كل المناطق",
+  "globalAIAgents.agentOrchestration": "تنسيق الوكلاء",
+  "lawLibrary.loadingFullArticle": "جارٍ تحميل المقال الكامل…",
+  "lawLibrary.noRecordFound": "لم يتم العثور على سجل.",
+  "hero.statusActive": "نشط",
+  "hero.brandName": "منصة DJAC",
+  "docsPortal.keyEsc": "Esc",
+  "docsPortal.keyEnter": "Enter",
 };
 export default messages;

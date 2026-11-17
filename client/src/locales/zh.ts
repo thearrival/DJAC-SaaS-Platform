@@ -4173,5 +4173,18 @@ const messages: Record<string, string> = {
   "regulatoryChange.status.inEffect": "已生效",
   "regulatoryChange.status.pending": "待定",
   "regulatoryChange.status.superseded": "已取代",
+  "common.remove": "移除",
+  "vendorAssessment.insightPreview": "洞察预览",
+  "serviceRequests.title": "服务请求",
+  "home.hero.tool": "工具",
+  "globalRegistry.sourceVerificationInProgress": "来源验证正在进行中。",
+  "globalAIAgents.allRegions": "所有地区",
+  "globalAIAgents.agentOrchestration": "代理编排",
+  "lawLibrary.loadingFullArticle": "正在加载完整文章…",
+  "lawLibrary.noRecordFound": "未找到记录。",
+  "hero.statusActive": "活跃",
+  "hero.brandName": "DJAC 平台",
+  "docsPortal.keyEsc": "Esc",
+  "docsPortal.keyEnter": "Enter",
 };
 export default messages;

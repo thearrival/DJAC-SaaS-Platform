@@ -683,7 +683,9 @@ function DataFeed() {
             className="w-1.5 h-1.5 rounded-full bg-green-400"
             style={{ animation: "glow-green 1.6s ease-in-out infinite" }}
           />
-          <span className="text-xs font-mono text-green-400">ACTIVE</span>
+          <span className="text-xs font-mono text-green-400">
+            {t("hero.statusActive", "ACTIVE")}
+          </span>
         </div>
       </div>
 
@@ -1363,7 +1365,9 @@ export default function DJACHero() {
               >
                 <Shield size={16} color="white" />
               </div>
-              <span className="font-bold text-sm">DJAC Platform</span>
+              <span className="font-bold text-sm">
+                {t("hero.brandName", "DJAC Platform")}
+              </span>
               <span
                 className="text-xs font-mono"
                 style={{ color: "hsl(var(--muted-foreground))" }}

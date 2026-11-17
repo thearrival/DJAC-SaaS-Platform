@@ -233,7 +233,9 @@ export default function ServiceRequests() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Service Requests</h1>
+          <h1 className="text-2xl font-bold text-white">
+            {t("serviceRequests.title", "Service Requests")}
+          </h1>
           <p className="text-sm text-zinc-400 mt-1">
             Request cybersecurity services from the Yalla-Hack team
           </p>

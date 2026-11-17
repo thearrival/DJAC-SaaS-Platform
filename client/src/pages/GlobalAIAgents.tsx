@@ -152,7 +152,9 @@ export default function GlobalAIAgents() {
           value={regionFilter}
           onChange={e => setRegionFilter(e.target.value)}
         >
-          <option value="all">All Regions</option>
+          <option value="all">
+            {t("globalAIAgents.allRegions", "All Regions")}
+          </option>
           {regions.map(r => (
             <option key={r} value={r}>
               {r}
@@ -211,7 +213,9 @@ export default function GlobalAIAgents() {
           <div className="flex items-start gap-3">
             <MessageSquareText className="h-5 w-5 text-primary mt-0.5" />
             <div>
-              <h3 className="font-semibold text-sm">Agent Orchestration</h3>
+              <h3 className="font-semibold text-sm">
+                {t("globalAIAgents.agentOrchestration", "Agent Orchestration")}
+              </h3>
               <p className="text-sm text-muted-foreground mt-1">
                 All agents communicate through the existing orchestration layer
                 using modular, event-driven workflows. Agent outputs are

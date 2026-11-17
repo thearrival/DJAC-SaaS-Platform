@@ -835,7 +835,9 @@ export default function DataSubjectRequests() {
                               )}
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Remove</TooltipContent>
+                          <TooltipContent>
+                            {t("common.remove", "Remove")}
+                          </TooltipContent>
                         </Tooltip>
                       </TableCell>
                     </TableRow>

@@ -4642,5 +4642,19 @@ const messages: Record<string, string> = {
   "regulatoryChange.status.inEffect": "En vigor",
   "regulatoryChange.status.pending": "Pendiente",
   "regulatoryChange.status.superseded": "Reemplazado",
+  "common.remove": "Eliminar",
+  "vendorAssessment.insightPreview": "Vista previa de insights",
+  "serviceRequests.title": "Solicitudes de servicio",
+  "home.hero.tool": "Herramienta",
+  "globalRegistry.sourceVerificationInProgress":
+    "La verificación de la fuente está en curso.",
+  "globalAIAgents.allRegions": "Todas las regiones",
+  "globalAIAgents.agentOrchestration": "Orquestación de agentes",
+  "lawLibrary.loadingFullArticle": "Cargando artículo completo…",
+  "lawLibrary.noRecordFound": "No se encontró ningún registro.",
+  "hero.statusActive": "ACTIVO",
+  "hero.brandName": "Plataforma DJAC",
+  "docsPortal.keyEsc": "Esc",
+  "docsPortal.keyEnter": "Intro",
 };
 export default messages;
