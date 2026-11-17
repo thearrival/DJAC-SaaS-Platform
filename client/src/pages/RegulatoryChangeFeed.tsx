@@ -261,11 +261,21 @@ export default function RegulatoryChangeFeed() {
             <SelectItem value="all">
               {t("regulatoryChange.allTypes", "All Types")}
             </SelectItem>
-            <SelectItem value="amendment">Amendment</SelectItem>
-            <SelectItem value="new_regulation">New Regulation</SelectItem>
-            <SelectItem value="repeal">Repeal</SelectItem>
-            <SelectItem value="guidance">Guidance</SelectItem>
-            <SelectItem value="enforcement">Enforcement</SelectItem>
+            <SelectItem value="amendment">
+              {t("regulatoryChange.type.amendment", "Amendment")}
+            </SelectItem>
+            <SelectItem value="new_regulation">
+              {t("regulatoryChange.type.newRegulation", "New Regulation")}
+            </SelectItem>
+            <SelectItem value="repeal">
+              {t("regulatoryChange.type.repeal", "Repeal")}
+            </SelectItem>
+            <SelectItem value="guidance">
+              {t("regulatoryChange.type.guidance", "Guidance")}
+            </SelectItem>
+            <SelectItem value="enforcement">
+              {t("regulatoryChange.type.enforcement", "Enforcement")}
+            </SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -278,9 +288,15 @@ export default function RegulatoryChangeFeed() {
             <SelectItem value="all">
               {t("regulatoryChange.allStatus", "All Status")}
             </SelectItem>
-            <SelectItem value="in_effect">In Effect</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="superseded">Superseded</SelectItem>
+            <SelectItem value="in_effect">
+              {t("regulatoryChange.status.inEffect", "In Effect")}
+            </SelectItem>
+            <SelectItem value="pending">
+              {t("regulatoryChange.status.pending", "Pending")}
+            </SelectItem>
+            <SelectItem value="superseded">
+              {t("regulatoryChange.status.superseded", "Superseded")}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>

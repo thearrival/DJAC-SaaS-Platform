@@ -4504,5 +4504,23 @@ const messages: Record<string, string> = {
   "ctem.avgScore": "平均スコア",
   "ctem.drift": "ドリフト",
   "ctem.none": "なし",
+  "securityMaturity.title": "セキュリティ成熟度",
+  "securityMaturity.loadFailed":
+    "セキュリティ成熟度データの読み込みに失敗しました。",
+  "securityMaturity.initial": "初期",
+  "securityMaturity.optimized": "最適化",
+  "securityMaturity.noAssessments": "まだ評価はありません。",
+  "securityMaturity.assessmentTitle": "評価タイトル",
+  "securityMaturity.domainScores": "ドメインスコア",
+  "securityMaturity.deleteAssessment": "評価を削除",
+  "securityMaturity.cancel": "キャンセル",
+  "regulatoryChange.type.amendment": "改正",
+  "regulatoryChange.type.newRegulation": "新規制",
+  "regulatoryChange.type.repeal": "廃止",
+  "regulatoryChange.type.guidance": "ガイダンス",
+  "regulatoryChange.type.enforcement": "執行",
+  "regulatoryChange.status.inEffect": "施行中",
+  "regulatoryChange.status.pending": "保留中",
+  "regulatoryChange.status.superseded": "置き換え済み",
 };
 export default messages;

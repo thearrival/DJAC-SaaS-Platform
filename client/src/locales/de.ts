@@ -4607,5 +4607,23 @@ const messages: Record<string, string> = {
   "ctem.avgScore": "Ø-Score",
   "ctem.drift": "Drift",
   "ctem.none": "Keine",
+  "securityMaturity.title": "Sicherheitsreife",
+  "securityMaturity.loadFailed":
+    "Sicherheitsreifedaten konnten nicht geladen werden.",
+  "securityMaturity.initial": "Initial",
+  "securityMaturity.optimized": "Optimiert",
+  "securityMaturity.noAssessments": "Noch keine Bewertungen.",
+  "securityMaturity.assessmentTitle": "Bewertungstitel",
+  "securityMaturity.domainScores": "Domänenbewertungen",
+  "securityMaturity.deleteAssessment": "Bewertung löschen",
+  "securityMaturity.cancel": "Abbrechen",
+  "regulatoryChange.type.amendment": "Änderung",
+  "regulatoryChange.type.newRegulation": "Neue Regulierung",
+  "regulatoryChange.type.repeal": "Aufhebung",
+  "regulatoryChange.type.guidance": "Leitlinie",
+  "regulatoryChange.type.enforcement": "Durchsetzung",
+  "regulatoryChange.status.inEffect": "In Kraft",
+  "regulatoryChange.status.pending": "Ausstehend",
+  "regulatoryChange.status.superseded": "Ersetzt",
 };
 export default messages;

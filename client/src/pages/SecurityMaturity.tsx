@@ -220,7 +220,9 @@ export default function SecurityMaturity() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Security Maturity</h1>
+          <h1 className="text-2xl font-bold text-white">
+            {t("securityMaturity.title", "Security Maturity")}
+          </h1>
           <p className="text-sm text-zinc-400 mt-1">
             Assess your organization's cybersecurity maturity across 10 domains
           </p>
@@ -234,7 +236,12 @@ export default function SecurityMaturity() {
       {hasLoadError && (
         <Card className="bg-zinc-900 border-zinc-800">
           <CardContent className="py-6 text-center text-zinc-400">
-            <p>Failed to load security maturity data.</p>
+            <p>
+              {t(
+                "securityMaturity.loadFailed",
+                "Failed to load security maturity data."
+              )}
+            </p>
             <Button
               variant="outline"
               size="sm"
@@ -276,8 +283,8 @@ export default function SecurityMaturity() {
               {/* Progress bar */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs text-zinc-500">
-                  <span>Initial</span>
-                  <span>Optimized</span>
+                  <span>{t("securityMaturity.initial", "Initial")}</span>
+                  <span>{t("securityMaturity.optimized", "Optimized")}</span>
                 </div>
                 <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                   <div
@@ -359,7 +366,9 @@ export default function SecurityMaturity() {
         <Card className="bg-zinc-900 border-zinc-800">
           <CardContent className="py-16 text-center">
             <Shield className="size-12 mx-auto mb-3 text-zinc-700" />
-            <p className="text-zinc-400">No assessments yet.</p>
+            <p className="text-zinc-400">
+              {t("securityMaturity.noAssessments", "No assessments yet.")}
+            </p>
             <p className="text-xs text-zinc-600 mt-1">
               Create your first security maturity assessment to get started.
             </p>
@@ -455,7 +464,9 @@ export default function SecurityMaturity() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Assessment Title</Label>
+                <Label>
+                  {t("securityMaturity.assessmentTitle", "Assessment Title")}
+                </Label>
                 <Input
                   placeholder={t(
                     "securityMaturity.placeholder.title",
@@ -499,7 +510,9 @@ export default function SecurityMaturity() {
 
             {/* Domain scores */}
             <div className="space-y-3">
-              <h4 className="text-sm font-medium text-white">Domain Scores</h4>
+              <h4 className="text-sm font-medium text-white">
+                {t("securityMaturity.domainScores", "Domain Scores")}
+              </h4>
               <div className="grid gap-3">
                 {DOMAINS.map(({ key, label }) => (
                   <div
@@ -601,14 +614,18 @@ export default function SecurityMaturity() {
       >
         <AlertDialogContent className="bg-zinc-900 border-zinc-800">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Assessment</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("securityMaturity.deleteAssessment", "Delete Assessment")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               This assessment snapshot will be permanently deleted. This action
               cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("securityMaturity.cancel", "Cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
               onClick={() =>

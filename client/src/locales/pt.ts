@@ -4587,5 +4587,23 @@ const messages: Record<string, string> = {
   "ctem.avgScore": "Pont. média",
   "ctem.drift": "Desvio",
   "ctem.none": "Nenhum",
+  "securityMaturity.title": "Maturidade de segurança",
+  "securityMaturity.loadFailed":
+    "Falha ao carregar dados de maturidade de segurança.",
+  "securityMaturity.initial": "Inicial",
+  "securityMaturity.optimized": "Otimizado",
+  "securityMaturity.noAssessments": "Nenhuma avaliação ainda.",
+  "securityMaturity.assessmentTitle": "Título da avaliação",
+  "securityMaturity.domainScores": "Pontuações por domínio",
+  "securityMaturity.deleteAssessment": "Excluir avaliação",
+  "securityMaturity.cancel": "Cancelar",
+  "regulatoryChange.type.amendment": "Emenda",
+  "regulatoryChange.type.newRegulation": "Nova regulamentação",
+  "regulatoryChange.type.repeal": "Revogação",
+  "regulatoryChange.type.guidance": "Orientação",
+  "regulatoryChange.type.enforcement": "Fiscalização",
+  "regulatoryChange.status.inEffect": "Em vigor",
+  "regulatoryChange.status.pending": "Pendente",
+  "regulatoryChange.status.superseded": "Substituído",
 };
 export default messages;
