@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useLocale } from "@/contexts/useLocale";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -69,15 +70,18 @@ function PaginationPrevious({
   className,
   ...props
 }: React.ComponentProps<typeof PaginationLink>) {
+  const { t } = useLocale();
   return (
     <PaginationLink
-      aria-label="Go to previous page"
+      aria-label={t("pagination.previousPage", "Go to previous page")}
       size="default"
       className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="hidden sm:block">Previous</span>
+      <span className="hidden sm:block">
+        {t("common.previous", "Previous")}
+      </span>
     </PaginationLink>
   );
 }
@@ -86,14 +90,15 @@ function PaginationNext({
   className,
   ...props
 }: React.ComponentProps<typeof PaginationLink>) {
+  const { t } = useLocale();
   return (
     <PaginationLink
-      aria-label="Go to next page"
+      aria-label={t("pagination.nextPage", "Go to next page")}
       size="default"
       className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
       {...props}
     >
-      <span className="hidden sm:block">Next</span>
+      <span className="hidden sm:block">{t("common.next", "Next")}</span>
       <ChevronRightIcon />
     </PaginationLink>
   );

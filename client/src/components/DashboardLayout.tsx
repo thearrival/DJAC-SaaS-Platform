@@ -941,10 +941,15 @@ function DashboardLayoutContent({
               <button
                 onClick={() => setCmdOpen(true)}
                 className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-border hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Search — open command palette"
+                aria-label={t(
+                  "common.searchOpenPalette",
+                  "Search — open command palette"
+                )}
               >
                 <Search className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Search</span>
+                <span className="hidden sm:inline">
+                  {t("common.search", "Search")}
+                </span>
               </button>
               <NotificationCenter />
               <ThemeToggle />
@@ -1021,7 +1026,7 @@ function DashboardLayoutContent({
                 <div className="flex items-center justify-center min-h-[40vh]">
                   <div
                     className="djac-page-spinner"
-                    aria-label="Loading page"
+                    aria-label={t("common.loadingPage", "Loading page")}
                     role="status"
                   />
                 </div>

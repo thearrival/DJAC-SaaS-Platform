@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { useLocale } from "@/contexts/useLocale";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -210,6 +211,7 @@ export function Globe3D({
   onSelect?: (sel: GlobeSelection) => void;
   className?: string;
 }) {
+  const { t } = useLocale();
   const ref = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<{
     x: number;
@@ -1225,7 +1227,7 @@ export function Globe3D({
       <button
         type="button"
         onClick={downloadPng}
-        aria-label="Download globe as PNG"
+        aria-label={t("globe.downloadPng", "Download globe as PNG")}
         style={{
           position: "absolute",
           right: 8,
@@ -1246,7 +1248,7 @@ export function Globe3D({
       <button
         type="button"
         onClick={downloadReport}
-        aria-label="Download one-page report"
+        aria-label={t("globe.downloadReport", "Download one-page report")}
         style={{
           position: "absolute",
           right: 8,
@@ -1267,7 +1269,7 @@ export function Globe3D({
       <button
         type="button"
         onClick={() => resetRef.current()}
-        aria-label="Reset view"
+        aria-label={t("globe.resetView", "Reset view")}
         style={{
           position: "absolute",
           left: 8,
@@ -1323,7 +1325,7 @@ export function Globe3D({
           padding: 2,
         }}
         role="group"
-        aria-label="Tour speed"
+        aria-label={t("globe.tourSpeed", "Tour speed")}
       >
         {[0.5, 1, 2].map(s => (
           <button

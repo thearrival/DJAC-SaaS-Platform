@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { Link } from "wouter";
 import {
   X,
@@ -11,6 +12,7 @@ import {
 const STORAGE_KEY = "djac_welcome_banner_dismissed";
 
 export function WelcomeBanner() {
+  const { t } = useLocale();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -116,7 +118,7 @@ export function WelcomeBanner() {
           alignItems: "center",
           justifyContent: "center",
         }}
-        aria-label="Dismiss"
+        aria-label={t("common.dismiss", "Dismiss")}
       >
         <X size={16} color="#fff" />
       </button>

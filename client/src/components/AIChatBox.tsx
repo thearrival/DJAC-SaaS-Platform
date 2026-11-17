@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Loader2, Send, User, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -121,6 +122,7 @@ export function AIChatBox({
   emptyStateMessage = "Start a conversation with AI",
   suggestedPrompts,
 }: AIChatBoxProps) {
+  const { t } = useLocale();
   const [input, setInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -234,7 +236,7 @@ export function AIChatBox({
               className="flex flex-col space-y-4 p-4"
               role="log"
               aria-live="polite"
-              aria-label="AI conversation"
+              aria-label={t("aiChat.conversation", "AI conversation")}
             >
               {displayMessages.map((message, index) => {
                 // Apply min-height to last message only if NOT loading (when loading, the loading indicator gets it)
@@ -328,7 +330,7 @@ export function AIChatBox({
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            aria-label="Chat message input"
+            aria-label={t("aiChat.messageInput", "Chat message input")}
             aria-describedby="chat-input-hint"
             className="flex-1 max-h-32 resize-none min-h-9"
             rows={1}
@@ -337,7 +339,11 @@ export function AIChatBox({
             type="submit"
             size="icon"
             disabled={!input.trim() || isLoading}
-            aria-label={isLoading ? "Sending message" : "Send message"}
+            aria-label={
+              isLoading
+                ? t("aiChat.sendingMessage", "Sending message")
+                : t("aiChat.sendMessage", "Send message")
+            }
             className="shrink-0 h-[38px] w-[38px]"
           >
             {isLoading ? (

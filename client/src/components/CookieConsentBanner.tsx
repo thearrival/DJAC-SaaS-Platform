@@ -9,6 +9,7 @@
  * This banner is required by EU/KSA/China privacy regulations as notice.
  */
 import { useState, useEffect } from "react";
+import { useLocale } from "@/contexts/useLocale";
 import { Cookie } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -18,6 +19,7 @@ const CONSENT_KEY = "djac_cookie_consent";
 const EXEMPT_PATHS = ["/privacy", "/terms"];
 
 export function CookieConsentBanner() {
+  const { t } = useLocale();
   const [visible, setVisible] = useState(false);
   const [location] = useLocation();
 
@@ -43,7 +45,7 @@ export function CookieConsentBanner() {
     <div
       role="dialog"
       aria-live="polite"
-      aria-label="Cookie consent"
+      aria-label={t("cookieConsent.ariaLabel", "Cookie consent")}
       style={{
         position: "fixed",
         bottom: 20,

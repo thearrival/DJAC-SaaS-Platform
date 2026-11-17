@@ -4584,5 +4584,23 @@ const messages: Record<string, string> = {
   "hero.card.rbac.item3":
     "Tokens de compartición con proveedores con caducidad",
   "hero.card.rbac.item4": "Relaciones de supervisión regulatoria",
+  "common.loadingPage": "Cargando página",
+  "common.dismiss": "Descartar",
+  "common.previous": "Anterior",
+  "common.next": "Siguiente",
+  "common.toggleSidebar": "Alternar barra lateral",
+  "common.searchOpenPalette": "Buscar — abrir paleta de comandos",
+  "common.search": "Buscar",
+  "aiChat.conversation": "Conversación de IA",
+  "aiChat.messageInput": "Entrada de mensaje de chat",
+  "cookieConsent.ariaLabel": "Consentimiento de cookies",
+  "globe.downloadPng": "Descargar globo como PNG",
+  "globe.downloadReport": "Descargar informe de una página",
+  "globe.resetView": "Restablecer vista",
+  "globe.tourSpeed": "Velocidad del recorrido",
+  "aiChat.sendingMessage": "Enviando mensaje",
+  "aiChat.sendMessage": "Enviar mensaje",
+  "pagination.previousPage": "Ir a la página anterior",
+  "pagination.nextPage": "Ir a la página siguiente",
 };
 export default messages;

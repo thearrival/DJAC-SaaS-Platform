@@ -10,6 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
 import { resolveDefaultThemeForPath } from "@shared/themePolicy";
 import { robotsDirectiveForPath } from "./lib/seoPolicy";
+import { useLocale } from "./contexts/useLocale";
 
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
 const ParticleField = lazy(() =>
@@ -143,6 +144,7 @@ const CrossBorderDataFlow = lazy(() => import("./pages/CrossBorderDataFlow"));
 // Root route: redirect already-authenticated users straight to /dashboard;
 // non-authenticated users see the Signup/Login page.
 function RootRoute() {
+  const { t } = useLocale();
   const [, navigate] = useLocation();
   const meQuery = trpc.localAuth.me.useQuery(undefined, {
     retry: false,
@@ -158,7 +160,11 @@ function RootRoute() {
   if (meQuery.isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
-        <div className="djac-page-spinner" aria-label="Loading" role="status" />
+        <div
+          className="djac-page-spinner"
+          aria-label={t("common.loading", "Loading")}
+          role="status"
+        />
       </div>
     );
   }
@@ -571,6 +577,7 @@ function Router() {
 }
 
 function ThemedAppShell() {
+  const { t } = useLocale();
   const [location] = useLocation();
   const defaultTheme = resolveDefaultThemeForPath(location);
 
@@ -593,7 +600,7 @@ function ThemedAppShell() {
             <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
               <div
                 className="djac-page-spinner"
-                aria-label="Loading"
+                aria-label={t("common.loading", "Loading")}
                 role="status"
               />
             </div>
