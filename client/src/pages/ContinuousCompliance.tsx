@@ -1139,11 +1139,15 @@ export default function ContinuousCompliance() {
               {lastRun && (
                 <div className="rounded-md border p-3 text-xs space-y-1.5">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Last scan</span>
+                    <span className="text-muted-foreground">
+                      {t("ctem.lastScan", "Last scan")}
+                    </span>
                     <span>{formatRunTime(lastRun.startedAt)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status</span>
+                    <span className="text-muted-foreground">
+                      {t("ctem.status", "Status")}
+                    </span>
                     <Badge variant="outline" className="text-[10px]">
                       {lastRun.runStatus}
                     </Badge>
@@ -1155,12 +1159,16 @@ export default function ContinuousCompliance() {
                     <span>{lastRun.assetsScanned ?? "—"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Vulns found</span>
+                    <span className="text-muted-foreground">
+                      {t("ctem.vulnsFound", "Vulns found")}
+                    </span>
                     <span>{lastRun.vulnsFound ?? "—"}</span>
                   </div>
                   {lastRun.alertRaised ? (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Alert</span>
+                      <span className="text-muted-foreground">
+                        {t("ctem.alert", "Alert")}
+                      </span>
                       <Badge
                         variant="outline"
                         className="bg-red-500/10 text-red-500 border-red-500/30 text-[10px]"
