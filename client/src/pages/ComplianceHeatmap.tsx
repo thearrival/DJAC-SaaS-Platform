@@ -291,8 +291,8 @@ function DetailPanel({ cell, source, target, onClose }: DetailPanelProps) {
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function ComplianceHeatmap() {
-  usePageTitle("Compliance Heatmap");
   const { t } = useLocale();
+  usePageTitle(t("complianceHeatmap.pageTitle", "Compliance Heatmap"));
   const [activeFilter, setActiveFilter] = useState<RelationshipType | "all">(
     "all"
   );

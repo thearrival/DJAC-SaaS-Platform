@@ -559,8 +559,8 @@ function InfoPanel({
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function SaaSMetrics() {
-  usePageTitle("SaaS Metrics");
   const { t } = useLocale();
+  usePageTitle(t("saasMetrics.pageTitle", "SaaS Metrics"));
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -682,7 +682,11 @@ export default function SaaSMetrics() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             {[
-              { l: "Rule of 40", href: "#rule40", c: C.purple },
+              {
+                l: t("saasMetrics.ruleOf40", "Rule of 40"),
+                href: "#rule40",
+                c: C.purple,
+              },
               { l: "Calculators", href: "#calculators", c: C.cyan },
               { l: "Advanced", href: "#advanced", c: C.green },
             ].map(b => (
@@ -889,7 +893,7 @@ export default function SaaSMetrics() {
           }}
         >
           <MetricCard
-            label="Monthly Recurring Revenue (MRR)"
+            label={t("saasMetrics.mrr", "Monthly Recurring Revenue (MRR)")}
             value="—"
             sub="Total customers × Avg revenue / month"
             accent={C.green}
@@ -899,7 +903,7 @@ export default function SaaSMetrics() {
             formula="MRR = Total Customers × Avg Revenue per Customer per Month"
           />
           <MetricCard
-            label="Annual Recurring Revenue (ARR)"
+            label={t("saasMetrics.arr", "Annual Recurring Revenue (ARR)")}
             value="—"
             sub="MRR × 12 — long-term view"
             accent={C.cyan}
@@ -909,16 +913,19 @@ export default function SaaSMetrics() {
             formula="ARR = MRR × 12"
           />
           <MetricCard
-            label="Compliance ARR Equivalent"
+            label={t("saasMetrics.complianceArr", "Compliance ARR Equivalent")}
             value={`${liveKpis.fwCount} Frameworks`}
-            sub="Active regulatory engagement units"
+            sub={t(
+              "saasMetrics.complianceArrSub",
+              "Active regulatory engagement units"
+            )}
             accent={C.blue}
             icon={<Globe2 style={{ width: 18, height: 18, color: C.blue }} />}
             trend="up"
-            trendValue="Live"
+            trendValue={t("saasMetrics.live", "Live")}
           />
           <MetricCard
-            label="Logo Churn Rate"
+            label={t("saasMetrics.logoChurn", "Logo Churn Rate")}
             value="—"
             sub="Customers lost ÷ customers at start of period"
             accent={C.red}
@@ -928,7 +935,7 @@ export default function SaaSMetrics() {
             formula="Logo Churn = Customers Lost / Customers at Start"
           />
           <MetricCard
-            label="Revenue Churn Rate"
+            label={t("saasMetrics.revenueChurn", "Revenue Churn Rate")}
             value="—"
             sub="Revenue lost from churn ÷ total start revenue"
             accent={C.orange}
@@ -938,7 +945,7 @@ export default function SaaSMetrics() {
             formula="Revenue Churn = Revenue Lost from Churned Customers / Total Revenue at Start"
           />
           <MetricCard
-            label="Customer Lifetime Value (LTV)"
+            label={t("saasMetrics.ltv", "Customer Lifetime Value (LTV)")}
             value="—"
             sub="Avg MRR × Customer lifetime months − support cost"
             accent={C.yellow}
@@ -969,7 +976,7 @@ export default function SaaSMetrics() {
           }}
         >
           <MetricCard
-            label="Customer Acquisition Cost (CAC)"
+            label={t("saasMetrics.cac", "Customer Acquisition Cost (CAC)")}
             value="—"
             sub="Total sales & marketing spend ÷ new customers acquired"
             accent={C.purple}
@@ -979,9 +986,12 @@ export default function SaaSMetrics() {
             formula="CAC = Total Sales & Marketing Costs / Customers Acquired"
           />
           <MetricCard
-            label="CAC Payback Period"
+            label={t("saasMetrics.cacPayback", "CAC Payback Period")}
             value="—"
-            sub="Months to recover acquisition cost"
+            sub={t(
+              "saasMetrics.cacPaybackSub",
+              "Months to recover acquisition cost"
+            )}
             accent={C.cyan}
             icon={
               <RefreshCw style={{ width: 18, height: 18, color: C.cyan }} />
@@ -989,9 +999,9 @@ export default function SaaSMetrics() {
             formula="CAC Payback = CAC / (Avg MRR per Customer × Gross Margin %)"
           />
           <MetricCard
-            label="CAC : LTV Ratio"
+            label={t("saasMetrics.cacLtv", "CAC : LTV Ratio")}
             value="—"
-            sub="Healthy benchmark: 1:3 or better"
+            sub={t("saasMetrics.cacLtvSub", "Healthy benchmark: 1:3 or better")}
             accent={C.green}
             icon={
               <TrendingUp style={{ width: 18, height: 18, color: C.green }} />
@@ -999,7 +1009,7 @@ export default function SaaSMetrics() {
             formula="CAC:LTV = CAC / LTV  |  Target: ≥1:3"
           />
           <MetricCard
-            label="Net Revenue Retention (NRR)"
+            label={t("saasMetrics.nrr", "Net Revenue Retention (NRR)")}
             value="—"
             sub="Accounts for upgrades, downgrades & churn — >100% = growth"
             accent={C.yellow}
@@ -1009,7 +1019,7 @@ export default function SaaSMetrics() {
             formula="NRR = (Starting MRR + Expansion − Contraction − Churn) / Starting MRR"
           />
           <MetricCard
-            label="Gross Revenue Retention (GRR)"
+            label={t("saasMetrics.grr", "Gross Revenue Retention (GRR)")}
             value="—"
             sub="Revenue retained excluding upsell — max 100%"
             accent={C.orange}
@@ -1021,7 +1031,10 @@ export default function SaaSMetrics() {
             formula="GRR = (Starting MRR − Contraction − Churn) / Starting MRR"
           />
           <MetricCard
-            label="Conflict-to-Remediation Rate"
+            label={t(
+              "saasMetrics.conflictRemediation",
+              "Conflict-to-Remediation Rate"
+            )}
             value={
               liveKpis.totalPairs > 0 ? pct(100 - liveKpis.conflictChurn) : "—"
             }
@@ -1068,17 +1081,17 @@ export default function SaaSMetrics() {
             fields={[
               {
                 key: "customers",
-                label: "Total Customers",
+                label: t("saasMetrics.totalCustomers", "Total Customers"),
                 placeholder: "e.g. 150",
               },
               {
                 key: "avgRev",
-                label: "Avg Revenue / Month",
+                label: t("saasMetrics.avgRevenueMonth", "Avg Revenue / Month"),
                 placeholder: "e.g. 200",
                 prefix: "$",
               },
             ]}
-            resultLabel="MRR / ARR"
+            resultLabel={t("saasMetrics.mrrArr", "MRR / ARR")}
             formulaLine="MRR = Customers × Avg Rev   |   ARR = MRR × 12"
             compute={({ customers, avgRev }) => {
               const mrr = customers * avgRev;
@@ -1092,18 +1105,24 @@ export default function SaaSMetrics() {
             fields={[
               {
                 key: "avgMrr",
-                label: "Avg MRR / Customer",
+                label: t("saasMetrics.avgMrrCustomer", "Avg MRR / Customer"),
                 placeholder: "e.g. 200",
                 prefix: "$",
               },
               {
                 key: "lifetimeMonths",
-                label: "Avg Lifetime (months)",
+                label: t(
+                  "saasMetrics.avgLifetimeMonths",
+                  "Avg Lifetime (months)"
+                ),
                 placeholder: "e.g. 36",
               },
               {
                 key: "supportCost",
-                label: "Support Cost/Customer",
+                label: t(
+                  "saasMetrics.supportCostCustomer",
+                  "Support Cost/Customer"
+                ),
                 placeholder: "e.g. 200",
                 prefix: "$",
               },
@@ -1127,12 +1146,15 @@ export default function SaaSMetrics() {
               },
               {
                 key: "newCustomers",
-                label: "New Customers Acquired",
+                label: t(
+                  "saasMetrics.newCustomersAcquired",
+                  "New Customers Acquired"
+                ),
                 placeholder: "e.g. 50",
               },
               {
                 key: "ltv",
-                label: "LTV (from above)",
+                label: t("saasMetrics.ltvFromAbove", "LTV (from above)"),
                 placeholder: "e.g. 7200",
                 prefix: "$",
               },
@@ -1150,10 +1172,14 @@ export default function SaaSMetrics() {
             title={t("saasMetrics.calc.churn", "Churn Rate Calculator")}
             accent={C.red}
             fields={[
-              { key: "lost", label: "Customers Lost", placeholder: "e.g. 5" },
+              {
+                key: "lost",
+                label: t("saasMetrics.customersLost", "Customers Lost"),
+                placeholder: "e.g. 5",
+              },
               {
                 key: "startCustomers",
-                label: "Customers at Start",
+                label: t("saasMetrics.customersAtStart", "Customers at Start"),
                 placeholder: "e.g. 200",
               },
               {
@@ -1242,7 +1268,7 @@ export default function SaaSMetrics() {
                 suffix: "%",
               },
             ]}
-            resultLabel="Payback Period"
+            resultLabel={t("saasMetrics.paybackPeriod", "Payback Period")}
             formulaLine="CAC Payback = CAC / (MRR × Gross Margin %)"
             compute={({ cac, mrrPerCust, grossMargin }) => {
               const denom = mrrPerCust * (grossMargin / 100);
@@ -1292,7 +1318,7 @@ export default function SaaSMetrics() {
                 suffix: "%",
               },
             ]}
-            resultLabel="Rule of 40 Score"
+            resultLabel={t("saasMetrics.ruleOf40Score", "Rule of 40 Score")}
             formulaLine="Score = Revenue Growth % + Profit Margin %  |  Target: ≥40"
             compute={({ revenueGrowth, profitMargin }) => {
               const score = revenueGrowth + profitMargin;
@@ -1320,7 +1346,7 @@ export default function SaaSMetrics() {
                 prefix: "$",
               },
             ]}
-            resultLabel="Magic Number"
+            resultLabel={t("saasMetrics.magicNumber", "Magic Number")}
             formulaLine="Magic Number = LTV / CAC  |  >1.0 = sustainable growth"
             compute={({ ltv, cac }) => {
               if (cac === 0) return "—";
@@ -1349,7 +1375,7 @@ export default function SaaSMetrics() {
                 prefix: "$",
               },
             ]}
-            resultLabel="Burn Multiple"
+            resultLabel={t("saasMetrics.burnMultiple", "Burn Multiple")}
             formulaLine="Burn Multiple = Burn Rate / Net New ARR  |  <1.5 = efficient"
             compute={({ burnRate, newARR }) => {
               if (newARR === 0) return "—";
@@ -1366,17 +1392,26 @@ export default function SaaSMetrics() {
             fields={[
               {
                 key: "mrrGrowth",
-                label: "MRR Growth (consecutive months)",
+                label: t(
+                  "saasMetrics.mrrGrowthConsecutive",
+                  "MRR Growth (consecutive months)"
+                ),
                 placeholder: "e.g. 3",
               },
               {
                 key: "retentionMonths",
-                label: "Retention Run Streak (months)",
+                label: t(
+                  "saasMetrics.retentionRunStreak",
+                  "Retention Run Streak (months)"
+                ),
                 placeholder: "e.g. 3",
               },
               {
                 key: "salesGrowth",
-                label: "Sales Growth Streak",
+                label: t(
+                  "saasMetrics.salesGrowthStreak",
+                  "Sales Growth Streak"
+                ),
                 placeholder: "e.g. 2",
               },
             ]}
@@ -1426,7 +1461,7 @@ export default function SaaSMetrics() {
             title={t("saasMetrics.calc.cohortAnalysis", "Cohort Analysis")}
             body="Track customer groups by sign-up date to assess retention trends, LTV by segment, and onboarding effectiveness over time. Surfaces which cohorts retain best and where drop-off occurs."
             badges={[
-              "Retention Trends",
+              t("saasMetrics.retentionTrends", "Retention Trends"),
               "LTV by Segment",
               "Onboarding Signals",
             ]}
