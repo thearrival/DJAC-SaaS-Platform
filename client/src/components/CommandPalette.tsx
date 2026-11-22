@@ -73,290 +73,305 @@ interface NavEntry {
   keywords?: string;
 }
 
-const NAV: NavEntry[] = [
-  // Overview
-  {
-    icon: LayoutDashboard,
-    label: "Dashboard",
-    path: "/dashboard",
-    group: "Overview",
-  },
-  // Global Intelligence
-  {
-    icon: Globe,
-    label: "Global Registry",
-    path: "/global-registry",
-    group: "Global Intelligence",
-    keywords: "regulatory frameworks standards jurisdictions regions",
-  },
-  {
-    icon: Network,
-    label: "Knowledge Graph",
-    path: "/knowledge-graph",
-    group: "Global Intelligence",
-    keywords: "graph visualization connections nodes edges",
-  },
-  {
-    icon: Building2,
-    label: "Industry Editions",
-    path: "/industry-editions",
-    group: "Global Intelligence",
-    keywords: "finance healthcare government ai cloud telecom",
-  },
-  {
-    icon: Bot,
-    label: "AI Agent Network",
-    path: "/ai-agents",
-    group: "Global Intelligence",
-    keywords: "agents orchestration llm",
-  },
-  // Intelligence
-  {
-    icon: FileSearch,
-    label: "Framework Analysis",
-    path: "/analysis",
-    group: "Intelligence",
-    keywords: "pipl csl dsl pdpl nca",
-  },
-  {
-    icon: ShieldCheck,
-    label: "Client Workspace",
-    path: "/client-workspace",
-    group: "Intelligence",
-    keywords: "market entry",
-  },
-  {
-    icon: ClipboardList,
-    label: "Vendor Assessment",
-    path: "/vendor-assessment",
-    group: "Intelligence",
-  },
-  {
-    icon: Bot,
-    label: "Pro Intelligence",
-    path: "/pro-intelligence",
-    group: "Intelligence",
-    keywords: "ai llm",
-  },
-  {
-    icon: ArrowLeftRight,
-    label: "Transfer Checker",
-    path: "/transfer-checker",
-    group: "Intelligence",
-    keywords: "data transfer cross-border",
-  },
-  // Compliance
-  {
-    icon: Scale,
-    label: "Legal Library",
-    path: "/laws",
-    group: "Compliance",
-    keywords: "law regulation",
-  },
-  {
-    icon: ClipboardList,
-    label: "Gap Tracker",
-    path: "/gap-tracker",
-    group: "Compliance",
-  },
-  {
-    icon: Wrench,
-    label: "Remediation Planner",
-    path: "/remediation-planner",
-    group: "Compliance",
-  },
-  {
-    icon: ShieldOff,
-    label: "Risk Register",
-    path: "/risk-register",
-    group: "Compliance",
-  },
-  {
-    icon: BookOpen,
-    label: "Policy Manager",
-    path: "/policy-manager",
-    group: "Compliance",
-  },
-  {
-    icon: ShieldAlert,
-    label: "Incident Register",
-    path: "/incident-register",
-    group: "Compliance",
-  },
-  {
-    icon: ClipboardCheck,
-    label: "Audit Schedule",
-    path: "/audit-schedule",
-    group: "Compliance",
-  },
-  {
-    icon: Activity,
-    label: "Continuous Compliance",
-    path: "/continuous-compliance",
-    group: "Compliance",
-  },
-  {
-    icon: UserCheck,
-    label: "DSR Tracker",
-    path: "/dsr-tracker",
-    group: "Compliance",
-    keywords: "data subject request gdpr",
-  },
-  // Risk & Vendor
-  {
-    icon: ShieldAlert,
-    label: "Vendor Risk Dashboard",
-    path: "/vendor-risk",
-    group: "Risk & Vendor",
-  },
-  {
-    icon: PieChart,
-    label: "Vendor Compliance Profiles",
-    path: "/vendor-compliance",
-    group: "Risk & Vendor",
-  },
-  // Analytics
-  {
-    icon: CalendarCheck2,
-    label: "Compliance Tracker",
-    path: "/compliance-tracker",
-    group: "Analytics",
-  },
-  {
-    icon: BarChart2,
-    label: "Compliance Scorecard",
-    path: "/compliance-scorecard",
-    group: "Analytics",
-  },
-  {
-    icon: CalendarDays,
-    label: "Compliance Calendar",
-    path: "/compliance-calendar",
-    group: "Analytics",
-  },
-  {
-    icon: LayoutGrid,
-    label: "Compliance Heatmap",
-    path: "/heatmap",
-    group: "Analytics",
-  },
-  // Reports
-  {
-    icon: FileText,
-    label: "Report Center",
-    path: "/report-center",
-    group: "Reports",
-  },
-  {
-    icon: FileDown,
-    label: "Compliance Reports",
-    path: "/compliance-reports",
-    group: "Reports",
-  },
-  {
-    icon: Bot,
-    label: "Assessment History",
-    path: "/assessment-history",
-    group: "Reports",
-  },
-  {
-    icon: FolderCheck,
-    label: "Evidence Locker",
-    path: "/evidence-locker",
-    group: "Reports",
-  },
-  {
-    icon: Sparkles,
-    label: "Enhanced Comparison",
-    path: "/dashboard-enhanced",
-    group: "Reports",
-  },
-  // Platform
-  {
-    icon: TrendingUp,
-    label: "SaaS Metrics",
-    path: "/saas-metrics",
-    group: "Platform",
-  },
-  {
-    icon: Activity,
-    label: "Operations Status",
-    path: "/operations",
-    group: "Platform",
-  },
-  {
-    icon: ListChecks,
-    label: "Onboarding Wizard",
-    path: "/onboarding-wizard",
-    group: "Platform",
-  },
-  {
-    icon: Bell,
-    label: "Notifications",
-    path: "/notifications",
-    group: "Platform",
-  },
-  // Account
-  {
-    icon: CreditCard,
-    label: "Billing & Subscription",
-    path: "/billing",
-    group: "Account",
-  },
-  {
-    icon: Settings,
-    label: "Account Settings",
-    path: "/account-settings",
-    group: "Account",
-  },
-  {
-    icon: Users,
-    label: "Team Members",
-    path: "/team-members",
-    group: "Account",
-  },
-  {
-    icon: Settings,
-    label: "Org Settings",
-    path: "/org-settings",
-    group: "Account",
-  },
-  { icon: Key, label: "API Keys", path: "/api-keys", group: "Account" },
-  // Admin
-  {
-    icon: Crown,
-    label: "Admin Control Center",
-    path: "/admin-control-center",
-    group: "Admin",
-  },
-  {
-    icon: Building2,
-    label: "Company Dashboard",
-    path: "/company/dashboard",
-    group: "Admin",
-  },
-  { icon: Shield, label: "Audit Log", path: "/audit-log", group: "Admin" },
-  {
-    icon: ExternalLink,
-    label: "Super Admin Dashboard",
-    path: "/superadmin/dashboard",
-    group: "Admin",
-  },
-];
+function buildNav(t: (key: string, fallback: string) => string): NavEntry[] {
+  const G = {
+    overview: t("cmd.group.overview", "Overview"),
+    global: t("cmd.group.global_intelligence", "Global Intelligence"),
+    intelligence: t("cmd.group.intelligence", "Intelligence"),
+    compliance: t("cmd.group.compliance", "Compliance"),
+    risk: t("cmd.group.risk_vendor", "Risk & Vendor"),
+    analytics: t("cmd.group.analytics", "Analytics"),
+    reports: t("cmd.group.reports", "Reports"),
+    platform: t("cmd.group.platform", "Platform"),
+    account: t("cmd.group.account", "Account"),
+    admin: t("cmd.group.admin", "Admin"),
+  };
+  return [
+    {
+      icon: LayoutDashboard,
+      label: t("cmd.nav.dashboard", "Dashboard"),
+      path: "/dashboard",
+      group: G.overview,
+    },
+    {
+      icon: Globe,
+      label: t("cmd.nav.globalRegistry", "Global Registry"),
+      path: "/global-registry",
+      group: G.global,
+      keywords: "regulatory frameworks standards jurisdictions regions",
+    },
+    {
+      icon: Network,
+      label: t("cmd.nav.knowledgeGraph", "Knowledge Graph"),
+      path: "/knowledge-graph",
+      group: G.global,
+      keywords: "graph visualization connections nodes edges",
+    },
+    {
+      icon: Building2,
+      label: t("cmd.nav.industryEditions", "Industry Editions"),
+      path: "/industry-editions",
+      group: G.global,
+      keywords: "finance healthcare government ai cloud telecom",
+    },
+    {
+      icon: Bot,
+      label: t("cmd.nav.aiAgents", "AI Agent Network"),
+      path: "/ai-agents",
+      group: G.global,
+      keywords: "agents orchestration llm",
+    },
+    {
+      icon: FileSearch,
+      label: t("cmd.nav.frameworkAnalysis", "Framework Analysis"),
+      path: "/analysis",
+      group: G.intelligence,
+      keywords: "pipl csl dsl pdpl nca",
+    },
+    {
+      icon: ShieldCheck,
+      label: t("cmd.nav.clientWorkspace", "Client Workspace"),
+      path: "/client-workspace",
+      group: G.intelligence,
+      keywords: "market entry",
+    },
+    {
+      icon: ClipboardList,
+      label: t("cmd.nav.vendorAssessment", "Vendor Assessment"),
+      path: "/vendor-assessment",
+      group: G.intelligence,
+    },
+    {
+      icon: Bot,
+      label: t("cmd.nav.proIntelligence", "Pro Intelligence"),
+      path: "/pro-intelligence",
+      group: G.intelligence,
+      keywords: "ai llm",
+    },
+    {
+      icon: ArrowLeftRight,
+      label: t("cmd.nav.transferChecker", "Transfer Checker"),
+      path: "/transfer-checker",
+      group: G.intelligence,
+      keywords: "data transfer cross-border",
+    },
+    {
+      icon: Scale,
+      label: t("cmd.nav.legalLibrary", "Legal Library"),
+      path: "/laws",
+      group: G.compliance,
+      keywords: "law regulation",
+    },
+    {
+      icon: ClipboardList,
+      label: t("cmd.nav.gapTracker", "Gap Tracker"),
+      path: "/gap-tracker",
+      group: G.compliance,
+    },
+    {
+      icon: Wrench,
+      label: t("cmd.nav.remediationPlanner", "Remediation Planner"),
+      path: "/remediation-planner",
+      group: G.compliance,
+    },
+    {
+      icon: ShieldOff,
+      label: t("cmd.nav.riskRegister", "Risk Register"),
+      path: "/risk-register",
+      group: G.compliance,
+    },
+    {
+      icon: BookOpen,
+      label: t("cmd.nav.policyManager", "Policy Manager"),
+      path: "/policy-manager",
+      group: G.compliance,
+    },
+    {
+      icon: ShieldAlert,
+      label: t("cmd.nav.incidentRegister", "Incident Register"),
+      path: "/incident-register",
+      group: G.compliance,
+    },
+    {
+      icon: ClipboardCheck,
+      label: t("cmd.nav.auditSchedule", "Audit Schedule"),
+      path: "/audit-schedule",
+      group: G.compliance,
+    },
+    {
+      icon: Activity,
+      label: t("cmd.nav.continuousCompliance", "Continuous Compliance"),
+      path: "/continuous-compliance",
+      group: G.compliance,
+    },
+    {
+      icon: UserCheck,
+      label: t("cmd.nav.dsrTracker", "DSR Tracker"),
+      path: "/dsr-tracker",
+      group: G.compliance,
+      keywords: "data subject request gdpr",
+    },
+    {
+      icon: ShieldAlert,
+      label: t("cmd.nav.vendorRisk", "Vendor Risk Dashboard"),
+      path: "/vendor-risk",
+      group: G.risk,
+    },
+    {
+      icon: PieChart,
+      label: t("cmd.nav.vendorCompliance", "Vendor Compliance Profiles"),
+      path: "/vendor-compliance",
+      group: G.risk,
+    },
+    {
+      icon: CalendarCheck2,
+      label: t("cmd.nav.complianceTracker", "Compliance Tracker"),
+      path: "/compliance-tracker",
+      group: G.analytics,
+    },
+    {
+      icon: BarChart2,
+      label: t("cmd.nav.complianceScorecard", "Compliance Scorecard"),
+      path: "/compliance-scorecard",
+      group: G.analytics,
+    },
+    {
+      icon: CalendarDays,
+      label: t("cmd.nav.complianceCalendar", "Compliance Calendar"),
+      path: "/compliance-calendar",
+      group: G.analytics,
+    },
+    {
+      icon: LayoutGrid,
+      label: t("cmd.nav.complianceHeatmap", "Compliance Heatmap"),
+      path: "/heatmap",
+      group: G.analytics,
+    },
+    {
+      icon: FileText,
+      label: t("cmd.nav.reportCenter", "Report Center"),
+      path: "/report-center",
+      group: G.reports,
+    },
+    {
+      icon: FileDown,
+      label: t("cmd.nav.complianceReports", "Compliance Reports"),
+      path: "/compliance-reports",
+      group: G.reports,
+    },
+    {
+      icon: Bot,
+      label: t("cmd.nav.assessmentHistory", "Assessment History"),
+      path: "/assessment-history",
+      group: G.reports,
+    },
+    {
+      icon: FolderCheck,
+      label: t("cmd.nav.evidenceLocker", "Evidence Locker"),
+      path: "/evidence-locker",
+      group: G.reports,
+    },
+    {
+      icon: Sparkles,
+      label: t("cmd.nav.enhancedComparison", "Enhanced Comparison"),
+      path: "/dashboard-enhanced",
+      group: G.reports,
+    },
+    {
+      icon: TrendingUp,
+      label: t("cmd.nav.saasMetrics", "SaaS Metrics"),
+      path: "/saas-metrics",
+      group: G.platform,
+    },
+    {
+      icon: Activity,
+      label: t("cmd.nav.operationsStatus", "Operations Status"),
+      path: "/operations",
+      group: G.platform,
+    },
+    {
+      icon: ListChecks,
+      label: t("cmd.nav.onboardingWizard", "Onboarding Wizard"),
+      path: "/onboarding-wizard",
+      group: G.platform,
+    },
+    {
+      icon: Bell,
+      label: t("cmd.nav.notifications", "Notifications"),
+      path: "/notifications",
+      group: G.platform,
+    },
+    {
+      icon: CreditCard,
+      label: t("cmd.nav.billing", "Billing & Subscription"),
+      path: "/billing",
+      group: G.account,
+    },
+    {
+      icon: Settings,
+      label: t("cmd.nav.accountSettings", "Account Settings"),
+      path: "/account-settings",
+      group: G.account,
+    },
+    {
+      icon: Users,
+      label: t("cmd.nav.teamMembers", "Team Members"),
+      path: "/team-members",
+      group: G.account,
+    },
+    {
+      icon: Settings,
+      label: t("cmd.nav.orgSettings", "Org Settings"),
+      path: "/org-settings",
+      group: G.account,
+    },
+    {
+      icon: Key,
+      label: t("cmd.nav.apiKeys", "API Keys"),
+      path: "/api-keys",
+      group: G.account,
+    },
+    {
+      icon: Crown,
+      label: t("cmd.nav.adminControlCenter", "Admin Control Center"),
+      path: "/admin-control-center",
+      group: G.admin,
+    },
+    {
+      icon: Building2,
+      label: t("cmd.nav.companyDashboard", "Company Dashboard"),
+      path: "/company/dashboard",
+      group: G.admin,
+    },
+    {
+      icon: Shield,
+      label: t("cmd.nav.auditLog", "Audit Log"),
+      path: "/audit-log",
+      group: G.admin,
+    },
+    {
+      icon: ExternalLink,
+      label: t("cmd.nav.superAdmin", "Super Admin Dashboard"),
+      path: "/superadmin/dashboard",
+      group: G.admin,
+    },
+  ];
+}
 
-// Deduplicated group order
-const GROUP_ORDER = [
-  "Overview",
-  "Global Intelligence",
-  "Intelligence",
-  "Compliance",
-  "Risk & Vendor",
-  "Analytics",
-  "Reports",
-  "Platform",
-  "Account",
-  "Admin",
-];
+function getGroupOrder(t: (key: string, fallback: string) => string): string[] {
+  return [
+    t("cmd.group.overview", "Overview"),
+    t("cmd.group.global_intelligence", "Global Intelligence"),
+    t("cmd.group.intelligence", "Intelligence"),
+    t("cmd.group.compliance", "Compliance"),
+    t("cmd.group.risk_vendor", "Risk & Vendor"),
+    t("cmd.group.analytics", "Analytics"),
+    t("cmd.group.reports", "Reports"),
+    t("cmd.group.platform", "Platform"),
+    t("cmd.group.account", "Account"),
+    t("cmd.group.admin", "Admin"),
+  ];
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -375,16 +390,19 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     if (!open) setQuery("");
   }, [open]);
 
+  const nav = useMemo(() => buildNav(t), [t]);
+  const groupOrder = useMemo(() => getGroupOrder(t), [t]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return NAV;
-    return NAV.filter(
+    if (!q) return nav;
+    return nav.filter(
       e =>
         e.label.toLowerCase().includes(q) ||
         e.group.toLowerCase().includes(q) ||
         (e.keywords ?? "").toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, nav]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, NavEntry[]>();
@@ -392,11 +410,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       if (!map.has(entry.group)) map.set(entry.group, []);
       map.get(entry.group)!.push(entry);
     }
-    return GROUP_ORDER.filter(g => map.has(g)).map(g => ({
-      group: g,
-      items: map.get(g)!,
-    }));
-  }, [filtered]);
+    return groupOrder
+      .filter(g => map.has(g))
+      .map(g => ({
+        group: g,
+        items: map.get(g)!,
+      }));
+  }, [filtered, groupOrder]);
 
   function go(path: string) {
     onOpenChange(false);
