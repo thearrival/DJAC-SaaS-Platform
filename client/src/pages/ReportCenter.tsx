@@ -115,8 +115,8 @@ function deriveReportInsights(markdown: string) {
 }
 
 export default function ReportCenter() {
-  usePageTitle("Report Center");
   const { t, locale } = useLocale();
+  usePageTitle(t("reportCenter.pageTitle", "Report Center"));
   const [jurisdiction, setJurisdiction] = useState<Jurisdiction>("both");
   const [reportLocale, setReportLocale] = useState<ReportLocale>("en");
   const [reportType, setReportType] = useState<ReportType>("full_compliance");

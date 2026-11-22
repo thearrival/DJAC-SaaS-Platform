@@ -162,7 +162,11 @@ export default function OrgSettings() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Export failed");
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : t("orgSettings.exportFailed", "Export failed")
+      );
     } finally {
       setExporting(false);
     }
@@ -199,8 +203,16 @@ export default function OrgSettings() {
     e.preventDefault();
     if (!isAdmin) return;
     const next: { name?: string; billingEmail?: string } = {};
-    if (!name.trim()) next.name = "Organization name is required";
-    if (!billingEmail.trim()) next.billingEmail = "Billing email is required";
+    if (!name.trim())
+      next.name = t(
+        "orgSettings.orgNameRequired",
+        "Organization name is required"
+      );
+    if (!billingEmail.trim())
+      next.billingEmail = t(
+        "orgSettings.billingEmailRequired",
+        "Billing email is required"
+      );
     if (Object.keys(next).length) {
       setErrors(next);
       return;
@@ -293,9 +305,18 @@ export default function OrgSettings() {
             className={`text-xs px-2.5 py-1 ${PLAN_COLORS[org.plan] ?? ""}`}
           >
             <CreditCard size={11} className="mr-1.5" />
-            {PLAN_LABELS[org.plan] ?? org.plan}
+            {t(
+              `orgSettings.plan.${org.plan}`,
+              PLAN_LABELS[org.plan] ?? org.plan
+            )}
             {trial !== null && (
-              <span className="ml-1.5 opacity-75">· {trial}d left</span>
+              <span className="ml-1.5 opacity-75">
+                ·{" "}
+                {t("orgSettings.daysLeft", "{days}d left").replace(
+                  "{days}",
+                  String(trial)
+                )}
+              </span>
             )}
           </Badge>
         )}
@@ -520,7 +541,10 @@ export default function OrgSettings() {
                 <SelectContent>
                   {JURISDICTION_OPTIONS.map(opt => (
                     <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
+                      {t(
+                        `orgSettings.jurisdiction.${opt.value.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                        opt.label
+                      )}
                     </SelectItem>
                   ))}
                 </SelectContent>
