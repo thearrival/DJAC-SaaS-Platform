@@ -61,8 +61,8 @@ const JURISDICTIONS = [
 type Jurisdiction = (typeof JURISDICTIONS)[number]["value"];
 
 export default function CompanyProfile() {
-  usePageTitle("Company Profile");
   const { t } = useLocale();
+  usePageTitle(t("companyProfile.pageTitle", "Company Profile"));
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
 
@@ -174,7 +174,10 @@ export default function CompanyProfile() {
             <SelectContent>
               {JURISDICTIONS.map(opt => (
                 <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {t(
+                    `companyProfile.jurisdiction.${opt.value.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                    opt.label
+                  )}
                 </SelectItem>
               ))}
             </SelectContent>

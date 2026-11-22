@@ -346,8 +346,8 @@ function EmptyPanel({ title, message }: { title: string; message: string }) {
 }
 
 export default function AdminControlCenter() {
-  usePageTitle("Admin Control Center");
   const { t } = useLocale();
+  usePageTitle(t("adminControlCenter.pageTitle", "Admin Control Center"));
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { user } = useAuth();
