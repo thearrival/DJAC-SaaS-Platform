@@ -4448,5 +4448,43 @@ const messages: Record<string, string> = {
   "common.morePages": "المزيد من الصفحات",
   "common.sidebar": "الشريط الجانبي",
   "common.sidebarMobileDesc": "يعرض الشريط الجانبي للهاتف المحمول.",
+  "yallaAdmin.portal.userDetail.allSessionsRevoked": "تم إلغاء جميع الجلسات.",
+  "yallaAdmin.portal.userDetail.unknownUa": "وكيل مستخدم غير معروف",
+  "yallaAdmin.portal.orgDetail.orgSuspended": "تم تعليق المؤسسة.",
+  "yallaAdmin.portal.orgDetail.orgUnsuspended": "تم إلغاء تعليق المؤسسة.",
+  "yallaAdmin.portal.orgDetail.noContactEmail": "لا يوجد بريد اتصال",
+  "yallaAdmin.portal.orgDetail.unsuspendOrg": "إلغاء تعليق المؤسسة",
+  "yallaAdmin.portal.orgDetail.suspendOrg": "تعليق المؤسسة",
+  "yallaAdmin.portal.orgDetail.currentSubscription": "الاشتراك الحالي",
+  "yallaAdmin.portal.orgDetail.willCancelAtPeriodEnd":
+    "سيتم الإلغاء في نهاية الفترة",
+  "yallaAdmin.portal.orgDetail.suspended": "معلق",
+  "yallaAdmin.portal.orgDetail.noAuditEvents": "لا توجد أحداث تدقيق.",
+  "yallaAdmin.portal.ownerAccess.subtitle":
+    "أنشئ روابط موقعة منتهية الصلاحية لدخول وحدة تحكم المالك المعزولة.",
+  "yallaAdmin.portal.overview.focusUsers":
+    "راقب نشاط المستخدمين على مستوى المنصة والمدخلات المقدمة.",
+  "yallaAdmin.portal.overview.focusOnboarding":
+    "تابع تقدم الإعداد لاكتشاف اختناقات الدعم أو التفعيل.",
+  "yallaAdmin.portal.overview.accessRequests": "طلبات الوصول",
+  "yallaAdmin.portal.overview.consultations": "الاستشارات",
+  "yallaAdmin.portal.users.filterPlaceholder":
+    "تصفية حسب اسم المستخدم أو البريد الإلكتروني أو الدور...",
+  "yallaAdmin.portal.intake.serviceRequestsTitle": "طلبات الخدمة",
+  "yallaAdmin.portal.intake.accessRequestsTitle": "طلبات الوصول",
+  "yallaAdmin.portal.intake.serviceRequestsLabel": "طلبات الخدمة",
+  "yallaAdmin.portal.intake.accessRequestsLabel": "طلبات الوصول",
+  "yallaAdmin.portal.intake.consultationRequestsLabel": "طلبات الاستشارة",
+  "yallaAdmin.portal.platformAudit.failureDetail": "تفاصيل الفشل",
+  "yallaAdmin.portal.subscriptions.totalValue": "القيمة الإجمالية",
+  "yallaAdmin.portal.subscriptions.organization": "المؤسسة",
+  "yallaAdmin.portal.subscriptions.interval": "الفاصل",
+  "yallaAdmin.portal.subscriptions.periodEnd": "نهاية الفترة",
+  "yallaAdmin.portal.signups.filterPlaceholder":
+    "تصفية حسب البريد الإلكتروني أو اسم المستخدم...",
+  "yallaAdmin.portal.signups.organization": "المؤسسة",
+  "yallaAdmin.portal.orgs.filterPlaceholder": "تصفية حسب الاسم أو الخطة...",
+  "yallaAdmin.portal.orgs.organization": "المؤسسة",
+  "yallaAdmin.portal.orgs.activeSessions": "الجلسات النشطة",
 };
 export default messages;

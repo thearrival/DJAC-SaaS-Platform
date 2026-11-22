@@ -4507,5 +4507,43 @@ const messages: Record<string, string> = {
   "common.morePages": "More pages",
   "common.sidebar": "Sidebar",
   "common.sidebarMobileDesc": "Displays the mobile sidebar.",
+  "yallaAdmin.portal.userDetail.allSessionsRevoked": "All sessions revoked.",
+  "yallaAdmin.portal.userDetail.unknownUa": "Unknown UA",
+  "yallaAdmin.portal.orgDetail.orgSuspended": "Organization suspended.",
+  "yallaAdmin.portal.orgDetail.orgUnsuspended": "Organization unsuspended.",
+  "yallaAdmin.portal.orgDetail.noContactEmail": "No contact email",
+  "yallaAdmin.portal.orgDetail.unsuspendOrg": "Unsuspend Organization",
+  "yallaAdmin.portal.orgDetail.suspendOrg": "Suspend Organization",
+  "yallaAdmin.portal.orgDetail.currentSubscription": "Current Subscription",
+  "yallaAdmin.portal.orgDetail.willCancelAtPeriodEnd":
+    "Will cancel at period end",
+  "yallaAdmin.portal.orgDetail.suspended": "Suspended",
+  "yallaAdmin.portal.orgDetail.noAuditEvents": "No audit events.",
+  "yallaAdmin.portal.ownerAccess.subtitle":
+    "Create expiring signed links for isolated owner-console entry.",
+  "yallaAdmin.portal.overview.focusUsers":
+    "Monitor platform-wide user activity and what inputs are being submitted.",
+  "yallaAdmin.portal.overview.focusOnboarding":
+    "Follow onboarding progression to spot support or activation bottlenecks.",
+  "yallaAdmin.portal.overview.accessRequests": "Access requests",
+  "yallaAdmin.portal.overview.consultations": "Consultations",
+  "yallaAdmin.portal.users.filterPlaceholder":
+    "Filter by username, email, or role...",
+  "yallaAdmin.portal.intake.serviceRequestsTitle": "Service Requests",
+  "yallaAdmin.portal.intake.accessRequestsTitle": "Access Requests",
+  "yallaAdmin.portal.intake.serviceRequestsLabel": "Service requests",
+  "yallaAdmin.portal.intake.accessRequestsLabel": "Access requests",
+  "yallaAdmin.portal.intake.consultationRequestsLabel": "Consultation requests",
+  "yallaAdmin.portal.platformAudit.failureDetail": "Failure Detail",
+  "yallaAdmin.portal.subscriptions.totalValue": "Total Value",
+  "yallaAdmin.portal.subscriptions.organization": "Organization",
+  "yallaAdmin.portal.subscriptions.interval": "Interval",
+  "yallaAdmin.portal.subscriptions.periodEnd": "Period End",
+  "yallaAdmin.portal.signups.filterPlaceholder":
+    "Filter by email or username...",
+  "yallaAdmin.portal.signups.organization": "Organization",
+  "yallaAdmin.portal.orgs.filterPlaceholder": "Filter by name or plan...",
+  "yallaAdmin.portal.orgs.organization": "Organization",
+  "yallaAdmin.portal.orgs.activeSessions": "Active Sessions",
 };
 export default messages;

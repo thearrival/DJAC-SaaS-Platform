@@ -4681,5 +4681,45 @@ const messages: Record<string, string> = {
   "common.morePages": "Weitere Seiten",
   "common.sidebar": "Seitenleiste",
   "common.sidebarMobileDesc": "Zeigt die mobile Seitenleiste an.",
+  "yallaAdmin.portal.userDetail.allSessionsRevoked":
+    "Alle Sitzungen wurden widerrufen.",
+  "yallaAdmin.portal.userDetail.unknownUa": "Unbekannter UA",
+  "yallaAdmin.portal.orgDetail.orgSuspended": "Organisation gesperrt.",
+  "yallaAdmin.portal.orgDetail.orgUnsuspended":
+    "Organisationssperre aufgehoben.",
+  "yallaAdmin.portal.orgDetail.noContactEmail": "Keine Kontakt-E-Mail",
+  "yallaAdmin.portal.orgDetail.unsuspendOrg": "Organisationssperre aufheben",
+  "yallaAdmin.portal.orgDetail.suspendOrg": "Organisation sperren",
+  "yallaAdmin.portal.orgDetail.currentSubscription": "Aktuelles Abonnement",
+  "yallaAdmin.portal.orgDetail.willCancelAtPeriodEnd":
+    "Wird am Periodenende gekündigt",
+  "yallaAdmin.portal.orgDetail.suspended": "Gesperrt",
+  "yallaAdmin.portal.orgDetail.noAuditEvents": "Keine Audit-Ereignisse.",
+  "yallaAdmin.portal.ownerAccess.subtitle":
+    "Erstellen Sie ablaufende signierte Links für den isolierten Eigentümerkonsolen-Zugang.",
+  "yallaAdmin.portal.overview.focusUsers":
+    "Überwachen Sie plattformweite Nutzeraktivitäten und eingereichte Eingaben.",
+  "yallaAdmin.portal.overview.focusOnboarding":
+    "Verfolgen Sie den Onboarding-Fortschritt, um Support- oder Aktivierungsengpässe zu erkennen.",
+  "yallaAdmin.portal.overview.accessRequests": "Zugriffsanfragen",
+  "yallaAdmin.portal.overview.consultations": "Beratungen",
+  "yallaAdmin.portal.users.filterPlaceholder":
+    "Nach Benutzername, E-Mail oder Rolle filtern...",
+  "yallaAdmin.portal.intake.serviceRequestsTitle": "Serviceanfragen",
+  "yallaAdmin.portal.intake.accessRequestsTitle": "Zugriffsanfragen",
+  "yallaAdmin.portal.intake.serviceRequestsLabel": "Serviceanfragen",
+  "yallaAdmin.portal.intake.accessRequestsLabel": "Zugriffsanfragen",
+  "yallaAdmin.portal.intake.consultationRequestsLabel": "Beratungsanfragen",
+  "yallaAdmin.portal.platformAudit.failureDetail": "Fehlerdetail",
+  "yallaAdmin.portal.subscriptions.totalValue": "Gesamtwert",
+  "yallaAdmin.portal.subscriptions.organization": "Organisation",
+  "yallaAdmin.portal.subscriptions.interval": "Intervall",
+  "yallaAdmin.portal.subscriptions.periodEnd": "Periodenende",
+  "yallaAdmin.portal.signups.filterPlaceholder":
+    "Nach E-Mail oder Benutzername filtern...",
+  "yallaAdmin.portal.signups.organization": "Organisation",
+  "yallaAdmin.portal.orgs.filterPlaceholder": "Nach Name oder Plan filtern...",
+  "yallaAdmin.portal.orgs.organization": "Organisation",
+  "yallaAdmin.portal.orgs.activeSessions": "Aktive Sitzungen",
 };
 export default messages;

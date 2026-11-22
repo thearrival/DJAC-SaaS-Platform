@@ -4699,5 +4699,45 @@ const messages: Record<string, string> = {
   "common.morePages": "Más páginas",
   "common.sidebar": "Barra lateral",
   "common.sidebarMobileDesc": "Muestra la barra lateral móvil.",
+  "yallaAdmin.portal.userDetail.allSessionsRevoked":
+    "Todas las sesiones han sido revocadas.",
+  "yallaAdmin.portal.userDetail.unknownUa": "UA desconocido",
+  "yallaAdmin.portal.orgDetail.orgSuspended": "Organización suspendida.",
+  "yallaAdmin.portal.orgDetail.orgUnsuspended": "Organización reactivada.",
+  "yallaAdmin.portal.orgDetail.noContactEmail": "Sin correo de contacto",
+  "yallaAdmin.portal.orgDetail.unsuspendOrg": "Reactivar organización",
+  "yallaAdmin.portal.orgDetail.suspendOrg": "Suspender organización",
+  "yallaAdmin.portal.orgDetail.currentSubscription": "Suscripción actual",
+  "yallaAdmin.portal.orgDetail.willCancelAtPeriodEnd":
+    "Se cancelará al final del período",
+  "yallaAdmin.portal.orgDetail.suspended": "Suspendido",
+  "yallaAdmin.portal.orgDetail.noAuditEvents": "No hay eventos de auditoría.",
+  "yallaAdmin.portal.ownerAccess.subtitle":
+    "Cree enlaces firmados con caducidad para la entrada aislada a la consola de propietario.",
+  "yallaAdmin.portal.overview.focusUsers":
+    "Supervise la actividad de usuarios y las entradas enviadas en la plataforma.",
+  "yallaAdmin.portal.overview.focusOnboarding":
+    "Siga la progresión de incorporación para detectar cuellos de botella de soporte o activación.",
+  "yallaAdmin.portal.overview.accessRequests": "Solicitudes de acceso",
+  "yallaAdmin.portal.overview.consultations": "Consultas",
+  "yallaAdmin.portal.users.filterPlaceholder":
+    "Filtrar por nombre de usuario, correo o rol...",
+  "yallaAdmin.portal.intake.serviceRequestsTitle": "Solicitudes de servicio",
+  "yallaAdmin.portal.intake.accessRequestsTitle": "Solicitudes de acceso",
+  "yallaAdmin.portal.intake.serviceRequestsLabel": "Solicitudes de servicio",
+  "yallaAdmin.portal.intake.accessRequestsLabel": "Solicitudes de acceso",
+  "yallaAdmin.portal.intake.consultationRequestsLabel":
+    "Solicitudes de consulta",
+  "yallaAdmin.portal.platformAudit.failureDetail": "Detalle del fallo",
+  "yallaAdmin.portal.subscriptions.totalValue": "Valor total",
+  "yallaAdmin.portal.subscriptions.organization": "Organización",
+  "yallaAdmin.portal.subscriptions.interval": "Intervalo",
+  "yallaAdmin.portal.subscriptions.periodEnd": "Fin del período",
+  "yallaAdmin.portal.signups.filterPlaceholder":
+    "Filtrar por correo o nombre de usuario...",
+  "yallaAdmin.portal.signups.organization": "Organización",
+  "yallaAdmin.portal.orgs.filterPlaceholder": "Filtrar por nombre o plan...",
+  "yallaAdmin.portal.orgs.organization": "Organización",
+  "yallaAdmin.portal.orgs.activeSessions": "Sesiones activas",
 };
 export default messages;

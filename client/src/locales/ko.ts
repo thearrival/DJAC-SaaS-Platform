@@ -4445,5 +4445,44 @@ const messages: Record<string, string> = {
   "common.morePages": "더 많은 페이지",
   "common.sidebar": "사이드바",
   "common.sidebarMobileDesc": "모바일 사이드바를 표시합니다.",
+  "yallaAdmin.portal.userDetail.allSessionsRevoked":
+    "모든 세션이 취소되었습니다.",
+  "yallaAdmin.portal.userDetail.unknownUa": "알 수 없는 UA",
+  "yallaAdmin.portal.orgDetail.orgSuspended": "조직이 정지되었습니다.",
+  "yallaAdmin.portal.orgDetail.orgUnsuspended": "조직 정지가 해제되었습니다.",
+  "yallaAdmin.portal.orgDetail.noContactEmail": "연락처 이메일 없음",
+  "yallaAdmin.portal.orgDetail.unsuspendOrg": "조직 정지 해제",
+  "yallaAdmin.portal.orgDetail.suspendOrg": "조직 정지",
+  "yallaAdmin.portal.orgDetail.currentSubscription": "현재 구독",
+  "yallaAdmin.portal.orgDetail.willCancelAtPeriodEnd":
+    "기간 종료 시 취소됩니다",
+  "yallaAdmin.portal.orgDetail.suspended": "정지됨",
+  "yallaAdmin.portal.orgDetail.noAuditEvents": "감사 이벤트가 없습니다.",
+  "yallaAdmin.portal.ownerAccess.subtitle":
+    "격리된 소유자 콘솔 진입을 위한 만료 서명 링크를 만듭니다.",
+  "yallaAdmin.portal.overview.focusUsers":
+    "플랫폼 전체 사용자 활동과 제출된 입력을 모니터링합니다.",
+  "yallaAdmin.portal.overview.focusOnboarding":
+    "온보딩 진행 상황을 추적하여 지원 또는 활성화 병목 현상을 파악합니다.",
+  "yallaAdmin.portal.overview.accessRequests": "액세스 요청",
+  "yallaAdmin.portal.overview.consultations": "상담",
+  "yallaAdmin.portal.users.filterPlaceholder":
+    "사용자 이름, 이메일 또는 역할로 필터...",
+  "yallaAdmin.portal.intake.serviceRequestsTitle": "서비스 요청",
+  "yallaAdmin.portal.intake.accessRequestsTitle": "액세스 요청",
+  "yallaAdmin.portal.intake.serviceRequestsLabel": "서비스 요청",
+  "yallaAdmin.portal.intake.accessRequestsLabel": "액세스 요청",
+  "yallaAdmin.portal.intake.consultationRequestsLabel": "상담 요청",
+  "yallaAdmin.portal.platformAudit.failureDetail": "실패 상세",
+  "yallaAdmin.portal.subscriptions.totalValue": "총 가치",
+  "yallaAdmin.portal.subscriptions.organization": "조직",
+  "yallaAdmin.portal.subscriptions.interval": "간격",
+  "yallaAdmin.portal.subscriptions.periodEnd": "기간 종료",
+  "yallaAdmin.portal.signups.filterPlaceholder":
+    "이메일 또는 사용자 이름으로 필터...",
+  "yallaAdmin.portal.signups.organization": "조직",
+  "yallaAdmin.portal.orgs.filterPlaceholder": "이름 또는 플랜으로 필터...",
+  "yallaAdmin.portal.orgs.organization": "조직",
+  "yallaAdmin.portal.orgs.activeSessions": "활성 세션",
 };
 export default messages;

@@ -4578,5 +4578,44 @@ const messages: Record<string, string> = {
   "common.morePages": "その他のページ",
   "common.sidebar": "サイドバー",
   "common.sidebarMobileDesc": "モバイルサイドバーを表示します。",
+  "yallaAdmin.portal.userDetail.allSessionsRevoked":
+    "すべてのセッションが取り消されました。",
+  "yallaAdmin.portal.userDetail.unknownUa": "不明なUA",
+  "yallaAdmin.portal.orgDetail.orgSuspended": "組織が停止されました。",
+  "yallaAdmin.portal.orgDetail.orgUnsuspended": "組織の停止が解除されました。",
+  "yallaAdmin.portal.orgDetail.noContactEmail": "連絡先メールなし",
+  "yallaAdmin.portal.orgDetail.unsuspendOrg": "組織の停止を解除",
+  "yallaAdmin.portal.orgDetail.suspendOrg": "組織を停止",
+  "yallaAdmin.portal.orgDetail.currentSubscription": "現在のサブスクリプション",
+  "yallaAdmin.portal.orgDetail.willCancelAtPeriodEnd":
+    "期間終了時にキャンセルされます",
+  "yallaAdmin.portal.orgDetail.suspended": "停止中",
+  "yallaAdmin.portal.orgDetail.noAuditEvents": "監査イベントはありません。",
+  "yallaAdmin.portal.ownerAccess.subtitle":
+    "分離されたオーナーコンソール入口用の期限付き署名リンクを作成します。",
+  "yallaAdmin.portal.overview.focusUsers":
+    "プラットフォーム全体のユーザー活動と送信された入力を監視します。",
+  "yallaAdmin.portal.overview.focusOnboarding":
+    "オンボーディングの進捗を追跡し、サポートや有効化のボトルネックを特定します。",
+  "yallaAdmin.portal.overview.accessRequests": "アクセスリクエスト",
+  "yallaAdmin.portal.overview.consultations": "相談",
+  "yallaAdmin.portal.users.filterPlaceholder":
+    "ユーザー名、メール、役割で絞り込み...",
+  "yallaAdmin.portal.intake.serviceRequestsTitle": "サービスリクエスト",
+  "yallaAdmin.portal.intake.accessRequestsTitle": "アクセスリクエスト",
+  "yallaAdmin.portal.intake.serviceRequestsLabel": "サービスリクエスト",
+  "yallaAdmin.portal.intake.accessRequestsLabel": "アクセスリクエスト",
+  "yallaAdmin.portal.intake.consultationRequestsLabel": "相談リクエスト",
+  "yallaAdmin.portal.platformAudit.failureDetail": "失敗の詳細",
+  "yallaAdmin.portal.subscriptions.totalValue": "合計金額",
+  "yallaAdmin.portal.subscriptions.organization": "組織",
+  "yallaAdmin.portal.subscriptions.interval": "間隔",
+  "yallaAdmin.portal.subscriptions.periodEnd": "期間終了",
+  "yallaAdmin.portal.signups.filterPlaceholder":
+    "メールまたはユーザー名で絞り込み...",
+  "yallaAdmin.portal.signups.organization": "組織",
+  "yallaAdmin.portal.orgs.filterPlaceholder": "名前またはプランで絞り込み...",
+  "yallaAdmin.portal.orgs.organization": "組織",
+  "yallaAdmin.portal.orgs.activeSessions": "アクティブセッション",
 };
 export default messages;

@@ -516,7 +516,10 @@ function UserDetailModal({
       setActionMsg(
         t(
           "yallaAdmin.portal.userDetail.sessionsRevoked",
-          "All sessions revoked."
+          t(
+            "yallaAdmin.portal.userDetail.allSessionsRevoked",
+            "All sessions revoked."
+          )
         )
       );
       loadDetail();
@@ -775,7 +778,10 @@ function UserDetailModal({
                     <p className="text-slate-600 text-xs">
                       {t(
                         "yallaAdmin.portal.userDetail.noAuditEvents",
-                        "No audit events."
+                        t(
+                          "yallaAdmin.portal.userDetail.noAuditEvents",
+                          "No audit events."
+                        )
                       )}
                     </p>
                   )}
@@ -809,7 +815,10 @@ function UserDetailModal({
                     <p className="text-slate-600 text-xs">
                       {t(
                         "yallaAdmin.portal.userDetail.noInteractions",
-                        "No interactions recorded."
+                        t(
+                          "yallaAdmin.portal.userDetail.noInteractions",
+                          "No interactions recorded."
+                        )
                       )}
                     </p>
                   )}
@@ -886,7 +895,15 @@ function OrganizationDetailModal({
         body: JSON.stringify({ suspend }),
       });
       setActionMsg(
-        suspend ? "Organization suspended." : "Organization unsuspended."
+        suspend
+          ? t(
+              "yallaAdmin.portal.orgDetail.orgSuspended",
+              "Organization suspended."
+            )
+          : t(
+              "yallaAdmin.portal.orgDetail.orgUnsuspended",
+              "Organization unsuspended."
+            )
       );
       loadDetail();
     } catch (e: unknown) {
@@ -955,7 +972,10 @@ function OrganizationDetailModal({
                       {detail.org.contactEmail ??
                         t(
                           "yallaAdmin.portal.org.noContactEmail",
-                          "No contact email"
+                          t(
+                            "yallaAdmin.portal.orgDetail.noContactEmail",
+                            "No contact email"
+                          )
                         )}
                     </p>
                   </div>
@@ -1150,7 +1170,10 @@ function OrganizationDetailModal({
                     <p className="text-slate-600 text-xs">
                       {t(
                         "yallaAdmin.portal.userDetail.noAuditEvents",
-                        "No audit events."
+                        t(
+                          "yallaAdmin.portal.userDetail.noAuditEvents",
+                          "No audit events."
+                        )
                       )}
                     </p>
                   )}
@@ -1213,7 +1236,10 @@ function OwnerAccessLinkPanel() {
       setMessage(
         t(
           "yallaAdmin.portal.ownerAccess.generated",
-          "Signed owner access link generated."
+          t(
+            "yallaAdmin.portal.ownerAccess.generated",
+            "Signed owner access link generated."
+          )
         )
       );
     } catch (e: unknown) {
@@ -1241,7 +1267,10 @@ function OwnerAccessLinkPanel() {
       setMessage(
         t(
           "yallaAdmin.portal.ownerAccess.copyFailed",
-          "Copy failed. Please copy the link manually."
+          t(
+            "yallaAdmin.portal.ownerAccess.copyFailed",
+            "Copy failed. Please copy the link manually."
+          )
         )
       );
     }
@@ -1389,7 +1418,7 @@ function OverviewTab({
         <StatCard
           label={t(
             "yallaAdmin.portal.overview.activeSessions",
-            "Active Sessions"
+            t("yallaAdmin.portal.overview.activeSessions", "Active Sessions")
           )}
           value={stats.activeSessions}
         />
@@ -1413,7 +1442,7 @@ function OverviewTab({
         <StatCard
           label={t(
             "yallaAdmin.portal.overview.assetsTracked",
-            "Assets Tracked"
+            t("yallaAdmin.portal.overview.assetsTracked", "Assets Tracked")
           )}
           value={stats.totalAssets}
         />
@@ -1428,7 +1457,7 @@ function OverviewTab({
         <StatCard
           label={t(
             "yallaAdmin.portal.overview.inboundIntake",
-            "Inbound Intake"
+            t("yallaAdmin.portal.overview.inboundIntake", "Inbound Intake")
           )}
           value={
             (intake?.counts.accessRequests ?? 0) +
@@ -1442,7 +1471,7 @@ function OverviewTab({
         <StatCard
           label={t(
             "yallaAdmin.portal.overview.blockedEvents",
-            "Blocked Events"
+            t("yallaAdmin.portal.overview.blockedEvents", "Blocked Events")
           )}
           value={validationCount}
           sub={t(
@@ -1501,7 +1530,10 @@ function OverviewTab({
               <div className="text-xs text-slate-500 mt-1">
                 {t(
                   "yallaAdmin.portal.overview.serviceRequestsLabel",
-                  "Service requests"
+                  t(
+                    "yallaAdmin.portal.overview.serviceRequests",
+                    "Service requests"
+                  )
                 )}
               </div>
             </div>
@@ -1512,7 +1544,10 @@ function OverviewTab({
               <div className="text-xs text-slate-500 mt-1">
                 {t(
                   "yallaAdmin.portal.overview.accessRequestsLabel",
-                  "Access requests"
+                  t(
+                    "yallaAdmin.portal.overview.accessRequests",
+                    "Access requests"
+                  )
                 )}
               </div>
             </div>
@@ -1523,7 +1558,7 @@ function OverviewTab({
               <div className="text-xs text-slate-500 mt-1">
                 {t(
                   "yallaAdmin.portal.overview.consultationRequestsLabel",
-                  "Consultations"
+                  t("yallaAdmin.portal.overview.consultations", "Consultations")
                 )}
               </div>
             </div>
@@ -1698,7 +1733,10 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
           <h3 className="text-sm font-semibold text-white">
             {t(
               "yallaAdmin.portal.overview.serviceRequestsLabel",
-              "Service requests"
+              t(
+                "yallaAdmin.portal.overview.serviceRequests",
+                "Service requests"
+              )
             )}
           </h3>
           {intake.serviceRequests.length === 0 ? (
@@ -1743,7 +1781,7 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
           <h3 className="text-sm font-semibold text-white">
             {t(
               "yallaAdmin.portal.overview.accessRequestsLabel",
-              "Access requests"
+              t("yallaAdmin.portal.overview.accessRequests", "Access requests")
             )}
           </h3>
           {intake.accessRequests.length === 0 ? (
@@ -2633,7 +2671,10 @@ function OrgsTab({
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
                 {t(
                   "yallaAdmin.portal.common.activeSessions",
-                  "Active Sessions"
+                  t(
+                    "yallaAdmin.portal.overview.activeSessions",
+                    "Active Sessions"
+                  )
                 )}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
