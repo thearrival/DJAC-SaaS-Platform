@@ -4755,5 +4755,56 @@ const messages: Record<string, string> = {
   "cmd.group.platform": "Plataforma",
   "cmd.group.account": "Conta",
   "cmd.group.admin": "Admin",
+  "yallaAdmin.portal.signups.noOrg": "Sem org.",
+  "yallaAdmin.portal.realtime.ownerOperationsConsole":
+    "Console de operações do proprietário",
+  "yallaAdmin.portal.realtime.liveStreamConnected":
+    "Transmissão ao vivo conectada",
+  "yallaAdmin.portal.realtime.reconnectingEllipsis": "Reconectando...",
+  "yallaAdmin.portal.realtime.waitingForEvents": "Aguardando eventos...",
+  "yallaAdmin.portal.tabs.onboarding": "Onboarding",
+  "yallaAdmin.portal.tabs.interactions": "Interações",
+  "yallaAdmin.portal.tabs.platformAudit": "Auditoria da plataforma",
+  "yallaAdmin.portal.tabs.validations": "Validações",
+  "yallaAdmin.portal.tabs.liveMonitor": "Monitor ao vivo",
+  "yallaAdmin.portal.tabDesc.signups":
+    "Cada registro de usuário com função, organização e status de verificação de e-mail.",
+  "yallaAdmin.portal.tabDesc.users":
+    "Todos os usuários registrados e seu estado de sessão atual.",
+  "yallaAdmin.portal.tabDesc.orgs":
+    "Todas as organizações com contagem de membros, plano e detalhamento de sessões ativas.",
+  "yallaAdmin.portal.tabDesc.intake":
+    "Solicitações comerciais e de acesso recebidas em superfícies públicas e autenticadas.",
+  "yallaAdmin.portal.tabDesc.onboarding":
+    "Acompanhe a progressão do usuário pelas etapas de onboarding e pontos de desistência.",
+  "yallaAdmin.portal.tabDesc.interactions":
+    "Instantâneos de entrada do usuário sanitizados e referências de saída registrados pela plataforma.",
+  "yallaAdmin.portal.tabDesc.validations":
+    "Solicitações bloqueadas ou com falha recentes, incluindo telemetria de validação central.",
+  "yallaAdmin.portal.tabDesc.system":
+    "Saúde em tempo de execução, perfil de memória e prontidão no nível do ambiente.",
+  "yallaAdmin.portal.tabDesc.audit":
+    "Ações realizadas dentro do próprio portal isolado do proprietário.",
+  "yallaAdmin.portal.tab.overview": "Visão geral",
+  "yallaAdmin.portal.tab.signups": "Cadastros",
+  "yallaAdmin.portal.tab.activeUsers": "Usuários ativos",
+  "yallaAdmin.portal.tab.organizations": "Organizações",
+  "yallaAdmin.portal.tab.orgs": "Organizações",
+  "yallaAdmin.portal.tab.subscriptions": "Assinaturas",
+  "yallaAdmin.portal.tab.intake": "Entradas",
+  "yallaAdmin.portal.tab.onboarding": "Onboarding",
+  "yallaAdmin.portal.tab.interactions": "Interações",
+  "yallaAdmin.portal.tab.platformAudit": "Auditoria da plataforma",
+  "yallaAdmin.portal.tab.validations": "Validações",
+  "yallaAdmin.portal.tab.validation": "Validações",
+  "yallaAdmin.portal.tab.system": "Sistema",
+  "yallaAdmin.portal.tab.adminAudit": "Auditoria admin",
+  "yallaAdmin.portal.tab.audit": "Auditoria admin",
+  "yallaAdmin.portal.tab.liveMonitor": "Monitor ao vivo",
+  "yallaAdmin.portal.tab.realtime": "Monitor ao vivo",
+  "yallaAdmin.portal.group.users": "Usuários",
+  "yallaAdmin.portal.group.billing": "Cobrança",
+  "yallaAdmin.portal.group.activity": "Atividade",
+  "yallaAdmin.portal.group.logs": "Logs",
 };
 export default messages;

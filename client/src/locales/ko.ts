@@ -4537,5 +4537,52 @@ const messages: Record<string, string> = {
   "cmd.group.platform": "플랫폼",
   "cmd.group.account": "계정",
   "cmd.group.admin": "관리",
+  "yallaAdmin.portal.signups.noOrg": "조직 없음",
+  "yallaAdmin.portal.realtime.ownerOperationsConsole": "소유자 운영 콘솔",
+  "yallaAdmin.portal.realtime.liveStreamConnected": "실시간 스트림 연결됨",
+  "yallaAdmin.portal.realtime.reconnectingEllipsis": "재연결 중...",
+  "yallaAdmin.portal.realtime.waitingForEvents": "이벤트 대기 중...",
+  "yallaAdmin.portal.tabs.onboarding": "온보딩",
+  "yallaAdmin.portal.tabs.interactions": "상호작용",
+  "yallaAdmin.portal.tabs.platformAudit": "플랫폼 감사",
+  "yallaAdmin.portal.tabs.validations": "검증",
+  "yallaAdmin.portal.tabs.liveMonitor": "실시간 모니터",
+  "yallaAdmin.portal.tabDesc.signups":
+    "역할, 조직, 이메일 인증 상태를 포함한 모든 사용자 등록.",
+  "yallaAdmin.portal.tabDesc.users": "등록된 모든 사용자와 현재 세션 상태.",
+  "yallaAdmin.portal.tabDesc.orgs":
+    "멤버 수, 플랜, 활성 세션 분석을 포함한 모든 조직.",
+  "yallaAdmin.portal.tabDesc.intake":
+    "공개 및 인증된 표면 전반의 인바운드 상업 및 액세스 요청.",
+  "yallaAdmin.portal.tabDesc.onboarding":
+    "온보딩 단계별 사용자 진행 상황과 이탈 지점을 추적합니다.",
+  "yallaAdmin.portal.tabDesc.interactions":
+    "플랫폼에서 기록한 정제된 사용자 입력 스냅샷 및 출력 참조.",
+  "yallaAdmin.portal.tabDesc.validations":
+    "중앙 검증 텔레메트리를 포함한 최근 차단되거나 실패한 요청.",
+  "yallaAdmin.portal.tabDesc.system":
+    "런타임 상태, 메모리 프로필 및 환경 수준 준비 상태.",
+  "yallaAdmin.portal.tabDesc.audit": "격리된 소유자 포털 자체에서 수행된 작업.",
+  "yallaAdmin.portal.tab.overview": "개요",
+  "yallaAdmin.portal.tab.signups": "가입",
+  "yallaAdmin.portal.tab.activeUsers": "활성 사용자",
+  "yallaAdmin.portal.tab.organizations": "조직",
+  "yallaAdmin.portal.tab.orgs": "조직",
+  "yallaAdmin.portal.tab.subscriptions": "구독",
+  "yallaAdmin.portal.tab.intake": "접수",
+  "yallaAdmin.portal.tab.onboarding": "온보딩",
+  "yallaAdmin.portal.tab.interactions": "상호작용",
+  "yallaAdmin.portal.tab.platformAudit": "플랫폼 감사",
+  "yallaAdmin.portal.tab.validations": "검증",
+  "yallaAdmin.portal.tab.validation": "검증",
+  "yallaAdmin.portal.tab.system": "시스템",
+  "yallaAdmin.portal.tab.adminAudit": "관리자 감사",
+  "yallaAdmin.portal.tab.audit": "관리자 감사",
+  "yallaAdmin.portal.tab.liveMonitor": "실시간 모니터",
+  "yallaAdmin.portal.tab.realtime": "실시간 모니터",
+  "yallaAdmin.portal.group.users": "사용자",
+  "yallaAdmin.portal.group.billing": "결제",
+  "yallaAdmin.portal.group.activity": "활동",
+  "yallaAdmin.portal.group.logs": "로그",
 };
 export default messages;

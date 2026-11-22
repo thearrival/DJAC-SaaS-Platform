@@ -516,10 +516,7 @@ function UserDetailModal({
       setActionMsg(
         t(
           "yallaAdmin.portal.userDetail.sessionsRevoked",
-          t(
-            "yallaAdmin.portal.userDetail.allSessionsRevoked",
-            "All sessions revoked."
-          )
+          "All sessions revoked."
         )
       );
       loadDetail();
@@ -778,10 +775,7 @@ function UserDetailModal({
                     <p className="text-slate-600 text-xs">
                       {t(
                         "yallaAdmin.portal.userDetail.noAuditEvents",
-                        t(
-                          "yallaAdmin.portal.userDetail.noAuditEvents",
-                          "No audit events."
-                        )
+                        "No audit events."
                       )}
                     </p>
                   )}
@@ -815,10 +809,7 @@ function UserDetailModal({
                     <p className="text-slate-600 text-xs">
                       {t(
                         "yallaAdmin.portal.userDetail.noInteractions",
-                        t(
-                          "yallaAdmin.portal.userDetail.noInteractions",
-                          "No interactions recorded."
-                        )
+                        "No interactions recorded."
                       )}
                     </p>
                   )}
@@ -972,10 +963,7 @@ function OrganizationDetailModal({
                       {detail.org.contactEmail ??
                         t(
                           "yallaAdmin.portal.org.noContactEmail",
-                          t(
-                            "yallaAdmin.portal.orgDetail.noContactEmail",
-                            "No contact email"
-                          )
+                          "No contact email"
                         )}
                     </p>
                   </div>
@@ -1170,10 +1158,7 @@ function OrganizationDetailModal({
                     <p className="text-slate-600 text-xs">
                       {t(
                         "yallaAdmin.portal.userDetail.noAuditEvents",
-                        t(
-                          "yallaAdmin.portal.userDetail.noAuditEvents",
-                          "No audit events."
-                        )
+                        "No audit events."
                       )}
                     </p>
                   )}
@@ -1236,10 +1221,7 @@ function OwnerAccessLinkPanel() {
       setMessage(
         t(
           "yallaAdmin.portal.ownerAccess.generated",
-          t(
-            "yallaAdmin.portal.ownerAccess.generated",
-            "Signed owner access link generated."
-          )
+          "Signed owner access link generated."
         )
       );
     } catch (e: unknown) {
@@ -1267,10 +1249,7 @@ function OwnerAccessLinkPanel() {
       setMessage(
         t(
           "yallaAdmin.portal.ownerAccess.copyFailed",
-          t(
-            "yallaAdmin.portal.ownerAccess.copyFailed",
-            "Copy failed. Please copy the link manually."
-          )
+          "Copy failed. Please copy the link manually."
         )
       );
     }
@@ -1418,7 +1397,7 @@ function OverviewTab({
         <StatCard
           label={t(
             "yallaAdmin.portal.overview.activeSessions",
-            t("yallaAdmin.portal.overview.activeSessions", "Active Sessions")
+            "Active Sessions"
           )}
           value={stats.activeSessions}
         />
@@ -1442,7 +1421,7 @@ function OverviewTab({
         <StatCard
           label={t(
             "yallaAdmin.portal.overview.assetsTracked",
-            t("yallaAdmin.portal.overview.assetsTracked", "Assets Tracked")
+            "Assets Tracked"
           )}
           value={stats.totalAssets}
         />
@@ -1457,7 +1436,7 @@ function OverviewTab({
         <StatCard
           label={t(
             "yallaAdmin.portal.overview.inboundIntake",
-            t("yallaAdmin.portal.overview.inboundIntake", "Inbound Intake")
+            "Inbound Intake"
           )}
           value={
             (intake?.counts.accessRequests ?? 0) +
@@ -1471,7 +1450,7 @@ function OverviewTab({
         <StatCard
           label={t(
             "yallaAdmin.portal.overview.blockedEvents",
-            t("yallaAdmin.portal.overview.blockedEvents", "Blocked Events")
+            "Blocked Events"
           )}
           value={validationCount}
           sub={t(
@@ -1530,10 +1509,7 @@ function OverviewTab({
               <div className="text-xs text-slate-500 mt-1">
                 {t(
                   "yallaAdmin.portal.overview.serviceRequestsLabel",
-                  t(
-                    "yallaAdmin.portal.overview.serviceRequests",
-                    "Service requests"
-                  )
+                  "Service requests"
                 )}
               </div>
             </div>
@@ -1544,10 +1520,7 @@ function OverviewTab({
               <div className="text-xs text-slate-500 mt-1">
                 {t(
                   "yallaAdmin.portal.overview.accessRequestsLabel",
-                  t(
-                    "yallaAdmin.portal.overview.accessRequests",
-                    "Access requests"
-                  )
+                  "Access requests"
                 )}
               </div>
             </div>
@@ -1558,7 +1531,7 @@ function OverviewTab({
               <div className="text-xs text-slate-500 mt-1">
                 {t(
                   "yallaAdmin.portal.overview.consultationRequestsLabel",
-                  t("yallaAdmin.portal.overview.consultations", "Consultations")
+                  "Consultations"
                 )}
               </div>
             </div>
@@ -1733,10 +1706,7 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
           <h3 className="text-sm font-semibold text-white">
             {t(
               "yallaAdmin.portal.overview.serviceRequestsLabel",
-              t(
-                "yallaAdmin.portal.overview.serviceRequests",
-                "Service requests"
-              )
+              "Service requests"
             )}
           </h3>
           {intake.serviceRequests.length === 0 ? (
@@ -1781,7 +1751,7 @@ function IntakeTab({ intake }: { intake: IntakeData | null }) {
           <h3 className="text-sm font-semibold text-white">
             {t(
               "yallaAdmin.portal.overview.accessRequestsLabel",
-              t("yallaAdmin.portal.overview.accessRequests", "Access requests")
+              "Access requests"
             )}
           </h3>
           {intake.accessRequests.length === 0 ? (
@@ -1965,7 +1935,8 @@ function InteractionsTab({ rows }: { rows: InteractionRow[] }) {
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
                   {row.actorName} · {row.actorEmail || "no email"} ·{" "}
-                  {row.organizationName ?? "No org"}
+                  {row.organizationName ??
+                    t("yallaAdmin.portal.signups.noOrg", "No org")}
                 </p>
               </div>
               <div className="text-xs text-slate-500">
@@ -2671,10 +2642,7 @@ function OrgsTab({
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
                 {t(
                   "yallaAdmin.portal.common.activeSessions",
-                  t(
-                    "yallaAdmin.portal.overview.activeSessions",
-                    "Active Sessions"
-                  )
+                  "Active Sessions"
                 )}
               </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
@@ -3415,7 +3383,15 @@ export default function YallaAdminPortal() {
                 <span
                   className={`w-2 h-2 rounded-full ${sseConnected ? "bg-emerald-400" : "bg-red-500"}`}
                   title={
-                    sseConnected ? "Live stream connected" : "Reconnecting..."
+                    sseConnected
+                      ? t(
+                          "yallaAdmin.portal.realtime.liveStreamConnected",
+                          "Live stream connected"
+                        )
+                      : t(
+                          "yallaAdmin.portal.realtime.reconnectingEllipsis",
+                          "Reconnecting..."
+                        )
                   }
                 />
                 {realtime && <Badge value={realtime.dbStatus} />}

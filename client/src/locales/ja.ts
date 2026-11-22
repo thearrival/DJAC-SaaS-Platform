@@ -4670,5 +4670,54 @@ const messages: Record<string, string> = {
   "cmd.group.platform": "プラットフォーム",
   "cmd.group.account": "アカウント",
   "cmd.group.admin": "管理",
+  "yallaAdmin.portal.signups.noOrg": "組織なし",
+  "yallaAdmin.portal.realtime.ownerOperationsConsole": "オーナー運用コンソール",
+  "yallaAdmin.portal.realtime.liveStreamConnected": "ライブストリーム接続済み",
+  "yallaAdmin.portal.realtime.reconnectingEllipsis": "再接続中...",
+  "yallaAdmin.portal.realtime.waitingForEvents": "イベントを待機中...",
+  "yallaAdmin.portal.tabs.onboarding": "オンボーディング",
+  "yallaAdmin.portal.tabs.interactions": "インタラクション",
+  "yallaAdmin.portal.tabs.platformAudit": "プラットフォーム監査",
+  "yallaAdmin.portal.tabs.validations": "検証",
+  "yallaAdmin.portal.tabs.liveMonitor": "ライブモニター",
+  "yallaAdmin.portal.tabDesc.signups":
+    "役割、組織、メール確認ステータスを含むすべてのユーザー登録。",
+  "yallaAdmin.portal.tabDesc.users":
+    "登録済みの全ユーザーと現在のセッション状態。",
+  "yallaAdmin.portal.tabDesc.orgs":
+    "メンバー数、プラン、アクティブセッション内訳を含むすべての組織。",
+  "yallaAdmin.portal.tabDesc.intake":
+    "公開および認証済みサーフェス全体の受信商用・アクセスリクエスト。",
+  "yallaAdmin.portal.tabDesc.onboarding":
+    "オンボーディング段階でのユーザー進捗と離脱ポイントを追跡します。",
+  "yallaAdmin.portal.tabDesc.interactions":
+    "プラットフォームが記録したサニタイズ済みユーザー入力スナップショットと出力参照。",
+  "yallaAdmin.portal.tabDesc.validations":
+    "中央検証テレメトリを含む、最近ブロックまたは失敗したリクエスト。",
+  "yallaAdmin.portal.tabDesc.system":
+    "ランタイムの健全性、メモリプロファイル、環境レベルの準備状況。",
+  "yallaAdmin.portal.tabDesc.audit":
+    "分離されたオーナーポータル内で実行されたアクション。",
+  "yallaAdmin.portal.tab.overview": "概要",
+  "yallaAdmin.portal.tab.signups": "登録",
+  "yallaAdmin.portal.tab.activeUsers": "アクティブユーザー",
+  "yallaAdmin.portal.tab.organizations": "組織",
+  "yallaAdmin.portal.tab.orgs": "組織",
+  "yallaAdmin.portal.tab.subscriptions": "サブスクリプション",
+  "yallaAdmin.portal.tab.intake": "インテーク",
+  "yallaAdmin.portal.tab.onboarding": "オンボーディング",
+  "yallaAdmin.portal.tab.interactions": "インタラクション",
+  "yallaAdmin.portal.tab.platformAudit": "プラットフォーム監査",
+  "yallaAdmin.portal.tab.validations": "検証",
+  "yallaAdmin.portal.tab.validation": "検証",
+  "yallaAdmin.portal.tab.system": "システム",
+  "yallaAdmin.portal.tab.adminAudit": "管理監査",
+  "yallaAdmin.portal.tab.audit": "管理監査",
+  "yallaAdmin.portal.tab.liveMonitor": "ライブモニター",
+  "yallaAdmin.portal.tab.realtime": "ライブモニター",
+  "yallaAdmin.portal.group.users": "ユーザー",
+  "yallaAdmin.portal.group.billing": "請求",
+  "yallaAdmin.portal.group.activity": "アクティビティ",
+  "yallaAdmin.portal.group.logs": "ログ",
 };
 export default messages;

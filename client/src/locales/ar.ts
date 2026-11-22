@@ -4539,5 +4539,54 @@ const messages: Record<string, string> = {
   "cmd.group.platform": "المنصة",
   "cmd.group.account": "الحساب",
   "cmd.group.admin": "الإدارة",
+  "yallaAdmin.portal.signups.noOrg": "لا توجد مؤسسة",
+  "yallaAdmin.portal.realtime.ownerOperationsConsole": "وحدة عمليات المالك",
+  "yallaAdmin.portal.realtime.liveStreamConnected": "البث المباشر متصل",
+  "yallaAdmin.portal.realtime.reconnectingEllipsis": "جارٍ إعادة الاتصال...",
+  "yallaAdmin.portal.realtime.waitingForEvents": "في انتظار الأحداث...",
+  "yallaAdmin.portal.tabs.onboarding": "الإعداد",
+  "yallaAdmin.portal.tabs.interactions": "التفاعلات",
+  "yallaAdmin.portal.tabs.platformAudit": "تدقيق المنصة",
+  "yallaAdmin.portal.tabs.validations": "التحققات",
+  "yallaAdmin.portal.tabs.liveMonitor": "المراقبة المباشرة",
+  "yallaAdmin.portal.tabDesc.signups":
+    "كل تسجيل مستخدم مع الدور والمؤسسة وحالة التحقق من البريد الإلكتروني.",
+  "yallaAdmin.portal.tabDesc.users":
+    "جميع المستخدمين المسجلين ووضع جلستهم الحالي.",
+  "yallaAdmin.portal.tabDesc.orgs":
+    "جميع المؤسسات مع عدد الأعضاء والخطة وتفصيل الجلسات النشطة.",
+  "yallaAdmin.portal.tabDesc.intake":
+    "طلبات تجارية ووصول واردة عبر الأسطح العامة والمصادق عليها.",
+  "yallaAdmin.portal.tabDesc.onboarding":
+    "تتبع تقدم المستخدم عبر مراحل الإعداد ونقاط الانقطاع.",
+  "yallaAdmin.portal.tabDesc.interactions":
+    "لقطات إدخال المستخدم المعقمة ومراجع الإخراج المسجلة بواسطة المنصة.",
+  "yallaAdmin.portal.tabDesc.validations":
+    "الطلبات المحظورة أو الفاشلة الأخيرة، بما في ذلك قياسات التحقق المركزية.",
+  "yallaAdmin.portal.tabDesc.system":
+    "صحة وقت التشغيل وملف الذاكرة وجاهزية مستوى البيئة.",
+  "yallaAdmin.portal.tabDesc.audit":
+    "الإجراءات المتخذة داخل بوابة المالك المعزولة نفسها.",
+  "yallaAdmin.portal.tab.overview": "نظرة عامة",
+  "yallaAdmin.portal.tab.signups": "التسجيلات",
+  "yallaAdmin.portal.tab.activeUsers": "المستخدمون النشطون",
+  "yallaAdmin.portal.tab.organizations": "المؤسسات",
+  "yallaAdmin.portal.tab.orgs": "المؤسسات",
+  "yallaAdmin.portal.tab.subscriptions": "الاشتراكات",
+  "yallaAdmin.portal.tab.intake": "الطلبات الواردة",
+  "yallaAdmin.portal.tab.onboarding": "الإعداد",
+  "yallaAdmin.portal.tab.interactions": "التفاعلات",
+  "yallaAdmin.portal.tab.platformAudit": "تدقيق المنصة",
+  "yallaAdmin.portal.tab.validations": "التحققات",
+  "yallaAdmin.portal.tab.validation": "التحققات",
+  "yallaAdmin.portal.tab.system": "النظام",
+  "yallaAdmin.portal.tab.adminAudit": "تدقيق الإدارة",
+  "yallaAdmin.portal.tab.audit": "تدقيق الإدارة",
+  "yallaAdmin.portal.tab.liveMonitor": "المراقبة المباشرة",
+  "yallaAdmin.portal.tab.realtime": "المراقبة المباشرة",
+  "yallaAdmin.portal.group.users": "المستخدمون",
+  "yallaAdmin.portal.group.billing": "الفوترة",
+  "yallaAdmin.portal.group.activity": "النشاط",
+  "yallaAdmin.portal.group.logs": "السجلات",
 };
 export default messages;
