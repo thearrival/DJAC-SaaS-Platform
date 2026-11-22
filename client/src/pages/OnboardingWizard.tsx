@@ -260,9 +260,13 @@ export default function OnboardingWizard() {
 
   const handleCreateOrganization = () => {
     const next: { name?: string; billingEmail?: string } = {};
-    if (!orgForm.name.trim()) next.name = "Organization name is required";
+    if (!orgForm.name.trim())
+      next.name = t("wizard.orgNameRequired", "Organization name is required");
     if (!orgForm.billingEmail.trim())
-      next.billingEmail = "Billing email is required";
+      next.billingEmail = t(
+        "wizard.billingEmailRequired",
+        "Billing email is required"
+      );
     if (Object.keys(next).length) {
       setOrgErrors(next);
       return;

@@ -913,7 +913,8 @@ export default function TransferChecker() {
                     </SelectItem>
                     {JURISDICTIONS.map(j => (
                       <SelectItem key={j.value} value={j.value}>
-                        {j.flag} {j.label}
+                        {j.flag}{" "}
+                        {t(`transferChecker.jurisdiction.${j.value}`, j.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -970,7 +971,8 @@ export default function TransferChecker() {
                     </SelectItem>
                     {JURISDICTIONS.filter(j => j.value !== from).map(j => (
                       <SelectItem key={j.value} value={j.value}>
-                        {j.flag} {j.label}
+                        {j.flag}{" "}
+                        {t(`transferChecker.jurisdiction.${j.value}`, j.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1168,7 +1170,10 @@ export default function TransferChecker() {
                       type="button"
                       disabled={step > 2}
                       onClick={() => toggleType(cat.id)}
-                      title={cat.desc}
+                      title={t(
+                        `transferChecker.dataType.${cat.id}.desc`,
+                        cat.desc
+                      )}
                       style={{
                         padding: "5px 11px",
                         borderRadius: 20,
@@ -1181,7 +1186,7 @@ export default function TransferChecker() {
                         transition: "all 0.15s",
                       }}
                     >
-                      {cat.label}
+                      {t(`transferChecker.dataType.${cat.id}.label`, cat.label)}
                     </button>
                   );
                 })}
