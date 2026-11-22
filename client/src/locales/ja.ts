@@ -4719,5 +4719,36 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.group.billing": "請求",
   "yallaAdmin.portal.group.activity": "アクティビティ",
   "yallaAdmin.portal.group.logs": "ログ",
+  "signup.pwReq.minLength": "8文字以上",
+  "signup.pwReq.uppercase": "大文字(A–Z)を1文字以上",
+  "signup.pwReq.number": "数字(0–9)を1文字以上",
+  "signup.role.compliance_officer.title": "コンプライアンス責任者 / DPO",
+  "signup.role.compliance_officer.desc":
+    "義務を管理し、規制ギャップを追跡し、監査対応のコンプライアンスレポートを生成します。",
+  "signup.role.compliance_officer.badge": "コンプライアンスとプライバシー",
+  "signup.role.lawyer.title": "弁護士 / 法務アドバイザー",
+  "signup.role.lawyer.desc":
+    "国境を越えた規制を調査し、クライアントに助言し、法改正をリアルタイムで追跡します。",
+  "signup.role.lawyer.badge": "法律専門職",
+  "signup.role.company.title": "企業 / 会社",
+  "signup.role.company.desc":
+    "組織を登録し、複数チームのアクセスを管理し、コンプライアンス義務を一元化します。",
+  "signup.role.company.badge": "企業体",
+  "signup.role.government.title": "政府 / 規制当局",
+  "signup.role.government.desc":
+    "規制フレームワークにアクセスし、越境市場参加者を監視し、義務を執行します。",
+  "signup.role.government.badge": "公的機関",
+  "signup.role.consultant.title": "コンサルタント / アドバイザー",
+  "signup.role.consultant.desc":
+    "マルチテナントのケース管理により、単一のコンプライアンスワークスペースから複数のクライアントに対応します。",
+  "signup.role.consultant.badge": "コンサルティングサービス",
+  "signup.role.vendor.title": "ベンダー / サプライヤー",
+  "signup.role.vendor.desc":
+    "コンプライアンス態勢を検証し、パートナーと評価を共有し、認証を管理します。",
+  "signup.role.vendor.badge": "サプライチェーン",
+  "signup.role.visitor.title": "訪問者 / 研究者",
+  "signup.role.visitor.desc":
+    "公開コンプライアンスフレームワーク、規制データベース、参照ドキュメントを探索します。",
+  "signup.role.visitor.badge": "公開アクセス",
 };
 export default messages;

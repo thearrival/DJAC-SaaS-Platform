@@ -4588,5 +4588,37 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.group.billing": "الفوترة",
   "yallaAdmin.portal.group.activity": "النشاط",
   "yallaAdmin.portal.group.logs": "السجلات",
+  "signup.pwReq.minLength": "8 أحرف على الأقل",
+  "signup.pwReq.uppercase": "حرف كبير واحد على الأقل (A–Z)",
+  "signup.pwReq.number": "رقم واحد على الأقل (0–9)",
+  "signup.role.compliance_officer.title":
+    "مسؤول الامتثال / مسؤول حماية البيانات",
+  "signup.role.compliance_officer.desc":
+    "إدارة الالتزامات وتتبع الفجوات التنظيمية وإنشاء تقارير امتثال جاهزة للتدقيق.",
+  "signup.role.compliance_officer.badge": "الامتثال والخصوصية",
+  "signup.role.lawyer.title": "محامٍ / مستشار قانوني",
+  "signup.role.lawyer.desc":
+    "ابحث في اللوائح عبر الحدود، وقدم المشورة للعملاء، وتتبع التغييرات التشريعية في الوقت الفعلي.",
+  "signup.role.lawyer.badge": "المهنة القانونية",
+  "signup.role.company.title": "مؤسسة / شركة",
+  "signup.role.company.desc":
+    "سجل مؤسستك، وأدر وصول الفرق المتعددة، ومركّز التزامات الامتثال.",
+  "signup.role.company.badge": "كيان مؤسسي",
+  "signup.role.government.title": "جهة حكومية / جهة تنظيمية",
+  "signup.role.government.desc":
+    "الوصول إلى الأطر التنظيمية، ومراقبة المشاركين في السوق عبر الحدود، وفرض الالتزامات.",
+  "signup.role.government.badge": "سلطة عامة",
+  "signup.role.consultant.title": "استشاري / مستشار",
+  "signup.role.consultant.desc":
+    "خدم عدة عملاء من مساحة عمل امتثال واحدة مع إدارة حالات متعددة المستأجرين.",
+  "signup.role.consultant.badge": "خدمات استشارية",
+  "signup.role.vendor.title": "مورد / مزود",
+  "signup.role.vendor.desc":
+    "تحقق من وضع الامتثال لديك، وشارك التقييمات مع الشركاء، وأدر الشهادات.",
+  "signup.role.vendor.badge": "سلسلة التوريد",
+  "signup.role.visitor.title": "زائر / باحث",
+  "signup.role.visitor.desc":
+    "استكشف أطر الامتثال العامة وقواعد البيانات التنظيمية والوثائق المرجعية.",
+  "signup.role.visitor.badge": "وصول عام",
 };
 export default messages;

@@ -4648,5 +4648,36 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.group.billing": "Billing",
   "yallaAdmin.portal.group.activity": "Activity",
   "yallaAdmin.portal.group.logs": "Logs",
+  "signup.pwReq.minLength": "At least 8 characters",
+  "signup.pwReq.uppercase": "At least one uppercase letter (A–Z)",
+  "signup.pwReq.number": "At least one number (0–9)",
+  "signup.role.compliance_officer.title": "Compliance Officer / DPO",
+  "signup.role.compliance_officer.desc":
+    "Manage obligations, track regulatory gaps, and generate audit-ready compliance reports.",
+  "signup.role.compliance_officer.badge": "Compliance & Privacy",
+  "signup.role.lawyer.title": "Lawyer / Legal Advisor",
+  "signup.role.lawyer.desc":
+    "Research cross-border regulations, advise clients, and track legislative changes in real time.",
+  "signup.role.lawyer.badge": "Legal Profession",
+  "signup.role.company.title": "Enterprise / Company",
+  "signup.role.company.desc":
+    "Register your organization, manage multi-team access, and centralize compliance obligations.",
+  "signup.role.company.badge": "Corporate Entity",
+  "signup.role.government.title": "Government / Regulator",
+  "signup.role.government.desc":
+    "Access regulatory frameworks, monitor cross-border market participants, and enforce obligations.",
+  "signup.role.government.badge": "Public Authority",
+  "signup.role.consultant.title": "Consultant / Advisor",
+  "signup.role.consultant.desc":
+    "Serve multiple clients from a single compliance workspace with multi-tenant case management.",
+  "signup.role.consultant.badge": "Consulting Services",
+  "signup.role.vendor.title": "Vendor / Supplier",
+  "signup.role.vendor.desc":
+    "Validate your compliance posture, share assessments with partners, and manage certifications.",
+  "signup.role.vendor.badge": "Supply Chain",
+  "signup.role.visitor.title": "Visitor / Researcher",
+  "signup.role.visitor.desc":
+    "Explore public compliance frameworks, regulatory databases, and reference documentation.",
+  "signup.role.visitor.badge": "Public Access",
 };
 export default messages;

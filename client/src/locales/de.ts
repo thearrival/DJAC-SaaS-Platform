@@ -4825,5 +4825,36 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.group.billing": "Abrechnung",
   "yallaAdmin.portal.group.activity": "Aktivität",
   "yallaAdmin.portal.group.logs": "Protokolle",
+  "signup.pwReq.minLength": "Mindestens 8 Zeichen",
+  "signup.pwReq.uppercase": "Mindestens ein Großbuchstabe (A–Z)",
+  "signup.pwReq.number": "Mindestens eine Zahl (0–9)",
+  "signup.role.compliance_officer.title": "Compliance-Beauftragter / DSB",
+  "signup.role.compliance_officer.desc":
+    "Verwalten Sie Pflichten, verfolgen Sie regulatorische Lücken und erstellen Sie auditbereite Compliance-Berichte.",
+  "signup.role.compliance_officer.badge": "Compliance & Datenschutz",
+  "signup.role.lawyer.title": "Anwalt / Rechtsberater",
+  "signup.role.lawyer.desc":
+    "Recherchieren Sie grenzüberschreitende Vorschriften, beraten Sie Kunden und verfolgen Sie Gesetzesänderungen in Echtzeit.",
+  "signup.role.lawyer.badge": "Rechtsberuf",
+  "signup.role.company.title": "Unternehmen / Firma",
+  "signup.role.company.desc":
+    "Registrieren Sie Ihre Organisation, verwalten Sie teamübergreifenden Zugriff und zentralisieren Sie Compliance-Pflichten.",
+  "signup.role.company.badge": "Unternehmenseinheit",
+  "signup.role.government.title": "Regierung / Regulierungsbehörde",
+  "signup.role.government.desc":
+    "Greifen Sie auf regulatorische Rahmenwerke zu, überwachen Sie grenzüberschreitende Marktteilnehmer und setzen Sie Pflichten durch.",
+  "signup.role.government.badge": "Öffentliche Behörde",
+  "signup.role.consultant.title": "Berater / Consultant",
+  "signup.role.consultant.desc":
+    "Betreuen Sie mehrere Kunden aus einem einzigen Compliance-Arbeitsbereich mit mandantenfähiger Fallverwaltung.",
+  "signup.role.consultant.badge": "Beratungsdienste",
+  "signup.role.vendor.title": "Anbieter / Lieferant",
+  "signup.role.vendor.desc":
+    "Validieren Sie Ihre Compliance-Position, teilen Sie Bewertungen mit Partnern und verwalten Sie Zertifizierungen.",
+  "signup.role.vendor.badge": "Lieferkette",
+  "signup.role.visitor.title": "Besucher / Forscher",
+  "signup.role.visitor.desc":
+    "Erkunden Sie öffentliche Compliance-Rahmenwerke, regulatorische Datenbanken und Referenzdokumentation.",
+  "signup.role.visitor.badge": "Öffentlicher Zugang",
 };
 export default messages;

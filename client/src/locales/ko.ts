@@ -4584,5 +4584,36 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.group.billing": "결제",
   "yallaAdmin.portal.group.activity": "활동",
   "yallaAdmin.portal.group.logs": "로그",
+  "signup.pwReq.minLength": "최소 8자",
+  "signup.pwReq.uppercase": "대문자(A–Z) 최소 1개",
+  "signup.pwReq.number": "숫자(0–9) 최소 1개",
+  "signup.role.compliance_officer.title": "컴플라이언스 담당자 / DPO",
+  "signup.role.compliance_officer.desc":
+    "의무를 관리하고 규제 격차를 추적하며 감사 준비된 컴플라이언스 보고서를 생성합니다.",
+  "signup.role.compliance_officer.badge": "컴플라이언스 및 개인정보",
+  "signup.role.lawyer.title": "변호사 / 법률 자문",
+  "signup.role.lawyer.desc":
+    "국경 간 규제를 조사하고 고객에게 자문하며 법률 변경을 실시간으로 추적합니다.",
+  "signup.role.lawyer.badge": "법률 전문직",
+  "signup.role.company.title": "기업 / 회사",
+  "signup.role.company.desc":
+    "조직을 등록하고 다중 팀 액세스를 관리하며 컴플라이언스 의무를 중앙화합니다.",
+  "signup.role.company.badge": "기업 법인",
+  "signup.role.government.title": "정부 / 규제기관",
+  "signup.role.government.desc":
+    "규제 프레임워크에 액세스하고 국경 간 시장 참여자를 모니터링하며 의무를 집행합니다.",
+  "signup.role.government.badge": "공공 기관",
+  "signup.role.consultant.title": "컨설턴트 / 자문가",
+  "signup.role.consultant.desc":
+    "멀티테넌트 사례 관리를 통해 단일 컴플라이언스 워크스페이스에서 여러 고객을 지원합니다.",
+  "signup.role.consultant.badge": "컨설팅 서비스",
+  "signup.role.vendor.title": "공급업체 / 벤더",
+  "signup.role.vendor.desc":
+    "컴플라이언스 상태를 검증하고 파트너와 평가를 공유하며 인증을 관리합니다.",
+  "signup.role.vendor.badge": "공급망",
+  "signup.role.visitor.title": "방문자 / 연구원",
+  "signup.role.visitor.desc":
+    "공개 컴플라이언스 프레임워크, 규제 데이터베이스 및 참조 문서를 탐색합니다.",
+  "signup.role.visitor.badge": "공개 액세스",
 };
 export default messages;

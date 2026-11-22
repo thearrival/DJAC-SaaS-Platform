@@ -4843,5 +4843,36 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.group.billing": "Facturación",
   "yallaAdmin.portal.group.activity": "Actividad",
   "yallaAdmin.portal.group.logs": "Registros",
+  "signup.pwReq.minLength": "Al menos 8 caracteres",
+  "signup.pwReq.uppercase": "Al menos una letra mayúscula (A–Z)",
+  "signup.pwReq.number": "Al menos un número (0–9)",
+  "signup.role.compliance_officer.title": "Oficial de cumplimiento / DPO",
+  "signup.role.compliance_officer.desc":
+    "Gestione obligaciones, rastree brechas regulatorias y genere informes de cumplimiento listos para auditoría.",
+  "signup.role.compliance_officer.badge": "Cumplimiento y privacidad",
+  "signup.role.lawyer.title": "Abogado / Asesor legal",
+  "signup.role.lawyer.desc":
+    "Investigue regulaciones transfronterizas, asesore a clientes y siga cambios legislativos en tiempo real.",
+  "signup.role.lawyer.badge": "Profesión legal",
+  "signup.role.company.title": "Empresa / Compañía",
+  "signup.role.company.desc":
+    "Registre su organización, gestione el acceso de múltiples equipos y centralice las obligaciones de cumplimiento.",
+  "signup.role.company.badge": "Entidad corporativa",
+  "signup.role.government.title": "Gobierno / Regulador",
+  "signup.role.government.desc":
+    "Acceda a marcos regulatorios, supervise participantes transfronterizos y haga cumplir obligaciones.",
+  "signup.role.government.badge": "Autoridad pública",
+  "signup.role.consultant.title": "Consultor / Asesor",
+  "signup.role.consultant.desc":
+    "Atienda a múltiples clientes desde un solo espacio de cumplimiento con gestión de casos multiinquilino.",
+  "signup.role.consultant.badge": "Servicios de consultoría",
+  "signup.role.vendor.title": "Proveedor / Suministrador",
+  "signup.role.vendor.desc":
+    "Valide su postura de cumplimiento, comparta evaluaciones con socios y gestione certificaciones.",
+  "signup.role.vendor.badge": "Cadena de suministro",
+  "signup.role.visitor.title": "Visitante / Investigador",
+  "signup.role.visitor.desc":
+    "Explore marcos de cumplimiento públicos, bases de datos regulatorias y documentación de referencia.",
+  "signup.role.visitor.badge": "Acceso público",
 };
 export default messages;

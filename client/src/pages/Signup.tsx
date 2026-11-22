@@ -187,11 +187,23 @@ function pwStrength(pw: string, C: DesignTokens) {
 }
 
 // Returns human-readable list of unmet password requirements.
-function pwRequirements(pw: string): string[] {
-  const issues: string[] = [];
-  if (pw.length < 8) issues.push("At least 8 characters");
-  if (!/[A-Z]/.test(pw)) issues.push("At least one uppercase letter (A–Z)");
-  if (!/[0-9]/.test(pw)) issues.push("At least one number (0–9)");
+function pwRequirements(pw: string): { key: string; fallback: string }[] {
+  const issues: { key: string; fallback: string }[] = [];
+  if (pw.length < 8)
+    issues.push({
+      key: "signup.pwReq.minLength",
+      fallback: "At least 8 characters",
+    });
+  if (!/[A-Z]/.test(pw))
+    issues.push({
+      key: "signup.pwReq.uppercase",
+      fallback: "At least one uppercase letter (A–Z)",
+    });
+  if (!/[0-9]/.test(pw))
+    issues.push({
+      key: "signup.pwReq.number",
+      fallback: "At least one number (0–9)",
+    });
   return issues;
 }
 
@@ -302,7 +314,7 @@ function PasswordField({
             >
               {pwRequirements(value).map(req => (
                 <li
-                  key={req}
+                  key={req.key}
                   style={{
                     fontSize: 11,
                     color: C.red,
@@ -311,7 +323,7 @@ function PasswordField({
                     gap: 4,
                   }}
                 >
-                  <span>&#9888;</span> {req}
+                  <span>&#9888;</span> {t(req.key, req.fallback)}
                 </li>
               ))}
             </ul>

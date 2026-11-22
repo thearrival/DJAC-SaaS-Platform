@@ -4360,5 +4360,32 @@ const messages: Record<string, string> = {
   "yallaAdmin.portal.group.billing": "计费",
   "yallaAdmin.portal.group.activity": "活动",
   "yallaAdmin.portal.group.logs": "日志",
+  "signup.pwReq.minLength": "至少 8 个字符",
+  "signup.pwReq.uppercase": "至少一个大写字母 (A–Z)",
+  "signup.pwReq.number": "至少一个数字 (0–9)",
+  "signup.role.compliance_officer.title": "合规官 / DPO",
+  "signup.role.compliance_officer.desc":
+    "管理义务、跟踪监管差距并生成可供审计的合规报告。",
+  "signup.role.compliance_officer.badge": "合规与隐私",
+  "signup.role.lawyer.title": "律师 / 法律顾问",
+  "signup.role.lawyer.desc": "研究跨境法规、为客户提供建议并实时跟踪立法变化。",
+  "signup.role.lawyer.badge": "法律专业",
+  "signup.role.company.title": "企业 / 公司",
+  "signup.role.company.desc":
+    "注册您的组织，管理多团队访问权限，并集中合规义务。",
+  "signup.role.company.badge": "企业实体",
+  "signup.role.government.title": "政府 / 监管机构",
+  "signup.role.government.desc": "访问监管框架，监控跨境市场参与者并执行义务。",
+  "signup.role.government.badge": "公共机构",
+  "signup.role.consultant.title": "顾问 / 咨询师",
+  "signup.role.consultant.desc":
+    "从单一合规工作区为多个客户提供服务，支持多租户案例管理。",
+  "signup.role.consultant.badge": "咨询服务",
+  "signup.role.vendor.title": "供应商",
+  "signup.role.vendor.desc": "验证您的合规状况，与合作伙伴共享评估并管理认证。",
+  "signup.role.vendor.badge": "供应链",
+  "signup.role.visitor.title": "访客 / 研究员",
+  "signup.role.visitor.desc": "探索公共合规框架、监管数据库和参考文档。",
+  "signup.role.visitor.badge": "公共访问",
 };
 export default messages;
