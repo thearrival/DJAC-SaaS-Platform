@@ -145,10 +145,13 @@ function InlineChoiceSelect({
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
-  options: string[];
+  options: Array<string | { value: string; label: string }>;
   ariaLabel: string;
   C: DesignTokens;
 }) {
+  const normalized = options.map(option =>
+    typeof option === "string" ? { value: option, label: option } : option
+  );
   return (
     <Select
       value={value || "__empty__"}
@@ -162,9 +165,9 @@ function InlineChoiceSelect({
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="__empty__">{placeholder}</SelectItem>
-        {options.map(option => (
-          <SelectItem key={option} value={option}>
-            {option}
+        {normalized.map(option => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
           </SelectItem>
         ))}
       </SelectContent>
@@ -1226,10 +1229,16 @@ function RoleRegisterForm({
   };
 
   const ROLE_DEFAULT_TITLES: Partial<Record<RoleId, string>> = {
-    lawyer: "Legal Advisor",
-    company: "Company Representative",
-    consultant: "Consultant",
-    vendor: "Vendor Representative",
+    lawyer: t("signup.defaultTitle.legal_advisor", "Legal Advisor"),
+    company: t(
+      "signup.defaultTitle.company_representative",
+      "Company Representative"
+    ),
+    consultant: t("signup.defaultTitle.consultant", "Consultant"),
+    vendor: t(
+      "signup.defaultTitle.vendor_representative",
+      "Vendor Representative"
+    ),
   };
   const effectiveTitle = (
     jobTitle ||
@@ -1633,7 +1642,10 @@ function RoleRegisterForm({
                     {JURISDICTIONS.map(j => (
                       <TagButton
                         key={j.value}
-                        label={j.label}
+                        label={t(
+                          `signup.jurisdiction.${j.value.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                          j.label
+                        )}
                         tagAccent={accent}
                         active={selectedTags.includes(j.value)}
                         onToggle={() =>
@@ -1650,7 +1662,13 @@ function RoleRegisterForm({
                     "signup.industryOptional",
                     "Industry sector (optional)"
                   )}
-                  options={INDUSTRIES}
+                  options={INDUSTRIES.map(i => ({
+                    value: i,
+                    label: t(
+                      `signup.industry.${i.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                      i
+                    ),
+                  }))}
                   ariaLabel={t("signup.industry", "Industry")}
                   C={C}
                 />
@@ -1719,7 +1737,10 @@ function RoleRegisterForm({
                     {PRACTICE_AREAS.map(a => (
                       <TagButton
                         key={a}
-                        label={a}
+                        label={t(
+                          `signup.practiceArea.${a.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                          a
+                        )}
                         tagAccent={accent}
                         active={selectedTags.includes(a)}
                         onToggle={() =>
@@ -1813,7 +1834,13 @@ function RoleRegisterForm({
                       "signup.employeesOptional",
                       "Employees (optional)"
                     )}
-                    options={EMP_RANGES}
+                    options={EMP_RANGES.map(i => ({
+                      value: i,
+                      label: t(
+                        `signup.empRange.${i.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                        i
+                      ),
+                    }))}
                     ariaLabel={t("signup.employeeRange", "Employees")}
                     C={C}
                   />
@@ -1934,7 +1961,10 @@ function RoleRegisterForm({
                     {PRACTICE_AREAS.map(a => (
                       <TagButton
                         key={a}
-                        label={a}
+                        label={t(
+                          `signup.practiceArea.${a.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                          a
+                        )}
                         tagAccent={accent}
                         active={selectedTags.includes(a)}
                         onToggle={() =>
@@ -1951,7 +1981,13 @@ function RoleRegisterForm({
                     "signup.selectMarket",
                     "Primary market (optional)"
                   )}
-                  options={MARKETS}
+                  options={MARKETS.map(i => ({
+                    value: i,
+                    label: t(
+                      `signup.market.${i.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                      i
+                    ),
+                  }))}
                   ariaLabel={t("signup.primaryMarket", "Primary market")}
                   C={C}
                 />
@@ -1983,7 +2019,13 @@ function RoleRegisterForm({
                     "signup.vendorCategoryRequired",
                     "Vendor category *"
                   )}
-                  options={VENDOR_CATS}
+                  options={VENDOR_CATS.map(i => ({
+                    value: i,
+                    label: t(
+                      `signup.vendorCat.${i.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                      i
+                    ),
+                  }))}
                   ariaLabel={t("signup.vendorCategory", "Vendor category")}
                   C={C}
                 />
@@ -1998,7 +2040,10 @@ function RoleRegisterForm({
                     {CERT_OPTIONS.map(c => (
                       <TagButton
                         key={c}
-                        label={c}
+                        label={t(
+                          `signup.cert.${c.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                          c
+                        )}
                         tagAccent={accent}
                         active={certifications.includes(c)}
                         onToggle={() =>
