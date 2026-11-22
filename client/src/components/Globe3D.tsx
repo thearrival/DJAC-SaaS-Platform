@@ -1208,7 +1208,12 @@ export function Globe3D({
           />
           <span>many</span>
         </div>
-        <div>Hub size/colour = frameworks per jurisdiction</div>
+        <div>
+          {t(
+            "globe.hubLegend",
+            "Hub size/colour = frameworks per jurisdiction"
+          )}
+        </div>
         <div
           style={{
             display: "flex",

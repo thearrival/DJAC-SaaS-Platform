@@ -108,6 +108,7 @@ function PaginationEllipsis({
   className,
   ...props
 }: React.ComponentProps<"span">) {
+  const { t } = useLocale();
   return (
     <span
       aria-hidden
@@ -116,7 +117,7 @@ function PaginationEllipsis({
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />
-      <span className="sr-only">More pages</span>
+      <span className="sr-only">{t("common.morePages", "More pages")}</span>
     </span>
   );
 }

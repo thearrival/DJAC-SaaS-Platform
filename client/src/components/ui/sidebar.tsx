@@ -165,6 +165,7 @@ function Sidebar({
   collapsible?: "offcanvas" | "icon" | "none";
   disableTransition?: boolean;
 }) {
+  const { t } = useLocale();
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
   if (collapsible === "none") {
@@ -198,8 +199,10 @@ function Sidebar({
           side={side}
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+            <SheetTitle>{t("common.sidebar", "Sidebar")}</SheetTitle>
+            <SheetDescription>
+              {t("common.sidebarMobileDesc", "Displays the mobile sidebar.")}
+            </SheetDescription>
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
@@ -266,6 +269,7 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
+  const { t } = useLocale();
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -282,7 +286,9 @@ function SidebarTrigger({
       {...props}
     >
       <PanelLeftIcon />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">
+        {t("common.toggleSidebar", "Toggle Sidebar")}
+      </span>
     </Button>
   );
 }

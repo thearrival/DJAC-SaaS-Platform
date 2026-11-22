@@ -820,7 +820,12 @@ export function RegulatoryPulseMatrix() {
               }}
             >
               <p style={{ margin: 0, fontSize: 11, color: "var(--djac-text)" }}>
-                <strong>Combined maximum exposure:</strong>{" "}
+                <strong>
+                  {t(
+                    "regulatoryMatrix.combinedMaxExposure",
+                    "Combined maximum exposure:"
+                  )}
+                </strong>{" "}
                 <span style={{ fontFamily: "monospace", fontWeight: 700 }}>
                   {formatCurrency(piplMaxPenalty + pdplMaxPenalty, "sar")}
                 </span>

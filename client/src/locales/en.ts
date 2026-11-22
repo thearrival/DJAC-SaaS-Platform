@@ -4497,5 +4497,15 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.lastActive": "Last Active",
   "yallaAdmin.access.ownerCheck": "Owner Access Check",
   "yallaAdmin.access.checkingToken": "Checking access token...",
+  "common.searchEllipsis": "Search…",
+  "globe.hubLegend": "Hub size/colour = frameworks per jurisdiction",
+  "regulatoryMatrix.combinedMaxExposure": "Combined maximum exposure:",
+  "common.more": "More",
+  "common.previousSlide": "Previous slide",
+  "common.nextSlide": "Next slide",
+  "common.close": "Close",
+  "common.morePages": "More pages",
+  "common.sidebar": "Sidebar",
+  "common.sidebarMobileDesc": "Displays the mobile sidebar.",
 };
 export default messages;

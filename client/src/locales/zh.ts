@@ -4219,5 +4219,15 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.lastActive": "最近活跃",
   "yallaAdmin.access.ownerCheck": "所有者访问检查",
   "yallaAdmin.access.checkingToken": "正在检查访问令牌...",
+  "common.searchEllipsis": "搜索…",
+  "globe.hubLegend": "枢纽大小/颜色 = 每个司法辖区的框架数量",
+  "regulatoryMatrix.combinedMaxExposure": "合并最大风险敞口：",
+  "common.more": "更多",
+  "common.previousSlide": "上一张幻灯片",
+  "common.nextSlide": "下一张幻灯片",
+  "common.close": "关闭",
+  "common.morePages": "更多页面",
+  "common.sidebar": "侧边栏",
+  "common.sidebarMobileDesc": "显示移动端侧边栏。",
 };
 export default messages;

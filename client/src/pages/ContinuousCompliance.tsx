@@ -1230,7 +1230,9 @@ export default function ContinuousCompliance() {
                       <TableHead className="text-xs">
                         {t("ctem.started", "Started")}
                       </TableHead>
-                      <TableHead className="text-xs">Status</TableHead>
+                      <TableHead className="text-xs">
+                        {t("ctem.status", "Status")}
+                      </TableHead>
                       <TableHead className="text-xs">
                         {t("ctem.triggeredBy", "Triggered by")}
                       </TableHead>

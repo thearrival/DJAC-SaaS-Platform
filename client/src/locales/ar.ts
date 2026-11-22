@@ -4438,5 +4438,15 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.lastActive": "آخر نشاط",
   "yallaAdmin.access.ownerCheck": "التحقق من وصول المالك",
   "yallaAdmin.access.checkingToken": "جارٍ التحقق من رمز الوصول...",
+  "common.searchEllipsis": "بحث…",
+  "globe.hubLegend": "حجم/لون المركز = عدد الأطر لكل اختصاص",
+  "regulatoryMatrix.combinedMaxExposure": "الحد الأقصى للتعرض المجمع:",
+  "common.more": "المزيد",
+  "common.previousSlide": "الشريحة السابقة",
+  "common.nextSlide": "الشريحة التالية",
+  "common.close": "إغلاق",
+  "common.morePages": "المزيد من الصفحات",
+  "common.sidebar": "الشريط الجانبي",
+  "common.sidebarMobileDesc": "يعرض الشريط الجانبي للهاتف المحمول.",
 };
 export default messages;

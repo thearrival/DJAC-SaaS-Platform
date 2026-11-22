@@ -4435,5 +4435,15 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.lastActive": "마지막 활동",
   "yallaAdmin.access.ownerCheck": "소유자 액세스 확인",
   "yallaAdmin.access.checkingToken": "액세스 토큰 확인 중...",
+  "common.searchEllipsis": "검색…",
+  "globe.hubLegend": "허브 크기/색상 = 관할권별 프레임워크 수",
+  "regulatoryMatrix.combinedMaxExposure": "합산 최대 노출:",
+  "common.more": "더보기",
+  "common.previousSlide": "이전 슬라이드",
+  "common.nextSlide": "다음 슬라이드",
+  "common.close": "닫기",
+  "common.morePages": "더 많은 페이지",
+  "common.sidebar": "사이드바",
+  "common.sidebarMobileDesc": "모바일 사이드바를 표시합니다.",
 };
 export default messages;

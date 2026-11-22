@@ -4689,5 +4689,15 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.lastActive": "Última actividad",
   "yallaAdmin.access.ownerCheck": "Verificación de acceso del propietario",
   "yallaAdmin.access.checkingToken": "Comprobando el token de acceso...",
+  "common.searchEllipsis": "Buscar…",
+  "globe.hubLegend": "Tamaño/color del centro = marcos por jurisdicción",
+  "regulatoryMatrix.combinedMaxExposure": "Exposición máxima combinada:",
+  "common.more": "Más",
+  "common.previousSlide": "Diapositiva anterior",
+  "common.nextSlide": "Diapositiva siguiente",
+  "common.close": "Cerrar",
+  "common.morePages": "Más páginas",
+  "common.sidebar": "Barra lateral",
+  "common.sidebarMobileDesc": "Muestra la barra lateral móvil.",
 };
 export default messages;

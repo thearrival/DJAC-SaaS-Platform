@@ -47,14 +47,65 @@ const APP_ROOT_ID = "djac-app-root";
 
 const renderStartupFallback = (message?: string) => {
   if (typeof document === "undefined") return;
-
+  const locale =
+    typeof localStorage !== "undefined"
+      ? localStorage.getItem("djac-locale") || "en"
+      : "en";
+  const copy: Record<string, { title: string; body: string; hint: string }> = {
+    en: {
+      title: "DJAC is loading safely",
+      body: "The app hit a browser compatibility or startup issue.",
+      hint: "Please refresh the page or open it in a current browser.",
+    },
+    ar: {
+      title: "يقوم DJAC بالتحميل بأمان",
+      body: "واجه التطبيق مشكلة في توافق المتصفح أو بدء التشغيل.",
+      hint: "يرجى تحديث الصفحة أو فتحها في متصفح حديث.",
+    },
+    zh: {
+      title: "DJAC 正在安全加载",
+      body: "应用遇到了浏览器兼容性或启动问题。",
+      hint: "请刷新页面或在较新的浏览器中打开。",
+    },
+    fr: {
+      title: "DJAC se charge en toute sécurité",
+      body: "L'application a rencontré un problème de compatibilité ou de démarrage du navigateur.",
+      hint: "Veuillez actualiser la page ou l'ouvrir dans un navigateur récent.",
+    },
+    es: {
+      title: "DJAC se está cargando de forma segura",
+      body: "La aplicación encontró un problema de compatibilidad o inicio del navegador.",
+      hint: "Actualice la página o ábrala en un navegador actual.",
+    },
+    de: {
+      title: "DJAC wird sicher geladen",
+      body: "Bei der App ist ein Browserkompatibilitäts- oder Startproblem aufgetreten.",
+      hint: "Bitte aktualisieren Sie die Seite oder öffnen Sie sie in einem aktuellen Browser.",
+    },
+    ja: {
+      title: "DJAC を安全に読み込んでいます",
+      body: "アプリでブラウザ互換性または起動の問題が発生しました。",
+      hint: "ページを更新するか、最新のブラウザで開いてください。",
+    },
+    ko: {
+      title: "DJAC를 안전하게 로드하는 중입니다",
+      body: "앱에서 브라우저 호환성 또는 시작 문제가 발생했습니다.",
+      hint: "페이지를 새로고침하거나 최신 브라우저에서 열어 주세요.",
+    },
+    pt: {
+      title: "DJAC está carregando com segurança",
+      body: "O aplicativo encontrou um problema de compatibilidade ou inicialização do navegador.",
+      hint: "Atualize a página ou abra em um navegador atual.",
+    },
+  };
+  const c = copy[locale] ?? copy.en;
   const root = getAppRoot();
   root.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#050508;color:#ffffff;font-family:Inter,Arial,sans-serif;">
       <div style="max-width:560px;background:rgba(30,30,45,0.4);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.08);text-align:center;">
-        <h1 style="margin:0 0 12px;font-size:24px;font-weight:700;">DJAC is loading safely</h1>
-        <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">The app hit a browser compatibility or startup issue.</p>
-        <p style="margin:0;font-size:13px;line-height:1.6;color:#94a3b8;">${message ?? "Please refresh the page or open it in a current browser."}</p>
+        <h1 style="margin:0 0 12px;font-size:24px;font-weight:700;">${c.title}</h1>
+        <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">${c.body}</p>
+        <p style="margin:0;font-size:13px;line-height:1.6;color:#94a3b8;">${message ?? c.hint}</p>
       </div>
     </div>
   `;

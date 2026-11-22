@@ -4568,5 +4568,15 @@ const messages: Record<string, string> = {
   "yallaAdmin.dashboard.lastActive": "最終アクティブ",
   "yallaAdmin.access.ownerCheck": "オーナーアクセス確認",
   "yallaAdmin.access.checkingToken": "アクセストークンを確認中...",
+  "common.searchEllipsis": "検索…",
+  "globe.hubLegend": "ハブのサイズ/色 = 管轄区域ごとのフレームワーク数",
+  "regulatoryMatrix.combinedMaxExposure": "合計最大エクスポージャー:",
+  "common.more": "もっと見る",
+  "common.previousSlide": "前のスライド",
+  "common.nextSlide": "次のスライド",
+  "common.close": "閉じる",
+  "common.morePages": "その他のページ",
+  "common.sidebar": "サイドバー",
+  "common.sidebarMobileDesc": "モバイルサイドバーを表示します。",
 };
 export default messages;
