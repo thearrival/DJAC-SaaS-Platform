@@ -5232,5 +5232,7 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Security": "Sécurité",
   "vendorAssessment.gapCategory.DataResidency": "Résidence des données",
   "vendorAssessment.gapCategory.Governance": "Gouvernance",
+  "clientWorkspace.pageTitle": "Mon espace de travail",
+  "clientWorkspace.unknown": "Inconnu",
 };
 export default messages;

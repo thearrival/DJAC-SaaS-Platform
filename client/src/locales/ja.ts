@@ -5065,5 +5065,7 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Security": "セキュリティ",
   "vendorAssessment.gapCategory.DataResidency": "データレジデンシー",
   "vendorAssessment.gapCategory.Governance": "ガバナンス",
+  "clientWorkspace.pageTitle": "マイワークスペース",
+  "clientWorkspace.unknown": "不明",
 };
 export default messages;

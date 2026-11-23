@@ -4929,5 +4929,7 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Security": "보안",
   "vendorAssessment.gapCategory.DataResidency": "데이터 거주",
   "vendorAssessment.gapCategory.Governance": "거버넌스",
+  "clientWorkspace.pageTitle": "내 작업 공간",
+  "clientWorkspace.unknown": "알 수 없음",
 };
 export default messages;

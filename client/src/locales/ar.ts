@@ -4940,5 +4940,7 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Security": "الأمن",
   "vendorAssessment.gapCategory.DataResidency": "إقامة البيانات",
   "vendorAssessment.gapCategory.Governance": "الحوكمة",
+  "clientWorkspace.pageTitle": "مساحة عملي",
+  "clientWorkspace.unknown": "غير معروف",
 };
 export default messages;

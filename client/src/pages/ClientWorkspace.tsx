@@ -423,10 +423,10 @@ function SimpleStringSelect({
 }
 
 export default function ClientWorkspace() {
-  usePageTitle("My Workspace");
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { t, locale } = useLocale();
+  usePageTitle(t("clientWorkspace.pageTitle", "My Workspace"));
   const localeKey = (
     locale === "en" || locale === "ar" || locale === "zh" ? locale : "en"
   ) as Locale;
@@ -644,7 +644,7 @@ export default function ClientWorkspace() {
         vendorId: job.result?.inputSummary.vendorId ?? 0,
         vendorName:
           vendorNameById.get(job.result?.inputSummary.vendorId ?? -1) ??
-          `Vendor ${job.result?.inputSummary.vendorId ?? "Unknown"}`,
+          `Vendor ${job.result?.inputSummary.vendorId ?? t("clientWorkspace.unknown", "Unknown")}`,
         score: job.result?.assessment?.overallScore ?? 0,
         riskLevel: job.result?.assessment?.riskLevel ?? "low",
       }));

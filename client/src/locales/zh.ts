@@ -4698,5 +4698,7 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Security": "安全",
   "vendorAssessment.gapCategory.DataResidency": "数据驻留",
   "vendorAssessment.gapCategory.Governance": "治理",
+  "clientWorkspace.pageTitle": "我的工作区",
+  "clientWorkspace.unknown": "未知",
 };
 export default messages;
