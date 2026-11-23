@@ -5054,5 +5054,16 @@ const messages: Record<string, string> = {
     "業界が変更されると、推奨事項は自動的に更新されます。",
   "vendorAssessment.ui.requiredFieldsNotice":
     "必須項目を入力してください：会社名、業界、および少なくとも1つのサイバーセキュリティフレームワーク。",
+  "vendorAssessment.dataLocation.Saudi Arabia": "サウジアラビア",
+  "vendorAssessment.dataLocation.China": "中国",
+  "vendorAssessment.dataLocation.US": "米国",
+  "vendorAssessment.dataLocation.EU": "EU",
+  "vendorAssessment.dataLocation.APAC": "APAC",
+  "vendorAssessment.dataLocation.Others": "その他",
+  "vendorAssessment.gapCategory.Infrastructure": "インフラストラクチャ",
+  "vendorAssessment.gapCategory.Compliance": "コンプライアンス",
+  "vendorAssessment.gapCategory.Security": "セキュリティ",
+  "vendorAssessment.gapCategory.DataResidency": "データレジデンシー",
+  "vendorAssessment.gapCategory.Governance": "ガバナンス",
 };
 export default messages;

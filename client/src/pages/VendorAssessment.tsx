@@ -2521,7 +2521,10 @@ export default function VendorAssessment() {
                           }}
                         />
                         <label className="text-sm cursor-pointer">
-                          {dataLocationLabels[locationKey]}
+                          {t(
+                            `vendorAssessment.dataLocation.${locationKey}`,
+                            dataLocationLabels[locationKey]
+                          )}
                         </label>
                       </div>
                     ))}
@@ -3165,7 +3168,10 @@ export default function VendorAssessment() {
                             labels={severityLabels}
                           />
                           <Badge variant="outline" className="text-xs">
-                            {categoryLabels[gap.category]}
+                            {t(
+                              `vendorAssessment.gapCategory.${gap.category}`,
+                              categoryLabels[gap.category]
+                            )}
                           </Badge>
                         </div>
                         <p className="font-medium text-gray-900 dark:text-gray-100">

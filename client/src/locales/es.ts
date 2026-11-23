@@ -5189,5 +5189,16 @@ const messages: Record<string, string> = {
     "Las recomendaciones se actualizan automáticamente cuando cambia la industria.",
   "vendorAssessment.ui.requiredFieldsNotice":
     "Complete los campos obligatorios: nombre de la empresa, industria y al menos un marco de ciberseguridad.",
+  "vendorAssessment.dataLocation.Saudi Arabia": "Arabia Saudita",
+  "vendorAssessment.dataLocation.China": "China",
+  "vendorAssessment.dataLocation.US": "EE. UU.",
+  "vendorAssessment.dataLocation.EU": "UE",
+  "vendorAssessment.dataLocation.APAC": "APAC",
+  "vendorAssessment.dataLocation.Others": "Otros",
+  "vendorAssessment.gapCategory.Infrastructure": "Infraestructura",
+  "vendorAssessment.gapCategory.Compliance": "Cumplimiento",
+  "vendorAssessment.gapCategory.Security": "Seguridad",
+  "vendorAssessment.gapCategory.DataResidency": "Residencia de datos",
+  "vendorAssessment.gapCategory.Governance": "Gobernanza",
 };
 export default messages;

@@ -4929,5 +4929,16 @@ const messages: Record<string, string> = {
     "يتم تحديث التوصيات تلقائيًا عند تغيير الصناعة.",
   "vendorAssessment.ui.requiredFieldsNotice":
     "أكمل الحقول المطلوبة: اسم الشركة والصناعة وإطار واحد على الأقل للأمن السيبراني.",
+  "vendorAssessment.dataLocation.Saudi Arabia": "المملكة العربية السعودية",
+  "vendorAssessment.dataLocation.China": "الصين",
+  "vendorAssessment.dataLocation.US": "الولايات المتحدة",
+  "vendorAssessment.dataLocation.EU": "الاتحاد الأوروبي",
+  "vendorAssessment.dataLocation.APAC": "آسيا والمحيط الهادئ",
+  "vendorAssessment.dataLocation.Others": "أخرى",
+  "vendorAssessment.gapCategory.Infrastructure": "البنية التحتية",
+  "vendorAssessment.gapCategory.Compliance": "الامتثال",
+  "vendorAssessment.gapCategory.Security": "الأمن",
+  "vendorAssessment.gapCategory.DataResidency": "إقامة البيانات",
+  "vendorAssessment.gapCategory.Governance": "الحوكمة",
 };
 export default messages;

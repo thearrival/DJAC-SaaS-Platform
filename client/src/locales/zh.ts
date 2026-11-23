@@ -4687,5 +4687,16 @@ const messages: Record<string, string> = {
   "vendorAssessment.ui.recommendationReady": "当行业变化时，建议会自动更新。",
   "vendorAssessment.ui.requiredFieldsNotice":
     "请填写必填字段：公司名称、行业以及至少一个网络安全框架。",
+  "vendorAssessment.dataLocation.Saudi Arabia": "沙特阿拉伯",
+  "vendorAssessment.dataLocation.China": "中国",
+  "vendorAssessment.dataLocation.US": "美国",
+  "vendorAssessment.dataLocation.EU": "欧盟",
+  "vendorAssessment.dataLocation.APAC": "亚太地区",
+  "vendorAssessment.dataLocation.Others": "其他",
+  "vendorAssessment.gapCategory.Infrastructure": "基础设施",
+  "vendorAssessment.gapCategory.Compliance": "合规",
+  "vendorAssessment.gapCategory.Security": "安全",
+  "vendorAssessment.gapCategory.DataResidency": "数据驻留",
+  "vendorAssessment.gapCategory.Governance": "治理",
 };
 export default messages;

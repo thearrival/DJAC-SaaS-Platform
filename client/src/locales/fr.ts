@@ -5221,5 +5221,16 @@ const messages: Record<string, string> = {
     "Les recommandations se mettent à jour automatiquement lorsque le secteur change.",
   "vendorAssessment.ui.requiredFieldsNotice":
     "Complétez les champs requis : nom de l'entreprise, secteur et au moins un cadre de cybersécurité.",
+  "vendorAssessment.dataLocation.Saudi Arabia": "Arabie saoudite",
+  "vendorAssessment.dataLocation.China": "Chine",
+  "vendorAssessment.dataLocation.US": "États-Unis",
+  "vendorAssessment.dataLocation.EU": "UE",
+  "vendorAssessment.dataLocation.APAC": "APAC",
+  "vendorAssessment.dataLocation.Others": "Autres",
+  "vendorAssessment.gapCategory.Infrastructure": "Infrastructure",
+  "vendorAssessment.gapCategory.Compliance": "Conformité",
+  "vendorAssessment.gapCategory.Security": "Sécurité",
+  "vendorAssessment.gapCategory.DataResidency": "Résidence des données",
+  "vendorAssessment.gapCategory.Governance": "Gouvernance",
 };
 export default messages;

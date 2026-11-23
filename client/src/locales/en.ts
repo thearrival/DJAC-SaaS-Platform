@@ -4984,5 +4984,16 @@ const messages: Record<string, string> = {
     "Recommendations update automatically when the industry changes.",
   "vendorAssessment.ui.requiredFieldsNotice":
     "Complete the required fields: Company Name, Industry, and at least one Cybersecurity Framework.",
+  "vendorAssessment.dataLocation.Saudi Arabia": "Saudi Arabia",
+  "vendorAssessment.dataLocation.China": "China",
+  "vendorAssessment.dataLocation.US": "US",
+  "vendorAssessment.dataLocation.EU": "EU",
+  "vendorAssessment.dataLocation.APAC": "APAC",
+  "vendorAssessment.dataLocation.Others": "Others",
+  "vendorAssessment.gapCategory.Infrastructure": "Infrastructure",
+  "vendorAssessment.gapCategory.Compliance": "Compliance",
+  "vendorAssessment.gapCategory.Security": "Security",
+  "vendorAssessment.gapCategory.DataResidency": "Data Residency",
+  "vendorAssessment.gapCategory.Governance": "Governance",
 };
 export default messages;

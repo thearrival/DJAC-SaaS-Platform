@@ -4918,5 +4918,16 @@ const messages: Record<string, string> = {
     "산업이 변경되면 권장 사항이 자동으로 업데이트됩니다.",
   "vendorAssessment.ui.requiredFieldsNotice":
     "필수 필드를 입력하세요: 회사명, 산업, 최소 하나의 사이버보안 프레임워크.",
+  "vendorAssessment.dataLocation.Saudi Arabia": "사우디아라비아",
+  "vendorAssessment.dataLocation.China": "중국",
+  "vendorAssessment.dataLocation.US": "미국",
+  "vendorAssessment.dataLocation.EU": "EU",
+  "vendorAssessment.dataLocation.APAC": "APAC",
+  "vendorAssessment.dataLocation.Others": "기타",
+  "vendorAssessment.gapCategory.Infrastructure": "인프라",
+  "vendorAssessment.gapCategory.Compliance": "컴플라이언스",
+  "vendorAssessment.gapCategory.Security": "보안",
+  "vendorAssessment.gapCategory.DataResidency": "데이터 거주",
+  "vendorAssessment.gapCategory.Governance": "거버넌스",
 };
 export default messages;
