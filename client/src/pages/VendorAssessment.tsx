@@ -1405,10 +1405,10 @@ export default function VendorAssessment() {
   const categoryLabels = GAP_CATEGORY_LABELS[localeKey];
   const severityLabels: Record<"Low" | "Medium" | "High" | "Critical", string> =
     {
-      Low: copy.results.low,
-      Medium: copy.results.medium,
-      High: copy.results.high,
-      Critical: copy.results.critical,
+      Low: t("vendorAssessment.results.low", copy.results.low),
+      Medium: t("vendorAssessment.results.medium", copy.results.medium),
+      High: t("vendorAssessment.results.high", copy.results.high),
+      Critical: t("vendorAssessment.results.critical", copy.results.critical),
     };
 
   // Form state
@@ -1547,8 +1547,12 @@ export default function VendorAssessment() {
   const addOtherCloudProviders = () => {
     const parsed = splitInputValues(infrastructure.otherCloudProvidersText);
     if (parsed.length === 0) {
-      setOtherCloudProvidersError(copy.fields.emptyValue);
-      sonnerToast.info(copy.fields.emptyValue);
+      setOtherCloudProvidersError(
+        t("vendorAssessment.fields.emptyValue", copy.fields.emptyValue)
+      );
+      sonnerToast.info(
+        t("vendorAssessment.fields.emptyValue", copy.fields.emptyValue)
+      );
       return;
     }
 
@@ -1566,18 +1570,27 @@ export default function VendorAssessment() {
         ]),
         otherCloudProvidersText: "",
       });
-      sonnerToast.success(copy.fields.addedValues, {
-        description: added.join(", "),
-      });
+      sonnerToast.success(
+        t("vendorAssessment.fields.addedValues", copy.fields.addedValues),
+        {
+          description: added.join(", "),
+        }
+      );
     }
 
     if (duplicates.length > 0) {
       setOtherCloudProvidersError(
-        `${copy.fields.duplicateValues}: ${duplicates.join(", ")}`
+        `${t("vendorAssessment.fields.duplicateValues", copy.fields.duplicateValues)}: ${duplicates.join(", ")}`
       );
-      sonnerToast.info(copy.fields.duplicateValues, {
-        description: duplicates.join(", "),
-      });
+      sonnerToast.info(
+        t(
+          "vendorAssessment.fields.duplicateValues",
+          copy.fields.duplicateValues
+        ),
+        {
+          description: duplicates.join(", "),
+        }
+      );
     } else {
       setOtherCloudProvidersError("");
     }
@@ -1591,9 +1604,12 @@ export default function VendorAssessment() {
       ),
     });
     setOtherCloudProvidersError("");
-    sonnerToast.success(copy.fields.removedValue, {
-      description: provider,
-    });
+    sonnerToast.success(
+      t("vendorAssessment.fields.removedValue", copy.fields.removedValue),
+      {
+        description: provider,
+      }
+    );
   };
 
   const addOtherDataHostingLocations = () => {
@@ -1601,8 +1617,12 @@ export default function VendorAssessment() {
       infrastructure.otherDataHostingLocationsText
     );
     if (parsed.length === 0) {
-      setOtherDataHostingLocationsError(copy.fields.emptyValue);
-      sonnerToast.info(copy.fields.emptyValue);
+      setOtherDataHostingLocationsError(
+        t("vendorAssessment.fields.emptyValue", copy.fields.emptyValue)
+      );
+      sonnerToast.info(
+        t("vendorAssessment.fields.emptyValue", copy.fields.emptyValue)
+      );
       return;
     }
 
@@ -1620,18 +1640,27 @@ export default function VendorAssessment() {
         ]),
         otherDataHostingLocationsText: "",
       });
-      sonnerToast.success(copy.fields.addedValues, {
-        description: added.join(", "),
-      });
+      sonnerToast.success(
+        t("vendorAssessment.fields.addedValues", copy.fields.addedValues),
+        {
+          description: added.join(", "),
+        }
+      );
     }
 
     if (duplicates.length > 0) {
       setOtherDataHostingLocationsError(
-        `${copy.fields.duplicateValues}: ${duplicates.join(", ")}`
+        `${t("vendorAssessment.fields.duplicateValues", copy.fields.duplicateValues)}: ${duplicates.join(", ")}`
       );
-      sonnerToast.info(copy.fields.duplicateValues, {
-        description: duplicates.join(", "),
-      });
+      sonnerToast.info(
+        t(
+          "vendorAssessment.fields.duplicateValues",
+          copy.fields.duplicateValues
+        ),
+        {
+          description: duplicates.join(", "),
+        }
+      );
     } else {
       setOtherDataHostingLocationsError("");
     }
@@ -1646,9 +1675,12 @@ export default function VendorAssessment() {
         ),
     });
     setOtherDataHostingLocationsError("");
-    sonnerToast.success(copy.fields.removedValue, {
-      description: location,
-    });
+    sonnerToast.success(
+      t("vendorAssessment.fields.removedValue", copy.fields.removedValue),
+      {
+        description: location,
+      }
+    );
   };
 
   const handleStartAssessment = () => {
@@ -1768,8 +1800,8 @@ export default function VendorAssessment() {
                 </div>
                 <p className="mt-2 text-sm font-semibold">
                   {profile.targetCountry === "SA"
-                    ? copy.options.sa
-                    : copy.options.china}
+                    ? t("vendorAssessment.options.sa", copy.options.sa)
+                    : t("vendorAssessment.options.china", copy.options.china)}
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-muted p-4 backdrop-blur-sm">
@@ -1876,13 +1908,21 @@ export default function VendorAssessment() {
             {/* Company Profile Section */}
             <Card>
               <CardHeader>
-                <CardTitle>{copy.sections.companyProfile}</CardTitle>
+                <CardTitle>
+                  {t(
+                    "vendorAssessment.sections.companyProfile",
+                    copy.sections.companyProfile
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.companyName}{" "}
+                      {t(
+                        "vendorAssessment.fields.companyName",
+                        copy.fields.companyName
+                      )}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <Input
@@ -1896,7 +1936,10 @@ export default function VendorAssessment() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.industry}{" "}
+                      {t(
+                        "vendorAssessment.fields.industry",
+                        copy.fields.industry
+                      )}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <Select
@@ -1925,7 +1968,10 @@ export default function VendorAssessment() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.hqCountry}
+                      {t(
+                        "vendorAssessment.fields.hqCountry",
+                        copy.fields.hqCountry
+                      )}
                     </label>
                     <Select
                       value={profile.hqCountry}
@@ -1940,19 +1986,30 @@ export default function VendorAssessment() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="SA">{copy.options.sa}</SelectItem>
+                        <SelectItem value="SA">
+                          {t("vendorAssessment.options.sa", copy.options.sa)}
+                        </SelectItem>
                         <SelectItem value="China">
-                          {copy.options.china}
+                          {t(
+                            "vendorAssessment.options.china",
+                            copy.options.china
+                          )}
                         </SelectItem>
                         <SelectItem value="Other">
-                          {copy.options.other}
+                          {t(
+                            "vendorAssessment.options.other",
+                            copy.options.other
+                          )}
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.targetCountry}{" "}
+                      {t(
+                        "vendorAssessment.fields.targetCountry",
+                        copy.fields.targetCountry
+                      )}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <Select
@@ -1968,9 +2025,14 @@ export default function VendorAssessment() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="SA">{copy.options.sa}</SelectItem>
+                        <SelectItem value="SA">
+                          {t("vendorAssessment.options.sa", copy.options.sa)}
+                        </SelectItem>
                         <SelectItem value="China">
-                          {copy.options.china}
+                          {t(
+                            "vendorAssessment.options.china",
+                            copy.options.china
+                          )}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -1980,7 +2042,10 @@ export default function VendorAssessment() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.companySize}
+                      {t(
+                        "vendorAssessment.fields.companySize",
+                        copy.fields.companySize
+                      )}
                     </label>
                     <Select
                       value={profile.companySize}
@@ -1996,21 +2061,35 @@ export default function VendorAssessment() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Startup">
-                          {copy.options.startup}
+                          {t(
+                            "vendorAssessment.options.startup",
+                            copy.options.startup
+                          )}
                         </SelectItem>
-                        <SelectItem value="SME">{copy.options.sme}</SelectItem>
+                        <SelectItem value="SME">
+                          {t("vendorAssessment.options.sme", copy.options.sme)}
+                        </SelectItem>
                         <SelectItem value="Enterprise">
-                          {copy.options.enterprise}
+                          {t(
+                            "vendorAssessment.options.enterprise",
+                            copy.options.enterprise
+                          )}
                         </SelectItem>
                         <SelectItem value="Multinational">
-                          {copy.options.multinational}
+                          {t(
+                            "vendorAssessment.options.multinational",
+                            copy.options.multinational
+                          )}
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.operationalModel}
+                      {t(
+                        "vendorAssessment.fields.operationalModel",
+                        copy.fields.operationalModel
+                      )}
                     </label>
                     <Select
                       value={profile.operationalModel}
@@ -2027,16 +2106,28 @@ export default function VendorAssessment() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="OnPremise">
-                          {copy.options.onpremise}
+                          {t(
+                            "vendorAssessment.options.onpremise",
+                            copy.options.onpremise
+                          )}
                         </SelectItem>
                         <SelectItem value="Cloud">
-                          {copy.options.cloud}
+                          {t(
+                            "vendorAssessment.options.cloud",
+                            copy.options.cloud
+                          )}
                         </SelectItem>
                         <SelectItem value="Hybrid">
-                          {copy.options.hybrid}
+                          {t(
+                            "vendorAssessment.options.hybrid",
+                            copy.options.hybrid
+                          )}
                         </SelectItem>
                         <SelectItem value="MultiCloud">
-                          {copy.options.multicloud}
+                          {t(
+                            "vendorAssessment.options.multicloud",
+                            copy.options.multicloud
+                          )}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -2045,7 +2136,10 @@ export default function VendorAssessment() {
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                    {copy.fields.businessActivities}
+                    {t(
+                      "vendorAssessment.fields.businessActivities",
+                      copy.fields.businessActivities
+                    )}
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {BUSINESS_ACTIVITY_OPTIONS.map(activity => (
@@ -2084,13 +2178,21 @@ export default function VendorAssessment() {
             {/* IT Infrastructure Section */}
             <Card>
               <CardHeader>
-                <CardTitle>{copy.sections.itInfrastructure}</CardTitle>
+                <CardTitle>
+                  {t(
+                    "vendorAssessment.sections.itInfrastructure",
+                    copy.sections.itInfrastructure
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.networkArchitecture}
+                      {t(
+                        "vendorAssessment.fields.networkArchitecture",
+                        copy.fields.networkArchitecture
+                      )}
                     </label>
                     <Select
                       value={infrastructure.networkArchitecture}
@@ -2107,23 +2209,38 @@ export default function VendorAssessment() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Traditional">
-                          {copy.options.traditional}
+                          {t(
+                            "vendorAssessment.options.traditional",
+                            copy.options.traditional
+                          )}
                         </SelectItem>
                         <SelectItem value="Modern">
-                          {copy.options.modern}
+                          {t(
+                            "vendorAssessment.options.modern",
+                            copy.options.modern
+                          )}
                         </SelectItem>
                         <SelectItem value="Distributed">
-                          {copy.options.distributed}
+                          {t(
+                            "vendorAssessment.options.distributed",
+                            copy.options.distributed
+                          )}
                         </SelectItem>
                         <SelectItem value="Serverless">
-                          {copy.options.serverless}
+                          {t(
+                            "vendorAssessment.options.serverless",
+                            copy.options.serverless
+                          )}
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.hostingModel}
+                      {t(
+                        "vendorAssessment.fields.hostingModel",
+                        copy.fields.hostingModel
+                      )}
                     </label>
                     <Select
                       value={infrastructure.hostingModel}
@@ -2139,16 +2256,28 @@ export default function VendorAssessment() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="OnPremise">
-                          {copy.options.onpremise}
+                          {t(
+                            "vendorAssessment.options.onpremise",
+                            copy.options.onpremise
+                          )}
                         </SelectItem>
                         <SelectItem value="Cloud">
-                          {copy.options.cloud}
+                          {t(
+                            "vendorAssessment.options.cloud",
+                            copy.options.cloud
+                          )}
                         </SelectItem>
                         <SelectItem value="Hybrid">
-                          {copy.options.hybrid}
+                          {t(
+                            "vendorAssessment.options.hybrid",
+                            copy.options.hybrid
+                          )}
                         </SelectItem>
                         <SelectItem value="MultiCloud">
-                          {copy.options.multicloud}
+                          {t(
+                            "vendorAssessment.options.multicloud",
+                            copy.options.multicloud
+                          )}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -2157,7 +2286,10 @@ export default function VendorAssessment() {
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                    {copy.fields.currentCloudProviders}
+                    {t(
+                      "vendorAssessment.fields.currentCloudProviders",
+                      copy.fields.currentCloudProviders
+                    )}
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {[
@@ -2206,16 +2338,34 @@ export default function VendorAssessment() {
                         />
                         <label className="text-sm cursor-pointer">
                           {provider === "AWS"
-                            ? copy.options.aws
+                            ? t(
+                                "vendorAssessment.options.aws",
+                                copy.options.aws
+                              )
                             : provider === "Azure"
-                              ? copy.options.azure
+                              ? t(
+                                  "vendorAssessment.options.azure",
+                                  copy.options.azure
+                                )
                               : provider === "GCP"
-                                ? copy.options.gcp
+                                ? t(
+                                    "vendorAssessment.options.gcp",
+                                    copy.options.gcp
+                                  )
                                 : provider === "Alibaba"
-                                  ? copy.options.alibaba
+                                  ? t(
+                                      "vendorAssessment.options.alibaba",
+                                      copy.options.alibaba
+                                    )
                                   : provider === "Tencent"
-                                    ? copy.options.tencent
-                                    : copy.options.others}
+                                    ? t(
+                                        "vendorAssessment.options.tencent",
+                                        copy.options.tencent
+                                      )
+                                    : t(
+                                        "vendorAssessment.options.others",
+                                        copy.options.others
+                                      )}
                         </label>
                       </div>
                     ))}
@@ -2223,7 +2373,10 @@ export default function VendorAssessment() {
                   {infrastructure.currentCloudProviders.includes("Others") && (
                     <div className="mt-3 space-y-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-card dark:bg-gray-900/50 p-3">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                        {copy.fields.otherCloudProviders}
+                        {t(
+                          "vendorAssessment.fields.otherCloudProviders",
+                          copy.fields.otherCloudProviders
+                        )}
                       </label>
                       <div className="flex flex-col gap-2 sm:flex-row">
                         <Input
@@ -2243,9 +2396,10 @@ export default function VendorAssessment() {
                               addOtherCloudProviders();
                             }
                           }}
-                          placeholder={
+                          placeholder={t(
+                            "vendorAssessment.fields.otherCloudProvidersPlaceholder",
                             copy.fields.otherCloudProvidersPlaceholder
-                          }
+                          )}
                           className="w-full"
                         />
                         <Button
@@ -2254,11 +2408,14 @@ export default function VendorAssessment() {
                           onClick={addOtherCloudProviders}
                           className="w-full sm:w-auto"
                         >
-                          {copy.fields.add}
+                          {t("vendorAssessment.fields.add", copy.fields.add)}
                         </Button>
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {copy.fields.typeAndAddHint}
+                        {t(
+                          "vendorAssessment.fields.typeAndAddHint",
+                          copy.fields.typeAndAddHint
+                        )}
                       </p>
                       {otherCloudProvidersError && (
                         <p className="text-xs text-red-600">
@@ -2277,7 +2434,7 @@ export default function VendorAssessment() {
                                 <TooltipTrigger asChild>
                                   <button
                                     type="button"
-                                    aria-label={`${copy.fields.remove}: ${provider}`}
+                                    aria-label={`${t("vendorAssessment.fields.remove", copy.fields.remove)}: ${provider}`}
                                     onClick={() =>
                                       removeOtherCloudProvider(provider)
                                     }
@@ -2287,7 +2444,7 @@ export default function VendorAssessment() {
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>{`${copy.fields.remove}: ${provider}`}</p>
+                                  <p>{`${t("vendorAssessment.fields.remove", copy.fields.remove)}: ${provider}`}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </Badge>
@@ -2300,7 +2457,10 @@ export default function VendorAssessment() {
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                    {copy.fields.dataHostingLocations}
+                    {t(
+                      "vendorAssessment.fields.dataHostingLocations",
+                      copy.fields.dataHostingLocations
+                    )}
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {(
@@ -2361,7 +2521,10 @@ export default function VendorAssessment() {
                   {infrastructure.dataHostingLocations.includes("Others") && (
                     <div className="mt-3 space-y-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-card dark:bg-gray-900/50 p-3">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                        {copy.fields.otherDataHostingLocations}
+                        {t(
+                          "vendorAssessment.fields.otherDataHostingLocations",
+                          copy.fields.otherDataHostingLocations
+                        )}
                       </label>
                       <div className="flex flex-col gap-2 sm:flex-row">
                         <Input
@@ -2381,9 +2544,10 @@ export default function VendorAssessment() {
                               addOtherDataHostingLocations();
                             }
                           }}
-                          placeholder={
+                          placeholder={t(
+                            "vendorAssessment.fields.otherDataHostingLocationsPlaceholder",
                             copy.fields.otherDataHostingLocationsPlaceholder
-                          }
+                          )}
                           className="w-full"
                         />
                         <Button
@@ -2392,11 +2556,14 @@ export default function VendorAssessment() {
                           onClick={addOtherDataHostingLocations}
                           className="w-full sm:w-auto"
                         >
-                          {copy.fields.add}
+                          {t("vendorAssessment.fields.add", copy.fields.add)}
                         </Button>
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {copy.fields.typeAndAddHint}
+                        {t(
+                          "vendorAssessment.fields.typeAndAddHint",
+                          copy.fields.typeAndAddHint
+                        )}
                       </p>
                       {otherDataHostingLocationsError && (
                         <p className="text-xs text-red-600">
@@ -2416,7 +2583,7 @@ export default function VendorAssessment() {
                                   <TooltipTrigger asChild>
                                     <button
                                       type="button"
-                                      aria-label={`${copy.fields.remove}: ${location}`}
+                                      aria-label={`${t("vendorAssessment.fields.remove", copy.fields.remove)}: ${location}`}
                                       onClick={() =>
                                         removeOtherDataHostingLocation(location)
                                       }
@@ -2429,7 +2596,7 @@ export default function VendorAssessment() {
                                     </button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>{`${copy.fields.remove}: ${location}`}</p>
+                                    <p>{`${t("vendorAssessment.fields.remove", copy.fields.remove)}: ${location}`}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </Badge>
@@ -2443,7 +2610,10 @@ export default function VendorAssessment() {
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                    {copy.fields.coreSystems}
+                    {t(
+                      "vendorAssessment.fields.coreSystems",
+                      copy.fields.coreSystems
+                    )}
                   </label>
                   <Textarea
                     value={infrastructure.coreSystems.join(", ")}
@@ -2467,13 +2637,21 @@ export default function VendorAssessment() {
             {/* Compliance & Cybersecurity Section */}
             <Card>
               <CardHeader>
-                <CardTitle>{copy.sections.compliance}</CardTitle>
+                <CardTitle>
+                  {t(
+                    "vendorAssessment.sections.compliance",
+                    copy.sections.compliance
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.dataResidencyStatus}
+                      {t(
+                        "vendorAssessment.fields.dataResidencyStatus",
+                        copy.fields.dataResidencyStatus
+                      )}
                     </label>
                     <Select
                       value={compliance.dataResidencyStatus}
@@ -2490,20 +2668,32 @@ export default function VendorAssessment() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="NotApplicable">
-                          {copy.options.notApplicable}
+                          {t(
+                            "vendorAssessment.options.notApplicable",
+                            copy.options.notApplicable
+                          )}
                         </SelectItem>
                         <SelectItem value="Partial">
-                          {copy.options.partial}
+                          {t(
+                            "vendorAssessment.options.partial",
+                            copy.options.partial
+                          )}
                         </SelectItem>
                         <SelectItem value="Full">
-                          {copy.options.full}
+                          {t(
+                            "vendorAssessment.options.full",
+                            copy.options.full
+                          )}
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                      {copy.fields.crossBorderTransferMechanism}
+                      {t(
+                        "vendorAssessment.fields.crossBorderTransferMechanism",
+                        copy.fields.crossBorderTransferMechanism
+                      )}
                     </label>
                     <Select
                       value={compliance.crossBorderTransferMechanism}
@@ -2520,16 +2710,22 @@ export default function VendorAssessment() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="None">
-                          {copy.options.none}
+                          {t(
+                            "vendorAssessment.options.none",
+                            copy.options.none
+                          )}
                         </SelectItem>
                         <SelectItem value="StandardContractualClauses">
-                          {copy.options.scc}
+                          {t("vendorAssessment.options.scc", copy.options.scc)}
                         </SelectItem>
                         <SelectItem value="BindingCorporateRules">
-                          {copy.options.bcr}
+                          {t("vendorAssessment.options.bcr", copy.options.bcr)}
                         </SelectItem>
                         <SelectItem value="Other">
-                          {copy.options.other}
+                          {t(
+                            "vendorAssessment.options.other",
+                            copy.options.other
+                          )}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -2582,7 +2778,10 @@ export default function VendorAssessment() {
                   </div>
 
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                    {copy.fields.cybersecurityFrameworks}{" "}
+                    {t(
+                      "vendorAssessment.fields.cybersecurityFrameworks",
+                      copy.fields.cybersecurityFrameworks
+                    )}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -2620,7 +2819,10 @@ export default function VendorAssessment() {
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                    {copy.fields.encryptionStandard}
+                    {t(
+                      "vendorAssessment.fields.encryptionStandard",
+                      copy.fields.encryptionStandard
+                    )}
                   </label>
                   <Select
                     value={compliance.encryptionStandard}
@@ -2636,15 +2838,26 @@ export default function VendorAssessment() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="None">{copy.options.none}</SelectItem>
+                      <SelectItem value="None">
+                        {t("vendorAssessment.options.none", copy.options.none)}
+                      </SelectItem>
                       <SelectItem value="AES128">
-                        {copy.options.aes128}
+                        {t(
+                          "vendorAssessment.options.aes128",
+                          copy.options.aes128
+                        )}
                       </SelectItem>
                       <SelectItem value="AES256">
-                        {copy.options.aes256}
+                        {t(
+                          "vendorAssessment.options.aes256",
+                          copy.options.aes256
+                        )}
                       </SelectItem>
                       <SelectItem value="Custom">
-                        {copy.options.custom}
+                        {t(
+                          "vendorAssessment.options.custom",
+                          copy.options.custom
+                        )}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -2675,10 +2888,10 @@ export default function VendorAssessment() {
                 disabled={!formComplete}
                 className="px-8"
               >
-                {copy.fields.analyze}
+                {t("vendorAssessment.fields.analyze", copy.fields.analyze)}
               </Button>
               <Button size="lg" variant="outline" onClick={handleReset}>
-                {copy.fields.reset}
+                {t("vendorAssessment.fields.reset", copy.fields.reset)}
               </Button>
             </div>
           </div>
@@ -2689,7 +2902,9 @@ export default function VendorAssessment() {
           <div className="space-y-6">
             <Card className="border-slate-200 dark:border-slate-700 bg-gradient-to-r from-white via-slate-50 to-red-50 dark:from-slate-900 dark:via-slate-900 dark:to-red-950/30 shadow-sm">
               <CardHeader>
-                <CardTitle>{copy.results.title}</CardTitle>
+                <CardTitle>
+                  {t("vendorAssessment.results.title", copy.results.title)}
+                </CardTitle>
                 <CardDescription>{executiveSummary}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -2700,8 +2915,11 @@ export default function VendorAssessment() {
                     </p>
                     <p className="mt-2 text-base font-semibold text-foreground dark:text-slate-100">
                       {profile.targetCountry === "SA"
-                        ? copy.options.sa
-                        : copy.options.china}
+                        ? t("vendorAssessment.options.sa", copy.options.sa)
+                        : t(
+                            "vendorAssessment.options.china",
+                            copy.options.china
+                          )}
                     </p>
                   </div>
                   <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-card dark:bg-slate-900 p-4">
@@ -2722,7 +2940,7 @@ export default function VendorAssessment() {
                             assessment.gaps[0].finding,
                             localeKey
                           )
-                        : copy.gaps.noGaps}
+                        : t("vendorAssessment.gaps.noGaps", copy.gaps.noGaps)}
                     </p>
                   </div>
                 </div>
@@ -2734,7 +2952,10 @@ export default function VendorAssessment() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    {copy.results.marketEntryReadiness}
+                    {t(
+                      "vendorAssessment.results.marketEntryReadiness",
+                      copy.results.marketEntryReadiness
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -2749,7 +2970,10 @@ export default function VendorAssessment() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    {copy.results.infrastructureReadiness}
+                    {t(
+                      "vendorAssessment.results.infrastructureReadiness",
+                      copy.results.infrastructureReadiness
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -2764,13 +2988,16 @@ export default function VendorAssessment() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    {copy.results.complianceRisk}
+                    {t(
+                      "vendorAssessment.results.complianceRisk",
+                      copy.results.complianceRisk
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScoreGauge
                     score={assessment.scores.complianceRisk}
-                    label={`${copy.results.riskLevel}: 0-100`}
+                    label={`${t("vendorAssessment.results.riskLevel", copy.results.riskLevel)}: 0-100`}
                     locale={locale}
                   />
                 </CardContent>
@@ -2779,19 +3006,31 @@ export default function VendorAssessment() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    {copy.results.readinessLevel}
+                    {t(
+                      "vendorAssessment.results.readinessLevel",
+                      copy.results.readinessLevel
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center justify-center">
                   <Badge className="text-lg px-4 py-2">
                     {assessment.readinessLevel === "NotReady" &&
-                      copy.results.notReady}
+                      t(
+                        "vendorAssessment.results.notReady",
+                        copy.results.notReady
+                      )}
                     {assessment.readinessLevel === "Partial" &&
-                      copy.results.partial}
+                      t(
+                        "vendorAssessment.results.partial",
+                        copy.results.partial
+                      )}
                     {assessment.readinessLevel === "Ready" &&
-                      copy.results.ready}
+                      t("vendorAssessment.results.ready", copy.results.ready)}
                     {assessment.readinessLevel === "FullyReady" &&
-                      copy.results.fullyReady}
+                      t(
+                        "vendorAssessment.results.fullyReady",
+                        copy.results.fullyReady
+                      )}
                   </Badge>
                 </CardContent>
               </Card>
@@ -2800,7 +3039,12 @@ export default function VendorAssessment() {
             {/* Overall Risk */}
             <Card>
               <CardHeader>
-                <CardTitle>{copy.results.overallRisk}</CardTitle>
+                <CardTitle>
+                  {t(
+                    "vendorAssessment.results.overallRisk",
+                    copy.results.overallRisk
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <RiskBadge
@@ -2813,12 +3057,14 @@ export default function VendorAssessment() {
             {/* Gaps */}
             <Card>
               <CardHeader>
-                <CardTitle>{copy.gaps.title}</CardTitle>
+                <CardTitle>
+                  {t("vendorAssessment.gaps.title", copy.gaps.title)}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {assessment.gaps.length === 0 ? (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    ✓ {copy.gaps.noGaps}
+                    ✓ {t("vendorAssessment.gaps.noGaps", copy.gaps.noGaps)}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -2832,7 +3078,10 @@ export default function VendorAssessment() {
                           }
                         </p>
                         <p className="text-xs text-red-700 dark:text-red-400">
-                          {copy.gaps.criticalCount}
+                          {t(
+                            "vendorAssessment.gaps.criticalCount",
+                            copy.gaps.criticalCount
+                          )}
                         </p>
                       </div>
                       <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/30 rounded-lg">
@@ -2843,7 +3092,10 @@ export default function VendorAssessment() {
                           }
                         </p>
                         <p className="text-xs text-orange-700 dark:text-orange-400">
-                          {copy.gaps.highCount}
+                          {t(
+                            "vendorAssessment.gaps.highCount",
+                            copy.gaps.highCount
+                          )}
                         </p>
                       </div>
                       <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg">
@@ -2854,7 +3106,10 @@ export default function VendorAssessment() {
                           }
                         </p>
                         <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                          {copy.gaps.mediumCount}
+                          {t(
+                            "vendorAssessment.gaps.mediumCount",
+                            copy.gaps.mediumCount
+                          )}
                         </p>
                       </div>
                       <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
@@ -2865,7 +3120,10 @@ export default function VendorAssessment() {
                           }
                         </p>
                         <p className="text-xs text-blue-700 dark:text-blue-400">
-                          {copy.gaps.lowCount}
+                          {t(
+                            "vendorAssessment.gaps.lowCount",
+                            copy.gaps.lowCount
+                          )}
                         </p>
                       </div>
                     </div>
@@ -2903,7 +3161,12 @@ export default function VendorAssessment() {
             {/* Recommendations */}
             <Card>
               <CardHeader>
-                <CardTitle>{copy.results.recommendations}</CardTitle>
+                <CardTitle>
+                  {t(
+                    "vendorAssessment.results.recommendations",
+                    copy.results.recommendations
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
@@ -2922,7 +3185,7 @@ export default function VendorAssessment() {
             {/* Action Buttons */}
             <div className="flex gap-4 justify-center">
               <Button size="lg" onClick={handleReset} className="px-8">
-                {copy.fields.reset}
+                {t("vendorAssessment.fields.reset", copy.fields.reset)}
               </Button>
             </div>
           </div>
