@@ -4661,5 +4661,31 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "部分就绪",
   "vendorAssessment.results.ready": "就绪",
   "vendorAssessment.results.fullyReady": "完全就绪",
+  "vendorAssessment.fields.emptyValue": "添加前请至少输入一个值。",
+  "vendorAssessment.fields.addedValues": "已添加的值",
+  "vendorAssessment.fields.duplicateValues": "已添加的值",
+  "vendorAssessment.fields.removedValue": "已移除的值",
+  "vendorAssessment.fields.add": "添加",
+  "vendorAssessment.fields.remove": "移除",
+  "vendorAssessment.fields.analyze": "分析并生成报告",
+  "vendorAssessment.fields.reset": "重置表单",
+  "vendorAssessment.options.sme": "中小企业（50-500 名员工）",
+  "vendorAssessment.options.scc": "标准合同条款",
+  "vendorAssessment.options.bcr": "具有约束力的公司规则",
+  "vendorAssessment.options.none": "无",
+  "vendorAssessment.gaps.noGaps": "未发现关键差距",
+  "vendorAssessment.gaps.title": "已识别差距",
+  "vendorAssessment.results.riskLevel": "风险",
+  "vendorAssessment.ui.companyNamePlaceholder": "Acme 公司",
+  "vendorAssessment.ui.industryPlaceholder": "选择行业类别",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP、CRM、HIS、电子商务平台 - 用逗号分隔",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "推荐框架",
+  "vendorAssessment.ui.applyRecommendedFrameworks": "应用推荐框架",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "建议根据所选行业、目标市场和 AI 相关活动生成。",
+  "vendorAssessment.ui.recommendationReady": "当行业变化时，建议会自动更新。",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "请填写必填字段：公司名称、行业以及至少一个网络安全框架。",
 };
 export default messages;

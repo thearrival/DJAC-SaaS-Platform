@@ -4901,5 +4901,33 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "جاهز جزئيًا",
   "vendorAssessment.results.ready": "جاهز",
   "vendorAssessment.results.fullyReady": "جاهز تمامًا",
+  "vendorAssessment.fields.emptyValue":
+    "أدخل قيمة واحدة على الأقل قبل الإضافة.",
+  "vendorAssessment.fields.addedValues": "القيم المضافة",
+  "vendorAssessment.fields.duplicateValues": "قيم مضافة بالفعل",
+  "vendorAssessment.fields.removedValue": "تمت إزالة القيمة",
+  "vendorAssessment.fields.add": "إضافة",
+  "vendorAssessment.fields.remove": "إزالة",
+  "vendorAssessment.fields.analyze": "تحليل وإنشاء تقرير",
+  "vendorAssessment.fields.reset": "إعادة تعيين النموذج",
+  "vendorAssessment.options.sme": "شركة صغيرة ومتوسطة (50-500 موظف)",
+  "vendorAssessment.options.scc": "البنود التعاقدية المعيارية",
+  "vendorAssessment.options.bcr": "القواعد الملزمة للشركات",
+  "vendorAssessment.options.none": "لا شيء",
+  "vendorAssessment.gaps.noGaps": "لم يتم تحديد فجوات حرجة",
+  "vendorAssessment.gaps.title": "الفجوات المحددة",
+  "vendorAssessment.results.riskLevel": "المخاطر",
+  "vendorAssessment.ui.companyNamePlaceholder": "شركة أكمي",
+  "vendorAssessment.ui.industryPlaceholder": "اختر فئة الصناعة",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP، CRM، HIS، منصة تجارة إلكترونية - افصل بفاصلة",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "الأطر الموصى بها",
+  "vendorAssessment.ui.applyRecommendedFrameworks": "تطبيق الأطر الموصى بها",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "يتم إنشاء التوصيات بناءً على الصناعة المختارة والسوق المستهدف والأنشطة المتعلقة بالذكاء الاصطناعي.",
+  "vendorAssessment.ui.recommendationReady":
+    "يتم تحديث التوصيات تلقائيًا عند تغيير الصناعة.",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "أكمل الحقول المطلوبة: اسم الشركة والصناعة وإطار واحد على الأقل للأمن السيبراني.",
 };
 export default messages;

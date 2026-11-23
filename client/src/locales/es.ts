@@ -5159,5 +5159,35 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "Parcialmente listo",
   "vendorAssessment.results.ready": "Listo",
   "vendorAssessment.results.fullyReady": "Totalmente listo",
+  "vendorAssessment.fields.emptyValue":
+    "Ingrese al menos un valor antes de agregar.",
+  "vendorAssessment.fields.addedValues": "Valores agregados",
+  "vendorAssessment.fields.duplicateValues": "Valores ya agregados",
+  "vendorAssessment.fields.removedValue": "Valor eliminado",
+  "vendorAssessment.fields.add": "Agregar",
+  "vendorAssessment.fields.remove": "Eliminar",
+  "vendorAssessment.fields.analyze": "Analizar y generar informe",
+  "vendorAssessment.fields.reset": "Restablecer formulario",
+  "vendorAssessment.options.sme": "PyME (50-500 empleados)",
+  "vendorAssessment.options.scc": "Cláusulas contractuales tipo",
+  "vendorAssessment.options.bcr": "Normas corporativas vinculantes",
+  "vendorAssessment.options.none": "Ninguno",
+  "vendorAssessment.gaps.noGaps": "No se identificaron brechas críticas",
+  "vendorAssessment.gaps.title": "Brechas identificadas",
+  "vendorAssessment.results.riskLevel": "Riesgo",
+  "vendorAssessment.ui.companyNamePlaceholder": "Acme Corporation",
+  "vendorAssessment.ui.industryPlaceholder":
+    "Seleccione una categoría de industria",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP, CRM, HIS, plataforma de comercio electrónico - separar por comas",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "Marcos recomendados",
+  "vendorAssessment.ui.applyRecommendedFrameworks":
+    "Aplicar marcos recomendados",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "Las recomendaciones se generan a partir de la industria, el mercado objetivo y las actividades relacionadas con IA seleccionados.",
+  "vendorAssessment.ui.recommendationReady":
+    "Las recomendaciones se actualizan automáticamente cuando cambia la industria.",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "Complete los campos obligatorios: nombre de la empresa, industria y al menos un marco de ciberseguridad.",
 };
 export default messages;

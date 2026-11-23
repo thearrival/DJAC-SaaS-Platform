@@ -5191,5 +5191,35 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "Partiellement prêt",
   "vendorAssessment.results.ready": "Prêt",
   "vendorAssessment.results.fullyReady": "Entièrement prêt",
+  "vendorAssessment.fields.emptyValue":
+    "Saisissez au moins une valeur avant d'ajouter.",
+  "vendorAssessment.fields.addedValues": "Valeurs ajoutées",
+  "vendorAssessment.fields.duplicateValues": "Valeurs déjà ajoutées",
+  "vendorAssessment.fields.removedValue": "Valeur supprimée",
+  "vendorAssessment.fields.add": "Ajouter",
+  "vendorAssessment.fields.remove": "Supprimer",
+  "vendorAssessment.fields.analyze": "Analyser et générer un rapport",
+  "vendorAssessment.fields.reset": "Réinitialiser le formulaire",
+  "vendorAssessment.options.sme": "PME (50-500 employés)",
+  "vendorAssessment.options.scc": "Clauses contractuelles types",
+  "vendorAssessment.options.bcr": "Règles d'entreprise contraignantes",
+  "vendorAssessment.options.none": "Aucun",
+  "vendorAssessment.gaps.noGaps": "Aucun écart critique identifié",
+  "vendorAssessment.gaps.title": "Écarts identifiés",
+  "vendorAssessment.results.riskLevel": "Risque",
+  "vendorAssessment.ui.companyNamePlaceholder": "Acme Corporation",
+  "vendorAssessment.ui.industryPlaceholder":
+    "Sélectionnez une catégorie de secteur",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP, CRM, HIS, plateforme e-commerce - séparez par des virgules",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "Cadres recommandés",
+  "vendorAssessment.ui.applyRecommendedFrameworks":
+    "Appliquer les cadres recommandés",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "Les recommandations sont générées à partir du secteur, du marché cible et des activités liées à l'IA sélectionnés.",
+  "vendorAssessment.ui.recommendationReady":
+    "Les recommandations se mettent à jour automatiquement lorsque le secteur change.",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "Complétez les champs requis : nom de l'entreprise, secteur et au moins un cadre de cybersécurité.",
 };
 export default messages;

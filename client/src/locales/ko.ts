@@ -4890,5 +4890,33 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "부분 준비됨",
   "vendorAssessment.results.ready": "준비됨",
   "vendorAssessment.results.fullyReady": "완전히 준비됨",
+  "vendorAssessment.fields.emptyValue":
+    "추가하기 전에 값을 하나 이상 입력하세요.",
+  "vendorAssessment.fields.addedValues": "추가된 값",
+  "vendorAssessment.fields.duplicateValues": "이미 추가된 값",
+  "vendorAssessment.fields.removedValue": "제거된 값",
+  "vendorAssessment.fields.add": "추가",
+  "vendorAssessment.fields.remove": "제거",
+  "vendorAssessment.fields.analyze": "분석 및 보고서 생성",
+  "vendorAssessment.fields.reset": "양식 초기화",
+  "vendorAssessment.options.sme": "중소기업(직원 50-500명)",
+  "vendorAssessment.options.scc": "표준계약조항",
+  "vendorAssessment.options.bcr": "구속력 있는 기업 규칙",
+  "vendorAssessment.options.none": "없음",
+  "vendorAssessment.gaps.noGaps": "중요한 격차가 식별되지 않음",
+  "vendorAssessment.gaps.title": "식별된 격차",
+  "vendorAssessment.results.riskLevel": "위험",
+  "vendorAssessment.ui.companyNamePlaceholder": "Acme Corporation",
+  "vendorAssessment.ui.industryPlaceholder": "산업 카테고리 선택",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP, CRM, HIS, 전자상거래 플랫폼 - 쉼표로 구분",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "권장 프레임워크",
+  "vendorAssessment.ui.applyRecommendedFrameworks": "권장 프레임워크 적용",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "권장 사항은 선택한 산업, 대상 시장 및 AI 관련 활동을 기반으로 생성됩니다.",
+  "vendorAssessment.ui.recommendationReady":
+    "산업이 변경되면 권장 사항이 자동으로 업데이트됩니다.",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "필수 필드를 입력하세요: 회사명, 산업, 최소 하나의 사이버보안 프레임워크.",
 };
 export default messages;

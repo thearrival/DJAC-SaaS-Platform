@@ -4955,5 +4955,34 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "Partially Ready",
   "vendorAssessment.results.ready": "Ready",
   "vendorAssessment.results.fullyReady": "Fully Ready",
+  "vendorAssessment.fields.emptyValue":
+    "Enter at least one value before adding.",
+  "vendorAssessment.fields.addedValues": "Added values",
+  "vendorAssessment.fields.duplicateValues": "Already added values",
+  "vendorAssessment.fields.removedValue": "Removed value",
+  "vendorAssessment.fields.add": "Add",
+  "vendorAssessment.fields.remove": "Remove",
+  "vendorAssessment.fields.analyze": "Analyze & Generate Report",
+  "vendorAssessment.fields.reset": "Reset Form",
+  "vendorAssessment.options.sme": "SME (50-500 employees)",
+  "vendorAssessment.options.scc": "Standard Contractual Clauses",
+  "vendorAssessment.options.bcr": "Binding Corporate Rules",
+  "vendorAssessment.options.none": "None",
+  "vendorAssessment.gaps.noGaps": "No critical gaps identified",
+  "vendorAssessment.gaps.title": "Identified Gaps",
+  "vendorAssessment.results.riskLevel": "Risk",
+  "vendorAssessment.ui.companyNamePlaceholder": "Acme Corporation",
+  "vendorAssessment.ui.industryPlaceholder": "Select an industry category",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP, CRM, HIS, e-Commerce Platform - separate by comma",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "Recommended frameworks",
+  "vendorAssessment.ui.applyRecommendedFrameworks":
+    "Apply recommended frameworks",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "Recommendations are generated from the selected industry, target market, and AI-related activities.",
+  "vendorAssessment.ui.recommendationReady":
+    "Recommendations update automatically when the industry changes.",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "Complete the required fields: Company Name, Industry, and at least one Cybersecurity Framework.",
 };
 export default messages;

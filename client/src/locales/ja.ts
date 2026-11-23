@@ -5026,5 +5026,33 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "部分的に準備完了",
   "vendorAssessment.results.ready": "準備完了",
   "vendorAssessment.results.fullyReady": "完全に準備完了",
+  "vendorAssessment.fields.emptyValue":
+    "追加する前に少なくとも1つの値を入力してください。",
+  "vendorAssessment.fields.addedValues": "追加された値",
+  "vendorAssessment.fields.duplicateValues": "既に追加された値",
+  "vendorAssessment.fields.removedValue": "削除された値",
+  "vendorAssessment.fields.add": "追加",
+  "vendorAssessment.fields.remove": "削除",
+  "vendorAssessment.fields.analyze": "分析してレポートを生成",
+  "vendorAssessment.fields.reset": "フォームをリセット",
+  "vendorAssessment.options.sme": "中小企業（50〜500名）",
+  "vendorAssessment.options.scc": "標準契約条項",
+  "vendorAssessment.options.bcr": "拘束的企業準則",
+  "vendorAssessment.options.none": "なし",
+  "vendorAssessment.gaps.noGaps": "重大なギャップは特定されませんでした",
+  "vendorAssessment.gaps.title": "特定されたギャップ",
+  "vendorAssessment.results.riskLevel": "リスク",
+  "vendorAssessment.ui.companyNamePlaceholder": "Acme株式会社",
+  "vendorAssessment.ui.industryPlaceholder": "業界カテゴリを選択",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP、CRM、HIS、eコマースプラットフォーム - カンマで区切る",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "推奨フレームワーク",
+  "vendorAssessment.ui.applyRecommendedFrameworks": "推奨フレームワークを適用",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "推奨事項は、選択した業界、ターゲット市場、AI関連活動に基づいて生成されます。",
+  "vendorAssessment.ui.recommendationReady":
+    "業界が変更されると、推奨事項は自動的に更新されます。",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "必須項目を入力してください：会社名、業界、および少なくとも1つのサイバーセキュリティフレームワーク。",
 };
 export default messages;

@@ -5123,5 +5123,34 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "Parcialmente pronto",
   "vendorAssessment.results.ready": "Pronto",
   "vendorAssessment.results.fullyReady": "Totalmente pronto",
+  "vendorAssessment.fields.emptyValue":
+    "Insira pelo menos um valor antes de adicionar.",
+  "vendorAssessment.fields.addedValues": "Valores adicionados",
+  "vendorAssessment.fields.duplicateValues": "Valores já adicionados",
+  "vendorAssessment.fields.removedValue": "Valor removido",
+  "vendorAssessment.fields.add": "Adicionar",
+  "vendorAssessment.fields.remove": "Remover",
+  "vendorAssessment.fields.analyze": "Analisar e gerar relatório",
+  "vendorAssessment.fields.reset": "Redefinir formulário",
+  "vendorAssessment.options.sme": "PME (50-500 funcionários)",
+  "vendorAssessment.options.scc": "Cláusulas contratuais padrão",
+  "vendorAssessment.options.bcr": "Regras corporativas vinculativas",
+  "vendorAssessment.options.none": "Nenhum",
+  "vendorAssessment.gaps.noGaps": "Nenhuma lacuna crítica identificada",
+  "vendorAssessment.gaps.title": "Lacunas identificadas",
+  "vendorAssessment.results.riskLevel": "Risco",
+  "vendorAssessment.ui.companyNamePlaceholder": "Acme Corporation",
+  "vendorAssessment.ui.industryPlaceholder": "Selecione uma categoria de setor",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP, CRM, HIS, plataforma de e-commerce - separe por vírgula",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "Frameworks recomendados",
+  "vendorAssessment.ui.applyRecommendedFrameworks":
+    "Aplicar frameworks recomendados",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "As recomendações são geradas com base no setor selecionado, mercado-alvo e atividades relacionadas à IA.",
+  "vendorAssessment.ui.recommendationReady":
+    "As recomendações são atualizadas automaticamente quando o setor muda.",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "Preencha os campos obrigatórios: nome da empresa, setor e pelo menos um framework de cibersegurança.",
 };
 export default messages;

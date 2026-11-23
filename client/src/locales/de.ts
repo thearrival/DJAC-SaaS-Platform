@@ -5138,5 +5138,34 @@ const messages: Record<string, string> = {
   "vendorAssessment.results.partial": "Teilweise bereit",
   "vendorAssessment.results.ready": "Bereit",
   "vendorAssessment.results.fullyReady": "Vollständig bereit",
+  "vendorAssessment.fields.emptyValue":
+    "Geben Sie mindestens einen Wert ein, bevor Sie hinzufügen.",
+  "vendorAssessment.fields.addedValues": "Hinzugefügte Werte",
+  "vendorAssessment.fields.duplicateValues": "Bereits hinzugefügte Werte",
+  "vendorAssessment.fields.removedValue": "Wert entfernt",
+  "vendorAssessment.fields.add": "Hinzufügen",
+  "vendorAssessment.fields.remove": "Entfernen",
+  "vendorAssessment.fields.analyze": "Analysieren & Bericht erstellen",
+  "vendorAssessment.fields.reset": "Formular zurücksetzen",
+  "vendorAssessment.options.sme": "KMU (50-500 Mitarbeiter)",
+  "vendorAssessment.options.scc": "Standardvertragsklauseln",
+  "vendorAssessment.options.bcr": "Verbindliche Unternehmensregeln",
+  "vendorAssessment.options.none": "Keine",
+  "vendorAssessment.gaps.noGaps": "Keine kritischen Lücken identifiziert",
+  "vendorAssessment.gaps.title": "Identifizierte Lücken",
+  "vendorAssessment.results.riskLevel": "Risiko",
+  "vendorAssessment.ui.companyNamePlaceholder": "Acme Corporation",
+  "vendorAssessment.ui.industryPlaceholder": "Branchenkategorie auswählen",
+  "vendorAssessment.ui.coreSystemsPlaceholder":
+    "ERP, CRM, HIS, E-Commerce-Plattform - durch Komma trennen",
+  "vendorAssessment.ui.recommendedFrameworksTitle": "Empfohlene Frameworks",
+  "vendorAssessment.ui.applyRecommendedFrameworks":
+    "Empfohlene Frameworks anwenden",
+  "vendorAssessment.ui.recommendedFrameworksHint":
+    "Empfehlungen werden basierend auf der ausgewählten Branche, dem Zielmarkt und KI-bezogenen Aktivitäten erstellt.",
+  "vendorAssessment.ui.recommendationReady":
+    "Empfehlungen werden automatisch aktualisiert, wenn sich die Branche ändert.",
+  "vendorAssessment.ui.requiredFieldsNotice":
+    "Füllen Sie die Pflichtfelder aus: Firmenname, Branche und mindestens ein Cybersicherheits-Framework.",
 };
 export default messages;

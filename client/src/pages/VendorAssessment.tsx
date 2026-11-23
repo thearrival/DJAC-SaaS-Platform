@@ -1930,7 +1930,10 @@ export default function VendorAssessment() {
                       onChange={e =>
                         setProfile({ ...profile, companyName: e.target.value })
                       }
-                      placeholder={uiText.companyNamePlaceholder}
+                      placeholder={t(
+                        "vendorAssessment.ui.companyNamePlaceholder",
+                        uiText.companyNamePlaceholder
+                      )}
                       className="w-full"
                     />
                   </div>
@@ -1949,7 +1952,12 @@ export default function VendorAssessment() {
                       }
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder={uiText.industryPlaceholder} />
+                        <SelectValue
+                          placeholder={t(
+                            "vendorAssessment.ui.industryPlaceholder",
+                            uiText.industryPlaceholder
+                          )}
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {INDUSTRY_OPTIONS.map(industry => (
@@ -2626,7 +2634,10 @@ export default function VendorAssessment() {
                           .filter(s => s),
                       })
                     }
-                    placeholder={uiText.coreSystemsPlaceholder}
+                    placeholder={t(
+                      "vendorAssessment.ui.coreSystemsPlaceholder",
+                      uiText.coreSystemsPlaceholder
+                    )}
                     className="w-full"
                     rows={3}
                   />
@@ -2735,7 +2746,10 @@ export default function VendorAssessment() {
                 <div>
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
-                      {uiText.recommendedFrameworksTitle}
+                      {t(
+                        "vendorAssessment.ui.recommendedFrameworksTitle",
+                        uiText.recommendedFrameworksTitle
+                      )}
                     </label>
                     <Button
                       type="button"
@@ -2744,11 +2758,17 @@ export default function VendorAssessment() {
                       onClick={applyRecommendedFrameworks}
                       disabled={recommendedFrameworks.length === 0}
                     >
-                      {uiText.applyRecommendedFrameworks}
+                      {t(
+                        "vendorAssessment.ui.applyRecommendedFrameworks",
+                        uiText.applyRecommendedFrameworks
+                      )}
                     </Button>
                   </div>
                   <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-                    {uiText.recommendedFrameworksHint}
+                    {t(
+                      "vendorAssessment.ui.recommendedFrameworksHint",
+                      uiText.recommendedFrameworksHint
+                    )}
                   </p>
                   <div className="mb-4 flex flex-wrap gap-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-3">
                     {recommendedFrameworks.length > 0 ? (
@@ -2772,7 +2792,10 @@ export default function VendorAssessment() {
                       })
                     ) : (
                       <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {uiText.recommendationReady}
+                        {t(
+                          "vendorAssessment.ui.recommendationReady",
+                          uiText.recommendationReady
+                        )}
                       </span>
                     )}
                   </div>
@@ -2874,7 +2897,10 @@ export default function VendorAssessment() {
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                   <p className="text-yellow-800 dark:text-yellow-300">
-                    {uiText.requiredFieldsNotice}
+                    {t(
+                      "vendorAssessment.ui.requiredFieldsNotice",
+                      uiText.requiredFieldsNotice
+                    )}
                   </p>
                 </div>
               </div>
