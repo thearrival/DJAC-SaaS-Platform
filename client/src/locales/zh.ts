@@ -4700,5 +4700,6 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Governance": "治理",
   "clientWorkspace.pageTitle": "我的工作区",
   "clientWorkspace.unknown": "未知",
+  "vendorAssessment.pageTitle": "供应商评估",
 };
 export default messages;

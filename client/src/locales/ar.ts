@@ -4942,5 +4942,6 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Governance": "الحوكمة",
   "clientWorkspace.pageTitle": "مساحة عملي",
   "clientWorkspace.unknown": "غير معروف",
+  "vendorAssessment.pageTitle": "تقييم الموردين",
 };
 export default messages;

@@ -4997,5 +4997,6 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Governance": "Governance",
   "clientWorkspace.pageTitle": "My Workspace",
   "clientWorkspace.unknown": "Unknown",
+  "vendorAssessment.pageTitle": "Vendor Assessment",
 };
 export default messages;

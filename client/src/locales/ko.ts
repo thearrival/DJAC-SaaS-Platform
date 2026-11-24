@@ -4931,5 +4931,6 @@ const messages: Record<string, string> = {
   "vendorAssessment.gapCategory.Governance": "거버넌스",
   "clientWorkspace.pageTitle": "내 작업 공간",
   "clientWorkspace.unknown": "알 수 없음",
+  "vendorAssessment.pageTitle": "공급업체 평가",
 };
 export default messages;
