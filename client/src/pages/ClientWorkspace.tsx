@@ -427,8 +427,19 @@ export default function ClientWorkspace() {
   const isDark = theme === "dark";
   const { t, locale } = useLocale();
   usePageTitle(t("clientWorkspace.pageTitle", "My Workspace"));
+  const supportedLocales: Locale[] = [
+    "en",
+    "ar",
+    "zh",
+    "fr",
+    "es",
+    "de",
+    "ja",
+    "ko",
+    "pt",
+  ];
   const localeKey = (
-    locale === "en" || locale === "ar" || locale === "zh" ? locale : "en"
+    supportedLocales.includes(locale as Locale) ? (locale as Locale) : "en"
   ) as Locale;
   const { user, refresh } = useAuth();
   const utils = trpc.useUtils();

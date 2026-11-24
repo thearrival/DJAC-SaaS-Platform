@@ -1,9 +1,16 @@
-export type VendorProfileLocale = "en" | "zh" | "ar";
+export type VendorProfileLocale =
+  "en" | "zh" | "ar" | "fr" | "es" | "de" | "ja" | "ko" | "pt";
 
 type LocalizedLabel = {
   en: string;
   zh: string;
   ar?: string;
+  fr?: string;
+  es?: string;
+  de?: string;
+  ja?: string;
+  ko?: string;
+  pt?: string;
 };
 
 export type VendorOption<T extends string = string> = {
@@ -1032,7 +1039,7 @@ export function getVendorProfileCopy(
   locale: VendorProfileLocale
 ): string {
   const entry = vendorProfileCopy[key];
-  return entry[locale] ?? entry.en;
+  return (entry as Record<string, string | undefined>)[locale] ?? entry.en;
 }
 
 export function getVendorOptionLabel<T extends string>(
