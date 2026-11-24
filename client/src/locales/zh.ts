@@ -4701,5 +4701,6 @@ const messages: Record<string, string> = {
   "clientWorkspace.pageTitle": "我的工作区",
   "clientWorkspace.unknown": "未知",
   "vendorAssessment.pageTitle": "供应商评估",
+  "transferChecker.pageTitle": "数据传输合规检查器",
 };
 export default messages;

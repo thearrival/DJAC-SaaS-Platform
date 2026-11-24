@@ -4932,5 +4932,6 @@ const messages: Record<string, string> = {
   "clientWorkspace.pageTitle": "내 작업 공간",
   "clientWorkspace.unknown": "알 수 없음",
   "vendorAssessment.pageTitle": "공급업체 평가",
+  "transferChecker.pageTitle": "데이터 이전 컴플라이언스 검사기",
 };
 export default messages;

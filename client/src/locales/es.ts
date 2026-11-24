@@ -5203,5 +5203,7 @@ const messages: Record<string, string> = {
   "clientWorkspace.pageTitle": "Mi espacio de trabajo",
   "clientWorkspace.unknown": "Desconocido",
   "vendorAssessment.pageTitle": "Evaluación de proveedores",
+  "transferChecker.pageTitle":
+    "Verificador de cumplimiento de transferencia de datos",
 };
 export default messages;

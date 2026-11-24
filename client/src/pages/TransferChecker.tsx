@@ -664,9 +664,11 @@ const STEP_COLORS: Record<ComplianceStep["level"], string> = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function TransferChecker() {
-  usePageTitle("Data Transfer Compliance Checker");
   const { theme } = useTheme();
   const { t } = useLocale();
+  usePageTitle(
+    t("transferChecker.pageTitle", "Data Transfer Compliance Checker")
+  );
   const isDark = theme === "dark";
 
   const [from, setFrom] = useState<Jurisdiction | "">("");
@@ -1041,13 +1043,21 @@ export default function TransferChecker() {
                 }}
               >
                 <span style={{ fontSize: 11.5 }}>
-                  {fromNode.flag} {fromNode.label}
+                  {fromNode.flag}{" "}
+                  {t(
+                    `transferChecker.jurisdiction.${fromNode.value}`,
+                    fromNode.label
+                  )}
                 </span>
                 <ArrowLeftRight
                   style={{ width: 12, height: 12, color: C.muted }}
                 />
                 <span style={{ fontSize: 11.5 }}>
-                  {toNode.flag} {toNode.label}
+                  {toNode.flag}{" "}
+                  {t(
+                    `transferChecker.jurisdiction.${toNode.value}`,
+                    toNode.label
+                  )}
                 </span>
                 <span
                   style={{

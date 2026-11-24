@@ -5068,5 +5068,6 @@ const messages: Record<string, string> = {
   "clientWorkspace.pageTitle": "マイワークスペース",
   "clientWorkspace.unknown": "不明",
   "vendorAssessment.pageTitle": "ベンダー評価",
+  "transferChecker.pageTitle": "データ移転コンプライアンスチェッカー",
 };
 export default messages;

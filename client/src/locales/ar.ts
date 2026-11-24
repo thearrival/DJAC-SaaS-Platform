@@ -4943,5 +4943,6 @@ const messages: Record<string, string> = {
   "clientWorkspace.pageTitle": "مساحة عملي",
   "clientWorkspace.unknown": "غير معروف",
   "vendorAssessment.pageTitle": "تقييم الموردين",
+  "transferChecker.pageTitle": "فاحص امتثال نقل البيانات",
 };
 export default messages;
